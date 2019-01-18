@@ -6,7 +6,16 @@
   "scripts": {
     "start": "webpack-dev-server --mode=development --colors",
     "build": "webpack --mode production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prestart:dist": "npm run clean-dist && npm run build:html",
+    "start:dist": "npx babel-node tools/build.js",
+    "poststart:dist": "npx babel-node tools/distServer.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean-dist": "npm run remove-dist && mkdir dist",
+    "remove-dist": "npx rimraf ./dist",
+    "build:html": "babel-node tools/buildHtml.js",
+    "predeploy": "npm run clean-dist && npm run build:html",
+    "deploy": "npx babel-node tools/build.js",
+    "postdeploy": "aws s3 sync dist/ s3://dev.app.mytrelar.com"
   },
   "repository": {
     "type": "git",
@@ -40,6 +49,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-react-hmre": "^1.1.1",
     "babel-register": "^6.26.0",
+    "cheerio": "^1.0.0-rc.2",
     "compression": "^1.7.3",
     "compression-webpack-plugin": "^2.0.0",
     "css-loader": "^2.1.0",
@@ -47,9 +57,10 @@
     "enzyme": "^3.8.0",
     "eventsource-polyfill": "^0.9.6",
     "express": "^4.16.4",
-    "extract-text-webpack-plugin": "^3.0.2",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^3.0.1",
     "html-webpack-plugin": "^3.2.0",
+    "open": "0.0.5",
     "style-loader": "^0.23.1",
     "url-loader": "^1.1.2",
     "webpack": "^4.28.4",
