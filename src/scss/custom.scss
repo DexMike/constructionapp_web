@@ -1,0 +1,11 @@
+.app-link {
+  color: -webkit-link;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#root {
+  .theme-dark {
+    color: #ddd;
+  }
+}

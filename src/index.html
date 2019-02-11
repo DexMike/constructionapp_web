@@ -1,18 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trelar Web</title>
-    <link rel="stylesheet" type="text/css" href="/styles.css" />
-    <!-- TODO make these assets as part of this codebase eventually -->
-    <link rel="icon" href="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-32x32.png" sizes="32x32" />
-    <link rel="icon" href="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-192x192.png" sizes="192x192" />
-    <link rel="apple-touch-icon-precomposed" href="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-180x180.png" />
-    <meta name="msapplication-TileImage" content="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-270x270.png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <title>Trelar Nimda</title>
+  <link rel="stylesheet" type="text/css" href="/style.css"/>
+  <!-- TODO make these assets as part of this codebase eventually -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.linearicons.com/free/1.0.0/icon-font.min.css">
+  <link rel="icon"
+        href="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-32x32.png"
+        sizes="32x32"/>
+  <link rel="icon"
+        href="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-192x192.png"
+        sizes="192x192"/>
+  <link rel="apple-touch-icon-precomposed"
+        href="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-180x180.png"/>
+  <meta name="msapplication-TileImage"
+        content="https://www.trelar.net/wp-content/uploads/2019/01/cropped-Screen-Shot-2019-01-15-at-1.23.26-PM-270x270.png"/>
+  <style>
+    .load__icon {
+      animation: linear load 2s infinite;
+      width: 32px;
+      height: 32px;
+    }
+
+    .load__icon-wrap {
+      margin: auto;
+    }
+
+    .load {
+      height: calc(100vh - 16px);
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    @keyframes load {
+      from {
+        transform: rotate(0deg) scale(2);
+      }
+      to {
+        transform: rotate(360deg) scale(2);
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script>document.write("<script type='text/javascript' src='/bundle.js?version=" + Date.now() + "'><\/script>");</script>
+<noscript>
+  You need to enable JavaScript to run this app.
+</noscript>
+<div id="root">
+  <!--Loader-->
+  <div class="load">
+    <div class="load__icon-wrap">
+      <svg class="load__icon">
+        <path fill="#4ce1b6" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+      </svg>
+    </div>
+  </div>
+  <!--Loader-->
+</div>
+<script>document.write('<script type=\'text/javascript\' src=\'/bundle.js?version=' + Date.now() + '\'><\/script>');</script>
 </body>
 </html>

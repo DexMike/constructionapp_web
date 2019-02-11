@@ -1,8 +1,9 @@
 import webpack from 'webpack';
 import path from 'path';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
-import CompressionPlugin from 'compression-webpack-plugin';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
+// import ExtractTextPlugin from 'extract-text-webpack-plugin';
+// import CompressionPlugin from 'compression-webpack-plugin';
+// import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production')
@@ -13,15 +14,15 @@ process.traceDeprecation = true;
 export default {
   devtool: 'source-map',
   entry: './src/index.js',
-  target: 'web',
+  // target: 'web',
   output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: '/',
+    path: path.resolve(__dirname, 'dist'),
+    // publicPath: '/',
     filename: 'bundle.js'
   },
-  devServer: {
-    contentBase: './dist'
-  },
+  // devServer: {
+  //   contentBase: './dist'
+  // },
   plugins: [
     // new HtmlWebpackPlugin({
     //   template: 'src/index.html',
@@ -30,7 +31,9 @@ export default {
     // }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
-    new ExtractTextPlugin('styles.css'),
+    new MiniCssExtractPlugin({
+      filename: 'style.css'
+    })
     // new CompressionPlugin({
     //   asset: '[path].gz[query]',
     //   algorithm: 'gzip',
@@ -41,10 +44,10 @@ export default {
   ],
   module: {
     rules: [
-      {
-        test: /\.html(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'file-loader'
-      },
+      // {
+      //   test: /\.html(\?v=\d+\.\d+\.\d+)?$/,
+      //   loader: 'file-loader'
+      // },
       {
         test: /\.jsx?$/,
         include: [path.resolve(__dirname, './src')],
@@ -54,15 +57,21 @@ export default {
           presets: ['react', 'es2015']
         }
       },
+      // {
+      //   test: /\.(gif|png|jpe?g|svg)$/i,
+      //   use: [{
+      //     loader: 'url-loader',
+      //     options: {
+      //       limit: 8000,
+      //       name: 'images/[hash]-[name].[ext]'
+      //     }
+      //   }]
+      // },
       {
-        test: /\.(gif|png|jpe?g|svg)$/i,
-        use: [{
-          loader: 'url-loader',
-          options: {
-            limit: 8000,
-            name: 'images/[hash]-[name].[ext]'
-          }
-        }]
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          'file-loader'
+        ]
       },
       {
         test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
@@ -90,12 +99,13 @@ export default {
         }
       },
       {
-        test: /\.css$/,
-        exclude: /node_modules/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: ['css-loader']
-        })
+        test: /\.(css|scss)$/,
+        use: [
+          'style-loader',
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader'
+        ]
       }
     ]
   }

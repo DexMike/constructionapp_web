@@ -1,0 +1,43 @@
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Badge } from 'reactstrap';
+import { NavLink } from 'react-router-dom';
+
+class SidebarLink extends Component {
+  render() {
+    const { route, onClick, icon, title, newLink } = this.props;
+    return (
+      <NavLink
+        to={route}
+        onClick={onClick}
+        activeClassName="sidebar__link-active"
+      >
+        <li className="sidebar__link">
+          {icon ? <span className={`sidebar__link-icon lnr lnr-${icon}`}/> : ''}
+          <p className="sidebar__link-title">
+            {title}
+            {newLink ? <Badge className="sidebar__link-badge"><span>New</span></Badge> : ''}
+          </p>
+        </li>
+      </NavLink>
+    );
+  }
+}
+
+SidebarLink.propTypes = {
+  title: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+  newLink: PropTypes.bool,
+  route: PropTypes.string,
+  onClick: PropTypes.func
+};
+
+SidebarLink.defaultProps = {
+  icon: '',
+  newLink: false,
+  route: '/',
+  onClick: () => {
+  }
+};
+
+export default SidebarLink;
