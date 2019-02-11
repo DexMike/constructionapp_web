@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import MainWrapper from '../MainWrapper';
 import WrappedRoutes from './WrappedRoutes';
+import LoginPage from '../login/LoginPage';
 
 class Router extends Component {
   render() {
@@ -9,8 +10,8 @@ class Router extends Component {
       <MainWrapper>
         <main>
           <Switch>
-            {/* <Route exact path="/" component={DashboardPage}/> */}
-            {/* <Route exact path="/log_in" component={LoginPage}/> */}
+            <Route exact path="/" component={LoginPage}/>
+            <Route exact path="/log_in" component={LoginPage}/>
             <Route path="/" component={WrappedRoutes}/>
           </Switch>
         </main>
