@@ -10,7 +10,6 @@ class Router extends Component {
       <MainWrapper>
         <main>
           <Switch>
-            <Route exact path="/" component={LoginPage}/>
             <Route exact path="/log_in" component={LoginPage}/>
             <Route path="/" component={WrappedRoutes}/>
           </Switch>

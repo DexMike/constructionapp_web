@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import DownIcon from 'mdi-react/ChevronDownIcon';
 import { Collapse } from 'reactstrap';
+import { Auth } from 'aws-amplify';
 import TopbarMenuLink from './TopbarMenuLink';
 import Ava from '../../../img/ava.png';
 
@@ -10,9 +11,15 @@ class TopbarProfile extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      collapse: false
+      collapse: false,
+      email: ''
     };
     this.toggle = this.toggle.bind(this);
+  }
+
+  async componentDidMount() {
+    const currentSession = await Auth.currentSession();
+    this.setState({ email: currentSession.idToken.payload.email });
   }
 
   toggle() {
@@ -21,14 +28,14 @@ class TopbarProfile extends PureComponent {
   }
 
   render() {
-    const { collapse } = this.state;
+    const { collapse, email } = this.state;
     return (
       <div className="topbar__profile">
         <button type="button" className="topbar__avatar" onClick={this.toggle}>
           <img className="topbar__avatar-img" src={`${window.location.origin}/${Ava}`}
                alt="avatar"
           />
-          <p className="topbar__avatar-name">Jake Howton</p>
+          <p className="topbar__avatar-name">{email}</p>
           <DownIcon className="topbar__icon"/>
         </button>
         {collapse && <button type="button" className="topbar__back" onClick={this.toggle}/>}
