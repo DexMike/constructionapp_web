@@ -9,7 +9,7 @@ class WrappedRoutes extends PureComponent {
       <div>
         <Layout/>
         <div className="container__wrap">
-          <Route path="/dashboard" component={DashboardPage}/>
+          <Route path="/" component={DashboardPage}/>
         </div>
       </div>
     );

@@ -1,10 +1,24 @@
 import React, { Component } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
+import Amplify from 'aws-amplify';
+import { ConfirmSignIn, ConfirmSignUp, ForgotPassword, RequireNewPassword, SignUp, VerifyContact, withAuthenticator } from 'aws-amplify-react';
 import 'bootstrap/dist/css/bootstrap.css';
 import '../scss/app.scss';
 import ScrollToTop from './ScrollToTop';
 import Router from './routing/Router';
+import LoginPage from './login/LoginPage';
+
+Amplify.configure({
+  Auth: {
+    mandatorySignIn: true,
+    region: 'us-east-1',
+    userPoolId: 'us-east-1_ztq1xhttu',
+    identityPoolId: 'us-east-1:602b5b90-1686-47cd-aaa9-39cf385699bd',
+    userPoolWebClientId: '52tgalb82hnrv338ambff0korj'
+  }
+});
+
 
 export const history = createHistory();
 
@@ -13,8 +27,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      loading: true,
-      loaded: false
+      loading: false,
+      loaded: true
     };
   }
 
@@ -55,4 +69,12 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withAuthenticator(App, false, [
+  <LoginPage/>,
+  <ConfirmSignIn/>,
+  <VerifyContact/>,
+  <SignUp/>,
+  <ConfirmSignUp/>,
+  <ForgotPassword/>,
+  <RequireNewPassword />
+]);
