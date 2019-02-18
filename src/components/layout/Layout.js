@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import Sidebar from './sidebar/Sidebar';
 import Topbar from './topbar/Topbar';
+// import ProfileService from '../../api/ProfileService';
 
 class Layout extends Component {
   constructor(props) {
@@ -14,6 +15,11 @@ class Layout extends Component {
 
     this.changeSidebarVisibility = this.changeSidebarVisibility.bind(this);
     this.changeMobileSidebarVisibility = this.changeMobileSidebarVisibility.bind(this);
+  }
+
+  async componentDidMount() {
+    // const profile = await ProfileService.getProfile();
+    // this.setState({ profile });
   }
 
   changeSidebarVisibility() {
