@@ -18,6 +18,7 @@ class Layout extends Component {
   }
 
   async componentDidMount() {
+    // TODO use this to set the layout navigation
     const profile = await ProfileService.getProfile();
     this.setState({ profile });
   }
