@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 // import SidebarLink from './SidebarLink';
 // import SidebarCategory from './SidebarCategory';
+import SidebarLink from './SidebarLink';
+import SidebarCategory from './SidebarCategory';
+// import ThemeTogglerButton from '../../App';
+import ThemeContext from '../../ThemeContext';
 
 class SidebarContent extends Component {
   constructor(props) {
@@ -19,6 +23,25 @@ class SidebarContent extends Component {
     return (
       <div className="sidebar__content">
         <ul className="sidebar__block">
+
+          <SidebarLink
+            title="Log In"
+            icon="exit"
+            route="/log_in"
+            onClick={this.hideSidebar}
+          />
+          <SidebarCategory title="Layout" icon="layers">
+            <ThemeContext.Consumer>
+              {({ toggleTheme }) => (
+                <button type="button" className="sidebar__link" onClick={toggleTheme}>
+                  <p className="sidebar__link-title">Toggle Theme</p>
+                </button>
+              )}
+            </ThemeContext.Consumer>
+            <React.Fragment />
+          </SidebarCategory>
+
+
           {/* <SidebarLink */}
           {/* title="Log In" */}
           {/* icon="exit" */}
@@ -37,6 +60,13 @@ class SidebarContent extends Component {
           {/* </SidebarCategory> */}
         </ul>
         <ul className="sidebar__block">
+
+          <SidebarLink
+            title="Dashboard"
+            route="/tables/Dashboard"
+            onClick={this.hideSidebar}
+          />
+
           {/* <SidebarCategory title="Tables" icon="diamond"> */}
           {/* <SidebarLink */}
           {/* title="Companies" */}
@@ -54,6 +84,14 @@ class SidebarContent extends Component {
           {/* onClick={this.hideSidebar} */}
           {/* /> */}
           {/* </SidebarCategory> */}
+        </ul>
+        <ul className="sidebar__block">
+          <SidebarLink
+            title="Jobs"
+            route="/tables/Jobs"
+            onClick={this.hideSidebar}
+          />
+
         </ul>
       </div>
     );
