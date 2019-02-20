@@ -62,10 +62,10 @@ class JobCustomerListPage extends Component {
       return <Redirect push to="/"/>;
     }
     if (status.goToAddJob) {
-      return <Redirect push to="/tables/jobs/save"/>;
+      return <Redirect push to="/jobs/save"/>;
     }
     if (status.goToUpdateJob) {
-      return <Redirect push to={`/tables/jobs/save/${status.jobId}`}/>;
+      return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
   }

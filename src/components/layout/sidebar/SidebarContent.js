@@ -63,7 +63,7 @@ class SidebarContent extends Component {
 
           <SidebarLink
             title="Dashboard"
-            route="/tables/Dashboard"
+            route="/dashboard"
             onClick={this.hideSidebar}
           />
 
@@ -88,7 +88,7 @@ class SidebarContent extends Component {
         <ul className="sidebar__block">
           <SidebarLink
             title="Jobs"
-            route="/tables/Jobs"
+            route="/jobs"
             onClick={this.hideSidebar}
           />
 

@@ -46,7 +46,7 @@ class JobSavePage extends Component {
       return <Redirect push to="/" />;
     }
     if (goToJob) {
-      return <Redirect push to="/tables/jobs" />;
+      return <Redirect push to="/jobs" />;
     }
     return false;
   }

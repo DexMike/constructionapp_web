@@ -9,6 +9,9 @@ import { Route } from 'react-router-dom';
 // import BookingListPage from '../bookings/BookingListPage';
 // import BookingSavePage from '../bookings/BookingSavePage';
 import JobListPage from '../jobs/JobListPage';
+// import JobCarrierListPage from '../jobs/JobCarrierListPage';
+// import JobCustomerListPage from '../jobs/JobCustomerListPage';
+// import JobPage from '../jobs/JobPage';
 import JobSavePage from '../jobs/JobSavePage';
 // import EquipmentListPage from '../equipments/EquipmentListPage';
 // import EquipmentSavePage from '../equipments/EquipmentSavePage';
@@ -24,15 +27,15 @@ class TableRoutes extends Component {
 
         <Route
           exact
-          path="/tables/jobs"
+          path="/jobs"
           component={JobListPage}
         />
         <Route
           exact
-          path="/tables/jobs/save"
+          path="/jobs/save"
           component={JobSavePage}
         />
-        <Route path="/tables/jobs/save/:id" component={JobSavePage} />
+        <Route path="/jobs/save/:id" component={JobSavePage} />
 
       </React.Fragment>
     );

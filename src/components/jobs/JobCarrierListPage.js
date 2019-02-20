@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+// Button
 import moment from 'moment';
 import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
@@ -22,7 +23,7 @@ class JobCarrierListPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchJobs();
+    //    await this.fetchJobs();
   }
 
   getState() {
@@ -90,14 +91,6 @@ class JobCarrierListPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                <Button
-                  style={{ width: '150px' }}
-                  className="btn btn-primary account__btn account__btn--small"
-                  onClick={() => this.handlePageClick('AddJob')}
-                >
-                  Add Job
-                </Button>
-                <hr/>
                 JobCarrierListPage
                 <TTable
                   columns={

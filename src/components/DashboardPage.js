@@ -15,10 +15,12 @@ class DashboardPage extends Component {
             <Card>
               <CardBody>
                 <hr/>
+                /DashboardPage
               </CardBody>
             </Card>
           </Col>
         </Row>
+        bunnies
       </Container>
     );
   }
