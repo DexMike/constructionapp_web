@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Route } from 'react-router-dom';
 import Layout from '../layout/Layout';
+import TableRoutes from './TableRoutes';
 import DashboardPage from '../DashboardPage';
 
 class WrappedRoutes extends PureComponent {
@@ -10,6 +11,7 @@ class WrappedRoutes extends PureComponent {
         <Layout/>
         <div className="container__wrap">
           <Route path="/" component={DashboardPage}/>
+          <Route path="/tables" component={TableRoutes}/>
         </div>
       </div>
     );
