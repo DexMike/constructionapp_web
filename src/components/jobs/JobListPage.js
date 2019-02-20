@@ -11,6 +11,7 @@ class JobListPage extends Component {
   constructor(props) {
     super(props);
 
+    // todo set companyType to Customer | Carrier to show appropriate page
     this.state = {
       // jobs: [],
       goToDashboard: false,

@@ -8,6 +8,7 @@ class DashboardPage extends Component {
     super(props);
 
     this.state = {
+      // todo set companyType to Customer | Carrier to show appropriate page
       companyType: 'Customer'
     };
   } // constructor
