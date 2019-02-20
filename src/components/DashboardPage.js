@@ -8,7 +8,7 @@ class DashboardPage extends Component {
 
     this.state = {
       profile: null
-    }
+    };
   }
 
   async componentDidMount() {
@@ -18,6 +18,7 @@ class DashboardPage extends Component {
   }
 
   render() {
+    const { profile } = this.state;
     return (
       <Container className="dashboard">
         <Row>
@@ -29,7 +30,8 @@ class DashboardPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                {this.state.profile && this.state.profile.companyType && <p>{this.state.profile.companyType}</p> }
+                {profile && profile.companyType
+                && <p>{profile.companyType}</p> }
                 <hr/>
               </CardBody>
             </Card>
