@@ -75,14 +75,14 @@ class JobListPage extends Component {
   }
 
   render() {
-    // const { jobs } = this.state;
+    const { companyType } = this.state;
     return (
       <React.Fragment>
         <div>
           Made it to JobListPage
         </div>
-        { this.state.companyType === 'Carrier' && <JobCarrierListPage/>}
-        { this.state.companyType === 'Customer' && <JobCustomerListPage/>}
+        { companyType === 'Carrier' && <JobCarrierListPage/>}
+        { companyType === 'Customer' && <JobCustomerListPage/>}
       </React.Fragment>
     );
   }

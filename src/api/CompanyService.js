@@ -4,19 +4,23 @@ const PATH = '/companies';
 
 class CompanyService extends AgentService {
   static async getCompanies() {
-    return (await super.get(PATH)).json();
+    const response = await super.get(PATH);
+    return (response);
   }
 
   static async createCompany(company) {
-    return (await super.post(PATH, company)).json();
+    const response = await super.post(PATH, company);
+    return (response);
   }
 
   static async updateCompany(company) {
-    return (await this.put(PATH, company)).json();
+    const response = await this.put(PATH, company);
+    return (response);
   }
 
   static async deleteCompanyById(id) {
-    return (await this.delete(PATH, id)).json();
+    const response = await this.delete(PATH, id);
+    return (response);
   }
 }
 

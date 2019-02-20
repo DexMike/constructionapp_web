@@ -14,13 +14,14 @@ class DashboardPage extends Component {
   } // constructor
 
   render() {
+    const { companyType } = this.state;
     return (
       <React.Fragment>
         <div>
           Made it to DashboardPage
         </div>
-        { this.state.companyType === 'Carrier' && <DashboardCarrierPage/>}
-        { this.state.companyType === 'Customer' && <DashboardCustomerPage/>}
+        { companyType === 'Carrier' && <DashboardCarrierPage/>}
+        { companyType === 'Customer' && <DashboardCustomerPage/>}
       </React.Fragment>
     );
   }

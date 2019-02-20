@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+// Button,
 import moment from 'moment';
 import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
@@ -90,44 +91,32 @@ class JobCustomerListPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                <Button
-                  style={{ width: '150px' }}
-                  className="btn btn-primary account__btn account__btn--small"
-                  onClick={() => this.handlePageClick('AddJob')}
-                >
-                  Add Job
-                </Button>
-                <hr/>
                 JobCustomerListPage
                 <TTable
                   columns={
                     [
                       {
-                        name: 'Customer',
+                        name: 'companiesId',
                         displayName: 'Customer'
                       },
                       {
-                        name: 'Material',
+                        name: 'notes',
                         displayName: 'Material'
                       },
                       {
-                        name: 'Size',
+                        name: 'rate',
                         displayName: 'Size'
                       },
                       {
-                        name: 'Start Date',
+                        name: 'startTime',
                         displayName: 'Start Date'
                       },
                       {
-                        name: 'End Date',
-                        displayName: 'End Date'
-                      },
-                      {
-                        name: 'Start Zip',
+                        name: 'startAddress',
                         displayName: 'Start Zip'
                       },
                       {
-                        name: 'Est Income',
+                        name: 'rateEstimate',
                         displayName: 'Est Income'
                       }
                     ]
