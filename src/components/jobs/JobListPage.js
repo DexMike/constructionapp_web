@@ -17,7 +17,7 @@ class JobListPage extends Component {
       goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
-      companyType: 'Carrier'
+      companyType: 'Customer'
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
