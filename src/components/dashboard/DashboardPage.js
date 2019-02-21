@@ -4,27 +4,38 @@ import React, { Component } from 'react';
 // import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import DashboardCarrierPage from './DashboardCarrierPage';
 import DashboardCustomerPage from './DashboardCustomerPage';
+import ProfileService from '../../api/ProfileService';
 
 class DashboardPage extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      // todo set companyType to Customer | Carrier to show appropriate page
-      companyType: 'Customer'
-      // companyType: 'Carrier'
+      companyType: null
     };
   } // constructor
+
+
+  async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ companyType: profile.companyType });
+  }
+
+  renderDashboardFromCompanyType() {
+    const { companyType } = this.state;
+    return (
+      <React.Fragment>
+        { companyType === 'Carrier' && <DashboardCarrierPage/>}
+        { companyType === 'Customer' && <DashboardCustomerPage/>}
+      </React.Fragment>
+    );
+  }
 
   render() {
     const { companyType } = this.state;
     return (
       <React.Fragment>
-        <div>
-          Hello
-        </div>
-        { companyType === 'Carrier' && <DashboardCarrierPage/>}
-        { companyType === 'Customer' && <DashboardCustomerPage/>}
+        { !!companyType && this.renderDashboardFromCompanyType()}
       </React.Fragment>
     );
   }
