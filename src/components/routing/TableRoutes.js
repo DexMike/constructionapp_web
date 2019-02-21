@@ -13,7 +13,7 @@ import JobListPage from '../jobs/JobListPage';
 // import JobCustomerListPage from '../jobs/JobCustomerListPage';
 // import JobPage from '../jobs/JobPage';
 import JobSavePage from '../jobs/JobSavePage';
-// import EquipmentListPage from '../equipments/EquipmentListPage';
+// import EquipmentListCarrierPage from '../equipments/EquipmentListCarrierPage';
 // import EquipmentSavePage from '../equipments/EquipmentSavePage';
 // import LookupListPage from '../lookups/LookupListPage';
 // import LookupSavePage from '../lookups/LookupSavePage';

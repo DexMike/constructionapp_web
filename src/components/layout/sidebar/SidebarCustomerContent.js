@@ -20,7 +20,7 @@ class SidebarCustomerContent extends Component {
   render() {
     return (
       <div className="sidebar__content">
-        
+
         <ul className="sidebar__block">
           <SidebarLink
             title="Dashboard"
