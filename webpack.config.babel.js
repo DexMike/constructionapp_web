@@ -22,7 +22,7 @@ export default {
     devtoolFallbackModuleFilenameTemplate: '[resourcePath]?[hash]'
   },
   devServer: {
-    port: 8081,
+    port: 8082,
     disableHostCheck: true,
     historyApiFallback: {
       rewrites: [

@@ -5,7 +5,7 @@ const PATH = '/profile';
 class ProfileService extends AgentService {
   static async getProfile() {
     const response = await super.get(PATH);
-    return response;
+    return (response);
   }
 }
 

@@ -2,60 +2,44 @@ import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 // import SidebarLink from './SidebarLink';
 // import SidebarCategory from './SidebarCategory';
+// import ThemeTogglerButton from '../../App';
+// import ThemeContext from '../../ThemeContext';
+import SidebarCarrierContent from './SidebarCarrierContent';
+import SidebarCustomerContent from './SidebarCustomerContent';
+import ProfileService from '../../../api/ProfileService';
+// import DashboardCarrierPage from '../../dashboard/DashboardPage';
 
 class SidebarContent extends Component {
   constructor(props) {
     super(props);
 
-    this.hideSidebar = this.hideSidebar.bind(this);
+    this.state = {
+      companyType: null
+    };
   }
 
-  hideSidebar() {
+  async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ companyType: profile.companyType });
+  }
+
+  renderSidebarFromCompanyType() {
+    const { companyType } = this.state;
     const { onClick } = this.props;
-    onClick();
+    return (
+      <React.Fragment>
+        { companyType === 'Carrier' && <SidebarCarrierContent onClick={onClick}/>}
+        { companyType === 'Customer' && <SidebarCustomerContent onClick={onClick}/>}
+      </React.Fragment>
+    );
   }
 
   render() {
+    const { companyType } = this.state;
     return (
-      <div className="sidebar__content">
-        <ul className="sidebar__block">
-          {/* <SidebarLink */}
-          {/* title="Log In" */}
-          {/* icon="exit" */}
-          {/* route="/log_in" */}
-          {/* onClick={this.hideSidebar} */}
-          {/* /> */}
-          {/* <SidebarCategory title="Layout" icon="layers"> */}
-          {/* <ThemeContext.Consumer> */}
-          {/* {({ toggleTheme }) => ( */}
-          {/* <button type="button" className="sidebar__link" onClick={toggleTheme}> */}
-          {/* <p className="sidebar__link-title">Toggle Theme</p> */}
-          {/* </button> */}
-          {/* )} */}
-          {/* </ThemeContext.Consumer> */}
-          {/* <React.Fragment/> */}
-          {/* </SidebarCategory> */}
-        </ul>
-        <ul className="sidebar__block">
-          {/* <SidebarCategory title="Tables" icon="diamond"> */}
-          {/* <SidebarLink */}
-          {/* title="Companies" */}
-          {/* route="/tables/companies" */}
-          {/* onClick={this.hideSidebar} */}
-          {/* /> */}
-          {/* <SidebarLink */}
-          {/* title="Addresses" */}
-          {/* route="/tables/addresses" */}
-          {/* onClick={this.hideSidebar} */}
-          {/* /> */}
-          {/* <SidebarLink */}
-          {/* title="Users" */}
-          {/* route="/tables/users" */}
-          {/* onClick={this.hideSidebar} */}
-          {/* /> */}
-          {/* </SidebarCategory> */}
-        </ul>
-      </div>
+      <React.Fragment>
+        { !!companyType && this.renderSidebarFromCompanyType() }
+      </React.Fragment>
     );
   }
 }
