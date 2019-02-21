@@ -10,6 +10,8 @@ import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
 import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
+import ProfileService from '../../api/ProfileService';
+import AgentService from '../../api/AgentService';
 
 // import MainWrapper from '../routing/Router';
 
@@ -43,6 +45,22 @@ class LoginPage extends SignIn {
     });
   }
 
+  async loginRouting() {
+    const profile = await ProfileService.getProfile();
+    if (profile.companyType === 'Carrier') {
+      window.location = '/';
+    }
+    if (profile.companyType === 'Customer') {
+      // TODO move this to JobService when it is ready
+      const jobs = await AgentService.get(`/companies/${profile.companyId}/jobs`);
+      if (jobs && jobs.length > 0) {
+        window.location = '/jobs';
+      } else {
+        window.location = '/'; // go to the trucks listing as the customer needs to create a job.
+      }
+    }
+  }
+
   async onSignIn() {
     this.setState({ loading: true });
     try {
@@ -60,7 +78,8 @@ class LoginPage extends SignIn {
       // If the user session is not null, then we are authenticated
       if (data.signInUserSession !== null) {
         this.props.onStateChange('authenticated', data);
-        window.location = '/';
+        // window.location = '/';
+        await this.loginRouting();
         return;
       }
 
