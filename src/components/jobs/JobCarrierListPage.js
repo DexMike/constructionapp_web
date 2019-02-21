@@ -23,7 +23,7 @@ class JobCarrierListPage extends Component {
   }
 
   async componentDidMount() {
-    //    await this.fetchJobs();
+    await this.fetchJobs();
   }
 
   getState() {
@@ -96,32 +96,32 @@ class JobCarrierListPage extends Component {
                   columns={
                     [
                       {
-                        name: 'Customer',
+                        name: 'companiesId',
                         displayName: 'Customer'
                       },
                       {
-                        name: 'Material',
-                        displayName: 'Material'
-                      },
-                      {
-                        name: 'Size',
-                        displayName: 'Size'
-                      },
-                      {
-                        name: 'Start Date',
+                        name: 'startTime',
                         displayName: 'Start Date'
                       },
                       {
-                        name: 'End Date',
-                        displayName: 'End Date'
-                      },
-                      {
-                        name: 'Start Zip',
+                        name: 'startAddress',
                         displayName: 'Start Zip'
                       },
                       {
-                        name: 'Est Income',
-                        displayName: 'Est Income'
+                        name: 'note',
+                        displayName: 'Size'
+                      },
+                      {
+                        name: 'rate',
+                        displayName: 'Rate'
+                      },
+                      {
+                        name: 'rateEstimate',
+                        displayName: 'Est. Income'
+                      },
+                      {
+                        name: 'notes',
+                        displayName: 'Materials'
                       }
                     ]
                   }

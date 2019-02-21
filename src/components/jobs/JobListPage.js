@@ -19,6 +19,7 @@ class JobListPage extends Component {
       goToUpdateJob: false,
       jobId: 0,
       companyType: 'Customer'
+      // companyType: 'Carrier'
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -46,19 +47,6 @@ class JobListPage extends Component {
       this.setState({ [`goTo${menuItem}`]: true });
     }
   }
-
-  // async fetchJobs() {
-  //   let jobs = await JobsService.getJobs();
-  //   jobs = jobs.map((job) => {
-  //     const newJob = job;
-  //     newJob.modifiedOn = moment(job.modifiedOn)
-  //       .format();
-  //     newJob.createdOn = moment(job.createdOn)
-  //       .format();
-  //     return newJob;
-  //   });
-  //   this.setState({ jobs });
-  // }
 
   renderGoTo() {
     const status = this.state;
