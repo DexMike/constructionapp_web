@@ -41,8 +41,7 @@ class TopbarProfile extends PureComponent {
         {collapse && <button type="button" className="topbar__back" onClick={this.toggle}/>}
         <Collapse isOpen={collapse} className="topbar__menu-wrap">
           <div className="topbar__menu">
-            {/* <TopbarMenuLink title="Companies" icon="list" path="/companies"/> */}
-            {/* <TopbarMenuLink title="Addresses" icon="inbox" path="/addresses"/> */}
+            <TopbarMenuLink title="Toggle Theme" icon="layers" path="/"/>
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Log Out" icon="exit" path="/"/>
           </div>

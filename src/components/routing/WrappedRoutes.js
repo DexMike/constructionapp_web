@@ -10,6 +10,7 @@ import DashboardPage from '../dashboard/DashboardPage';
 // import JobCustomerListPage from '../jobs/JobCustomerListPage';
 import JobListPage from '../jobs/JobListPage';
 import JobSavePage from '../jobs/JobSavePage';
+import EquipmentListPage from '../equipments/EquipmentListPage';
 
 // No longer using TableRoutes
 // import TableRoutes from './TableRoutes';
@@ -63,6 +64,7 @@ class WrappedRoutes extends PureComponent {
             component={JobSavePage}
           />
           <Route path="/jobs/save/:id" component={JobSavePage} />
+          <Route exact path="/equipments" component={EquipmentListPage} />
 
         </div>
       </div>

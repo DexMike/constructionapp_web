@@ -20,26 +20,7 @@ class SidebarCustomerContent extends Component {
   render() {
     return (
       <div className="sidebar__content">
-        <ul className="sidebar__block">
-
-          <SidebarLink
-            title="Log In"
-            icon="exit"
-            route="/log_in"
-            onClick={this.hideSidebar}
-          />
-          <SidebarCategory title="Layout" icon="layers">
-            <ThemeContext.Consumer>
-              {({ toggleTheme }) => (
-                <button type="button" className="sidebar__link" onClick={toggleTheme}>
-                  <p className="sidebar__link-title">Toggle Theme</p>
-                </button>
-              )}
-            </ThemeContext.Consumer>
-            <React.Fragment />
-          </SidebarCategory>
-        </ul>
-
+        
         <ul className="sidebar__block">
           <SidebarLink
             title="Dashboard"

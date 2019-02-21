@@ -7,7 +7,7 @@ import LoginPage from '../login/LoginPage';
 class Router extends Component {
   render() {
     return (
-      <MainWrapper>
+      <MainWrapper theme={this.context}>
         <main>
           <Switch>
             <Route exact path="/log_in" component={LoginPage}/>
