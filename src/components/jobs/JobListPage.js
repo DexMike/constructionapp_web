@@ -4,6 +4,7 @@ import { Redirect } from 'react-router-dom';
 // import moment from 'moment';
 // import TTable from '../common/TTable';
 // import JobsService from '../../api/JobsService';
+import ProfileService from '../../api/ProfileService';
 import JobCarrierListPage from './JobCarrierListPage';
 import JobCustomerListPage from './JobCustomerListPage';
 
@@ -18,8 +19,7 @@ class JobListPage extends Component {
       goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
-      companyType: 'Customer'
-      // companyType: 'Carrier'
+      companyType: null
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -27,6 +27,8 @@ class JobListPage extends Component {
   }
 
   async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ companyType: profile.companyType });
     //    await this.fetchJobs();
   }
 
@@ -48,6 +50,16 @@ class JobListPage extends Component {
     }
   }
 
+  renderJobListFromCompanyType() {
+    const { companyType } = this.state;
+    return (
+      <React.Fragment>
+        { companyType === 'Carrier' && <JobCarrierListPage/>}
+        { companyType === 'Customer' && <JobCustomerListPage/>}
+      </React.Fragment>
+    );
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -66,11 +78,7 @@ class JobListPage extends Component {
     const { companyType } = this.state;
     return (
       <React.Fragment>
-        <div>
-          Made it to JobListPage
-        </div>
-        { companyType === 'Carrier' && <JobCarrierListPage/>}
-        { companyType === 'Customer' && <JobCustomerListPage/>}
+        { !!companyType && this.renderJobListFromCompanyType()}
       </React.Fragment>
     );
   }

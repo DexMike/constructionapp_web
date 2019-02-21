@@ -7,7 +7,7 @@ import * as PropTypes from 'prop-types';
 import SidebarCarrierContent from './SidebarCarrierContent';
 import SidebarCustomerContent from './SidebarCustomerContent';
 import ProfileService from '../../../api/ProfileService';
-import DashboardCarrierPage from '../../dashboard/DashboardPage';
+// import DashboardCarrierPage from '../../dashboard/DashboardPage';
 
 class SidebarContent extends Component {
   constructor(props) {
