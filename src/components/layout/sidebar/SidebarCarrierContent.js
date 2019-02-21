@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import * as PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import SidebarLink from './SidebarLink';
 import SidebarCategory from './SidebarCategory';
 // import ThemeTogglerButton from '../../App';
@@ -76,8 +76,8 @@ class SidebarCarrierContent extends Component {
   }
 }
 
-// SidebarCarrierContent.propTypes = {
-// //  onClick: PropTypes.func.isRequired
-// };
+SidebarCarrierContent.propTypes = {
+  onClick: PropTypes.func.isRequired
+};
 
 export default SidebarCarrierContent;

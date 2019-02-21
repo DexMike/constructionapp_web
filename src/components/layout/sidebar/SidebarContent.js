@@ -16,24 +16,18 @@ class SidebarContent extends Component {
       companyType: 'Customer'
       // companyType: 'Carrier'
     };
-
-    // this.hideSidebar = this.hideSidebar.bind(this);
   }
-
-  // hideSidebar() {
-  //   const { onClick } = this.props;
-  //   onClick();
-  // }
 
   render() {
     const { companyType } = this.state;
+    const { onClick } = this.props;
     return (
       <React.Fragment>
         <div>
           &nbsp;
         </div>
-        { companyType === 'Carrier' && <SidebarCarrierContent/>}
-        { companyType === 'Customer' && <SidebarCustomerContent/>}
+        {companyType === 'Carrier' && <SidebarCarrierContent onClick={onClick}/>}
+        {companyType === 'Customer' && <SidebarCustomerContent onClick={onClick}/>}
       </React.Fragment>
     );
   }
