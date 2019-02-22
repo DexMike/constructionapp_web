@@ -65,11 +65,15 @@ class JobSavePage extends Component {
         <button type="button" className="app-link" onClick={() => this.handlePageClick('Job')}>
           Jobs
         </button>
-        &#62;Save
+        &#62;
+        {job.companiesId}
+        &#62;
+        {job.id}
+
         <div className="row">
           <div className="col-md-12">
             <h3 className="page-title">
-              Save Job
+              Job Details
             </h3>
           </div>
         </div>

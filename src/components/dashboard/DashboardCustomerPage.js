@@ -80,10 +80,9 @@ class DashboardCustomerPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Jobs
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Jobs</h3>
+            <h3 className="page-title">Dashboard</h3>
           </Col>
         </Row>
         <Row>
