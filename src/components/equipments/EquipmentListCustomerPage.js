@@ -9,13 +9,15 @@ import {
   Row,
   Modal
 } from 'reactstrap';
+import moment from 'moment';
 // import classnames from 'classnames';
 // import moment from 'moment';
 // import AgentService from '../../api/AgentService';
 import TTable from '../common/TTable';
 import JobCreateForm from '../jobs/JobCreateForm';
+import EquipmentService from '../../api/EquipmentService';
 
-class EquipmentListCarrierPage extends Component {
+class EquipmentListCustomerPage extends Component {
   constructor(props) {
     super(props);
 
@@ -25,8 +27,40 @@ class EquipmentListCarrierPage extends Component {
       goToDashboard: false,
       goToAddEquipment: false,
       goToUpdateEquipment: false,
-      equipmentId: 0,
-      modal: true
+      equipmentId: 1,
+      modal: true,
+      selectedEquipment: {
+        companyId: 19,
+        createdBy: 5,
+        createdOn: 1550078746000,
+        currentAvailability: 1,
+        defaultDriverId: 5,
+        description: 'Test desc',
+        driverEquipmentsId: 19,
+        driversId: 4,
+        equipmentAddressId: 3,
+        hourRate: 122,
+        id: 1,
+        image: '',
+        isArchived: 0,
+        licensePlate: 'I87YI7',
+        makeId: '2',
+        maxCapacity: 25,
+        maxDistance: 67,
+        minCapacity: 25,
+        minHours: 4,
+        modelId: '1',
+        modifiedBy: null,
+        modifiedOn: 1550078746000,
+        name: 'Bo\'s Truck',
+        notes: 'This truck is a bottom dump type.',
+        rateType: 'Ton',
+        styleId: 45,
+        tonRate: 23,
+        type: 'Bottom Dump',
+        vin: '4T1BD1FK7DU070343',
+        materials: ['Stone', 'Gravel'] // This comes from the Equipment Materials table
+      }
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -36,7 +70,7 @@ class EquipmentListCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    // await this.fetchEquipments();
+    await this.fetchEquipments();
   }
 
   // toggle(tab) {
@@ -48,18 +82,18 @@ class EquipmentListCarrierPage extends Component {
   //   }
   // }
 
-  // async fetchEquipments() {
-  //   let equipments = await AgentService.getEquipments();
-  //   equipments = equipments.map((equipment) => {
-  //     const newEquipment = equipment;
-  //     newEquipment.modifiedOn = moment(equipment.modifiedOn)
-  //       .format();
-  //     newEquipment.createdOn = moment(equipment.createdOn)
-  //       .format();
-  //     return newEquipment;
-  //   });
-  //   this.setState({ equipments });
-  // }
+  async fetchEquipments() {
+    let equipments = await EquipmentService.getEquipments();
+    equipments = equipments.map((equipment) => {
+      const newEquipment = equipment;
+      newEquipment.modifiedOn = moment(equipment.modifiedOn)
+        .format();
+      newEquipment.createdOn = moment(equipment.createdOn)
+        .format();
+      return newEquipment;
+    });
+    this.setState({ equipments });
+  }
 
   handlePageClick(menuItem) {
     if (menuItem) {
@@ -96,7 +130,7 @@ class EquipmentListCarrierPage extends Component {
   }
 
   render() {
-    const { equipments, modal } = this.state;
+    const { equipments, modal, selectedEquipment } = this.state;
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -132,7 +166,7 @@ class EquipmentListCarrierPage extends Component {
                     <h4 className="bold-text modal__title">Job Request</h4>
                   </div>
                   <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-                    <JobCreateForm />
+                    <JobCreateForm selectedEquipment={selectedEquipment} />
                   </div>
                 </Modal>
                 <TTable
@@ -185,4 +219,4 @@ class EquipmentListCarrierPage extends Component {
   }
 }
 
-export default EquipmentListCarrierPage;
+export default EquipmentListCustomerPage;

@@ -10,7 +10,7 @@ import DashboardPage from '../dashboard/DashboardPage';
 // import JobCustomerListPage from '../jobs/JobCustomerListPage';
 import JobListPage from '../jobs/JobListPage';
 import JobSavePage from '../jobs/JobSavePage';
-import EquipmentListCarrierPage from '../equipments/EquipmentListCarrierPage';
+import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
 
 // No longer using TableRoutes
 // import TableRoutes from './TableRoutes';
@@ -23,7 +23,7 @@ import EquipmentListCarrierPage from '../equipments/EquipmentListCarrierPage';
 // import UserSavePage from '../users/UserSavePage';
 // import BookingListPage from '../bookings/BookingListPage';
 // import BookingSavePage from '../bookings/BookingSavePage';
-// import EquipmentListCarrierPage from '../equipments/EquipmentListCarrierPage';
+// import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
 // import EquipmentSavePage from '../equipments/EquipmentSavePage';
 // import LookupListPage from '../lookups/LookupListPage';
 // import LookupSavePage from '../lookups/LookupSavePage';
@@ -64,7 +64,7 @@ class WrappedRoutes extends PureComponent {
             component={JobSavePage}
           />
           <Route path="/jobs/save/:id" component={JobSavePage} />
-          <Route exact path="/trucks" component={EquipmentListCarrierPage} />
+          <Route exact path="/trucks" component={EquipmentListCustomerPage} />
 
         </div>
       </div>
