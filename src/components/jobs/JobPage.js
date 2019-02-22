@@ -22,7 +22,7 @@ class JobPage extends Component {
       status: 'New',
       startAddress: 0,
       endAddress: 0,
-      modelType: 'All',
+      rateType: 'All',
       rate: 0,
       notes: '',
       createdBy: 0,
@@ -98,7 +98,7 @@ class JobPage extends Component {
       && job.status
       && job.startAddress
       && job.endAddress
-      && job.modelType
+      && job.rateType
     );
   }
 
@@ -129,7 +129,7 @@ class JobPage extends Component {
       status,
       startAddress,
       endAddress,
-      modelType,
+      rateType,
       rate,
       notes,
       createdBy,
@@ -202,7 +202,7 @@ class JobPage extends Component {
                       <div className="form__form-group">
                         <span className="form__form-group-label">Status</span>
                         <div className="form__form-group-field">
-                          <input name="status" type="number" value={status} onChange={this.handleInputChange} />
+                          <input name="status" type="text" value={status} onChange={this.handleInputChange} />
                         </div>
                       </div>
 
@@ -223,7 +223,7 @@ class JobPage extends Component {
                       <div className="form__form-group">
                         <span className="form__form-group-label">Model Type</span>
                         <div className="form__form-group-field">
-                          <input name="modelType" type="number" value={modelType} onChange={this.handleInputChange} />
+                          <input name="rateType" type="number" value={rateType} onChange={this.handleInputChange} />
                         </div>
                       </div>
 

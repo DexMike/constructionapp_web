@@ -75,6 +75,7 @@ class JobCarrierListPage extends Component {
     const { jobs } = this.state;
     return (
       <Container className="dashboard">
+
         {this.renderGoTo()}
         <button type="button" className="app-link"
                 onClick={() => this.handlePageClick('Dashboard')}
@@ -82,6 +83,8 @@ class JobCarrierListPage extends Component {
           Dashboard
         </button>
         &#62;Jobs
+
+
         <Row>
           <Col md={12}>
             <h3 className="page-title">Jobs</h3>
@@ -95,6 +98,10 @@ class JobCarrierListPage extends Component {
                 <TTable
                   columns={
                     [
+                      {
+                        name: 'id',
+                        displayName: 'Job Id'
+                      },
                       {
                         name: 'companiesId',
                         displayName: 'Customer'

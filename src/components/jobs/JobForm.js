@@ -3,8 +3,7 @@ import moment from 'moment';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Row, Button, Container,
-  Nav, NavItem, NavLink, TabContent, TabPane
+import { Card, CardBody, Col, Row, Button, Container
 } from 'reactstrap';
 import JobsService from '../../api/JobsService';
 import TCheckBox from '../common/TCheckBox';
@@ -18,7 +17,7 @@ class JobForm extends Component {
       status: 'New',
       startAddress: 0,
       endAddress: 0,
-      modelType: 'All',
+      rateType: 'All',
       rate: 0,
       notes: '',
       createdBy: 0,
@@ -29,7 +28,6 @@ class JobForm extends Component {
     };
 
     this.state = {
-      activeTab: '1',
       ...job
     };
 
@@ -94,7 +92,7 @@ class JobForm extends Component {
       && job.status
       && job.startAddress
       && job.endAddress
-      && job.modelType
+      && job.rateType
     );
   }
 
@@ -125,65 +123,20 @@ class JobForm extends Component {
       status,
       startAddress,
       endAddress,
-      modelType,
+      rateType,
       rate,
       notes,
       createdBy,
       createdOn,
       modifiedBy,
       modifiedOn,
-      isArchived,
-      activeTab
+      isArchived
     } = this.state;
     return (
       <React.Fragment>
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
-              <div className="tabs tabs--justify tabs--bordered-top">
-                <div className="tabs__wrap">
-                  <Nav tabs>
-                    <NavItem>
-                      <NavLink
-                        className={classnames({
-                          active: activeTab === '1'
-                        })}
-                        onClick={() => {
-                          this.toggle('1');
-                        }}
-                      >
-                        Job
-                      </NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink
-                        className={classnames({
-                          active: activeTab === '2'
-                        })}
-                        onClick={() => {
-                          this.toggle('2');
-                        }}
-                      >
-                        Bookings
-                      </NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink
-                        className={classnames({
-                          active: activeTab === '3'
-                        })}
-                        onClick={() => {
-                          this.toggle('3');
-                        }}
-                      >
-                        Bids
-                      </NavLink>
-                    </NavItem>
-                  </Nav>
-                </div>
-              </div>
-              <TabContent activeTab={activeTab}>
-                <TabPane tabId="1">
                   <br/>
                   <form className="form" onSubmit={e => this.saveJob(e)}>
                     <div className="form__half">
@@ -198,7 +151,7 @@ class JobForm extends Component {
                       <div className="form__form-group">
                         <span className="form__form-group-label">Status</span>
                         <div className="form__form-group-field">
-                          <input name="status" type="number" value={status} onChange={this.handleInputChange} />
+                          <input name="status" type="text" value={status} onChange={this.handleInputChange} />
                         </div>
                       </div>
 
@@ -219,7 +172,7 @@ class JobForm extends Component {
                       <div className="form__form-group">
                         <span className="form__form-group-label">Model Type</span>
                         <div className="form__form-group-field">
-                          <input name="modelType" type="number" value={modelType} onChange={this.handleInputChange} />
+                          <input name="rateType" type="text" value={rateType} onChange={this.handleInputChange} />
                         </div>
                       </div>
 
@@ -302,14 +255,6 @@ class JobForm extends Component {
                       </Row>
                     </Container>
                   </form>
-                </TabPane>
-                <TabPane tabId="2">
-                  <p>In development</p>
-                </TabPane>
-                <TabPane tabId="3">
-                  <p>In development</p>
-                </TabPane>
-              </TabContent>
             </CardBody>
           </Card>
         </Col>
