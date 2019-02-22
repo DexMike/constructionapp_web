@@ -64,7 +64,7 @@ class WrappedRoutes extends PureComponent {
             component={JobSavePage}
           />
           <Route path="/jobs/save/:id" component={JobSavePage} />
-          <Route exact path="/trucks" component={EquipmentListCustomerPage} />
+          {/*<Route exact path="/trucks" component={EquipmentListCustomerPage} />*/}
 
         </div>
       </div>

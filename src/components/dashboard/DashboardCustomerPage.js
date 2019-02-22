@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
 import TTable from '../common/TTable';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
 import EquipmentService from '../../api/EquipmentService';
+import JobCreateForm from '../jobs/JobCreateForm';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -14,7 +15,9 @@ class DashboardCustomerPage extends Component {
 
     this.state = {
       equipments: [],
-      goToDashboard: false
+      goToDashboard: false,
+      selectedEquipment: {},
+      modal: false,
       // goToAddJob: false,
       // goToUpdateJob: false,
       // goToCreateJob: false,
@@ -24,6 +27,7 @@ class DashboardCustomerPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     // this.handleJobEdit = this.handleJobEdit.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
+    this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -79,11 +83,24 @@ class DashboardCustomerPage extends Component {
     }
   }
 
-  // handleEquipmentEdit(id) {
-  handleEquipmentEdit() {
+  handleEquipmentEdit(id) {
+    let selectedEquipment = {};
+    selectedEquipment = this.state.equipments.filter(equipment => {
+      if(id === equipment.id) {
+        return equipment;
+      }
+    }, id)[0];
+    selectedEquipment.materials = ['Any'];
     this.setState({
-      // goToUpdateEquipment: true,
-      // equipmentId: id
+      selectedEquipment,
+      modal: true
+    });
+  }
+
+  toggleAddJobModal() {
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
     });
   }
 
@@ -110,10 +127,25 @@ class DashboardCustomerPage extends Component {
       minCapacity,
       materials,
       zipCode,
-      rateType
+      rateType,
+      modal,
+      selectedEquipment
     } = this.state;
     return (
       <Container className="dashboard">
+        <Modal
+          isOpen={modal}
+          toggle={this.toggleAddJobModal}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn" onClick={this.toggleAddJobModal}/>
+            <h4 className="bold-text modal__title">Job Request</h4>
+          </div>
+          <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+            <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
+          </div>
+        </Modal>
         {this.renderGoTo()}
         <button type="button" className="app-link"
                 onClick={() => this.handlePageClick('Dashboard')}
@@ -208,6 +240,10 @@ class DashboardCustomerPage extends Component {
                 <TTable
                   columns={
                     [
+                      {
+                        name: 'id',
+                        displayName: 'ID'
+                      },
                       {
                         name: 'image',
                         displayName: 'Image'
