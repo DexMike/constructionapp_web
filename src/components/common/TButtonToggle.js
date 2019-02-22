@@ -5,12 +5,12 @@ class TButtonToggle extends Component {
     return (
       <div className="row">
         <div className="col-sm-6">
-          <button className="btn btn-secondary btn-sm">
+          <button type="button" className="btn btn-secondary btn-sm">
             Hour
           </button>
         </div>
         <div className="col-sm-6">
-          <button className="btn btn-primary btn-sm">
+          <button type="button" className="btn btn-primary btn-sm">
             Ton
           </button>
         </div>

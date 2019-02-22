@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import SidebarLink from './SidebarLink';
-import SidebarCategory from './SidebarCategory';
+// import SidebarCategory from './SidebarCategory';
 // import ThemeTogglerButton from '../../App';
-import ThemeContext from '../../ThemeContext';
+// import ThemeContext from '../../ThemeContext';
 
 class SidebarCarrierContent extends Component {
   constructor(props) {

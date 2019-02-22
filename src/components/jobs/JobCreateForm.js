@@ -3,7 +3,6 @@ import truckImage from '../../img/default_truck.png';
 import TButtonToggle from '../common/TButtonToggle';
 
 class JobCreateForm extends Component {
-
   renderStartLocation() {
     return (
       <React.Fragment>
@@ -15,7 +14,8 @@ class JobCreateForm extends Component {
         <div style={{
           borderBottom: '3px solid #ccc',
           marginBottom: '15px'
-        }}/>
+        }}
+        />
         <div className="row form">
           <div className="col-sm-12">
             <div className="form__form-group">
@@ -62,7 +62,8 @@ class JobCreateForm extends Component {
         <div style={{
           borderBottom: '3px solid #ccc',
           marginBottom: '15px'
-        }}/>
+        }}
+        />
         <div className="row form">
           <div className="col-sm-12">
             <div className="form__form-group">
@@ -105,7 +106,8 @@ class JobCreateForm extends Component {
         <div style={{ paddingTop: '10px' }} className="row">
           <div className="col-sm-3">
             <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
-                 style={{ width: '100px' }}/>
+                 style={{ width: '100px' }}
+            />
           </div>
           <div className="col-sm-3">
             <div className="form__form-group">
@@ -151,7 +153,8 @@ class JobCreateForm extends Component {
         <div style={{
           borderBottom: '2px solid #ccc',
           marginTop: '10px'
-        }}/>
+        }}
+        />
         <div style={{ paddingTop: '10px' }} className="row">
           <div className="col-sm-12 form">
             <div className="form__form-group">
@@ -194,7 +197,8 @@ class JobCreateForm extends Component {
         <div className="form">
           <div className="form__form-group">
             <h4 className="form__form-group-label">Comments</h4>
-            <div className="form__form-group-field"><textarea name="textarea" type="text"></textarea>
+            <div className="form__form-group-field">
+              <textarea name="textarea" type="text" />
             </div>
           </div>
         </div>
@@ -203,12 +207,12 @@ class JobCreateForm extends Component {
           <div className="col-sm-7">
             <div className="row">
               <div className="col-sm-4">
-                <button className="btn btn-secondary">
+                <button type="button" className="btn btn-secondary">
                   Cancel
                 </button>
               </div>
               <div className="col-sm-8">
-                <button className="btn btn-primary">
+                <button type="button" className="btn btn-primary">
                   Send Request
                 </button>
               </div>

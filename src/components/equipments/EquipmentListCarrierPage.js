@@ -9,9 +9,9 @@ import {
   Row,
   Modal
 } from 'reactstrap';
-import classnames from 'classnames';
-import moment from 'moment';
-import AgentService from '../../api/AgentService';
+// import classnames from 'classnames';
+// import moment from 'moment';
+// import AgentService from '../../api/AgentService';
 import TTable from '../common/TTable';
 import JobCreateForm from '../jobs/JobCreateForm';
 
@@ -20,7 +20,7 @@ class EquipmentListCarrierPage extends Component {
     super(props);
 
     this.state = {
-      activeTab: '1',
+      // activeTab: '1',
       equipments: [],
       goToDashboard: false,
       goToAddEquipment: false,
@@ -74,6 +74,13 @@ class EquipmentListCarrierPage extends Component {
   //   });
   // }
 
+  toggleAddJobModal() {
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
+    });
+  }
+
   renderGoTo() {
     const { goToDashboard, goToAddEquipment, goToUpdateEquipment, equipmentId } = this.state;
     if (goToDashboard) {
@@ -86,12 +93,6 @@ class EquipmentListCarrierPage extends Component {
       return <Redirect push to={`/tables/equipments/save/${equipmentId}`}/>;
     }
     return true;
-  }
-
-  toggleAddJobModal() {
-    this.setState({
-      modal: !this.state.modal,
-    });
   }
 
   render() {
@@ -127,29 +128,13 @@ class EquipmentListCarrierPage extends Component {
                   className="modal-dialog--primary modal-dialog--header"
                 >
                   <div className="modal__header">
-                    <button className="lnr lnr-cross modal__close-btn" onClick={this.toggleAddJobModal}/>
+                    <button type="button" className="lnr lnr-cross modal__close-btn" onClick={this.toggleAddJobModal}/>
                     <h4 className="bold-text modal__title">Job Request</h4>
                   </div>
-                  <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
+                  <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
                     <JobCreateForm />
                   </div>
                 </Modal>
-                {/*<div className="tabs tabs--bordered-bottom">*/}
-                {/*<div className="tabs__wrap">*/}
-                {/*<Nav tabs>*/}
-                {/*<NavItem>*/}
-                {/*<NavLink*/}
-                {/*className={classnames({ active: activeTab === '1' })}*/}
-                {/*onClick={() => {*/}
-                {/*this.toggle('1');*/}
-                {/*}}*/}
-                {/*>*/}
-                {/*Equipment*/}
-                {/*</NavLink>*/}
-                {/*</NavItem>*/}
-                {/*</Nav>*/}
-                {/*<TabContent activeTab={activeTab}>*/}
-                {/*<TabPane tabId="1">*/}
                 <TTable
                   columns={
                     [
@@ -191,10 +176,6 @@ class EquipmentListCarrierPage extends Component {
                   handleIdClick={() => {
                   }}
                 />
-                {/*</TabPane>*/}
-                {/*</TabContent>*/}
-                {/*</div>*/}
-                {/*</div>*/}
               </CardBody>
             </Card>
           </Col>
