@@ -17,7 +17,7 @@ class DashboardCustomerPage extends Component {
       equipments: [],
       goToDashboard: false,
       selectedEquipment: {},
-      modal: false,
+      modal: false
       // goToAddJob: false,
       // goToUpdateJob: false,
       // goToCreateJob: false,
@@ -84,12 +84,13 @@ class DashboardCustomerPage extends Component {
   }
 
   handleEquipmentEdit(id) {
-    let selectedEquipment = {};
-    selectedEquipment = this.state.equipments.filter(equipment => {
-      if(id === equipment.id) {
+    const { equipments } = this.state;
+    const [selectedEquipment] = equipments.filter((equipment) => {
+      if (id === equipment.id) {
         return equipment;
       }
-    }, id)[0];
+      return false;
+    }, id);
     selectedEquipment.materials = ['Any'];
     this.setState({
       selectedEquipment,
