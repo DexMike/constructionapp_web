@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
-import classnames from 'classnames';
+import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+// import classnames from 'classnames';
 import moment from 'moment';
 import TTable from '../common/TTable';
-import JobsService from '../../api/JobsService';
-import AgentService from '../../api/AgentService';
+// import JobsService from '../../api/JobsService';
+// import AgentService from '../../api/AgentService';
 import EquipmentService from '../../api/EquipmentService';
 
 class DashboardCustomerPage extends Component {
@@ -13,22 +13,21 @@ class DashboardCustomerPage extends Component {
     super(props);
 
     this.state = {
-      jobs: [],
       equipments: [],
-      goToDashboard: false,
-      goToAddJob: false,
-      goToUpdateJob: false,
-      goToCreateJob: false,
-      jobId: 0
+      goToDashboard: false
+      // goToAddJob: false,
+      // goToUpdateJob: false,
+      // goToCreateJob: false,
+      // jobId: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.handleJobEdit = this.handleJobEdit.bind(this);
+    // this.handleJobEdit = this.handleJobEdit.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
   }
 
   async componentDidMount() {
-    await this.fetchJobs();
+    // await this.fetchJobs();
     await this.fetchEquipments();
   }
 
@@ -37,18 +36,18 @@ class DashboardCustomerPage extends Component {
     return status;
   }
 
-  async fetchJobs() {
-    let jobs = await JobsService.getJobs();
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      newJob.modifiedOn = moment(job.modifiedOn)
-        .format();
-      newJob.createdOn = moment(job.createdOn)
-        .format();
-      return newJob;
-    });
-    this.setState({ jobs });
-  }
+  // async fetchJobs() {
+  //   let jobs = await JobsService.getJobs();
+  //   jobs = jobs.map((job) => {
+  //     const newJob = job;
+  //     newJob.modifiedOn = moment(job.modifiedOn)
+  //       .format();
+  //     newJob.createdOn = moment(job.createdOn)
+  //       .format();
+  //     return newJob;
+  //   });
+  //   this.setState({ jobs });
+  // }
 
   async fetchEquipments() {
     let equipments = await EquipmentService.getEquipments();
@@ -63,16 +62,16 @@ class DashboardCustomerPage extends Component {
     this.setState({ equipments });
   }
 
-  async filterEquipment() {
+  // async filterEquipment() {
+  //
+  // }
 
-  }
-
-  handleJobEdit(id) {
-    this.setState({
-      goToUpdateJob: true,
-      jobId: id
-    });
-  }
+  // handleJobEdit(id) {
+  //   this.setState({
+  //     goToUpdateJob: true,
+  //     jobId: id
+  //   });
+  // }
 
   handlePageClick(menuItem) {
     if (menuItem) {
@@ -80,10 +79,11 @@ class DashboardCustomerPage extends Component {
     }
   }
 
-  handleEquipmentEdit(id) {
+  // handleEquipmentEdit(id) {
+  handleEquipmentEdit() {
     this.setState({
-      goToUpdateEquipment: true,
-      equipmentId: id
+      // goToUpdateEquipment: true,
+      // equipmentId: id
     });
   }
 
@@ -92,18 +92,17 @@ class DashboardCustomerPage extends Component {
     if (status.goToDashboard) {
       return <Redirect push to="/"/>;
     }
-    if (status.goToAddJob) {
-      return <Redirect push to="/jobs/save"/>;
-    }
-    if (status.goToUpdateJob) {
-      return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
-    }
+    // if (status.goToAddJob) {
+    //   return <Redirect push to="/jobs/save"/>;
+    // }
+    // if (status.goToUpdateJob) {
+    //   return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
+    // }
     return false;
   }
 
   render() {
     const {
-      jobs,
       equipments,
       startAvailability,
       endAvailability,
@@ -121,10 +120,10 @@ class DashboardCustomerPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Jobs
+        &#62;Dashboard
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Jobs</h3>
+            <h3 className="page-title">Dashboard</h3>
           </Col>
         </Row>
 
@@ -134,67 +133,66 @@ class DashboardCustomerPage extends Component {
               <CardBody>
                 <h3>Filters</h3>
 
-                  <form className="form" onSubmit={e => this.saveCompany(e)}>
-
-                    <Row>
-                      <Col>
-                        <span className="form__form-group-label">Start Availability</span>
-                        <div className="form__form-group-field">
+                <form className="form" onSubmit={e => this.saveCompany(e)}>
+                  <Row>
+                    <Col>
+                      <span className="form__form-group-label">Start Availability</span>
+                      <div className="form__form-group-field">
                         <input name="startAvailability" type="text" value={startAvailability}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                      <Col>
-                        <span className="form__form-group-label">End Availability</span>
-                        <div className="form__form-group-field">
+                      </div>
+                    </Col>
+                    <Col>
+                      <span className="form__form-group-label">End Availability</span>
+                      <div className="form__form-group-field">
                         <input name="endAvailability" type="text" value={endAvailability}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                      <Col>
-                        <span className="form__form-group-label">Truck Type</span>
-                        <div className="form__form-group-field">
+                      </div>
+                    </Col>
+                    <Col>
+                      <span className="form__form-group-label">Truck Type</span>
+                      <div className="form__form-group-field">
                         <input name="truckType" type="text" value={truckType}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                      <Col>
-                        <span className="form__form-group-label">Min Capacity</span>
-                        <div className="form__form-group-field">
+                      </div>
+                    </Col>
+                    <Col>
+                      <span className="form__form-group-label">Min Capacity</span>
+                      <div className="form__form-group-field">
                         <input name="minCapacity" type="text" value={minCapacity}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                      <Col>
-                        <span className="form__form-group-label">materials</span>
-                        <div className="form__form-group-field">
+                      </div>
+                    </Col>
+                    <Col>
+                      <span className="form__form-group-label">materials</span>
+                      <div className="form__form-group-field">
                         <input name="materials" type="text" value={materials}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                      <Col>
-                        <span className="form__form-group-label">Zip Code</span>
-                        <div className="form__form-group-field">
+                      </div>
+                    </Col>
+                    <Col>
+                      <span className="form__form-group-label">Zip Code</span>
+                      <div className="form__form-group-field">
                         <input name="zipCode" type="text" value={zipCode}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                      <Col>
-                        <span className="form__form-group-label">Rate Type</span>
-                        <div className="form__form-group-field">
+                      </div>
+                    </Col>
+                    <Col>
+                      <span className="form__form-group-label">Rate Type</span>
+                      <div className="form__form-group-field">
                         <input name="rateType" type="text" value={rateType}
-                               onChange={this.handleInputChange}
+                             onChange={this.handleInputChange}
                         />
-                        </div>
-                      </Col>
-                    </Row>
-                  </form>
+                      </div>
+                    </Col>
+                  </Row>
+                </form>
 
               </CardBody>
             </Card>
@@ -202,45 +200,11 @@ class DashboardCustomerPage extends Component {
 
         </Row>
 
-
-        {/*id*/}
-        {/*name*/}
-        {/*type*/}
-        {/*styleId*/}
-        {/*maxCapacity*/}
-        {/*minCapacity*/}
-        {/*minHours*/}
-        {/*maxDistance*/}
-        {/*description*/}
-        {/*licensePlate*/}
-        {/*vin*/}
-        {/*image*/}
-
-        {/*currentAvailability*/}
-        {/*hourRate*/}
-        {/*tonRate*/}
-        {/*rateType*/}
-
-        {/*companyId*/}
-        {/*defaultDriverId*/}
-        {/*driverEquipmentsId*/}
-        {/*driversId*/}
-        {/*equipmentAddressId*/}
-
-        {/*modelId*/}
-        {/*makeId*/}
-        {/*notes*/}
-        {/*createdBy*/}
-        {/*createdOn*/}
-        {/*modifiedBy*/}
-        {/*modifiedOn*/}
-        {/*isArchived*/}
-
         <Row>
           <Col md={12}>
             <Card>
               <CardBody>
-                Displaying "10" of "575"
+                Displaying XXX of YYY
                 <TTable
                   columns={
                     [
@@ -259,7 +223,7 @@ class DashboardCustomerPage extends Component {
                       },
 
                       {
-                        name: 'hourRate' + "/ Hour",
+                        name: 'hourRate',
                         displayName: 'Hourly Rate'
                       },
                       {
@@ -275,11 +239,7 @@ class DashboardCustomerPage extends Component {
                       {
                         name: 'companyId',
                         displayName: 'Company Name'
-                      },
-                      // {
-                      //   name: 'equipmentsId.value',
-                      //   displayName: 'Materials'
-                      // }
+                      }
                     ]
                   }
                   data={equipments}
