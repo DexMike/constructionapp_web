@@ -1,7 +1,7 @@
 import { Auth } from 'aws-amplify';
 // TODO use .env for developer's local config
-const API_ENDPOINT = 'http://localhost:8080';
-// const API_ENDPOINT = 'https://dev.api.mytrelar.com';
+// const API_ENDPOINT = 'http://localhost:8080';
+const API_ENDPOINT = 'https://dev.api.mytrelar.com';
 
 class AgentService {
   static async getHeaders() {
