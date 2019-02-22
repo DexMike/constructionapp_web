@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import classnames from 'classnames';
 import moment from 'moment';
 import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
+import AgentService from '../../api/AgentService';
+import EquipmentService from '../../api/EquipmentService';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -11,23 +14,57 @@ class DashboardCustomerPage extends Component {
 
     this.state = {
       jobs: [],
+      equipments: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
+      goToCreateJob: false,
       jobId: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
   }
 
   async componentDidMount() {
     await this.fetchJobs();
+    await this.fetchEquipments();
   }
 
   getState() {
     const status = this.state;
     return status;
+  }
+
+  async fetchJobs() {
+    let jobs = await JobsService.getJobs();
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      newJob.modifiedOn = moment(job.modifiedOn)
+        .format();
+      newJob.createdOn = moment(job.createdOn)
+        .format();
+      return newJob;
+    });
+    this.setState({ jobs });
+  }
+
+  async fetchEquipments() {
+    let equipments = await EquipmentService.getEquipments();
+    equipments = equipments.map((equipment) => {
+      const newEquipment = equipment;
+      newEquipment.modifiedOn = moment(equipment.modifiedOn)
+        .format();
+      newEquipment.createdOn = moment(equipment.createdOn)
+        .format();
+      return newEquipment;
+    });
+    this.setState({ equipments });
+  }
+
+  async filterEquipment() {
+
   }
 
   handleJobEdit(id) {
@@ -43,17 +80,11 @@ class DashboardCustomerPage extends Component {
     }
   }
 
-  async fetchJobs() {
-    let jobs = await JobsService.getJobs();
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      newJob.modifiedOn = moment(job.modifiedOn)
-        .format();
-      newJob.createdOn = moment(job.createdOn)
-        .format();
-      return newJob;
+  handleEquipmentEdit(id) {
+    this.setState({
+      goToUpdateEquipment: true,
+      equipmentId: id
     });
-    this.setState({ jobs });
   }
 
   renderGoTo() {
@@ -73,6 +104,7 @@ class DashboardCustomerPage extends Component {
   render() {
     const {
       jobs,
+      equipments,
       startAvailability,
       endAvailability,
       truckType,
@@ -100,109 +132,69 @@ class DashboardCustomerPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                Filters
+                <h3>Filters</h3>
 
-                Start Availability
-                End Availability
-                Truck Type
-                Min Capacity
-                Materials
-                Zip Code
-                Rate Type
+                  <form className="form" onSubmit={e => this.saveCompany(e)}>
 
-              </CardBody>
-            </Card>
-          </Col>
-
-        </Row>
-
-        <Row>
-          <Col md={12}>
-            <Card>
-              <CardBody>
-
-                <form className="form" onSubmit={e => this.saveCompany(e)}>
-                  <div className="form__half">
-
-                    <div className="form__form-group">
-                      <span className="form__form-group-label">Start Availability</span>
-                      <div className="form__form-group-field">
-                        <input name="startAvailability" type="text" placeholder=""
-                               value={startAvailability} onChange={this.handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="form__form-group">
-                      <span className="form__form-group-label">End Availability</span>
-                      <div className="form__form-group-field">
-                        <input name="endAvailability" type="text" value={moment(endAvailability)
-                          .format()} onChange={this.handleInputChange} disabled
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="form__half">
-
-                    <div className="form__form-group">
-                      <span className="form__form-group-label">Truck Type</span>
-                      <div className="form__form-group-field">
-                        <input name="truckType" type="text" placeholder="" value={truckType}
+                    <Row>
+                      <Col>
+                        <span className="form__form-group-label">Start Availability</span>
+                        <div className="form__form-group-field">
+                        <input name="startAvailability" type="text" value={startAvailability}
                                onChange={this.handleInputChange}
                         />
-                      </div>
-                    </div>
-                    <div className="form__form-group">
-                      <span className="form__form-group-label">minCapacity</span>
-                      <div className="form__form-group-field">
+                        </div>
+                      </Col>
+                      <Col>
+                        <span className="form__form-group-label">End Availability</span>
+                        <div className="form__form-group-field">
+                        <input name="endAvailability" type="text" value={endAvailability}
+                               onChange={this.handleInputChange}
+                        />
+                        </div>
+                      </Col>
+                      <Col>
+                        <span className="form__form-group-label">Truck Type</span>
+                        <div className="form__form-group-field">
+                        <input name="truckType" type="text" value={truckType}
+                               onChange={this.handleInputChange}
+                        />
+                        </div>
+                      </Col>
+                      <Col>
+                        <span className="form__form-group-label">Min Capacity</span>
+                        <div className="form__form-group-field">
                         <input name="minCapacity" type="text" value={minCapacity}
                                onChange={this.handleInputChange}
                         />
-                      </div>
-                    </div>
-                    <div className="form__form-group">
-                      <span className="form__form-group-label">materials</span>
-                      <div className="form__form-group-field">
+                        </div>
+                      </Col>
+                      <Col>
+                        <span className="form__form-group-label">materials</span>
+                        <div className="form__form-group-field">
                         <input name="materials" type="text" value={materials}
                                onChange={this.handleInputChange}
                         />
-                      </div>
-                    </div>
-                  </div>
-
-                  <Container>
-                    <Row>
-                      <Col md="4">
-                        <Button
-                          className="account__btn btn-delete"
-                          onClick={() => this.handleDelete()}
-                        >
-                          Delete Company
-                        </Button>
+                        </div>
                       </Col>
-                      <Col md="4">
-                        {this.renderGoTo()}
-                        <Button
-                          className="app-link account__btn btn-back"
-                          onClick={() => this.handlePageClick('Company')}
-                        >
-                          Cancel
-                        </Button>
+                      <Col>
+                        <span className="form__form-group-label">Zip Code</span>
+                        <div className="form__form-group-field">
+                        <input name="zipCode" type="text" value={zipCode}
+                               onChange={this.handleInputChange}
+                        />
+                        </div>
                       </Col>
-                      <Col md="4">
-                        <Button
-                          type="submit"
-                          className="account__btn btn-save"
-                        >
-                          Submit
-                        </Button>
+                      <Col>
+                        <span className="form__form-group-label">Rate Type</span>
+                        <div className="form__form-group-field">
+                        <input name="rateType" type="text" value={rateType}
+                               onChange={this.handleInputChange}
+                        />
+                        </div>
                       </Col>
                     </Row>
-                  </Container>
-                </form>
-
-
-
+                  </form>
 
               </CardBody>
             </Card>
@@ -210,43 +202,90 @@ class DashboardCustomerPage extends Component {
 
         </Row>
 
+
+        {/*id*/}
+        {/*name*/}
+        {/*type*/}
+        {/*styleId*/}
+        {/*maxCapacity*/}
+        {/*minCapacity*/}
+        {/*minHours*/}
+        {/*maxDistance*/}
+        {/*description*/}
+        {/*licensePlate*/}
+        {/*vin*/}
+        {/*image*/}
+
+        {/*currentAvailability*/}
+        {/*hourRate*/}
+        {/*tonRate*/}
+        {/*rateType*/}
+
+        {/*companyId*/}
+        {/*defaultDriverId*/}
+        {/*driverEquipmentsId*/}
+        {/*driversId*/}
+        {/*equipmentAddressId*/}
+
+        {/*modelId*/}
+        {/*makeId*/}
+        {/*notes*/}
+        {/*createdBy*/}
+        {/*createdOn*/}
+        {/*modifiedBy*/}
+        {/*modifiedOn*/}
+        {/*isArchived*/}
+
         <Row>
           <Col md={12}>
             <Card>
               <CardBody>
-                Dashboard Customer Page
+                Displaying "10" of "575"
                 <TTable
                   columns={
                     [
                       {
-                        name: 'companiesId',
-                        displayName: 'Customer'
+                        name: 'image',
+                        displayName: 'Image'
                       },
                       {
-                        name: 'notes',
-                        displayName: 'Material'
+                        name: 'type',
+                        displayName: 'type'
+                      },
+
+                      {
+                        name: 'maxCapacity',
+                        displayName: 'Max Capacity'
+                      },
+
+                      {
+                        name: 'hourRate' + "/ Hour",
+                        displayName: 'Hourly Rate'
                       },
                       {
-                        name: 'rate',
-                        displayName: 'Size'
+                        name: 'minHours',
+                        displayName: 'Min Hours'
                       },
+
                       {
-                        name: 'startTime',
-                        displayName: 'Start Date'
+                        name: 'tonRate',
+                        displayName: 'Ton Rate'
                       },
+
                       {
-                        name: 'startAddress',
-                        displayName: 'Start Zip'
+                        name: 'companyId',
+                        displayName: 'Company Name'
                       },
-                      {
-                        name: 'rateEstimate',
-                        displayName: 'Est Income'
-                      }
+                      // {
+                      //   name: 'equipmentsId.value',
+                      //   displayName: 'Materials'
+                      // }
                     ]
                   }
-                  data={jobs}
-                  handleIdClick={this.handleJobEdit}
+                  data={equipments}
+                  handleIdClick={this.handleEquipmentEdit}
                 />
+
               </CardBody>
             </Card>
           </Col>
@@ -255,6 +294,5 @@ class DashboardCustomerPage extends Component {
     );
   }
 }
-
 
 export default DashboardCustomerPage;
