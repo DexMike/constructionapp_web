@@ -24,6 +24,11 @@ class JobsService extends AgentService {
     const response = await this.delete(PATH, id);
     return (response);
   }
+
+  static async getJobById(id) {
+    const response = await this.get(`${PATH}/${id}`);
+    return (response);
+  }
 }
 
 export default JobsService;

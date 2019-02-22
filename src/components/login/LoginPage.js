@@ -56,7 +56,7 @@ class LoginPage extends SignIn {
       if (jobs && jobs.length > 0) {
         window.location = '/jobs';
       } else {
-        window.location = '/'; // go to the trucks listing as the customer needs to create a job.
+        window.location = '/'; // go to the equipments listing as the customer needs to create a job.
       }
     }
   }

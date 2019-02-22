@@ -2,11 +2,20 @@ import React, { Component } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 import Amplify from 'aws-amplify';
-import { ConfirmSignIn, ConfirmSignUp, ForgotPassword, RequireNewPassword, SignUp, VerifyContact, withAuthenticator } from 'aws-amplify-react';
+import {
+  ConfirmSignIn,
+  ConfirmSignUp,
+  ForgotPassword,
+  RequireNewPassword,
+  SignUp,
+  VerifyContact,
+  withAuthenticator
+} from 'aws-amplify-react';
 import 'bootstrap/dist/css/bootstrap.css';
 import '../scss/app.scss';
 import ScrollToTop from './ScrollToTop';
 import Router from './routing/Router';
+import ThemeContext from './ThemeContext';
 import LoginPage from './login/LoginPage';
 
 Amplify.configure({
@@ -26,9 +35,24 @@ class App extends Component {
   constructor(props) {
     super(props);
 
+    this.toggleTheme = () => {
+      this.setState(state => ({
+        theme: state.theme === 'dark' ? 'light' : 'dark'
+      }), () => {
+        const { theme } = this.state;
+        localStorage.setItem('theme', theme);
+      });
+    };
+
+    const theme = localStorage.getItem('theme')
+      ? localStorage.getItem('theme')
+      : 'light';
+
     this.state = {
       loading: false,
-      loaded: true
+      loaded: true,
+      theme,
+      toggleTheme: this.toggleTheme // eslint-disable-line react/no-unused-state
     };
   }
 
@@ -56,14 +80,16 @@ class App extends Component {
     const { loaded } = this.state;
     return (
       <BrowserRouter>
-        <ScrollToTop>
-          <React.Fragment>
-            {!loaded && this.renderLoader()}
-            <div>
-              <Router history={history}/>
-            </div>
-          </React.Fragment>
-        </ScrollToTop>
+        <ThemeContext.Provider value={this.state}>
+          <ScrollToTop>
+            <React.Fragment>
+              {!loaded && this.renderLoader()}
+              <div>
+                <Router history={history}/>
+              </div>
+            </React.Fragment>
+          </ScrollToTop>
+        </ThemeContext.Provider>
       </BrowserRouter>
     );
   }
@@ -76,5 +102,5 @@ export default withAuthenticator(App, false, [
   <SignUp/>,
   <ConfirmSignUp/>,
   <ForgotPassword/>,
-  <RequireNewPassword />
+  <RequireNewPassword/>
 ]);

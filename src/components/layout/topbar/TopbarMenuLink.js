@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
+import ThemeContext from '../../ThemeContext';
 
 class TopbarMenuLink extends Component {
   logOut() {
@@ -19,7 +20,16 @@ class TopbarMenuLink extends Component {
             <p className="topbar__link-title">{title}</p>
           </Link>
         )}
-        { title !== 'Log Out' && (
+        {title === 'Toggle Theme' && (
+          <ThemeContext.Consumer>
+            {({ toggleTheme }) => (
+              <button type="button" className="sidebar__link" onClick={toggleTheme}>
+                <p className="sidebar__link-title">Toggle Theme</p>
+              </button>
+            )}
+          </ThemeContext.Consumer>
+        )}
+        { title !== 'Log Out' && title !== 'Toggle Theme' && (
           <Link className="topbar__link" to={path}>
             <span className={`topbar__link-icon lnr lnr-${icon}`}/>
             <p className="topbar__link-title">{title}</p>

@@ -82,7 +82,62 @@ class DashboardCarrierPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Jobs
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Dashboard</h3>
+          </Col>
+        </Row>
+        <Row>
+          <Col ms={2}>
+            <Card>
+              <CardBody>
+                <h5 className="bold-text">All Jobs</h5>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col ms={2}>
+            <Card>
+              <CardBody>
+                <h5 className="bold-text">Pending Offers</h5>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col ms={2}>
+            <Card>
+              <CardBody>
+                <h5 className="bold-text">Jobs in Progress</h5>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col ms={2}>
+            <Card>
+              <CardBody>
+                <h5 className="bold-text">Booked Jobs</h5>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col ms={2}>
+            <Card>
+              <CardBody>
+                <h5 className="bold-text">Completed Jobs</h5>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col m={2}>
+            <Card>
+              <CardBody>
+                <h5 className="bold-text">Upcoming Revenue</h5>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* {this.renderGoTo()} */}
+        {/* <button type="button" className="app-link" */}
+        {/* onClick={() => this.handlePageClick('Dashboard')} */}
+        {/* > */}
+        {/* Dashboard */}
+        {/* </button> */}
         <Row>
           <Col md={12}>
             <h3 className="page-title">Jobs</h3>
@@ -92,10 +147,14 @@ class DashboardCarrierPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                Dashboard Carrier Page
+                Carrier
                 <TTable
                   columns={
                     [
+                      {
+                        name: 'id',
+                        displayName: 'Job Id'
+                      },
                       {
                         name: 'companiesId',
                         displayName: 'Customer'
