@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 import moment from 'moment';
 import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
@@ -71,7 +71,16 @@ class DashboardCustomerPage extends Component {
   }
 
   render() {
-    const { jobs } = this.state;
+    const {
+      jobs,
+      startAvailability,
+      endAvailability,
+      truckType,
+      minCapacity,
+      materials,
+      zipCode,
+      rateType
+    } = this.state;
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -86,6 +95,121 @@ class DashboardCustomerPage extends Component {
             <h3 className="page-title">Jobs</h3>
           </Col>
         </Row>
+
+        <Row>
+          <Col md={12}>
+            <Card>
+              <CardBody>
+                Filters
+
+                Start Availability
+                End Availability
+                Truck Type
+                Min Capacity
+                Materials
+                Zip Code
+                Rate Type
+
+              </CardBody>
+            </Card>
+          </Col>
+
+        </Row>
+
+        <Row>
+          <Col md={12}>
+            <Card>
+              <CardBody>
+
+                <form className="form" onSubmit={e => this.saveCompany(e)}>
+                  <div className="form__half">
+
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">Start Availability</span>
+                      <div className="form__form-group-field">
+                        <input name="startAvailability" type="text" placeholder=""
+                               value={startAvailability} onChange={this.handleInputChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">End Availability</span>
+                      <div className="form__form-group-field">
+                        <input name="endAvailability" type="text" value={moment(endAvailability)
+                          .format()} onChange={this.handleInputChange} disabled
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form__half">
+
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">Truck Type</span>
+                      <div className="form__form-group-field">
+                        <input name="truckType" type="text" placeholder="" value={truckType}
+                               onChange={this.handleInputChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">minCapacity</span>
+                      <div className="form__form-group-field">
+                        <input name="minCapacity" type="text" value={minCapacity}
+                               onChange={this.handleInputChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">materials</span>
+                      <div className="form__form-group-field">
+                        <input name="materials" type="text" value={materials}
+                               onChange={this.handleInputChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Container>
+                    <Row>
+                      <Col md="4">
+                        <Button
+                          className="account__btn btn-delete"
+                          onClick={() => this.handleDelete()}
+                        >
+                          Delete Company
+                        </Button>
+                      </Col>
+                      <Col md="4">
+                        {this.renderGoTo()}
+                        <Button
+                          className="app-link account__btn btn-back"
+                          onClick={() => this.handlePageClick('Company')}
+                        >
+                          Cancel
+                        </Button>
+                      </Col>
+                      <Col md="4">
+                        <Button
+                          type="submit"
+                          className="account__btn btn-save"
+                        >
+                          Submit
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Container>
+                </form>
+
+
+
+
+              </CardBody>
+            </Card>
+          </Col>
+
+        </Row>
+
         <Row>
           <Col md={12}>
             <Card>
