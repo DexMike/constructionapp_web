@@ -167,19 +167,27 @@ class DashboardCustomerPage extends Component {
                 <h3>Filters</h3>
 
                 <form className="form" onSubmit={e => this.saveCompany(e)}>
+                  {/*<Row style={{color:Tomato}}>*/}
                   <Row>
                     <Col>
                       <span className="form__form-group-label">Start Availability</span>
                       <div className="form__form-group-field">
-                        <input name="startAvailability" type="text" value={startAvailability}
-                             onChange={this.handleInputChange}
+                        <input name="startAvailability"
+                               type="text"
+                               placeholder="Select Start Date"
+                               value={startAvailability}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
                     <Col>
                       <span className="form__form-group-label">End Availability</span>
                       <div className="form__form-group-field">
-                        <input name="endAvailability" type="text" value={endAvailability}
+                        <input name="endAvailability"
+                             style={{ width: '100%' }}
+                             type="text"
+                               placeholder="Select End Date"
+                             value={endAvailability}
                              onChange={this.handleInputChange}
                         />
                       </div>
@@ -187,7 +195,10 @@ class DashboardCustomerPage extends Component {
                     <Col>
                       <span className="form__form-group-label">Truck Type</span>
                       <div className="form__form-group-field">
-                        <input name="truckType" type="text" value={truckType}
+                        <input name="truckType"
+                               type="text"
+                               placeholder="Any"
+                               value={truckType}
                              onChange={this.handleInputChange}
                         />
                       </div>
@@ -195,7 +206,10 @@ class DashboardCustomerPage extends Component {
                     <Col>
                       <span className="form__form-group-label">Min Capacity</span>
                       <div className="form__form-group-field">
-                        <input name="minCapacity" type="text" value={minCapacity}
+                        <input name="minCapacity"
+                               type="text"
+                               placeholder="Min # of tons"
+                               value={minCapacity}
                              onChange={this.handleInputChange}
                         />
                       </div>
@@ -203,7 +217,10 @@ class DashboardCustomerPage extends Component {
                     <Col>
                       <span className="form__form-group-label">materials</span>
                       <div className="form__form-group-field">
-                        <input name="materials" type="text" value={materials}
+                        <input name="materials"
+                               type="text"
+                               placeholder="Any"
+                               value={materials}
                              onChange={this.handleInputChange}
                         />
                       </div>
@@ -211,15 +228,21 @@ class DashboardCustomerPage extends Component {
                     <Col>
                       <span className="form__form-group-label">Zip Code</span>
                       <div className="form__form-group-field">
-                        <input name="zipCode" type="text" value={zipCode}
-                             onChange={this.handleInputChange}
+                        <input name="zipCode"
+                               type="text"
+                               placeholder="Zip Code"
+                               value={zipCode}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
                     <Col>
                       <span className="form__form-group-label">Rate Type</span>
                       <div className="form__form-group-field">
-                        <input name="rateType" type="text" value={rateType}
+                        <input name="rateType"
+                               type="text"
+                               placeholder="Any"
+                               value={rateType}
                              onChange={this.handleInputChange}
                         />
                       </div>
@@ -237,7 +260,13 @@ class DashboardCustomerPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                Displaying XXX of YYY
+                Displaying {
+                if equipement !=== null {
+                  equipment.length
+                } else {
+                  none
+                  }
+                } of YYY
                 <TTable
                   columns={
                     [
