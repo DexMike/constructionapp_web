@@ -119,7 +119,7 @@ class DashboardCustomerPage extends Component {
     return false;
   }
 
-  render() {
+  renderModal() {
     const {
       equipments,
       startAvailability,
@@ -133,33 +133,56 @@ class DashboardCustomerPage extends Component {
       selectedEquipment
     } = this.state;
     return (
-      <Container className="dashboard">
-        <Modal
-          isOpen={modal}
-          toggle={this.toggleAddJobModal}
-          className="modal-dialog--primary modal-dialog--header"
-        >
-          <div className="modal__header">
-            <button type="button" className="lnr lnr-cross modal__close-btn" onClick={this.toggleAddJobModal}/>
-            <h4 className="bold-text modal__title">Job Request</h4>
-          </div>
-          <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-            <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
-          </div>
-        </Modal>
-        {this.renderGoTo()}
+      <Modal
+        isOpen={modal}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn" onClick={this.toggleAddJobModal}/>
+          <h4 className="bold-text modal__title">Job Request</h4>
+        </div>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
+        </div>
+      </Modal>
+    );
+  }
+  renderBreadcrumb() {
+    return (
+      <div>
         <button type="button" className="app-link"
                 onClick={() => this.handlePageClick('Dashboard')}
         >
           Dashboard
         </button>
         &#62;Dashboard
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Dashboard</h3>
-          </Col>
-        </Row>
-
+      </div>
+    );
+  }
+  renderTitle() {
+    return (
+      <Row>
+        <Col md={12}>
+          <h3 className="page-title">Dashboard</h3>
+        </Col>
+      </Row>
+    );
+  }
+  renderFilter() {
+    const {
+      equipments,
+      startAvailability,
+      endAvailability,
+      truckType,
+      minCapacity,
+      materials,
+      zipCode,
+      rateType,
+      modal,
+      selectedEquipment
+    } = this.state;
+    return (
         <Row>
           <Col md={12}>
             <Card>
@@ -184,11 +207,11 @@ class DashboardCustomerPage extends Component {
                       <span className="form__form-group-label">End Availability</span>
                       <div className="form__form-group-field">
                         <input name="endAvailability"
-                             style={{ width: '100%' }}
-                             type="text"
+                               style={{ width: '100%' }}
+                               type="text"
                                placeholder="Select End Date"
-                             value={endAvailability}
-                             onChange={this.handleInputChange}
+                               value={endAvailability}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
@@ -199,7 +222,7 @@ class DashboardCustomerPage extends Component {
                                type="text"
                                placeholder="Any"
                                value={truckType}
-                             onChange={this.handleInputChange}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
@@ -210,7 +233,7 @@ class DashboardCustomerPage extends Component {
                                type="text"
                                placeholder="Min # of tons"
                                value={minCapacity}
-                             onChange={this.handleInputChange}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
@@ -221,7 +244,7 @@ class DashboardCustomerPage extends Component {
                                type="text"
                                placeholder="Any"
                                value={materials}
-                             onChange={this.handleInputChange}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
@@ -243,7 +266,7 @@ class DashboardCustomerPage extends Component {
                                type="text"
                                placeholder="Any"
                                value={rateType}
-                             onChange={this.handleInputChange}
+                               onChange={this.handleInputChange}
                         />
                       </div>
                     </Col>
@@ -255,67 +278,107 @@ class DashboardCustomerPage extends Component {
           </Col>
 
         </Row>
+      );
+  }
 
-        <Row>
-          <Col md={12}>
-            <Card>
-              <CardBody>
-                Displaying {
-                if equipement !=== null {
-                  equipment.length
-                } else {
-                  none
-                  }
-                } of YYY
-                <TTable
-                  columns={
-                    [
-                      {
-                        name: 'id',
-                        displayName: 'ID'
-                      },
-                      {
-                        name: 'image',
-                        displayName: 'Image'
-                      },
-                      {
-                        name: 'type',
-                        displayName: 'type'
-                      },
+  renderTable() {
+    const {
+      equipments,
+      startAvailability,
+      endAvailability,
+      truckType,
+      minCapacity,
+      materials,
+      zipCode,
+      rateType,
+      modal,
+      selectedEquipment
+    } = this.state;
+    return (
+      <Row>
+        <Col md={12}>
+          <Card>
+            <CardBody>
+              {/*Displaying {*/}
+              {/*if equipement !=== null {*/}
+              {/*equipment.length*/}
+              {/*} else {*/}
+              {/*none*/}
+              {/*}*/}
+              {/*} of YYY*/}
+              <TTable
+                columns={
+                  [
+                    {
+                      name: 'id',
+                      displayName: 'ID'
+                    },
+                    {
+                      name: 'image',
+                      displayName: 'Image'
+                    },
+                    {
+                      name: 'type',
+                      displayName: 'type'
+                    },
 
-                      {
-                        name: 'maxCapacity',
-                        displayName: 'Max Capacity'
-                      },
+                    {
+                      name: 'maxCapacity',
+                      displayName: 'Max Capacity'
+                    },
 
-                      {
-                        name: 'hourRate',
-                        displayName: 'Hourly Rate'
-                      },
-                      {
-                        name: 'minHours',
-                        displayName: 'Min Hours'
-                      },
+                    {
+                      name: 'hourRate',
+                      displayName: 'Hourly Rate'
+                    },
+                    {
+                      name: 'minHours',
+                      displayName: 'Min Hours'
+                    },
 
-                      {
-                        name: 'tonRate',
-                        displayName: 'Ton Rate'
-                      },
+                    {
+                      name: 'tonRate',
+                      displayName: 'Ton Rate'
+                    },
 
-                      {
-                        name: 'companyId',
-                        displayName: 'Company Name'
-                      }
-                    ]
-                  }
-                  data={equipments}
-                  handleIdClick={this.handleEquipmentEdit}
-                />
+                    {
+                      name: 'companyId',
+                      displayName: 'Company Name'
+                    }
+                  ]
+                }
+                data={equipments}
+                handleIdClick={this.handleEquipmentEdit}
+              />
 
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+    );
+  }
+
+  render() {
+    const {
+      equipments,
+      startAvailability,
+      endAvailability,
+      truckType,
+      minCapacity,
+      materials,
+      zipCode,
+      rateType,
+      modal,
+      selectedEquipment
+    } = this.state;
+    return (
+      <Container className="dashboard">
+        {this.renderModal()}
+        {this.renderGoTo()}
+        {this.renderBreadcrumb()}
+        {this.renderTitle()}
+        {this.renderFilter()}
+        {this.renderTable()}
       </Container>
     );
   }
