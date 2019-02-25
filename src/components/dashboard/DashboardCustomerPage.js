@@ -324,116 +324,114 @@ class DashboardCustomerPage extends Component {
 
               <form className="form" onSubmit={e => this.saveCompany(e)}>
 
-                {/*<Row size={12}>*/}
-                {/*</Row>*/}
-                {/*<Row size={12}>*/}
-                {/*</Row>*/}
+                <Col lg={12}>
+                  <Row lg={12} style={{ background: '#eef4f8' }}>
+                    <Col>
+                      Start Availability
+                    </Col>
+                    <Col>
+                      End Availability
+                    </Col>
+                    <Col>
+                      Truck Type
+                    </Col>
+                    <Col>
+                      Min Capacity
+                    </Col>
+                    <Col>
+                      Materials
+                    </Col>
+                    <Col>
+                      Zip Code
+                    </Col>
+                    <Col>
+                      Rate Type
+                    </Col>
+                  </Row>
+                  <Row lg={12} style={{ background: '#c8dde7' }}>
+                    <Col>
+                      <input name="startAvailability"
+                             type="text"
+                             placeholder="Select Start Date"
+                             value={startAvailability}
+                             onChange={this.handleInputChange}
+                      />
+                    </Col>
+                    <Col>
+                      <input name="endAvailability"
+                             style={{ width: '100%' }}
+                             type="text"
+                             placeholder="Select End Date"
+                             value={endAvailability}
+                             onChange={this.handleInputChange}
+                      />
+                    </Col>
+                    <Col>
+                      <Select
+                        name="equipmentTypes"
+                        value={equipmentTypes}
+                        onChange={this.handleInputChange}
+                      >
+                        {
+                          equipmentTypes.map(typeSelect => (
+                            <option key={typeSelect.order} value={typeSelect.order}>
+                              {typeSelect.val1}
+                            </option>
+                          ))
+                        }
+                      </Select>
+                    </Col>
+                    <Col>
+                      <input name="minCapacity"
+                             type="text"
+                             placeholder="Min # of tons"
+                             value={minCapacity}
+                             onChange={this.handleInputChange}
+                      />
+                    </Col>
+                    <Col>
+                      <Select
+                        name="materialTypes"
+                        value={materialTypes}
+                        onChange={this.handleInputChange}
+                      >
+                        {
+                          materialTypes.map(typeSelect => (
+                            <option key={typeSelect.order} value={typeSelect.order}>
+                              {typeSelect.val1}
+                            </option>
+                          ))
+                        }
+                      </Select>
+                    </Col>
+                    <Col>
+                      <input name="zipCode"
+                             type="text"
+                             placeholder="Zip Code"
+                             value={zipCode}
+                             onChange={this.handleInputChange}
+                      />
+                    </Col>
+                    <Col>
+                      <Select
+                        name="rateTypes"
+                        value={rateTypes}
+                        onChange={this.handleInputChange}
+                      >
+                        {
+                          rateTypes.map(typeSelect => (
+                            <option key={typeSelect.order} value={typeSelect.order}>
+                              {typeSelect.val1}
+                            </option>
+                          ))
+                        }
+                      </Select>
+                    </Col>
+                  </Row>
+                </Col>
 
                 <br />
 
-                <div className="col-sm-12" style={{ background: '#c7dde8' }}>
-                  <Row>
-                    <Col>
-                      <span className="form__form-group-label">Start Availability</span>
-                      <div className="form__form-group-field">
-                        <input name="startAvailability"
-                               type="text"
-                               placeholder="Select Start Date"
-                               value={startAvailability}
-                               onChange={this.handleInputChange}
-                        />
-                      </div>
-                    </Col>
-                    <Col>
-                      <span className="form__form-group-label">End Availability</span>
-                      <div className="form__form-group-field">
-                        <input name="endAvailability"
-                               style={{ width: '100%' }}
-                               type="text"
-                               placeholder="Select End Date"
-                               value={endAvailability}
-                               onChange={this.handleInputChange}
-                        />
-                      </div>
-                    </Col>
-                    <Col>
-                      <span className="form__form-group-label">Truck Type</span>
-                      <div className="form__form-group-field">
-                        <Select
-                          name="equipmentTypes"
-                          value={equipmentTypes}
-                          onChange={this.handleInputChange}
-                        >
-                          {
-                            equipmentTypes.map(typeSelect => (
-                              <option key={typeSelect.order} value={typeSelect.order}>
-                                {typeSelect.val1}
-                              </option>
-                            ))
-                          }
-                        </Select>
-                      </div>
-                    </Col>
-                    <Col>
-                      <span className="form__form-group-label">Min Capacity</span>
-                      <div className="form__form-group-field">
-                        <input name="minCapacity"
-                               type="text"
-                               placeholder="Min # of tons"
-                               value={minCapacity}
-                               onChange={this.handleInputChange}
-                        />
-                      </div>
-                    </Col>
-                    <Col>
-                      <span className="form__form-group-label">Materials</span>
-                      <div className="form__form-group-field">
-                        <Select
-                          name="materialTypes"
-                          value={materialTypes}
-                          onChange={this.handleInputChange}
-                        >
-                          {
-                            materialTypes.map(typeSelect => (
-                              <option key={typeSelect.order} value={typeSelect.order}>
-                                {typeSelect.val1}
-                              </option>
-                            ))
-                          }
-                        </Select>
-                      </div>
-                    </Col>
-                    <Col>
-                      <span className="form__form-group-label">Zip Code</span>
-                      <div className="form__form-group-field">
-                        <input name="zipCode"
-                               type="text"
-                               placeholder="Zip Code"
-                               value={zipCode}
-                               onChange={this.handleInputChange}
-                        />
-                      </div>
-                    </Col>
-                    <Col>
-                      <span className="form__form-group-label">Rate Type</span>
-                      <div className="form__form-group-field">
-                        <Select
-                          name="rateTypes"
-                          value={rateTypes}
-                          onChange={this.handleInputChange}
-                        >
-                          {
-                            rateTypes.map(typeSelect => (
-                              <option key={typeSelect.order} value={typeSelect.order}>
-                                {typeSelect.val1}
-                              </option>
-                            ))
-                          }
-                        </Select>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
               </form>
 
             </CardBody>
