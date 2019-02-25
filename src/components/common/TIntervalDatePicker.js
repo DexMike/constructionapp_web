@@ -13,10 +13,14 @@ class TIntervalDatePickerField extends PureComponent {
     super(props);
     this.state = {
       startDate: null,
-      endDate: null,
+      endDate: null
     };
     this.handleChange = this.handleChange.bind(this);
   }
+
+  handleChangeStart = startDate => this.handleChange({ startDate });
+
+  handleChangeEnd = endDate => this.handleChange({ endDate });
 
   handleChange({ startDate, endDate }) {
     startDate = startDate || this.state.startDate;
@@ -29,10 +33,6 @@ class TIntervalDatePickerField extends PureComponent {
     this.setState({ startDate, endDate });
     this.props.onChange({ start: startDate, end: endDate });
   }
-
-  handleChangeStart = startDate => this.handleChange({ startDate });
-
-  handleChangeEnd = endDate => this.handleChange({ endDate });
 
   render() {
     return (
@@ -74,7 +74,7 @@ const renderIntervalDatePickerField = props => (
 renderIntervalDatePickerField.propTypes = {
   input: PropTypes.shape({
     onChange: PropTypes.func,
-  }).isRequired,
+  }).isRequired
 };
 
 export default renderIntervalDatePickerField;

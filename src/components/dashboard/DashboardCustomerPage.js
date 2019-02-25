@@ -456,15 +456,15 @@ class DashboardCustomerPage extends Component {
 
           <Col lg={4} sm={8}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-                <Col>
-                  Type: {equipment.type}
-                </Col>
-                <Col>
-                  Capacity: {equipment.maxCapacity} Tons
-                </Col>
+              <Col>
+                Type: {equipment.type}
+              </Col>
+              <Col>
+                Capacity: {equipment.maxCapacity} Tons
+              </Col>
             </Row>
             <Row>
-              <Col style={{ background: '#ffa83b'}}>
+              <Col style={{ background: '#ffa83b' }}>
                 Rate
               </Col>
               <Col>
@@ -485,8 +485,6 @@ class DashboardCustomerPage extends Component {
               <Col>
                 $ {equipment.tonRate} / Ton
               </Col>
-              <Col>
-              </Col>
             </Row>
           </Col>
 
@@ -503,13 +501,18 @@ class DashboardCustomerPage extends Component {
             </Row>
             <Row>
               <Col>
-                HMA<br />
-                Stone<br />
-                Sand<br />
+                HMA
+                <br />
+                Stone
+                <br />
+                Sand
+                <br />
               </Col>
               <Col>
-                Gravel<br />
-                Recycling<br />
+                Gravel
+                <br />
+                Recycling
+                <br />
               </Col>
               <Col>
                 <button type="button" className="btn btn-primary">
