@@ -1,35 +1,35 @@
 import AgentService from './AgentService';
 
-const PATH = '/equipments';
+const PATH = '/users';
 
-class EquipmentService extends AgentService {
-  static async getEquipments() {
+class UserService extends AgentService {
+  static async getUsers() {
     const response = await super.get(PATH);
     return (response);
   }
 
-  static async getEquipmentById(id) {
+  static async getUserById(id) {
     const response = await this.get(`${PATH}/${id}`);
     return (response);
   }
 
-  static async createEquipment(equipment) {
-    const response = await super.post(PATH, equipment);
+  static async createUser(user) {
+    const response = await super.post(PATH, user);
     return (response);
   }
 
-  static async updateEquipment(equipment) {
-    const response = await this.put(PATH, equipment);
+  static async updateUser(user) {
+    const response = await this.put(PATH, user);
     return (response);
   }
 
-  static async deleteEquipmentById(id) {
+  static async deleteUserById(id) {
     const response = await this.delete(PATH, id);
     return (response);
   }
 }
 
-export default EquipmentService;
+export default UserService;
 
 // INSERT INTO `orion`.`Equipments` (`name`, `type`, `styleId`, `maxCapacity`,
 // `minCapacity`, `minHours`, `maxDistance`, `description`, `licensePlate`, `vin`,
