@@ -323,6 +323,14 @@ class DashboardCustomerPage extends Component {
               <h3>Filters</h3>
 
               <form className="form" onSubmit={e => this.saveCompany(e)}>
+
+                {/*<Row size={12}>*/}
+                {/*</Row>*/}
+                {/*<Row size={12}>*/}
+                {/*</Row>*/}
+
+                <br />
+
                 <div className="col-sm-12" style={{ background: '#c7dde8' }}>
                   <Row>
                     <Col>
@@ -439,54 +447,78 @@ class DashboardCustomerPage extends Component {
   renderEquipmentRow(equipment) {
     return (
       <React.Fragment>
-        <div style={{ paddingTop: '10px' }} className="row">
-          <div className="col-sm-2">
+        <Row lg={12}>
+          <Col lg={2} sm={4}>
             <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
                  style={{ width: '100px' }}
             />
-          </div>
+          </Col>
 
-          <div className="col-sm-2" style={{ background: '#c7dde8' }}>
-            <span>
-              TYPE:
-              {equipment.type}
-              &nbsp;
-              {equipment.maxCapacity}
-              &nbsp;ton
-            </span>
-          </div>
+          <Col lg={4} sm={8}>
+            <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
+                <Col>
+                  Type: {equipment.type}
+                </Col>
+                <Col>
+                  Capacity: {equipment.maxCapacity} Tons
+                </Col>
+            </Row>
+            <Row>
+              <Col style={{ background: '#ffa83b'}}>
+                Rate
+              </Col>
+              <Col>
+                Minimum
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                $ {equipment.hourRate} / Hour
+              </Col>
+              <Col>
+                Minimum
+                MinCapacity:
+                {equipment.minCapacity} / Tons
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                $ {equipment.tonRate} / Ton
+              </Col>
+              <Col>
+              </Col>
+            </Row>
+          </Col>
 
-          <div className="col-sm-3">
-            <span>
-              Rate
-              byHour:
-              {equipment.hourRate}
-              byTon:
-              {equipment.tonRate}
-              Minimum
-              MinCapacity:
-              {equipment.minCapacity}
-            </span>
-          </div>
-
-          <div className="col-sm-1" style={{ background: '#c7dde8' }}>
-            <span>
-              Company Name
-              {equipment.companyId}
-            </span>
-          </div>
-
-          <div className="col-sm-2">
-            Materials Hauled
-            {equipment.notes}
-          </div>
-
-          <div className="col-sm-2">
-            <button type="button" className="btn btn-primary">
-              Request
-            </button>
-          </div>
-        </div>
+          <Col lg={6} sm={12} style={{ background: '#e895b4' }}>
+            <Row>
+              <Col>
+                Company Name
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                Materials
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                HMA<br />
+                Stone<br />
+                Sand<br />
+              </Col>
+              <Col>
+                Gravel<br />
+                Recycling<br />
+              </Col>
+              <Col>
+                <button type="button" className="btn btn-primary">
+                  Request
+                </button>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
         <hr />
       </React.Fragment>
     );
