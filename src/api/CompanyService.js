@@ -8,6 +8,11 @@ class CompanyService extends AgentService {
     return (response);
   }
 
+  static async getCompanyById(id) {
+    const response = await this.get(`${PATH}/${id}`);
+    return (response);
+  }
+
   static async createCompany(company) {
     const response = await super.post(PATH, company);
     return (response);
