@@ -82,62 +82,65 @@ class DashboardCarrierPage extends Component {
         >
           Dashboard
         </button>
+
         <Row>
           <Col md={12}>
             <h3 className="page-title">Dashboard</h3>
           </Col>
         </Row>
-        <Row>
-          <Col md={12}>
-            <Card>
-              <CardBody>
-                <Col md={2}>
-                  <Card>
-                    <CardBody>
-                      <h5 className="bold-text">All Jobs</h5>
-                      {jobs.length}
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col md={2}>
-                  <Card>
-                    <CardBody>
-                      <h5 className="bold-text">Pending Offers</h5>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col md={2}>
-                  <Card>
-                    <CardBody>
-                      <h5 className="bold-text">Jobs in Progress</h5>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col md={2}>
-                  <Card>
-                    <CardBody>
-                      <h5 className="bold-text">Booked Jobs</h5>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col md={2}>
-                  <Card>
-                    <CardBody>
-                      <h5 className="bold-text">Completed Jobs</h5>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col m={2}>
-                  <Card>
-                    <CardBody>
-                      <h5 className="bold-text">Upcoming Revenue</h5>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+
+        <div class="row">
+          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
+            <div class="card">
+              <div class="dashboard__card-widget card-body">
+                1
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
+            <div class="card">
+              <div class="dashboard__card-widget card-body">
+                s
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
+            <div class="card">
+              <div class="dashboard__card-widget card-body">
+                s
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
+            <div class="card">
+              <div class="dashboard__card-widget card-body">
+                s
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
+            <div class="card">
+              <div class="dashboard__card-widget card-body">
+                s
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
+            <div class="card">
+              <div class="dashboard__card-widget card-body">
+                s
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <br />
 
         {/* {this.renderGoTo()} */}
         {/* <button type="button" className="app-link" */}
