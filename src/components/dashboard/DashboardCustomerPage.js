@@ -514,7 +514,8 @@ class DashboardCustomerPage extends Component {
                   {equipments.length}
                 </Col>
                 <Col>
-                  Search
+                  &nbsp;
+                  {/* Saved for Search */}
                 </Col>
                 <Col>
                   Sort By
