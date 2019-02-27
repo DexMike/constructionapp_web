@@ -18,28 +18,15 @@ import Router from './routing/Router';
 import ThemeContext from './ThemeContext';
 import LoginPage from './login/LoginPage';
 
-// These settings are to connect to Dev environment
 Amplify.configure({
   Auth: {
     mandatorySignIn: true,
-    region: 'us-east-1',
-    userPoolId: 'us-east-1_ztq1xhttu',
-    identityPoolId: 'us-east-1:602b5b90-1686-47cd-aaa9-39cf385699bd',
-    userPoolWebClientId: '52tgalb82hnrv338ambff0korj'
+    region: process.env.AWS_REGION,
+    userPoolId: process.env.AWS_USER_POOL_ID,
+    identityPoolId: process.env.AWS_IDENTITY_POOL_ID,
+    userPoolWebClientId: process.env.AWS_USER_POOL_WEB_CLIENT_ID
   }
 });
-
-// These settings are to connect to Demo environment
-// Amplify.configure({
-//   Auth: {
-//     mandatorySignIn: true,
-//     region: 'us-east-1',
-//     userPoolId: 'us-east-1_ztq1xhttu',
-//     identityPoolId: 'us-east-1:602b5b90-1686-47cd-aaa9-39cf385699bd',
-//     userPoolWebClientId: '52tgalb82hnrv338ambff0korj'
-//   }
-// });
-
 
 export const history = createHistory();
 

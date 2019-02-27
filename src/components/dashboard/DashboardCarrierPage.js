@@ -88,7 +88,7 @@ class DashboardCarrierPage extends Component {
           </Col>
         </Row>
         <Row>
-          <Col ms={2}>
+          <Col sm={2}>
             <Card>
               <CardBody>
                 <h5 className="bold-text">All Jobs</h5>

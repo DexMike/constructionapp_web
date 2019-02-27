@@ -1,11 +1,12 @@
 import { Auth } from 'aws-amplify';
 // TODO use .env for developer's local config
 // const API_ENDPOINT = 'http://localhost:8080';
-const API_ENDPOINT = 'https://dev.api.mytrelar.com';
+// const API_ENDPOINT = 'https://dev.api.mytrelar.com';
 // const API_ENDPOINT = 'https://demo.api.mytrelar.com';
 // Once AWS finishes creating the distributions in CloudFront then we will use API endpoint above
 // and delete one below
 // const API_ENDPOINT = 'https://sab0qj85x0.execute-api.us-east-1.amazonaws.com/Prod';
+const API_ENDPOINT = process.env.API_ENDPOINT;
 
 class AgentService {
   static async getHeaders() {

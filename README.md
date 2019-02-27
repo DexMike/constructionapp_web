@@ -8,6 +8,9 @@ npm i
 
 if it is the first time running or some new libraries got added, doesn't hurt to just always run it
 
+Grab config variables:
+Copy .env.example to .env.local in your project root directory
+
 npm start
 
 It attempt to run the app on port 8081, if that port is taken it will try 8082 etc
