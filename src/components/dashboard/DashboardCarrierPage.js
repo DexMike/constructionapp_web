@@ -89,51 +89,51 @@ class DashboardCarrierPage extends Component {
           </Col>
         </Row>
 
-        <div class="row">
-          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
-            <div class="card">
-              <div class="dashboard__card-widget card-body">
+        <div className="row">
+          <div className="col-12 col-md-2 col-lg-1">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">All Jobs</h5>
                 {jobs.length}
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
-            <div class="card">
-              <div class="dashboard__card-widget card-body">
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Pending Offers</h5>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
-            <div class="card">
-              <div class="dashboard__card-widget card-body">
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Jobs in Progress</h5>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
-            <div class="card">
-              <div class="dashboard__card-widget card-body">
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Booked Jobs</h5>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
-            <div class="card">
-              <div class="dashboard__card-widget card-body">
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Completed Jobs</h5>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-12 col-lg-6 col-xl-3">
-            <div class="card">
-              <div class="dashboard__card-widget card-body">
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Upcoming Revenue</h5>
               </div>
             </div>
