@@ -10,6 +10,7 @@ import TableRow from '@material-ui/core/TableRow';
 import MatTableHead from './materialTable/MatTableHead';
 // import MatTableToolbar from './materialTable/MatTableToolbar';
 // import TableHead from '@material-ui/core/TableHead';
+import truckImage from '../../img/default_truck.png';
 
 class TTable extends Component {
   constructor(props) {
@@ -136,6 +137,17 @@ class TTable extends Component {
                            }}
                 >
                   {shallowItem[key]}
+                </TableCell>
+              );
+            }
+            if (key === 'image') {
+              return (
+                <TableCell key="image">
+                  {/* Setting the image to default truck image for now */}
+                  {/* Eventually need to pull real image of truck */}
+                  <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
+                       style={{ width: '100px' }}
+                  />
                 </TableCell>
               );
             }

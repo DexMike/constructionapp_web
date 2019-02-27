@@ -88,45 +88,52 @@ class DashboardCarrierPage extends Component {
           </Col>
         </Row>
         <Row>
-          <Col ms={2}>
+          <Col md={12}>
             <Card>
               <CardBody>
-                <h5 className="bold-text">All Jobs</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
-                <h5 className="bold-text">Pending Offers</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
-                <h5 className="bold-text">Jobs in Progress</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
-                <h5 className="bold-text">Booked Jobs</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
-                <h5 className="bold-text">Completed Jobs</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col m={2}>
-            <Card>
-              <CardBody>
-                <h5 className="bold-text">Upcoming Revenue</h5>
+                <Col md={2}>
+                  <Card>
+                    <CardBody>
+                      <h5 className="bold-text">All Jobs</h5>
+                      {jobs.length}
+                    </CardBody>
+                  </Card>
+                </Col>
+                <Col md={2}>
+                  <Card>
+                    <CardBody>
+                      <h5 className="bold-text">Pending Offers</h5>
+                    </CardBody>
+                  </Card>
+                </Col>
+                <Col md={2}>
+                  <Card>
+                    <CardBody>
+                      <h5 className="bold-text">Jobs in Progress</h5>
+                    </CardBody>
+                  </Card>
+                </Col>
+                <Col md={2}>
+                  <Card>
+                    <CardBody>
+                      <h5 className="bold-text">Booked Jobs</h5>
+                    </CardBody>
+                  </Card>
+                </Col>
+                <Col md={2}>
+                  <Card>
+                    <CardBody>
+                      <h5 className="bold-text">Completed Jobs</h5>
+                    </CardBody>
+                  </Card>
+                </Col>
+                <Col m={2}>
+                  <Card>
+                    <CardBody>
+                      <h5 className="bold-text">Upcoming Revenue</h5>
+                    </CardBody>
+                  </Card>
+                </Col>
               </CardBody>
             </Card>
           </Col>
@@ -154,6 +161,10 @@ class DashboardCarrierPage extends Component {
                       {
                         name: 'id',
                         displayName: 'Job Id'
+                      },
+                      {
+                        name: 'image',
+                        displayName: 'Truck Image'
                       },
                       {
                         name: 'companiesId',

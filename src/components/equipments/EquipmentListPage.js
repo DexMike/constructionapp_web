@@ -113,7 +113,7 @@ class EquipmentListPage extends Component {
                               },
                               {
                                 name: 'image',
-                                displayName: 'Image'
+                                displayName: 'Truck Image'
                               },
                               {
                                 name: 'companyId',
