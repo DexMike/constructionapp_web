@@ -1,4 +1,5 @@
 import webpack from 'webpack';
+import Dotenv from 'dotenv-webpack';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -42,6 +43,9 @@ export default {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
+    new Dotenv({
+      path: './.env.local'
+    }),
     new webpack.DefinePlugin(GLOBALS),
     new MiniCssExtractPlugin({
       filename: 'style.css'
