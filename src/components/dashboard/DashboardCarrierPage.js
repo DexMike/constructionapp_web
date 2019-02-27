@@ -93,7 +93,8 @@ class DashboardCarrierPage extends Component {
           <div class="col-12 col-md-12 col-lg-6 col-xl-3">
             <div class="card">
               <div class="dashboard__card-widget card-body">
-                1
+                <h5 className="bold-text">All Jobs</h5>
+                {jobs.length}
               </div>
             </div>
           </div>
@@ -101,7 +102,7 @@ class DashboardCarrierPage extends Component {
           <div class="col-12 col-md-12 col-lg-6 col-xl-3">
             <div class="card">
               <div class="dashboard__card-widget card-body">
-                s
+                <h5 className="bold-text">Pending Offers</h5>
               </div>
             </div>
           </div>
@@ -109,7 +110,7 @@ class DashboardCarrierPage extends Component {
           <div class="col-12 col-md-12 col-lg-6 col-xl-3">
             <div class="card">
               <div class="dashboard__card-widget card-body">
-                s
+                <h5 className="bold-text">Jobs in Progress</h5>
               </div>
             </div>
           </div>
@@ -117,7 +118,7 @@ class DashboardCarrierPage extends Component {
           <div class="col-12 col-md-12 col-lg-6 col-xl-3">
             <div class="card">
               <div class="dashboard__card-widget card-body">
-                s
+                <h5 className="bold-text">Booked Jobs</h5>
               </div>
             </div>
           </div>
@@ -125,7 +126,7 @@ class DashboardCarrierPage extends Component {
           <div class="col-12 col-md-12 col-lg-6 col-xl-3">
             <div class="card">
               <div class="dashboard__card-widget card-body">
-                s
+                <h5 className="bold-text">Completed Jobs</h5>
               </div>
             </div>
           </div>
@@ -133,7 +134,7 @@ class DashboardCarrierPage extends Component {
           <div class="col-12 col-md-12 col-lg-6 col-xl-3">
             <div class="card">
               <div class="dashboard__card-widget card-body">
-                s
+                <h5 className="bold-text">Upcoming Revenue</h5>
               </div>
             </div>
           </div>
