@@ -100,7 +100,7 @@ class JobCustomerListPage extends Component {
                         displayName: 'Customer'
                       },
                       {
-                        name: 'notes',
+                        name: 'material',
                         displayName: 'Material'
                       },
                       {

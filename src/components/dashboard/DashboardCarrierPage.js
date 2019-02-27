@@ -90,7 +90,7 @@ class DashboardCarrierPage extends Component {
         </Row>
 
         <div className="row">
-          <div className="col-12 col-md-2 col-lg-1">
+          <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">All Jobs</h5>
