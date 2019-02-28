@@ -47,11 +47,8 @@ class JobCreateForm extends Component {
     this.setState({ job });
   }
 
-  isRateTon() {
-    const { rate } = this.state;
-    if (rate) {
-      // TODO
-    }
+  isRateTon(rate) {
+    return rate !== 'Hour';
   }
 
   renderSelectedEquipment() {
@@ -139,7 +136,7 @@ class JobCreateForm extends Component {
         </div>
         <div className="row">
           <div className="col-sm-4">
-            <TButtonToggle isOtherToggled buttonOne="Hour" buttonTwo="Ton" onChange={this.toggleJobRate} />
+            <TButtonToggle isOtherToggled={this.isRateTon(job.rate)} buttonOne="Hour" buttonTwo="Ton" onChange={this.toggleJobRate} />
           </div>
         </div>
         <div className="row">
@@ -153,7 +150,7 @@ class JobCreateForm extends Component {
           </div>
           <div className="col-sm-5 form form--horizontal">
             <div className="form__form-group">
-              <span className="form__form-group-label">Estimated Tons</span>
+              <span className="form__form-group-label">Estimated {job.rate}s</span>
               <div className="form__form-group-field">
                 <input name="job.rateEstimate" type="text" value={job.rateEstimate} onChange={this.handleInputChange} />
               </div>
@@ -299,12 +296,13 @@ class JobCreateForm extends Component {
   }
 
   render() {
+    const { job } = this.state;
     return (
       <div>
         {this.renderSelectedEquipment()}
         {this.renderJobTop()}
         {this.renderJobStartLocation()}
-        {this.renderJobEndLocation()}
+        {this.isRateTon(job.rate) && this.renderJobEndLocation()}
         {this.renderJobBottom()}
         {this.renderJobFormButtons()}
       </div>
