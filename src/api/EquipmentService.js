@@ -13,6 +13,12 @@ class EquipmentService extends AgentService {
     return (response);
   }
 
+  static async getEquipmentByCompanyIdAndType(companyId, type) {
+    // `${super.getEndpoint()}/company/${companyId}/type/${type}/equipments`
+    const response = await this.get(`/company/${companyId}/type/${type}/equipments`);
+    return (response);
+  }
+
   static async createEquipment(equipment) {
     const response = await super.post(PATH, equipment);
     return (response);
