@@ -11,7 +11,7 @@ import {
 // import classnames from 'classnames';
 import moment from 'moment';
 import { Select } from '@material-ui/core';
-import TTable from '../common/TTable';
+// import TTable from '../common/TTable';
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
@@ -26,34 +26,40 @@ class DashboardCustomerPage extends Component {
 
     // copied from Nimda EquipmentForm
 
-
-    // const filter = {
-    //   startDate: null,
-    //   endDate: null,
-    //   truckType: null,
-    //   minCapactiy: null,
-    //   materials: null,
-    //   zipCode: null,
-    //   rateType: null
-    // };
-
+    // Comment
     this.state = {
-      // companyName: '',
-      // drivers: [],
-      equipmentTypes: [],
-      materialTypes: [],
-      rateTypes: [],
-      sortBy: 1,
-      // users: [],
+
+      // Look up lists
+      equipmentTypeList: [],
+      materialTypeList: [],
+      rateTypeList: [],
+      sortByList: [],
+
+      // Filters
+      // sortBy: 1,
+
       equipments: [],
-      goToDashboard: false,
       selectedEquipment: {},
-      modal: false
+
+      modal: false,
+      goToDashboard: false,
+
+      // TODO: Refactor to a single filter object
+      // Filter values
+      filterStartAvailability: '',
+      filterEndAvailability: '',
+      filterTruckType: '',
+      filterMinCapacity: '',
+      filterMaterials: '',
+      filterZipCode: '',
+      filterRateType: ''
+
       // ...equipment
       // goToAddJob: false,
       // goToUpdateJob: false,
       // goToCreateJob: false,
       // jobId: 0
+
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -97,23 +103,50 @@ class DashboardCustomerPage extends Component {
     //
     const lookups = await LookupsService.getLookups();
 
-    const equipmentTypes = [];
+    const equipmentTypeList = [];
     Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'EquipmentType') equipmentTypes.push(itm);
+      if (itm.key === 'EquipmentType') equipmentTypeList.push(itm);
     });
-    this.setState({ equipmentTypes });
+    this.setState({ equipmentTypeList });
+    // Set first value for each filter to first value in list
+    if (equipmentTypeList != null) {
+      this.state.filterTruckType = equipmentTypeList[0];
+    }
 
-    const materialTypes = [];
+    const materialTypeList = [];
     Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'MaterialType') materialTypes.push(itm);
+      if (itm.key === 'MaterialType') materialTypeList.push(itm);
     });
-    this.setState({ materialTypes });
+    this.setState({ materialTypeList });
+    // Set first value for each filter to first value in list
+    if (materialTypeList != null) {
+      this.state.filterMaterials = materialTypeList[0];
+    }
 
-    const rateTypes = [];
+    const rateTypeList = [];
     Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'RateType') rateTypes.push(itm);
+      if (itm.key === 'RateType') rateTypeList.push(itm);
     });
-    this.setState({ rateTypes });
+    this.setState({ rateTypeList });
+    // Set first value for each filter to first value in list
+    if (rateTypeList != null) {
+      this.state.filterRateType = rateTypeList[0];
+    }
+
+    this.state.sortByList = ['Hourly ascending', 'Hourly descending',
+      'Tonnage ascending', 'Tonnage descending'];
+    this.state.filterSortBy = this.state.sortByList[0];
+    console.log("list");
+    console.log(this.state.sortByList);
+    console.log("item");
+    console.log(this.state.filterSortBy );
+
+    // setup other filter initial values
+    this.state.filterStartAvailability = '';
+    this.state.filterEndAvailability = '';
+    this.state.filterMinCapacity = 0;
+    // TODO: set this to user.Company.Address.zip
+    this.state.filterZipCode = '78701';
   }
 
   async fetchParentValues() {
@@ -270,20 +303,19 @@ class DashboardCustomerPage extends Component {
 
   renderFilter() {
     const {
-      startAvailability,
-      endAvailability,
-      // truckType,
-      minCapacity,
-      // materials,
-      zipCode,
-      // rateType,
+      // Lists
+      equipmentTypeList,
+      materialTypeList,
+      rateTypeList,
 
-      equipmentTypes,
-      materialTypes,
-      rateTypes
-      // modal,
-      // equipments,
-      // selectedEquipment
+      // Filter values
+      filterStartAvailability,
+      filterEndAvailability,
+      filterTruckType,
+      filterMinCapacity,
+      filterMaterials,
+      filterZipCode,
+      filterRateType
     } = this.state;
 
     return (
@@ -321,78 +353,78 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} style={{ background: '#c8dde7' }}>
                     <Col>
-                      <input name="startAvailability"
+                      <input name="filterStartAvailability"
                              type="text"
                              placeholder="Select Start Date"
-                             value={startAvailability}
+                             value={filterStartAvailability}
                              onChange={this.handleInputChange}
                       />
                     </Col>
                     <Col>
-                      <input name="endAvailability"
+                      <input name="filterEndAvailability"
                              style={{ width: '100%' }}
                              type="text"
                              placeholder="Select End Date"
-                             value={endAvailability}
+                             value={filterEndAvailability}
                              onChange={this.handleInputChange}
                       />
                     </Col>
                     <Col>
                       <Select
-                        name="equipmentTypes"
-                        value={equipmentTypes}
+                        name="filterTruckType"
+                        value={filterTruckType}
                         onChange={this.handleInputChange}
                       >
                         {
-                          equipmentTypes.map(typeSelect => (
-                            <option key={typeSelect.order} value={typeSelect.order}>
-                              {typeSelect.val1}
+                          equipmentTypeList.map(equipmentType => (
+                            <option key={equipmentType.order} value={equipmentType.order}>
+                              {equipmentType.val1}
                             </option>
                           ))
                         }
                       </Select>
                     </Col>
                     <Col>
-                      <input name="minCapacity"
+                      <input name="filterMinCapacity"
                              type="text"
                              placeholder="Min # of tons"
-                             value={minCapacity}
+                             value={filterMinCapacity}
                              onChange={this.handleInputChange}
                       />
                     </Col>
                     <Col>
                       <Select
-                        name="materialTypes"
-                        value={materialTypes}
+                        name="filterMaterials"
+                        value={filterMaterials}
                         onChange={this.handleInputChange}
                       >
                         {
-                          materialTypes.map(typeSelect => (
-                            <option key={typeSelect.order} value={typeSelect.order}>
-                              {typeSelect.val1}
+                          materialTypeList.map(materialType => (
+                            <option key={materialType.order} value={materialType.order}>
+                              {materialType.val1}
                             </option>
                           ))
                         }
                       </Select>
                     </Col>
                     <Col>
-                      <input name="zipCode"
+                      <input name="filterZipCode"
                              type="text"
                              placeholder="Zip Code"
-                             value={zipCode}
+                             value={filterZipCode}
                              onChange={this.handleInputChange}
                       />
                     </Col>
                     <Col>
                       <Select
-                        name="rateTypes"
-                        value={rateTypes}
+                        name="filterRateType"
+                        value={filterRateType}
                         onChange={this.handleInputChange}
                       >
                         {
-                          rateTypes.map(typeSelect => (
-                            <option key={typeSelect.order} value={typeSelect.order}>
-                              {typeSelect.val1}
+                          rateTypeList.map(rateType => (
+                            <option key={rateType.order} value={rateType.order}>
+                              {rateType.val1}
                             </option>
                           ))
                         }
@@ -484,7 +516,10 @@ class DashboardCustomerPage extends Component {
                 <br />
               </Col>
               <Col>
-                <button type="button" className="btn btn-primary">
+                <button type="button"
+                        className="btn btn-primary"
+                        onClick={() => this.handleEquipmentEdit(equipment.id)}
+                >
                   Request
                 </button>
               </Col>
@@ -498,12 +533,13 @@ class DashboardCustomerPage extends Component {
 
   renderEquipmentTable() {
     const {
+      sortByList,
+      filterSortBy,
       equipments,
-      sortBy
-    } = this.state;
 
-    const sortByList = ['Hourly ascending', 'Hourly descending',
-      'Tonnage ascending', 'Tonnage descending'];
+      filterRateType,
+      rateTypeList
+    } = this.state;
 
     return (
       <Row>
@@ -517,20 +553,22 @@ class DashboardCustomerPage extends Component {
                   &nbsp;of&nbsp;
                   {equipments.length}
                 </Col>
+
                 <Col>
-                  Search
+                  &nbsp;
                 </Col>
+
                 <Col>
-                  Sort By
+                  Sort By&nbsp;
                   <Select
-                    name="sortby"
-                    value={sortBy}
+                    name="filterSortBy"
+                    value={filterSortBy}
                     onChange={this.handleInputChange}
                   >
                     {
-                      sortByList.map(sb => (
-                        <option value={sb}>
-                          {sb}
+                      sortByList.map(sortBy => (
+                        <option value={sortBy}>
+                          {sortBy}
                         </option>
                       ))
                     }
@@ -548,51 +586,6 @@ class DashboardCustomerPage extends Component {
                   ))
                 }
               </Row>
-
-              <TTable
-                columns={
-                  [
-                    {
-                      name: 'id',
-                      displayName: 'ID'
-                    },
-                    {
-                      name: 'image',
-                      displayName: 'Image'
-                    },
-                    {
-                      name: 'type',
-                      displayName: 'type'
-                    },
-
-                    {
-                      name: 'maxCapacity',
-                      displayName: 'Max Capacity'
-                    },
-
-                    {
-                      name: 'hourRate',
-                      displayName: 'Hourly Rate'
-                    },
-                    {
-                      name: 'minHours',
-                      displayName: 'Min Hours'
-                    },
-
-                    {
-                      name: 'tonRate',
-                      displayName: 'Ton Rate'
-                    },
-
-                    {
-                      name: 'companyId',
-                      displayName: 'Company Name'
-                    }
-                  ]
-                }
-                data={equipments}
-                handleIdClick={this.handleEquipmentEdit}
-              />
 
             </CardBody>
           </Card>
