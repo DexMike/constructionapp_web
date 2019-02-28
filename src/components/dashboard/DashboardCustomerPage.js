@@ -357,8 +357,8 @@ class DashboardCustomerPage extends Component {
                           onChange={this.handleInputChange}
                         >
                           {
-                            equipmentTypes.map((typeSelect, index) => (
-                              <option key={index} value={typeSelect.order}>
+                            equipmentTypes.map(typeSelect => (
+                              <option key={typeSelect.order} value={typeSelect.order}>
                                 {typeSelect.val1}
                               </option>
                             ))
@@ -386,8 +386,8 @@ class DashboardCustomerPage extends Component {
                           onChange={this.handleInputChange}
                         >
                           {
-                            materialTypes.map((typeSelect, index) => (
-                              <option key={index} value={typeSelect.order}>
+                            materialTypes.map(typeSelect => (
+                              <option key={typeSelect.order} value={typeSelect.order}>
                                 {typeSelect.val1}
                               </option>
                             ))
@@ -415,8 +415,8 @@ class DashboardCustomerPage extends Component {
                           onChange={this.handleInputChange}
                         >
                           {
-                            rateTypes.map((typeSelect, index) => (
-                              <option key={index} value={typeSelect.order}>
+                            rateTypes.map(typeSelect => (
+                              <option key={typeSelect.order} value={typeSelect.order}>
                                 {typeSelect.val1}
                               </option>
                             ))
@@ -514,8 +514,7 @@ class DashboardCustomerPage extends Component {
                   {equipments.length}
                 </Col>
                 <Col>
-                  &nbsp;
-                  {/* Saved for Search */}
+                  Search
                 </Col>
                 <Col>
                   Sort By
@@ -525,8 +524,8 @@ class DashboardCustomerPage extends Component {
                     onChange={this.handleInputChange}
                   >
                     {
-                      sortByList.map((sb, index) => (
-                        <option key={index} value={sb}>
+                      sortByList.map(sb => (
+                        <option value={sb}>
                           {sb}
                         </option>
                       ))
@@ -601,7 +600,6 @@ class DashboardCustomerPage extends Component {
   render() {
     return (
       <Container className="dashboard">
-        <h1>{JSON.stringify(process.env)}</h1>
         {this.renderModal()}
         {this.renderGoTo()}
         {this.renderBreadcrumb()}
