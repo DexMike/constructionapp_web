@@ -1,0 +1,32 @@
+// On Hold
+
+// class Equipment {
+// name: '',
+// type: 0,
+// styleId: 0,
+// maxCapacity: 0,
+// minCapacity: 0,
+// minHours: 0,
+// maxDistance: 0,
+// description: '',
+// licensePlate: '',
+// vin: '',
+// image: '',
+// currentAvailability: 0,
+// hourRate: 0,
+// tonRate: 0,
+// rateType: 'Hour',
+// companyId: 0,
+// defaultDriverId: 0,
+// driverEquipmentsId: 0,
+// driversId: 0,
+// equipmentAddressId: 0,
+// modelId: '',
+// makeId: '',
+// notes: '',
+// createdBy: 0,
+// createdOn: moment().unix() * 1000,
+// modifiedBy: 0,
+// modifiedOn: moment().unix() * 1000,
+// isArchived: 0
+// }
