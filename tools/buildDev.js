@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import webpackConfig from '../webpack.config.prod';
+import webpackConfig from '../webpack.config.dev';
 
 process.env.NODE_ENV = 'production';
 console.log('generating minified bundle for production via webpack. this will take a moment.');

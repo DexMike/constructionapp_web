@@ -32,7 +32,9 @@ export default {
     // }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
-    new Dotenv(),
+    new Dotenv({
+      path: './.env.dev'
+    }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
     })
