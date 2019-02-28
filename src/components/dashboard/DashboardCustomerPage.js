@@ -265,37 +265,38 @@ class DashboardCustomerPage extends Component {
         <Col md={12}>
           <Card>
             <CardBody>
-              <h3>Filters</h3>
+              <h3 id="filter-title">Filters</h3>
 
-              <form className="form" onSubmit={e => this.saveCompany(e)}>
+              <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col>
+                    <Col className="filter-item-title">
                       Start Availability
                     </Col>
-                    <Col>
+                    <Col className="filter-item-title">
                       End Availability
                     </Col>
-                    <Col>
+                    <Col className="filter-item-title">
                       Truck Type
                     </Col>
-                    <Col>
+                    <Col className="filter-item-title">
                       Min Capacity
                     </Col>
-                    <Col>
+                    <Col className="filter-item-title">
                       Materials
                     </Col>
-                    <Col>
+                    <Col className="filter-item-title">
                       Zip Code
                     </Col>
-                    <Col>
+                    <Col className="filter-item-title">
                       Rate Type
                     </Col>
                   </Row>
-                  <Row lg={12} style={{ background: '#c8dde7' }}>
+                  <Row lg={12} id="filter-input-row">
                     <Col>
                       <input name="filters.startAvailability"
+                             className="filter-text"
                              type="text"
                              placeholder="Select Start Date"
                              value={filters.startAvailability}
@@ -304,6 +305,7 @@ class DashboardCustomerPage extends Component {
                     </Col>
                     <Col>
                       <input name="filters.endAvailability"
+                             className="filter-text"
                              style={{ width: '100%' }}
                              type="text"
                              placeholder="Select End Date"
@@ -335,6 +337,7 @@ class DashboardCustomerPage extends Component {
                     </Col>
                     <Col>
                       <input name="filters.minCapacity"
+                             className="filter-text"
                              type="text"
                              placeholder="Min # of tons"
                              value={filters.minCapacity}
@@ -365,6 +368,7 @@ class DashboardCustomerPage extends Component {
                     </Col>
                     <Col>
                       <input name="filters.zipCode"
+                             className="filter-text"
                              type="text"
                              placeholder="Zip Code"
                              value={filters.zipCode}
@@ -392,19 +396,6 @@ class DashboardCustomerPage extends Component {
                         }
                         placeholder={rateTypeList[0]}
                       />
-                      {/*<Select*/}
-                        {/*name="filters.rateType"*/}
-                        {/*value={filters.rateType}*/}
-                        {/*onChange={this.handleFilterChange}*/}
-                      {/*>*/}
-                        {/*{*/}
-                          {/*rateTypeList.map(rateType => (*/}
-                            {/*<option key={rateType} value={rateType}>*/}
-                              {/*{rateType}*/}
-                            {/*</option>*/}
-                          {/*))*/}
-                        {/*}*/}
-                      {/*</Select>*/}
                     </Col>
                   </Row>
                 </Col>
@@ -553,20 +544,6 @@ class DashboardCustomerPage extends Component {
                     }
                     placeholder={sortByList[0]}
                   />
-                  {/*<Select*/}
-                    {/*name="filters.sortBy"*/}
-                    {/*value={filters.sortBy}*/}
-                    {/*onChange={this.handleFilterChange}*/}
-                  {/*>*/}
-                    {/*{*/}
-                      {/*sortByList.map(sortBy => (*/}
-                        {/*<option key={sortBy} value={sortBy}>*/}
-                          {/*{sortBy}*/}
-                        {/*</option>*/}
-                      {/*))*/}
-                    {/*}*/}
-                  {/*</Select>*/}
-
                 </Col>
               </Row>
 
