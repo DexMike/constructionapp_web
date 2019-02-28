@@ -7,6 +7,7 @@ import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
 
 class DashboardCarrierPage extends Component {
+  // estimatedIncome;
   constructor(props) {
     super(props);
 
@@ -73,7 +74,21 @@ class DashboardCarrierPage extends Component {
   }
 
   render() {
-    const { jobs } = this.state;
+    let { jobs } = this.state;
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      // newJob.rate = `$${newJob.rate}`;
+      if (newJob.rateType === 'Hour') {
+        newJob.estimatedIncome = newJob.rate * newJob.rateEstimate;
+        // newJob.size = `${newJob.rateEstimate} Hours`;
+      }
+      if (newJob.rateType === 'Ton') {
+        newJob.estimatedIncome = newJob.rate * newJob.rateEstimate;
+        // newJob.size = `${newJob.rateEstimate} Tons`;
+      }
+      return newJob;
+    });
+    // console.log(jobs);
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -184,7 +199,7 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Start Zip'
                       },
                       {
-                        name: 'note',
+                        name: 'rateEstimate',
                         displayName: 'Size'
                       },
                       {
@@ -192,7 +207,7 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Rate'
                       },
                       {
-                        name: 'rateEstimate',
+                        name: 'estimatedIncome',
                         displayName: 'Est. Income'
                       },
                       {
