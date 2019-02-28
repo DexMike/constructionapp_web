@@ -266,7 +266,7 @@ class JobCreateForm extends Component {
         <div className="form__form-group">
           <h4 className="form__form-group-label">Comments</h4>
           <div className="form__form-group-field">
-            <textarea name="textarea" type="text" value={job.note} onChange={this.handleInputChange} />
+            <textarea name="textarea" value={job.note} onChange={this.handleInputChange} />
           </div>
         </div>
       </div>
