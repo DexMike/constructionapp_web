@@ -11,6 +11,7 @@ import {
 // import classnames from 'classnames';
 import moment from 'moment';
 import { Select } from '@material-ui/core';
+import TSelect from '../common/TSelect';
 // import TTable from '../common/TTable';
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
@@ -50,15 +51,16 @@ class DashboardCustomerPage extends Component {
 
       // TODO: Refactor to a single filter object
       // Filter values
-      filterStartAvailability: '',
-      filterEndAvailability: '',
-      filterTruckType: '',
-      filterMinCapacity: '',
-      filterMaterials: '',
-      filterZipCode: '',
-      filterRateType: '',
-      filterSortBy: sortByList[0]
-
+      filters: {
+        startAvailability: '',
+        endAvailability: '',
+        truckType: '',
+        minCapacity: '',
+        materials: '',
+        zipCode: '',
+        rateType: '',
+        sortBy: sortByList[0]
+      }
       // ...equipment
       // goToAddJob: false,
       // goToUpdateJob: false,
@@ -70,37 +72,18 @@ class DashboardCustomerPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
   }
 
   async componentDidMount() {
     // await this.fetchJobs();
     await this.fetchEquipments();
+    await this.fetchFilterLists();
   }
 
-  // componentWillReceiveProps(nextProps) {
-  componentWillReceiveProps() {
-    // if (nextProps.equipment) {
-    //   const { equipment } = nextProps;
-    //   Object.keys(equipment)
-    //     .map((key) => {
-    //       if (equipment[key] === null) {
-    //         equipment[key] = '';
-    //       }
-    //       return true;
-    //     });
-    //   this.setState({ ...equipment });
-    this.fetchForeignValues();
-    this.fetchParentValues();
-    // }
-  }
-
-  getState() {
-    const status = this.state;
-    return status;
-  }
-
-  async fetchForeignValues() {
-    let { filterZipCode , materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+  async fetchFilterLists() {
+    let { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
 
     const profile = await ProfileService.getProfile();
 
@@ -108,7 +91,7 @@ class DashboardCustomerPage extends Component {
       const company = await CompanyService.getCompanyById(profile.companyId);
       if (company.addressId) {
         const address = await AddressService.getAddressById(company.addressId);
-        filterZipCode = address.zipCode ? address.zipCode : filterZipCode;
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
       }
     }
 
@@ -116,53 +99,32 @@ class DashboardCustomerPage extends Component {
 
     Object.values(lookups)
       .forEach((itm) => {
-        if (itm.key === 'EquipmentType') equipmentTypeList.push(itm);
+        if (itm.key === 'EquipmentType') equipmentTypeList.push(itm.val1);
       });
 
     Object.values(lookups)
       .forEach((itm) => {
-        if (itm.key === 'MaterialType') materialTypeList.push(itm);
+        if (itm.key === 'MaterialType') materialTypeList.push(itm.val1);
       });
 
     Object.values(lookups)
       .forEach((itm) => {
-        if (itm.key === 'RateType') rateTypeList.push(itm);
+        if (itm.key === 'RateType') rateTypeList.push(itm.val1);
       });
 
+    filters.truckType = equipmentTypeList[0];
+    filters.materials = materialTypeList[0];
+    filters.rateType = rateTypeList[0];
     this.setState({
-      filterZipCode,
+      filters,
       equipmentTypeList,
       materialTypeList,
       rateTypeList
     });
   }
 
-  async fetchParentValues() {
-    // const users = await AgentService.getUsers();
-    // const { companyId } = this.state;
-    // const drivers = [];
-    // Object.values(users).forEach((itm) => {
-    //   if (itm.companyId === companyId) {
-    //     drivers.push(itm);
-    //   }
-    // });
-    // this.setState({ drivers });
-  }
-
-  // async fetchJobs() {
-  //   let jobs = await JobsService.getJobs();
-  //   jobs = jobs.map((job) => {
-  //     const newJob = job;
-  //     newJob.modifiedOn = moment(job.modifiedOn)
-  //       .format();
-  //     newJob.createdOn = moment(job.createdOn)
-  //       .format();
-  //     return newJob;
-  //   });
-  //   this.setState({ jobs });
-  // }
-
   async fetchEquipments() {
+    // TODO pull this.state.filters for filter api calls later on.
     let equipments = await EquipmentService.getEquipments();
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
@@ -175,23 +137,21 @@ class DashboardCustomerPage extends Component {
     this.setState({ equipments });
   }
 
-  // async filterEquipment() {
-  //
-  // }
-
-  // handleJobEdit(id) {
-  //   this.setState({
-  //     goToUpdateJob: true,
-  //     jobId: id
-  //   });
-  // }
-
-  handleInputChange(e) {
+  handleFilterChange(e) {
     let { value } = e.target;
-    if (e.target.name === 'isArchived') {
-      value = e.target.checked ? Number(1) : Number(0);
-    }
-    this.setState({ [e.target.name]: value });
+    const { filters } = this.state;
+    filters[e.target.name] = value;
+    debugger;
+    this.setState({ filters });
+    // TODO once we have a change in filters e.g. here, we want to fetch equipments again
+  }
+
+  handleSelectFilterChange(option) {
+    let { value, name } = option;
+    const { filters } = this.state;
+    filters[name] = value;
+    this.setState({ filters });
+    // TODO once we have a change in filters e.g. here, we want to fetch equipments again
   }
 
   handlePageClick(menuItem) {
@@ -297,15 +257,7 @@ class DashboardCustomerPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
-
-      // Filter values
-      filterStartAvailability,
-      filterEndAvailability,
-      filterTruckType,
-      filterMinCapacity,
-      filterMaterials,
-      filterZipCode,
-      filterRateType
+      filters
     } = this.state;
 
     return (
@@ -343,82 +295,116 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} style={{ background: '#c8dde7' }}>
                     <Col>
-                      <input name="filterStartAvailability"
+                      <input name="filters.startAvailability"
                              type="text"
                              placeholder="Select Start Date"
-                             value={filterStartAvailability}
-                             onChange={this.handleInputChange}
+                             value={filters.startAvailability}
+                             onChange={this.handleFilterChange}
                       />
                     </Col>
                     <Col>
-                      <input name="filterEndAvailability"
+                      <input name="filters.endAvailability"
                              style={{ width: '100%' }}
                              type="text"
                              placeholder="Select End Date"
-                             value={filterEndAvailability}
-                             onChange={this.handleInputChange}
+                             value={filters.endAvailability}
+                             onChange={this.handleFilterChange}
                       />
                     </Col>
                     <Col>
-                      <Select
-                        name="filterTruckType"
-                        value={filterTruckType}
-                        onChange={this.handleInputChange}
-                      >
-                        {
-                          equipmentTypeList.map(equipmentType => (
-                            <option key={equipmentType.id} value={equipmentType.order}>
-                              {equipmentType.val1}
-                            </option>
-                          ))
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'truckType',
+                            value: filters.truckType
+                          }
                         }
-                      </Select>
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.truckType}
+                        options={
+                          equipmentTypeList.map(equipmentType => ({name: 'truckType', value: equipmentType, label: equipmentType}))
+                        }
+                        placeholder={equipmentTypeList[0]}
+                      />
                     </Col>
                     <Col>
-                      <input name="filterMinCapacity"
+                      <input name="filters.minCapacity"
                              type="text"
                              placeholder="Min # of tons"
-                             value={filterMinCapacity}
-                             onChange={this.handleInputChange}
+                             value={filters.minCapacity}
+                             onChange={this.handleFilterChange}
                       />
                     </Col>
                     <Col>
-                      <Select
-                        name="filterMaterials"
-                        value={filterMaterials}
-                        onChange={this.handleInputChange}
-                      >
-                        {
-                          materialTypeList.map(materialType => (
-                            <option key={materialType.id} value={materialType.order}>
-                              {materialType.val1}
-                            </option>
-                          ))
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'materialType',
+                            value: filters.materialType
+                          }
                         }
-                      </Select>
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.materialType}
+                        options={
+                          materialTypeList.map(materialType => ({name: 'materialType', value: materialType, label: materialType}))
+                        }
+                        placeholder={materialTypeList[0]}
+                      />
                     </Col>
                     <Col>
-                      <input name="filterZipCode"
+                      <input name="filters.zipCode"
                              type="text"
                              placeholder="Zip Code"
-                             value={filterZipCode}
-                             onChange={this.handleInputChange}
+                             value={filters.zipCode}
+                             onChange={this.handleFilterChange}
                       />
                     </Col>
                     <Col>
-                      <Select
-                        name="filterRateType"
-                        value={filterRateType}
-                        onChange={this.handleInputChange}
-                      >
-                        {
-                          rateTypeList.map(rateType => (
-                            <option key={rateType.id} value={rateType.order}>
-                              {rateType.val1}
-                            </option>
-                          ))
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
                         }
-                      </Select>
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({name: 'rateType', value: rateType, label: rateType}))
+                        }
+                        placeholder={rateTypeList[0]}
+                      />
+                      {/*<Select*/}
+                        {/*name="filters.rateType"*/}
+                        {/*value={filters.rateType}*/}
+                        {/*onChange={this.handleFilterChange}*/}
+                      {/*>*/}
+                        {/*{*/}
+                          {/*rateTypeList.map(rateType => (*/}
+                            {/*<option key={rateType} value={rateType}>*/}
+                              {/*{rateType}*/}
+                            {/*</option>*/}
+                          {/*))*/}
+                        {/*}*/}
+                      {/*</Select>*/}
                     </Col>
                   </Row>
                 </Col>
@@ -524,7 +510,7 @@ class DashboardCustomerPage extends Component {
   renderEquipmentTable() {
     const {
       sortByList,
-      filterSortBy,
+      filters,
       equipments
     } = this.state;
 
@@ -547,19 +533,39 @@ class DashboardCustomerPage extends Component {
 
                 <Col>
                   Sort By&nbsp;
-                  <Select
-                    name="filterSortBy"
-                    value={filterSortBy}
-                    onChange={this.handleInputChange}
-                  >
-                    {
-                      sortByList.map(sortBy => (
-                        <option key={sortBy} value={sortBy}>
-                          {sortBy}
-                        </option>
-                      ))
+                  <TSelect
+                    input={
+                      {
+                        onChange: this.handleSelectFilterChange,
+                        name: 'sortBy',
+                        value: filters.sortBy
+                      }
                     }
-                  </Select>
+                    meta={
+                      {
+                        touched: false,
+                        error: 'Unable to select'
+                      }
+                    }
+                    value={filters.sortBy}
+                    options={
+                      sortByList.map(sortBy => ({name: 'sortBy', value: sortBy, label: sortBy}))
+                    }
+                    placeholder={sortByList[0]}
+                  />
+                  {/*<Select*/}
+                    {/*name="filters.sortBy"*/}
+                    {/*value={filters.sortBy}*/}
+                    {/*onChange={this.handleFilterChange}*/}
+                  {/*>*/}
+                    {/*{*/}
+                      {/*sortByList.map(sortBy => (*/}
+                        {/*<option key={sortBy} value={sortBy}>*/}
+                          {/*{sortBy}*/}
+                        {/*</option>*/}
+                      {/*))*/}
+                    {/*}*/}
+                  {/*</Select>*/}
 
                 </Col>
               </Row>
