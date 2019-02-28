@@ -17,6 +17,9 @@ import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
 import truckImage from '../../img/default_truck.png';
+import CompanyService from '../../api/CompanyService';
+import AddressService from '../../api/AddressService';
+import ProfileService from '../../api/ProfileService';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
 
@@ -25,6 +28,8 @@ class DashboardCustomerPage extends Component {
     super(props);
 
     // copied from Nimda EquipmentForm
+    const sortByList = ['Hourly ascending', 'Hourly descending',
+      'Tonnage ascending', 'Tonnage descending'];
 
     // Comment
     this.state = {
@@ -33,8 +38,7 @@ class DashboardCustomerPage extends Component {
       equipmentTypeList: [],
       materialTypeList: [],
       rateTypeList: [],
-      sortByList: [],
-
+      sortByList,
       // Filters
       // sortBy: 1,
 
@@ -46,13 +50,14 @@ class DashboardCustomerPage extends Component {
 
       // TODO: Refactor to a single filter object
       // Filter values
-      filterStartAvailability: null,
-      filterEndAvailability: null,
-      filterTruckType: null,
-      filterMinCapacity: null,
-      filterMaterials: null,
-      filterZipCode: null,
-      filterRateType: null
+      filterStartAvailability: '',
+      filterEndAvailability: '',
+      filterTruckType: '',
+      filterMinCapacity: '',
+      filterMaterials: '',
+      filterZipCode: '',
+      filterRateType: '',
+      filterSortBy: sortByList[0]
 
       // ...equipment
       // goToAddJob: false,
@@ -95,54 +100,41 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchForeignValues() {
-    // const { equipment } = this.props;
-    // if (equipment.companyId) {
-    //   const company = await AgentService.getCompanyById(equipment.companyId);
-    //   this.setState({ companyName: company.legalName });
-    // }
-    //
+    let { filterZipCode , materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+
+    const profile = await ProfileService.getProfile();
+
+    if (profile.companyId) {
+      const company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        const address = await AddressService.getAddressById(company.addressId);
+        filterZipCode = address.zipCode ? address.zipCode : filterZipCode;
+      }
+    }
+
     const lookups = await LookupsService.getLookups();
 
-    const equipmentTypeList = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'EquipmentType') equipmentTypeList.push(itm);
+    Object.values(lookups)
+      .forEach((itm) => {
+        if (itm.key === 'EquipmentType') equipmentTypeList.push(itm);
+      });
+
+    Object.values(lookups)
+      .forEach((itm) => {
+        if (itm.key === 'MaterialType') materialTypeList.push(itm);
+      });
+
+    Object.values(lookups)
+      .forEach((itm) => {
+        if (itm.key === 'RateType') rateTypeList.push(itm);
+      });
+
+    this.setState({
+      filterZipCode,
+      equipmentTypeList,
+      materialTypeList,
+      rateTypeList
     });
-    this.setState({ equipmentTypeList });
-    // Set first value for each filter to first value in list
-    if (equipmentTypeList != null) {
-      this.state.filterTruckType = equipmentTypeList[0];
-    }
-
-    const materialTypeList = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'MaterialType') materialTypeList.push(itm);
-    });
-    this.setState({ materialTypeList });
-    // Set first value for each filter to first value in list
-    if (materialTypeList != null) {
-      this.state.filterMaterials = materialTypeList[0];
-    }
-
-    const rateTypeList = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'RateType') rateTypeList.push(itm);
-    });
-    this.setState({ rateTypeList });
-    // Set first value for each filter to first value in list
-    if (rateTypeList != null) {
-      this.state.filterRateType = rateTypeList[0];
-    }
-
-    this.state.sortByList = ['Hourly ascending', 'Hourly descending',
-      'Tonnage ascending', 'Tonnage descending'];
-    this.setState({filterSortBy: this.state.sortByList[0]});
-
-    // setup other filter initial values
-    const newfilterStartAvailability = this.state.filterStartAvailability = '';
-    this.state.filterEndAvailability = '';
-    this.state.filterMinCapacity = 0;
-    // TODO: set this to user.Company.Address.zip
-    this.state.filterZipCode = '78701';
   }
 
   async fetchParentValues() {
@@ -264,11 +256,13 @@ class DashboardCustomerPage extends Component {
         className="modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__header">
-          <button type="button" className="lnr lnr-cross modal__close-btn" onClick={this.toggleAddJobModal}/>
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleAddJobModal}/>
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}/>
         </div>
       </Modal>
     );
@@ -373,7 +367,7 @@ class DashboardCustomerPage extends Component {
                       >
                         {
                           equipmentTypeList.map(equipmentType => (
-                            <option key={equipmentType.order} value={equipmentType.order}>
+                            <option key={equipmentType.id} value={equipmentType.order}>
                               {equipmentType.val1}
                             </option>
                           ))
@@ -396,7 +390,7 @@ class DashboardCustomerPage extends Component {
                       >
                         {
                           materialTypeList.map(materialType => (
-                            <option key={materialType.order} value={materialType.order}>
+                            <option key={materialType.id} value={materialType.order}>
                               {materialType.val1}
                             </option>
                           ))
@@ -419,7 +413,7 @@ class DashboardCustomerPage extends Component {
                       >
                         {
                           rateTypeList.map(rateType => (
-                            <option key={rateType.order} value={rateType.order}>
+                            <option key={rateType.id} value={rateType.order}>
                               {rateType.val1}
                             </option>
                           ))
@@ -429,7 +423,7 @@ class DashboardCustomerPage extends Component {
                   </Row>
                 </Col>
 
-                <br />
+                <br/>
 
               </form>
 
@@ -499,17 +493,17 @@ class DashboardCustomerPage extends Component {
             <Row>
               <Col>
                 HMA
-                <br />
+                <br/>
                 Stone
-                <br />
+                <br/>
                 Sand
-                <br />
+                <br/>
               </Col>
               <Col>
                 Gravel
-                <br />
+                <br/>
                 Recycling
-                <br />
+                <br/>
               </Col>
               <Col>
                 <button type="button"
@@ -522,7 +516,7 @@ class DashboardCustomerPage extends Component {
             </Row>
           </Col>
         </Row>
-        <hr />
+        <hr/>
       </React.Fragment>
     );
   }
@@ -560,7 +554,7 @@ class DashboardCustomerPage extends Component {
                   >
                     {
                       sortByList.map(sortBy => (
-                        <option value={sortBy}>
+                        <option key={sortBy} value={sortBy}>
                           {sortBy}
                         </option>
                       ))
