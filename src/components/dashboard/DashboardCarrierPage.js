@@ -4,7 +4,7 @@ import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import moment from 'moment';
 // import ProfileService from '../../api/ProfileService';
 import TTable from '../common/TTable';
-import JobsService from '../../api/JobsService';
+import JobService from '../../api/JobService';
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -46,7 +46,7 @@ class DashboardCarrierPage extends Component {
   }
 
   async fetchJobs() {
-    let jobs = await JobsService.getJobs();
+    let jobs = await JobService.getJobs();
     jobs = jobs.map((job) => {
       const newJob = job;
       newJob.modifiedOn = moment(job.modifiedOn)

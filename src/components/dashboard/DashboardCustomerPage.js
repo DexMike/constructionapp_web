@@ -17,7 +17,7 @@ import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
 import truckImage from '../../img/default_truck.png';
-// import JobsService from '../../api/JobsService';
+// import JobService from '../../api/JobService';
 // import AgentService from '../../api/AgentService';
 
 class DashboardCustomerPage extends Component {
@@ -158,7 +158,7 @@ class DashboardCustomerPage extends Component {
   }
 
   // async fetchJobs() {
-  //   let jobs = await JobsService.getJobs();
+  //   let jobs = await JobService.getJobs();
   //   jobs = jobs.map((job) => {
   //     const newJob = job;
   //     newJob.modifiedOn = moment(job.modifiedOn)
@@ -358,7 +358,7 @@ class DashboardCustomerPage extends Component {
                         >
                           {
                             equipmentTypes.map(typeSelect => (
-                              <option key={typeSelect.order} value={typeSelect.order}>
+                              <option key={typeSelect.id} value={typeSelect.order}>
                                 {typeSelect.val1}
                               </option>
                             ))
@@ -387,7 +387,7 @@ class DashboardCustomerPage extends Component {
                         >
                           {
                             materialTypes.map(typeSelect => (
-                              <option key={typeSelect.order} value={typeSelect.order}>
+                              <option key={typeSelect.id} value={typeSelect.order}>
                                 {typeSelect.val1}
                               </option>
                             ))
@@ -416,7 +416,7 @@ class DashboardCustomerPage extends Component {
                         >
                           {
                             rateTypes.map(typeSelect => (
-                              <option key={typeSelect.order} value={typeSelect.order}>
+                              <option key={typeSelect.id} value={typeSelect.order}>
                                 {typeSelect.val1}
                               </option>
                             ))
@@ -482,7 +482,7 @@ class DashboardCustomerPage extends Component {
           </div>
 
           <div className="col-sm-2">
-            <button type="button" className="btn btn-primary">
+            <button type="button" className="btn btn-primary" onClick={() => this.handleEquipmentEdit(equipment.id)}>
               Request
             </button>
           </div>
@@ -525,7 +525,7 @@ class DashboardCustomerPage extends Component {
                   >
                     {
                       sortByList.map(sb => (
-                        <option value={sb}>
+                        <option key={sb} value={sb}>
                           {sb}
                         </option>
                       ))

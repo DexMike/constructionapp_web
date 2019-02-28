@@ -1,36 +1,57 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
+import JobService from '../../api/JobService';
 // import moment from 'moment';
 import truckImage from '../../img/default_truck.png';
 import TButtonToggle from '../common/TButtonToggle';
+import AddressService from '../../api/AddressService';
+// import BidService from '../../api/BidService';
+import ProfileService from '../../api/ProfileService';
 
 class JobCreateForm extends Component {
   constructor(props) {
     super(props);
-
+    const job = JobService.getDefaultJob();
+    // Note: not needed for creating a job
+    delete job.endTime;
+    // job.
     this.state = {
-      // companiesId: 19,
-      // name: '',
-      // status: 'New',
-      // startAddress: 0,
-      // endAddress: 0,
-      // rateType: 'Hour',
-      // rateEstimate: 0,
-      // rateTotal: 0,
-      // startGeoFence: '',
-      // endGeoFence: '',
-      // numberOfTrucks: 0,
-      // startTime: '',
-      // endTime: '',
-      // rate: 0,
-      // materialType: 'All',
-      // notes: '',
-      // createdBy: 0,
-      // createdOn: moment().unix() * 1000,
-      // modifiedBy: 0,
-      // modifiedOn: moment().unix() * 1000,
-      // isArchived: 0
+      job,
+      startAddress: AddressService.getDefaultAddress(),
+      endAddress: AddressService.getDefaultAddress()
+      // ,
+      // bid: BidService.getDefaultBid()
     };
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.toggleJobRate = this.toggleJobRate.bind(this);
+  }
+
+  async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    const { job } = this.state;
+    job.companyId = profile.companyId;
+    this.setState({ job });
+  }
+
+  handleInputChange(e) {
+    this.setState({ [e.target.name]: e.target.value });
+  }
+
+  toggleJobRate() {
+    const { job } = this.state;
+    if (job.rate === 'Hour') {
+      job.rate = 'Ton';
+    } else {
+      job.rate = 'Hour';
+    }
+    this.setState({ job });
+  }
+
+  isRateTon() {
+    const { rate } = this.state;
+    if (rate) {
+      // TODO
+    }
   }
 
   renderSelectedEquipment() {
@@ -94,6 +115,7 @@ class JobCreateForm extends Component {
   }
 
   renderJobTop() {
+    const { job } = this.state;
     return (
       <React.Fragment>
         <div style={{
@@ -117,7 +139,7 @@ class JobCreateForm extends Component {
         </div>
         <div className="row">
           <div className="col-sm-4">
-            <TButtonToggle/>
+            <TButtonToggle isOtherToggled buttonOne="Hour" buttonTwo="Ton" onChange={this.toggleJobRate} />
           </div>
         </div>
         <div className="row">
@@ -125,7 +147,7 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
               <div className="form__form-group-field">
-                <input name="startDate" type="text" placeholder="00/00/0000"/>
+                <input name="job.startTime" type="text" placeholder="00/00/0000" value={job.startTime} onChange={this.handleInputChange} />
               </div>
             </div>
           </div>
@@ -133,7 +155,7 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Estimated Tons</span>
               <div className="form__form-group-field">
-                <input name="estimatedTons" type="text"/>
+                <input name="job.rateEstimate" type="text" value={job.rateEstimate} onChange={this.handleInputChange} />
               </div>
             </div>
           </div>
@@ -143,6 +165,7 @@ class JobCreateForm extends Component {
   }
 
   renderJobStartLocation() {
+    const { startAddress } = this.state;
     return (
       <React.Fragment>
         <div className="row">
@@ -158,31 +181,31 @@ class JobCreateForm extends Component {
         <div className="row form">
           <div className="col-sm-12">
             <div className="form__form-group">
-              <input name="addressLine1" type="text" placeholder="Address #1"/>
+              <input name="addressLine1" type="text" placeholder="Address #1" value={startAddress.address1} onChange={this.handleInputChange} />
             </div>
           </div>
         </div>
         <div className="row form">
           <div className="col-sm-12">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="Address #2"/>
+              <input name="addressLine2" type="text" placeholder="Address #2" value={startAddress.address2} onChange={this.handleInputChange} />
             </div>
           </div>
         </div>
         <div className="row form">
           <div className="col-sm-7">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="City"/>
+              <input name="addressLine2" type="text" placeholder="City" value={startAddress.city} onChange={this.handleInputChange} />
             </div>
           </div>
           <div className="col-sm-2">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="State"/>
+              <input name="addressLine2" type="text" placeholder="State" value={startAddress.state} onChange={this.handleInputChange} />
             </div>
           </div>
           <div className="col-sm-3">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="Zip Code"/>
+              <input name="addressLine2" type="text" placeholder="Zip Code" value={startAddress.zipCode} onChange={this.handleInputChange} />
             </div>
           </div>
         </div>
@@ -191,6 +214,7 @@ class JobCreateForm extends Component {
   }
 
   renderJobEndLocation() {
+    const { endAddress } = this.state;
     return (
       <React.Fragment>
         <div className="row">
@@ -206,31 +230,31 @@ class JobCreateForm extends Component {
         <div className="row form">
           <div className="col-sm-12">
             <div className="form__form-group">
-              <input name="addressLine1" type="text" placeholder="Address #1"/>
+              <input name="addressLine1" type="text" placeholder="Address #1" value={endAddress.address1} onChange={this.handleInputChange}/>
             </div>
           </div>
         </div>
         <div className="row form">
           <div className="col-sm-12">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="Address #2"/>
+              <input name="addressLine2" type="text" placeholder="Address #2" value={endAddress.address2} onChange={this.handleInputChange}/>
             </div>
           </div>
         </div>
         <div className="row form">
           <div className="col-sm-7">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="City"/>
+              <input name="addressLine2" type="text" placeholder="City" value={endAddress.city} onChange={this.handleInputChange} />
             </div>
           </div>
           <div className="col-sm-2">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="State"/>
+              <input name="addressLine2" type="text" placeholder="State" value={endAddress.state} onChange={this.handleInputChange} />
             </div>
           </div>
           <div className="col-sm-3">
             <div className="form__form-group">
-              <input name="addressLine2" type="text" placeholder="Zip Code"/>
+              <input name="addressLine2" type="text" placeholder="Zip Code" value={endAddress.zipCode} onChange={this.handleInputChange} />
             </div>
           </div>
         </div>
@@ -239,12 +263,13 @@ class JobCreateForm extends Component {
   }
 
   renderJobBottom() {
+    const { job } = this.state;
     return (
       <div className="form">
         <div className="form__form-group">
           <h4 className="form__form-group-label">Comments</h4>
           <div className="form__form-group-field">
-            <textarea name="textarea" type="text"/>
+            <textarea name="textarea" type="text" value={job.note} onChange={this.handleInputChange} />
           </div>
         </div>
       </div>
