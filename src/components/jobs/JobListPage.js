@@ -18,6 +18,7 @@ class JobListPage extends Component {
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
+      goToUpdateJob: false,
       jobId: 0,
       companyType: null
     };

@@ -1,10 +1,10 @@
 import webpack from 'webpack';
-import Dotenv from 'dotenv-webpack';
 import path from 'path';
 // import ExtractTextPlugin from 'extract-text-webpack-plugin';
 // import CompressionPlugin from 'compression-webpack-plugin';
 // import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import Dotenv from 'dotenv-webpack';
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production')
@@ -32,7 +32,9 @@ export default {
     // }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
-    new Dotenv(),
+    new Dotenv({
+      path: './.env.demo'
+    }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
     })
