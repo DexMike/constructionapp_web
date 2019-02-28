@@ -5,7 +5,6 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row, Button, Container
 } from 'reactstrap';
 import JobsService from '../../api/JobsService';
-import TCheckBox from '../common/TCheckBox';
 
 class JobForm extends Component {
   constructor(props) {
@@ -121,15 +120,9 @@ class JobForm extends Component {
       companiesId,
       status,
       startAddress,
-      endAddress,
+      startTime,
       rateType,
       rate,
-      notes,
-      createdBy,
-      createdOn,
-      modifiedBy,
-      modifiedOn,
-      isArchived
     } = this.state;
     return (
       <React.Fragment>
@@ -142,7 +135,7 @@ class JobForm extends Component {
                     <span className="form__form-group-label">Companies Id</span>
                     <div className="form__form-group-field">
                       <input name="companiesId" type="number" value={companiesId}
-                             onChange={this.handleInputChange}
+                             onChange={this.handleInputChange} disabled
                       />
                     </div>
                   </div>
@@ -151,7 +144,16 @@ class JobForm extends Component {
                     <span className="form__form-group-label">Status</span>
                     <div className="form__form-group-field">
                       <input name="status" type="text" value={status}
-                             onChange={this.handleInputChange}
+                             onChange={this.handleInputChange} disabled
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">Start Time</span>
+                    <div className="form__form-group-field">
+                      <input name="startTime" type="number" value={startTime}
+                             onChange={this.handleInputChange} disabled
                       />
                     </div>
                   </div>
@@ -160,25 +162,16 @@ class JobForm extends Component {
                     <span className="form__form-group-label">Start Address</span>
                     <div className="form__form-group-field">
                       <input name="startAddress" type="number" value={startAddress}
-                             onChange={this.handleInputChange}
+                             onChange={this.handleInputChange} disabled
                       />
                     </div>
                   </div>
 
                   <div className="form__form-group">
-                    <span className="form__form-group-label">End Address</span>
-                    <div className="form__form-group-field">
-                      <input name="endAddress" type="number" value={endAddress}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Model Type</span>
+                    <span className="form__form-group-label">Rate Type</span>
                     <div className="form__form-group-field">
                       <input name="rateType" type="text" value={rateType}
-                             onChange={this.handleInputChange}
+                             onChange={this.handleInputChange} disabled
                       />
                     </div>
                   </div>
@@ -187,88 +180,28 @@ class JobForm extends Component {
                     <span className="form__form-group-label">Rate</span>
                     <div className="form__form-group-field">
                       <input name="rate" type="number" value={rate}
-                             onChange={this.handleInputChange}
+                             onChange={this.handleInputChange} disabled
                       />
                     </div>
                   </div>
 
                   <div className="form__form-group">
-                    <span className="form__form-group-label">Notes</span>
+                    <span className="form__form-group-label">Estimated Income</span>
                     <div className="form__form-group-field">
-                      <input name="notes" type="text" value={notes}
-                             onChange={this.handleInputChange}
-                      />
-
+                      <input name="estimatedIncome" type="number" value={rate} disabled/>
                     </div>
                   </div>
 
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Created By</span>
-                    <div className="form__form-group-field">
-                      <input name="createdBy" type="number" value={createdBy}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Created On</span>
-                    <div className="form__form-group-field">
-                      <input name="createdOn" type="text" value={moment(createdOn)
-                        .format()} onChange={this.handleInputChange} disabled
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Modified By</span>
-                    <div className="form__form-group-field">
-                      <input name="modifiedBy" type="number" value={modifiedBy}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Modified On</span>
-                    <div className="form__form-group-field">
-                      <input name="modifiedOn" type="text" value={moment(modifiedOn)
-                        .format()} onChange={this.handleInputChange} disabled
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <TCheckBox onChange={this.handleInputChange} name="isArchived"
-                               value={!!isArchived} label="Is Archived"
-                    />
-                  </div>
                 </div>
                 <Container>
                   <Row>
-                    <Col md="4">
-                      <Button
-                        className="account__btn btn-delete"
-                        onClick={() => this.handleDelete()}
-                      >
-                        Delete Job
-                      </Button>
-                    </Col>
                     <Col md="4">
                       {this.renderGoTo()}
                       <Button
                         className="app-link account__btn btn-back"
                         onClick={() => this.handlePageClick('Job')}
                       >
-                        Cancel
-                      </Button>
-                    </Col>
-                    <Col md="4">
-                      <Button
-                        type="submit"
-                        className="account__btn btn-save"
-                      >
-                        Submit
+                        Go Back
                       </Button>
                     </Col>
                   </Row>
