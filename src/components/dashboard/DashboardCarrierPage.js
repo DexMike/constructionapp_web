@@ -82,55 +82,66 @@ class DashboardCarrierPage extends Component {
         >
           Dashboard
         </button>
+
         <Row>
           <Col md={12}>
             <h3 className="page-title">Dashboard</h3>
           </Col>
         </Row>
-        <Row>
-          <Col sm={2}>
-            <Card>
-              <CardBody>
+
+        <div className="row">
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">All Jobs</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
+                {jobs.length}
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Pending Offers</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Jobs in Progress</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Booked Jobs</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col ms={2}>
-            <Card>
-              <CardBody>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Completed Jobs</h5>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col m={2}>
-            <Card>
-              <CardBody>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-2 col-lg-2">
+            <div className="card">
+              <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Upcoming Revenue</h5>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <br />
 
         {/* {this.renderGoTo()} */}
         {/* <button type="button" className="app-link" */}
@@ -154,6 +165,10 @@ class DashboardCarrierPage extends Component {
                       {
                         name: 'id',
                         displayName: 'Job Id'
+                      },
+                      {
+                        name: 'image',
+                        displayName: 'Truck Image'
                       },
                       {
                         name: 'companiesId',

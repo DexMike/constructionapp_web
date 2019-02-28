@@ -83,7 +83,14 @@ class EquipmentListPage extends Component {
   }
 
   render() {
-    const { equipments } = this.state;
+    let { equipments } = this.state;
+    equipments = equipments.map((equipment) => {
+      const newEquipment = equipment;
+      newEquipment.hourRate = `$${newEquipment.hourRate}`;
+      newEquipment.tonRate = `$${newEquipment.tonRate}`;
+      newEquipment.maxCapacity = `${newEquipment.maxCapacity} Tons`;
+      return newEquipment;
+    });
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -113,31 +120,27 @@ class EquipmentListPage extends Component {
                               },
                               {
                                 name: 'image',
-                                displayName: 'Image'
-                              },
-                              {
-                                name: 'companyId',
-                                displayName: 'CompanyID'
+                                displayName: 'Truck Image'
                               },
                               {
                                 name: 'name',
                                 displayName: 'Name'
                               },
                               {
-                                name: 'licensePlate',
-                                displayName: 'License Plate'
+                                name: 'styleId',
+                                displayName: 'Type'
                               },
                               {
-                                name: 'modifiedBy',
-                                displayName: 'Modified By'
+                                name: 'maxCapacity',
+                                displayName: 'Capacity'
                               },
                               {
-                                name: 'modifiedOn',
-                                displayName: 'Modified On'
+                                name: 'hourRate',
+                                displayName: 'Rate Per Hour'
                               },
                               {
-                                name: 'isArchived',
-                                displayName: 'Is Archived'
+                                name: 'tonRate',
+                                displayName: 'Rate per Ton'
                               }
                             ]
                           }
