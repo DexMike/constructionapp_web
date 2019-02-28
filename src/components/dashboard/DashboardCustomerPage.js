@@ -135,10 +135,10 @@ class DashboardCustomerPage extends Component {
 
     this.state.sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
-    this.state.filterSortBy = this.state.sortByList[0];
+    this.setState({filterSortBy: this.state.sortByList[0]});
 
     // setup other filter initial values
-    this.state.filterStartAvailability = '';
+    const newfilterStartAvailability = this.state.filterStartAvailability = '';
     this.state.filterEndAvailability = '';
     this.state.filterMinCapacity = 0;
     // TODO: set this to user.Company.Address.zip
