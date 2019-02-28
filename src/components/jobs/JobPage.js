@@ -6,7 +6,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row, Button, Container,
   Nav, NavItem, NavLink, TabContent, TabPane
 } from 'reactstrap';
-import JobsService from '../../api/JobsService';
+import JobService from '../../api/JobService';
 import TCheckBox from '../common/TCheckBox';
 
 // import JobListPage from './JobListPage';
@@ -82,11 +82,11 @@ class JobPage extends Component {
       // then we are updating the record
       jobPage.isArchived = jobPage.isArchived === 'on' ? 1 : 0;
       jobPage.modifiedOn = moment().unix() * 1000;
-      await JobsService.updateJob(jobPage);
+      await JobService.updateJob(jobPage);
       handlePageClick('Job');
     } else {
       // create
-      await JobsService.createJob(jobPage);
+      await JobService.createJob(jobPage);
       handlePageClick('Job');
     }
   }

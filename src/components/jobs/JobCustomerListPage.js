@@ -4,7 +4,7 @@ import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
 import moment from 'moment';
 import TTable from '../common/TTable';
-import JobsService from '../../api/JobsService';
+import JobService from '../../api/JobService';
 
 class JobCustomerListPage extends Component {
   constructor(props) {
@@ -45,7 +45,7 @@ class JobCustomerListPage extends Component {
   }
 
   async fetchJobs() {
-    let jobs = await JobsService.getJobs();
+    let jobs = await JobService.getJobs();
     jobs = jobs.map((job) => {
       const newJob = job;
       newJob.modifiedOn = moment(job.modifiedOn)
@@ -100,7 +100,7 @@ class JobCustomerListPage extends Component {
                         displayName: 'Customer'
                       },
                       {
-                        name: 'notes',
+                        name: 'material',
                         displayName: 'Material'
                       },
                       {

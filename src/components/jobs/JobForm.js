@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row, Button, Container
 } from 'reactstrap';
-import JobsService from '../../api/JobsService';
+import JobService from '../../api/JobService';
 import TCheckBox from '../common/TCheckBox';
 
 class JobForm extends Component {
@@ -75,11 +75,11 @@ class JobForm extends Component {
       // then we are updating the record
       jobForm.isArchived = jobForm.isArchived === 'on' ? 1 : 0;
       jobForm.modifiedOn = moment().unix() * 1000;
-      await JobsService.updateJob(jobForm);
+      await JobService.updateJob(jobForm);
       handlePageClick('Job');
     } else {
       // create
-      await JobsService.createJob(jobForm);
+      await JobService.createJob(jobForm);
       handlePageClick('Job');
     }
   }
