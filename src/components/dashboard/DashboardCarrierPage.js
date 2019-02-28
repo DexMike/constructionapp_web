@@ -77,15 +77,16 @@ class DashboardCarrierPage extends Component {
     let { jobs } = this.state;
     jobs = jobs.map((job) => {
       const newJob = job;
-      // newJob.rate = `$${newJob.rate}`;
+      const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
-        newJob.estimatedIncome = newJob.rate * newJob.rateEstimate;
+        newJob.estimatedIncome = tempRate * newJob.rateEstimate;
         // newJob.size = `${newJob.rateEstimate} Hours`;
       }
       if (newJob.rateType === 'Ton') {
-        newJob.estimatedIncome = newJob.rate * newJob.rateEstimate;
+        newJob.estimatedIncome = tempRate * newJob.rateEstimate;
         // newJob.size = `${newJob.rateEstimate} Tons`;
       }
+      // newJob.rate = `$${newJob.rate}`;
       return newJob;
     });
     // console.log(jobs);
