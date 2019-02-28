@@ -46,13 +46,13 @@ class DashboardCustomerPage extends Component {
 
       // TODO: Refactor to a single filter object
       // Filter values
-      filterStartAvailability: '',
-      filterEndAvailability: '',
-      filterTruckType: '',
-      filterMinCapacity: '',
-      filterMaterials: '',
-      filterZipCode: '',
-      filterRateType: ''
+      filterStartAvailability: null,
+      filterEndAvailability: null,
+      filterTruckType: null,
+      filterMinCapacity: null,
+      filterMaterials: null,
+      filterZipCode: null,
+      filterRateType: null
 
       // ...equipment
       // goToAddJob: false,
@@ -136,10 +136,6 @@ class DashboardCustomerPage extends Component {
     this.state.sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
     this.state.filterSortBy = this.state.sortByList[0];
-    console.log("list");
-    console.log(this.state.sortByList);
-    console.log("item");
-    console.log(this.state.filterSortBy );
 
     // setup other filter initial values
     this.state.filterStartAvailability = '';
@@ -535,10 +531,7 @@ class DashboardCustomerPage extends Component {
     const {
       sortByList,
       filterSortBy,
-      equipments,
-
-      filterRateType,
-      rateTypeList
+      equipments
     } = this.state;
 
     return (
