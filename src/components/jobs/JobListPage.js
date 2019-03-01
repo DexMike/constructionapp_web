@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 // import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // import moment from 'moment';
 // import TTable from '../common/TTable';
-// import JobsService from '../../api/JobsService';
+// import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCarrierListPage from './JobCarrierListPage';
 import JobCustomerListPage from './JobCustomerListPage';

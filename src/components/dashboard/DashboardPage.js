@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 // import { Redirect } from 'react-router-dom';
-// import JobsService from '../../api/JobsService';
+// import JobService from '../../api/JobService';
 // import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import DashboardCarrierPage from './DashboardCarrierPage';
 import DashboardCustomerPage from './DashboardCustomerPage';

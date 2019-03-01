@@ -6,7 +6,7 @@ import { Auth } from 'aws-amplify';
 // Once AWS finishes creating the distributions in CloudFront then we will use API endpoint above
 // and delete one below
 // const API_ENDPOINT = 'https://sab0qj85x0.execute-api.us-east-1.amazonaws.com/Prod';
-const API_ENDPOINT = process.env.API_ENDPOINT;
+const { API_ENDPOINT } = process.env;
 
 class AgentService {
   static async getHeaders() {

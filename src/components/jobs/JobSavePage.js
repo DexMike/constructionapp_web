@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import JobForm from './JobForm';
-import JobsService from '../../api/JobsService';
+import JobService from '../../api/JobService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -22,7 +22,7 @@ class JobSavePage extends Component {
   async componentDidMount() {
     const { match } = this.props;
     if (match.params.id) {
-      const job = await JobsService.getJobById(match.params.id);
+      const job = await JobService.getJobById(match.params.id);
       this.setState({ job });
     }
   }
@@ -36,7 +36,7 @@ class JobSavePage extends Component {
   async handleDelete() {
     const { match } = this.props;
     const { id } = match.params;
-    await JobsService.deleteJobById(id);
+    await JobService.deleteJobById(id);
     this.handlePageClick('Job');
   }
 
