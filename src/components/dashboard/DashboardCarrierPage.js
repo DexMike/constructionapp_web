@@ -29,22 +29,18 @@ class DashboardCarrierPage extends Component {
     const jobs = await this.fetchJobs();
 
     Promise.all(
-      jobs.map(async (job) => {
-        const companyName = await CompanyService.getCompanyById(job.companiesId);
-        job.companyName = companyName.legalName;
+      jobs.map(async job => {
+        const company = await CompanyService.getCompanyById(job.companiesId);
+        job.companyName = company.legalName;
         // console.log(companyName);
-        // console.log(job.companyName);
-
+        // console.log(job.companyName)
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         job.material = materialsList.jobId;
         // console.log(companyName);
         console.log(job.material);
       })
     );
-    this.setState({
-      jobs
-    });
-
+    this.setState({ jobs });
     console.log(jobs);
   }
 
@@ -62,12 +58,6 @@ class DashboardCarrierPage extends Component {
       }
       return <span key={material}>{material}</span>;
     });
-  }
-
-
-  getState() {
-    const status = this.state;
-    return status;
   }
 
   handleJobEdit(id) {

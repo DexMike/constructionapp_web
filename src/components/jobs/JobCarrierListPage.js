@@ -30,9 +30,9 @@ class JobCarrierListPage extends Component {
 
     Promise.all(
       jobs.map(async (job) => {
-        const companyName = await CompanyService.getCompanyById(job.companiesId);
-        job.companyName = companyName.legalName;
-        console.log(companyName);
+        const company = await CompanyService.getCompanyById(job.companiesId);
+        job.companyName = company.legalName;
+        // console.log(companyName);
         // console.log(job.companyName);
 
         // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
@@ -42,29 +42,8 @@ class JobCarrierListPage extends Component {
         // debugger;
       })
     );
-    this.setState({
-      jobs
-    });
-
+    this.setState({ jobs });
     console.log(jobs);
-
-    // jobs = jobs.map(async (job) => {
-    //   // job.materials = await JobMaterialService.getJobMaterialsById(job.id);
-    //   job.companyName = await CompanyService.getCompanyById(job.companiesId);
-    //   return job;
-    // });
-    //
-    // Promise.all(jobs).then((jobs) => {
-    //   debugger;
-    //   this.setState({
-    //     jobs
-    //   });
-    // });
-  }
-
-  getState() {
-    const status = this.state;
-    return status;
   }
 
   handleJobEdit(id) {
@@ -90,7 +69,8 @@ class JobCarrierListPage extends Component {
         .format();
       return newJob;
     });
-    this.setState({ jobs });
+    return jobs;
+    // this.setState({ jobs });
   }
 
   renderGoTo() {
@@ -154,7 +134,7 @@ class JobCarrierListPage extends Component {
                         displayName: 'Job Id'
                       },
                       {
-                        name: 'companiesId',
+                        name: 'companyName',
                         displayName: 'Customer'
                       },
                       {
