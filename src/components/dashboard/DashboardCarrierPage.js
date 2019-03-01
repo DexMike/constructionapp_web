@@ -5,9 +5,11 @@ import moment from 'moment';
 // import ProfileService from '../../api/ProfileService';
 import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
+import CompanyService from '../../api/CompanyService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class DashboardCarrierPage extends Component {
-  // estimatedIncome;
+
   constructor(props) {
     super(props);
 
@@ -25,8 +27,44 @@ class DashboardCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchJobs();
+    const jobs = await this.fetchJobs();
+
+    Promise.all(
+      jobs.map(async (job) => {
+        const companyName = await CompanyService.getCompanyById(job.companiesId);
+        job.companyName = companyName.legalName;
+        // console.log(companyName);
+        // console.log(job.companyName);
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        job.material = materialsList.jobId;
+        // console.log(companyName);
+        console.log(job.material);
+      })
+    );
+    this.setState({
+      jobs
+    });
+
+    console.log(jobs);
   }
+
+  // this came from Adam - to reuse
+  renderEquipmentMaterials() {
+    const { selectedEquipment } = this.props;
+    return selectedEquipment.materials.map((material, index, materials) => {
+      if (index !== materials.length - 1) {
+        return (
+          <span key={material}>
+            {material}
+            ,&nbsp;
+          </span>
+        );
+      }
+      return <span key={material}>{material}</span>;
+    });
+  }
+
 
   getState() {
     const status = this.state;
@@ -56,7 +94,7 @@ class DashboardCarrierPage extends Component {
         .format();
       return newJob;
     });
-    this.setState({ jobs });
+    return jobs;
   }
 
   renderGoTo() {
@@ -79,17 +117,17 @@ class DashboardCarrierPage extends Component {
       const newJob = job;
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
-        newJob.estimatedIncome = tempRate * newJob.rateEstimate;
-        // newJob.size = `${newJob.rateEstimate} Hours`;
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = `${newJob.rateEstimate} Hours`;
       }
       if (newJob.rateType === 'Ton') {
-        newJob.estimatedIncome = tempRate * newJob.rateEstimate;
-        // newJob.size = `${newJob.rateEstimate} Tons`;
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = `${newJob.rateEstimate} Tons`;
       }
-      // newJob.rate = `$${newJob.rate}`;
+      newJob.newRate = `$${newJob.rate}`;
       return newJob;
     });
-    // console.log(jobs);
+    console.log(jobs);
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -188,7 +226,7 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Truck Image'
                       },
                       {
-                        name: 'companiesId',
+                        name: 'companyName',
                         displayName: 'Customer'
                       },
                       {
@@ -200,11 +238,11 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Start Zip'
                       },
                       {
-                        name: 'rateEstimate',
+                        name: 'newSize',
                         displayName: 'Size'
                       },
                       {
-                        name: 'rate',
+                        name: 'newRate',
                         displayName: 'Rate'
                       },
                       {
@@ -212,7 +250,8 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Est. Income'
                       },
                       {
-                        name: 'notes',
+                        // the materials needs to come from the the JobMaterials Table
+                        name: 'material',
                         displayName: 'Materials'
                       }
                     ]

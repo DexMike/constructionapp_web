@@ -88,9 +88,9 @@ class EquipmentListPage extends Component {
       const newEquipment = equipment;
       newEquipment.hourRate = `$${newEquipment.hourRate}`;
       newEquipment.tonRate = `$${newEquipment.tonRate}`;
-      newEquipment.maxCapacity = `${newEquipment.maxCapacity} Tons`;
       return newEquipment;
     });
+    // console.log(equipments);
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -112,38 +112,38 @@ class EquipmentListPage extends Component {
                 <div className="tabs tabs--bordered-bottom">
                   <div className="tabs__wrap">
                     <TTable
-                          columns={
-                            [
-                              {
-                                name: 'id',
-                                displayName: 'ID'
-                              },
-                              {
-                                name: 'image',
-                                displayName: 'Truck Image'
-                              },
-                              {
-                                name: 'name',
-                                displayName: 'Name'
-                              },
-                              {
-                                name: 'styleId',
-                                displayName: 'Type'
-                              },
-                              {
-                                name: 'maxCapacity',
-                                displayName: 'Capacity'
-                              },
-                              {
-                                name: 'hourRate',
-                                displayName: 'Rate Per Hour'
-                              },
-                              {
-                                name: 'tonRate',
-                                displayName: 'Rate per Ton'
-                              }
-                            ]
+                      columns={
+                        [
+                          {
+                            name: 'id',
+                            displayName: 'ID'
+                          },
+                          {
+                            name: 'image',
+                            displayName: 'Truck Image'
+                          },
+                          {
+                            name: 'name',
+                            displayName: 'Name'
+                          },
+                          {
+                            name: 'type',
+                            displayName: 'Type'
+                          },
+                          {
+                            name: 'maxCapacity',
+                            displayName: 'Capacity'
+                          },
+                          {
+                            name: 'hourRate',
+                            displayName: 'Rate per Hour'
+                          },
+                          {
+                            name: 'tonRate',
+                            displayName: 'Rate per Ton'
                           }
+                        ]
+                      }
                           data={equipments}
                           handleIdClick={this.handleEquipmentEdit}
                     />

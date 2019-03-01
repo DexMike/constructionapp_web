@@ -5,6 +5,8 @@ import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import moment from 'moment';
 import TTable from '../common/TTable';
 import JobsService from '../../api/JobsService';
+import CompanyService from '../../api/CompanyService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCarrierListPage extends Component {
   constructor(props) {
@@ -23,7 +25,40 @@ class JobCarrierListPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchJobs();
+    const jobs = await this.fetchJobs();
+
+    Promise.all(
+      jobs.map(async (job) => {
+        const companyName = await CompanyService.getCompanyById(job.companiesId);
+        job.companyName = companyName.legalName;
+        console.log(companyName);
+        // console.log(job.companyName);
+
+        // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        // job.material = materialsList.jobId;
+        // // console.log(companyName);
+        // console.log(job.material);
+        // debugger;
+      })
+    );
+    this.setState({
+      jobs
+    });
+
+    console.log(jobs);
+
+    // jobs = jobs.map(async (job) => {
+    //   // job.materials = await JobMaterialService.getJobMaterialsById(job.id);
+    //   job.companyName = await CompanyService.getCompanyById(job.companiesId);
+    //   return job;
+    // });
+    //
+    // Promise.all(jobs).then((jobs) => {
+    //   debugger;
+    //   this.setState({
+    //     jobs
+    //   });
+    // });
   }
 
   getState() {
@@ -72,7 +107,22 @@ class JobCarrierListPage extends Component {
   }
 
   render() {
-    const { jobs } = this.state;
+    let { jobs } = this.state;
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      const tempRate = newJob.rate;
+      if (newJob.rateType === 'Hour') {
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = `${newJob.rateEstimate} Hours`;
+      }
+      if (newJob.rateType === 'Ton') {
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = `${newJob.rateEstimate} Tons`;
+      }
+      newJob.newRate = `$${newJob.rate}`;
+      return newJob;
+    });
+    console.log(jobs);
     return (
       <Container className="dashboard">
 
@@ -115,19 +165,20 @@ class JobCarrierListPage extends Component {
                         displayName: 'Start Zip'
                       },
                       {
-                        name: 'note',
+                        name: 'newSize',
                         displayName: 'Size'
                       },
                       {
-                        name: 'rate',
+                        name: 'newRate',
                         displayName: 'Rate'
                       },
                       {
-                        name: 'rateEstimate',
+                        name: 'estimatedIncome',
                         displayName: 'Est. Income'
                       },
                       {
-                        name: 'notes',
+                        // the materials needs to come from the the JobMaterials Table
+                        name: 'material',
                         displayName: 'Materials'
                       }
                     ]
