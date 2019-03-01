@@ -86,7 +86,7 @@ class DashboardCustomerPage extends Component {
 
   async fetchFilterLists() {
     const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
-]
+
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
