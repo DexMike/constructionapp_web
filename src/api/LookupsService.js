@@ -15,6 +15,12 @@ class LookupsService extends AgentService {
     return (response);
   }
 
+  static async getLookupsByType(type) {
+    // const response = await fetch(`${super.getEndpoint()}/lookups/type/${type}`);
+    const response = await super.get(`${PATH}/lookups/type/${type}`);
+    return response.json();
+  }
+
   static async createLookup(lookup) {
     const response = await super.post(PATH, lookup);
     return (response);

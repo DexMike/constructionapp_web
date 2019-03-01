@@ -9,17 +9,19 @@ import {
 } from 'reactstrap';
 // import EyeIcon from 'mdi-react/EyeIcon';
 import PropTypes from 'prop-types';
-// import TCheckBox from '../common/TCheckBox';
+import TDateTimePicker from '../common/TDateTimePicker';
 
 class AddTruckFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startTime: 0,
-      endTime: 0,
+      startDate: '',
+      endDate: '',
       isAvailable: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.startDateChange = this.startDateChange.bind(this);
+    this.endDateChange = this.endDateChange.bind(this);
     this.makeAvailable = this.makeAvailable.bind(this);
     this.availableButtonColor = this.availableButtonColor.bind(this);
   }
@@ -51,6 +53,14 @@ class AddTruckFormTwo extends PureComponent {
     this.setState({ isAvailable: newValue });
   }
 
+  startDateChange(data) {
+    this.setState({ startDate: data.value });
+  }
+
+  endDateChange(data) {
+    this.setState({ startDate: data.value });
+  }
+
   async saveAddress() {
     /*
     // use like FORM pages in others
@@ -65,7 +75,7 @@ class AddTruckFormTwo extends PureComponent {
 
   render() {
     const { handleSubmit, p } = this.props;
-    const { startTime, endTime, isAvailable } = this.state;
+    const { startDate, endDate, isAvailable } = this.state;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -94,12 +104,30 @@ class AddTruckFormTwo extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Start</span>
-                  <input name="name" type="text" value={startTime} onChange={this.handleInputChange} />
+                  <TDateTimePicker
+                    input={
+                      {
+                        onChange: this.startDateChange,
+                        name: 'Truck Type',
+                        value: { startDate }
+                      }
+                    }
+                    onChange={this.handleInputChange}
+                  />
                   <input type="hidden" value={p} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">End</span>
-                  <input name="type" type="text" value={endTime} onChange={this.handleInputChange} />
+                  <TDateTimePicker
+                    input={
+                      {
+                        onChange: this.startDateChange,
+                        name: 'Truck Type',
+                        value: { endDate }
+                      }
+                    }
+                    onChange={this.handleInputChange}
+                  />
                 </div>
 
               </Row>
@@ -159,6 +187,10 @@ AddTruckFormTwo.propTypes = {
   // form: 'horizontal_form_validation_two', // a unique identifier for this form
   // validate,
   handleSubmit: PropTypes.func.isRequired
+};
+
+AddTruckFormTwo.defaultProps = {
+  p: PropTypes.number
 };
 
 export default AddTruckFormTwo;

@@ -113,6 +113,7 @@ class AddTruckForm extends PureComponent {
                     {page === 2
                       && (
                       <AddTruckFormTwo
+                        p={page}
                         onSubmit={this.nextPage}
                         company={company}
                         previousPage={this.previousPage}

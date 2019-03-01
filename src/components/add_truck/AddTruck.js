@@ -10,7 +10,7 @@ import {
   Modal
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import EquipmentsService from '../../api/EquipmentsService';
+import EquipmentsService from '../../api/EquipmentService';
 import AddTruckForm from './AddTruckForm';
 import './AddTruck.css';
 

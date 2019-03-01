@@ -54,7 +54,7 @@ class AddTruckFormThree extends PureComponent {
     await DriverService.createDriver(driver);
     // this gets around sending the form just because, triggers function in the parent
     if (typeof this.props.onDriverSave === 'function') {
-        this.props.onDriverSave(e.target.value);
+      this.props.onDriverSave(e.target.value);
     }
   }
 

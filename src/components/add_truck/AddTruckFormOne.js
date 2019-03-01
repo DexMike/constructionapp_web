@@ -156,7 +156,7 @@ class AddTruckFormOne extends PureComponent {
     // console.log(152);
     // this gets around sending the form just because, triggers function in the parent
     if (typeof this.props.onTruckSave === 'function') {
-        this.props.onTruckSave(e.target.value);
+      this.props.onTruckSave(e.target.value);
     }
     // this.handleSubmit('Equipment');
   }
