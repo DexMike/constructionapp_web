@@ -10,7 +10,7 @@ import {
 } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
-import { Select } from '@material-ui/core';
+// import { Select } from '@material-ui/core';
 import TSelect from '../common/TSelect';
 // import TTable from '../common/TTable';
 import EquipmentService from '../../api/EquipmentService';
@@ -28,7 +28,8 @@ class DashboardCustomerPage extends Component {
   constructor(props) {
     super(props);
 
-    // copied from Nimda EquipmentForm
+    // NOTE: if you update this list you have to update
+    // Orion.EquipmentDao.filtersOrderByClause
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
 
@@ -56,12 +57,13 @@ class DashboardCustomerPage extends Component {
         endAvailability: '',
         truckType: '',
         minCapacity: '',
-        materials: '',
+        materialType: '',
         zipCode: '',
         rateType: '',
         sortBy: sortByList[0]
       }
-      // ...equipment
+
+    // ...equipment
       // goToAddJob: false,
       // goToUpdateJob: false,
       // goToCreateJob: false,
@@ -125,7 +127,11 @@ class DashboardCustomerPage extends Component {
 
   async fetchEquipments() {
     // TODO pull this.state.filters for filter api calls later on.
-    let equipments = await EquipmentService.getEquipments();
+    const { filters } = this.state;
+
+    // let equipments = await EquipmentService.getEquipments();
+    let equipments = await EquipmentService.getEquipmentByFilters(filters);
+
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
       newEquipment.modifiedOn = moment(equipment.modifiedOn)
@@ -141,9 +147,9 @@ class DashboardCustomerPage extends Component {
     let { value } = e.target;
     const { filters } = this.state;
     filters[e.target.name] = value;
-    debugger;
     this.setState({ filters });
-    // TODO once we have a change in filters e.g. here, we want to fetch equipments again
+
+    this.fetchEquipments();
   }
 
   handleSelectFilterChange(option) {
@@ -151,7 +157,8 @@ class DashboardCustomerPage extends Component {
     const { filters } = this.state;
     filters[name] = value;
     this.setState({ filters });
-    // TODO once we have a change in filters e.g. here, we want to fetch equipments again
+
+    this.fetchEquipments();
   }
 
   handlePageClick(menuItem) {
