@@ -50,6 +50,7 @@ class LoginPage extends SignIn {
     if (profile.companyType === 'Carrier') {
       window.location = '/';
     }
+
     if (profile.companyType === 'Customer') {
       // TODO move this to JobService when it is ready
       const jobs = await AgentService.get(`/companies/${profile.companyId}/jobs`);
