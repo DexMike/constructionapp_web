@@ -10,7 +10,7 @@ import {
 } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
-import { Select } from '@material-ui/core';
+// import { Select } from '@material-ui/core';
 import TSelect from '../common/TSelect';
 // import TTable from '../common/TTable';
 import EquipmentService from '../../api/EquipmentService';
@@ -86,7 +86,6 @@ class DashboardCustomerPage extends Component {
 
   async fetchFilterLists() {
     const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
-]
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
@@ -127,10 +126,11 @@ class DashboardCustomerPage extends Component {
 
   async fetchEquipments() {
     // TODO pull this.state.filters for filter api calls later on.
-    const { filters } = this.state;
+    // const { filters } = this.state;
 
-    // let equipments = await EquipmentService.getEquipments();
-    let equipments = await EquipmentService.getEquipmentByFilters(filters);
+    let equipments = await EquipmentService.getEquipments();
+    // NOTE commenting out until it is ready.
+    // let equipments = await EquipmentService.getEquipmentByFilters(filters);
 
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
@@ -229,12 +229,15 @@ class DashboardCustomerPage extends Component {
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
+          />
           <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
           }}
           />
         </div>
-      </Modal>);
+      </Modal>
+    );
   }
 
   renderBreadcrumb() {
@@ -436,7 +439,7 @@ class DashboardCustomerPage extends Component {
   renderEquipmentRow(equipment) {
     return (
       <React.Fragment>
-        <Row md={12} style={{width: '100%'}}>
+        <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
           <Col md={2}>
             <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
@@ -572,7 +575,7 @@ class DashboardCustomerPage extends Component {
                 </Col>
               </Row>
 
-              <Row  style={{marginTop: '10px'}}>
+              <Row style={{ marginTop: '10px' }}>
                 {
                   equipments.map(equipment => (
                     <React.Fragment key={equipment.id}>

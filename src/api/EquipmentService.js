@@ -15,10 +15,10 @@ class EquipmentService extends AgentService {
 
   //   /equipments/filters/FILTERS
   static async getEquipmentByFilters(filters) {
-    console.log("getEquipmentByFilters");
-    console.log(filters);
+    // console.log("getEquipmentByFilters");
+    // console.log(filters);
 
-    const response = await super.post(PATH + '/filters', filters);
+    const response = await super.post(`${PATH}/filters`, filters);
 
     return (response);
   }
@@ -37,7 +37,6 @@ class EquipmentService extends AgentService {
     const response = await this.delete(PATH, id);
     return (response);
   }
-
 }
 
 export default EquipmentService;
