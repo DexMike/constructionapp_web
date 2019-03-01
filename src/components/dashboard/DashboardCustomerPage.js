@@ -427,14 +427,15 @@ class DashboardCustomerPage extends Component {
   renderEquipmentRow(equipment) {
     return (
       <React.Fragment>
-        <Row lg={12}>
-          <Col lg={2} sm={4}>
-            <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
-                 style={{ width: '100px' }}
+        <Row md={12} style={{width: '100%'}}>
+          {/* 100 85 */}
+          <Col md={2}>
+            <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
+                 style={{ width: '118px' }}
             />
           </Col>
 
-          <Col lg={4} sm={8}>
+          <Col md={4}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
               <Col>
                 Type: {equipment.type}
@@ -444,7 +445,7 @@ class DashboardCustomerPage extends Component {
               </Col>
             </Row>
             <Row>
-              <Col style={{ background: '#ffa83b' }}>
+              <Col>
                 Rate
               </Col>
               <Col>
@@ -468,8 +469,8 @@ class DashboardCustomerPage extends Component {
             </Row>
           </Col>
 
-          <Col lg={6} sm={12} style={{ background: '#e895b4' }}>
-            <Row>
+          <Col md={6}>
+            <Row style={{ background: '#c7dde8' }}>
               <Col>
                 Company Name
               </Col>
@@ -531,42 +532,43 @@ class DashboardCustomerPage extends Component {
                 </Col>
                 <Col md={6}>
                   <Row>
-                    <Col md={6}></Col>
+                    <Col md={6} id="sortby">Sort By</Col>
+                    <Col md={6}>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'sortBy',
+                            value: filters.sortBy
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.sortBy}
+                        options={
+                          sortByList.map(sortBy => ({
+                            name: 'sortBy',
+                            value: sortBy,
+                            label: sortBy
+                          }))
+                        }
+                        placeholder={sortByList[0]}
+                      />
+                    </Col>
                   </Row>
-                  Sort By&nbsp;
-                  <TSelect
-                    input={
-                      {
-                        onChange: this.handleSelectFilterChange,
-                        name: 'sortBy',
-                        value: filters.sortBy
-                      }
-                    }
-                    meta={
-                      {
-                        touched: false,
-                        error: 'Unable to select'
-                      }
-                    }
-                    value={filters.sortBy}
-                    options={
-                      sortByList.map(sortBy => ({
-                        name: 'sortBy',
-                        value: sortBy,
-                        label: sortBy
-                      }))
-                    }
-                    placeholder={sortByList[0]}
-                  />
                 </Col>
               </Row>
 
-              <Row>
+              <Row  style={{marginTop: '10px'}}>
                 {
                   equipments.map(equipment => (
-                    <div key={equipment.id}>
+                    <React.Fragment key={equipment.id}>
                       {this.renderEquipmentRow(equipment)}
-                    </div>
+                    </React.Fragment>
                   ))
                 }
               </Row>
