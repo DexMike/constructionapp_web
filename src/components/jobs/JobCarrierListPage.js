@@ -6,7 +6,7 @@ import moment from 'moment';
 import TTable from '../common/TTable';
 // import JobsService from '../../api/JobsService';
 import CompanyService from '../../api/CompanyService';
-import JobMaterialsService from '../../api/JobMaterialsService';
+// import JobMaterialsService from '../../api/JobMaterialsService';
 import JobService from '../../api/JobService';
 
 class JobCarrierListPage extends Component {
@@ -30,8 +30,9 @@ class JobCarrierListPage extends Component {
 
     Promise.all(
       jobs.map(async (job) => {
+        const newJob = job;
         const company = await CompanyService.getCompanyById(job.companiesId);
-        job.companyName = company.legalName;
+        newJob.companyName = company.legalName;
         // console.log(companyName);
         // console.log(job.companyName);
 
@@ -40,10 +41,11 @@ class JobCarrierListPage extends Component {
         // // console.log(companyName);
         // console.log(job.material);
         // debugger;
+        return newJob;
       })
     );
     this.setState({ jobs });
-    console.log(jobs);
+    // console.log(jobs);
   }
 
   handleJobEdit(id) {
@@ -103,7 +105,7 @@ class JobCarrierListPage extends Component {
       newJob.newRate = `$${newJob.rate}`;
       return newJob;
     });
-    console.log(jobs);
+    // console.log(jobs);
     return (
       <Container className="dashboard">
 

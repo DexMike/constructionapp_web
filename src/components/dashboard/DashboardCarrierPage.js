@@ -29,35 +29,39 @@ class DashboardCarrierPage extends Component {
     const jobs = await this.fetchJobs();
 
     Promise.all(
-      jobs.map(async job => {
-        const company = await CompanyService.getCompanyById(job.companiesId);
-        job.companyName = company.legalName;
+      jobs.map(async (job) => {
+        const newJob = job;
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
         // console.log(companyName);
         // console.log(job.companyName)
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        job.material = materialsList.jobId;
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
         // console.log(companyName);
-        console.log(job.material);
+        // console.log(job.material);
+        return newJob;
       })
     );
     this.setState({ jobs });
-    console.log(jobs);
+    // console.log(jobs);
   }
 
   // this came from Adam - to reuse
-  renderEquipmentMaterials() {
-    const { selectedEquipment } = this.props;
-    return selectedEquipment.materials.map((material, index, materials) => {
-      if (index !== materials.length - 1) {
-        return (
-          <span key={material}>
-            {material}
-            ,&nbsp;
-          </span>
-        );
+  equipmentMaterialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
       }
-      return <span key={material}>{material}</span>;
-    });
+    }
+    return materialsString;
   }
 
   handleJobEdit(id) {
@@ -116,7 +120,7 @@ class DashboardCarrierPage extends Component {
       newJob.newRate = `$${newJob.rate}`;
       return newJob;
     });
-    console.log(jobs);
+    // console.log(jobs);
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
