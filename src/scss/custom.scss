@@ -58,4 +58,17 @@ $turquoise: rgb(84,142,168);
     border-left: 1px solid #ccc;
   }
 }
+
+#equipment-display-count {
+  color: $color-dark-turquoise;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+#sortby {
+  text-align: right;
+  color: $color-dark-turquoise;
+  font-size: 16px;
+  padding-top: 5px;
+}
 // ---- customer dashboard page
