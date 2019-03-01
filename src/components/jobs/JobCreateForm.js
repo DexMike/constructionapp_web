@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
+import moment from 'moment';
 import JobService from '../../api/JobService';
-// import moment from 'moment';
 import truckImage from '../../img/default_truck.png';
 import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
-import moment from 'moment';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -47,11 +46,16 @@ class JobCreateForm extends Component {
     bid.userId = profile.userId;
     bid.createdBy = profile.userId;
     bid.modifiedBy = profile.userId;
-    this.setState({ job, startAddress, endAddress, bid });
+    this.setState({
+      job,
+      startAddress,
+      endAddress,
+      bid
+    });
   }
 
   handleJobInputChange(e) {
-    const {job} = this.state;
+    const { job } = this.state;
     job[e.target.name] = e.target.value;
     this.setState({ job });
   }
@@ -93,27 +97,35 @@ class JobCreateForm extends Component {
       // console.error('didnt put all the required fields.');
       return;
     }
-    startAddress.modifiedOn = moment().unix() * 1000;
-    startAddress.createdOn = moment().unix() * 1000;
+    startAddress.modifiedOn = moment()
+      .unix() * 1000;
+    startAddress.createdOn = moment()
+      .unix() * 1000;
     const newStartAddress = await AddressService.createAddress(startAddress);
     job.startAddress = newStartAddress.id;
-    if(job.rateType === 'Ton') {
-      endAddress.modifiedOn = moment().unix() * 1000;
-      endAddress.createdOn = moment().unix() * 1000;
+    if (job.rateType === 'Ton') {
+      endAddress.modifiedOn = moment()
+        .unix() * 1000;
+      endAddress.createdOn = moment()
+        .unix() * 1000;
       const newEndAddress = await AddressService.createAddress(endAddress);
       job.endAddress = newEndAddress.id;
       job.rateEstimate = selectedEquipment.tonRate;
     } else {
       job.rateEstimate = selectedEquipment.hourRate;
     }
-    job.modifiedOn = moment().unix() * 1000;
-    job.createdOn = moment().unix() * 1000;
+    job.modifiedOn = moment()
+      .unix() * 1000;
+    job.createdOn = moment()
+      .unix() * 1000;
     const newJob = await JobService.createJob(job);
     bid.jobId = newJob.id;
     bid.rate = job.rate;
     bid.rateEstimate = job.rateEstimate;
-    bid.modifiedOn = moment().unix() * 1000;
-    bid.createdOn = moment().unix() * 1000;
+    bid.modifiedOn = moment()
+      .unix() * 1000;
+    bid.createdOn = moment()
+      .unix() * 1000;
     await BidService.createBid(bid);
     closeModal();
   }
@@ -172,16 +184,20 @@ class JobCreateForm extends Component {
             </div>
           </div>
         </div>
-        {!this.isRateTypeTon(job.rateType) && (<div style={{ marginTop: '5px' }}>
-          $
-          {selectedEquipment.hourRate}
-          &nbsp;per hour
-        </div>)}
-        {this.isRateTypeTon(job.rateType) && (<div style={{ marginTop: '5px' }}>
-          $
-          {selectedEquipment.tonRate}
-          &nbsp;per ton
-        </div>)}
+        {!this.isRateTypeTon(job.rateType) && (
+          <div style={{ marginTop: '5px' }}>
+            $
+            {selectedEquipment.hourRate}
+            &nbsp;per hour
+          </div>
+        )}
+        {this.isRateTypeTon(job.rateType) && (
+          <div style={{ marginTop: '5px' }}>
+            $
+            {selectedEquipment.tonRate}
+            &nbsp;per ton
+          </div>
+        )}
       </React.Fragment>
     );
   }
@@ -227,7 +243,9 @@ class JobCreateForm extends Component {
         </div>
         <div className="row">
           <div className="col-sm-4">
-            <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour" buttonTwo="Ton" onChange={this.toggleJobRateType} />
+            <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
+                           buttonTwo="Ton" onChange={this.toggleJobRateType}
+            />
           </div>
         </div>
         <div className="row">
@@ -416,7 +434,7 @@ class JobCreateForm extends Component {
         <div className="form__form-group">
           <h4 className="form__form-group-label">Comments</h4>
           <div className="form__form-group-field">
-            <textarea name="notes" value={job.notes} onChange={this.handleJobInputChange} />
+            <textarea name="notes" value={job.notes} onChange={this.handleJobInputChange}/>
           </div>
         </div>
       </div>

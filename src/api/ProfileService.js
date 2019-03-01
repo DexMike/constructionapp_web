@@ -13,7 +13,7 @@ class ProfileService extends AgentService {
       companyType: 'Customer',
       companyId: 0,
       userId: 0
-    }
+    };
   }
 }
 
