@@ -1,7 +1,7 @@
 import React from 'react';
 // import { Link } from 'react-router-dom';
-import FacebookIcon from 'mdi-react/FacebookIcon';
-import GooglePlusIcon from 'mdi-react/GooglePlusIcon';
+// import FacebookIcon from 'mdi-react/FacebookIcon';
+// import GooglePlusIcon from 'mdi-react/GooglePlusIcon';
 // import { Link, Redirect } from 'react-router-dom';
 import { SignIn } from 'aws-amplify-react';
 import { Auth } from 'aws-amplify';
@@ -240,23 +240,31 @@ class LoginPage extends SignIn {
                           LAR
                         </span>
                       </span>
+                      <span style={{
+                        fontSize: '16px',
+                        position: 'relative',
+                        bottom: '6px'
+                      }}
+                      >
+                        &trade;
+                      </span>
                     </h3>
                     <h4 className="account__subhead subhead">
-                      Changing the Way Construction Moves
+                      Changing how Construction Moves
                     </h4>
                   </div>
                   {this.renderLogInForm()}
-                  <div className="account__or">
-                    <p>Or Easily Using</p>
-                  </div>
-                  <div className="account__social">
-                    <span className="account__social-btn account__social-btn--facebook">
-                      <FacebookIcon/>
-                    </span>
-                    <span className="account__social-btn account__social-btn--google">
-                      <GooglePlusIcon/>
-                    </span>
-                  </div>
+                  {/* <div className="account__or"> */}
+                  {/* <p>Or Easily Using</p> */}
+                  {/* </div> */}
+                  {/* <div className="account__social"> */}
+                  {/* <span className="account__social-btn account__social-btn--facebook"> */}
+                  {/* <FacebookIcon/> */}
+                  {/* </span> */}
+                  {/* <span className="account__social-btn account__social-btn--google"> */}
+                  {/* <GooglePlusIcon/> */}
+                  {/* </span> */}
+                  {/* </div> */}
                 </div>
               </div>
             </div>
