@@ -8,7 +8,7 @@ import {
   Row
 } from 'reactstrap';
 // import EyeIcon from 'mdi-react/EyeIcon';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 // import TCheckBox from '../common/TCheckBox';
 
 class AddTruckFormTwo extends PureComponent {
@@ -57,8 +57,14 @@ class AddTruckFormTwo extends PureComponent {
     */
   }
 
+  handleSubmit(menuItem) {
+    if (menuItem) {
+      this.setState({ [`goTo${menuItem}`]: true });
+    }
+  }
+
   render() {
-    // const { handleSubmit, availableButtonColor, makeAvailable } = this.props;
+    const { handleSubmit, p } = this.props;
     const { startTime, endTime, isAvailable } = this.state;
     return (
       <Col md={12} lg={12}>
@@ -66,12 +72,15 @@ class AddTruckFormTwo extends PureComponent {
           <CardBody>
             <div className="card__title">
               <h5 className="bold-text">
-                Configure your schedule
+                Configure your schedule (p)
               </h5>
             </div>
 
             {/*  onSubmit={handleSubmit} */}
-            <form className="form form--horizontal addtruck__form">
+            <form
+              className="form form--horizontal addtruck__form"
+              onSubmit={handleSubmit}
+            >
 
               <Row>
                 <div className="col-md-12 form__form-group">
@@ -86,6 +95,7 @@ class AddTruckFormTwo extends PureComponent {
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Start</span>
                   <input name="name" type="text" value={startTime} onChange={this.handleInputChange} />
+                  <input type="hidden" value={p} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">End</span>
@@ -94,42 +104,38 @@ class AddTruckFormTwo extends PureComponent {
 
               </Row>
 
+              <Row className="col-md-12">
+                <hr className="bighr" />
+              </Row>
+
+              <Row className="col-md-12">
+                <div className="col-md-3 form__form-group">
+                  <span className="form__form-group-label">Toggle Availability</span>
+                </div>
+                <div className="col-md-4 form__form-group">
+                  {/* color={availableButtonColor(true)} */}
+                  <Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
+                    Available
+                  </Button>
+                </div>
+                <div className="col-md-5 form__form-group">
+                  {/* color={availableButtonColor(false)} */}
+                  <Button color={this.availableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
+                    Un-available
+                  </Button>
+                </div>
+              </Row>
+
+              <Row>
+                <div className="col-md-12 form__form-group">
+                  <ButtonToolbar className="form__button-toolbar wizard__toolbar">
+                    <Button color="primary" type="button" className="previous">Back</Button>
+                    <Button color="primary" type="submit" className="next">Next</Button>
+                  </ButtonToolbar>
+                </div>
+              </Row>
+
             </form>
-
-            <Row className="col-md-12">
-              <hr className="bighr" />
-            </Row>
-
-            <Row className="col-md-12">
-              <div className="col-md-3 form__form-group">
-                <span className="form__form-group-label">Toggle Availability</span>
-              </div>
-              <div className="col-md-3 form__form-group">
-                {/* color={availableButtonColor(true)} */}
-                <Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
-                  Available
-                </Button>
-              </div>
-              <div className="col-md-3 form__form-group">
-                {/* color={availableButtonColor(false)} */}
-                <Button color={this.availableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
-                  Un-available
-                </Button>
-              </div>
-            </Row>
-
-            <Row className="col-md-12">
-              <hr className="bighr" />
-            </Row>
-
-            <Row>
-              <div className="col-md-12 form__form-group">
-                <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                  <Button color="primary" type="button" className="previous">Back</Button>
-                  <Button color="primary" type="submit" className="next">Next</Button>
-                </ButtonToolbar>
-              </div>
-            </Row>
 
           </CardBody>
         </Card>
@@ -139,7 +145,20 @@ class AddTruckFormTwo extends PureComponent {
 }
 
 AddTruckFormTwo.propTypes = {
-  // handleSubmit: PropTypes.func.isRequired
+  /*
+  equipment: PropTypes.shape({
+    id: PropTypes.number
+  }),
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string
+    })
+  }),
+  */
+  p: PropTypes.number,
+  // form: 'horizontal_form_validation_two', // a unique identifier for this form
+  // validate,
+  handleSubmit: PropTypes.func.isRequired
 };
 
 export default AddTruckFormTwo;

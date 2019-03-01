@@ -9,11 +9,11 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import MultiSelect from '../common/MultiSelect';
-import SelectField from '../common/Select';
+import MultiSelect from '../common/TMultiSelect';
+import SelectField from '../common/TSelect';
 import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
-import EquipmentsService from '../../api/EquipmentsService';
+import DriverService from '../../api/EquipmentService';
 import './AddTruck.css';
 // import validate from '../common/validate';
 
@@ -42,6 +42,7 @@ class AddTruckFormOne extends PureComponent {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    // console.log(props);
   }
 
   async componentDidMount() {
@@ -85,7 +86,7 @@ class AddTruckFormOne extends PureComponent {
     return !!(company.maxCapacity);
   }
 
-  handleSubmit(menuItem) {
+  async handleSubmit(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
@@ -93,20 +94,16 @@ class AddTruckFormOne extends PureComponent {
 
   async saveTruck(e) {
     e.preventDefault();
+    e.persist();
+
     /*
     if (!this.isFormValid()) {
       return;
     }
     */
-    const { match } = this.props;
+    const { company } = this.props;
+    // console.log(company);
     const {
-      /*
-      multiInput,
-      multiMeta,
-      allMaterials,
-      selectInput,
-      selectMeta,
-      */
       truckType,
       maxCapacity,
       description,
@@ -118,8 +115,8 @@ class AddTruckFormOne extends PureComponent {
       // ratesByTon,
       ratesCostPerTon,
       minOperatingTime,
-      maxDistanceToPickup,
-      handleSubmit } = this.state;
+      maxDistanceToPickup
+    } = this.state;
     // validation is pending
 
     const chargeBy = ratesByBoth === true ? 1 : 0;
@@ -127,7 +124,7 @@ class AddTruckFormOne extends PureComponent {
     // TODO-> Ask which params are required
     const saveValues = {
       name: '', // unasigned
-      type: truckType,
+      type: 'Truck',
       styleId: 0, // unasigned
       maxCapacity, // This is a shorthand of (maxCapacity: maxCapacity)
       minCapacity: 0, // unasigned
@@ -141,29 +138,34 @@ class AddTruckFormOne extends PureComponent {
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
-      companyId: match.params.id,
+      companyId: company.id,
       defaultDriverId: 0, // unasigned
       driverEquipmentsId: 0, // unasigned
-      driversId: 0, // unasigned
-      equipmentAddressId: 0, // unasigned
+      driversId: 1, // THIS IS A FK
+      equipmentAddressId: 3, // THIS IS A FK
       modelId: '', // unasigned
       makeId: '', // unasigned
-      notes: '', // unasigned
+      notes: truckType, // unasigned
       createdBy: 0,
       createdOn: moment().unix() * 1000,
       modifiedBy: 0,
       modifiedOn: moment().unix() * 1000,
       isArchived: 0
     };
-    await EquipmentsService.createEquipment(saveValues);
-    handleSubmit('Equipment');
+    await DriverService.createEquipment(saveValues);
+    // console.log(152);
+    // this gets around sending the form just because, triggers function in the parent
+    if (typeof this.props.onTruckSave === 'function') {
+        this.props.onTruckSave(e.target.value);
+    }
+    // this.handleSubmit('Equipment');
   }
 
   handleInputChange(e) {
     let { value } = e.target;
     // const { ratesByHour, ratesByTon } = this.state;
     if (e.target.name === 'ratesByBoth') {
-      // // console.log(133);
+      // // // console.log(133);
       value = e.target.checked ? Number(1) : Number(0);
       if (e.target.checked) {
         this.setState({ ratesByHour: 1, ratesByTon: 1 });
@@ -178,7 +180,7 @@ class AddTruckFormOne extends PureComponent {
       this.setState({ ratesByHour: 0 });
     }
     if (e.target.name === 'maxCapacity') {
-      // console.log(217);
+      // // console.log(217);
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
     this.setState({ [e.target.name]: value });
@@ -193,15 +195,11 @@ class AddTruckFormOne extends PureComponent {
       newLookup.createdOn = moment(lookup.createdOn).format();
       return newLookup;
     });
-    const simpleMaterials = [];
-    for (const material of materials) {
-      const simple = {
-        value: String(material.id),
-        label: material.val1
-      };
-      simpleMaterials.push(simple);
-    }
-    this.setState({ allMaterials: simpleMaterials });
+    materials = materials.map(material => ({
+      value: String(material.id),
+      label: material.val1
+    }));
+    this.setState({ allMaterials: materials });
   }
 
   render() {
@@ -223,7 +221,7 @@ class AddTruckFormOne extends PureComponent {
       minOperatingTime,
       maxDistanceToPickup
     } = this.state;
-    const { handleSubmit, p } = this.props;
+    const { p } = this.props;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -236,10 +234,10 @@ class AddTruckFormOne extends PureComponent {
               </h5>
             </div>
 
-            {/* onSubmit={e => this.saveCompany(e)} */}
+            {/* this.handleSubmit  */}
             <form
               className="form form--horizontal addtruck__form"
-              onSubmit={handleSubmit}
+              onSubmit={e => this.saveTruck(e)}
             >
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
@@ -478,6 +476,7 @@ class AddTruckFormOne extends PureComponent {
                 <div className="col-md-12 form__form-group">
                   <ButtonToolbar className="form__button-toolbar wizard__toolbar">
                     <Button color="primary" type="button" disabled className="previous">Back</Button>
+                    {/* onSubmit={e => this.saveTruck(e)} */}
                     <Button color="primary" type="submit" className="next">Next</Button>
                   </ButtonToolbar>
                 </div>
@@ -500,13 +499,19 @@ AddTruckFormOne.propTypes = {
     })
   }),
   p: PropTypes.number,
+  company: PropTypes.shape({
+    name: PropTypes.string,
+    id: PropTypes.number
+  }),
+  onTruckSave: PropTypes.func.isRequired
   // form: 'horizontal_form_validation_two', // a unique identifier for this form
   // validate,
-  handleSubmit: PropTypes.func.isRequired
+  // handleSubmit: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
+  company: null,
   equipment: null,
   match: {
     params: {}

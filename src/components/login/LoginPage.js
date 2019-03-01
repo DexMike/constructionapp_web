@@ -105,7 +105,6 @@ class LoginPage extends SignIn {
   }
 
   async onConfirmSignin(token) {
-    console.log(108);
     this.setState({ loading: true });
     try {
       // console.log(`onConfirmSignIn:: ${this.state.username}, ${token}`);
@@ -113,8 +112,6 @@ class LoginPage extends SignIn {
       await Auth.confirmSignIn(this.state.user, token);
       // console.log(`onConfirmSignIn::Response#2: ${JSON.stringify(data, null, 2)}`);
       const profile = await Auth.currentUser();
-      console.log(115);
-      console.log(profile);
       this.props.onStateChange('authenticated', profile);
     } catch (err) {
       // console.log('Error: ', err);

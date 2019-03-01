@@ -16,6 +16,8 @@ class AddTruckForm extends PureComponent {
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
+    this.gotoPage.bind(this);
+    // console.log(props);
   }
 
   async componentDidMount() {
@@ -29,9 +31,15 @@ class AddTruckForm extends PureComponent {
   }
 
   nextPage() {
+    // console.log(32);
     const { page } = this.state;
     // just checking if the state changed
     this.setState({ page: page + 1 });
+  }
+
+  gotoPage(pageNumber) {
+    // console.log(40);
+    this.setState({ page: pageNumber });
   }
 
   previousPage() {
@@ -39,8 +47,14 @@ class AddTruckForm extends PureComponent {
     this.setState({ page: page - 1 });
   }
 
+  handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      // console.log('enter press here!');
+    }
+  }
+
   render() {
-    // const { onSubmit } = this.props;
+    const { company } = this.props;
     const { page, loaded } = this.state;
     if (loaded) {
       return (
@@ -51,28 +65,69 @@ class AddTruckForm extends PureComponent {
               <Card>
                 <div className="wizard">
                   <div className="wizard__steps">
-                    <div className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}>
+                    {/* onClick={this.gotoPage(1)} */}
+                    <div
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
+                    >
                       <p>Add Truck</p>
                     </div>
-                    <div className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}>
+                    <div
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
+                    >
                       <p>Add Schedule</p>
                     </div>
-                    <div className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}>
+                    <div
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
+                    >
                       <p>Add Driver</p>
                     </div>
-                    <div className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}>
+                    <div
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}
+                    >
                       <p>Summary</p>
                     </div>
                   </div>
                   <div className="wizard__form-wrapper">
-                    {page === 1
-&& <AddTruckFormOne p={page} onSubmit={this.nextPage} handleSubmit={this.nextPage} />
-                    }
                     {/* onSubmit={this.nextPage} */}
+                    {page === 1
+                      && (
+                      <AddTruckFormOne
+                        p={page}
+                        company={company}
+                        onTruckSave={this.nextPage}
+                        handleSubmit={this.nextPage}
+                      />
+                      )}
                     {page === 2
-&& <AddTruckFormTwo previousPage={this.previousPage} handleSubmit={this.nextPage} />}
+                      && (
+                      <AddTruckFormTwo
+                        onSubmit={this.nextPage}
+                        company={company}
+                        previousPage={this.previousPage}
+                        handleSubmit={this.nextPage}
+                      />
+                      )}
                     {page === 3
-&& <AddTruckFormThree previousPage={this.previousPage} handleSubmit={this.nextPage} />}
+                      && (
+                        <AddTruckFormThree
+                          previousPage={this.previousPage}
+                          company={company}
+                          onDriverSave={this.nextPage}
+                          handleSubmit={this.nextPage}
+                        />
+                      )}
                     {page === 4
                       && <AddTruckFormFour previousPage={this.previousPage} />}
                     {/* onSubmit={onSubmit} */}
