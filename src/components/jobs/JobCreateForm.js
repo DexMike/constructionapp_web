@@ -274,13 +274,15 @@ class JobCreateForm extends Component {
   }
 
   renderJobFormButtons() {
+    const { closeModal } = this.props;
+
     return (
       <div className="row">
         <div className="col-sm-5"/>
         <div className="col-sm-7">
           <div className="row">
             <div className="col-sm-4">
-              <button type="button" className="btn btn-secondary">
+              <button type="button" className="btn btn-secondary" onClick={() => closeModal()}>
                 Cancel
               </button>
             </div>
@@ -298,7 +300,7 @@ class JobCreateForm extends Component {
   render() {
     const { job } = this.state;
     return (
-      <div>
+      <div id="job-request">
         {this.renderSelectedEquipment()}
         {this.renderJobTop()}
         {this.renderJobStartLocation()}
@@ -313,7 +315,8 @@ class JobCreateForm extends Component {
 JobCreateForm.propTypes = {
   selectedEquipment: PropTypes.shape({
     id: PropTypes.number
-  }).isRequired
+  }).isRequired,
+  closeModal: PropTypes.func.isRequired
 };
 
 export default JobCreateForm;
