@@ -10,13 +10,13 @@ class TDateTimePickerField extends PureComponent {
     };
   }
 
-  handleChange = (date) => {
+  handleChange(date) {
     this.setState({
       startDate: date
     });
     const { onChange } = this.props;
     onChange(date);
-  };
+  }
 
   render() {
     const { startDate } = this.state;

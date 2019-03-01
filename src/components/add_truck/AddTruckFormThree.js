@@ -32,7 +32,7 @@ class AddTruckFormThree extends PureComponent {
   }
 
   handleInputChange(e) {
-    console.log(28);
+    // console.log(28);
     let { value } = e.target;
     if (e.target.name === 'isArchived') {
       value = e.target.checked ? Number(1) : Number(0);
@@ -49,12 +49,13 @@ class AddTruckFormThree extends PureComponent {
       usersId: newUser.id,
       driverLicenseId: 1 // THIS IS A FK
     };
-    console.log(50);
-    console.log(driver);
+    // console.log(50);
+    // console.log(driver);
     await DriverService.createDriver(driver);
     // this gets around sending the form just because, triggers function in the parent
-    if (typeof this.props.onDriverSave === 'function') {
-      this.props.onDriverSave(e.target.value);
+    const { onDriverSave } = this.props;
+    if (typeof onDriverSave === 'function') {
+      onDriverSave(e.target.value);
     }
   }
 

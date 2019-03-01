@@ -42,7 +42,7 @@ class AddTruckFormOne extends PureComponent {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    // console.log(props);
+    // // console.log(props);
   }
 
   async componentDidMount() {
@@ -102,7 +102,7 @@ class AddTruckFormOne extends PureComponent {
     }
     */
     const { company } = this.props;
-    // console.log(company);
+    // // console.log(company);
     const {
       truckType,
       maxCapacity,
@@ -153,10 +153,11 @@ class AddTruckFormOne extends PureComponent {
       isArchived: 0
     };
     await DriverService.createEquipment(saveValues);
-    // console.log(152);
+    // // console.log(152);
     // this gets around sending the form just because, triggers function in the parent
-    if (typeof this.props.onTruckSave === 'function') {
-      this.props.onTruckSave(e.target.value);
+    const { onTruckSave } = this.props;
+    if (typeof onTruckSave.onTruckSave === 'function') {
+      onTruckSave(e.target.value);
     }
     // this.handleSubmit('Equipment');
   }
@@ -165,7 +166,7 @@ class AddTruckFormOne extends PureComponent {
     let { value } = e.target;
     // const { ratesByHour, ratesByTon } = this.state;
     if (e.target.name === 'ratesByBoth') {
-      // // // console.log(133);
+      // // // // console.log(133);
       value = e.target.checked ? Number(1) : Number(0);
       if (e.target.checked) {
         this.setState({ ratesByHour: 1, ratesByTon: 1 });
@@ -180,7 +181,7 @@ class AddTruckFormOne extends PureComponent {
       this.setState({ ratesByHour: 0 });
     }
     if (e.target.name === 'maxCapacity') {
-      // // console.log(217);
+      // // // console.log(217);
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
     this.setState({ [e.target.name]: value });
