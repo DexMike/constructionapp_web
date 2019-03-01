@@ -28,7 +28,8 @@ class DashboardCustomerPage extends Component {
   constructor(props) {
     super(props);
 
-    // copied from Nimda EquipmentForm
+    // NOTE: if you update this list you have to update
+    // Orion.EquipmentDao.filtersOrderByClause
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
 
@@ -61,6 +62,7 @@ class DashboardCustomerPage extends Component {
         rateType: '',
         sortBy: sortByList[0]
       }
+
       // ...equipment
       // goToAddJob: false,
       // goToUpdateJob: false,
@@ -84,7 +86,6 @@ class DashboardCustomerPage extends Component {
 
   async fetchFilterLists() {
     const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
-
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
@@ -125,7 +126,12 @@ class DashboardCustomerPage extends Component {
 
   async fetchEquipments() {
     // TODO pull this.state.filters for filter api calls later on.
+    // const { filters } = this.state;
+
     let equipments = await EquipmentService.getEquipments();
+    // NOTE commenting out until it is ready.
+    // let equipments = await EquipmentService.getEquipmentByFilters(filters);
+
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
       newEquipment.modifiedOn = moment(equipment.modifiedOn)
@@ -142,7 +148,8 @@ class DashboardCustomerPage extends Component {
     const { filters } = this.state;
     filters[e.target.name] = value;
     this.setState({ filters });
-    // TODO once we have a change in filters e.g. here, we want to fetch equipments again
+
+    this.fetchEquipments();
   }
 
   handleSelectFilterChange(option) {
@@ -150,7 +157,8 @@ class DashboardCustomerPage extends Component {
     const { filters } = this.state;
     filters[name] = value;
     this.setState({ filters });
-    // TODO once we have a change in filters e.g. here, we want to fetch equipments again
+
+    this.fetchEquipments();
   }
 
   handlePageClick(menuItem) {
@@ -221,7 +229,12 @@ class DashboardCustomerPage extends Component {
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
+          />
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
+          />
         </div>
       </Modal>
     );
@@ -426,14 +439,15 @@ class DashboardCustomerPage extends Component {
   renderEquipmentRow(equipment) {
     return (
       <React.Fragment>
-        <Row lg={12}>
-          <Col lg={2} sm={4}>
-            <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
-                 style={{ width: '100px' }}
+        <Row md={12} style={{ width: '100%' }}>
+          {/* 100 85 */}
+          <Col md={2}>
+            <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
+                 style={{ width: '118px' }}
             />
           </Col>
 
-          <Col lg={4} sm={8}>
+          <Col md={4}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
               <Col>
                 Type: {equipment.type}
@@ -443,7 +457,7 @@ class DashboardCustomerPage extends Component {
               </Col>
             </Row>
             <Row>
-              <Col style={{ background: '#ffa83b' }}>
+              <Col>
                 Rate
               </Col>
               <Col>
@@ -467,8 +481,8 @@ class DashboardCustomerPage extends Component {
             </Row>
           </Col>
 
-          <Col lg={6} sm={12} style={{ background: '#e895b4' }}>
-            <Row>
+          <Col md={6}>
+            <Row style={{ background: '#c7dde8' }}>
               <Col>
                 Company Name
               </Col>
@@ -522,52 +536,51 @@ class DashboardCustomerPage extends Component {
           <Card>
             <CardBody>
               <Row>
-                <Col>
+                <Col md={6} id="equipment-display-count">
                   Displaying&nbsp;
                   {equipments.length}
                   &nbsp;of&nbsp;
                   {equipments.length}
                 </Col>
-
-                <Col>
-                  &nbsp;
-                </Col>
-
-                <Col>
-                  Sort By&nbsp;
-                  <TSelect
-                    input={
-                      {
-                        onChange: this.handleSelectFilterChange,
-                        name: 'sortBy',
-                        value: filters.sortBy
-                      }
-                    }
-                    meta={
-                      {
-                        touched: false,
-                        error: 'Unable to select'
-                      }
-                    }
-                    value={filters.sortBy}
-                    options={
-                      sortByList.map(sortBy => ({
-                        name: 'sortBy',
-                        value: sortBy,
-                        label: sortBy
-                      }))
-                    }
-                    placeholder={sortByList[0]}
-                  />
+                <Col md={6}>
+                  <Row>
+                    <Col md={6} id="sortby">Sort By</Col>
+                    <Col md={6}>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'sortBy',
+                            value: filters.sortBy
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.sortBy}
+                        options={
+                          sortByList.map(sortBy => ({
+                            name: 'sortBy',
+                            value: sortBy,
+                            label: sortBy
+                          }))
+                        }
+                        placeholder={sortByList[0]}
+                      />
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
 
-              <Row>
+              <Row style={{ marginTop: '10px' }}>
                 {
                   equipments.map(equipment => (
-                    <div key={equipment.id}>
+                    <React.Fragment key={equipment.id}>
                       {this.renderEquipmentRow(equipment)}
-                    </div>
+                    </React.Fragment>
                   ))
                 }
               </Row>
