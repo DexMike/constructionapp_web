@@ -10,7 +10,7 @@ import {
 } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
-// import { Select } from '@material-ui/core';
+import { Select } from '@material-ui/core';
 import TSelect from '../common/TSelect';
 // import TTable from '../common/TTable';
 import EquipmentService from '../../api/EquipmentService';
@@ -338,7 +338,11 @@ class DashboardCustomerPage extends Component {
                         }
                         value={filters.truckType}
                         options={
-                          equipmentTypeList.map(equipmentType => ({ name: 'truckType', value: equipmentType, label: equipmentType }))
+                          equipmentTypeList.map(equipmentType => ({
+                            name: 'truckType',
+                            value: equipmentType,
+                            label: equipmentType
+                          }))
                         }
                         placeholder={equipmentTypeList[0]}
                       />
@@ -369,7 +373,10 @@ class DashboardCustomerPage extends Component {
                         }
                         value={filters.materialType}
                         options={
-                          materialTypeList.map(materialType => ({ name: 'materialType', value: materialType, label: materialType }))
+                          materialTypeList.map(materialType => ({
+                            name: 'materialType',
+                            value: materialType,
+                            label: materialType}))
                         }
                         placeholder={materialTypeList[0]}
                       />
@@ -400,7 +407,11 @@ class DashboardCustomerPage extends Component {
                         }
                         value={filters.rateType}
                         options={
-                          rateTypeList.map(rateType => ({ name: 'rateType', value: rateType, label: rateType }))
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
                         }
                         placeholder={rateTypeList[0]}
                       />
@@ -519,18 +530,16 @@ class DashboardCustomerPage extends Component {
           <Card>
             <CardBody>
               <Row>
-                <Col>
+                <Col md={6} id="equipment-display-count">
                   Displaying&nbsp;
                   {equipments.length}
                   &nbsp;of&nbsp;
                   {equipments.length}
                 </Col>
-
-                <Col>
-                  &nbsp;
-                </Col>
-
-                <Col>
+                <Col md={6}>
+                  <Row>
+                    <Col md={6}></Col>
+                  </Row>
                   Sort By&nbsp;
                   <TSelect
                     input={
@@ -548,7 +557,11 @@ class DashboardCustomerPage extends Component {
                     }
                     value={filters.sortBy}
                     options={
-                      sortByList.map(sortBy => ({ name: 'sortBy', value: sortBy, label: sortBy }))
+                      sortByList.map(sortBy => ({
+                        name: 'sortBy',
+                        value: sortBy,
+                        label: sortBy
+                      }))
                     }
                     placeholder={sortByList[0]}
                   />
