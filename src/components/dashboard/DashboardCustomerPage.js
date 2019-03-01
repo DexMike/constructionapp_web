@@ -10,7 +10,7 @@ import {
 } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
-import { Select } from '@material-ui/core';
+// import { Select } from '@material-ui/core';
 import TSelect from '../common/TSelect';
 // import TTable from '../common/TTable';
 import EquipmentService from '../../api/EquipmentService';
@@ -56,7 +56,7 @@ class DashboardCustomerPage extends Component {
         endAvailability: '',
         truckType: '',
         minCapacity: '',
-        materials: '',
+        materialType: '',
         zipCode: '',
         rateType: '',
         sortBy: sortByList[0]
@@ -83,7 +83,7 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchFilterLists() {
-    let { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
 
     const profile = await ProfileService.getProfile();
 
@@ -112,9 +112,9 @@ class DashboardCustomerPage extends Component {
         if (itm.key === 'RateType') rateTypeList.push(itm.val1);
       });
 
-    filters.truckType = equipmentTypeList[0];
-    filters.materials = materialTypeList[0];
-    filters.rateType = rateTypeList[0];
+    [filters.truckType] = equipmentTypeList;
+    [filters.materials] = materialTypeList;
+    [filters.rateType] = rateTypeList;
     this.setState({
       filters,
       equipmentTypeList,
@@ -138,16 +138,15 @@ class DashboardCustomerPage extends Component {
   }
 
   handleFilterChange(e) {
-    let { value } = e.target;
+    const { value } = e.target;
     const { filters } = this.state;
     filters[e.target.name] = value;
-    debugger;
     this.setState({ filters });
     // TODO once we have a change in filters e.g. here, we want to fetch equipments again
   }
 
   handleSelectFilterChange(option) {
-    let { value, name } = option;
+    const { value, name } = option;
     const { filters } = this.state;
     filters[name] = value;
     this.setState({ filters });
@@ -217,12 +216,12 @@ class DashboardCustomerPage extends Component {
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleAddJobModal}/>
+                  onClick={this.toggleAddJobModal}
+          />
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
-          }}/>
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
         </div>
       </Modal>
     );
@@ -330,7 +329,11 @@ class DashboardCustomerPage extends Component {
                         }
                         value={filters.truckType}
                         options={
-                          equipmentTypeList.map(equipmentType => ({name: 'truckType', value: equipmentType, label: equipmentType}))
+                          equipmentTypeList.map(equipmentType => ({
+                            name: 'truckType',
+                            value: equipmentType,
+                            label: equipmentType
+                          }))
                         }
                         placeholder={equipmentTypeList[0]}
                       />
@@ -361,7 +364,11 @@ class DashboardCustomerPage extends Component {
                         }
                         value={filters.materialType}
                         options={
-                          materialTypeList.map(materialType => ({name: 'materialType', value: materialType, label: materialType}))
+                          materialTypeList.map(materialType => ({
+                            name: 'materialType',
+                            value: materialType,
+                            label: materialType
+                          }))
                         }
                         placeholder={materialTypeList[0]}
                       />
@@ -392,7 +399,11 @@ class DashboardCustomerPage extends Component {
                         }
                         value={filters.rateType}
                         options={
-                          rateTypeList.map(rateType => ({name: 'rateType', value: rateType, label: rateType}))
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
                         }
                         placeholder={rateTypeList[0]}
                       />
@@ -540,7 +551,11 @@ class DashboardCustomerPage extends Component {
                     }
                     value={filters.sortBy}
                     options={
-                      sortByList.map(sortBy => ({name: 'sortBy', value: sortBy, label: sortBy}))
+                      sortByList.map(sortBy => ({
+                        name: 'sortBy',
+                        value: sortBy,
+                        label: sortBy
+                      }))
                     }
                     placeholder={sortByList[0]}
                   />
