@@ -85,8 +85,8 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchFilterLists() {
-    let { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
-
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+]
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
@@ -114,9 +114,9 @@ class DashboardCustomerPage extends Component {
         if (itm.key === 'RateType') rateTypeList.push(itm.val1);
       });
 
-    filters.truckType = equipmentTypeList[0];
-    filters.materials = materialTypeList[0];
-    filters.rateType = rateTypeList[0];
+    [filters.truckType] = equipmentTypeList;
+    [filters.materials] = materialTypeList;
+    [filters.rateType] = rateTypeList;
     this.setState({
       filters,
       equipmentTypeList,
@@ -144,7 +144,7 @@ class DashboardCustomerPage extends Component {
   }
 
   handleFilterChange(e) {
-    let { value } = e.target;
+    const { value } = e.target;
     const { filters } = this.state;
     filters[e.target.name] = value;
     this.setState({ filters });
@@ -153,7 +153,7 @@ class DashboardCustomerPage extends Component {
   }
 
   handleSelectFilterChange(option) {
-    let { value, name } = option;
+    const { value, name } = option;
     const { filters } = this.state;
     filters[name] = value;
     this.setState({ filters });
@@ -229,6 +229,7 @@ class DashboardCustomerPage extends Component {
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {}} />
           <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
           }}
           />
@@ -376,7 +377,8 @@ class DashboardCustomerPage extends Component {
                           materialTypeList.map(materialType => ({
                             name: 'materialType',
                             value: materialType,
-                            label: materialType}))
+                            label: materialType
+                          }))
                         }
                         placeholder={materialTypeList[0]}
                       />
