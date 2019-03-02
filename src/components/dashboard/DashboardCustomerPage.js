@@ -12,7 +12,9 @@ import {
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
 import TSelect from '../common/TSelect';
+import TDateTimePicker from '../common/TDateTimePicker';
 // import TTable from '../common/TTable';
+
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
@@ -76,6 +78,7 @@ class DashboardCustomerPage extends Component {
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.startDateChange = this.startDateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -204,6 +207,10 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  startDateChange(data) {
+    this.setState({ startDate: data.value });
+  }
+
   toggleAddJobModal() {
     const { modal } = this.state;
     this.setState({
@@ -251,9 +258,11 @@ class DashboardCustomerPage extends Component {
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm
-            selectedEquipment={selectedEquipment}
-            closeModal={this.toggleAddJobModal}
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
+          />
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
           />
         </div>
       </Modal>
@@ -289,7 +298,10 @@ class DashboardCustomerPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
+
+      // filters
       filters
+
     } = this.state;
 
     return (
@@ -327,7 +339,7 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col>
-                      <input name="filters.startAvailability"
+                      <input name="startAvailability"
                              className="filter-text"
                              type="text"
                              placeholder="Select Start Date"
@@ -335,8 +347,22 @@ class DashboardCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
+                    {/*<Col>*/}
+                      {/*<TDateTimePicker*/}
+                        {/*input={*/}
+                          {/*{*/}
+                            {/*onChange: this.startDateChange,*/}
+                            {/*name: 'startAvailability',*/}
+                            {/*value: { startDate }*/}
+                          {/*}*/}
+                        {/*}*/}
+                        {/*className="filter-text"*/}
+                        {/*placeholder="Select End Date"*/}
+                        {/*onChange={this.handleInputChange}*/}
+                      {/*/>*/}
+                    {/*</Col>*/}
                     <Col>
-                      <input name="filters.endAvailability"
+                      <input name="endAvailability"
                              className="filter-text"
                              style={{ width: '100%' }}
                              type="text"
@@ -372,7 +398,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.minCapacity"
+                      <input name="minCapacity"
                              className="filter-text"
                              type="text"
                              placeholder="Min # of tons"
@@ -407,7 +433,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.zipCode"
+                      <input name="zipCode"
                              className="filter-text"
                              type="text"
                              placeholder="Zip Code"
