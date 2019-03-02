@@ -12,7 +12,9 @@ import {
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
 import TSelect from '../common/TSelect';
+import TDateTimePicker from '../common/TDateTimePicker';
 // import TTable from '../common/TTable';
+
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
@@ -76,6 +78,7 @@ class DashboardCustomerPage extends Component {
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.startDateChange = this.startDateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -204,6 +207,10 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  startDateChange(data) {
+    this.setState({ startDate: data.value });
+  }
+
   toggleAddJobModal() {
     const { modal } = this.state;
     this.setState({
@@ -291,7 +298,10 @@ class DashboardCustomerPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
+
+      // filters
       filters
+
     } = this.state;
 
     return (
@@ -337,6 +347,20 @@ class DashboardCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
+                    {/*<Col>*/}
+                      {/*<TDateTimePicker*/}
+                        {/*input={*/}
+                          {/*{*/}
+                            {/*onChange: this.startDateChange,*/}
+                            {/*name: 'startAvailability',*/}
+                            {/*value: { startDate }*/}
+                          {/*}*/}
+                        {/*}*/}
+                        {/*className="filter-text"*/}
+                        {/*placeholder="Select End Date"*/}
+                        {/*onChange={this.handleInputChange}*/}
+                      {/*/>*/}
+                    {/*</Col>*/}
                     <Col>
                       <input name="endAvailability"
                              className="filter-text"
