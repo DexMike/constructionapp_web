@@ -329,7 +329,7 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col>
-                      <input name="filters.startAvailability"
+                      <input name="startAvailability"
                              className="filter-text"
                              type="text"
                              placeholder="Select Start Date"
@@ -338,7 +338,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.endAvailability"
+                      <input name="endAvailability"
                              className="filter-text"
                              style={{ width: '100%' }}
                              type="text"
@@ -374,7 +374,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.minCapacity"
+                      <input name="minCapacity"
                              className="filter-text"
                              type="text"
                              placeholder="Min # of tons"
@@ -409,7 +409,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.zipCode"
+                      <input name="zipCode"
                              className="filter-text"
                              type="text"
                              placeholder="Zip Code"
