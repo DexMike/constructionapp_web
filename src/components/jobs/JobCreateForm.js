@@ -33,10 +33,14 @@ class JobCreateForm extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid } = this.state;
+    const { selectedEquipment } = this.props;
     job.companiesId = profile.companyId;
     job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
     job.createdBy = profile.userId;
+    if (selectedEquipment.rateType !== 'All') {
+      job.rateType = selectedEquipment.rateType;
+    }
     startAddress.companyId = profile.companyId;
     startAddress.modifiedBy = profile.userId;
     startAddress.createdBy = profile.userId;
@@ -112,10 +116,10 @@ class JobCreateForm extends Component {
         .unix() * 1000;
       const newEndAddress = await AddressService.createAddress(endAddress);
       newJob.endAddress = newEndAddress.id;
-      newJob.rateEstimate = selectedEquipment.tonRate;
+      newJob.rate = selectedEquipment.tonRate;
     } else {
       delete newJob.endAddress;
-      newJob.rateEstimate = selectedEquipment.hourRate;
+      newJob.rate = selectedEquipment.hourRate;
     }
     newJob.modifiedOn = moment()
       .unix() * 1000;
@@ -222,6 +226,7 @@ class JobCreateForm extends Component {
 
   renderJobTop() {
     const { job } = this.state;
+    const { selectedEquipment } = this.props;
     return (
       <React.Fragment>
         <div style={{
@@ -244,13 +249,15 @@ class JobCreateForm extends Component {
             </div>
           </div>
         </div>
-        <div className="row">
-          <div className="col-sm-4">
-            <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
-                           buttonTwo="Ton" onChange={this.toggleJobRateType}
-            />
+        {selectedEquipment.rateType === 'All' && (
+          <div className="row">
+            <div className="col-sm-4">
+              <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
+                             buttonTwo="Ton" onChange={this.toggleJobRateType}
+              />
+            </div>
           </div>
-        </div>
+        )}
         <div className="row">
           <div className="col-sm-7 form form--horizontal">
             <div className="form__form-group">
@@ -269,9 +276,9 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
               <div className="form__form-group-field">
-                <input name="rate"
+                <input name="rateEstimate"
                        type="text"
-                       value={job.rate}
+                       value={job.rateEstimate}
                        onChange={this.handleJobInputChange}
                 />
               </div>

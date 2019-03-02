@@ -23,6 +23,7 @@ import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
+// import JobMaterialsService from '../../api/JobMaterialsService';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
 
@@ -148,42 +149,49 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchEquipments() {
-    // TODO pull this.state.filters for filter api calls later on.
     const { filters } = this.state;
-
-    // let equipments = await EquipmentService.getEquipments();
-    // NOTE commenting out until it is ready.
-    let equipments = await EquipmentService.getEquipmentByFilters(filters);
+    const equipments = await EquipmentService.getEquipmentByFilters(filters);
 
     if (equipments) {
-      equipments = equipments.map((equipment) => {
+      // NOTE let's try not to use Promise.all and use full api calls
+      // Promise.all(
+      equipments.map((equipment) => {
         const newEquipment = equipment;
+        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
+        //     newEquipment.companyName = company.legalName;
+        // console.log(companyName);
+        // console.log(job.companyName)
+        // const materialsList = await EquipmentMaterialsService
+        // .getEquipmentMaterialsByJobId(job.id);
+        // const materials = materialsList.map(materialItem => materialItem.value);
+        // newJob.material = this.equipmentMaterialsAsString(materials);
+        // console.log(companyName);
+        // console.log(job.material);
         newEquipment.modifiedOn = moment(equipment.modifiedOn)
           .format();
         newEquipment.createdOn = moment(equipment.createdOn)
           .format();
         return newEquipment;
       });
+      // );
+      this.setState({ equipments });
     }
-    this.setState({ equipments });
   }
 
-  handleFilterChange(e) {
+  async handleFilterChange(e) {
     const { value } = e.target;
     const { filters } = this.state;
     filters[e.target.name] = value;
+    await this.fetchEquipments();
     this.setState({ filters });
-
-    this.fetchEquipments();
   }
 
-  handleSelectFilterChange(option) {
+  async handleSelectFilterChange(option) {
     const { value, name } = option;
     const { filters } = this.state;
     filters[name] = value;
+    await this.fetchEquipments();
     this.setState({ filters });
-
-    this.fetchEquipments();
   }
 
   handlePageClick(menuItem) {
@@ -502,7 +510,7 @@ class DashboardCustomerPage extends Component {
                 Capacity: {equipment.maxCapacity} Tons
               </Col>
             </Row>
-            <Row>
+            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
               <Col>
                 Rate
               </Col>
@@ -510,53 +518,71 @@ class DashboardCustomerPage extends Component {
                 Minimum
               </Col>
             </Row>
-            <Row>
-              <Col>
-                $ {equipment.hourRate} / Hour
-              </Col>
-              <Col>
-                Minimum
-                MinCapacity:
-                {equipment.minCapacity} / Tons
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                $ {equipment.tonRate} / Ton
-              </Col>
-            </Row>
+            {(equipment.rateType === 'All' || equipment.rateType === 'Hour') && (
+              <Row>
+                <Col>
+
+                  <span>
+                  $ {equipment.hourRate} / Hour
+                  </span>
+
+                </Col>
+                <Col>
+                  {equipment.minHours} hours min
+                </Col>
+              </Row>
+            )}
+            {(equipment.rateType === 'All' || equipment.rateType === 'Ton') && (
+              <Row>
+                <Col>
+
+                  <span>
+                  $ {equipment.tonRate} / Ton
+                  </span>
+
+                </Col>
+                <Col>
+                  {equipment.minCapacity} tons min
+                </Col>
+              </Row>
+            )}
           </Col>
 
           <Col md={6}>
             <Row style={{ background: '#c7dde8' }}>
               <Col>
-                Company Name
+                Name: {equipment.name}
               </Col>
+              {/* <Col md={6}> */}
+              {/* Company: {equipment.companyName} */}
+              {/* </Col> */}
             </Row>
+            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
+            {/* <Col> */}
+            {/* TODO needs API for equipment materials */}
+            {/* Materials Hauled */}
+            {/* </Col> */}
+            {/* </Row> */}
             <Row>
               <Col>
-                Materials
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                HMA
+                {/* HMA */}
                 <br/>
-                Stone
+                {/* Stone */}
                 <br/>
-                Sand
+                {/* Sand */}
                 <br/>
               </Col>
               <Col>
-                Gravel
+                {/* Gravel */}
                 <br/>
-                Recycling
+                {/* Recycling */}
                 <br/>
               </Col>
               <Col>
                 <button type="button"
                         className="btn btn-primary"
                         onClick={() => this.handleEquipmentEdit(equipment.id)}
+                        style={{ marginTop: '10px' }}
                 >
                   Request
                 </button>
