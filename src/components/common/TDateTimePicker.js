@@ -6,8 +6,10 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: null
+      startDate: new Date(props.givenDate)
     };
+    this.handleChange = this.handleChange.bind(this);
+    // this.setDate();
   }
 
   handleChange(date) {
@@ -20,15 +22,15 @@ class TDateTimePickerField extends PureComponent {
 
   render() {
     const { startDate } = this.state;
-    // showTimeSelect
     return (
       <div className="date-picker">
         <DatePicker
           timeFormat="HH:mm"
           className="form__form-group-datepicker"
           selected={startDate}
+          showTimeSelect
           onChange={this.handleChange}
-          dateFormat="LLL, dd" // http://userguide.icu-project.org/formatparse/datetime
+          dateFormat="MMMM dd, yyyy hh:mm aaa" // http://userguide.icu-project.org/formatparse/datetime
         />
       </div>
     );
@@ -53,11 +55,12 @@ renderTDateTimePickerField.propTypes = {
 };
 
 TDateTimePickerField.propTypes = {
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
+  givenDate: PropTypes.number
 };
 
 TDateTimePickerField.defaultProps = {
-  // onChange: PropTypes.func.isRequired
+  givenDate: PropTypes.number
 };
 
 export default renderTDateTimePickerField;

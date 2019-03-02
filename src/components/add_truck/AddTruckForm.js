@@ -33,7 +33,6 @@ class AddTruckForm extends PureComponent {
   }
 
   nextPage(e) {
-    console.log(e);
     const { page } = this.state;
     // just checking if the state changed
     this.setState({ page: page + 1 });
@@ -58,8 +57,9 @@ class AddTruckForm extends PureComponent {
   handleTruckSave(e) {
     console.log(e);
     // let's keep the info from the truck in memory
-    const { truckCachedInfo } = this.state;
+    const { truckCachedInfo, page } = this.state;
     truckCachedInfo.push(e);
+    this.setState({ page: page + 1 });
   }
 
   render() {

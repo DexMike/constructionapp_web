@@ -15,7 +15,7 @@ class AddTruckFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: '',
+      startDate: new Date(1550016000000),
       endDate: '',
       isAvailable: false
     };
@@ -54,6 +54,7 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   startDateChange(data) {
+    console.log(data);
     this.setState({ startDate: data.value });
   }
 
@@ -76,6 +77,8 @@ class AddTruckFormTwo extends PureComponent {
   render() {
     const { handleSubmit, p } = this.props;
     const { startDate, endDate, isAvailable } = this.state;
+    // let fakeDate = new Date();
+    const fakeDate = 1550016000000;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -108,8 +111,9 @@ class AddTruckFormTwo extends PureComponent {
                     input={
                       {
                         onChange: this.startDateChange,
-                        name: 'Truck Type',
-                        value: { startDate }
+                        name: 'startDate',
+                        value: { startDate },
+                        givenDate: fakeDate
                       }
                     }
                     onChange={this.handleInputChange}
@@ -122,8 +126,9 @@ class AddTruckFormTwo extends PureComponent {
                     input={
                       {
                         onChange: this.startDateChange,
-                        name: 'Truck Type',
-                        value: { endDate }
+                        name: 'endDate',
+                        value: { endDate },
+                        givenDate: fakeDate
                       }
                     }
                     onChange={this.handleInputChange}

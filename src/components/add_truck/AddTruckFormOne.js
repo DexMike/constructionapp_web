@@ -166,8 +166,6 @@ class AddTruckFormOne extends PureComponent {
 
     // should turckinfo be a function instead?
     onTruckFullInfo(saveValues);
-
-    // AQUI ME QUEDO, no esta mandando a la segunda forma
     this.handleSubmit('Equipment');
   }
 
@@ -508,13 +506,23 @@ AddTruckFormOne.propTypes = {
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  onTruckFullInfo: PropTypes.func.isRequired
+  onTruckFullInfo: PropTypes.func.isRequired // ,
+  /* ,
+  onTruckSave: PropTypes.func.isRequired,
+  handleTruckSave: PropTypesPropTypes.shape({
+    truckInfo: PropTypes.number
+  })
+  */
+  // form: 'horizontal_form_validation_two', // a unique identifier for this form
+  // validate,
+  // handleSubmit: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
   company: null,
   equipment: null
+  // onTruckSave: PropTypes.object
 };
 
 export default AddTruckFormOne;

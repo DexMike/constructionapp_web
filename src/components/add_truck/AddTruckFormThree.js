@@ -33,7 +33,6 @@ class AddTruckFormThree extends PureComponent {
 
   handleInputChange(e) {
     // console.log(28);
-    
     let { value } = e.target;
     if (e.target.name === 'isArchived') {
       value = e.target.checked ? Number(1) : Number(0);
