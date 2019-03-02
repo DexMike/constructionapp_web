@@ -85,7 +85,7 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchFilterLists() {
-    let { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
@@ -121,7 +121,7 @@ class DashboardCustomerPage extends Component {
         equipmentTypeList.push(itm.val1);
       });
 
-    const lookupMaterialTypeList= await LookupsService.getLookupsByType('MaterialType');
+    const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
     Object.values(lookupMaterialTypeList)
       .forEach((itm) => {
         materialTypeList.push(itm.val1);
