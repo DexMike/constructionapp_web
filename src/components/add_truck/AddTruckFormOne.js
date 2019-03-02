@@ -13,7 +13,7 @@ import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
-import DriverService from '../../api/EquipmentService';
+// import DriverService from '../../api/DriverService';
 import './AddTruck.css';
 // import validate from '../common/validate';
 
@@ -117,6 +117,7 @@ class AddTruckFormOne extends PureComponent {
       minOperatingTime,
       maxDistanceToPickup
     } = this.state;
+    const { onTruckFullInfo } = this.props;
     // validation is pending
 
     const chargeBy = ratesByBoth === true ? 1 : 0;
@@ -152,14 +153,22 @@ class AddTruckFormOne extends PureComponent {
       modifiedOn: moment().unix() * 1000,
       isArchived: 0
     };
-    await DriverService.createEquipment(saveValues);
-    // // console.log(152);
-    // this gets around sending the form just because, triggers function in the parent
+
+    // DO NOT SAVE, SEND TO PARENT
+    // await DriverService.createEquipment(saveValues);
+    // Comment: this gets around sending the form just because, triggers function in the parent
+    /*
     const { onTruckSave } = this.props;
-    if (typeof onTruckSave.onTruckSave === 'function') {
+    if (typeof onTruckSave === 'function') {
       onTruckSave(e.target.value);
     }
-    // this.handleSubmit('Equipment');
+    */
+
+    // should turckinfo be a function instead?
+    onTruckFullInfo(saveValues);
+
+    // AQUI ME QUEDO, no esta mandando a la segunda forma
+    this.handleSubmit('Equipment');
   }
 
   handleInputChange(e) {
@@ -494,29 +503,18 @@ AddTruckFormOne.propTypes = {
   equipment: PropTypes.shape({
     id: PropTypes.number
   }),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.string
-    })
-  }),
   p: PropTypes.number,
   company: PropTypes.shape({
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  onTruckSave: PropTypes.func.isRequired
-  // form: 'horizontal_form_validation_two', // a unique identifier for this form
-  // validate,
-  // handleSubmit: PropTypes.func.isRequired
+  onTruckFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
   company: null,
-  equipment: null,
-  match: {
-    params: {}
-  }
+  equipment: null
 };
 
 export default AddTruckFormOne;

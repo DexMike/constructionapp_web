@@ -12,11 +12,13 @@ class AddTruckForm extends PureComponent {
     super(props);
     this.state = {
       page: 1,
-      loaded: false
+      loaded: false,
+      truckCachedInfo: []
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
     this.gotoPage.bind(this);
+    this.handleTruckSave = this.handleTruckSave.bind(this);
     // console.log(props);
   }
 
@@ -30,8 +32,8 @@ class AddTruckForm extends PureComponent {
     }
   }
 
-  nextPage() {
-    // console.log(32);
+  nextPage(e) {
+    console.log(e);
     const { page } = this.state;
     // just checking if the state changed
     this.setState({ page: page + 1 });
@@ -53,9 +55,16 @@ class AddTruckForm extends PureComponent {
     }
   }
 
+  handleTruckSave(e) {
+    console.log(e);
+    // let's keep the info from the truck in memory
+    const { truckCachedInfo } = this.state;
+    truckCachedInfo.push(e);
+  }
+
   render() {
     const { company } = this.props;
-    const { page, loaded } = this.state;
+    const { page, loaded, truckCachedInfo } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -78,7 +87,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
+                      className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}                      
                     >
                       <p>Add Schedule</p>
                     </div>
@@ -106,7 +115,7 @@ class AddTruckForm extends PureComponent {
                       <AddTruckFormOne
                         p={page}
                         company={company}
-                        onTruckSave={this.nextPage}
+                        onTruckFullInfo={this.handleTruckSave}
                         handleSubmit={this.nextPage}
                       />
                       )}
@@ -127,6 +136,7 @@ class AddTruckForm extends PureComponent {
                           company={company}
                           onDriverSave={this.nextPage}
                           handleSubmit={this.nextPage}
+                          truckFullInfo={truckCachedInfo}
                         />
                       )}
                     {page === 4
@@ -153,14 +163,15 @@ AddTruckForm.propTypes = {
     id: PropTypes.number,
     page: PropTypes.number
   }),
-  incomingPage: PropTypes.number
+  incomingPage: PropTypes.number // ,
+  // handleTruckSave: PropTypes.func.isRequired
 };
 
 AddTruckForm.defaultProps = {
   company: PropTypes.shape({
     id: PropTypes.number,
     page: PropTypes.number
-  })// ,
+  })
   // onSubmit: PropTypes.func.isRequired
 };
 
