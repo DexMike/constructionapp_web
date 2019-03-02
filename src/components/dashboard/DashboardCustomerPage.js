@@ -251,9 +251,11 @@ class DashboardCustomerPage extends Component {
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm
-            selectedEquipment={selectedEquipment}
-            closeModal={this.toggleAddJobModal}
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
+          />
+          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
+          }}
           />
         </div>
       </Modal>
