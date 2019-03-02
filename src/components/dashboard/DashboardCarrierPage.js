@@ -47,7 +47,6 @@ class DashboardCarrierPage extends Component {
     // console.log(jobs);
   }
 
-  // this came from Adam - to reuse
   equipmentMaterialsAsString(materials) {
     let materialsString = '';
     if (materials) {

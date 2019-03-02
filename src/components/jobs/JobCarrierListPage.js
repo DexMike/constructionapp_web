@@ -8,6 +8,7 @@ import TTable from '../common/TTable';
 import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 import JobService from '../../api/JobService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCarrierListPage extends Component {
   constructor(props) {
@@ -31,21 +32,36 @@ class JobCarrierListPage extends Component {
     Promise.all(
       jobs.map(async (job) => {
         const newJob = job;
-        const company = await CompanyService.getCompanyById(job.companiesId);
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
         newJob.companyName = company.legalName;
         // console.log(companyName);
-        // console.log(job.companyName);
-
-        // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        // job.material = materialsList.jobId;
-        // // console.log(companyName);
+        // console.log(job.companyName)
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+        // console.log(companyName);
         // console.log(job.material);
-        // debugger;
         return newJob;
       })
     );
     this.setState({ jobs });
     // console.log(jobs);
+  }
+
+  equipmentMaterialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
   }
 
   handleJobEdit(id) {
@@ -72,7 +88,6 @@ class JobCarrierListPage extends Component {
       return newJob;
     });
     return jobs;
-    // this.setState({ jobs });
   }
 
   renderGoTo() {
@@ -108,7 +123,6 @@ class JobCarrierListPage extends Component {
     // console.log(jobs);
     return (
       <Container className="dashboard">
-
         {this.renderGoTo()}
         <button type="button" className="app-link"
                 onClick={() => this.handlePageClick('Dashboard')}

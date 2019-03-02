@@ -10,6 +10,8 @@ import {
 import moment from 'moment';
 import EquipmentService from '../../api/EquipmentService';
 import TTable from '../common/TTable';
+// import CompanyService from '../../api/CompanyService';
+// import JobMaterialsService from '../../api/JobMaterialsService';
 
 class EquipmentListPage extends Component {
   constructor(props) {
@@ -30,7 +32,20 @@ class EquipmentListPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchEquipments();
+    const equipments = await this.fetchEquipments();
+
+    // commenting code below - we will need it if we need to get anything about the company
+    // Promise.all(
+    //   equipments.map(async (equipment) => {
+    //     const newEquipment = equipment;
+    //     const company = await EquipmentService.getCompanyById(newEquipment.companyId);
+    //     newEquipment.companyName = company.legalName;
+    //     // console.log(newEquipment.companyName);
+    //     // console.log(job.companyName)
+    //     return newEquipment;
+    //   })
+    // );
+    this.setState({ equipments });
   }
 
   toggle(tab) {
@@ -52,7 +67,7 @@ class EquipmentListPage extends Component {
         .format();
       return newEquipment;
     });
-    this.setState({ equipments });
+    return equipments;
   }
 
   handlePageClick(menuItem) {
@@ -104,6 +119,9 @@ class EquipmentListPage extends Component {
           <Col md={12}>
             <h3 className="page-title">Equipment</h3>
           </Col>
+        </Row>
+        <Row>
+          EquipmentListPage
         </Row>
         <Row>
           <Col md={12} lg={12}>
