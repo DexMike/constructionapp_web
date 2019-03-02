@@ -33,12 +33,12 @@ class BidService extends AgentService {
 
   static getDefaultBid() {
     return {
-      jobId: '',
-      hasCustomerAccepted: '',
-      hasSchedulerAccepted: '',
-      status: '0',
-      userId: '',
-      rateType: '0',
+      jobId: 0,
+      hasCustomerAccepted: 0,
+      hasSchedulerAccepted: 0,
+      status: 'New',
+      userId: 0,
+      rateType: 'Hour',
       rate: '',
       rateEstimate: '',
       notes: '',

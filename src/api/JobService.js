@@ -57,7 +57,8 @@ class JobService extends AgentService {
       startTime: moment()
         .unix() * 1000,
       endTime: '',
-      rate: 'Hour',
+      rateType: 'Hour',
+      rate: 0,
       notes: '',
       createdBy: 0,
       createdOn: moment()

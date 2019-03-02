@@ -1,0 +1,35 @@
+.moveLeft{
+    text-align: left;
+}
+.moveRight{
+    text-align: right;
+}
+hr {
+    width: 100%;
+}
+
+.bighr{
+    background-color: rgba(204, 204, 204, 0.185);
+    height: 5px;
+    border: none;
+}
+
+.modal-dialog--header{
+    width: 70% !important;
+    max-width: 70%;
+}
+.modal-dialog--body{
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.form input, .form textarea {
+    border: 1px solid #f2f4f7 !important;
+    color: #646777 !important;
+}
+.checkbox-btn:hover .checkbox-btn__checkbox-custom {
+    border-color: #4ce1b6 !important;
+}
+
+.checkbox-btn__checkbox-custom {
+    border: 1px solid #dddddd !important;
+}
