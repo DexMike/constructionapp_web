@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-// Button
 import moment from 'moment';
 import TTable from '../common/TTable';
-// import JobsService from '../../api/JobsService';
 import CompanyService from '../../api/CompanyService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
 import JobService from '../../api/JobService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 
@@ -148,6 +145,10 @@ class JobCarrierListPage extends Component {
                       {
                         name: 'id',
                         displayName: 'Job Id'
+                      },
+                      {
+                        name: 'name',
+                        displayName: 'Job Name'
                       },
                       {
                         name: 'companyName',
