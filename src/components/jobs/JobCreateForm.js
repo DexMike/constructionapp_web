@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
 import TButtonToggle from '../common/TButtonToggle';
@@ -90,8 +91,9 @@ class JobCreateForm extends Component {
     e.preventDefault();
     const { closeModal, selectedEquipment } = this.props;
     const { startAddress, job, endAddress, bid } = this.state;
-    startAddress.name = `Job: ${job.name}`;
-    endAddress.name = `Job: ${job.name}`;
+    const newJob = CloneDeep(job);
+    startAddress.name = `Job: ${newJob.name}`;
+    endAddress.name = `Job: ${newJob.name}`;
     if (!this.isFormValid()) {
       // TODO display error message
       // console.error('didnt put all the required fields.');
@@ -102,26 +104,27 @@ class JobCreateForm extends Component {
     startAddress.createdOn = moment()
       .unix() * 1000;
     const newStartAddress = await AddressService.createAddress(startAddress);
-    job.startAddress = newStartAddress.id;
-    if (job.rateType === 'Ton') {
+    newJob.startAddress = newStartAddress.id;
+    if (newJob.rateType === 'Ton') {
       endAddress.modifiedOn = moment()
         .unix() * 1000;
       endAddress.createdOn = moment()
         .unix() * 1000;
       const newEndAddress = await AddressService.createAddress(endAddress);
-      job.endAddress = newEndAddress.id;
-      job.rateEstimate = selectedEquipment.tonRate;
+      newJob.endAddress = newEndAddress.id;
+      newJob.rateEstimate = selectedEquipment.tonRate;
     } else {
-      job.rateEstimate = selectedEquipment.hourRate;
+      delete newJob.endAddress;
+      newJob.rateEstimate = selectedEquipment.hourRate;
     }
-    job.modifiedOn = moment()
+    newJob.modifiedOn = moment()
       .unix() * 1000;
-    job.createdOn = moment()
+    newJob.createdOn = moment()
       .unix() * 1000;
-    const newJob = await JobService.createJob(job);
-    bid.jobId = newJob.id;
-    bid.rate = job.rate;
-    bid.rateEstimate = job.rateEstimate;
+    const createdJob = await JobService.createJob(newJob);
+    bid.jobId = createdJob.id;
+    bid.rate = createdJob.rate;
+    bid.rateEstimate = createdJob.rateEstimate;
     bid.modifiedOn = moment()
       .unix() * 1000;
     bid.createdOn = moment()
