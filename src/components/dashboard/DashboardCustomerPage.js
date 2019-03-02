@@ -96,21 +96,41 @@ class DashboardCustomerPage extends Component {
       }
     }
 
-    const lookups = await LookupsService.getLookups();
+    // const lookups = await LookupsService.getLookups();
+    //
+    // Object.values(lookups)
+    //   .forEach((itm) => {
+    //     if (itm.key === 'EquipmentType') equipmentTypeList.push(itm.val1);
+    //   });
+    // Object.values(lookups)
+    //   .forEach((itm) => {
+    //     if (itm.key === 'MaterialType') materialTypeList.push(itm.val1);
+    //   });
+    //
+    // Object.values(lookups)
+    //   .forEach((itm) => {
+    //     if (itm.key === 'RateType') rateTypeList.push(itm.val1);
+    //   });
 
-    Object.values(lookups)
+    // TODO need to refactor above to do the filtering on the Orion
+    // LookupDao Hibernate side
+
+    const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
+    Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        if (itm.key === 'EquipmentType') equipmentTypeList.push(itm.val1);
+        equipmentTypeList.push(itm.val1);
       });
 
-    Object.values(lookups)
+    const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
+    Object.values(lookupMaterialTypeList)
       .forEach((itm) => {
-        if (itm.key === 'MaterialType') materialTypeList.push(itm.val1);
+        materialTypeList.push(itm.val1);
       });
 
-    Object.values(lookups)
+    const lookupRateTypelist = await LookupsService.getLookupsByType('RateType');
+    Object.values(lookupRateTypelist)
       .forEach((itm) => {
-        if (itm.key === 'RateType') rateTypeList.push(itm.val1);
+        rateTypeList.push(itm.val1);
       });
 
     [filters.truckType] = equipmentTypeList;
@@ -126,20 +146,22 @@ class DashboardCustomerPage extends Component {
 
   async fetchEquipments() {
     // TODO pull this.state.filters for filter api calls later on.
-    // const { filters } = this.state;
+    const { filters } = this.state;
 
-    let equipments = await EquipmentService.getEquipments();
+    // let equipments = await EquipmentService.getEquipments();
     // NOTE commenting out until it is ready.
-    // let equipments = await EquipmentService.getEquipmentByFilters(filters);
+    let equipments = await EquipmentService.getEquipmentByFilters(filters);
 
-    equipments = equipments.map((equipment) => {
-      const newEquipment = equipment;
-      newEquipment.modifiedOn = moment(equipment.modifiedOn)
-        .format();
-      newEquipment.createdOn = moment(equipment.createdOn)
-        .format();
-      return newEquipment;
-    });
+    if (equipments) {
+      equipments = equipments.map((equipment) => {
+        const newEquipment = equipment;
+        newEquipment.modifiedOn = moment(equipment.modifiedOn)
+          .format();
+        newEquipment.createdOn = moment(equipment.createdOn)
+          .format();
+        return newEquipment;
+      });
+    }
     this.setState({ equipments });
   }
 

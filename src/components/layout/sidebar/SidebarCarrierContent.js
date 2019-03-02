@@ -48,7 +48,7 @@ class SidebarCarrierContent extends Component {
         <ul className="sidebar__block">
           <SidebarLink
             title="Drivers"
-            route="/drivers"
+            route="/users"
             onClick={this.hideSidebar}
           />
         </ul>
