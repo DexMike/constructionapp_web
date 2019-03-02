@@ -7,8 +7,8 @@ import DashboardCarrierPage from './DashboardCarrierPage';
 import DashboardCustomerPage from './DashboardCustomerPage';
 import ProfileService from '../../api/ProfileService';
 import EquipmentsService from '../../api/EquipmentService';
-import AddTruckForm from '../add_truck/AddTruckForm';
-import '../add_truck/AddTruck.css';
+import AddTruckForm from '../addTruck/AddTruckForm';
+import '../addTruck/AddTruck.css';
 
 class DashboardPage extends Component {
   constructor(props) {
@@ -40,15 +40,15 @@ class DashboardPage extends Component {
   // Pull trucks
   async fetchCompanyTrucks() {
     const profile = await ProfileService.getProfile();
-    this.setState({ companyId: profile.companyId });
-    const materials = await EquipmentsService.getEquipmentByCompanyIdAndType(
+    const equipments = await EquipmentsService.getEquipmentByCompanyIdAndType(
       profile.companyId,
       'Truck'
     );
     this.toggleAddTruckModal();
     // console.log(materials.length);
     this.setState({
-      totalTrucks: materials.length,
+      companyId: profile.companyId,
+      totalTrucks: equipments.length,
       loaded: true
     });
   }
@@ -99,11 +99,11 @@ class DashboardPage extends Component {
   }
 
   render() {
-    const { companyType, loaded } = this.state;
+    const { companyType, loaded, totalTrucks } = this.state;
     if (loaded) {
       return (
         <React.Fragment>
-          { this.renderModal() }
+          { !!companyType && companyType === 'Carrier' && totalTrucks >= 0 && this.renderModal() }
           { !!companyType && this.renderDashboardFromCompanyType()}
         </React.Fragment>
       );
