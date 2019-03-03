@@ -8,13 +8,15 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import UserService from '../../api/UserService';
-import DriverService from '../../api/DriverService';
+// import UserService from '../../api/UserService';
+// import DriverService from '../../api/DriverService';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
     super(props);
     const { company } = this.props;
+    // console.log('>PROPS COMPANY');
+    // console.log(company);
     this.state = {
       // showPassword: false
       firstName: '',
@@ -32,7 +34,6 @@ class AddTruckFormThree extends PureComponent {
   }
 
   handleInputChange(e) {
-    // console.log(28);
     let { value } = e.target;
     if (e.target.name === 'isArchived') {
       value = e.target.checked ? Number(1) : Number(0);
@@ -40,23 +41,13 @@ class AddTruckFormThree extends PureComponent {
     this.setState({ [e.target.name]: value });
   }
 
-  async saveDriver(e) {
+  async saveUser(e) {
     e.preventDefault();
     e.persist();
-    const newUser = await UserService.createUser(this.state);
-
-    const driver = {
-      usersId: newUser.id,
-      driverLicenseId: 1 // THIS IS A FK
-    };
-    // console.log(50);
-    // console.log(driver);
-    await DriverService.createDriver(driver);
-    // this gets around sending the form just because, triggers function in the parent
-    const { onDriverSave } = this.props;
-    if (typeof onDriverSave === 'function') {
-      onDriverSave(e.target.value);
-    }
+    const { onUserFullInfo } = this.props;
+    const availability = this.state;
+    onUserFullInfo(availability);
+    this.handleSubmit('User');
   }
 
   handleSubmit(menuItem) {
@@ -67,7 +58,17 @@ class AddTruckFormThree extends PureComponent {
 
   render() {
     // const { handleSubmit } = this.props;
-    const { firstName, lastName, mobilePhone, email } = this.state;
+    const {
+      firstName,
+      lastName,
+      mobilePhone,
+      email,
+      companyId,
+      parentId,
+      isBanned,
+      preferredLanguage,
+      userStatus
+    } = this.state;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -80,8 +81,13 @@ class AddTruckFormThree extends PureComponent {
 
             <form
               className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveDriver(e)}
+              onSubmit={e => this.saveUser(e)}
             >
+
+              <input type="hidden" value={parentId} />
+              <input type="hidden" value={isBanned} />
+              <input type="hidden" value={preferredLanguage} />
+              <input type="hidden" value={userStatus} />
 
               <Row className="col-md-12">
                 <hr className="bighr" />
@@ -97,6 +103,7 @@ class AddTruckFormThree extends PureComponent {
                     value={firstName}
                     onChange={this.handleInputChange}
                   />
+                  <input type="hidden" value={companyId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Last Name</span>
@@ -157,11 +164,14 @@ AddTruckFormThree.propTypes = {
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  onDriverSave: PropTypes.func.isRequired
+  // onDriverSave: PropTypes.func.isRequired,
+  // truckFullInfo: PropTypes.func.isRequired,
+  onUserFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {
   company: null
+  // truckFullInfo: null
 };
 
 export default AddTruckFormThree;

@@ -15,7 +15,6 @@ class LookupsService extends AgentService {
     return (response);
   }
 
-  // "/lookups/type/{type}", method = RequestMethod.GET)
   static async getLookupsByType(key) {
     const response = await super.get(`${PATH}/type/${key}`);
     return (response);

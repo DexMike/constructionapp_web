@@ -13,7 +13,7 @@ import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
-import DriverService from '../../api/EquipmentService';
+// import DriverService from '../../api/DriverService';
 import './AddTruck.css';
 // import validate from '../common/validate';
 
@@ -117,6 +117,7 @@ class AddTruckFormOne extends PureComponent {
       minOperatingTime,
       maxDistanceToPickup
     } = this.state;
+    const { onTruckFullInfo } = this.props;
     // validation is pending
 
     const chargeBy = ratesByBoth === true ? 1 : 0;
@@ -152,14 +153,20 @@ class AddTruckFormOne extends PureComponent {
       modifiedOn: moment().unix() * 1000,
       isArchived: 0
     };
-    await DriverService.createEquipment(saveValues);
-    // // console.log(152);
-    // this gets around sending the form just because, triggers function in the parent
+
+    // DO NOT SAVE, SEND TO PARENT
+    // await DriverService.createEquipment(saveValues);
+    // Comment: this gets around sending the form just because, triggers function in the parent
+    /*
     const { onTruckSave } = this.props;
-    if (typeof onTruckSave.onTruckSave === 'function') {
+    if (typeof onTruckSave === 'function') {
       onTruckSave(e.target.value);
     }
-    // this.handleSubmit('Equipment');
+    */
+
+    // should turckinfo be a function instead?
+    onTruckFullInfo(saveValues);
+    this.handleSubmit('Truck');
   }
 
   handleInputChange(e) {
@@ -220,7 +227,8 @@ class AddTruckFormOne extends PureComponent {
       ratesByTon,
       ratesCostPerTon,
       minOperatingTime,
-      maxDistanceToPickup
+      maxDistanceToPickup,
+      type
     } = this.state;
     const { p } = this.props;
     return (
@@ -242,9 +250,9 @@ class AddTruckFormOne extends PureComponent {
             >
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
-                  <h4 className="subhead">
-                  Tell us a bout your truck
-                  </h4>
+                  <h3 className="subhead">
+                  Tell us about your truck
+                  </h3>
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Truck description</span>
@@ -262,7 +270,7 @@ class AddTruckFormOne extends PureComponent {
                       {
                         onChange: this.selectChange,
                         name: 'Truck Type',
-                        value: truckType
+                        value: { type }
                       }
                     }
                     meta={
@@ -355,9 +363,9 @@ class AddTruckFormOne extends PureComponent {
                   </div>
                 </div>
                 <div className="col-md-8 form__form-group">
-                  <i className="material-icons">shopping_basket</i>
+                  <i className="material-icons iconSet">local_shipping</i>
                    &nbsp;
-                  <i className="material-icons">schedule</i>
+                  <i className="material-icons iconSet">schedule</i>
                 </div>
 
                 {/* SECOND ROW */}
@@ -367,7 +375,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-1 ">
-                  <i className="material-icons">schedule</i>
+                  <i className="material-icons iconSet">schedule</i>
                 </div>
                 <div className="col-md-3 form__form-group">
                   Min Rate per Hour $
@@ -417,7 +425,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-1 ">
-                  <i className="material-icons">shopping_basket</i>
+                  <i className="material-icons iconSet">local_shipping</i>
                 </div>
                 <div className="col-md-3 form__form-group">
                   Cost per Ton $
@@ -494,17 +502,18 @@ AddTruckFormOne.propTypes = {
   equipment: PropTypes.shape({
     id: PropTypes.number
   }),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.string
-    })
-  }),
   p: PropTypes.number,
   company: PropTypes.shape({
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  onTruckSave: PropTypes.func.isRequired
+  onTruckFullInfo: PropTypes.func.isRequired // ,
+  /* ,
+  onTruckSave: PropTypes.func.isRequired,
+  handleTruckSave: PropTypesPropTypes.shape({
+    truckInfo: PropTypes.number
+  })
+  */
   // form: 'horizontal_form_validation_two', // a unique identifier for this form
   // validate,
   // handleSubmit: PropTypes.func.isRequired
@@ -513,10 +522,8 @@ AddTruckFormOne.propTypes = {
 AddTruckFormOne.defaultProps = {
   p: null,
   company: null,
-  equipment: null,
-  match: {
-    params: {}
-  }
+  equipment: null
+  // onTruckSave: PropTypes.object
 };
 
 export default AddTruckFormOne;
