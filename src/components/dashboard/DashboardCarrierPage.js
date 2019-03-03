@@ -7,6 +7,7 @@ import TTable from '../common/TTable';
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import AddressService from '../../api/AddressService';
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -40,6 +41,10 @@ class DashboardCarrierPage extends Component {
         newJob.material = this.equipmentMaterialsAsString(materials);
         // console.log(companyName);
         // console.log(job.material);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
         return newJob;
       })
     );
@@ -105,9 +110,26 @@ class DashboardCarrierPage extends Component {
 
   render() {
     let { jobs } = this.state;
+    let newJobCount = 0;
+    let acceptedJobCount = 0;
+    let inProgressJobCount = 0;
+    let completedJobCount = 0;
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
+      if (newJob.status === 'New') {
+        newJobCount += 1;
+      }
+      if (newJob.status === 'Accepted') {
+        acceptedJobCount += 1;
+      }
+      if (newJob.status === 'In Progress') {
+        inProgressJobCount += 1;
+      }
+      if (newJob.status === 'Completed') {
+        completedJobCount += 1;
+      }
       if (newJob.rateType === 'Hour') {
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
         newJob.newSize = `${newJob.rateEstimate} Hours`;
@@ -148,7 +170,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">Pending Offers</h5>
+                <h5 className="bold-text">New Offers</h5>
+                {newJobCount}
               </div>
             </div>
           </div>
@@ -157,6 +180,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Jobs in Progress</h5>
+                {inProgressJobCount}
               </div>
             </div>
           </div>
@@ -165,6 +189,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Booked Jobs</h5>
+                {acceptedJobCount}
               </div>
             </div>
           </div>
@@ -173,6 +198,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Completed Jobs</h5>
+                {completedJobCount}
               </div>
             </div>
           </div>
@@ -209,10 +235,10 @@ class DashboardCarrierPage extends Component {
                 <TTable
                   columns={
                     [
-                      {
-                        name: 'id',
-                        displayName: 'Job Id'
-                      },
+                      // {
+                      //   name: 'id',
+                      //   displayName: 'Job Id'
+                      // },
                       {
                         name: 'name',
                         displayName: 'Job Name'
@@ -220,6 +246,10 @@ class DashboardCarrierPage extends Component {
                       {
                         name: 'image',
                         displayName: 'Truck Image'
+                      },
+                      {
+                        name: 'status',
+                        displayName: 'Job Status'
                       },
                       {
                         name: 'companyName',
@@ -230,7 +260,7 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Start Date'
                       },
                       {
-                        name: 'startAddress',
+                        name: 'zip',
                         displayName: 'Start Zip'
                       },
                       {
