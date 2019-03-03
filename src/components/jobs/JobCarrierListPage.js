@@ -156,6 +156,10 @@ class JobCarrierListPage extends Component {
                         displayName: 'Job Name'
                       },
                       {
+                        name: 'status',
+                        displayName: 'Job Status'
+                      },
+                      {
                         name: 'companyName',
                         displayName: 'Customer'
                       },

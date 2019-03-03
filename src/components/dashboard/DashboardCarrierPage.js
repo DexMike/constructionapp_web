@@ -110,9 +110,26 @@ class DashboardCarrierPage extends Component {
 
   render() {
     let { jobs } = this.state;
+    let newJobCount = 0;
+    let acceptedJobCount = 0;
+    let inProgressJobCount = 0;
+    let completedJobCount = 0;
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
+      if (newJob.status === 'New') {
+        newJobCount += 1;
+      }
+      if (newJob.status === 'Accepted') {
+        acceptedJobCount += 1;
+      }
+      if (newJob.status === 'In Progress') {
+        inProgressJobCount += 1;
+      }
+      if (newJob.status === 'Completed') {
+        completedJobCount += 1;
+      }
       if (newJob.rateType === 'Hour') {
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
         newJob.newSize = `${newJob.rateEstimate} Hours`;
@@ -153,7 +170,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">Pending Offers</h5>
+                <h5 className="bold-text">New Offers</h5>
+                {newJobCount}
               </div>
             </div>
           </div>
@@ -162,6 +180,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Jobs in Progress</h5>
+                {inProgressJobCount}
               </div>
             </div>
           </div>
@@ -170,6 +189,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Booked Jobs</h5>
+                {acceptedJobCount}
               </div>
             </div>
           </div>
@@ -178,6 +198,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="bold-text">Completed Jobs</h5>
+                {completedJobCount}
               </div>
             </div>
           </div>
@@ -225,6 +246,10 @@ class DashboardCarrierPage extends Component {
                       {
                         name: 'image',
                         displayName: 'Truck Image'
+                      },
+                      {
+                        name: 'status',
+                        displayName: 'Job Status'
                       },
                       {
                         name: 'companyName',
