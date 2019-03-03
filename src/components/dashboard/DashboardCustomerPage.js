@@ -527,7 +527,7 @@ class DashboardCustomerPage extends Component {
                 Minimum
               </Col>
             </Row>
-            {(equipment.rateType === 'All' || equipment.rateType === 'Hour') && (
+            {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
               <Row>
                 <Col>
 
@@ -542,7 +542,6 @@ class DashboardCustomerPage extends Component {
                       prefix={'$ '}
                       suffix={' / Hour'}
                     />
-
                   </span>
 
                 </Col>
@@ -559,7 +558,7 @@ class DashboardCustomerPage extends Component {
                 </Col>
               </Row>
             )}
-            {(equipment.rateType === 'All' || equipment.rateType === 'Ton') && (
+            {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
               <Row>
                 <Col>
 
