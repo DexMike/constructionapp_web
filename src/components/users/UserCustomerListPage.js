@@ -6,25 +6,24 @@ import {
   CardBody,
   Col,
   Container,
-  Modal,
   Row
 } from 'reactstrap';
 // import classnames from 'classnames';
-import moment from 'moment';
+// import moment from 'moment';
 // import { Select } from '@material-ui/core';
-import NumberFormat from 'react-number-format';
-import TSelect from '../common/TSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
+// import NumberFormat from 'react-number-format';
+// import TSelect from '../common/TSelect';
+// import TDateTimePicker from '../common/TDateTimePicker';
 import TTable from '../common/TTable';
 
 // import truckImage from '../../img/default_truck.png';
 import UserService from '../../api/UserService';
-import LookupsService from '../../api/LookupsService';
-import CompanyService from '../../api/CompanyService';
-import AddressService from '../../api/AddressService';
-import ProfileService from '../../api/ProfileService';
+// import LookupsService from '../../api/LookupsService';
+// import CompanyService from '../../api/CompanyService';
+// import AddressService from '../../api/AddressService';
+// import ProfileService from '../../api/ProfileService';
 
-import JobCreateForm from '../jobs/JobCreateForm';
+// import JobCreateForm from '../jobs/JobCreateForm';
 
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import JobsService from '../../api/JobsService';

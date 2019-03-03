@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import UserCarrierListPage from './UserCarrierListPage';
 import UserCustomerListPage from './UserCustomerListPage';
 import ProfileService from '../../api/ProfileService';
-import UserService from '../../api/UserService';
+// import UserService from '../../api/UserService';
 import '../addTruck/AddTruck.css';
 
 class UserPage extends Component {
@@ -14,8 +14,7 @@ class UserPage extends Component {
     super(props);
 
     this.state = {
-      companyType: null,
-      companyId: 0
+      companyType: null
     };
   } // constructor
 
@@ -26,21 +25,21 @@ class UserPage extends Component {
   }
 
   async fetchCompanyUsers() {
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
 
-    const users = await UserService.getUsersByCompanyIdAndType(
-      profile.companyId,
-      'All'
-    );
+    // const users = await UserService.getUsersByCompanyIdAndType(
+    //   profile.companyId,
+    //   'All'
+    // );
 
-    this.setState({
-      companyId: profile.companyId,
-      loaded: true
-    });
+    // this.setState({
+    // companyId: profile.companyId,
+    // loaded: true
+    // });
   }
 
   render() {
-    const { companyType, totalUsers } = this.state;
+    const { companyType } = this.state;
     return (
       <React.Fragment>
         {companyType === 'Carrier' && <UserCarrierListPage/>}
