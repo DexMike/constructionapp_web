@@ -4,6 +4,7 @@ import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
+import NumberFormat from 'react-number-format';
 import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
@@ -178,7 +179,18 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Capacity</span>
               <div className="form__form-group-field">
-                <span>{selectedEquipment.maxCapacity}</span>
+                <span>
+                  <NumberFormat
+                    value={selectedEquipment.maxCapacity}
+                    displayType={'text'}
+                    decimalSeparator={'.'}
+                    decimalScale={0}
+                    fixedDecimalScale={true}
+                    thousandSeparator={true}
+                    prefix={' '}
+                    suffix={' Tons'}
+                  />
+                  </span>
               </div>
             </div>
           </div>
@@ -193,16 +205,30 @@ class JobCreateForm extends Component {
         </div>
         {!this.isRateTypeTon(job.rateType) && (
           <div style={{ marginTop: '5px' }}>
-            $
-            {selectedEquipment.hourRate}
-            &nbsp;per hour
+            <NumberFormat
+              value={selectedEquipment.hourRate}
+              displayType={'text'}
+              decimalSeparator={'.'}
+              decimalScale={2}
+              fixedDecimalScale={true}
+              thousandSeparator={true}
+              prefix={'$ '}
+              suffix={' per Hour'}
+            />
           </div>
         )}
         {this.isRateTypeTon(job.rateType) && (
           <div style={{ marginTop: '5px' }}>
-            $
-            {selectedEquipment.tonRate}
-            &nbsp;per ton
+            <NumberFormat
+              value={selectedEquipment.tonRate}
+              displayType={'text'}
+              decimalSeparator={'.'}
+              decimalScale={2}
+              fixedDecimalScale={true}
+              thousandSeparator={true}
+              prefix={'$ '}
+              suffix={' per Ton'}
+            />
           </div>
         )}
       </React.Fragment>
@@ -249,7 +275,7 @@ class JobCreateForm extends Component {
             </div>
           </div>
         </div>
-        {selectedEquipment.rateType === 'All' && (
+        {selectedEquipment.rateType === 'Both' && (
           <div className="row">
             <div className="col-sm-4">
               <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
