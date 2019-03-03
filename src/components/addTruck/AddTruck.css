@@ -15,8 +15,8 @@ hr {
 }
 
 .modal-dialog--header{
-    width: 70% !important;
-    max-width: 70%;
+    width: 720px !important; /* 650px */
+    max-width: 720px;
 }
 .modal-dialog--body{
     width: 100% !important;
@@ -32,4 +32,29 @@ hr {
 
 .checkbox-btn__checkbox-custom {
     border: 1px solid #dddddd !important;
+}
+
+.profile__stat-number {
+    color: #646777;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    margin: 0;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    color: #646777;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    color: #646777;
+}
+
+.theme-light .profile__information {
+    border-bottom: 1px solid #eff1f5;
+}
+
+.iconSet{
+    color: #646777;
+    font-size: 35px;
 }

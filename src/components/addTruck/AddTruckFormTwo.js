@@ -10,13 +10,14 @@ import {
 // import EyeIcon from 'mdi-react/EyeIcon';
 import PropTypes from 'prop-types';
 import TDateTimePicker from '../common/TDateTimePicker';
+// import { start } from 'repl';
 
 class AddTruckFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: '',
-      endDate: '',
+      startDate: new Date(),
+      endDate: new Date(),
       isAvailable: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -54,18 +55,32 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   startDateChange(data) {
-    this.setState({ startDate: data.value });
+    // console.log(data);
+    this.setState({ startDate: data });
   }
 
   endDateChange(data) {
-    this.setState({ startDate: data.value });
+    this.setState({ endDate: data });
   }
 
-  async saveAddress() {
-    /*
-    // use like FORM pages in others
-    */
+  async saveAvailability(e) {
+    e.preventDefault();
+    e.persist();
+    const { onAvailabilityFullInfo } = this.props;
+    onAvailabilityFullInfo(this.state);
+    this.handleSubmit('Truck');
   }
+
+  /*
+  async saveUser(e) {
+    e.preventDefault();
+    e.persist();
+    const { onUserFullInfo } = this.props;
+    const availability = this.state;
+    onUserFullInfo(availability);
+    this.handleSubmit('User');
+  }
+  */
 
   handleSubmit(menuItem) {
     if (menuItem) {
@@ -74,8 +89,14 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   render() {
-    const { handleSubmit, p } = this.props;
+    const { p } = this.props;
     const { startDate, endDate, isAvailable } = this.state;
+    const today = new Date();
+
+    const date = new Date();
+    const tomorrowDate = date.setDate(date.getDate() + 1);
+    const currentDate = today.getTime();
+
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -89,14 +110,12 @@ class AddTruckFormTwo extends PureComponent {
             {/*  onSubmit={handleSubmit} */}
             <form
               className="form form--horizontal addtruck__form"
-              onSubmit={handleSubmit}
+              onSubmit={e => this.saveAvailability(e)}
             >
 
               <Row>
                 <div className="col-md-12 form__form-group">
                   <h4 className="subhead">
-                    Truck Availability IS:
-                    {isAvailable}
                     <br />
                     Set availability by date range
                   </h4>
@@ -108,8 +127,9 @@ class AddTruckFormTwo extends PureComponent {
                     input={
                       {
                         onChange: this.startDateChange,
-                        name: 'Truck Type',
-                        value: { startDate }
+                        name: 'startDate',
+                        value: { startDate },
+                        givenDate: currentDate
                       }
                     }
                     onChange={this.handleInputChange}
@@ -121,9 +141,10 @@ class AddTruckFormTwo extends PureComponent {
                   <TDateTimePicker
                     input={
                       {
-                        onChange: this.startDateChange,
-                        name: 'Truck Type',
-                        value: { endDate }
+                        onChange: this.endDateChange,
+                        name: 'endDate',
+                        value: { endDate },
+                        givenDate: tomorrowDate
                       }
                     }
                     onChange={this.handleInputChange}
@@ -140,14 +161,11 @@ class AddTruckFormTwo extends PureComponent {
                 <div className="col-md-3 form__form-group">
                   <span className="form__form-group-label">Toggle Availability</span>
                 </div>
-                <div className="col-md-4 form__form-group">
+                <div className="col-md-9 form__form-group">
                   {/* color={availableButtonColor(true)} */}
                   <Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
                     Available
                   </Button>
-                </div>
-                <div className="col-md-5 form__form-group">
-                  {/* color={availableButtonColor(false)} */}
                   <Button color={this.availableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
                     Un-available
                   </Button>
@@ -184,9 +202,11 @@ AddTruckFormTwo.propTypes = {
   }),
   */
   p: PropTypes.number,
+  // DISABLING onTruckFullInfo for now
+  // onTruckFullInfo: PropTypes.func.isRequired,
   // form: 'horizontal_form_validation_two', // a unique identifier for this form
   // validate,
-  handleSubmit: PropTypes.func.isRequired
+  onAvailabilityFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormTwo.defaultProps = {
