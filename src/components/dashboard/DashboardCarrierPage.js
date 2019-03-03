@@ -214,6 +214,10 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Job Id'
                       },
                       {
+                        name: 'name',
+                        displayName: 'Job Name'
+                      },
+                      {
                         name: 'image',
                         displayName: 'Truck Image'
                       },
