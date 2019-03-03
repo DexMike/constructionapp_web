@@ -12,6 +12,7 @@ import JobListPage from '../jobs/JobListPage';
 import JobSavePage from '../jobs/JobSavePage';
 import EquipmentListPage from '../equipments/EquipmentListPage';
 import EquipmentSavePage from '../equipments/EquipmentSavePage';
+import UserPage from '../users/UserPage';
 import UserListPage from '../users/UserListPage';
 import UserSavePage from '../users/UserSavePage';
 
@@ -84,7 +85,8 @@ class WrappedRoutes extends PureComponent {
           <Route
             exact
             path="/users"
-            component={UserListPage}
+            // component={UserListPage}
+            component={UserPage}
           />
           <Route
             exact
@@ -92,6 +94,20 @@ class WrappedRoutes extends PureComponent {
             component={UserSavePage}
           />
           <Route path="/users/save/:id" component={UserSavePage} />
+
+          <Route
+            exact
+            path="/users/save"
+            component={UserSavePage}
+          />
+          <Route path="/users/carrier/save/:id" component={UserSavePage} />
+
+          <Route
+            exact
+            path="/users/save"
+            component={UserSavePage}
+          />
+          <Route path="/users/carrier/save/:id" component={UserSavePage} />
 
         </div>
       </div>

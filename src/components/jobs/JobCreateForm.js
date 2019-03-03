@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
+import NumberFormat from 'react-number-format';
+
+import TButtonToggle from '../common/TButtonToggle';
+
 import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
-import NumberFormat from 'react-number-format';
-import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
