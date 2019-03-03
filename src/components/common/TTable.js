@@ -165,7 +165,7 @@ class TTable extends Component {
 
   render() {
     const { order, orderBy, selected, rowsPerPage, page } = this.state;
-    const { data, columns } = this.props;
+    const { data, columns, handleIdClick } = this.props;
     const emptyRows = 0;
     // const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - (page * rowsPerPage));
     return (
@@ -194,6 +194,7 @@ class TTable extends Component {
                         className="material-table__row"
                         role="checkbox"
                         onClick={() => {
+                          handleIdClick(dataItem.id);
                         }}
                         // onClick={event => this.handleClick(event, d.id)}
                         aria-checked={false}
