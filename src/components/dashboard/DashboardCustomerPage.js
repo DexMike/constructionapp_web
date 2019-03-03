@@ -11,8 +11,11 @@ import {
 // import classnames from 'classnames';
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
+import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
+import TDateTimePicker from '../common/TDateTimePicker';
 // import TTable from '../common/TTable';
+
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
@@ -21,6 +24,7 @@ import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
+// import JobMaterialsService from '../../api/JobMaterialsService';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
 
@@ -76,6 +80,7 @@ class DashboardCustomerPage extends Component {
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.startDateChange = this.startDateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -96,21 +101,41 @@ class DashboardCustomerPage extends Component {
       }
     }
 
-    const lookups = await LookupsService.getLookups();
+    // const lookups = await LookupsService.getLookups();
+    //
+    // Object.values(lookups)
+    //   .forEach((itm) => {
+    //     if (itm.key === 'EquipmentType') equipmentTypeList.push(itm.val1);
+    //   });
+    // Object.values(lookups)
+    //   .forEach((itm) => {
+    //     if (itm.key === 'MaterialType') materialTypeList.push(itm.val1);
+    //   });
+    //
+    // Object.values(lookups)
+    //   .forEach((itm) => {
+    //     if (itm.key === 'RateType') rateTypeList.push(itm.val1);
+    //   });
 
-    Object.values(lookups)
+    // TODO need to refactor above to do the filtering on the Orion
+    // LookupDao Hibernate side
+
+    const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
+    Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        if (itm.key === 'EquipmentType') equipmentTypeList.push(itm.val1);
+        equipmentTypeList.push(itm.val1);
       });
 
-    Object.values(lookups)
+    const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
+    Object.values(lookupMaterialTypeList)
       .forEach((itm) => {
-        if (itm.key === 'MaterialType') materialTypeList.push(itm.val1);
+        materialTypeList.push(itm.val1);
       });
 
-    Object.values(lookups)
+    const lookupRateTypelist = await LookupsService.getLookupsByType('RateType');
+    Object.values(lookupRateTypelist)
       .forEach((itm) => {
-        if (itm.key === 'RateType') rateTypeList.push(itm.val1);
+        rateTypeList.push(itm.val1);
       });
 
     [filters.truckType] = equipmentTypeList;
@@ -125,40 +150,49 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchEquipments() {
-    // TODO pull this.state.filters for filter api calls later on.
-    // const { filters } = this.state;
+    const { filters } = this.state;
+    const equipments = await EquipmentService.getEquipmentByFilters(filters);
 
-    let equipments = await EquipmentService.getEquipments();
-    // NOTE commenting out until it is ready.
-    // let equipments = await EquipmentService.getEquipmentByFilters(filters);
-
-    equipments = equipments.map((equipment) => {
-      const newEquipment = equipment;
-      newEquipment.modifiedOn = moment(equipment.modifiedOn)
-        .format();
-      newEquipment.createdOn = moment(equipment.createdOn)
-        .format();
-      return newEquipment;
-    });
-    this.setState({ equipments });
+    if (equipments) {
+      // NOTE let's try not to use Promise.all and use full api calls
+      // Promise.all(
+      equipments.map((equipment) => {
+        const newEquipment = equipment;
+        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
+        //     newEquipment.companyName = company.legalName;
+        // console.log(companyName);
+        // console.log(job.companyName)
+        // const materialsList = await EquipmentMaterialsService
+        // .getEquipmentMaterialsByJobId(job.id);
+        // const materials = materialsList.map(materialItem => materialItem.value);
+        // newJob.material = this.equipmentMaterialsAsString(materials);
+        // console.log(companyName);
+        // console.log(job.material);
+        newEquipment.modifiedOn = moment(equipment.modifiedOn)
+          .format();
+        newEquipment.createdOn = moment(equipment.createdOn)
+          .format();
+        return newEquipment;
+      });
+      // );
+      this.setState({ equipments });
+    }
   }
 
-  handleFilterChange(e) {
+  async handleFilterChange(e) {
     const { value } = e.target;
     const { filters } = this.state;
     filters[e.target.name] = value;
+    await this.fetchEquipments();
     this.setState({ filters });
-
-    this.fetchEquipments();
   }
 
-  handleSelectFilterChange(option) {
+  async handleSelectFilterChange(option) {
     const { value, name } = option;
     const { filters } = this.state;
     filters[name] = value;
+    await this.fetchEquipments();
     this.setState({ filters });
-
-    this.fetchEquipments();
   }
 
   handlePageClick(menuItem) {
@@ -180,6 +214,10 @@ class DashboardCustomerPage extends Component {
       selectedEquipment,
       modal: true
     });
+  }
+
+  startDateChange(data) {
+    this.setState({ startDate: data.value });
   }
 
   toggleAddJobModal() {
@@ -229,11 +267,9 @@ class DashboardCustomerPage extends Component {
           <h4 className="bold-text modal__title">Job Request</h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
-          }}
-          />
-          <JobCreateForm selectedEquipment={selectedEquipment} handlePageClick={() => {
-          }}
+          <JobCreateForm
+            selectedEquipment={selectedEquipment}
+            closeModal={this.toggleAddJobModal}
           />
         </div>
       </Modal>
@@ -269,7 +305,10 @@ class DashboardCustomerPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
+
+      // filters
       filters
+
     } = this.state;
 
     return (
@@ -307,7 +346,7 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col>
-                      <input name="filters.startAvailability"
+                      <input name="startAvailability"
                              className="filter-text"
                              type="text"
                              placeholder="Select Start Date"
@@ -315,8 +354,22 @@ class DashboardCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
+                    {/*<Col>*/}
+                      {/*<TDateTimePicker*/}
+                        {/*input={*/}
+                          {/*{*/}
+                            {/*onChange: this.startDateChange,*/}
+                            {/*name: 'startAvailability',*/}
+                            {/*value: { startDate }*/}
+                          {/*}*/}
+                        {/*}*/}
+                        {/*className="filter-text"*/}
+                        {/*placeholder="Select End Date"*/}
+                        {/*onChange={this.handleInputChange}*/}
+                      {/*/>*/}
+                    {/*</Col>*/}
                     <Col>
-                      <input name="filters.endAvailability"
+                      <input name="endAvailability"
                              className="filter-text"
                              style={{ width: '100%' }}
                              type="text"
@@ -352,7 +405,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.minCapacity"
+                      <input name="minCapacity"
                              className="filter-text"
                              type="text"
                              placeholder="Min # of tons"
@@ -387,7 +440,7 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="filters.zipCode"
+                      <input name="zipCode"
                              className="filter-text"
                              type="text"
                              placeholder="Zip Code"
@@ -449,14 +502,24 @@ class DashboardCustomerPage extends Component {
 
           <Col md={4}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-              <Col>
+              <Col className="customer-truck-results-title">
                 Type: {equipment.type}
               </Col>
-              <Col>
-                Capacity: {equipment.maxCapacity} Tons
+              <Col className="customer-truck-results-title">
+                Capacity:
+                <NumberFormat
+                  value={equipment.maxCapacity}
+                  displayType={'text'}
+                  decimalSeparator={'.'}
+                  decimalScale={0}
+                  fixedDecimalScale={true}
+                  thousandSeparator={true}
+                  prefix={' '}
+                  suffix={' Tons'}
+                />
               </Col>
             </Row>
-            <Row>
+            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
               <Col>
                 Rate
               </Col>
@@ -464,53 +527,105 @@ class DashboardCustomerPage extends Component {
                 Minimum
               </Col>
             </Row>
-            <Row>
-              <Col>
-                $ {equipment.hourRate} / Hour
-              </Col>
-              <Col>
-                Minimum
-                MinCapacity:
-                {equipment.minCapacity} / Tons
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                $ {equipment.tonRate} / Ton
-              </Col>
-            </Row>
+            {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
+              <Row>
+                <Col>
+
+                  <span>
+                    <NumberFormat
+                      value={equipment.hourRate}
+                      displayType={'text'}
+                      decimalSeparator={'.'}
+                      decimalScale={2}
+                      fixedDecimalScale={true}
+                      thousandSeparator={true}
+                      prefix={'$ '}
+                      suffix={' / Hour'}
+                    />
+                  </span>
+
+                </Col>
+                <Col>
+                  <NumberFormat
+                    value={equipment.minHours}
+                    displayType={'text'}
+                    decimalSeparator={'.'}
+                    decimalScale={2}
+                    fixedDecimalScale={true}
+                    thousandSeparator={true}
+                    suffix={' hours min'}
+                  />
+                </Col>
+              </Row>
+            )}
+            {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
+              <Row>
+                <Col>
+
+                  <span>
+                    <NumberFormat
+                      value={equipment.tonRate}
+                      displayType={'text'}
+                      decimalSeparator={'.'}
+                      decimalScale={2}
+                      fixedDecimalScale={true}
+                      thousandSeparator={true}
+                      prefix={'$ '}
+                      suffix={' / Ton'}
+                      />
+                  </span>
+
+                </Col>
+                <Col>
+                  <NumberFormat
+                    value={equipment.minCapacity}
+                    displayType={'text'}
+                    decimalSeparator={'.'}
+                    decimalScale={2}
+                    fixedDecimalScale={true}
+                    thousandSeparator={true}
+                    suffix={' tons min'}
+                  />
+                </Col>
+              </Row>
+            )}
           </Col>
 
           <Col md={6}>
             <Row style={{ background: '#c7dde8' }}>
-              <Col>
-                Company Name
+              <Col className="customer-truck-results-title">
+                Name: {equipment.name}
               </Col>
+              {/* <Col md={6} className="customer-truck-results-title> */}
+              {/* Company: {equipment.companyName} */}
+              {/* </Col> */}
             </Row>
+            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
+            {/* <Col> */}
+            {/* TODO needs API for equipment materials */}
+            {/* Materials Hauled */}
+            {/* </Col> */}
+            {/* </Row> */}
             <Row>
               <Col>
-                Materials
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                HMA
+                {/* HMA */}
                 <br/>
-                Stone
+                {/* Stone */}
                 <br/>
-                Sand
+                {/* Sand */}
                 <br/>
               </Col>
               <Col>
-                Gravel
+                {/* Gravel */}
                 <br/>
-                Recycling
+                {/* Recycling */}
                 <br/>
               </Col>
               <Col>
                 <button type="button"
                         className="btn btn-primary"
                         onClick={() => this.handleEquipmentEdit(equipment.id)}
+                        style={{ marginTop: '10px' }}
                 >
                   Request
                 </button>

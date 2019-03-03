@@ -5,6 +5,8 @@ import moment from 'moment';
 // import ProfileService from '../../api/ProfileService';
 import TTable from '../common/TTable';
 import JobService from '../../api/JobService';
+import CompanyService from '../../api/CompanyService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -24,12 +26,41 @@ class DashboardCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchJobs();
+    const jobs = await this.fetchJobs();
+
+    Promise.all(
+      jobs.map(async (job) => {
+        const newJob = job;
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+        // console.log(companyName);
+        // console.log(job.companyName)
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+        // console.log(companyName);
+        // console.log(job.material);
+        return newJob;
+      })
+    );
+    this.setState({ jobs });
+    // console.log(jobs);
   }
 
-  getState() {
-    const status = this.state;
-    return status;
+  equipmentMaterialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
   }
 
   handleJobEdit(id) {
@@ -55,7 +86,7 @@ class DashboardCarrierPage extends Component {
         .format();
       return newJob;
     });
-    this.setState({ jobs });
+    return jobs;
   }
 
   renderGoTo() {
@@ -73,7 +104,22 @@ class DashboardCarrierPage extends Component {
   }
 
   render() {
-    const { jobs } = this.state;
+    let { jobs } = this.state;
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      const tempRate = newJob.rate;
+      if (newJob.rateType === 'Hour') {
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = `${newJob.rateEstimate} Hours`;
+      }
+      if (newJob.rateType === 'Ton') {
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = `${newJob.rateEstimate} Tons`;
+      }
+      newJob.newRate = `$${newJob.rate}`;
+      return newJob;
+    });
+    // console.log(jobs);
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -139,6 +185,7 @@ class DashboardCarrierPage extends Component {
             </div>
           </div>
 
+
         </div>
 
         <br />
@@ -167,11 +214,15 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Job Id'
                       },
                       {
+                        name: 'name',
+                        displayName: 'Job Name'
+                      },
+                      {
                         name: 'image',
                         displayName: 'Truck Image'
                       },
                       {
-                        name: 'companiesId',
+                        name: 'companyName',
                         displayName: 'Customer'
                       },
                       {
@@ -183,19 +234,20 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Start Zip'
                       },
                       {
-                        name: 'note',
+                        name: 'newSize',
                         displayName: 'Size'
                       },
                       {
-                        name: 'rate',
+                        name: 'newRate',
                         displayName: 'Rate'
                       },
                       {
-                        name: 'rateEstimate',
+                        name: 'estimatedIncome',
                         displayName: 'Est. Income'
                       },
                       {
-                        name: 'notes',
+                        // the materials needs to come from the the JobMaterials Table
+                        name: 'material',
                         displayName: 'Materials'
                       }
                     ]

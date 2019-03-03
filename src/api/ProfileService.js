@@ -7,6 +7,14 @@ class ProfileService extends AgentService {
     const response = await super.get(PATH);
     return (response);
   }
+
+  static getDefaultProfile() {
+    return {
+      companyType: 'Customer',
+      companyId: 0,
+      userId: 0
+    };
+  }
 }
 
 export default ProfileService;

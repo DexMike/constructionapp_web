@@ -66,3 +66,8 @@ TODO
 ## CICD 
 
 TODO
+
+## Data Formatting
+We have react-number-format, docs are:
+https://www.npmjs.com/package/react-number-format
+

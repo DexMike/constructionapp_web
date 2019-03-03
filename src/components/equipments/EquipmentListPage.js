@@ -12,8 +12,8 @@ import {
 import moment from 'moment';
 import EquipmentService from '../../api/EquipmentService';
 import TTable from '../common/TTable';
-import AddTruckForm from '../add_truck/AddTruckForm';
-import '../add_truck/AddTruck.css';
+import AddTruckForm from '../addTruck/AddTruckForm';
+import '../addTruck/AddTruck.css';
 
 class EquipmentListPage extends Component {
   constructor(props) {
@@ -37,8 +37,22 @@ class EquipmentListPage extends Component {
 
   async componentDidMount() {
     await this.fetchEquipments();
-    const { loaded } = this.state;
+    // const { loaded } = this.state;
     this.setState({ loaded: true });
+    const equipments = await this.fetchEquipments();
+
+    // commenting code below - we will need it if we need to get anything about the company
+    // Promise.all(
+    //   equipments.map(async (equipment) => {
+    //     const newEquipment = equipment;
+    //     const company = await EquipmentService.getCompanyById(newEquipment.companyId);
+    //     newEquipment.companyName = company.legalName;
+    //     // console.log(newEquipment.companyName);
+    //     // console.log(job.companyName)
+    //     return newEquipment;
+    //   })
+    // );
+    this.setState({ equipments });
   }
 
   toggle(tab) {
@@ -68,7 +82,7 @@ class EquipmentListPage extends Component {
         .format();
       return newEquipment;
     });
-    this.setState({ equipments });
+    return equipments;
   }
 
   handlePageClick(menuItem) {
@@ -138,7 +152,6 @@ class EquipmentListPage extends Component {
       const newEquipment = equipment;
       newEquipment.hourRate = `$${newEquipment.hourRate}`;
       newEquipment.tonRate = `$${newEquipment.tonRate}`;
-      newEquipment.maxCapacity = `${newEquipment.maxCapacity} Tons`;
       return newEquipment;
     });
     if (loaded) {
@@ -159,11 +172,7 @@ class EquipmentListPage extends Component {
               </Col>
             </Row>
             <Row>
-              <Col md={12}>
-                <Button color="secondary" onClick={this.toggleAddTruckModal} type="button">
-                  Add a Truck
-                </Button>
-              </Col>
+              EquipmentListPage
             </Row>
             <Row>
               <Col md={12} lg={12}>
@@ -172,38 +181,38 @@ class EquipmentListPage extends Component {
                     <div className="tabs tabs--bordered-bottom">
                       <div className="tabs__wrap">
                         <TTable
-                              columns={
-                                [
-                                  {
-                                    name: 'id',
-                                    displayName: 'ID'
-                                  },
-                                  {
-                                    name: 'image',
-                                    displayName: 'Truck Image'
-                                  },
-                                  {
-                                    name: 'name',
-                                    displayName: 'Name'
-                                  },
-                                  {
-                                    name: 'styleId',
-                                    displayName: 'Type'
-                                  },
-                                  {
-                                    name: 'maxCapacity',
-                                    displayName: 'Capacity'
-                                  },
-                                  {
-                                    name: 'hourRate',
-                                    displayName: 'Rate Per Hour'
-                                  },
-                                  {
-                                    name: 'tonRate',
-                                    displayName: 'Rate per Ton'
-                                  }
-                                ]
+                          columns={
+                            [
+                              {
+                                name: 'id',
+                                displayName: 'ID'
+                              },
+                              {
+                                name: 'image',
+                                displayName: 'Truck Image'
+                              },
+                              {
+                                name: 'name',
+                                displayName: 'Name'
+                              },
+                              {
+                                name: 'type',
+                                displayName: 'Type'
+                              },
+                              {
+                                name: 'maxCapacity',
+                                displayName: 'Capacity'
+                              },
+                              {
+                                name: 'hourRate',
+                                displayName: 'Rate per Hour'
+                              },
+                              {
+                                name: 'tonRate',
+                                displayName: 'Rate per Ton'
                               }
+                            ]
+                          }
                               data={equipments}
                               handleIdClick={this.handleEquipmentEdit}
                         />
