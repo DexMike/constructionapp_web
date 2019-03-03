@@ -5,33 +5,42 @@ import {
   CardBody,
   Col,
   Container,
-  Row
+  Row,
+  Modal,
+  Button
 } from 'reactstrap';
 import moment from 'moment';
 import EquipmentService from '../../api/EquipmentService';
 import TTable from '../common/TTable';
-// import CompanyService from '../../api/CompanyService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
+import AddTruckForm from '../addTruck/AddTruckForm';
+import '../addTruck/AddTruck.css';
+import ProfileService from '../../api/ProfileService';
 
 class EquipmentListPage extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      companyId: 0,
       activeTab: '1',
       equipments: [],
       goToDashboard: false,
       goToAddEquipment: false,
       goToUpdateEquipment: false,
-      equipmentId: 0
+      equipmentId: 0,
+      modal: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
   }
 
   async componentDidMount() {
+    await this.fetchEquipments();
+    // const { loaded } = this.state;
+    this.setState({ loaded: true });
     const equipments = await this.fetchEquipments();
 
     // commenting code below - we will need it if we need to get anything about the company
@@ -40,8 +49,8 @@ class EquipmentListPage extends Component {
     //     const newEquipment = equipment;
     //     const company = await EquipmentService.getCompanyById(newEquipment.companyId);
     //     newEquipment.companyName = company.legalName;
-    //     // console.log(newEquipment.companyName);
-    //     // console.log(job.companyName)
+    //     // // console.log(newEquipment.companyName);
+    //     // // console.log(job.companyName)
     //     return newEquipment;
     //   })
     // );
@@ -57,7 +66,20 @@ class EquipmentListPage extends Component {
     }
   }
 
+  toggleAddTruckModal() {
+    // console.log('toggle');
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
+    });
+  }
+
   async fetchEquipments() {
+    const profile = await ProfileService.getProfile();
+    this.setState({
+      companyId: profile.companyId
+    });
+
     let equipments = await EquipmentService.getEquipments();
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
@@ -97,80 +119,127 @@ class EquipmentListPage extends Component {
     return true;
   }
 
+  renderModal() {
+    // const { match } = this.props;
+    const {
+      totalTrucks,
+      modal,
+      companyId
+    } = this.state;
+    let tabShow = 1;
+    if (totalTrucks > 0) {
+      tabShow = 3;
+    }
+    const company = {
+      name: '',
+      id: companyId
+    };
+    return (
+      <Modal
+        isOpen={modal}
+        toggle={this.toggleAddTruckModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__body" style={{ padding: '0px' }}>
+          <AddTruckForm
+            id={companyId}
+            company={company}
+            incomingPage={tabShow}
+            handlePageClick={() => {}}
+          />
+        </div>
+      </Modal>
+    );
+  }
+
   render() {
     let { equipments } = this.state;
+    const { loaded } = this.state;
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
       newEquipment.hourRate = `$${newEquipment.hourRate}`;
       newEquipment.tonRate = `$${newEquipment.tonRate}`;
       return newEquipment;
     });
-    // console.log(equipments);
+    if (loaded) {
+      return (
+        <React.Fragment>
+          { this.renderModal() }
+          <Container className="dashboard">
+            {this.renderGoTo()}
+            <button type="button" className="app-link"
+              onClick={() => this.handlePageClick('Dashboard')}
+            >
+              Dashboard
+            </button>
+            &nbsp;&#62; Trucks
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Equipment</h3>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <Button color="secondary" onClick={this.toggleAddTruckModal} type="button">
+                  Add a Truck
+                </Button>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12} lg={12}>
+                <Card>
+                  <CardBody className="products-list">
+                    <div className="tabs tabs--bordered-bottom">
+                      <div className="tabs__wrap">
+                        <TTable
+                          columns={
+                            [
+                              {
+                                name: 'id',
+                                displayName: 'ID'
+                              },
+                              {
+                                name: 'image',
+                                displayName: 'Truck Image'
+                              },
+                              {
+                                name: 'name',
+                                displayName: 'Name'
+                              },
+                              {
+                                name: 'type',
+                                displayName: 'Type'
+                              },
+                              {
+                                name: 'maxCapacity',
+                                displayName: 'Capacity'
+                              },
+                              {
+                                name: 'hourRate',
+                                displayName: 'Rate per Hour'
+                              },
+                              {
+                                name: 'tonRate',
+                                displayName: 'Rate per Ton'
+                              }
+                            ]
+                          }
+                              data={equipments}
+                              handleIdClick={this.handleEquipmentEdit}
+                        />
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </React.Fragment>
+      );
+    }
     return (
       <Container className="dashboard">
-        {this.renderGoTo()}
-        <button type="button" className="app-link"
-          onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &nbsp;&#62; Trucks
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Equipment</h3>
-          </Col>
-        </Row>
-        <Row>
-          EquipmentListPage
-        </Row>
-        <Row>
-          <Col md={12} lg={12}>
-            <Card>
-              <CardBody className="products-list">
-                <div className="tabs tabs--bordered-bottom">
-                  <div className="tabs__wrap">
-                    <TTable
-                      columns={
-                        [
-                          {
-                            name: 'id',
-                            displayName: 'ID'
-                          },
-                          {
-                            name: 'image',
-                            displayName: 'Truck Image'
-                          },
-                          {
-                            name: 'name',
-                            displayName: 'Name'
-                          },
-                          {
-                            name: 'type',
-                            displayName: 'Type'
-                          },
-                          {
-                            name: 'maxCapacity',
-                            displayName: 'Capacity'
-                          },
-                          {
-                            name: 'hourRate',
-                            displayName: 'Rate per Hour'
-                          },
-                          {
-                            name: 'tonRate',
-                            displayName: 'Rate per Ton'
-                          }
-                        ]
-                      }
-                          data={equipments}
-                          handleIdClick={this.handleEquipmentEdit}
-                    />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+        Loading...
       </Container>
     );
   }

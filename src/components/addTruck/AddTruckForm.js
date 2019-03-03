@@ -12,12 +12,18 @@ class AddTruckForm extends PureComponent {
     super(props);
     this.state = {
       page: 1,
-      loaded: false
+      loaded: false,
+      truckCachedInfo: {},
+      availabilityCachedInfo: {},
+      userCachedInfo: {}
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
     this.gotoPage.bind(this);
-    // console.log(props);
+    this.handleTruckSave = this.handleTruckSave.bind(this);
+    this.handleAvailabilitySave = this.handleAvailabilitySave.bind(this);
+    this.handleUserSave = this.handleUserSave.bind(this);
+    // // console.log(props);
   }
 
   async componentDidMount() {
@@ -30,15 +36,38 @@ class AddTruckForm extends PureComponent {
     }
   }
 
-  nextPage() {
-    // console.log(32);
-    const { page } = this.state;
-    // just checking if the state changed
+  handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      // // // console.log('enter press here!');
+    }
+  }
+
+  handleTruckSave(e) {
+    // console.log(e);
+    // let's keep the info from the truck in memory
+    const { truckCachedInfo, page } = this.state;
+    truckCachedInfo.info = e;
+    this.setState({ page: page + 1 });
+  }
+
+  handleAvailabilitySave(e) {
+    // console.log(e);
+    // let's keep the info from the truck in memory
+    const { availabilityCachedInfo, page } = this.state;
+    availabilityCachedInfo.info = e;
+    this.setState({ page: page + 1 });
+  }
+
+  handleUserSave(e) {
+    // console.log(e);
+    // let's keep the info from the truck in memory
+    const { userCachedInfo, page } = this.state;
+    userCachedInfo.info = e;
     this.setState({ page: page + 1 });
   }
 
   gotoPage(pageNumber) {
-    // console.log(40);
+    // // // console.log(40);
     this.setState({ page: pageNumber });
   }
 
@@ -47,15 +76,21 @@ class AddTruckForm extends PureComponent {
     this.setState({ page: page - 1 });
   }
 
-  handleKeyPress(event) {
-    if (event.key === 'Enter') {
-      // console.log('enter press here!');
-    }
+  nextPage() {
+    const { page } = this.state;
+    // just checking if the state changed
+    this.setState({ page: page + 1 });
   }
 
   render() {
     const { company } = this.props;
-    const { page, loaded } = this.state;
+    const {
+      page,
+      loaded,
+      truckCachedInfo,
+      availabilityCachedInfo,
+      userCachedInfo
+    } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -106,7 +141,7 @@ class AddTruckForm extends PureComponent {
                       <AddTruckFormOne
                         p={page}
                         company={company}
-                        onTruckSave={this.nextPage}
+                        onTruckFullInfo={this.handleTruckSave}
                         handleSubmit={this.nextPage}
                       />
                       )}
@@ -114,8 +149,10 @@ class AddTruckForm extends PureComponent {
                       && (
                       <AddTruckFormTwo
                         p={page}
-                        onSubmit={this.nextPage}
+                        // onSubmit={this.nextPage}
                         company={company}
+                        onTruckFullInfo={this.handleTruckSave}
+                        onAvailabilityFullInfo={this.handleAvailabilitySave}
                         previousPage={this.previousPage}
                         handleSubmit={this.nextPage}
                       />
@@ -125,12 +162,21 @@ class AddTruckForm extends PureComponent {
                         <AddTruckFormThree
                           previousPage={this.previousPage}
                           company={company}
-                          onDriverSave={this.nextPage}
+                          onUserFullInfo={this.handleUserSave}
+                          // onDriverSave={this.nextPage}
                           handleSubmit={this.nextPage}
+                          // truckFullInfo={truckCachedInfo}
                         />
                       )}
                     {page === 4
-                      && <AddTruckFormFour previousPage={this.previousPage} />}
+                      && (
+                      <AddTruckFormFour
+                        previousPage={this.previousPage}
+                        truckFullInfo={truckCachedInfo}
+                        availabilityFullInfo={availabilityCachedInfo}
+                        userFullInfo={userCachedInfo}
+                      />
+                      )}
                     {/* onSubmit={onSubmit} */}
                   </div>
                 </div>
@@ -153,20 +199,23 @@ AddTruckForm.propTypes = {
     id: PropTypes.number,
     page: PropTypes.number
   }),
-  incomingPage: PropTypes.number
+  // id: PropTypes.number,
+  incomingPage: PropTypes.number // ,
+  // handleTruckSave: PropTypes.func.isRequired
 };
 
 AddTruckForm.defaultProps = {
   company: PropTypes.shape({
     id: PropTypes.number,
     page: PropTypes.number
-  })// ,
+  })
   // onSubmit: PropTypes.func.isRequired
 };
 
 AddTruckForm.defaultProps = {
   company: null,
   incomingPage: 0
+  // id: null
 };
 
 export default AddTruckForm;

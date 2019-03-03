@@ -2,12 +2,10 @@ import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
-import NumberFormat from 'react-number-format';
-
-import TButtonToggle from '../common/TButtonToggle';
-
 import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
+import NumberFormat from 'react-number-format';
+import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
@@ -184,15 +182,15 @@ class JobCreateForm extends Component {
                 <span>
                   <NumberFormat
                     value={selectedEquipment.maxCapacity}
-                    displayType={'text'}
-                    decimalSeparator={'.'}
+                    displayType="text"
+                    decimalSeparator="."
                     decimalScale={0}
-                    fixedDecimalScale={true}
-                    thousandSeparator={true}
-                    prefix={' '}
-                    suffix={' Tons'}
+                    fixedDecimalScale
+                    thousandSeparator
+                    prefix=" "
+                    suffix=" Tons"
                   />
-                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -209,13 +207,13 @@ class JobCreateForm extends Component {
           <div style={{ marginTop: '5px' }}>
             <NumberFormat
               value={selectedEquipment.hourRate}
-              displayType={'text'}
-              decimalSeparator={'.'}
+              displayType="text"
+              decimalSeparator="."
               decimalScale={2}
-              fixedDecimalScale={true}
-              thousandSeparator={true}
-              prefix={'$ '}
-              suffix={' per Hour'}
+              fixedDecimalScale
+              thousandSeparator
+              prefix="$ "
+              suffix=" per Hour"
             />
           </div>
         )}
@@ -223,13 +221,13 @@ class JobCreateForm extends Component {
           <div style={{ marginTop: '5px' }}>
             <NumberFormat
               value={selectedEquipment.tonRate}
-              displayType={'text'}
-              decimalSeparator={'.'}
+              displayType="text"
+              decimalSeparator="."
               decimalScale={2}
-              fixedDecimalScale={true}
-              thousandSeparator={true}
-              prefix={'$ '}
-              suffix={' per Ton'}
+              fixedDecimalScale
+              thousandSeparator
+              prefix="$ "
+              suffix=" per Ton"
             />
           </div>
         )}

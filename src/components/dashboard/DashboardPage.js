@@ -32,9 +32,7 @@ class DashboardPage extends Component {
 
   toggleAddTruckModal() {
     const { modal } = this.state;
-    this.setState({
-      modal: !modal
-    });
+    this.setState({ modal: !modal });
   }
 
   // Pull trucks
@@ -44,7 +42,8 @@ class DashboardPage extends Component {
       profile.companyId,
       'Truck'
     );
-    this.toggleAddTruckModal();
+    // DO NOT LAUNCH THE MODAL AT THIS TIME
+    // this.toggleAddTruckModal();
     // console.log(materials.length);
     this.setState({
       companyId: profile.companyId,
