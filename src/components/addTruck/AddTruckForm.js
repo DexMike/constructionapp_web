@@ -13,9 +13,9 @@ class AddTruckForm extends PureComponent {
     this.state = {
       page: 1,
       loaded: false,
-      truckCachedInfo: [],
-      availabilityCachedInfo: [],
-      userCachedInfo: []
+      truckCachedInfo: {},
+      availabilityCachedInfo: {},
+      userCachedInfo: {}
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -23,7 +23,7 @@ class AddTruckForm extends PureComponent {
     this.handleTruckSave = this.handleTruckSave.bind(this);
     this.handleAvailabilitySave = this.handleAvailabilitySave.bind(this);
     this.handleUserSave = this.handleUserSave.bind(this);
-    // console.log(props);
+    // // console.log(props);
   }
 
   async componentDidMount() {
@@ -36,14 +36,38 @@ class AddTruckForm extends PureComponent {
     }
   }
 
-  nextPage(e) {
-    const { page } = this.state;
-    // just checking if the state changed
+  handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      // // // console.log('enter press here!');
+    }
+  }
+
+  handleTruckSave(e) {
+    // console.log(e);
+    // let's keep the info from the truck in memory
+    const { truckCachedInfo, page } = this.state;
+    truckCachedInfo.info = e;
+    this.setState({ page: page + 1 });
+  }
+
+  handleAvailabilitySave(e) {
+    // console.log(e);
+    // let's keep the info from the truck in memory
+    const { availabilityCachedInfo, page } = this.state;
+    availabilityCachedInfo.info = e;
+    this.setState({ page: page + 1 });
+  }
+
+  handleUserSave(e) {
+    // console.log(e);
+    // let's keep the info from the truck in memory
+    const { userCachedInfo, page } = this.state;
+    userCachedInfo.info = e;
     this.setState({ page: page + 1 });
   }
 
   gotoPage(pageNumber) {
-    // console.log(40);
+    // // // console.log(40);
     this.setState({ page: pageNumber });
   }
 
@@ -52,33 +76,9 @@ class AddTruckForm extends PureComponent {
     this.setState({ page: page - 1 });
   }
 
-  handleKeyPress(event) {
-    if (event.key === 'Enter') {
-      // console.log('enter press here!');
-    }
-  }
-
-  handleTruckSave(e) {
-    console.log(e);
-    // let's keep the info from the truck in memory
-    const { truckCachedInfo, page } = this.state;
-    truckCachedInfo.push(e);
-    this.setState({ page: page + 1 });
-  }
-
-  handleAvailabilitySave(e) {
-    console.log(e);
-    // let's keep the info from the truck in memory
-    const { availabilityCachedInfo, page } = this.state;
-    availabilityCachedInfo.push(e);
-    this.setState({ page: page + 1 });
-  }
-
-  handleUserSave(e) {
-    console.log(e);
-    // let's keep the info from the truck in memory
-    const { userCachedInfo, page } = this.state;
-    userCachedInfo.push(e);
+  nextPage() {
+    const { page } = this.state;
+    // just checking if the state changed
     this.setState({ page: page + 1 });
   }
 
@@ -113,7 +113,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}                      
+                      className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Add Schedule</p>
                     </div>
@@ -165,7 +165,7 @@ class AddTruckForm extends PureComponent {
                           onUserFullInfo={this.handleUserSave}
                           // onDriverSave={this.nextPage}
                           handleSubmit={this.nextPage}
-                          truckFullInfo={truckCachedInfo}
+                          // truckFullInfo={truckCachedInfo}
                         />
                       )}
                     {page === 4
@@ -199,6 +199,7 @@ AddTruckForm.propTypes = {
     id: PropTypes.number,
     page: PropTypes.number
   }),
+  // id: PropTypes.number,
   incomingPage: PropTypes.number // ,
   // handleTruckSave: PropTypes.func.isRequired
 };
@@ -214,6 +215,7 @@ AddTruckForm.defaultProps = {
 AddTruckForm.defaultProps = {
   company: null,
   incomingPage: 0
+  // id: null
 };
 
 export default AddTruckForm;

@@ -6,20 +6,22 @@ import {
   Col,
   Container,
   Row,
-  Button,
-  Modal
+  Modal,
+  Button
 } from 'reactstrap';
 import moment from 'moment';
 import EquipmentService from '../../api/EquipmentService';
 import TTable from '../common/TTable';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import '../addTruck/AddTruck.css';
+import ProfileService from '../../api/ProfileService';
 
 class EquipmentListPage extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      companyId: 0,
       activeTab: '1',
       equipments: [],
       goToDashboard: false,
@@ -47,8 +49,8 @@ class EquipmentListPage extends Component {
     //     const newEquipment = equipment;
     //     const company = await EquipmentService.getCompanyById(newEquipment.companyId);
     //     newEquipment.companyName = company.legalName;
-    //     // console.log(newEquipment.companyName);
-    //     // console.log(job.companyName)
+    //     // // console.log(newEquipment.companyName);
+    //     // // console.log(job.companyName)
     //     return newEquipment;
     //   })
     // );
@@ -65,7 +67,7 @@ class EquipmentListPage extends Component {
   }
 
   toggleAddTruckModal() {
-    console.log('toggle');
+    // console.log('toggle');
     const { modal } = this.state;
     this.setState({
       modal: !modal
@@ -73,6 +75,11 @@ class EquipmentListPage extends Component {
   }
 
   async fetchEquipments() {
+    const profile = await ProfileService.getProfile();
+    this.setState({
+      companyId: profile.companyId
+    });
+
     let equipments = await EquipmentService.getEquipments();
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
@@ -172,7 +179,11 @@ class EquipmentListPage extends Component {
               </Col>
             </Row>
             <Row>
-              EquipmentListPage
+              <Col md={12}>
+                <Button color="secondary" onClick={this.toggleAddTruckModal} type="button">
+                  Add a Truck
+                </Button>
+              </Col>
             </Row>
             <Row>
               <Col md={12} lg={12}>

@@ -5,7 +5,7 @@ import {
   Col,
   Button
 } from 'reactstrap';
-import PropTypes from 'prop-types';
+import PropTypes, { object } from 'prop-types';
 import DriverService from '../../api/DriverService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
@@ -13,13 +13,13 @@ import EquipmentService from '../../api/EquipmentService';
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
     super(props);
-    console.log('>>LAST STEP GOT PROPS');
-    console.log(props);
+    // // console.log('>>LAST STEP GOT PROPS');
+    // console.log(props);
     this.state = {
       // showPassword: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    // this.handleSubmit = this.handleSubmit.bind(this);
+    this.saveInfo = this.saveInfo.bind(this);
   }
 
   // on the login I can find something like this
@@ -40,13 +40,15 @@ class AddTruckFormFour extends PureComponent {
   }
 
   // save after the user has checked the info
-  async saveInfo(e) {
+  async saveInfo() {
     // e.preventDefault();
     // e.persist();
-    console.log(e);
-
+    // // console.log(e);
+    // // console.log(this.props);
     const { truckFullInfo, userFullInfo } = this.props;
-    const newUser = await UserService.createUser(userFullInfo[0]);
+
+    // console.log(truckFullInfo);
+    const newUser = await UserService.createUser(userFullInfo.info);
 
     const driver = {
       usersId: newUser.id,
@@ -56,12 +58,12 @@ class AddTruckFormFour extends PureComponent {
 
     // assing missing info
     // this closes the cylce of having the truck info cached
-    truckFullInfo[0].driversId = newDriver.id;
-    truckFullInfo[0].defaultDriverId = newUser.id; // careful here, don't know if it's default
-    console.log('>>SAVING...');
-    await EquipmentService.createEquipment(truckFullInfo[0]);
+    truckFullInfo.info.driversId = newDriver.id;
+    truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
+    // // console.log('>>SAVING...');
+    await EquipmentService.createEquipment(truckFullInfo.info);
 
-    console.log('>>DONE SAVING');
+    // // console.log('>>DONE SAVING');
     /**/
   }
 
@@ -82,10 +84,13 @@ class AddTruckFormFour extends PureComponent {
       userFullInfo
     } = this.props;
     // const { showPassword } = this.state;
-    const availableText = availabilityFullInfo[0].isAvailable ? 'Unavailable' : 'Available';
-    console.log(availabilityFullInfo[0].startDate.toString());
-    const printedStartDate = availabilityFullInfo[0].startDate.toISOString().slice(0, 10).replace(/-/g, '-');
-    const printedEndDate = availabilityFullInfo[0].endDate.toISOString().slice(0, 10).replace(/-/g, '-');
+    // console.log(truckFullInfo);
+    // console.log(availabilityFullInfo);
+    // console.log(userFullInfo);
+    const availableText = availabilityFullInfo.info.isAvailable ? 'Unavailable' : 'Available';
+    // // console.log(availabilityFullInfo.info.startDate.toString());
+    const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
+    const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -99,40 +104,40 @@ class AddTruckFormFour extends PureComponent {
                 <h4>Information about your Truck:</h4>
                 <br />
                 <p className="profile__contact">
-                  <strong>Description: </strong><br />{truckFullInfo[0].description}
+                  <strong>Description: </strong><br />{truckFullInfo.info.description}
                   <br /><br />
-                  <strong>Type: </strong><br />{truckFullInfo[0].type}
+                  <strong>Type: </strong><br />{truckFullInfo.info.type}
                   <br /><br />
                   <strong>Materials hauled: </strong><br /> {/* MATES */}
                   <br /><br />
-                  <strong>Maximum capacity: </strong><br />{truckFullInfo[0].maxCapacity} Tons
+                  <strong>Maximum capacity: </strong><br />{truckFullInfo.info.maxCapacity} Tons
                   <br /><br />
-                  <strong>VIN: </strong><br />{truckFullInfo[0].vin}
+                  <strong>VIN: </strong><br />{truckFullInfo.info.vin}
                   <br /><br />
-                  <strong>License plate: </strong><br />{truckFullInfo[0].licensePlate}
+                  <strong>License plate: </strong><br />{truckFullInfo.info.licensePlate}
                   <br /><br />
-                  <strong>Rate per hour: </strong><br />{truckFullInfo[0].hourRate}
+                  <strong>Rate per hour: </strong><br />{truckFullInfo.info.hourRate}
                   <br /><br />
-                  <strong>Rate per ton: </strong><br />{truckFullInfo[0].tonRate}
-                  <br /><br />
-                  <strong>Maximum distance to pickup: </strong>
-                  <br />{truckFullInfo[0].maxDistance} Miles
+                  <strong>Rate per ton: </strong><br />{truckFullInfo.info.tonRate}
                   <br /><br />
                   <strong>Maximum distance to pickup: </strong>
-                  <br />{truckFullInfo[0].maxDistance} Miles
+                  <br />{truckFullInfo.info.maxDistance} Miles
+                  <br /><br />
+                  <strong>Maximum distance to pickup: </strong>
+                  <br />{truckFullInfo.info.maxDistance} Miles
                 </p>
                 <hr />
                 <h4>Information about the Driver:</h4>
                 <br />
                 <p className="profile__contact">
                   <strong>Name: </strong>
-                  <br />{userFullInfo[0].firstName} {userFullInfo[0].lastName}
+                  <br />{userFullInfo.info.firstName} {userFullInfo.info.lastName}
                   <br /><br />
                   <strong>Email: </strong>
-                  <br />{userFullInfo[0].email}
+                  <br />{userFullInfo.info.email}
                   <br /><br />
                   <strong>Mobile phone: </strong>
-                  {userFullInfo[0].mobilePhone}
+                  {userFullInfo.info.mobilePhone}
                 </p>
               </div>
             </div>
@@ -155,7 +160,7 @@ class AddTruckFormFour extends PureComponent {
             <div className="profile__stats">
               <h5>Does this information look good?</h5>
               <br />
-              <Button color="primary" onClick={e => this.saveInfo(e)} type="submit" className="next">
+              <Button color="primary" onClick={this.saveInfo} type="submit" className="next">
                 Yes, save now
               </Button>
             </div>
@@ -167,15 +172,21 @@ class AddTruckFormFour extends PureComponent {
 }
 
 AddTruckFormFour.propTypes = {
-  truckFullInfo: PropTypes.array.isRequired,
-  availabilityFullInfo: PropTypes.array.isRequired,
-  userFullInfo: PropTypes.array.isRequired
+  truckFullInfo: PropTypes.shape({
+    info: object
+  }),
+  availabilityFullInfo: PropTypes.shape({
+    info: object
+  }),
+  userFullInfo: PropTypes.shape({
+    info: object
+  })
 };
 
 AddTruckFormFour.defaultProps = {
-  // truckFullInfo: null,
-  // availabilityFullInfo: null,
-  // userFullInfo: null
+  truckFullInfo: null,
+  availabilityFullInfo: null,
+  userFullInfo: null
 };
 
 export default AddTruckFormFour;

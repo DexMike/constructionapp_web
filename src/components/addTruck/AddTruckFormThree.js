@@ -15,6 +15,8 @@ class AddTruckFormThree extends PureComponent {
   constructor(props) {
     super(props);
     const { company } = this.props;
+    // console.log('>PROPS COMPANY');
+    // console.log(company);
     this.state = {
       // showPassword: false
       firstName: '',
@@ -56,7 +58,17 @@ class AddTruckFormThree extends PureComponent {
 
   render() {
     // const { handleSubmit } = this.props;
-    const { firstName, lastName, mobilePhone, email } = this.state;
+    const {
+      firstName,
+      lastName,
+      mobilePhone,
+      email,
+      companyId,
+      parentId,
+      isBanned,
+      preferredLanguage,
+      userStatus
+    } = this.state;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -72,6 +84,11 @@ class AddTruckFormThree extends PureComponent {
               onSubmit={e => this.saveUser(e)}
             >
 
+              <input type="hidden" value={parentId} />
+              <input type="hidden" value={isBanned} />
+              <input type="hidden" value={preferredLanguage} />
+              <input type="hidden" value={userStatus} />
+
               <Row className="col-md-12">
                 <hr className="bighr" />
               </Row>
@@ -86,6 +103,7 @@ class AddTruckFormThree extends PureComponent {
                     value={firstName}
                     onChange={this.handleInputChange}
                   />
+                  <input type="hidden" value={companyId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Last Name</span>

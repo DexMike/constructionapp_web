@@ -32,9 +32,7 @@ class DashboardPage extends Component {
 
   toggleAddTruckModal() {
     const { modal } = this.state;
-    this.setState({
-      modal: !modal
-    });
+    this.setState({ modal: !modal });
   }
 
   // Pull trucks

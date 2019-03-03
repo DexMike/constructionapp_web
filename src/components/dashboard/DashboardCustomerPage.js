@@ -13,7 +13,7 @@ import moment from 'moment';
 // import { Select } from '@material-ui/core';
 import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
+// import TDateTimePicker from '../common/TDateTimePicker';
 // import TTable from '../common/TTable';
 
 import EquipmentService from '../../api/EquipmentService';
@@ -80,7 +80,7 @@ class DashboardCustomerPage extends Component {
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
-    this.startDateChange = this.startDateChange.bind(this);
+    // this.startDateChange = this.startDateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -216,9 +216,11 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  /*
   startDateChange(data) {
-    this.setState({ startDate: data.value });
+    this.setState({ startDate: data });
   }
+  */
 
   toggleAddJobModal() {
     const { modal } = this.state;
@@ -354,20 +356,20 @@ class DashboardCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    {/*<Col>*/}
-                      {/*<TDateTimePicker*/}
-                        {/*input={*/}
-                          {/*{*/}
-                            {/*onChange: this.startDateChange,*/}
-                            {/*name: 'startAvailability',*/}
-                            {/*value: { startDate }*/}
-                          {/*}*/}
-                        {/*}*/}
-                        {/*className="filter-text"*/}
-                        {/*placeholder="Select End Date"*/}
-                        {/*onChange={this.handleInputChange}*/}
-                      {/*/>*/}
-                    {/*</Col>*/}
+                    {/* <Col> */}
+                    {/* <TDateTimePicker */}
+                    {/* input={ */}
+                    {/* { */}
+                    {/* onChange: this.startDateChange, */}
+                    {/* name: 'startAvailability', */}
+                    {/* value: { startDate } */}
+                    {/* } */}
+                    {/* } */}
+                    {/* className="filter-text" */}
+                    {/* placeholder="Select End Date" */}
+                    {/* onChange={this.handleInputChange} */}
+                    {/* /> */}
+                    {/* </Col> */}
                     <Col>
                       <input name="endAvailability"
                              className="filter-text"
@@ -509,13 +511,13 @@ class DashboardCustomerPage extends Component {
                 Capacity:
                 <NumberFormat
                   value={equipment.maxCapacity}
-                  displayType={'text'}
-                  decimalSeparator={'.'}
+                  displayType="text"
+                  decimalSeparator="."
                   decimalScale={0}
-                  fixedDecimalScale={true}
-                  thousandSeparator={true}
-                  prefix={' '}
-                  suffix={' Tons'}
+                  fixedDecimalScale
+                  thousandSeparator
+                  prefix=" "
+                  suffix=" Tons"
                 />
               </Col>
             </Row>
@@ -534,13 +536,13 @@ class DashboardCustomerPage extends Component {
                   <span>
                     <NumberFormat
                       value={equipment.hourRate}
-                      displayType={'text'}
-                      decimalSeparator={'.'}
+                      displayType="text"
+                      decimalSeparator="."
                       decimalScale={2}
-                      fixedDecimalScale={true}
-                      thousandSeparator={true}
-                      prefix={'$ '}
-                      suffix={' / Hour'}
+                      fixedDecimalScale
+                      thousandSeparator
+                      prefix="$ "
+                      suffix=" / Hour"
                     />
                   </span>
 
@@ -548,12 +550,12 @@ class DashboardCustomerPage extends Component {
                 <Col>
                   <NumberFormat
                     value={equipment.minHours}
-                    displayType={'text'}
-                    decimalSeparator={'.'}
+                    displayType="text"
+                    decimalSeparator="."
                     decimalScale={2}
-                    fixedDecimalScale={true}
-                    thousandSeparator={true}
-                    suffix={' hours min'}
+                    fixedDecimalScale
+                    thousandSeparator
+                    suffix=" hours min"
                   />
                 </Col>
               </Row>
@@ -565,26 +567,26 @@ class DashboardCustomerPage extends Component {
                   <span>
                     <NumberFormat
                       value={equipment.tonRate}
-                      displayType={'text'}
-                      decimalSeparator={'.'}
+                      displayType="text"
+                      decimalSeparator="."
                       decimalScale={2}
-                      fixedDecimalScale={true}
-                      thousandSeparator={true}
-                      prefix={'$ '}
-                      suffix={' / Ton'}
-                      />
+                      fixedDecimalScale
+                      thousandSeparator
+                      prefix="$ "
+                      suffix=" / Ton"
+                    />
                   </span>
 
                 </Col>
                 <Col>
                   <NumberFormat
                     value={equipment.minCapacity}
-                    displayType={'text'}
-                    decimalSeparator={'.'}
+                    displayType="text"
+                    decimalSeparator="."
                     decimalScale={2}
-                    fixedDecimalScale={true}
-                    thousandSeparator={true}
-                    suffix={' tons min'}
+                    fixedDecimalScale
+                    thousandSeparator
+                    suffix=" tons min"
                   />
                 </Col>
               </Row>
