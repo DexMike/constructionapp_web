@@ -11,6 +11,21 @@ class JobService extends AgentService {
     return (response);
   }
 
+  // getJobsByCompanyIdAndStatus
+  // input
+  //    companyID: id of company
+  //    status: Status string from Lookups; use All to get everything
+  //    TODO: NOTE: status is being ignored right now
+  // Usage:
+  // const equipments = await getJobsByCompanyIdAndStatus.getUsersByCompanyIdAndStatus(
+  //   profile.companyId,
+  //   'All'
+  // );
+  static async getJobsByCompanyIdAndType(companyId, status) {
+    const response = await this.get(`/company/${companyId}/type/${status}${PATH}`);
+    return (response);
+  }
+
   // static async getJobById(id) {
   //   const response = await this.get(`${PATH}/${id}`);
   //   return (response);

@@ -11,11 +11,12 @@ class UserService extends AgentService {
   // getUsersByCompanyIdAndType
   // input
   //    companyID: id of company
-  //    type: of user, being ignored for now
+  //    type: of user from Lookups; use All to get everything
+  //    TODO: NOTE: type is being ignored right now
   // Usage:
   // const equipments = await UserService.getUsersByCompanyIdAndType(
   //   profile.companyId,
-  // 'Driver'
+  //   'All'
   // );
   static async getUsersByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/users`);
