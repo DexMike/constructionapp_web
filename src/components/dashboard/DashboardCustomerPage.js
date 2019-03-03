@@ -14,7 +14,6 @@ import moment from 'moment';
 import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
-// import TTable from '../common/TTable';
 
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
@@ -187,7 +186,6 @@ class DashboardCustomerPage extends Component {
     const { filters } = this.state;
     filters[e.target.name] = value;
     await this.fetchEquipments();
-    console.log(filters);
     this.setState({ filters });
   }
 

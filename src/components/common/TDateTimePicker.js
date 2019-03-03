@@ -21,7 +21,6 @@ class TDateTimePickerField extends PureComponent {
 
   render() {
     const { startDate } = this.state;
-    // showTimeSelect
     return (
       <div className="date-picker">
         <DatePicker
