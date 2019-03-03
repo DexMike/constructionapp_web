@@ -6,6 +6,7 @@ import TTable from '../common/TTable';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import AddressService from '../../api/AddressService';
 
 class JobCarrierListPage extends Component {
   constructor(props) {
@@ -38,6 +39,10 @@ class JobCarrierListPage extends Component {
         newJob.material = this.equipmentMaterialsAsString(materials);
         // console.log(companyName);
         // console.log(job.material);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
         return newJob;
       })
     );
@@ -142,13 +147,17 @@ class JobCarrierListPage extends Component {
                 <TTable
                   columns={
                     [
-                      {
-                        name: 'id',
-                        displayName: 'Job Id'
-                      },
+                      // {
+                      //   name: 'id',
+                      //   displayName: 'Job Id'
+                      // },
                       {
                         name: 'name',
                         displayName: 'Job Name'
+                      },
+                      {
+                        name: 'status',
+                        displayName: 'Job Status'
                       },
                       {
                         name: 'companyName',
@@ -159,7 +168,7 @@ class JobCarrierListPage extends Component {
                         displayName: 'Start Date'
                       },
                       {
-                        name: 'startAddress',
+                        name: 'zip',
                         displayName: 'Start Zip'
                       },
                       {
