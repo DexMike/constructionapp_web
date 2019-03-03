@@ -166,7 +166,7 @@ class AddTruckFormOne extends PureComponent {
 
     // should turckinfo be a function instead?
     onTruckFullInfo(saveValues);
-    this.handleSubmit('Equipment');
+    this.handleSubmit('Truck');
   }
 
   handleInputChange(e) {
@@ -227,7 +227,8 @@ class AddTruckFormOne extends PureComponent {
       ratesByTon,
       ratesCostPerTon,
       minOperatingTime,
-      maxDistanceToPickup
+      maxDistanceToPickup,
+      type
     } = this.state;
     const { p } = this.props;
     return (
@@ -249,9 +250,9 @@ class AddTruckFormOne extends PureComponent {
             >
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
-                  <h4 className="subhead">
-                  Tell us a bout your truck
-                  </h4>
+                  <h3 className="subhead">
+                  Tell us about your truck
+                  </h3>
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Truck description</span>
@@ -269,7 +270,7 @@ class AddTruckFormOne extends PureComponent {
                       {
                         onChange: this.selectChange,
                         name: 'Truck Type',
-                        value: truckType
+                        value: { type }
                       }
                     }
                     meta={
@@ -362,9 +363,9 @@ class AddTruckFormOne extends PureComponent {
                   </div>
                 </div>
                 <div className="col-md-8 form__form-group">
-                  <i className="material-icons">shopping_basket</i>
+                  <i className="material-icons iconSet">local_shipping</i>
                    &nbsp;
-                  <i className="material-icons">schedule</i>
+                  <i className="material-icons iconSet">schedule</i>
                 </div>
 
                 {/* SECOND ROW */}
@@ -374,7 +375,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-1 ">
-                  <i className="material-icons">schedule</i>
+                  <i className="material-icons iconSet">schedule</i>
                 </div>
                 <div className="col-md-3 form__form-group">
                   Min Rate per Hour $
@@ -424,7 +425,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-1 ">
-                  <i className="material-icons">shopping_basket</i>
+                  <i className="material-icons iconSet">local_shipping</i>
                 </div>
                 <div className="col-md-3 form__form-group">
                   Cost per Ton $

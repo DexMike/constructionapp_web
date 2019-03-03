@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
+    console.log(props);
     this.state = {
       startDate: new Date(props.givenDate)
     };

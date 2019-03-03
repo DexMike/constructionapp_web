@@ -13,12 +13,16 @@ class AddTruckForm extends PureComponent {
     this.state = {
       page: 1,
       loaded: false,
-      truckCachedInfo: []
+      truckCachedInfo: [],
+      availabilityCachedInfo: [],
+      userCachedInfo: []
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
     this.gotoPage.bind(this);
     this.handleTruckSave = this.handleTruckSave.bind(this);
+    this.handleAvailabilitySave = this.handleAvailabilitySave.bind(this);
+    this.handleUserSave = this.handleUserSave.bind(this);
     // console.log(props);
   }
 
@@ -62,9 +66,31 @@ class AddTruckForm extends PureComponent {
     this.setState({ page: page + 1 });
   }
 
+  handleAvailabilitySave(e) {
+    console.log(e);
+    // let's keep the info from the truck in memory
+    const { availabilityCachedInfo, page } = this.state;
+    availabilityCachedInfo.push(e);
+    this.setState({ page: page + 1 });
+  }
+
+  handleUserSave(e) {
+    console.log(e);
+    // let's keep the info from the truck in memory
+    const { userCachedInfo, page } = this.state;
+    userCachedInfo.push(e);
+    this.setState({ page: page + 1 });
+  }
+
   render() {
     const { company } = this.props;
-    const { page, loaded, truckCachedInfo } = this.state;
+    const {
+      page,
+      loaded,
+      truckCachedInfo,
+      availabilityCachedInfo,
+      userCachedInfo
+    } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -123,8 +149,10 @@ class AddTruckForm extends PureComponent {
                       && (
                       <AddTruckFormTwo
                         p={page}
-                        onSubmit={this.nextPage}
+                        // onSubmit={this.nextPage}
                         company={company}
+                        onTruckFullInfo={this.handleTruckSave}
+                        onAvailabilityFullInfo={this.handleAvailabilitySave}
                         previousPage={this.previousPage}
                         handleSubmit={this.nextPage}
                       />
@@ -134,13 +162,21 @@ class AddTruckForm extends PureComponent {
                         <AddTruckFormThree
                           previousPage={this.previousPage}
                           company={company}
-                          onDriverSave={this.nextPage}
+                          onUserFullInfo={this.handleUserSave}
+                          // onDriverSave={this.nextPage}
                           handleSubmit={this.nextPage}
                           truckFullInfo={truckCachedInfo}
                         />
                       )}
                     {page === 4
-                      && <AddTruckFormFour previousPage={this.previousPage} />}
+                      && (
+                      <AddTruckFormFour
+                        previousPage={this.previousPage}
+                        truckFullInfo={truckCachedInfo}
+                        availabilityFullInfo={availabilityCachedInfo}
+                        userFullInfo={userCachedInfo}
+                      />
+                      )}
                     {/* onSubmit={onSubmit} */}
                   </div>
                 </div>

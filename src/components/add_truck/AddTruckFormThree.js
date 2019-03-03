@@ -8,8 +8,8 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import UserService from '../../api/UserService';
-import DriverService from '../../api/DriverService';
+// import UserService from '../../api/UserService';
+// import DriverService from '../../api/DriverService';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
@@ -32,7 +32,6 @@ class AddTruckFormThree extends PureComponent {
   }
 
   handleInputChange(e) {
-    // console.log(28);
     let { value } = e.target;
     if (e.target.name === 'isArchived') {
       value = e.target.checked ? Number(1) : Number(0);
@@ -40,30 +39,13 @@ class AddTruckFormThree extends PureComponent {
     this.setState({ [e.target.name]: value });
   }
 
-  async saveDriver(e) {
+  async saveUser(e) {
     e.preventDefault();
     e.persist();
-    const newUser = await UserService.createUser(this.state);
-    const { truckFullInfo } = this.props;
-    const driver = {
-      usersId: newUser.id,
-      driverLicenseId: 1 // THIS IS A FK
-    };
-    // console.log(50);
-    // console.log(driver);
-    const newDriver = await DriverService.createDriver(driver);
-
-    // assing missing info
-    // this closes the cylce of having the truck info cached
-    truckFullInfo.driversId = newDriver.id;
-    truckFullInfo.defaultDriverId = newUser.id; // careful here, don't know if it's default
-    console.log('>>SAVING...');
-    await DriverService.createEquipment(truckFullInfo);
-    // this gets around sending the form just because, triggers function in the parent
-    const { onDriverSave } = this.props;
-    if (typeof onDriverSave === 'function') {
-      onDriverSave(e.target.value);
-    }
+    const { onUserFullInfo } = this.props;
+    const availability = this.state;
+    onUserFullInfo(availability);
+    this.handleSubmit('User');
   }
 
   handleSubmit(menuItem) {
@@ -87,7 +69,7 @@ class AddTruckFormThree extends PureComponent {
 
             <form
               className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveDriver(e)}
+              onSubmit={e => this.saveUser(e)}
             >
 
               <Row className="col-md-12">
@@ -164,8 +146,9 @@ AddTruckFormThree.propTypes = {
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  onDriverSave: PropTypes.func.isRequired,
-  truckFullInfo: PropTypes.func.isRequired
+  // onDriverSave: PropTypes.func.isRequired,
+  // truckFullInfo: PropTypes.func.isRequired,
+  onUserFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {
