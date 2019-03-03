@@ -25,6 +25,7 @@ class AddTruckFormOne extends PureComponent {
       // ...equipment,
       selectedMaterials: [],
       allMaterials: [],
+      truckTypes: [],
       maxCapacity: 0,
       description: '',
       vin: '',
@@ -36,7 +37,7 @@ class AddTruckFormOne extends PureComponent {
       ratesCostPerTon: 0,
       minOperatingTime: 0,
       maxDistanceToPickup: 0,
-      truckType: ''
+      truckType: 'Coman camarones'
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -77,8 +78,12 @@ class AddTruckFormOne extends PureComponent {
   }
 
   selectChange(data) {
-    // const { truckType } = this.state;
-    this.setState({ truckType: data.value });
+    console.log(data);
+    // this.setState({ truckType: data.value });
+    this.setState({ truckType: data.value },
+    function () {
+      console.log('setState completed', this.state)
+    });
   }
 
   isFormValid() {
@@ -123,8 +128,10 @@ class AddTruckFormOne extends PureComponent {
     const chargeBy = ratesByBoth === true ? 1 : 0;
     // map the values with the ones on equipment
     // TODO-> Ask which params are required
+    const shortDesc = description.substring(0, 45);
+
     const saveValues = {
-      name: '', // unasigned
+      name: shortDesc, // unasigned
       type: 'Truck',
       styleId: 0, // unasigned
       maxCapacity, // This is a shorthand of (maxCapacity: maxCapacity)
@@ -154,17 +161,7 @@ class AddTruckFormOne extends PureComponent {
       isArchived: 0
     };
 
-    // DO NOT SAVE, SEND TO PARENT
-    // await DriverService.createEquipment(saveValues);
-    // Comment: this gets around sending the form just because, triggers function in the parent
-    /*
-    const { onTruckSave } = this.props;
-    if (typeof onTruckSave === 'function') {
-      onTruckSave(e.target.value);
-    }
-    */
-
-    // should turckinfo be a function instead?
+    // save info in the parent
     onTruckFullInfo(saveValues);
     this.handleSubmit('Truck');
   }
@@ -197,17 +194,38 @@ class AddTruckFormOne extends PureComponent {
   // Pull materials
   async fetchMaterials() {
     let materials = await LookupsService.getLookupsByType('MaterialType');
-    materials = materials.map((lookup) => {
-      const newLookup = lookup;
-      newLookup.modifiedOn = moment(lookup.modifiedOn).format();
-      newLookup.createdOn = moment(lookup.createdOn).format();
-      return newLookup;
-    });
+    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+
     materials = materials.map(material => ({
       value: String(material.id),
       label: material.val1
     }));
-    this.setState({ allMaterials: materials });
+
+    const allTruckTypes = [];
+    Object.values(truckTypes).forEach((itm) => {
+      const inside = {
+        label: itm.val1,
+        value: itm.val1
+      };
+      allTruckTypes.push(inside);
+    });
+    /*
+    allTruckTypes = [
+      { value: 'Side Dump', label: 'Side Dump' },
+      { value: 'Dump Belly', label: 'Dump Belly' },
+      { value: 'Bottom Dump', label: 'Bottom Dump' },
+      { value: 'Rear Dump', label: 'Rear Dump' }
+    ];
+    */
+
+    console.log(allTruckTypes);
+    this.setState({
+      allMaterials: materials,
+      truckTypes: allTruckTypes
+    },
+    function () {
+    console.log('setState completed', this.state)
+    });
   }
 
   render() {
@@ -228,7 +246,7 @@ class AddTruckFormOne extends PureComponent {
       ratesCostPerTon,
       minOperatingTime,
       maxDistanceToPickup,
-      type
+      truckTypes
     } = this.state;
     const { p } = this.props;
     return (
@@ -270,7 +288,7 @@ class AddTruckFormOne extends PureComponent {
                       {
                         onChange: this.selectChange,
                         name: 'Truck Type',
-                        value: { type }
+                        value: truckType
                       }
                     }
                     meta={
@@ -280,12 +298,7 @@ class AddTruckFormOne extends PureComponent {
                       }
                     }
                     value={truckType}
-                    options={[
-                      { value: 'Side Dump', label: 'Side Dump' },
-                      { value: 'Dump Belly', label: 'Dump Belly' },
-                      { value: 'Bottom Dump', label: 'Bottom Dump' },
-                      { value: 'Rear Dump', label: 'Rear Dump' }
-                    ]}
+                    options={truckTypes}
                     placeholder="Truck Type"
                   />
                 </div>
@@ -409,7 +422,7 @@ class AddTruckFormOne extends PureComponent {
                 <div className="col-md-2 form__form-group">
                   <input
                     name="minOperatingTime"
-                    type="text"
+                    type="number"
                     value={minOperatingTime}
                     onChange={this.handleInputChange}
                   />

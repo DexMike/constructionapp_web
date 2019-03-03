@@ -9,6 +9,8 @@ class SelectField extends PureComponent {
   }
 
   handleChange(selectedOption) {
+    console.log(12);
+    console.log(selectedOption);
     const { onChange } = this.props;
     onChange(selectedOption);
   }

@@ -45,7 +45,11 @@ class AddTruckFormFour extends PureComponent {
     // e.persist();
     // // console.log(e);
     // // console.log(this.props);
-    const { truckFullInfo, userFullInfo } = this.props;
+    const {
+      truckFullInfo,
+      userFullInfo,
+      availabilityFullInfo
+    } = this.props;
 
     // console.log(truckFullInfo);
     const newUser = await UserService.createUser(userFullInfo.info);
@@ -60,7 +64,11 @@ class AddTruckFormFour extends PureComponent {
     // this closes the cylce of having the truck info cached
     truckFullInfo.info.driversId = newDriver.id;
     truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
-    // // console.log('>>SAVING...');
+    truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate.toISOString().slice(0, 19).replace('T', ' ');
+    truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate.toISOString().slice(0, 19).replace('T', ' ');
+
+    console.log('>>SAVING... ');
+    console.log(truckFullInfo.info);
     await EquipmentService.createEquipment(truckFullInfo.info);
 
     // // console.log('>>DONE SAVING');
