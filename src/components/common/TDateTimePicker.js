@@ -9,7 +9,6 @@ class TDateTimePickerField extends PureComponent {
       startDate: new Date(props.givenDate)
     };
     this.handleChange = this.handleChange.bind(this);
-    // this.setDate();
   }
 
   handleChange(date) {
