@@ -11,6 +11,7 @@ import {
 // import classnames from 'classnames';
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
+import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
 // import TTable from '../common/TTable';
@@ -501,11 +502,21 @@ class DashboardCustomerPage extends Component {
 
           <Col md={4}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-              <Col>
+              <Col className="customer-truck-results-title">
                 Type: {equipment.type}
               </Col>
-              <Col>
-                Capacity: {equipment.maxCapacity} Tons
+              <Col className="customer-truck-results-title">
+                Capacity:
+                <NumberFormat
+                  value={equipment.maxCapacity}
+                  displayType={'text'}
+                  decimalSeparator={'.'}
+                  decimalScale={0}
+                  fixedDecimalScale={true}
+                  thousandSeparator={true}
+                  prefix={' '}
+                  suffix={' Tons'}
+                />
               </Col>
             </Row>
             <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
@@ -521,12 +532,30 @@ class DashboardCustomerPage extends Component {
                 <Col>
 
                   <span>
-                  $ {equipment.hourRate} / Hour
+                    <NumberFormat
+                      value={equipment.hourRate}
+                      displayType={'text'}
+                      decimalSeparator={'.'}
+                      decimalScale={2}
+                      fixedDecimalScale={true}
+                      thousandSeparator={true}
+                      prefix={'$ '}
+                      suffix={' / Hour'}
+                    />
+
                   </span>
 
                 </Col>
                 <Col>
-                  {equipment.minHours} hours min
+                  <NumberFormat
+                    value={equipment.minHours}
+                    displayType={'text'}
+                    decimalSeparator={'.'}
+                    decimalScale={2}
+                    fixedDecimalScale={true}
+                    thousandSeparator={true}
+                    suffix={' hours min'}
+                  />
                 </Col>
               </Row>
             )}
@@ -535,12 +564,29 @@ class DashboardCustomerPage extends Component {
                 <Col>
 
                   <span>
-                  $ {equipment.tonRate} / Ton
+                    <NumberFormat
+                      value={equipment.tonRate}
+                      displayType={'text'}
+                      decimalSeparator={'.'}
+                      decimalScale={2}
+                      fixedDecimalScale={true}
+                      thousandSeparator={true}
+                      prefix={'$ '}
+                      suffix={' / Ton'}
+                      />
                   </span>
 
                 </Col>
                 <Col>
-                  {equipment.minCapacity} tons min
+                  <NumberFormat
+                    value={equipment.minCapacity}
+                    displayType={'text'}
+                    decimalSeparator={'.'}
+                    decimalScale={2}
+                    fixedDecimalScale={true}
+                    thousandSeparator={true}
+                    suffix={' tons min'}
+                  />
                 </Col>
               </Row>
             )}
@@ -548,10 +594,10 @@ class DashboardCustomerPage extends Component {
 
           <Col md={6}>
             <Row style={{ background: '#c7dde8' }}>
-              <Col>
+              <Col className="customer-truck-results-title">
                 Name: {equipment.name}
               </Col>
-              {/* <Col md={6}> */}
+              {/* <Col md={6} className="customer-truck-results-title> */}
               {/* Company: {equipment.companyName} */}
               {/* </Col> */}
             </Row>
