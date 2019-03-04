@@ -170,8 +170,12 @@ class EquipmentListPage extends Component {
     const { loaded } = this.state;
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
-      newEquipment.hourRate = `$${newEquipment.hourRate}`;
-      newEquipment.tonRate = `$${newEquipment.tonRate}`;
+      const tempHourRate = newEquipment.hourRate;
+      const tempTonRate = newEquipment.tonRate;
+
+      newEquipment.tempHourRate = `$${newEquipment.hourRate}`;
+      newEquipment.tempTonRate = `$${newEquipment.tonRate}`;
+
       return newEquipment;
     });
     if (loaded) {
@@ -228,11 +232,11 @@ class EquipmentListPage extends Component {
                                 displayName: 'Capacity'
                               },
                               {
-                                name: 'hourRate',
+                                name: 'tempHourRate',
                                 displayName: 'Rate per Hour'
                               },
                               {
-                                name: 'tonRate',
+                                name: 'tempTonRate',
                                 displayName: 'Rate per Ton'
                               }
                             ]
