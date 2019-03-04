@@ -261,6 +261,7 @@ class AddTruckFormOne extends PureComponent {
       // Materials Hauled is missing
     }
 
+<<<<<<< HEAD
     // load info from page list
     if (Object.keys(passedTruckFullInfo).length > 0) {
       // there should be a better way of doign this
@@ -289,6 +290,13 @@ class AddTruckFormOne extends PureComponent {
       if (passedTruckFullInfo.rateType === 'Hour') {
         this.setState({ ratesByHour: true });
       }
+=======
+      // console.log(preloaded.info.type);
+      // console.log(preloaded.info.tonRate);
+      // special
+      /* truckType: preloaded.info.truckType
+      ratesByBoth: preloaded.info.ratesByBoth, */
+>>>>>>> dev
     }
 
     console.log(passedTruckFullInfo);

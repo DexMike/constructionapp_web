@@ -69,9 +69,8 @@ class JobService extends AgentService {
       startGeoFence: '',
       endGeoFence: '',
       numberOfTrucks: 0,
-      startTime: moment()
-        .unix() * 1000,
-      endTime: '',
+      startTime: new Date(),
+      endTime: new Date(),
       rateType: 'Hour',
       rate: 0,
       notes: '',
