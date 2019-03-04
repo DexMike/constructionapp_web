@@ -18,7 +18,7 @@ class AddTruckForm extends PureComponent {
       truckCachedInfo: {},
       availabilityCachedInfo: {},
       userCachedInfo: {},
-      truckPassedInfo: {} // info that comes fromt he parent list
+      truckPassedInfo: {} // info that comes from the parent list
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -213,6 +213,9 @@ class AddTruckForm extends PureComponent {
                         availabilityFullInfo={availabilityCachedInfo}
                         userFullInfo={userCachedInfo}
                         onClose={this.closeNow}
+                        getTruckFullInfo={this.getTruckInfo}
+                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
+                        getUserFullInfo={this.getUserInfo}
                       />
                       )}
                     {/* onSubmit={onSubmit} */}

@@ -40,41 +40,51 @@ class AddTruckFormFour extends PureComponent {
 
   // save after the user has checked the info
   async saveInfo() {
-    // e.preventDefault();
-    // e.persist();
-    // // console.log(e);
-    // // console.log(this.props);
+    // save new or update?
     const {
+      getTruckFullInfo,
+      getAvailiabilityFullInfo,
+      getUserFullInfo,
       truckFullInfo,
       userFullInfo,
-      availabilityFullInfo,
-      onClose
+      availabilityFullInfo
     } = this.props;
+    console.log(Object.keys(getTruckFullInfo()).length);
+    console.log(Object.keys(getAvailiabilityFullInfo()).length);
+    console.log(Object.keys(getUserFullInfo()).length);
+    // return false;
+    if (Object.keys(getTruckFullInfo()).length > 0
+      && Object.keys(getAvailiabilityFullInfo()).length > 0
+      && Object.keys(getUserFullInfo()).length > 0) {
+      // not saving, updating instead
+      // console.log('>> UPDATING..');
+      // console.log(getTruckFullInfo);
+      await EquipmentService.updateEquipment(truckFullInfo.info);
+      // still missing to assing info for user and driver
+    } else {
+      const {
+        truckFullInfo,
+        userFullInfo,
+        availabilityFullInfo,
+        onClose
+      } = this.props;
 
-    // console.log(truckFullInfo);
-    const newUser = await UserService.createUser(userFullInfo.info);
+      const newUser = await UserService.createUser(userFullInfo.info);
 
-    const driver = {
-      usersId: newUser.id,
-      driverLicenseId: 1 // THIS IS A FK
-    };
-    const newDriver = await DriverService.createDriver(driver);
+      const driver = {
+        usersId: newUser.id,
+        driverLicenseId: 1 // THIS IS A FK
+      };
+      const newDriver = await DriverService.createDriver(driver);
 
-    // assing missing info
-    // this closes the cylce of having the truck info cached
-    truckFullInfo.info.driversId = newDriver.id;
-    truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
-    // truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate.toISOString()
-    // .slice(0, 19).replace('T', ' ');
-    truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
-    // truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate.toISOString()
-    // .slice(0, 19).replace('T', ' ');
-    truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
-    // console.log('>>SAVING... ');
-    // console.log(truckFullInfo.info);
-    await EquipmentService.createEquipment(truckFullInfo.info);
-    onClose();
-    /**/
+      // assing missing info
+      truckFullInfo.info.driversId = newDriver.id;
+      truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
+      truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
+      truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
+      await EquipmentService.createEquipment(truckFullInfo.info);
+      onClose();
+    }
   }
 
   async saveAddress() {
@@ -194,7 +204,11 @@ AddTruckFormFour.propTypes = {
     info: object
   }),
   previousPage: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  // fields for loaded info
+  getTruckFullInfo: PropTypes.func.isRequired,
+  getAvailiabilityFullInfo: PropTypes.func.isRequired,
+  getUserFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormFour.defaultProps = {
