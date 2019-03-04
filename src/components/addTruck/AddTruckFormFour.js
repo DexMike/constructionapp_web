@@ -9,6 +9,7 @@ import PropTypes, { object } from 'prop-types';
 import DriverService from '../../api/DriverService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
+import truckImage from '../../img/12.png';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
@@ -107,7 +108,7 @@ class AddTruckFormFour extends PureComponent {
           <CardBody className="profile__card">
             <div className="profile__information">
               <div className="profile__avatar">
-                <img src="img/12.png" alt="avatar" />
+                <img src={`${window.location.origin}/${truckImage}`} alt="avatar"/>
               </div>
               <div className="profile__data">
                 <p className="profile__name">Summary of Truck and Driver Information</p>

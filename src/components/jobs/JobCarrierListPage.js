@@ -108,6 +108,7 @@ class JobCarrierListPage extends Component {
 
   render() {
     let { jobs } = this.state;
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -122,6 +123,7 @@ class JobCarrierListPage extends Component {
       newJob.newRate = `$${newJob.rate}`;
       return newJob;
     });
+
     // console.log(jobs);
     return (
       <Container className="dashboard">
@@ -143,7 +145,7 @@ class JobCarrierListPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                JobCarrierListPage
+                Job Carrier List Page
                 <TTable
                   columns={
                     [

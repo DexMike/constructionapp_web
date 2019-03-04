@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Row, Button, Container
-} from 'reactstrap';
-import JobService from '../../api/JobService';
+import { Card, CardBody, Col, Row, Button, Container} from 'reactstrap';
 import TCheckBox from '../common/TCheckBox';
+import JobService from '../../api/JobService';
+import CompanyService from '../../api/CompanyService';
+import JobMaterialsService from '../../api/JobMaterialsService';
+import AddressService from '../../api/AddressService';
 
 class JobForm extends Component {
   constructor(props) {
@@ -31,6 +33,29 @@ class JobForm extends Component {
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+  }
+
+  async componentDidMount() {
+    const jobs = await this.fetchJobs();
+
+    Promise.all(
+      jobs.map(async (job) => {
+        const newJob = job;
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
+        return newJob;
+      })
+    );
+    this.setState({ jobs });
+    // console.log(jobs);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -139,7 +164,7 @@ class JobForm extends Component {
               <form className="form" onSubmit={e => this.saveJob(e)}>
                 <div className="form__half">
                   <div className="form__form-group">
-                    <span className="form__form-group-label">Companies Id</span>
+                    <span className="form__form-group-label">Company Name</span>
                     <div className="form__form-group-field">
                       <input name="companiesId" type="number" value={companiesId}
                              onChange={this.handleInputChange}

@@ -4,6 +4,7 @@ import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import moment from 'moment';
 // import ProfileService from '../../api/ProfileService';
 import TTable from '../common/TTable';
+
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -32,10 +33,13 @@ class DashboardCarrierPage extends Component {
     Promise.all(
       jobs.map(async (job) => {
         const newJob = job;
+
         const company = await CompanyService.getCompanyById(newJob.companiesId);
         newJob.companyName = company.legalName;
+
         // console.log(companyName);
-        // console.log(job.companyName)
+        // console.log(job.companyName);
+
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         const materials = materialsList.map(materialItem => materialItem.value);
         newJob.material = this.equipmentMaterialsAsString(materials);
