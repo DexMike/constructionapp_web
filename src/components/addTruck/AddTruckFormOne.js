@@ -221,7 +221,7 @@ class AddTruckFormOne extends PureComponent {
     const { getTruckFullInfo } = this.props;
     const preloaded = getTruckFullInfo();
     if (Object.keys(preloaded).length > 0) {
-      console.log('>> Seems that there is cached information');
+      // console.log('>> Seems that there is cached information');
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,

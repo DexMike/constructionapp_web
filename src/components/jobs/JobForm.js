@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Row, Button, Container} from 'reactstrap';
+import { Card, CardBody, Col, Row, Button, Container } from 'reactstrap';
 import TCheckBox from '../common/TCheckBox';
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
