@@ -27,7 +27,7 @@ class TDateTimePickerField extends PureComponent {
           timeFormat="HH:mm"
           className="form__form-group-datepicker"
           selected={startDate}
-          showTimeSelect
+          // showTimeSelect //shows Time picker as well
           onChange={this.handleChange}
           dateFormat="MMMM dd, yyyy hh:mm aaa" // http://userguide.icu-project.org/formatparse/datetime
         />
