@@ -13,8 +13,6 @@ import moment from 'moment';
 // import { Select } from '@material-ui/core';
 import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
-// import TDateTimePicker from '../common/TDateTimePicker';
-// import TTable from '../common/TTable';
 
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
@@ -27,6 +25,7 @@ import ProfileService from '../../api/ProfileService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
+import TDateTimePicker from '../common/TDateTimePicker';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -53,12 +52,14 @@ class DashboardCustomerPage extends Component {
 
       modal: false,
       goToDashboard: false,
+      startDate: new Date(),
+      endDate: new Date(),
 
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
-        startAvailability: '',
-        endAvailability: '',
+        startAvailability: new Date(),
+        endAvailability: new Date(),
         truckType: '',
         minCapacity: '',
         materialType: '',
@@ -80,7 +81,8 @@ class DashboardCustomerPage extends Component {
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
-    // this.startDateChange = this.startDateChange.bind(this);
+    this.handleStartDateChange = this.handleStartDateChange.bind(this);
+    this.handleEndDateChange = this.handleEndDateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -216,11 +218,19 @@ class DashboardCustomerPage extends Component {
     });
   }
 
-  /*
-  startDateChange(data) {
-    this.setState({ startDate: data });
+  async handleStartDateChange(e) {
+    const { filters } = this.state;
+    filters.startAvailability = e;
+    await this.fetchEquipments();
+    this.setState({ filters });
   }
-  */
+
+  async handleEndDateChange(e) {
+    const { filters } = this.state;
+    filters.endAvailability = e;
+    await this.fetchEquipments();
+    this.setState({ filters });
+  }
 
   toggleAddJobModal() {
     const { modal } = this.state;
@@ -307,6 +317,8 @@ class DashboardCustomerPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
+      startDate,
+      endDate,
 
       // filters
       filters
@@ -348,36 +360,30 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col>
-                      <input name="startAvailability"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Select Start Date"
-                             value={filters.startAvailability}
-                             onChange={this.handleFilterChange}
+                      <TDateTimePicker
+                          input={
+                            {
+                              onChange: this.handleStartDateChange,
+                              name: 'startAvailability',
+                              value: { startDate },
+                              givenDate: new Date(startDate).getTime()
+                            }
+                          }
+                          onChange={this.handleFilterChange}
                       />
                     </Col>
-                    {/* <Col> */}
-                    {/* <TDateTimePicker */}
-                    {/* input={ */}
-                    {/* { */}
-                    {/* onChange: this.startDateChange, */}
-                    {/* name: 'startAvailability', */}
-                    {/* value: { startDate } */}
-                    {/* } */}
-                    {/* } */}
-                    {/* className="filter-text" */}
-                    {/* placeholder="Select End Date" */}
-                    {/* onChange={this.handleInputChange} */}
-                    {/* /> */}
-                    {/* </Col> */}
                     <Col>
-                      <input name="endAvailability"
-                             className="filter-text"
-                             style={{ width: '100%' }}
-                             type="text"
-                             placeholder="Select End Date"
-                             value={filters.endAvailability}
-                             onChange={this.handleFilterChange}
+                      <TDateTimePicker
+                          input={
+                            {
+                              className: 'filter-text',
+                              onChange: this.handleEndDateChange,
+                              name: 'endAvailability',
+                              value: { endDate },
+                              givenDate: new Date(endDate).getTime()
+                            }
+                          }
+                          onChange={this.handleFilterChange}
                       />
                     </Col>
                     <Col>
