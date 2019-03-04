@@ -23,6 +23,7 @@ class AddTruck extends PureComponent {
       modal: false
     };
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
+    this.closeIt = this.closeIt.bind(this);
   }
 
   async componentDidMount() {

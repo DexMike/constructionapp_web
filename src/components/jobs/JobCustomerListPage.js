@@ -55,6 +55,11 @@ class JobCustomerListPage extends Component {
     // console.log(jobs);
   }
 
+  getState() {
+    const status = this.state;
+    return status;
+  }
+
   equipmentMaterialsAsString(materials) {
     let materialsString = '';
     if (materials) {
@@ -69,11 +74,6 @@ class JobCustomerListPage extends Component {
       }
     }
     return materialsString;
-  }
-
-  getState() {
-    const status = this.state;
-    return status;
   }
 
   handleJobEdit(id) {

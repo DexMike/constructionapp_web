@@ -14,8 +14,6 @@ import truckImage from '../../img/12.png';
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
     super(props);
-    // // console.log('>>LAST STEP GOT PROPS');
-    // console.log(props);
     this.state = {
       // showPassword: false
     };
@@ -49,7 +47,8 @@ class AddTruckFormFour extends PureComponent {
     const {
       truckFullInfo,
       userFullInfo,
-      availabilityFullInfo
+      availabilityFullInfo,
+      onClose
     } = this.props;
 
     // console.log(truckFullInfo);
@@ -74,8 +73,7 @@ class AddTruckFormFour extends PureComponent {
     // console.log('>>SAVING... ');
     // console.log(truckFullInfo.info);
     await EquipmentService.createEquipment(truckFullInfo.info);
-
-    // // console.log('>>DONE SAVING');
+    onClose();
     /**/
   }
 
@@ -93,7 +91,8 @@ class AddTruckFormFour extends PureComponent {
     const {
       availabilityFullInfo,
       truckFullInfo,
-      userFullInfo
+      userFullInfo,
+      previousPage
     } = this.props;
     // const { showPassword } = this.state;
     // console.log(truckFullInfo);
@@ -172,7 +171,8 @@ class AddTruckFormFour extends PureComponent {
             <div className="profile__stats">
               <h5>Does this information look good?</h5>
               <br />
-              <Button color="primary" onClick={this.saveInfo} type="submit" className="next">
+              <Button color="primary" type="button" className="previous" onClick={previousPage} >No, go back</Button>
+              <Button color="danger" onClick={this.saveInfo} type="submit" className="next">
                 Yes, save now
               </Button>
             </div>
@@ -192,7 +192,9 @@ AddTruckFormFour.propTypes = {
   }),
   userFullInfo: PropTypes.shape({
     info: object
-  })
+  }),
+  previousPage: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormFour.defaultProps = {

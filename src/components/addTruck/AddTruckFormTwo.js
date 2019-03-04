@@ -27,6 +27,17 @@ class AddTruckFormTwo extends PureComponent {
     this.availableButtonColor = this.availableButtonColor.bind(this);
   }
 
+  componentDidMount() {
+    // check fo cached info
+    const { getAvailiabilityFullInfo } = this.props;
+    const preloaded = getAvailiabilityFullInfo();
+    if (Object.keys(preloaded).length > 0) {
+      this.setState({
+        isAvailable: preloaded.info.isAvailable
+      });
+    }
+  }
+
   // on the login I can find something like this
   showPassword(e) {
     e.preventDefault();
@@ -89,13 +100,24 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   render() {
-    const { p } = this.props;
+    const { p, previousPage } = this.props;
     const { startDate, endDate, isAvailable } = this.state;
-    const today = new Date();
 
+    const today = new Date();
     const date = new Date();
-    const tomorrowDate = date.setDate(date.getDate() + 1);
-    const currentDate = today.getTime();
+    let tomorrowDate = date.setDate(date.getDate() + 1);
+    let currentDate = today.getTime();
+
+    // cached?
+    const { getAvailiabilityFullInfo } = this.props;
+    const preloaded = getAvailiabilityFullInfo();
+    if (Object.keys(preloaded).length > 0) {
+      tomorrowDate = preloaded.info.endDate.getTime();
+      currentDate = preloaded.info.startDate.getTime();
+    } else {
+      tomorrowDate = date.setDate(date.getDate() + 1);
+      currentDate = today.getTime();
+    }
 
     return (
       <Col md={12} lg={12}>
@@ -175,7 +197,7 @@ class AddTruckFormTwo extends PureComponent {
               <Row>
                 <div className="col-md-12 form__form-group">
                   <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" className="previous">Back</Button>
+                    <Button color="primary" type="button" className="previous" onClick={previousPage} >Back</Button>
                     <Button color="primary" type="submit" className="next">Next</Button>
                   </ButtonToolbar>
                 </div>
@@ -191,26 +213,15 @@ class AddTruckFormTwo extends PureComponent {
 }
 
 AddTruckFormTwo.propTypes = {
-  /*
-  equipment: PropTypes.shape({
-    id: PropTypes.number
-  }),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.string
-    })
-  }),
-  */
   p: PropTypes.number,
-  // DISABLING onTruckFullInfo for now
-  // onTruckFullInfo: PropTypes.func.isRequired,
-  // form: 'horizontal_form_validation_two', // a unique identifier for this form
-  // validate,
+  previousPage: PropTypes.func.isRequired,
+  getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onAvailabilityFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormTwo.defaultProps = {
   p: PropTypes.number
+  // previousPage: PropTypes.func.isAvailable,
 };
 
 export default AddTruckFormTwo;
