@@ -66,7 +66,7 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   startDateChange(data) {
-    console.log(data);
+    // console.log(data);
     this.setState({ startDate: data });
   }
 

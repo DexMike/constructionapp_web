@@ -63,11 +63,14 @@ class AddTruckFormFour extends PureComponent {
     // this closes the cylce of having the truck info cached
     truckFullInfo.info.driversId = newDriver.id;
     truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
-    truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate.toISOString().slice(0, 19).replace('T', ' ');
-    truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate.toISOString().slice(0, 19).replace('T', ' ');
-
-    console.log('>>SAVING... ');
-    console.log(truckFullInfo.info);
+    // truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate.toISOString()
+    // .slice(0, 19).replace('T', ' ');
+    truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
+    // truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate.toISOString()
+    // .slice(0, 19).replace('T', ' ');
+    truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
+    // console.log('>>SAVING... ');
+    // console.log(truckFullInfo.info);
     await EquipmentService.createEquipment(truckFullInfo.info);
     onClose();
     /**/
