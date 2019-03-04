@@ -5,16 +5,16 @@ import {
   Card,
   CardBody,
   Col,
-  Nav,
-  NavItem,
-  NavLink,
-  TabContent,
-  TabPane,
+  // Nav,
+  // NavItem,
+  // NavLink,
+  // TabContent,
+  // TabPane,
   Row,
   Button,
   Container
 } from 'reactstrap';
-import classnames from 'classnames';
+// import classnames from 'classnames';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import UserService from '../../api/UserService';
@@ -219,12 +219,16 @@ class UserForm extends Component {
     }
     return true;
   }
+  //
+  // This is being used as the driver detail page. We are not currently showing
+  // any users to the customer so there is no customer user detail page
+  //
 
   render() {
     const {
       companyName, firstName, lastName, email, mobilePhone, managerId, managers,
       isBanned, rating, driverId, preferredLanguage, languages, userStatus, userStatuses,
-      parentId, isArchived, activeTab
+      parentId, isArchived
     } = this.state;
     return (
       <React.Fragment>
@@ -233,115 +237,82 @@ class UserForm extends Component {
             <CardBody>
               <div className="card__title" />
 
-              <div className="tabs tabs--justify tabs--bordered-top">
-                <div className="tabs__wrap">
-                  <Nav tabs>
-                    <NavItem>
-                      <NavLink
-                        className={classnames({
-                          active: activeTab === '1'
-                        })}
-                        onClick={() => {
-                          this.toggle('1');
-                        }}
-                      >
-                        Users
-                      </NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink
-                        className={classnames({
-                          active: activeTab === '2'
-                        })}
-                        onClick={() => {
-                          this.toggle('2');
-                        }}
-                      >
-                        Address
-                      </NavLink>
-                    </NavItem>
-                  </Nav>
-                </div>
-              </div>
-
-              <TabContent activeTab={activeTab}>
-                <TabPane tabId="1">
-                  <br />
-                  <form className="form" onSubmit={e => this.saveUser(e)}>
-                    <div className="form__half">
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+              <br />
+              <form className="form" onSubmit={e => this.saveUser(e)}>
+                <div className="form__half">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           * Company
-                        </span>
-                        <div className="form__form-group-field">
-                          <input name="companyId" type="text" value={companyName} disabled />
-                        </div>
-                      </div>
+                    </span>
+                    <div className="form__form-group-field">
+                      <input name="companyId" type="text" value={companyName} disabled />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           * First Name
-                        </span>
-                        <div className="form__form-group-field">
-                          <input
+                    </span>
+                    <div className="form__form-group-field">
+                      <input
                             name="firstName"
                             type="text"
                             placeholder="First Name"
                             value={firstName}
                             onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           * Last Name
-                        </span>
-                        <div className="form__form-group-field">
-                          <input
+                    </span>
+                    <div className="form__form-group-field">
+                      <input
                             name="lastName"
                             type="text"
                             placeholder=" Last Name"
                             value={lastName}
                             onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">* Email</span>
-                        <div className="form__form-group-field">
-                          <input
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">* Email</span>
+                    <div className="form__form-group-field">
+                      <input
                             name="email"
                             type="text"
                             placeholder="Email"
                             value={email}
                             onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           * Mobile Phone
-                        </span>
-                        <div className="form__form-group-field">
-                          <input
+                    </span>
+                    <div className="form__form-group-field">
+                      <input
                             name="mobilePhone"
                             type="text"
                             placeholder="Mobile Phone"
                             value={mobilePhone}
                             onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           Manager
-                        </span>
-                        <div className="form__form-group-field">
-                          <SelectField
+                    </span>
+                    <div className="form__form-group-field">
+                      <SelectField
                             input={
                               {
                                 onChange: this.handleManagerIdChange,
@@ -358,64 +329,52 @@ class UserForm extends Component {
                             value={managerId}
                             options={managers}
                             placeholder="Select a Manager"
-                          />
-                        </div>
-                      </div>
+                      />
                     </div>
-                    {/* Second half */}
-                    <div className="form__half">
-                      <div className="form__form-group">
-                        {/* <span className="form__form-group-label"> */}
-                        {/** Is Banned */}
-                        {/* </span> */}
-                        <div className="form__form-group">
-                          <TCheckBox onChange={this.handleInputChange} name="isBanned"
+                  </div>
+                </div>
+                <div className="form__half">
+                  <div className="form__form-group">
+                    <div className="form__form-group">
+                      <TCheckBox onChange={this.handleInputChange} name="isBanned"
                                      value={!!isBanned} label="Is Banned"
-                          />
-                        </div>
-                        {/* <div className="form__form-group-field"> */}
-                        {/* <input */}
-                        {/* name="isBanned" */}
-                        {/* type="checkbox" */}
-                        {/* value={isBanned} */}
-                        {/* onChange={this.handleInputChange} */}
-                        {/* /> */}
-                        {/* </div> */}
-                      </div>
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">Rating</span>
-                        <div className="form__form-group-field">
-                          <input
+                      />
+                    </div>
+                  </div>
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">Rating</span>
+                    <div className="form__form-group-field">
+                      <input
                             name="rating"
                             type="number"
                             placeholder=""
                             value={rating}
                             onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           Driver Id
-                        </span>
-                        <div className="form__form-group-field">
-                          <input
+                    </span>
+                    <div className="form__form-group-field">
+                      <input
                             name="driverId"
                             type="number"
                             placeholder=""
                             value={driverId}
                             onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           * Preferred Language Id
-                        </span>
-                        <div className="form__form-group-field">
-                          <SelectField
+                    </span>
+                    <div className="form__form-group-field">
+                      <SelectField
                             input={
                               {
                                 onChange: this.handlePreferredLangChange,
@@ -432,16 +391,16 @@ class UserForm extends Component {
                             value={preferredLanguage}
                             options={languages}
                             placeholder="Select a language"
-                          />
-                        </div>
-                      </div>
+                      />
+                    </div>
+                  </div>
 
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
+                  <div className="form__form-group">
+                    <span className="form__form-group-label">
                           * User Status
-                        </span>
-                        <div className="form__form-group-field">
-                          <SelectField
+                    </span>
+                    <div className="form__form-group-field">
+                      <SelectField
                             input={
                               {
                                 onChange: this.handleUserStatChange,
@@ -458,67 +417,42 @@ class UserForm extends Component {
                             value={userStatus}
                             options={userStatuses}
                             placeholder="Select a status"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form__form-group">
-                        <span className="form__form-group-label">
-                          Parent Id
-                        </span>
-                        <div className="form__form-group-field">
-                          <input
-                            name="parentId"
-                            type="number"
-                            placeholder=""
-                            value={parentId}
-                            onChange={this.handleInputChange}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form__form-group">
-                        <TCheckBox onChange={this.handleInputChange} name="isArchived"
-                                   value={!!isArchived} label="Is Archived"
-                        />
-                      </div>
+                      />
                     </div>
-                    <Container>
-                      <Row>
-                        <Col md="4">
-                          <Button
-                            className="account__btn btn-delete"
-                            onClick={() => this.handleDelete()}
-                          >
-                            Delete User
-                          </Button>
-                        </Col>
-                        <Col md="4">
-                          {this.renderGoTo()}
-                          <Button
-                            className="app-link account__btn btn-back"
-                            onClick={() => this.handlePageClick('User')}
-                          >
-                            Cancel
-                          </Button>
-                        </Col>
-                        <Col md="4">
-                          <Button
-                            type="submit"
-                            className="account__btn btn-save"
-                          >
-                            Submit
-                          </Button>
-                        </Col>
-                      </Row>
-                    </Container>
-                  </form>
-                </TabPane>
+                  </div>
 
-                <TabPane tabId="2">
-                  <p>In development</p>
-                </TabPane>
-              </TabContent>
+                </div>
+                <Container>
+
+                  {/* <Row> */}
+                  {/* <Col md="4"> */}
+                  {/* <Button */}
+                  {/* className="account__btn btn-delete" */}
+                  {/* onClick={() => this.handleDelete()} */}
+                  {/* > */}
+                  {/* Delete User */}
+                  {/* </Button> */}
+                  {/* </Col> */}
+                  {/* <Col md="4"> */}
+                  {/* {this.renderGoTo()} */}
+                  {/* <Button */}
+                  {/* className="app-link account__btn btn-back" */}
+                  {/* onClick={() => this.handlePageClick('User')} */}
+                  {/* > */}
+                  {/* Cancel */}
+                  {/* </Button> */}
+                  {/* </Col> */}
+                  {/* <Col md="4"> */}
+                  {/* <Button */}
+                  {/* type="submit" */}
+                  {/* className="account__btn btn-save" */}
+                  {/* > */}
+                  {/* Submit */}
+                  {/* </Button> */}
+                  {/* </Col> */}
+                  {/* </Row> */}
+                </Container>
+              </form>
             </CardBody>
           </Card>
         </Col>
