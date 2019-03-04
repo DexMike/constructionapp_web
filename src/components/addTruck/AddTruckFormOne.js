@@ -15,6 +15,7 @@ import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
+
 // import validate from '../common/validate';
 
 class AddTruckFormOne extends PureComponent {
@@ -78,12 +79,12 @@ class AddTruckFormOne extends PureComponent {
   }
 
   selectChange(data) {
-    console.log(data);
+    // console.log(data);
     // this.setState({ truckType: data.value });
-    this.setState({ truckType: data.value },
-    function () {
-      console.log('setState completed', this.state)
-    });
+    this.setState({ truckType: data.value });
+    // function () {
+    // console.log('setState completed', this.state);
+    // });
   }
 
   isFormValid() {
@@ -132,7 +133,7 @@ class AddTruckFormOne extends PureComponent {
 
     const saveValues = {
       name: shortDesc, // unasigned
-      type: 'Truck',
+      type: truckType,
       styleId: 0, // unasigned
       maxCapacity, // This is a shorthand of (maxCapacity: maxCapacity)
       minCapacity: 0, // unasigned
@@ -142,7 +143,7 @@ class AddTruckFormOne extends PureComponent {
       licensePlate,
       vin,
       image: '', // unasigned
-      currentAvailability: 0, // unasigned
+      currentAvailability: 1, // unasigned
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
@@ -153,11 +154,13 @@ class AddTruckFormOne extends PureComponent {
       equipmentAddressId: 3, // THIS IS A FK
       modelId: '', // unasigned
       makeId: '', // unasigned
-      notes: truckType, // unasigned
+      notes: '', // unasigned
       createdBy: 0,
-      createdOn: moment().unix() * 1000,
+      createdOn: moment()
+        .unix() * 1000,
       modifiedBy: 0,
-      modifiedOn: moment().unix() * 1000,
+      modifiedOn: moment()
+        .unix() * 1000,
       isArchived: 0
     };
 
@@ -173,9 +176,15 @@ class AddTruckFormOne extends PureComponent {
       // // // // console.log(133);
       value = e.target.checked ? Number(1) : Number(0);
       if (e.target.checked) {
-        this.setState({ ratesByHour: 1, ratesByTon: 1 });
+        this.setState({
+          ratesByHour: 1,
+          ratesByTon: 1
+        });
       } else {
-        this.setState({ ratesByHour: 0, ratesByTon: 0 });
+        this.setState({
+          ratesByHour: 0,
+          ratesByTon: 0
+        });
       }
     }
     if (e.target.name === 'ratesByHour' && e.target.checked) {
@@ -202,13 +211,14 @@ class AddTruckFormOne extends PureComponent {
     }));
 
     const allTruckTypes = [];
-    Object.values(truckTypes).forEach((itm) => {
-      const inside = {
-        label: itm.val1,
-        value: itm.val1
-      };
-      allTruckTypes.push(inside);
-    });
+    Object.values(truckTypes)
+      .forEach((itm) => {
+        const inside = {
+          label: itm.val1,
+          value: itm.val1
+        };
+        allTruckTypes.push(inside);
+      });
     /*
     allTruckTypes = [
       { value: 'Side Dump', label: 'Side Dump' },
@@ -218,14 +228,14 @@ class AddTruckFormOne extends PureComponent {
     ];
     */
 
-    console.log(allTruckTypes);
+    // console.log(allTruckTypes);
     this.setState({
       allMaterials: materials,
       truckTypes: allTruckTypes
-    },
-    function () {
-    console.log('setState completed', this.state)
     });
+    // function () {
+    // console.log('setState completed', this.state)
+    // });
   }
 
   render() {
@@ -269,7 +279,7 @@ class AddTruckFormOne extends PureComponent {
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
                   <h3 className="subhead">
-                  Tell us about your truck
+                    Tell us about your truck
                   </h3>
                 </div>
                 <div className="col-md-6 form__form-group">
@@ -357,7 +367,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <hr className="bighr" />
+                <hr className="bighr"/>
               </Row>
 
               <Row className="col-md-12">
@@ -371,20 +381,20 @@ class AddTruckFormOne extends PureComponent {
                 <div className="col-md-4 form__form-group">
                   <div className="form__form-group">
                     <TCheckBox onChange={this.handleInputChange} name="ratesByBoth"
-                      value={!!ratesByBoth} label="By Both"
+                               value={!!ratesByBoth} label="By Both"
                     />
                   </div>
                 </div>
                 <div className="col-md-8 form__form-group">
                   <i className="material-icons iconSet">local_shipping</i>
-                   &nbsp;
+                  &nbsp;
                   <i className="material-icons iconSet">schedule</i>
                 </div>
 
                 {/* SECOND ROW */}
                 <div className="col-md-4 form__form-group">
                   <TCheckBox onChange={this.handleInputChange} name="ratesByHour"
-                    value={!!ratesByHour} label="By Hour"
+                             value={!!ratesByHour} label="By Hour"
                   />
                 </div>
                 <div className="col-md-1 ">
@@ -406,7 +416,7 @@ class AddTruckFormOne extends PureComponent {
                 </div>
 
                 <div className="col-md-9 form__form-group">
-                  <hr />
+                  <hr/>
                 </div>
 
                 <div className="col-md-12 form__form-group">
@@ -434,7 +444,7 @@ class AddTruckFormOne extends PureComponent {
                 {/* FOURTH ROW */}
                 <div className="col-md-4 form__form-group">
                   <TCheckBox onChange={this.handleInputChange} name="ratesByTon"
-                    value={!!ratesByTon} label="By Ton"
+                             value={!!ratesByTon} label="By Ton"
                   />
                 </div>
                 <div className="col-md-1 ">
@@ -475,7 +485,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <div className="col-md-9 form__form-group">
-                <hr />
+                <hr/>
               </div>
 
               <Row className="col-md-12">
@@ -497,7 +507,11 @@ class AddTruckFormOne extends PureComponent {
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
                   <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" disabled className="previous">Back</Button>
+                    <Button color="primary" type="button" disabled
+                            className="previous"
+                    >
+                      Back
+                    </Button>
                     {/* onSubmit={e => this.saveTruck(e)} */}
                     <Button color="primary" type="submit" className="next">Next</Button>
                   </ButtonToolbar>
