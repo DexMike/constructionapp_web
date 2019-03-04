@@ -22,8 +22,7 @@ class JobCreateForm extends Component {
       job,
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
-      bid: BidService.getDefaultBid(),
-      loaded: false
+      bid: BidService.getDefaultBid()
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
@@ -275,10 +274,10 @@ class JobCreateForm extends Component {
               <h4 className="form__form-group-label">Job Name</h4>
               <div className="form__form-group-field">
                 <input name="name"
-                       style={{ width: '100%' }}
-                       type="text"
-                       placeholder="Job # 242423"
-                       onChange={this.handleJobInputChange}
+                      style={{ width: '100%' }}
+                      type="text"
+                      placeholder="Job # 242423"
+                      onChange={this.handleJobInputChange}
                 />
               </div>
             </div>
@@ -288,7 +287,7 @@ class JobCreateForm extends Component {
           <div className="row">
             <div className="col-sm-4">
               <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
-                             buttonTwo="Ton" onChange={this.toggleJobRateType}
+                            buttonTwo="Ton" onChange={this.toggleJobRateType}
               />
             </div>
           </div>
@@ -304,7 +303,8 @@ class JobCreateForm extends Component {
                       onChange: this.handleStartTimeChange,
                       name: 'startTime',
                       value: job.startTime,
-                      givenDate: new Date(job.startTime).getTime()
+                      givenDate: new Date(job.startTime).getTime(),
+                      dateFormat: 'MM-dd-yy'
                     }
                   }
                   onChange={this.handleJobInputChange}
@@ -317,9 +317,9 @@ class JobCreateForm extends Component {
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
               <div className="form__form-group-field">
                 <input name="rateEstimate"
-                       type="text"
-                       value={job.rateEstimate}
-                       onChange={this.handleJobInputChange}
+                      type="text"
+                      value={job.rateEstimate}
+                      onChange={this.handleJobInputChange}
                 />
               </div>
             </div>
@@ -421,10 +421,10 @@ class JobCreateForm extends Component {
           <div className="col-sm-12">
             <div className="form__form-group">
               <input name="address1"
-                     type="text"
-                     placeholder="Address #1"
-                     value={endAddress.address1}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="Address #1"
+                    value={endAddress.address1}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
@@ -433,10 +433,10 @@ class JobCreateForm extends Component {
           <div className="col-sm-12">
             <div className="form__form-group">
               <input name="address2"
-                     type="text"
-                     placeholder="Address #2"
-                     value={endAddress.address2}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="Address #2"
+                    value={endAddress.address2}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
@@ -445,30 +445,30 @@ class JobCreateForm extends Component {
           <div className="col-sm-7">
             <div className="form__form-group">
               <input name="city"
-                     type="text"
-                     placeholder="City"
-                     value={endAddress.city}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="City"
+                    value={endAddress.city}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
           <div className="col-sm-2">
             <div className="form__form-group">
               <input name="state"
-                     type="text"
-                     placeholder="State"
-                     value={endAddress.state}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="State"
+                    value={endAddress.state}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
           <div className="col-sm-3">
             <div className="form__form-group">
               <input name="zipCode"
-                     type="text"
-                     placeholder="Zip Code"
-                     value={endAddress.zipCode}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="Zip Code"
+                    value={endAddress.zipCode}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
@@ -516,24 +516,16 @@ class JobCreateForm extends Component {
   }
 
   render() {
-    const { job, loaded } = this.state;
-    if (loaded) {
-      return (
-        <form id="job-request" onSubmit={e => this.createJob(e)}>
-          {this.renderSelectedEquipment()}
-          {this.renderJobTop()}
-          {this.renderJobStartLocation()}
-          {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
-          {this.renderJobBottom()}
-          {this.renderJobFormButtons()}
-        </form>
-      );
-    }
-
+    const { job } = this.state;
     return (
-      <React.Fragment>
-        X
-      </React.Fragment>
+      <form id="job-request" onSubmit={e => this.createJob(e)}>
+        {this.renderSelectedEquipment()}
+        {this.renderJobTop()}
+        {this.renderJobStartLocation()}
+        {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
+        {this.renderJobBottom()}
+        {this.renderJobFormButtons()}
+      </form>
     );
   }
 }

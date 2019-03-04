@@ -366,7 +366,8 @@ class DashboardCustomerPage extends Component {
                               onChange: this.handleStartDateChange,
                               name: 'startAvailability',
                               value: { startDate },
-                              givenDate: new Date(startDate).getTime()
+                              givenDate: new Date(startDate).getTime(),
+                              dateFormat: 'MM-dd-yy'
                             }
                           }
                           onChange={this.handleFilterChange}
@@ -380,7 +381,8 @@ class DashboardCustomerPage extends Component {
                               onChange: this.handleEndDateChange,
                               name: 'endAvailability',
                               value: { endDate },
-                              givenDate: new Date(endDate).getTime()
+                              givenDate: new Date(endDate).getTime(),
+                              dateFormat: 'MM-dd-yy'
                             }
                           }
                           onChange={this.handleFilterChange}
