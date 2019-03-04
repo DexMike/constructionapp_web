@@ -5,6 +5,7 @@ import AddTruckFormOne from './AddTruckFormOne';
 import AddTruckFormTwo from './AddTruckFormTwo';
 import AddTruckFormThree from './AddTruckFormThree';
 import AddTruckFormFour from './AddTruckFormFour';
+// import TButtonToggle from '../common/TButtonToggle';
 
 
 class AddTruckForm extends PureComponent {
@@ -23,7 +24,10 @@ class AddTruckForm extends PureComponent {
     this.handleTruckSave = this.handleTruckSave.bind(this);
     this.handleAvailabilitySave = this.handleAvailabilitySave.bind(this);
     this.handleUserSave = this.handleUserSave.bind(this);
-    // // console.log(props);
+    this.getTruckInfo = this.getTruckInfo.bind(this);
+    this.getAvailiabilityInfo = this.getAvailiabilityInfo.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
+    this.closeNow = this.closeNow.bind(this);
   }
 
   async componentDidMount() {
@@ -34,6 +38,21 @@ class AddTruckForm extends PureComponent {
     } else {
       this.setState({ page: 1, loaded: true });
     }
+  }
+
+  getTruckInfo() {
+    const { truckCachedInfo } = this.state;
+    return truckCachedInfo;
+  }
+
+  getAvailiabilityInfo() {
+    const { availabilityCachedInfo } = this.state;
+    return availabilityCachedInfo;
+  }
+
+  getUserInfo() {
+    const { userCachedInfo } = this.state;
+    return userCachedInfo;
   }
 
   handleKeyPress(event) {
@@ -80,6 +99,12 @@ class AddTruckForm extends PureComponent {
     const { page } = this.state;
     // just checking if the state changed
     this.setState({ page: page + 1 });
+  }
+
+  closeNow() {
+    const { toggle } = this.props;
+    // console.log('>trying to close');
+    toggle();
   }
 
   render() {
@@ -143,6 +168,7 @@ class AddTruckForm extends PureComponent {
                         company={company}
                         onTruckFullInfo={this.handleTruckSave}
                         handleSubmit={this.nextPage}
+                        getTruckFullInfo={this.getTruckInfo}
                       />
                       )}
                     {page === 2
@@ -151,10 +177,12 @@ class AddTruckForm extends PureComponent {
                         p={page}
                         // onSubmit={this.nextPage}
                         company={company}
-                        onTruckFullInfo={this.handleTruckSave}
+                        // what about this? do we need it?
+                        // onTruckFullInfo={this.handleTruckSave}
                         onAvailabilityFullInfo={this.handleAvailabilitySave}
                         previousPage={this.previousPage}
                         handleSubmit={this.nextPage}
+                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
                       />
                       )}
                     {page === 3
@@ -165,7 +193,7 @@ class AddTruckForm extends PureComponent {
                           onUserFullInfo={this.handleUserSave}
                           // onDriverSave={this.nextPage}
                           handleSubmit={this.nextPage}
-                          // truckFullInfo={truckCachedInfo}
+                          getUserFullInfo={this.getUserInfo}
                         />
                       )}
                     {page === 4
@@ -175,6 +203,7 @@ class AddTruckForm extends PureComponent {
                         truckFullInfo={truckCachedInfo}
                         availabilityFullInfo={availabilityCachedInfo}
                         userFullInfo={userCachedInfo}
+                        onClose={this.closeNow}
                       />
                       )}
                     {/* onSubmit={onSubmit} */}
@@ -200,8 +229,8 @@ AddTruckForm.propTypes = {
     page: PropTypes.number
   }),
   // id: PropTypes.number,
-  incomingPage: PropTypes.number // ,
-  // handleTruckSave: PropTypes.func.isRequired
+  incomingPage: PropTypes.number,
+  toggle: PropTypes.func.isRequired
 };
 
 AddTruckForm.defaultProps = {

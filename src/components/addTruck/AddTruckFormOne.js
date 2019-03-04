@@ -20,7 +20,6 @@ import './AddTruck.css';
 class AddTruckFormOne extends PureComponent {
   constructor(props) {
     super(props);
-
     this.state = {
       // ...equipment,
       selectedMaterials: [],
@@ -32,12 +31,12 @@ class AddTruckFormOne extends PureComponent {
       licensePlate: '',
       ratesByBoth: false,
       ratesByHour: false,
-      ratesCostPerHour: 0,
       ratesByTon: false,
       ratesCostPerTon: 0,
+      ratesCostPerHour: 0,
       minOperatingTime: 0,
       maxDistanceToPickup: 0,
-      truckType: 'Coman camarones'
+      truckType: ''
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -78,12 +77,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   selectChange(data) {
-    console.log(data);
-    // this.setState({ truckType: data.value });
-    this.setState({ truckType: data.value },
-    function () {
-      console.log('setState completed', this.state)
-    });
+    this.setState({ truckType: data.value });
   }
 
   isFormValid() {
@@ -209,23 +203,35 @@ class AddTruckFormOne extends PureComponent {
       };
       allTruckTypes.push(inside);
     });
-    /*
-    allTruckTypes = [
-      { value: 'Side Dump', label: 'Side Dump' },
-      { value: 'Dump Belly', label: 'Dump Belly' },
-      { value: 'Bottom Dump', label: 'Bottom Dump' },
-      { value: 'Rear Dump', label: 'Rear Dump' }
-    ];
-    */
-
-    console.log(allTruckTypes);
     this.setState({
       allMaterials: materials,
       truckTypes: allTruckTypes
-    },
-    function () {
-    console.log('setState completed', this.state)
     });
+
+    // check if there is preloaded info
+    const { getTruckFullInfo } = this.props;
+    const preloaded = getTruckFullInfo();
+    if (Object.keys(preloaded).length > 0) {
+      console.log('>> Seems that there is cached information');
+      this.setState({
+        maxCapacity: preloaded.info.maxCapacity,
+        description: preloaded.info.description,
+        vin: preloaded.info.vin,
+        licensePlate: preloaded.info.licensePlate,
+        ratesByBoth: preloaded.info.ratesByBoth,
+        ratesByHour: preloaded.info.ratesByHour,
+        ratesByTon: preloaded.info.ratesByTon
+      });
+      // controlled PENDING
+      /*
+        ratesCostPerTon: preloaded.info.ratesCostPerTon,
+        ratesCostPerHour: preloaded.info.ratesCostPerHour,
+        minOperatingTime: preloaded.info.minOperatingTime,
+        maxDistanceToPickup: preloaded.info.maxDistanceToPickup
+      */
+      // special
+      /* truckType: preloaded.info.truckType */
+    }
   }
 
   render() {
@@ -520,23 +526,14 @@ AddTruckFormOne.propTypes = {
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  onTruckFullInfo: PropTypes.func.isRequired // ,
-  /* ,
-  onTruckSave: PropTypes.func.isRequired,
-  handleTruckSave: PropTypesPropTypes.shape({
-    truckInfo: PropTypes.number
-  })
-  */
-  // form: 'horizontal_form_validation_two', // a unique identifier for this form
-  // validate,
-  // handleSubmit: PropTypes.func.isRequired
+  getTruckFullInfo: PropTypes.func.isRequired,
+  onTruckFullInfo: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
   company: null,
   equipment: null
-  // onTruckSave: PropTypes.object
 };
 
 export default AddTruckFormOne;

@@ -33,6 +33,20 @@ class AddTruckFormThree extends PureComponent {
     // this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentDidMount() {
+    // check fo cached info
+    const { getUserFullInfo } = this.props;
+    const preloaded = getUserFullInfo();
+    if (Object.keys(preloaded).length > 0) {
+      this.setState({
+        firstName: preloaded.info.firstName,
+        lastName: preloaded.info.lastName,
+        mobilePhone: preloaded.info.mobilePhone,
+        email: preloaded.info.email
+      });
+    }
+  }
+
   handleInputChange(e) {
     let { value } = e.target;
     if (e.target.name === 'isArchived') {
@@ -57,7 +71,7 @@ class AddTruckFormThree extends PureComponent {
   }
 
   render() {
-    // const { handleSubmit } = this.props;
+    const { previousPage } = this.props;
     const {
       firstName,
       lastName,
@@ -145,7 +159,7 @@ class AddTruckFormThree extends PureComponent {
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
                   <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" disabled className="previous">Back</Button>
+                    <Button color="primary" type="button" onClick={previousPage} className="previous">Back</Button>
                     <Button color="primary" type="submit" className="next">Next</Button>
                   </ButtonToolbar>
                 </div>
@@ -164,9 +178,9 @@ AddTruckFormThree.propTypes = {
     name: PropTypes.string,
     id: PropTypes.number
   }),
-  // onDriverSave: PropTypes.func.isRequired,
-  // truckFullInfo: PropTypes.func.isRequired,
-  onUserFullInfo: PropTypes.func.isRequired
+  getUserFullInfo: PropTypes.func.isRequired,
+  onUserFullInfo: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {

@@ -37,24 +37,19 @@ class EquipmentListPage extends Component {
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
   }
 
-  async componentDidMount() {
-    await this.fetchEquipments();
-    // const { loaded } = this.state;
-    this.setState({ loaded: true });
-    const equipments = await this.fetchEquipments();
+  componentDidMount() {
+    this.loadEquipments();
+  }
 
-    // commenting code below - we will need it if we need to get anything about the company
-    // Promise.all(
-    //   equipments.map(async (equipment) => {
-    //     const newEquipment = equipment;
-    //     const company = await EquipmentService.getCompanyById(newEquipment.companyId);
-    //     newEquipment.companyName = company.legalName;
-    //     // // console.log(newEquipment.companyName);
-    //     // // console.log(job.companyName)
-    //     return newEquipment;
-    //   })
-    // );
-    this.setState({ equipments });
+  async loadEquipments() {
+    const { modal } = this.state;
+    // load only if the modal is not present
+    if (!modal) {
+      await this.fetchEquipments();
+      this.setState({ loaded: true });
+      const equipments = await this.fetchEquipments();
+      this.setState({ equipments });
+    }
   }
 
   toggle(tab) {
@@ -71,7 +66,7 @@ class EquipmentListPage extends Component {
     const { modal } = this.state;
     this.setState({
       modal: !modal
-    });
+    }, this.loadEquipments);
   }
 
   async fetchEquipments() {
@@ -146,6 +141,7 @@ class EquipmentListPage extends Component {
             company={company}
             incomingPage={tabShow}
             handlePageClick={() => {}}
+            toggle={this.toggleAddTruckModal}
           />
         </div>
       </Modal>
