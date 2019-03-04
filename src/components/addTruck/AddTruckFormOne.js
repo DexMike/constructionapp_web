@@ -238,8 +238,10 @@ class AddTruckFormOne extends PureComponent {
     });
 
     // check if there is preloaded info
-    const { getTruckFullInfo } = this.props;
+    const { getTruckFullInfo, passedTruckFullInfo } = this.props;
     const preloaded = getTruckFullInfo();
+
+    // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
       // console.log('>> Seems that there is cached information');
       this.setState({
@@ -256,13 +258,40 @@ class AddTruckFormOne extends PureComponent {
         ratesCostPerHour: preloaded.info.hourRate,
         truckType: preloaded.info.type
       });
-
-      console.log(preloaded.info.type);
-      // console.log(preloaded.info.tonRate);
-      // special
-      /* truckType: preloaded.info.truckType
-      ratesByBoth: preloaded.info.ratesByBoth, */
+      // Materials Hauled is missing
     }
+
+    // load info from page list
+    if (Object.keys(passedTruckFullInfo).length > 0) {
+      // there should be a better way of doign this
+      console.log(passedTruckFullInfo);
+      this.setState({
+        maxCapacity: passedTruckFullInfo.maxCapacity,
+        description: passedTruckFullInfo.description,
+        vin: passedTruckFullInfo.vin,
+        licensePlate: passedTruckFullInfo.licensePlate,
+        // ratesByBoth: preloaded.info.ratesByBoth,
+        // ratesByHour: preloaded.info.ratesByHour,
+        // ratesByTon: preloaded.info.ratesByTon,
+        minOperatingTime: passedTruckFullInfo.minHours,
+        maxDistanceToPickup: passedTruckFullInfo.maxDistance,
+        ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
+        ratesCostPerHour: passedTruckFullInfo.hourRate,
+        truckType: passedTruckFullInfo.type
+      });
+      // set booleans
+      if (passedTruckFullInfo.rateType === 'Both') {
+        this.setState({ ratesByBoth: true });
+      }
+      if (passedTruckFullInfo.rateType === 'Tons') {
+        this.setState({ ratesByTon: true });
+      }
+      if (passedTruckFullInfo.rateType === 'Hour') {
+        this.setState({ ratesByHour: true });
+      }
+    }
+
+    console.log(passedTruckFullInfo);
   }
 
   render() {
@@ -539,11 +568,11 @@ class AddTruckFormOne extends PureComponent {
                     >
                       Back
                     </Button>
-                    {/* onSubmit={e => this.saveTruck(e)} */}
                     <Button color="primary" type="submit" className="next">Next</Button>
                   </ButtonToolbar>
                 </div>
               </Row>
+
             </form>
           </CardBody>
         </Card>
@@ -562,13 +591,17 @@ AddTruckFormOne.propTypes = {
     id: PropTypes.number
   }),
   getTruckFullInfo: PropTypes.func.isRequired,
-  onTruckFullInfo: PropTypes.func.isRequired
+  onTruckFullInfo: PropTypes.func.isRequired,
+  passedTruckFullInfo: PropTypes.shape({
+    info: PropTypes.object
+  })
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
   company: null,
-  equipment: null
+  equipment: null,
+  passedTruckFullInfo: null
 };
 
 export default AddTruckFormOne;

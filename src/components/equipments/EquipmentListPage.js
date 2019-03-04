@@ -28,7 +28,8 @@ class EquipmentListPage extends Component {
       goToAddEquipment: false,
       goToUpdateEquipment: false,
       equipmentId: 0,
-      modal: false
+      modal: false,
+      selectedItemData: {}
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -62,7 +63,6 @@ class EquipmentListPage extends Component {
   }
 
   toggleAddTruckModal() {
-    // console.log('toggle');
     const { modal } = this.state;
     this.setState({
       modal: !modal
@@ -93,11 +93,26 @@ class EquipmentListPage extends Component {
     }
   }
 
+  returnItemData(id) {
+    const { equipments } = this.state;
+    if (id !== 0) {
+      const obj = equipments.find(obj => obj.id === id);
+      this.setState({ selectedItemData: obj });
+    }
+    return false;
+  }
+
   handleEquipmentEdit(id) {
+    console.log(id);
+    this.returnItemData(id);
+    /*
     this.setState({
       goToUpdateEquipment: true,
       equipmentId: id
     });
+    */
+    // instead of going to the edit, let's call up the modal
+    this.toggleAddTruckModal();
   }
 
   renderGoTo() {
@@ -119,7 +134,8 @@ class EquipmentListPage extends Component {
     const {
       totalTrucks,
       modal,
-      companyId
+      companyId,
+      selectedItemData
     } = this.state;
     let tabShow = 1;
     if (totalTrucks > 0) {
@@ -142,6 +158,7 @@ class EquipmentListPage extends Component {
             incomingPage={tabShow}
             handlePageClick={() => {}}
             toggle={this.toggleAddTruckModal}
+            passedInfo={selectedItemData}
           />
         </div>
       </Modal>
