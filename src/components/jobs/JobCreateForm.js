@@ -9,6 +9,7 @@ import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
+import TDateTimePicker from '../common/TDateTimePicker';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -27,6 +28,7 @@ class JobCreateForm extends Component {
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
     this.handleEndAddressInputChange = this.handleEndAddressInputChange.bind(this);
     this.toggleJobRateType = this.toggleJobRateType.bind(this);
+    this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
     this.createJob = this.createJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
   }
@@ -76,6 +78,12 @@ class JobCreateForm extends Component {
     const { endAddress } = this.state;
     endAddress[e.target.name] = e.target.value;
     this.setState({ endAddress });
+  }
+
+  handleStartTimeChange(e) {
+    const { job } = this.state;
+    job.startTime = e;
+    this.setState({ job });
   }
 
   toggleJobRateType() {
@@ -266,10 +274,10 @@ class JobCreateForm extends Component {
               <h4 className="form__form-group-label">Job Name</h4>
               <div className="form__form-group-field">
                 <input name="name"
-                       style={{ width: '100%' }}
-                       type="text"
-                       placeholder="Job # 242423"
-                       onChange={this.handleJobInputChange}
+                      style={{ width: '100%' }}
+                      type="text"
+                      placeholder="Job # 242423"
+                      onChange={this.handleJobInputChange}
                 />
               </div>
             </div>
@@ -279,7 +287,7 @@ class JobCreateForm extends Component {
           <div className="row">
             <div className="col-sm-4">
               <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
-                             buttonTwo="Ton" onChange={this.toggleJobRateType}
+                            buttonTwo="Ton" onChange={this.toggleJobRateType}
               />
             </div>
           </div>
@@ -289,11 +297,17 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
               <div className="form__form-group-field">
-                <input name="startTime"
-                       type="text"
-                       placeholder="00/00/0000"
-                       value={job.startTime}
-                       onChange={this.handleJobInputChange}
+                <TDateTimePicker
+                  input={
+                    {
+                      onChange: this.handleStartTimeChange,
+                      name: 'startTime',
+                      value: job.startTime,
+                      givenDate: new Date(job.startTime).getTime(),
+                      dateFormat: 'MM-dd-yy'
+                    }
+                  }
+                  onChange={this.handleJobInputChange}
                 />
               </div>
             </div>
@@ -303,9 +317,9 @@ class JobCreateForm extends Component {
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
               <div className="form__form-group-field">
                 <input name="rateEstimate"
-                       type="text"
-                       value={job.rateEstimate}
-                       onChange={this.handleJobInputChange}
+                      type="text"
+                      value={job.rateEstimate}
+                      onChange={this.handleJobInputChange}
                 />
               </div>
             </div>
@@ -407,10 +421,10 @@ class JobCreateForm extends Component {
           <div className="col-sm-12">
             <div className="form__form-group">
               <input name="address1"
-                     type="text"
-                     placeholder="Address #1"
-                     value={endAddress.address1}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="Address #1"
+                    value={endAddress.address1}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
@@ -419,10 +433,10 @@ class JobCreateForm extends Component {
           <div className="col-sm-12">
             <div className="form__form-group">
               <input name="address2"
-                     type="text"
-                     placeholder="Address #2"
-                     value={endAddress.address2}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="Address #2"
+                    value={endAddress.address2}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
@@ -431,30 +445,30 @@ class JobCreateForm extends Component {
           <div className="col-sm-7">
             <div className="form__form-group">
               <input name="city"
-                     type="text"
-                     placeholder="City"
-                     value={endAddress.city}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="City"
+                    value={endAddress.city}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
           <div className="col-sm-2">
             <div className="form__form-group">
               <input name="state"
-                     type="text"
-                     placeholder="State"
-                     value={endAddress.state}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="State"
+                    value={endAddress.state}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
           <div className="col-sm-3">
             <div className="form__form-group">
               <input name="zipCode"
-                     type="text"
-                     placeholder="Zip Code"
-                     value={endAddress.zipCode}
-                     onChange={this.handleEndAddressInputChange}
+                    type="text"
+                    placeholder="Zip Code"
+                    value={endAddress.zipCode}
+                    onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
