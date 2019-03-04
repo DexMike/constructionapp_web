@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Row, Button, Container } from 'reactstrap';
-import TCheckBox from '../common/TCheckBox';
+import { Card, CardBody, Col, Row } from 'reactstrap';
+// import TCheckBox from '../common/TCheckBox';
 import JobService from '../../api/JobService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
@@ -22,9 +22,11 @@ class JobForm extends Component {
       rate: 0,
       notes: '',
       createdBy: 0,
-      createdOn: moment().unix() * 1000,
+      createdOn: moment()
+        .unix() * 1000,
       modifiedBy: 0,
-      modifiedOn: moment().unix() * 1000,
+      modifiedOn: moment()
+        .unix() * 1000,
       isArchived: 0
     };
 
@@ -99,7 +101,8 @@ class JobForm extends Component {
     if (job && job.id) {
       // then we are updating the record
       jobForm.isArchived = jobForm.isArchived === 'on' ? 1 : 0;
-      jobForm.modifiedOn = moment().unix() * 1000;
+      jobForm.modifiedOn = moment()
+        .unix() * 1000;
       await JobService.updateJob(jobForm);
       handlePageClick('Job');
     } else {
@@ -130,175 +133,217 @@ class JobForm extends Component {
     this.setState({ [e.target.name]: e.target.value });
   }
 
+  materialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
+  }
+
   renderGoTo() {
     const { goToDashboard, goToJob } = this.state;
     if (goToDashboard) {
-      return <Redirect push to="/" />;
+      return <Redirect push to="/"/>;
     }
     if (goToJob) {
-      return <Redirect push to="/jobs" />;
+      return <Redirect push to="/jobs"/>;
     }
     return true;
   }
 
+  renderJobTop(job) {
+    return (
+      <React.Fragment>
+        <h4 style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          {job.name}
+        </h4>
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Start Date</span>
+              <div className="form__form-group-field">
+                <span>
+                  {moment(job.startTime)
+                    .format('MM/DD/YY')}
+                </span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Estimated Amount</span>
+              <div className="form__form-group-field">
+                <span>{job.rateEstimate} {job.rateType}(s)</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Company Name</span>
+              <div className="form__form-group-field">
+                <span>{job.company.legalName}</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Status</span>
+              <div className="form__form-group-field">
+                <span>{job.status}</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Materials</span>
+              <div className="form__form-group-field">
+                <span>{this.materialsAsString(job.materials)}</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Rate</span>
+              <div className="form__form-group-field">
+                ${job.rate} / {job.rateType}
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Created On</span>
+              <div className="form__form-group-field">
+                <span>
+                  {moment(job.createdOn)
+                    .format('MM/DD/YY')}
+                </span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
+  renderAddress(address) {
+    return (
+      <Row style={{ marginTop: '20px' }}>
+        <Col sm={12}>
+          <div className="form__form-group">
+            <span className="form__form-group-label">Address</span>
+            <div className="form__form-group-field">
+              <span>{address.address1}</span>
+            </div>
+          </div>
+        </Col>
+        {address.address2 && (
+          <Col sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>{address.address2}</span>
+              </div>
+            </div>
+          </Col>
+        )}
+        {address.address3 && (
+          <Col sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>{address.address3}</span>
+              </div>
+            </div>
+          </Col>
+        )}
+        {address.address4 && (
+          <Col sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>{address.address4}</span>
+              </div>
+            </div>
+          </Col>
+        )}
+        <Col xl={3} lg={4} md={6} sm={12}>
+          <div className="form__form-group">
+            <span className="form__form-group-label">City</span>
+            <div className="form__form-group-field">
+              <span>{address.city}</span>
+            </div>
+          </div>
+        </Col>
+        <Col xl={3} lg={4} md={6} sm={12}>
+          <div className="form__form-group">
+            <span className="form__form-group-label">State</span>
+            <div className="form__form-group-field">
+              <span>{address.state}</span>
+            </div>
+          </div>
+        </Col>
+        <Col xl={3} lg={4} md={6} sm={12}>
+          <div className="form__form-group">
+            <span className="form__form-group-label">Zip Code</span>
+            <div className="form__form-group-field">
+              <span>{address.zipCode}</span>
+            </div>
+          </div>
+        </Col>
+      </Row>
+    );
+  }
+
+  renderJobBottom(job) {
+    return (
+      <React.Fragment>
+        <h4 style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          Comments
+        </h4>
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                {job.notes}
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   render() {
-    const {
-      companiesId,
-      status,
-      startAddress,
-      endAddress,
-      rateType,
-      rate,
-      notes,
-      createdBy,
-      createdOn,
-      modifiedBy,
-      modifiedOn,
-      isArchived
-    } = this.state;
+    const { job } = this.props;
     return (
       <React.Fragment>
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
-              <form className="form" onSubmit={e => this.saveJob(e)}>
-                <div className="form__half">
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Company Name</span>
-                    <div className="form__form-group-field">
-                      <input name="companiesId" type="number" value={companiesId}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Status</span>
-                    <div className="form__form-group-field">
-                      <input name="status" type="text" value={status}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Start Address</span>
-                    <div className="form__form-group-field">
-                      <input name="startAddress" type="number" value={startAddress}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">End Address</span>
-                    <div className="form__form-group-field">
-                      <input name="endAddress" type="number" value={endAddress}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Model Type</span>
-                    <div className="form__form-group-field">
-                      <input name="rateType" type="text" value={rateType}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Rate</span>
-                    <div className="form__form-group-field">
-                      <input name="rate" type="number" value={rate}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Notes</span>
-                    <div className="form__form-group-field">
-                      <input name="notes" type="text" value={notes}
-                             onChange={this.handleInputChange}
-                      />
-
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Created By</span>
-                    <div className="form__form-group-field">
-                      <input name="createdBy" type="number" value={createdBy}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Created On</span>
-                    <div className="form__form-group-field">
-                      <input name="createdOn" type="text" value={moment(createdOn)
-                        .format()} onChange={this.handleInputChange} disabled
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Modified By</span>
-                    <div className="form__form-group-field">
-                      <input name="modifiedBy" type="number" value={modifiedBy}
-                             onChange={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Modified On</span>
-                    <div className="form__form-group-field">
-                      <input name="modifiedOn" type="text" value={moment(modifiedOn)
-                        .format()} onChange={this.handleInputChange} disabled
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form__form-group">
-                    <TCheckBox onChange={this.handleInputChange} name="isArchived"
-                               value={!!isArchived} label="Is Archived"
-                    />
-                  </div>
-                </div>
-                <Container>
-                  <Row>
-                    <Col md="4">
-                      <Button
-                        className="account__btn btn-delete"
-                        onClick={() => this.handleDelete()}
-                      >
-                        Delete Job
-                      </Button>
-                    </Col>
-                    <Col md="4">
-                      {this.renderGoTo()}
-                      <Button
-                        className="app-link account__btn btn-back"
-                        onClick={() => this.handlePageClick('Job')}
-                      >
-                        Cancel
-                      </Button>
-                    </Col>
-                    <Col md="4">
-                      <Button
-                        type="submit"
-                        className="account__btn btn-save"
-                      >
-                        Submit
-                      </Button>
-                    </Col>
-                  </Row>
-                </Container>
-              </form>
+              {this.renderJobTop(job)}
+              <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
+              {this.renderAddress(job.startAddress)}
+              {job.endAddress && (
+                <React.Fragment>
+                  <h4 style={{ borderBottom: '3px solid #ccc' }}>End Location</h4>
+                  {this.renderAddress(job.endAddress)}
+                </React.Fragment>
+              )}
+              {this.renderJobBottom(job)}
             </CardBody>
           </Card>
         </Col>

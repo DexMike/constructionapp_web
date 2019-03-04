@@ -10,8 +10,8 @@ import {
   // NavLink,
   // TabContent,
   // TabPane,
-  Row,
-  Button,
+  // Row,
+  // Button,
   Container
 } from 'reactstrap';
 // import classnames from 'classnames';
@@ -227,8 +227,8 @@ class UserForm extends Component {
   render() {
     const {
       companyName, firstName, lastName, email, mobilePhone, managerId, managers,
-      isBanned, rating, driverId, preferredLanguage, languages, userStatus, userStatuses,
-      parentId, isArchived
+      isBanned, rating, driverId, preferredLanguage, languages, userStatus, userStatuses
+      // , parentId, isArchived
     } = this.state;
     return (
       <React.Fragment>

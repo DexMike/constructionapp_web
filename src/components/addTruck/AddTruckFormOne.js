@@ -257,7 +257,7 @@ class AddTruckFormOne extends PureComponent {
         truckType: preloaded.info.type
       });
 
-      console.log(preloaded.info.type);
+      // console.log(preloaded.info.type);
       // console.log(preloaded.info.tonRate);
       // special
       /* truckType: preloaded.info.truckType

@@ -103,7 +103,7 @@ class AddTruckForm extends PureComponent {
 
   closeNow() {
     const { toggle } = this.props;
-    console.log('>trying to close');
+    // console.log('>trying to close');
     toggle();
   }
 
