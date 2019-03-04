@@ -15,8 +15,8 @@ hr {
 }
 
 .modal-dialog--header{
-    width: 720px !important; /* 650px */
-    max-width: 720px;
+    width: 740px !important; /* 650px */
+    max-width: 740px;
 }
 .modal-dialog--body{
     width: 100% !important;

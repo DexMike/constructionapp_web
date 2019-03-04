@@ -30,7 +30,7 @@ class AddTruckFormOne extends PureComponent {
       description: '',
       vin: '',
       licensePlate: '',
-      ratesByBoth: false,
+      ratesByBoth: false, // this only tracks the select
       ratesByHour: false,
       ratesByTon: false,
       ratesCostPerTon: 0,
@@ -110,9 +110,9 @@ class AddTruckFormOne extends PureComponent {
       vin,
       licensePlate,
       ratesByBoth,
-      // ratesByHour,
+      ratesByHour,
+      ratesByTon,
       ratesCostPerHour,
-      // ratesByTon,
       ratesCostPerTon,
       minOperatingTime,
       maxDistanceToPickup
@@ -120,7 +120,24 @@ class AddTruckFormOne extends PureComponent {
     const { onTruckFullInfo } = this.props;
     // validation is pending
 
-    const chargeBy = ratesByBoth === true ? 1 : 0;
+    /*
+    Rate Type is being set to 0, it should be set to:
+    Both if they clicked Both;
+    Ton if they pick By Tons;
+    Hour if they pick By Hour
+    */
+    let chargeBy = '';
+    if (ratesByBoth) {
+      chargeBy = 'Both';
+    } else {
+      if (ratesByHour) {
+        chargeBy = 'Hour';
+      }
+      if (ratesByTon) {
+        chargeBy = 'Tons';
+      }
+    }
+
     // map the values with the ones on equipment
     // TODO-> Ask which params are required
     const shortDesc = description.substring(0, 45);
@@ -138,6 +155,9 @@ class AddTruckFormOne extends PureComponent {
       vin,
       image: '', // unasigned
       currentAvailability: 1, // unasigned
+      ratesByBoth, // keeping here in order to track it
+      ratesByHour, // keeping here in order to track it
+      ratesByTon, // keeping here in order to track it
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
@@ -229,17 +249,19 @@ class AddTruckFormOne extends PureComponent {
         licensePlate: preloaded.info.licensePlate,
         ratesByBoth: preloaded.info.ratesByBoth,
         ratesByHour: preloaded.info.ratesByHour,
-        ratesByTon: preloaded.info.ratesByTon
+        ratesByTon: preloaded.info.ratesByTon,
+        minOperatingTime: preloaded.info.minHours,
+        maxDistanceToPickup: preloaded.info.maxDistance,
+        ratesCostPerTon: preloaded.info.tonRate,
+        ratesCostPerHour: preloaded.info.hourRate,
+        truckType: preloaded.info.type
       });
-      // controlled PENDING
-      /*
-        ratesCostPerTon: preloaded.info.ratesCostPerTon,
-        ratesCostPerHour: preloaded.info.ratesCostPerHour,
-        minOperatingTime: preloaded.info.minOperatingTime,
-        maxDistanceToPickup: preloaded.info.maxDistanceToPickup
-      */
+
+      console.log(preloaded.info.type);
+      // console.log(preloaded.info.tonRate);
       // special
-      /* truckType: preloaded.info.truckType */
+      /* truckType: preloaded.info.truckType
+      ratesByBoth: preloaded.info.ratesByBoth, */
     }
   }
 
