@@ -9,6 +9,7 @@ import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
+import TDateTimePicker from '../common/TDateTimePicker';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -21,12 +22,14 @@ class JobCreateForm extends Component {
       job,
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
-      bid: BidService.getDefaultBid()
+      bid: BidService.getDefaultBid(),
+      loaded: false
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
     this.handleEndAddressInputChange = this.handleEndAddressInputChange.bind(this);
     this.toggleJobRateType = this.toggleJobRateType.bind(this);
+    this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
     this.createJob = this.createJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
   }
@@ -76,6 +79,12 @@ class JobCreateForm extends Component {
     const { endAddress } = this.state;
     endAddress[e.target.name] = e.target.value;
     this.setState({ endAddress });
+  }
+
+  handleStartTimeChange(e) {
+    const { job } = this.state;
+    job.startTime = e;
+    this.setState({ job });
   }
 
   toggleJobRateType() {
@@ -289,11 +298,16 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
               <div className="form__form-group-field">
-                <input name="startTime"
-                       type="text"
-                       placeholder="00/00/0000"
-                       value={job.startTime}
-                       onChange={this.handleJobInputChange}
+                <TDateTimePicker
+                  input={
+                    {
+                      onChange: this.handleStartTimeChange,
+                      name: 'startTime',
+                      value: job.startTime,
+                      givenDate: new Date(job.startTime).getTime()
+                    }
+                  }
+                  onChange={this.handleJobInputChange}
                 />
               </div>
             </div>
@@ -502,16 +516,24 @@ class JobCreateForm extends Component {
   }
 
   render() {
-    const { job } = this.state;
+    const { job, loaded } = this.state;
+    if (loaded) {
+      return (
+        <form id="job-request" onSubmit={e => this.createJob(e)}>
+          {this.renderSelectedEquipment()}
+          {this.renderJobTop()}
+          {this.renderJobStartLocation()}
+          {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
+          {this.renderJobBottom()}
+          {this.renderJobFormButtons()}
+        </form>
+      );
+    }
+
     return (
-      <form id="job-request" onSubmit={e => this.createJob(e)}>
-        {this.renderSelectedEquipment()}
-        {this.renderJobTop()}
-        {this.renderJobStartLocation()}
-        {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
-        {this.renderJobBottom()}
-        {this.renderJobFormButtons()}
-      </form>
+      <React.Fragment>
+        X
+      </React.Fragment>
     );
   }
 }
