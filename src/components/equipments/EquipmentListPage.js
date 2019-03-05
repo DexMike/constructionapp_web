@@ -96,14 +96,16 @@ class EquipmentListPage extends Component {
   returnItemData(id) {
     const { equipments } = this.state;
     if (id !== 0) {
-      const obj = equipments.find(obj => obj.id === id);
-      this.setState({ selectedItemData: obj });
+      for (const equipment of equipments) {
+        if (equipment.id === id) {
+          this.setState({ selectedItemData: equipment });
+        }
+      }
     }
     return false;
   }
 
   handleEquipmentEdit(id) {
-    console.log(id);
     this.returnItemData(id);
     /*
     this.setState({
@@ -170,8 +172,8 @@ class EquipmentListPage extends Component {
     const { loaded } = this.state;
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
-      const tempHourRate = newEquipment.hourRate;
-      const tempTonRate = newEquipment.tonRate;
+      // const tempHourRate = newEquipment.hourRate;
+      // const tempTonRate = newEquipment.tonRate;
 
       newEquipment.tempHourRate = `$${newEquipment.hourRate}`;
       newEquipment.tempTonRate = `$${newEquipment.tonRate}`;

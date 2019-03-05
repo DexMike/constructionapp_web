@@ -47,28 +47,23 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       truckFullInfo,
       userFullInfo,
-      availabilityFullInfo
+      availabilityFullInfo,
+      onClose
+      // availabilityFullInfo
     } = this.props;
-    console.log(Object.keys(getTruckFullInfo()).length);
-    console.log(Object.keys(getAvailiabilityFullInfo()).length);
-    console.log(Object.keys(getUserFullInfo()).length);
+
+    // console.log(Object.keys(getTruckFullInfo()).length);
+    // console.log(Object.keys(getAvailiabilityFullInfo()).length);
+    // console.log(Object.keys(getUserFullInfo()).length);
     // return false;
     if (Object.keys(getTruckFullInfo()).length > 0
       && Object.keys(getAvailiabilityFullInfo()).length > 0
       && Object.keys(getUserFullInfo()).length > 0) {
       // not saving, updating instead
-      // console.log('>> UPDATING..');
-      // console.log(getTruckFullInfo);
+      // careful here, I'm missing the ID
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // still missing to assing info for user and driver
     } else {
-      const {
-        truckFullInfo,
-        userFullInfo,
-        availabilityFullInfo,
-        onClose
-      } = this.props;
-
       const newUser = await UserService.createUser(userFullInfo.info);
 
       const driver = {
@@ -104,12 +99,8 @@ class AddTruckFormFour extends PureComponent {
       userFullInfo,
       previousPage
     } = this.props;
-    // const { showPassword } = this.state;
-    // console.log(truckFullInfo);
-    // console.log(availabilityFullInfo);
-    // console.log(userFullInfo);
+
     const availableText = availabilityFullInfo.info.isAvailable ? 'Unavailable' : 'Available';
-    // // console.log(availabilityFullInfo.info.startDate.toString());
     const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
     const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
     return (

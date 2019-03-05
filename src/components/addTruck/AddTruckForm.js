@@ -11,7 +11,6 @@ import AddTruckFormFour from './AddTruckFormFour';
 class AddTruckForm extends PureComponent {
   constructor(props) {
     super(props);
-    console.log(props);
     this.state = {
       page: 1,
       loaded: false,

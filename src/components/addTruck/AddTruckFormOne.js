@@ -23,6 +23,7 @@ class AddTruckFormOne extends PureComponent {
     super(props);
     this.state = {
       // ...equipment,
+      id: 0, // for use if we are editing
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
@@ -102,8 +103,8 @@ class AddTruckFormOne extends PureComponent {
     }
     */
     const { company } = this.props;
-    // // console.log(company);
     const {
+      id,
       truckType,
       maxCapacity,
       description,
@@ -120,12 +121,7 @@ class AddTruckFormOne extends PureComponent {
     const { onTruckFullInfo } = this.props;
     // validation is pending
 
-    /*
-    Rate Type is being set to 0, it should be set to:
-    Both if they clicked Both;
-    Ton if they pick By Tons;
-    Hour if they pick By Hour
-    */
+    // set states for checkboxes
     let chargeBy = '';
     if (ratesByBoth) {
       chargeBy = 'Both';
@@ -143,6 +139,7 @@ class AddTruckFormOne extends PureComponent {
     const shortDesc = description.substring(0, 45);
 
     const saveValues = {
+      id,
       name: shortDesc, // unasigned
       type: truckType,
       styleId: 0, // unasigned
@@ -187,7 +184,6 @@ class AddTruckFormOne extends PureComponent {
     let { value } = e.target;
     // const { ratesByHour, ratesByTon } = this.state;
     if (e.target.name === 'ratesByBoth') {
-      // // // // console.log(133);
       value = e.target.checked ? Number(1) : Number(0);
       if (e.target.checked) {
         this.setState({
@@ -208,7 +204,6 @@ class AddTruckFormOne extends PureComponent {
       this.setState({ ratesByHour: 0 });
     }
     if (e.target.name === 'maxCapacity') {
-      // // // console.log(217);
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
     this.setState({ [e.target.name]: value });
@@ -261,12 +256,11 @@ class AddTruckFormOne extends PureComponent {
       // Materials Hauled is missing
     }
 
-<<<<<<< HEAD
-    // load info from page list
+    // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
       // there should be a better way of doign this
-      console.log(passedTruckFullInfo);
       this.setState({
+        id: passedTruckFullInfo.id,
         maxCapacity: passedTruckFullInfo.maxCapacity,
         description: passedTruckFullInfo.description,
         vin: passedTruckFullInfo.vin,
@@ -290,22 +284,14 @@ class AddTruckFormOne extends PureComponent {
       if (passedTruckFullInfo.rateType === 'Hour') {
         this.setState({ ratesByHour: true });
       }
-=======
-      // console.log(preloaded.info.type);
-      // console.log(preloaded.info.tonRate);
-      // special
-      /* truckType: preloaded.info.truckType
-      ratesByBoth: preloaded.info.ratesByBoth, */
->>>>>>> dev
     }
-
-    console.log(passedTruckFullInfo);
   }
 
   render() {
     const {
       // multiInput,
       // multiMeta,
+      id,
       selectedMaterials,
       allMaterials,
       truckType,
@@ -330,7 +316,7 @@ class AddTruckFormOne extends PureComponent {
             <div className="card__title">
               <h5 className="bold-text">
                 Welcome to Trelar, Lets add a truck so customers can find you (
-                {p}
+                {p}, {id}
                 )
               </h5>
             </div>
