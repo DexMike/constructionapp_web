@@ -2,11 +2,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import JobForm from './JobForm';
+import JobCarrierForm from './JobCarrierForm';
+import JobCustomerForm from './JobCustomerForm';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import CompanyService from '../../api/CompanyService';
+import ProfileService from '../../api/ProfileService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -24,12 +26,14 @@ class JobSavePage extends Component {
         },
         endAddress: {
           address1: ''
-        }
+        },
+        companyType: null
       }
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.carrierOrCustomerForm = this.carrierOrCustomerForm.bind(this);
   }
 
   async componentDidMount() {
@@ -66,6 +70,16 @@ class JobSavePage extends Component {
     const { id } = match.params;
     await JobService.deleteJobById(id);
     this.handlePageClick('Job');
+  }
+
+  async carrierOrCustomerForm(job) {
+    const { companyType } = this.state;
+    const profile = await ProfileService.getProfile();
+    this.setState({ companyType: profile.companyType });
+    if (profile.companyType === 'Carrier') {
+      return <JobCarrierForm job={job} handlePageClick={this.handlePageClick} />;
+    }
+    return <JobCustomerForm job={job} handlePageClick={this.handlePageClick} />;
   }
 
   renderGoTo() {
@@ -105,7 +119,8 @@ class JobSavePage extends Component {
             </h3>
           </div>
         </div>
-        <JobForm job={job} handlePageClick={this.handlePageClick} />
+        {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
+        {this.carrierOrCustomerForm(job)}
       </div>
     );
   }
