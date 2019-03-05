@@ -1,5 +1,8 @@
 
 import React, { Component } from 'react';
+import {
+  Container
+} from 'reactstrap';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import JobCarrierForm from './JobCarrierForm';
@@ -9,6 +12,7 @@ import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -26,14 +30,16 @@ class JobSavePage extends Component {
         },
         endAddress: {
           address1: ''
-        },
-        companyType: null
-      }
+        }
+      },
+      // moved conpanyType to the first level
+      // for some reason I couldn't set it when nested
+      companyType: null
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
-    this.carrierOrCustomerForm = this.carrierOrCustomerForm.bind(this);
+    // this.carrierOrCustomerForm = this.carrierOrCustomerForm.bind(this);
   }
 
   async componentDidMount() {
@@ -57,6 +63,13 @@ class JobSavePage extends Component {
       job.materials = materials.map(material => material.value);
       this.setState({ job });
     }
+
+    // moved the loader to the mount function
+    const profile = await ProfileService.getProfile();
+    this.setState({ companyType: profile.companyType },
+      function test() {
+        console.log('setState completed', this.state);
+      });
   }
 
   handlePageClick(menuItem) {
@@ -72,16 +85,6 @@ class JobSavePage extends Component {
     this.handlePageClick('Job');
   }
 
-  async carrierOrCustomerForm(job) {
-    const { companyType } = this.state;
-    const profile = await ProfileService.getProfile();
-    this.setState({ companyType: profile.companyType });
-    if (profile.companyType === 'Carrier') {
-      return <JobCarrierForm job={job} handlePageClick={this.handlePageClick} />;
-    }
-    return <JobCustomerForm job={job} handlePageClick={this.handlePageClick} />;
-  }
-
   renderGoTo() {
     const { goToDashboard, goToJob } = this.state;
     if (goToDashboard) {
@@ -94,34 +97,51 @@ class JobSavePage extends Component {
   }
 
   render() {
-    const { job } = this.state;
-    return (
-      <div className="container">
-        {this.renderGoTo()}
-        <button type="button" className="app-link"
-          onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &#62;
-        <button type="button" className="app-link" onClick={() => this.handlePageClick('Job')}>
-          Jobs
-        </button>
-        &nbsp;&#62;&nbsp;
-        {job.company.legalName}
-        &nbsp;&#62;&nbsp;
-        {job.name}
+    const { job, companyType } = this.state;
+    // waiting for jobs and type to be available
+    if (companyType !== null && job !== null) {
+      let type = '';
+      // console.log(companyType);
+      // get the <JobCarrierForm> inside parentheses so that jsx doesn't complain
+      if (companyType === 'Carrier') {
+        type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick} />);
+      } else {
+        type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick} />);
+      }
+      return (
+        <div className="container">
+          {this.renderGoTo()}
+          <button type="button" className="app-link"
+            onClick={() => this.handlePageClick('Dashboard')}
+          >
+            Dashboard
+          </button>
+          &#62;
+          <button type="button" className="app-link" onClick={() => this.handlePageClick('Job')}>
+            Jobs
+          </button>
+          &nbsp;&#62;&nbsp;
+          {job.company.legalName}
+          &nbsp;&#62;&nbsp;
+          {job.name}
 
-        <div className="row">
-          <div className="col-md-12">
-            <h3 className="page-title">
-              Job Details
-            </h3>
+          <div className="row">
+            <div className="col-md-12">
+              <h3 className="page-title">
+                Job Details
+              </h3>
+            </div>
           </div>
+          {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
+          {/* this.carrierOrCustomerForm(job) */}
+          {type}
         </div>
-        {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
-        {this.carrierOrCustomerForm(job)}
-      </div>
+      );
+    }
+    return (
+      <Container className="dashboard">
+        Loading...
+      </Container>
     );
   }
 }

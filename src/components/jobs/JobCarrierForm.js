@@ -168,7 +168,7 @@ class JobCarrierForm extends Component {
           marginBottom: '20px'
         }}
         >
-          {job.name} this is carrier job detail
+          {job.name} this is carrier job detail (carrier)
         </h4>
         <Row>
           <Col xl={3} lg={4} md={6} sm={12}>

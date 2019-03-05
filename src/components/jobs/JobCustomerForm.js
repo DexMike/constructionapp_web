@@ -170,7 +170,7 @@ class JobForm extends Component {
         >
           {job.name}
         </h4>
-        <h3>this is carrier job detail</h3>
+        <h3>this is carrier job detail (customer)</h3>
         <Row>
           <Col xl={3} lg={4} md={6} sm={12}>
             <div className="form__form-group">

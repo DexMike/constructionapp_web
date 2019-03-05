@@ -23,6 +23,9 @@ class AddTruckFormOne extends PureComponent {
     super(props);
     this.state = {
       // ...equipment,
+      id: 0, // for use if we are editing
+      driversId: 0, // for use if we are editing
+      defaultDriverId: 0, // for use if we are editing
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
@@ -43,7 +46,6 @@ class AddTruckFormOne extends PureComponent {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    // // console.log(props);
   }
 
   async componentDidMount() {
@@ -102,8 +104,10 @@ class AddTruckFormOne extends PureComponent {
     }
     */
     const { company } = this.props;
-    // // console.log(company);
     const {
+      id,
+      defaultDriverId,
+      driversId,
       truckType,
       maxCapacity,
       description,
@@ -120,12 +124,7 @@ class AddTruckFormOne extends PureComponent {
     const { onTruckFullInfo } = this.props;
     // validation is pending
 
-    /*
-    Rate Type is being set to 0, it should be set to:
-    Both if they clicked Both;
-    Ton if they pick By Tons;
-    Hour if they pick By Hour
-    */
+    // set states for checkboxes
     let chargeBy = '';
     if (ratesByBoth) {
       chargeBy = 'Both';
@@ -139,10 +138,11 @@ class AddTruckFormOne extends PureComponent {
     }
 
     // map the values with the ones on equipment
-    // TODO-> Ask which params are required
     const shortDesc = description.substring(0, 45);
 
+    // TODO-> Ask which params are required
     const saveValues = {
+      id,
       name: shortDesc, // unasigned
       type: truckType,
       styleId: 0, // unasigned
@@ -162,9 +162,9 @@ class AddTruckFormOne extends PureComponent {
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
       companyId: company.id,
-      defaultDriverId: 0, // unasigned
+      defaultDriverId, // unasigned
       driverEquipmentsId: 0, // unasigned
-      driversId: 1, // THIS IS A FK
+      driversId, // THIS IS A FK
       equipmentAddressId: 3, // THIS IS A FK
       modelId: '', // unasigned
       makeId: '', // unasigned
@@ -187,7 +187,6 @@ class AddTruckFormOne extends PureComponent {
     let { value } = e.target;
     // const { ratesByHour, ratesByTon } = this.state;
     if (e.target.name === 'ratesByBoth') {
-      // // // // console.log(133);
       value = e.target.checked ? Number(1) : Number(0);
       if (e.target.checked) {
         this.setState({
@@ -208,7 +207,6 @@ class AddTruckFormOne extends PureComponent {
       this.setState({ ratesByHour: 0 });
     }
     if (e.target.name === 'maxCapacity') {
-      // // // console.log(217);
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
     this.setState({ [e.target.name]: value });
@@ -238,8 +236,10 @@ class AddTruckFormOne extends PureComponent {
     });
 
     // check if there is preloaded info
-    const { getTruckFullInfo } = this.props;
+    const { getTruckFullInfo, passedTruckFullInfo } = this.props;
     const preloaded = getTruckFullInfo();
+
+    // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
       // console.log('>> Seems that there is cached information');
       this.setState({
@@ -256,12 +256,37 @@ class AddTruckFormOne extends PureComponent {
         ratesCostPerHour: preloaded.info.hourRate,
         truckType: preloaded.info.type
       });
+      // Materials Hauled is missing
+    }
 
-      // console.log(preloaded.info.type);
-      // console.log(preloaded.info.tonRate);
-      // special
-      /* truckType: preloaded.info.truckType
-      ratesByBoth: preloaded.info.ratesByBoth, */
+    // if this is loaded from the list instead
+    if (Object.keys(passedTruckFullInfo).length > 0) {
+      // there should be a better way of doign this
+
+      this.setState({
+        id: passedTruckFullInfo.id,
+        driversId: passedTruckFullInfo.driversId,
+        defaultDriverId: passedTruckFullInfo.defaultDriverId,
+        maxCapacity: passedTruckFullInfo.maxCapacity,
+        description: passedTruckFullInfo.description,
+        vin: passedTruckFullInfo.vin,
+        licensePlate: passedTruckFullInfo.licensePlate,
+        minOperatingTime: passedTruckFullInfo.minHours,
+        maxDistanceToPickup: passedTruckFullInfo.maxDistance,
+        ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
+        ratesCostPerHour: passedTruckFullInfo.hourRate,
+        truckType: passedTruckFullInfo.type
+      });
+      // set booleans
+      if (passedTruckFullInfo.rateType === 'Both') {
+        this.setState({ ratesByBoth: true });
+      }
+      if (passedTruckFullInfo.rateType === 'Tons') {
+        this.setState({ ratesByTon: true });
+      }
+      if (passedTruckFullInfo.rateType === 'Hour') {
+        this.setState({ ratesByHour: true });
+      }
     }
   }
 
@@ -269,6 +294,9 @@ class AddTruckFormOne extends PureComponent {
     const {
       // multiInput,
       // multiMeta,
+      id,
+      defaultDriverId,
+      driversId,
       selectedMaterials,
       allMaterials,
       truckType,
@@ -293,7 +321,7 @@ class AddTruckFormOne extends PureComponent {
             <div className="card__title">
               <h5 className="bold-text">
                 Welcome to Trelar, Lets add a truck so customers can find you (
-                {p}
+                {p}, {id}
                 )
               </h5>
             </div>
@@ -317,6 +345,8 @@ class AddTruckFormOne extends PureComponent {
                     value={description}
                     onChange={this.handleInputChange}
                   />
+                  <input type="hidden" val={defaultDriverId} />
+                  <input type="hidden" val={driversId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Truck Type</span>
@@ -539,11 +569,11 @@ class AddTruckFormOne extends PureComponent {
                     >
                       Back
                     </Button>
-                    {/* onSubmit={e => this.saveTruck(e)} */}
                     <Button color="primary" type="submit" className="next">Next</Button>
                   </ButtonToolbar>
                 </div>
               </Row>
+
             </form>
           </CardBody>
         </Card>
@@ -562,13 +592,17 @@ AddTruckFormOne.propTypes = {
     id: PropTypes.number
   }),
   getTruckFullInfo: PropTypes.func.isRequired,
-  onTruckFullInfo: PropTypes.func.isRequired
+  onTruckFullInfo: PropTypes.func.isRequired,
+  passedTruckFullInfo: PropTypes.shape({
+    info: PropTypes.object
+  })
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
   company: null,
-  equipment: null
+  equipment: null,
+  passedTruckFullInfo: null
 };
 
 export default AddTruckFormOne;
