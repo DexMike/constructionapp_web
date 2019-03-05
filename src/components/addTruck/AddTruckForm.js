@@ -63,12 +63,11 @@ class AddTruckForm extends PureComponent {
 
   handleKeyPress(event) {
     if (event.key === 'Enter') {
-      // // // console.log('enter press here!');
+      // not in use
     }
   }
 
   handleTruckSave(e) {
-    // console.log(e);
     // let's keep the info from the truck in memory
     const { truckCachedInfo, page } = this.state;
     truckCachedInfo.info = e;
@@ -76,7 +75,6 @@ class AddTruckForm extends PureComponent {
   }
 
   handleAvailabilitySave(e) {
-    // console.log(e);
     // let's keep the info from the truck in memory
     const { availabilityCachedInfo, page } = this.state;
     availabilityCachedInfo.info = e;
@@ -84,7 +82,6 @@ class AddTruckForm extends PureComponent {
   }
 
   handleUserSave(e) {
-    // console.log(e);
     // let's keep the info from the truck in memory
     const { userCachedInfo, page } = this.state;
     userCachedInfo.info = e;
@@ -92,7 +89,6 @@ class AddTruckForm extends PureComponent {
   }
 
   gotoPage(pageNumber) {
-    // // // console.log(40);
     this.setState({ page: pageNumber });
   }
 
@@ -109,7 +105,6 @@ class AddTruckForm extends PureComponent {
 
   closeNow() {
     const { toggle } = this.props;
-    // console.log('>trying to close');
     toggle();
   }
 
@@ -202,6 +197,8 @@ class AddTruckForm extends PureComponent {
                           // onDriverSave={this.nextPage}
                           handleSubmit={this.nextPage}
                           getUserFullInfo={this.getUserInfo}
+                          // this is to track if we are editing
+                          passedTruckFullInfoId={truckPassedInfo.driversId}
                         />
                       )}
                     {page === 4

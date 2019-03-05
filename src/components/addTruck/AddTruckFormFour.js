@@ -52,17 +52,23 @@ class AddTruckFormFour extends PureComponent {
       // availabilityFullInfo
     } = this.props;
 
-    // console.log(Object.keys(getTruckFullInfo()).length);
-    // console.log(Object.keys(getAvailiabilityFullInfo()).length);
-    // console.log(Object.keys(getUserFullInfo()).length);
-    // return false;
+    // not saving, updating instead
     if (Object.keys(getTruckFullInfo()).length > 0
       && Object.keys(getAvailiabilityFullInfo()).length > 0
       && Object.keys(getUserFullInfo()).length > 0) {
-      // not saving, updating instead
-      // careful here, I'm missing the ID
+      // assign all the info from availiabilty into the equipment
+      const available = availabilityFullInfo.info.isAvailable;
+      const start = new Date(availabilityFullInfo.info.startDate);
+      const end = new Date(availabilityFullInfo.info.endDate);
+      truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
+      truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
+      truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
       await EquipmentService.updateEquipment(truckFullInfo.info);
-      // still missing to assing info for user and driver
+
+      // now let's save the user
+      await UserService.updateUser(userFullInfo.info);
+
+      onClose();
     } else {
       const newUser = await UserService.createUser(userFullInfo.info);
 
@@ -74,6 +80,7 @@ class AddTruckFormFour extends PureComponent {
 
       // assing missing info
       truckFullInfo.info.driversId = newDriver.id;
+      truckFullInfo.info.defaultDriverId = newDriver.id; // set as default as well
       truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
       truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
       truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;

@@ -8,17 +8,16 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-// import UserService from '../../api/UserService';
-// import DriverService from '../../api/DriverService';
+import UserService from '../../api/UserService';
+import DriverService from '../../api/DriverService';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
     super(props);
     const { company } = this.props;
-    // console.log('>PROPS COMPANY');
-    // console.log(company);
     this.state = {
       // showPassword: false
+      id: 0, // only to track if this is an edit
       firstName: '',
       lastName: '',
       mobilePhone: '',
@@ -30,12 +29,12 @@ class AddTruckFormThree extends PureComponent {
       userStatus: 'New'
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    // this.handleSubmit = this.handleSubmit.bind(this);
+    this.getAndSetExistingUser = this.getAndSetExistingUser.bind(this);
   }
 
   componentDidMount() {
     // check fo cached info
-    const { getUserFullInfo } = this.props;
+    const { getUserFullInfo, passedTruckFullInfoId } = this.props;
     const preloaded = getUserFullInfo();
     if (Object.keys(preloaded).length > 0) {
       this.setState({
@@ -45,6 +44,25 @@ class AddTruckFormThree extends PureComponent {
         email: preloaded.info.email
       });
     }
+
+    // check for existing user (if this is loaded data)
+    // TODO -> use only a bool to check for this (only pass the id)
+    if (passedTruckFullInfoId !== 0) {
+      this.getAndSetExistingUser(passedTruckFullInfoId);
+    }
+  }
+
+  async getAndSetExistingUser(id) {
+    // I only have the driverId, so I have to work from there
+    const driver = await DriverService.getDriverById(id);
+    const user = await UserService.getUserById(driver.usersId);
+    this.setState({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      mobilePhone: user.mobilePhone,
+      email: user.email
+    });
   }
 
   handleInputChange(e) {
@@ -73,6 +91,7 @@ class AddTruckFormThree extends PureComponent {
   render() {
     const { previousPage } = this.props;
     const {
+      id,
       firstName,
       lastName,
       mobilePhone,
@@ -97,7 +116,7 @@ class AddTruckFormThree extends PureComponent {
               className="form form--horizontal addtruck__form"
               onSubmit={e => this.saveUser(e)}
             >
-
+              <input type="hidden" value={id} />
               <input type="hidden" value={parentId} />
               <input type="hidden" value={isBanned} />
               <input type="hidden" value={preferredLanguage} />
@@ -180,12 +199,13 @@ AddTruckFormThree.propTypes = {
   }),
   getUserFullInfo: PropTypes.func.isRequired,
   onUserFullInfo: PropTypes.func.isRequired,
-  previousPage: PropTypes.func.isRequired
+  previousPage: PropTypes.func.isRequired,
+  passedTruckFullInfoId: PropTypes.number
 };
 
 AddTruckFormThree.defaultProps = {
-  company: null
-  // truckFullInfo: null
+  company: null,
+  passedTruckFullInfoId: null
 };
 
 export default AddTruckFormThree;

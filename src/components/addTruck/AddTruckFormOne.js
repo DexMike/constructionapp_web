@@ -24,6 +24,8 @@ class AddTruckFormOne extends PureComponent {
     this.state = {
       // ...equipment,
       id: 0, // for use if we are editing
+      driversId: 0, // for use if we are editing
+      defaultDriverId: 0, // for use if we are editing
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
@@ -44,7 +46,6 @@ class AddTruckFormOne extends PureComponent {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    // // console.log(props);
   }
 
   async componentDidMount() {
@@ -105,6 +106,8 @@ class AddTruckFormOne extends PureComponent {
     const { company } = this.props;
     const {
       id,
+      defaultDriverId,
+      driversId,
       truckType,
       maxCapacity,
       description,
@@ -135,9 +138,9 @@ class AddTruckFormOne extends PureComponent {
     }
 
     // map the values with the ones on equipment
-    // TODO-> Ask which params are required
     const shortDesc = description.substring(0, 45);
 
+    // TODO-> Ask which params are required
     const saveValues = {
       id,
       name: shortDesc, // unasigned
@@ -159,9 +162,9 @@ class AddTruckFormOne extends PureComponent {
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
       companyId: company.id,
-      defaultDriverId: 0, // unasigned
+      defaultDriverId, // unasigned
       driverEquipmentsId: 0, // unasigned
-      driversId: 1, // THIS IS A FK
+      driversId, // THIS IS A FK
       equipmentAddressId: 3, // THIS IS A FK
       modelId: '', // unasigned
       makeId: '', // unasigned
@@ -259,15 +262,15 @@ class AddTruckFormOne extends PureComponent {
     // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
       // there should be a better way of doign this
+
       this.setState({
         id: passedTruckFullInfo.id,
+        driversId: passedTruckFullInfo.driversId,
+        defaultDriverId: passedTruckFullInfo.defaultDriverId,
         maxCapacity: passedTruckFullInfo.maxCapacity,
         description: passedTruckFullInfo.description,
         vin: passedTruckFullInfo.vin,
         licensePlate: passedTruckFullInfo.licensePlate,
-        // ratesByBoth: preloaded.info.ratesByBoth,
-        // ratesByHour: preloaded.info.ratesByHour,
-        // ratesByTon: preloaded.info.ratesByTon,
         minOperatingTime: passedTruckFullInfo.minHours,
         maxDistanceToPickup: passedTruckFullInfo.maxDistance,
         ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
@@ -292,6 +295,8 @@ class AddTruckFormOne extends PureComponent {
       // multiInput,
       // multiMeta,
       id,
+      defaultDriverId,
+      driversId,
       selectedMaterials,
       allMaterials,
       truckType,
@@ -340,6 +345,8 @@ class AddTruckFormOne extends PureComponent {
                     value={description}
                     onChange={this.handleInputChange}
                   />
+                  <input type="hidden" val={defaultDriverId} />
+                  <input type="hidden" val={driversId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Truck Type</span>
