@@ -9,6 +9,7 @@ class MultiSelectField extends PureComponent {
   }
 
   handleChange(value) {
+    console.log(value);
     const { onChange } = this.props;
     onChange(value);
   }
@@ -25,10 +26,10 @@ class MultiSelectField extends PureComponent {
         value={value}
         onChange={this.handleChange}
         options={options}
-        clearable={false}
+        // clearable={false}
         className="form__form-group-select"
         closeOnSelect={false}
-        removeSelected={false}
+        // removeSelected={false}
         placeholder={placeholder}
       />
     );

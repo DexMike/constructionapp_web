@@ -58,3 +58,7 @@ p, h1, h2, h3, h4, h5, h6 {
     color: #646777;
     font-size: 35px;
 }
+
+.wizard__toolbar {
+    border-top: 1px solid gray !important;
+}

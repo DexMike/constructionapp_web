@@ -67,6 +67,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleMultiChange(data) {
+    console.log(data);
     const { selectedMaterials } = this.state;
     // TODO -> this works well for adding but not for deleting
     const newWord = data.pop().value;
@@ -76,7 +77,10 @@ class AddTruckFormOne extends PureComponent {
     } else {
       selectedMaterials.push(newWord);
     }
-    this.setState({ selectedMaterials });
+    this.setState({ selectedMaterials },
+      function chido() {
+        console.log('setState completed', this.state);
+      });
   }
 
   selectChange(data) {
@@ -320,9 +324,7 @@ class AddTruckFormOne extends PureComponent {
           <CardBody>
             <div className="card__title">
               <h5 className="bold-text">
-                Welcome to Trelar, Lets add a truck so customers can find you (
-                {p}, {id}
-                )
+                Welcome to Trelar, Lets add a truck so customers can find you
               </h5>
             </div>
 
@@ -345,6 +347,8 @@ class AddTruckFormOne extends PureComponent {
                     value={description}
                     onChange={this.handleInputChange}
                   />
+                  <input type="hidden" val={p} />
+                  <input type="hidden" val={id} />
                   <input type="hidden" val={defaultDriverId} />
                   <input type="hidden" val={driversId} />
                 </div>
@@ -562,16 +566,14 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" disabled
-                            className="previous"
-                    >
-                      Back
-                    </Button>
-                    <Button color="primary" type="submit" className="next">Next</Button>
-                  </ButtonToolbar>
-                </div>
+                <ButtonToolbar className="form__button-toolbar wizard__toolbar">
+                  <Button color="primary" type="button" disabled
+                          className="previous"
+                  >
+                    Back
+                  </Button>
+                  <Button color="primary" type="submit" className="next">Next</Button>
+                </ButtonToolbar>
               </Row>
 
             </form>
