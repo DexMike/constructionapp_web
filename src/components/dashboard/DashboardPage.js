@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 // import { Redirect } from 'react-router-dom';
 // import JobService from '../../api/JobService';
 // import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-import { Modal, Container } from 'reactstrap';
+import { Container } from 'reactstrap';
 import DashboardCarrierPage from './DashboardCarrierPage';
 import DashboardCustomerPage from './DashboardCustomerPage';
 import ProfileService from '../../api/ProfileService';
-import EquipmentsService from '../../api/EquipmentService';
-import AddTruckForm from '../addTruck/AddTruckForm';
+// import EquipmentsService from '../../api/EquipmentService';
+// import AddTruckForm from '../addTruck/AddTruckForm';
 import '../addTruck/AddTruck.css';
 
 class DashboardPage extends Component {
@@ -16,8 +16,8 @@ class DashboardPage extends Component {
 
     this.state = {
       companyType: null,
-      companyId: 0,
-      totalTrucks: 0,
+      // companyId: 0,
+      // totalTrucks: 0,
       modal: false
     };
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
@@ -37,17 +37,19 @@ class DashboardPage extends Component {
 
   // Pull trucks
   async fetchCompanyTrucks() {
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
+    /*
     const equipments = await EquipmentsService.getEquipmentByCompanyIdAndType(
       profile.companyId,
       'Truck'
     );
+    */
     // DO NOT LAUNCH THE MODAL AT THIS TIME
     // this.toggleAddTruckModal();
     // console.log(materials.length);
     this.setState({
-      companyId: profile.companyId,
-      totalTrucks: equipments.length,
+      // companyId: profile.companyId,
+      // totalTrucks: equipments.length,
       loaded: true
     });
   }
@@ -64,45 +66,14 @@ class DashboardPage extends Component {
     );
   }
 
-  renderModal() {
-    // const { match } = this.props;
-    const {
-      totalTrucks,
-      modal,
-      companyId
-    } = this.state;
-    let tabShow = 1;
-    if (totalTrucks > 0) {
-      tabShow = 3;
-    }
-    const company = {
-      name: '',
-      id: companyId
-    };
-    return (
-      <Modal
-        isOpen={modal}
-        toggle={this.toggleAddTruckModal}
-        className="modal-dialog--primary modal-dialog--header"
-      >
-        <div className="modal__body" style={{ padding: '0px' }}>
-          <AddTruckForm
-            id={companyId}
-            company={company}
-            incomingPage={tabShow}
-            handlePageClick={() => {}}
-          />
-        </div>
-      </Modal>
-    );
-  }
-
   render() {
-    const { companyType, loaded, totalTrucks } = this.state;
+    const { companyType, loaded } = this.state;
     if (loaded) {
       return (
         <React.Fragment>
-          { !!companyType && companyType === 'Carrier' && totalTrucks >= 0 && this.renderModal() }
+          {/*
+            !!companyType && companyType === 'Carrier' && totalTrucks >= 0 && this.renderModal()
+          */}
           { !!companyType && this.renderDashboardFromCompanyType()}
         </React.Fragment>
       );
