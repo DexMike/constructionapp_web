@@ -28,7 +28,8 @@ class EquipmentListPage extends Component {
       goToAddEquipment: false,
       goToUpdateEquipment: false,
       equipmentId: 0,
-      modal: false
+      modal: false,
+      selectedItemData: {}
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -62,7 +63,6 @@ class EquipmentListPage extends Component {
   }
 
   toggleAddTruckModal() {
-    // console.log('toggle');
     const { modal } = this.state;
     this.setState({
       modal: !modal
@@ -93,11 +93,28 @@ class EquipmentListPage extends Component {
     }
   }
 
+  returnItemData(id) {
+    const { equipments } = this.state;
+    if (id !== 0) {
+      for (const equipment of equipments) {
+        if (equipment.id === id) {
+          this.setState({ selectedItemData: equipment });
+        }
+      }
+    }
+    return false;
+  }
+
   handleEquipmentEdit(id) {
+    this.returnItemData(id);
+    /*
     this.setState({
       goToUpdateEquipment: true,
       equipmentId: id
     });
+    */
+    // instead of going to the edit, let's call up the modal
+    this.toggleAddTruckModal();
   }
 
   renderGoTo() {
@@ -119,7 +136,8 @@ class EquipmentListPage extends Component {
     const {
       totalTrucks,
       modal,
-      companyId
+      companyId,
+      selectedItemData
     } = this.state;
     let tabShow = 1;
     if (totalTrucks > 0) {
@@ -142,6 +160,7 @@ class EquipmentListPage extends Component {
             incomingPage={tabShow}
             handlePageClick={() => {}}
             toggle={this.toggleAddTruckModal}
+            passedInfo={selectedItemData}
           />
         </div>
       </Modal>
@@ -153,8 +172,12 @@ class EquipmentListPage extends Component {
     const { loaded } = this.state;
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
-      newEquipment.hourRate = `$${newEquipment.hourRate}`;
-      newEquipment.tonRate = `$${newEquipment.tonRate}`;
+      // const tempHourRate = newEquipment.hourRate;
+      // const tempTonRate = newEquipment.tonRate;
+
+      newEquipment.tempHourRate = `$${newEquipment.hourRate}`;
+      newEquipment.tempTonRate = `$${newEquipment.tonRate}`;
+
       return newEquipment;
     });
     if (loaded) {
@@ -211,11 +234,11 @@ class EquipmentListPage extends Component {
                                 displayName: 'Capacity'
                               },
                               {
-                                name: 'hourRate',
+                                name: 'tempHourRate',
                                 displayName: 'Rate per Hour'
                               },
                               {
-                                name: 'tonRate',
+                                name: 'tempTonRate',
                                 displayName: 'Rate per Ton'
                               }
                             ]
