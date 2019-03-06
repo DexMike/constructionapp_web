@@ -16,7 +16,7 @@ import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
 
-// import validate from '../common/validate';
+// import validate from '../common/validate ';
 
 class AddTruckFormOne extends PureComponent {
   constructor(props) {
@@ -98,15 +98,7 @@ class AddTruckFormOne extends PureComponent {
     }
   }
 
-  async saveTruck(e) {
-    e.preventDefault();
-    e.persist();
-
-    /*
-    if (!this.isFormValid()) {
-      return;
-    }
-    */
+  saveTruckInfo(redir) {
     const { company } = this.props;
     const {
       id,
@@ -159,6 +151,8 @@ class AddTruckFormOne extends PureComponent {
       vin,
       image: '', // unasigned
       currentAvailability: 1, // unasigned
+      startAvailabilit: new Date(),
+      endAvailability: new Date(),
       ratesByBoth, // keeping here in order to track it
       ratesByHour, // keeping here in order to track it
       ratesByTon, // keeping here in order to track it
@@ -179,12 +173,25 @@ class AddTruckFormOne extends PureComponent {
       modifiedBy: 0,
       modifiedOn: moment()
         .unix() * 1000,
-      isArchived: 0
+      isArchived: 0,
+      redir
     };
 
     // save info in the parent
     onTruckFullInfo(saveValues);
     this.handleSubmit('Truck');
+  }
+
+  async saveTruck(e) {
+    e.preventDefault();
+    e.persist();
+
+    /*
+    if (!this.isFormValid()) {
+      return;
+    }
+    */
+    this.saveTruckInfo(true);
   }
 
   handleInputChange(e) {
@@ -292,6 +299,8 @@ class AddTruckFormOne extends PureComponent {
         this.setState({ ratesByHour: true });
       }
     }
+    this.saveTruckInfo(false);
+    // let's cache this info, in case we want to go back
   }
 
   render() {
@@ -317,7 +326,7 @@ class AddTruckFormOne extends PureComponent {
       maxDistanceToPickup,
       truckTypes
     } = this.state;
-    const { p } = this.props;
+    const { p, onClose } = this.props;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -566,7 +575,16 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <ButtonToolbar className="form__button-toolbar wizard__toolbar">
+                <hr className="bighr" />
+              </Row>
+
+              <Row className="col-md-12">
+                <ButtonToolbar className="col-md-6 wizard__toolbar">
+                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                    Cancel
+                  </Button>
+                </ButtonToolbar>
+                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
                   <Button color="primary" type="button" disabled
                           className="previous"
                   >
@@ -597,7 +615,8 @@ AddTruckFormOne.propTypes = {
   onTruckFullInfo: PropTypes.func.isRequired,
   passedTruckFullInfo: PropTypes.shape({
     info: PropTypes.object
-  })
+  }),
+  onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {

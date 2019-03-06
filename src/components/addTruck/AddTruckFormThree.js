@@ -47,7 +47,8 @@ class AddTruckFormThree extends PureComponent {
 
     // check for existing user (if this is loaded data)
     // TODO -> use only a bool to check for this (only pass the id)
-    if (passedTruckFullInfoId !== 0) {
+    console.log(passedTruckFullInfoId);
+    if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
     }
   }
@@ -62,7 +63,11 @@ class AddTruckFormThree extends PureComponent {
       lastName: user.lastName,
       mobilePhone: user.mobilePhone,
       email: user.email
+    },
+    function chido() { // wait until it loads
+      this.saveUserInfo(false);
     });
+    // , this.saveUserInfo(false));
   }
 
   handleInputChange(e) {
@@ -73,13 +78,31 @@ class AddTruckFormThree extends PureComponent {
     this.setState({ [e.target.name]: value });
   }
 
+  saveUserInfo(redir) {
+    const { onUserFullInfo } = this.props;
+    const {
+      id, // only to track if this is an edit
+      firstName,
+      lastName,
+      mobilePhone,
+      email
+    } = this.state;
+    const userInfo = {
+      id, // only to track if this is an edit
+      firstName,
+      lastName,
+      mobilePhone,
+      email
+    };
+    userInfo.redir = redir;
+    onUserFullInfo(userInfo);
+    this.handleSubmit('User');
+  }
+
   async saveUser(e) {
     e.preventDefault();
     e.persist();
-    const { onUserFullInfo } = this.props;
-    const availability = this.state;
-    onUserFullInfo(availability);
-    this.handleSubmit('User');
+    this.saveUserInfo(true);
   }
 
   handleSubmit(menuItem) {
@@ -89,7 +112,7 @@ class AddTruckFormThree extends PureComponent {
   }
 
   render() {
-    const { previousPage } = this.props;
+    const { previousPage, onClose } = this.props;
     const {
       id,
       firstName,
@@ -176,12 +199,15 @@ class AddTruckFormThree extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" onClick={previousPage} className="previous">Back</Button>
-                    <Button color="primary" type="submit" className="next">Next</Button>
-                  </ButtonToolbar>
-                </div>
+                <ButtonToolbar className="col-md-6 wizard__toolbar">
+                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                    Cancel
+                  </Button>
+                </ButtonToolbar>
+                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                  <Button color="secondary" type="button" onClick={previousPage} className="previous">Back</Button>
+                  <Button color="primary" type="submit" className="next">Next</Button>
+                </ButtonToolbar>
               </Row>
 
             </form>
@@ -200,7 +226,8 @@ AddTruckFormThree.propTypes = {
   getUserFullInfo: PropTypes.func.isRequired,
   onUserFullInfo: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
-  passedTruckFullInfoId: PropTypes.number
+  passedTruckFullInfoId: PropTypes.number,
+  onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {

@@ -59,6 +59,38 @@ p, h1, h2, h3, h4, h5, h6 {
     font-size: 35px;
 }
 
+/*
 .wizard__toolbar {
     border-top: 1px solid gray !important;
+}
+*/
+
+.wizard__step{
+    cursor: pointer;
+}
+.wizard__step--active{
+    cursor: default;
+}
+.btn-toolbar:last-child {
+    margin-top: 0px !important;
+    margin-bottom: -10px !important;
+}
+.card-body {
+    padding-top: 20px;
+    padding: 12px;
+}
+.wizard__form-wrapper {
+    margin-top: 20px !important;
+}
+.card {
+    padding-bottom: 16px !important;
+}
+.card__title {
+    margin-bottom: 16px !important;
+}
+.right-buttons{
+    justify-content: flex-end !important;
+}
+.btn-toolbar {
+    margin: 0px !important;
 }
