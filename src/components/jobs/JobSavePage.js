@@ -32,7 +32,7 @@ class JobSavePage extends Component {
           address1: ''
         }
       },
-      // moved conpanyType to the first level
+      // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null
     };
