@@ -136,7 +136,7 @@ class AddTruckFormTwo extends PureComponent {
           <CardBody>
             <div className="card__title">
               <h5 className="bold-text">
-                Configure your schedule (p)
+                Configure your schedule
               </h5>
             </div>
 

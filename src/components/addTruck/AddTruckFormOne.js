@@ -10,6 +10,7 @@ import {
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import MultiSelect from '../common/TMultiSelect';
+// import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
 import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
@@ -68,17 +69,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleMultiChange(data) {
-    // console.log(data);
-    const { selectedMaterials } = this.state;
-    // TODO -> this works well for adding but not for deleting
-    const newWord = data.pop().value;
-    const index = selectedMaterials.indexOf(newWord);
-    if (index !== -1) {
-      selectedMaterials.splice(index, 1);
-    } else {
-      selectedMaterials.push(newWord);
-    }
-    this.setState({ selectedMaterials });
+    this.setState({ selectedMaterials: data });
   }
 
   selectChange(data) {
@@ -301,6 +292,11 @@ class AddTruckFormOne extends PureComponent {
     // let's cache this info, in case we want to go back
   }
 
+  handleImg(e) {
+    // console.log(e);
+    return e;
+  }
+
   render() {
     const {
       // multiInput,
@@ -384,7 +380,9 @@ class AddTruckFormOne extends PureComponent {
 
               <Row className="col-md-12">
                 <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Materials Hauled</span>
+                  <span className="form__form-group-label">
+                    Materials Hauled
+                  </span>
                   <MultiSelect
                     input={
                       {
@@ -440,9 +438,9 @@ class AddTruckFormOne extends PureComponent {
 
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
-                  <h4 className="subhead">
+                  <h3 className="subhead">
                     Truck Rates
-                  </h4>
+                  </h3>
                 </div>
 
                 {/* FIRST ROW */}
@@ -482,14 +480,17 @@ class AddTruckFormOne extends PureComponent {
                 <div className="col-md-2 form__form-group moveleft">
                   Hours
                 </div>
+              </Row>
 
-                <div className="col-md-9 form__form-group">
-                  <hr/>
-                </div>
+              <Row className="col-md-12">
+                <hr />
+              </Row>
+
+              <Row className="col-md-12">
 
                 <div className="col-md-12 form__form-group">
                   <h4 className="subhead">
-                    Do you have a Minumum:
+                    Do you have a Minimum:
                   </h4>
                 </div>
 
@@ -532,13 +533,13 @@ class AddTruckFormOne extends PureComponent {
                 <div className="col-md-2 form__form-group">
                   / Ton
                 </div>
+              </Row>
 
-                <div className="col-md-12 form__form-group">
-                  <h4 className="subhead">
-                    Do you have a Minumum:
-                  </h4>
-                </div>
+              <Row className="col-md-12">
+                <hr />
+              </Row>
 
+              <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
                   Max Distance to Pickup &nbsp;
                   <input
@@ -552,9 +553,9 @@ class AddTruckFormOne extends PureComponent {
 
               </Row>
 
-              <div className="col-md-9 form__form-group">
-                <hr/>
-              </div>
+              <Row className="col-md-12">
+                <hr />
+              </Row>
 
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
@@ -575,6 +576,20 @@ class AddTruckFormOne extends PureComponent {
               <Row className="col-md-12">
                 <hr className="bighr" />
               </Row>
+
+              {/*
+              <Row>
+                <DropZoneMultipleField
+                  input={
+                    {
+                      onChange: this.handleImg,
+                      name: 'materials',
+                      value: { maxDistanceToPickup }
+                    }
+                  }
+                />
+              </Row>
+              */}
 
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">

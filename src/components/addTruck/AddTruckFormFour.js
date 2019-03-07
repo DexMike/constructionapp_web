@@ -158,9 +158,6 @@ class AddTruckFormFour extends PureComponent {
                     <br /><br />
                     <strong>Maximum distance to pickup: </strong>
                     <br />{truckFullInfo.info.maxDistance} Miles
-                    <br /><br />
-                    <strong>Maximum distance to pickup: </strong>
-                    <br />{truckFullInfo.info.maxDistance} Miles
                   </p>
                   <hr />
                   <h4>Information about the Driver:</h4>

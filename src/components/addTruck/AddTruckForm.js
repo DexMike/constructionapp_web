@@ -85,10 +85,7 @@ class AddTruckForm extends PureComponent {
       }
     };
 
-    this.setState({ availabilityCachedInfo: availableInfo },
-      function chido() { // wait until it loads
-        this.saveUserInfo(false);
-      });
+    this.setState({ availabilityCachedInfo: availableInfo });
 
     if (truckCachedInfo.info.redir) {
       this.setState({
