@@ -38,7 +38,7 @@ class AddTruckFormTwo extends PureComponent {
         endDate: preloaded.info.endDate
       },
       function wait() { // wait until it loads
-        console.log(this.state);
+        // // console.log(this.state);
         this.saveAvailabilityInfo(false);
       });
     }
@@ -76,7 +76,7 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   startDateChange(data) {
-    // console.log(data);
+    // // // console.log(data);
     this.setState({ startDate: data },
       function wait() {
         this.saveAvailabilityInfo(false);
@@ -104,7 +104,7 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   handleSubmit(menuItem) {
-    console.log(menuItem);
+    // // console.log(menuItem);
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }

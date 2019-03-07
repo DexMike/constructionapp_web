@@ -40,7 +40,8 @@ class AddTruckFormOne extends PureComponent {
       ratesCostPerHour: 0,
       minOperatingTime: 0,
       maxDistanceToPickup: 0,
-      truckType: ''
+      truckType: ''// ,
+      // class: 'shown'
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -67,7 +68,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleMultiChange(data) {
-    console.log(data);
+    // console.log(data);
     const { selectedMaterials } = this.state;
     // TODO -> this works well for adding but not for deleting
     const newWord = data.pop().value;
@@ -77,10 +78,7 @@ class AddTruckFormOne extends PureComponent {
     } else {
       selectedMaterials.push(newWord);
     }
-    this.setState({ selectedMaterials },
-      function chido() {
-        console.log('setState completed', this.state);
-      });
+    this.setState({ selectedMaterials });
   }
 
   selectChange(data) {
@@ -252,7 +250,7 @@ class AddTruckFormOne extends PureComponent {
 
     // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
-      // console.log('>> Seems that there is cached information');
+      // // console.log('>> Seems that there is cached information');
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,
@@ -406,7 +404,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Maximum Capacity</span>
+                  <span className="form__form-group-label">Maximum Capacity (Tons)</span>
                   <input
                     name="maxCapacity"
                     type="number"
@@ -482,7 +480,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-2 form__form-group moveleft">
-                  / hour
+                  Hours
                 </div>
 
                 <div className="col-md-9 form__form-group">
@@ -497,7 +495,7 @@ class AddTruckFormOne extends PureComponent {
 
                 {/* THIRD ROW */}
                 <div className="col-md-4 form__form-group">
-                  Min Operating Time
+                  Minimum Booking Time
                 </div>
                 <div className="col-md-2 form__form-group">
                   <input

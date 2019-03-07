@@ -9,7 +9,7 @@ class MultiSelectField extends PureComponent {
   }
 
   handleChange(value) {
-    console.log(value);
+    // console.log(value);
     const { onChange } = this.props;
     onChange(value);
   }

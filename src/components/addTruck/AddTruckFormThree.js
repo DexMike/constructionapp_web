@@ -47,7 +47,7 @@ class AddTruckFormThree extends PureComponent {
 
     // check for existing user (if this is loaded data)
     // TODO -> use only a bool to check for this (only pass the id)
-    console.log(passedTruckFullInfoId);
+    // console.log(passedTruckFullInfoId);
     if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
     }

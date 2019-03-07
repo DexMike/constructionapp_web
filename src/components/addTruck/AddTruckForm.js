@@ -87,8 +87,7 @@ class AddTruckForm extends PureComponent {
 
     this.setState({ availabilityCachedInfo: availableInfo },
       function chido() { // wait until it loads
-        console.log(this.state);
-      // this.saveUserInfo(false);
+        this.saveUserInfo(false);
       });
 
     if (truckCachedInfo.info.redir) {
@@ -109,7 +108,7 @@ class AddTruckForm extends PureComponent {
   }
 
   handleUserSave(e) {
-    // console.log('>USER SAVE', e);
+    // // console.log('>USER SAVE', e);
     // let's keep the info from the truck in memory
     const { userCachedInfo, page } = this.state;
     userCachedInfo.info = e;
