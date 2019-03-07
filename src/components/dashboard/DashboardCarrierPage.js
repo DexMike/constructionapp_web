@@ -165,8 +165,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">All Jobs</h5>
-                {jobs.length}
+                <h5 className="card__title bold-text"><center>All Jobs</center></h5>
+                <span><center><h4>{jobs.length}</h4></center></span>
               </div>
             </div>
           </div>
@@ -174,8 +174,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">New Offers</h5>
-                {newJobCount}
+                <h5 className="card__title bold-text"><center>New Offers</center></h5>
+                <span><center><h4>{newJobCount}</h4></center></span>
               </div>
             </div>
           </div>
@@ -183,8 +183,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">Jobs in Progress</h5>
-                {inProgressJobCount}
+                <h5 className="card__title bold-text"><center>Jobs in Progress</center></h5>
+                <span><center><h4>{inProgressJobCount}</h4></center></span>
               </div>
             </div>
           </div>
@@ -192,8 +192,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">Booked Jobs</h5>
-                {acceptedJobCount}
+                <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
+                <span><center><h4>{acceptedJobCount}</h4></center></span>
               </div>
             </div>
           </div>
@@ -201,8 +201,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">Completed Jobs</h5>
-                {completedJobCount}
+                <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
+                <span><center><h4>{completedJobCount}</h4></center></span>
               </div>
             </div>
           </div>
@@ -210,7 +210,8 @@ class DashboardCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="bold-text">Upcoming Revenue</h5>
+                <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
+                {/* <span><center><h4>{newJobCount}</h4></center></span> */}
               </div>
             </div>
           </div>
