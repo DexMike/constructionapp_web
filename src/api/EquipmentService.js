@@ -13,8 +13,6 @@ class EquipmentService extends AgentService {
     return (response);
   }
 
-
-  //   /equipments/filters/FILTERS
   static async getEquipmentByFilters(filters) {
     const response = await super.post(`${PATH}/filters`, filters);
     return (response);

@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
+// import TField from '../common/TField';
 import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
@@ -30,7 +31,8 @@ class AddTruckFormOne extends PureComponent {
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
-      maxCapacity: 0,
+      maxCapacity: 15,
+      // maxCapacityTouched: false,
       description: '',
       vin: '',
       licensePlate: '',
@@ -76,11 +78,6 @@ class AddTruckFormOne extends PureComponent {
     this.setState({ truckType: data.value });
   }
 
-  isFormValid() {
-    const company = this.state;
-    return !!(company.maxCapacity);
-  }
-
   async handleSubmit(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
@@ -91,6 +88,7 @@ class AddTruckFormOne extends PureComponent {
     const { company } = this.props;
     const {
       id,
+      selectedMaterials,
       defaultDriverId,
       driversId,
       truckType,
@@ -128,6 +126,7 @@ class AddTruckFormOne extends PureComponent {
     // TODO-> Ask which params are required
     const saveValues = {
       id,
+      selectedMaterials,
       name: shortDesc, // unasigned
       type: truckType,
       styleId: 0, // unasigned
@@ -140,7 +139,7 @@ class AddTruckFormOne extends PureComponent {
       vin,
       image: '', // unasigned
       currentAvailability: 1, // unasigned
-      startAvailabilit: new Date(),
+      startAvailability: new Date(),
       endAvailability: new Date(),
       ratesByBoth, // keeping here in order to track it
       ratesByHour, // keeping here in order to track it
@@ -171,12 +170,22 @@ class AddTruckFormOne extends PureComponent {
     this.handleSubmit('Truck');
   }
 
+  isFormValid() {
+    const { maxCapacity } = this.state;
+    // console.log(maxCapacity);
+    if (maxCapacity === 0) {
+      return false;
+    }
+    return true;
+    // return !!(maxCapacity.maxCapacity);
+  }
+
   async saveTruck(e) {
     e.preventDefault();
     e.persist();
-
     /*
     if (!this.isFormValid()) {
+      this.setState({ maxCapacityTouched: true });
       return;
     }
     */
@@ -184,6 +193,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
+    // // console.log(e);
     let { value } = e.target;
     // const { ratesByHour, ratesByTon } = this.state;
     if (e.target.name === 'ratesByBoth') {
@@ -241,7 +251,7 @@ class AddTruckFormOne extends PureComponent {
 
     // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
-      // // console.log('>> Seems that there is cached information');
+      // // // console.log('>> Seems that there is cached information');
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,
@@ -293,7 +303,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleImg(e) {
-    // console.log(e);
+    // // console.log(e);
     return e;
   }
 
@@ -308,7 +318,9 @@ class AddTruckFormOne extends PureComponent {
       allMaterials,
       truckType,
       maxCapacity,
+      // maxCapacityTouched,
       description,
+      // descriptionTouched,
       vin,
       licensePlate,
       ratesByBoth,
@@ -406,10 +418,29 @@ class AddTruckFormOne extends PureComponent {
                   <input
                     name="maxCapacity"
                     type="number"
-                    placeholder="Tons"
                     value={maxCapacity}
                     onChange={this.handleInputChange}
                   />
+                  {/*
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleJobInputChange,
+                        name: 'maxCapacity',
+                        value: maxCapacity
+                      }
+                    }
+                    placeholder="prueba"
+                    type="number"
+                    meta={
+                      {
+                        touched: maxCapacityTouched,
+                        error: 'Please set the Maximum Capacity'
+                      }
+                    }
+                    value={maxCapacity}
+                  />
+                  */}
                 </div>
 
                 <div className="col-md-6 form__form-group">

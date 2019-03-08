@@ -125,7 +125,7 @@ class AddTruckForm extends PureComponent {
 
   nextPage() {
     const { page } = this.state;
-    // just checking if the state changed
+    // just checking if the state changeo
     this.setState({ page: page + 1 });
   }
 
@@ -252,6 +252,7 @@ class AddTruckForm extends PureComponent {
                     {page === 4
                       && (
                       <AddTruckFormFour
+                        company={company}
                         previousPage={this.previousPage}
                         truckFullInfo={truckCachedInfo}
                         availabilityFullInfo={availabilityCachedInfo}

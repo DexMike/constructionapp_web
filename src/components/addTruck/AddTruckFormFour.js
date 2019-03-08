@@ -11,6 +11,7 @@ import PropTypes, { object } from 'prop-types';
 import DriverService from '../../api/DriverService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
+import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import truckImage from '../../img/12.png';
 
 class AddTruckFormFour extends PureComponent {
@@ -44,20 +45,22 @@ class AddTruckFormFour extends PureComponent {
   async saveInfo() {
     // save new or update?
     const {
+
       getTruckFullInfo, // cached info
+      /*
       getAvailiabilityFullInfo,
       getUserFullInfo,
+      */
       truckFullInfo, // saved info
       userFullInfo,
       availabilityFullInfo,
-      onClose
-      // availabilityFullInfo
+      onClose,
+      company
+      // availability FullInfo
     } = this.props;
 
     // not saving, updating instead
-    if (Object.keys(getTruckFullInfo()).length > 0
-      && Object.keys(getAvailiabilityFullInfo()).length > 0
-      && Object.keys(getUserFullInfo()).length > 0) {
+    if (truckFullInfo.info.id !== 0) {
       // assign all the info from availiabilty into the equipment
       const available = availabilityFullInfo.info.isAvailable;
       const start = new Date(availabilityFullInfo.info.startDate);
@@ -70,9 +73,24 @@ class AddTruckFormFour extends PureComponent {
       // now let's save the user
       await UserService.updateUser(userFullInfo.info);
 
+      // save materials
+      await EquipmentMaterialsService.createAllEquipmentMaterials(
+        getTruckFullInfo().info.id,
+        JSON.stringify(availabilityFullInfo.info.selectedMaterials)
+      );
+
       onClose();
     } else {
+      // setup info for user
+      delete userFullInfo.info.redir;
+      delete userFullInfo.info.id;
+      userFullInfo.info.companyId = company.id;
+      userFullInfo.info.preferredLanguage = 'English';
+      userFullInfo.info.isBanned = 0;
+      userFullInfo.info.userStatus = 'New';
+
       const newUser = await UserService.createUser(userFullInfo.info);
+      // return false;
 
       const driver = {
         usersId: newUser.id,
@@ -80,13 +98,30 @@ class AddTruckFormFour extends PureComponent {
       };
       const newDriver = await DriverService.createDriver(driver);
 
-      // assing missing info
       truckFullInfo.info.driversId = newDriver.id;
       truckFullInfo.info.defaultDriverId = newDriver.id; // set as default as well
       truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
-      truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
-      truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
-      await EquipmentService.createEquipment(truckFullInfo.info);
+      const selectedTruckMaterials = truckFullInfo.info.selectedMaterials;
+
+      // remove unnecesary info
+      delete truckFullInfo.info.id;
+      delete truckFullInfo.info.selectedMaterials;
+      delete truckFullInfo.info.redir;
+      delete truckFullInfo.info.ratesByBoth;
+      delete truckFullInfo.info.ratesByHour;
+      delete truckFullInfo.info.ratesByTon;
+
+      const createdEquipment = await EquipmentService.createEquipment(truckFullInfo.info);
+      const jsonMaterials = JSON.stringify(selectedTruckMaterials);
+      // console.log(116);
+      // console.log(jsonMaterials);
+
+      // save materials
+      await EquipmentMaterialsService.createAllEquipmentMaterials(
+        jsonMaterials,
+        createdEquipment.id
+      );
+
       onClose();
     }
   }
@@ -120,6 +155,13 @@ class AddTruckFormFour extends PureComponent {
     console.log(Object.keys(getUserFullInfo().info).length);
     */
 
+    // show selected materials
+    let allMaterials = '';
+    for (const material of getTruckFullInfo().info.selectedMaterials) {
+      allMaterials += `${material.label}, `;
+    }
+    allMaterials = allMaterials.substring(0, allMaterials.length - 2);
+
     // do we  have info? otherwise don't let the user continue
     if (Object.keys(getAvailiabilityFullInfo().info).length > 0
       && Object.keys(getTruckFullInfo().info).length > 0
@@ -144,7 +186,7 @@ class AddTruckFormFour extends PureComponent {
                     <br /><br />
                     <strong>Type: </strong><br />{truckFullInfo.info.type}
                     <br /><br />
-                    <strong>Materials hauled: </strong><br /> {/* MATES */}
+                    <strong>Materials hauled: </strong><br />{allMaterials}
                     <br /><br />
                     <strong>Maximum capacity: </strong><br />{truckFullInfo.info.maxCapacity} Tons
                     <br /><br />
@@ -226,6 +268,10 @@ AddTruckFormFour.propTypes = {
   userFullInfo: PropTypes.shape({
     info: object
   }),
+  company: PropTypes.shape({
+    name: PropTypes.string,
+    id: PropTypes.number
+  }),
   previousPage: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   // fields for loaded info
@@ -236,6 +282,7 @@ AddTruckFormFour.propTypes = {
 
 AddTruckFormFour.defaultProps = {
   truckFullInfo: null,
+  company: null,
   availabilityFullInfo: null,
   userFullInfo: null
 };
