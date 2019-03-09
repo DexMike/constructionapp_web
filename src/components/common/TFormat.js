@@ -111,27 +111,35 @@ class TFormat {
   }
 
   static asPhone(inputValue) {
-    //format="+1 (###) ###-####" mask="_"/
+    // <NumberFormat format="+1 (###) ###-####" mask="_" />
     return (
       <NumberFormat
         value={inputValue}
-        displayType="text"
-        format="+1 (###) ###-####"
-        mask="_"
-        prefix=""
-        suffix="&nbsp;/&nbsp;Hour"
+        type="text"
+        format="(###) ###-####"
+        mask=""
       />
     );
-
   }
 
   static asDate(inputValue) {
     return moment(inputValue).format("MM/DD/YYYY");
   }
 
-  static asZip5(inputValue) {
-    return "00000";
+  static asDateTime(inputValue) {
+    return moment(inputValue).format("MM/DD/YYYY HH:mm");
   }
+
+  static asZip5(inputValue) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        type="text"
+        format="#####"
+        mask="_"
+      />
+    )
+  };
 }
 
 export default TFormat;

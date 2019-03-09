@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import moment from 'moment';
-// import ProfileService from '../../api/ProfileService';
+
 import TTable from '../common/TTable';
+import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
@@ -118,6 +119,7 @@ class DashboardCarrierPage extends Component {
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
+    let potentialIncome = 0;
 
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -135,16 +137,25 @@ class DashboardCarrierPage extends Component {
         completedJobCount += 1;
       }
       if (newJob.rateType === 'Hour') {
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = `${newJob.rateEstimate} Hours`;
+        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
       if (newJob.rateType === 'Ton') {
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = `${newJob.rateEstimate} Tons`;
+        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-      newJob.newRate = `$${newJob.rate}`;
+
+      newJob.newStartDate = TFormat.asDate(job.startTime);
+
+      potentialIncome += tempRate * newJob.rateEstimate;
+
       return newJob;
     });
+
+    potentialIncome = TFormat.asMoney(potentialIncome);
+
     // console.log(jobs);
     return (
       <Container className="dashboard">
@@ -211,7 +222,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
-                {/* <span><center><h4>{newJobCount}</h4></center></span> */}
+                 <span><center><h4>{potentialIncome}</h4></center></span>
               </div>
             </div>
           </div>
@@ -261,7 +272,7 @@ class DashboardCarrierPage extends Component {
                         displayName: 'Customer'
                       },
                       {
-                        name: 'startTime',
+                        name: 'newStartDate ',
                         displayName: 'Start Date'
                       },
                       {
