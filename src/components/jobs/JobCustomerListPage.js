@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
-import moment from 'moment';
 import TTable from '../common/TTable';
+import TFormat from "../common/TFormat";
 
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
@@ -91,14 +91,16 @@ class JobCustomerListPage extends Component {
 
   async fetchJobs() {
     let jobs = await JobService.getJobs();
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      newJob.modifiedOn = moment(job.modifiedOn)
-        .format();
-      newJob.createdOn = moment(job.createdOn)
-        .format();
-      return newJob;
-    });
+
+    // AJ: commenting out because we don't want to modify the timestamps, unless we save data
+    // jobs = jobs.map((job) => {
+    //   const newJob = job;
+    //   newJob.modifiedOn = moment(job.modifiedOn)
+    //     .format();
+    //   newJob.createdOn = moment(job.createdOn)
+    //     .format();
+    //   return newJob;
+    // });
     return jobs;
   }
 
@@ -121,6 +123,7 @@ class JobCustomerListPage extends Component {
 
     jobs = jobs.map((job) => {
       const newJob = job;
+
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
@@ -131,6 +134,10 @@ class JobCustomerListPage extends Component {
         newJob.newSize = `${newJob.rateEstimate} Tons`;
       }
       newJob.newRate = `$${newJob.rate}`;
+
+      // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
+      newJob.newStartDate = TFormat.asDate(job.startTime);
+
       return newJob;
     });
 
@@ -173,7 +180,7 @@ class JobCustomerListPage extends Component {
                         displayName: 'Size'
                       },
                       {
-                        name: 'startTime',
+                        name: 'newStartDate',
                         displayName: 'Start Date'
                       },
                       {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-import moment from 'moment';
+import TFormat from "../common/TFormat";
 import TTable from '../common/TTable';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
@@ -81,14 +81,16 @@ class JobCarrierListPage extends Component {
 
   async fetchJobs() {
     let jobs = await JobService.getJobs();
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      newJob.modifiedOn = moment(job.modifiedOn)
-        .format();
-      newJob.createdOn = moment(job.createdOn)
-        .format();
-      return newJob;
-    });
+
+    // AJ: commenting out because we don't want to modify the timestamps, unless we save data
+    // jobs = jobs.map((job) => {
+    //   const newJob = job;
+    //   newJob.modifiedOn = moment(job.modifiedOn)
+    //     .format();
+    //   newJob.createdOn = moment(job.createdOn)
+    //     .format();
+    //   return newJob;
+    // });
     return jobs;
   }
 
@@ -113,14 +115,22 @@ class JobCarrierListPage extends Component {
       const newJob = job;
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = `${newJob.rateEstimate} Hours`;
+        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      } else if (newJob.rateType === 'Ton') {
+        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      } else {
+        newJob.newSize = "Invalid Rate Type";
+        newJob.newRate = "Invalid Rate Type";
+        newJob.estimatedIncome = "Invalid Rate Type";
       }
-      if (newJob.rateType === 'Ton') {
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = `${newJob.rateEstimate} Tons`;
-      }
-      newJob.newRate = `$${newJob.rate}`;
+
+      // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
+      newJob.newStartDate = TFormat.asDate(job.startTime);
+
       return newJob;
     });
 
@@ -166,7 +176,7 @@ class JobCarrierListPage extends Component {
                         displayName: 'Customer'
                       },
                       {
-                        name: 'startTime',
+                        name: 'newStartDate',
                         displayName: 'Start Date'
                       },
                       {

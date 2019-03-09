@@ -9,12 +9,13 @@ import {
   Modal,
   Button
 } from 'reactstrap';
-import moment from 'moment';
-import EquipmentService from '../../api/EquipmentService';
+// import moment from 'moment';
 import TTable from '../common/TTable';
+import TFormat from '../common/TFormat';
+import EquipmentService from '../../api/EquipmentService';
+import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import '../addTruck/AddTruck.css';
-import ProfileService from '../../api/ProfileService';
 
 class EquipmentListPage extends Component {
   constructor(props) {
@@ -76,14 +77,14 @@ class EquipmentListPage extends Component {
     });
 
     let equipments = await EquipmentService.getEquipments();
-    equipments = equipments.map((equipment) => {
-      const newEquipment = equipment;
-      newEquipment.modifiedOn = moment(equipment.modifiedOn)
-        .format();
-      newEquipment.createdOn = moment(equipment.createdOn)
-        .format();
-      return newEquipment;
-    });
+    // equipments = equipments.map((equipment) => {
+    //   const newEquipment = equipment;
+    //   newEquipment.modifiedOn = moment(equipment.modifiedOn)
+    //     .format();
+    //   newEquipment.createdOn = moment(equipment.createdOn)
+    //     .format();
+    //   return newEquipment;
+    // });
     return equipments;
   }
 
@@ -175,11 +176,13 @@ class EquipmentListPage extends Component {
       // const tempHourRate = newEquipment.hourRate;
       // const tempTonRate = newEquipment.tonRate;
 
-      newEquipment.tempHourRate = `$${newEquipment.hourRate}`;
-      newEquipment.tempTonRate = `$${newEquipment.tonRate}`;
+      newEquipment.newMaxCapacity = TFormat.asTons(newEquipment.maxCapacity);
+      newEquipment.newHourRate = TFormat.asMoneyByHour(newEquipment.hourRate);
+      newEquipment.newTonRate = TFormat.asMoneyByTons(newEquipment.tonRate);
 
       return newEquipment;
     });
+
     if (loaded) {
       return (
         <React.Fragment>
@@ -230,15 +233,15 @@ class EquipmentListPage extends Component {
                                 displayName: 'Type'
                               },
                               {
-                                name: 'maxCapacity',
+                                name: 'newMaxCapacity',
                                 displayName: 'Capacity'
                               },
                               {
-                                name: 'tempHourRate',
+                                name: 'newHourRate',
                                 displayName: 'Rate per Hour'
                               },
                               {
-                                name: 'tempTonRate',
+                                name: 'newTonRate',
                                 displayName: 'Rate per Ton'
                               }
                             ]
