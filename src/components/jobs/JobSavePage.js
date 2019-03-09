@@ -67,8 +67,8 @@ class JobSavePage extends Component {
     // moved the loader to the mount function
     const profile = await ProfileService.getProfile();
     this.setState({ companyType: profile.companyType },
-      function test() {
-        console.log('setState completed', this.state);
+      () => {
+        // console.log('setState completed', this.state);
       });
   }
 

@@ -22,6 +22,10 @@ class AddTruckForm extends PureComponent {
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
     this.gotoPage.bind(this);
+    this.firstPage = this.firstPage.bind(this);
+    this.secondPage = this.secondPage.bind(this);
+    this.thirdPage = this.thirdPage.bind(this);
+    this.fourthPage = this.fourthPage.bind(this);
     this.handleTruckSave = this.handleTruckSave.bind(this);
     this.handleAvailabilitySave = this.handleAvailabilitySave.bind(this);
     this.handleUserSave = this.handleUserSave.bind(this);
@@ -71,21 +75,44 @@ class AddTruckForm extends PureComponent {
     // let's keep the info from the truck in memory
     const { truckCachedInfo, page } = this.state;
     truckCachedInfo.info = e;
-    this.setState({ page: page + 1 });
+
+    // also set availability info
+    const availableInfo = {
+      info: {
+        startDate: e.startAvailability,
+        endDate: e.endAvailability,
+        isAvailable: e.currentAvailability
+      }
+    };
+
+    this.setState({ availabilityCachedInfo: availableInfo });
+
+    if (truckCachedInfo.info.redir) {
+      this.setState({
+        page: page + 1
+      });
+    }
   }
 
   handleAvailabilitySave(e) {
     // let's keep the info from the truck in memory
     const { availabilityCachedInfo, page } = this.state;
     availabilityCachedInfo.info = e;
-    this.setState({ page: page + 1 });
+    console.log(e);
+    // not receiving the redir
+    if (e.redir) {
+      this.setState({ page: page + 1 });
+    }
   }
 
   handleUserSave(e) {
+    // // console.log('>USER SAVE', e);
     // let's keep the info from the truck in memory
     const { userCachedInfo, page } = this.state;
     userCachedInfo.info = e;
-    this.setState({ page: page + 1 });
+    if (e.redir) {
+      this.setState({ page: page + 1 });
+    }
   }
 
   gotoPage(pageNumber) {
@@ -99,8 +126,24 @@ class AddTruckForm extends PureComponent {
 
   nextPage() {
     const { page } = this.state;
-    // just checking if the state changed
+    // just checking if the state changeo
     this.setState({ page: page + 1 });
+  }
+
+  firstPage() {
+    this.setState({ page: 1 });
+  }
+
+  secondPage() {
+    this.setState({ page: 2 });
+  }
+
+  thirdPage() {
+    this.setState({ page: 3 });
+  }
+
+  fourthPage() {
+    this.setState({ page: 4 });
   }
 
   closeNow() {
@@ -132,6 +175,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
+                      onClick={this.firstPage}
                       className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Add Truck</p>
@@ -140,6 +184,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
+                      onClick={this.secondPage}
                       className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Add Schedule</p>
@@ -148,6 +193,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
+                      onClick={this.thirdPage}
                       className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Add Driver</p>
@@ -156,6 +202,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
+                      onClick={this.fourthPage}
                       className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Summary</p>
@@ -170,6 +217,7 @@ class AddTruckForm extends PureComponent {
                         company={company}
                         onTruckFullInfo={this.handleTruckSave}
                         handleSubmit={this.nextPage}
+                        onClose={this.closeNow}
                         getTruckFullInfo={this.getTruckInfo}
                         passedTruckFullInfo={truckPassedInfo}
                       />
@@ -185,6 +233,7 @@ class AddTruckForm extends PureComponent {
                         onAvailabilityFullInfo={this.handleAvailabilitySave}
                         previousPage={this.previousPage}
                         handleSubmit={this.nextPage}
+                        onClose={this.closeNow}
                         getAvailiabilityFullInfo={this.getAvailiabilityInfo}
                       />
                       )}
@@ -194,7 +243,7 @@ class AddTruckForm extends PureComponent {
                           previousPage={this.previousPage}
                           company={company}
                           onUserFullInfo={this.handleUserSave}
-                          // onDriverSave={this.nextPage}
+                          onClose={this.closeNow}
                           handleSubmit={this.nextPage}
                           getUserFullInfo={this.getUserInfo}
                           // this is to track if we are editing
@@ -204,6 +253,7 @@ class AddTruckForm extends PureComponent {
                     {page === 4
                       && (
                       <AddTruckFormFour
+                        company={company}
                         previousPage={this.previousPage}
                         truckFullInfo={truckCachedInfo}
                         availabilityFullInfo={availabilityCachedInfo}
