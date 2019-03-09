@@ -8,6 +8,7 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes from 'prop-types';
+import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 
@@ -26,7 +27,23 @@ class AddTruckFormThree extends PureComponent {
       parentId: 4, // THIS IS A FK
       isBanned: 0,
       preferredLanguage: 'eng',
-      userStatus: 'New'
+      userStatus: 'New',
+      reqHandlerFName: {
+        touched: false,
+        error: 'Please enter a first name for the driver'
+      },
+      reqHandlerLName: {
+        touched: false,
+        error: 'Please enter a last name for the driver'
+      },
+      reqHandlerEmail: {
+        touched: false,
+        error: 'Please enter a mobile phone for the driver'
+      },
+      reqHandlerPhone: {
+        touched: false,
+        error: 'Please enter an email for the driver'
+      }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.getAndSetExistingUser = this.getAndSetExistingUser.bind(this);
@@ -73,11 +90,69 @@ class AddTruckFormThree extends PureComponent {
     this.setState({ [e.target.name]: value });
   }
 
+  isFormValid() {
+    const truck = this.state;
+    const {
+      reqHandlerFName,
+      reqHandlerLName,
+      reqHandlerEmail,
+      reqHandlerPhone
+    } = this.state;
+    let isValid = true;
+
+    if (truck.firstName === null || truck.firstName.length === 0) {
+      this.setState({
+        reqHandlerFName: Object.assign({}, reqHandlerFName, {
+          touched: true
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.lastName === null || truck.lastName.length === 0) {
+      this.setState({
+        reqHandlerLName: Object.assign({}, reqHandlerLName, {
+          touched: true
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.email === null || truck.email.length === 0) {
+      this.setState({
+        reqHandlerEmail: Object.assign({}, reqHandlerEmail, {
+          touched: true
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.mobilePhone === null || truck.mobilePhone.length === 0) {
+      this.setState({
+        reqHandlerPhone: Object.assign({}, reqHandlerPhone, {
+          touched: true
+        })
+      });
+      isValid = false;
+    }
+
+    if (isValid) {
+      return true;
+    }
+
+    return false;
+  }
+
   async saveUser(e) {
     e.preventDefault();
     e.persist();
     const { onUserFullInfo } = this.props;
     const availability = this.state;
+
+    if (!this.isFormValid()) {
+      return;
+    }
+
     onUserFullInfo(availability);
     this.handleSubmit('User');
   }
@@ -100,7 +175,11 @@ class AddTruckFormThree extends PureComponent {
       parentId,
       isBanned,
       preferredLanguage,
-      userStatus
+      userStatus,
+      reqHandlerFName,
+      reqHandlerLName,
+      reqHandlerEmail,
+      reqHandlerPhone
     } = this.state;
     return (
       <Col md={12} lg={12}>
@@ -130,21 +209,33 @@ class AddTruckFormThree extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">First Name</span>
-                  <input
-                    name="firstName"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'firstName',
+                        value: firstName
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={firstName}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerFName}
                   />
                   <input type="hidden" value={companyId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Last Name</span>
-                  <input
-                    name="lastName"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'lastName',
+                        value: lastName
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={lastName}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerLName}
                   />
                 </div>
               </Row>
@@ -153,20 +244,32 @@ class AddTruckFormThree extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Mobile Phone</span>
-                  <input
-                    name="mobilePhone"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'mobilePhone',
+                        value: mobilePhone
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={mobilePhone}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerPhone}
                   />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Email</span>
-                  <input
-                    name="email"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'email',
+                        value: email
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={email}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerEmail}
                   />
                 </div>
               </Row>

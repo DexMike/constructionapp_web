@@ -32,7 +32,7 @@ class SelectField extends PureComponent {
   }
 }
 
-const renderSelectField = function renderSelectField({ input, options, placeholder, meta }) {
+/* const renderSelectField = function renderSelectField({ input, options, placeholder, meta }) {
   return (
     <div className="form__form-group-input-wrap">
       <SelectField
@@ -41,6 +41,21 @@ const renderSelectField = function renderSelectField({ input, options, placehold
         placeholder={placeholder}
       />
       {meta.touched && meta.error && <span className="form__form-group-error">{meta.error}</span>}
+    </div>
+  );
+}; */
+
+const renderSelectField = function renderSelectField({
+  input, options, placeholder, meta: { touched, error }
+}) {
+  return (
+    <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+      <SelectField
+        {...input}
+        options={options}
+        placeholder={placeholder}
+      />
+      {touched && error && <span className="form__form-group-error">{error}</span>}
     </div>
   );
 };

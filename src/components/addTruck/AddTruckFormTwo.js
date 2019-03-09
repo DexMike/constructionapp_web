@@ -18,7 +18,15 @@ class AddTruckFormTwo extends PureComponent {
     this.state = {
       startDate: new Date(),
       endDate: new Date(),
-      isAvailable: false
+      isAvailable: false,
+      reqHandlerStartDate: {
+        touched: false,
+        error: 'Please select a start date for when your truck is available'
+      },
+      reqHandlerEndDate: {
+        touched: false,
+        error: 'Please select an end date for when your truck is available'
+      }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.startDateChange = this.startDateChange.bind(this);
@@ -66,18 +74,68 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   startDateChange(data) {
+    const { reqHandlerStartDate } = this.state;
     // console.log(data);
     this.setState({ startDate: data });
+    this.setState({
+      reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
+        touched: false
+      })
+    });
   }
 
   endDateChange(data) {
+    const { reqHandlerEndDate } = this.state;
     this.setState({ endDate: data });
+    this.setState({
+      reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
+        touched: false
+      })
+    });
+  }
+
+  isFormValid() {
+    const truck = this.state;
+    const {
+      reqHandlerStartDate,
+      reqHandlerEndDate
+    } = this.state;
+    let isValid = true;
+
+    if (truck.startDate === null || truck.startDate.length === 0) {
+      this.setState({
+        reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
+          touched: true
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.endDate === null || truck.endDate.length === 0) {
+      this.setState({
+        reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
+          touched: true
+        })
+      });
+      isValid = false;
+    }
+
+    if (isValid) {
+      return true;
+    }
+
+    return false;
   }
 
   async saveAvailability(e) {
     e.preventDefault();
     e.persist();
     const { onAvailabilityFullInfo } = this.props;
+
+    if (!this.isFormValid()) {
+      return;
+    }
+
     onAvailabilityFullInfo(this.state);
     this.handleSubmit('Truck');
   }
@@ -101,7 +159,13 @@ class AddTruckFormTwo extends PureComponent {
 
   render() {
     const { p, previousPage } = this.props;
-    const { startDate, endDate, isAvailable } = this.state;
+    const {
+      startDate,
+      endDate,
+      isAvailable,
+      reqHandlerStartDate,
+      reqHandlerEndDate
+    } = this.state;
 
     const today = new Date();
     const date = new Date();
@@ -155,6 +219,7 @@ class AddTruckFormTwo extends PureComponent {
                       }
                     }
                     onChange={this.handleInputChange}
+                    meta={reqHandlerStartDate}
                   />
                   <input type="hidden" value={p} />
                 </div>
@@ -170,6 +235,7 @@ class AddTruckFormTwo extends PureComponent {
                       }
                     }
                     onChange={this.handleInputChange}
+                    meta={reqHandlerEndDate}
                   />
                 </div>
 

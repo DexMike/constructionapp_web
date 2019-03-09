@@ -36,16 +36,16 @@ class MultiSelectField extends PureComponent {
 }
 
 const renderMultiSelectField = function renderMultiSelectField(
-  { input, options, placeholder, meta }
+  { input, options, placeholder, meta: { touched, error } }
 ) {
   return (
-    <div className="form__form-group-input-wrap">
+    <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
       <MultiSelectField
         {...input}
         options={options}
         placeholder={placeholder}
       />
-      {meta.touched && meta.error && <span className="form__form-group-error">{meta.error}</span>}
+      {touched && error && <span className="form__form-group-error">{error}</span>}
     </div>
   );
 };
