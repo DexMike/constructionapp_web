@@ -3,7 +3,6 @@ import moment from 'moment';
 import NumberFormat from 'react-number-format';
 
 class TFormat {
-
   static asMoney(inputValue) {
     return (
       <NumberFormat
@@ -17,7 +16,7 @@ class TFormat {
         suffix=""
       />
     );
-  };
+  }
 
   static asMoneyByHour(inputValue) {
     return (
@@ -32,7 +31,7 @@ class TFormat {
         suffix="&nbsp;/&nbsp;Hour"
       />
     );
-  };
+  }
 
   static asMoneyByTons(inputValue) {
     return (
@@ -47,7 +46,20 @@ class TFormat {
         suffix="&nbsp;/&nbsp;Ton"
       />
     );
-  };
+  }
+
+  // inputRateType
+  // inputRate
+  // inputeRateEstimate
+  static asMoneyByRate(inputRateType, inputRate, inputRateEstimate) {
+    if (inputRateType === 'Hour') {
+      return TFormat.asMoney(inputRate * inputRateEstimate);
+    }
+    if (inputRateType === 'Ton') {
+      return TFormat.asMoney(inputRate * inputRateEstimate);
+    }
+    return "$ 0.00";
+  }
 
   static asHours(inputValue) {
     return (
@@ -138,8 +150,8 @@ class TFormat {
         format="#####"
         mask="_"
       />
-    )
-  };
+    );
+  }
 }
 
 export default TFormat;
