@@ -79,8 +79,8 @@ class AddTruckForm extends PureComponent {
     // also set availability info
     const availableInfo = {
       info: {
-        startDate: new Date(),
-        endDate: new Date(),
+        startDate: e.startAvailability,
+        endDate: e.endAvailability,
         isAvailable: e.currentAvailability
       }
     };
@@ -93,12 +93,13 @@ class AddTruckForm extends PureComponent {
       });
     }
   }
-  /**/
 
   handleAvailabilitySave(e) {
     // let's keep the info from the truck in memory
     const { availabilityCachedInfo, page } = this.state;
     availabilityCachedInfo.info = e;
+    console.log(e);
+    // not receiving the redir
     if (e.redir) {
       this.setState({ page: page + 1 });
     }

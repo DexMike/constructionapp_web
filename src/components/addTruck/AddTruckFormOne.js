@@ -31,7 +31,7 @@ class AddTruckFormOne extends PureComponent {
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
-      maxCapacity: 15,
+      maxCapacity: 0,
       // maxCapacityTouched: false,
       description: '',
       vin: '',
@@ -71,6 +71,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleMultiChange(data) {
+    console.log('>>HANDLEMULTICHANGE', data);
     this.setState({ selectedMaterials: data });
   }
 
@@ -85,6 +86,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   saveTruckInfo(redir) {
+    console.log('>>SAVING TRUCK INFO');
     const { company } = this.props;
     const {
       id,
@@ -105,7 +107,9 @@ class AddTruckFormOne extends PureComponent {
       maxDistanceToPickup
     } = this.state;
     const { onTruckFullInfo } = this.props;
-    // validation is pending
+    // validation is pending now
+
+    //console.log(onTruckFullInfo());
 
     // set states for checkboxes
     let chargeBy = '';
@@ -122,6 +126,21 @@ class AddTruckFormOne extends PureComponent {
 
     // map the values with the ones on equipment
     const shortDesc = description.substring(0, 45);
+    let start = new Date();
+    let end = new Date();
+
+    // dates if preloaded
+    const { getTruckFullInfo } = this.props;
+    const preloaded = getTruckFullInfo();
+    // load info from cached (if coming back from next tabs)
+    if (typeof preloaded.info !== 'undefined') {
+      if (Object.keys(preloaded.info).length > 0) {
+        start = preloaded.info.startAvailability;
+        end = preloaded.info.endAvailability;
+      }
+    }
+
+    console.log('>>DATES BEFORE SAVING:', start, end);
 
     // TODO-> Ask which params are required
     const saveValues = {
@@ -139,8 +158,8 @@ class AddTruckFormOne extends PureComponent {
       vin,
       image: '', // unasigned
       currentAvailability: 1, // unasigned
-      startAvailability: new Date(),
-      endAvailability: new Date(),
+      startAvailability: start, // careful here, it's date unless it exists
+      endAvailability: end,
       ratesByBoth, // keeping here in order to track it
       ratesByHour, // keeping here in order to track it
       ratesByTon, // keeping here in order to track it
@@ -164,6 +183,9 @@ class AddTruckFormOne extends PureComponent {
       isArchived: 0,
       redir
     };
+
+    console.log('BEFORE SAVING DATE:');
+    console.log(saveValues);
 
     // save info in the parent
     onTruckFullInfo(saveValues);
@@ -251,7 +273,9 @@ class AddTruckFormOne extends PureComponent {
 
     // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
-      // // // console.log('>> Seems that there is cached information');
+      console.log('>> Seems that there is cached information');
+      console.log(preloaded);
+      console.log(passedTruckFullInfo);
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,
@@ -271,8 +295,6 @@ class AddTruckFormOne extends PureComponent {
 
     // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
-      // there should be a better way of doign this
-
       this.setState({
         id: passedTruckFullInfo.id,
         driversId: passedTruckFullInfo.driversId,
@@ -391,7 +413,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-12 form__form-group">
                   <span className="form__form-group-label">
                     Materials Hauled
                   </span>
@@ -413,36 +435,9 @@ class AddTruckFormOne extends PureComponent {
                     placeholder="Materials"
                   />
                 </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Maximum Capacity (Tons)</span>
-                  <input
-                    name="maxCapacity"
-                    type="number"
-                    value={maxCapacity}
-                    onChange={this.handleInputChange}
-                  />
-                  {/*
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleJobInputChange,
-                        name: 'maxCapacity',
-                        value: maxCapacity
-                      }
-                    }
-                    placeholder="prueba"
-                    type="number"
-                    meta={
-                      {
-                        touched: maxCapacityTouched,
-                        error: 'Please set the Maximum Capacity'
-                      }
-                    }
-                    value={maxCapacity}
-                  />
-                  */}
-                </div>
+              </Row>
 
+              <Row className="col-md-12">
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Vin #</span>
                   <input
@@ -571,15 +566,28 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  Max Distance to Pickup &nbsp;
+                <div className="col-md-6 form__form-group">
+                  <span className="form__form-group-label">
+                    Maximum Capacity (Tons)
+                  </span>
+                  <input
+                    name="maxCapacity"
+                    type="number"
+                    value={maxCapacity}
+                    onChange={this.handleInputChange}
+                  />
+                </div>
+                <div className="col-md-6 form__form-group">
+                  <span className="form__form-group-label">
+                    Max Distance to Pickup (Miles)
+                  </span>
                   <input
                     name="maxDistanceToPickup"
                     type="number"
                     value={maxDistanceToPickup}
                     onChange={this.handleInputChange}
+                    placeholder="How far will you travel per job"
                   />
-                  (How far will you travel per job?)
                 </div>
 
               </Row>

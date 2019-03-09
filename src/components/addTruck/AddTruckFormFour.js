@@ -105,7 +105,7 @@ class AddTruckFormFour extends PureComponent {
 
       // remove unnecesary info
       delete truckFullInfo.info.id;
-      delete truckFullInfo.info.selectedMaterials;
+      // delete truckFullInfo.info.selectedMaterials;
       delete truckFullInfo.info.redir;
       delete truckFullInfo.info.ratesByBoth;
       delete truckFullInfo.info.ratesByHour;
@@ -113,8 +113,6 @@ class AddTruckFormFour extends PureComponent {
 
       const createdEquipment = await EquipmentService.createEquipment(truckFullInfo.info);
       const jsonMaterials = JSON.stringify(selectedTruckMaterials);
-      // console.log(116);
-      // console.log(jsonMaterials);
 
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(
@@ -154,6 +152,7 @@ class AddTruckFormFour extends PureComponent {
     console.log(Object.keys(getTruckFullInfo().info).length);
     console.log(Object.keys(getUserFullInfo().info).length);
     */
+
 
     // show selected materials
     let allMaterials = '';

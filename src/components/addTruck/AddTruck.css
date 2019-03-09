@@ -105,3 +105,8 @@ p, h1, h2, h3, h4, h5, h6 {
 .form.form--horizontal .form__form-group-label {
     width: 180px !important;
 }
+/*
+.Select--multi .Select-multi-value-wrapper{
+    width: 90% !important;
+}
+*/

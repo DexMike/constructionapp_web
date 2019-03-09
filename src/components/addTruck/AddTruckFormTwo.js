@@ -18,13 +18,15 @@ class AddTruckFormTwo extends PureComponent {
     this.state = {
       startDate: new Date(),
       endDate: new Date(),
-      isAvailable: false
+      isAvailable: true,
+      redir: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.startDateChange = this.startDateChange.bind(this);
     this.endDateChange = this.endDateChange.bind(this);
     this.makeAvailable = this.makeAvailable.bind(this);
     this.availableButtonColor = this.availableButtonColor.bind(this);
+    this.saveAndGoBack = this.saveAndGoBack.bind(this);
   }
 
   componentDidMount() {
@@ -32,6 +34,7 @@ class AddTruckFormTwo extends PureComponent {
     const { getAvailiabilityFullInfo } = this.props;
     const preloaded = getAvailiabilityFullInfo();
     if (Object.keys(preloaded).length > 0) {
+      console.log(preloaded);
       this.setState({
         isAvailable: preloaded.info.isAvailable,
         startDate: preloaded.info.startDate,
@@ -41,6 +44,8 @@ class AddTruckFormTwo extends PureComponent {
         // // console.log(this.state);
         this.saveAvailabilityInfo(false);
       });
+    } else {
+      console.log(47);
     }
   }
 
@@ -76,7 +81,6 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   startDateChange(data) {
-    // // // console.log(data);
     this.setState({ startDate: data },
       function wait() {
         this.saveAvailabilityInfo(false);
@@ -92,15 +96,23 @@ class AddTruckFormTwo extends PureComponent {
 
   saveAvailabilityInfo(redir) {
     const { onAvailabilityFullInfo } = this.props;
-    onAvailabilityFullInfo.redir = redir;
-    onAvailabilityFullInfo(this.state);
-    this.handleSubmit('Availability');
+    this.setState({ redir },
+      function wait() {
+        onAvailabilityFullInfo(this.state);
+        this.handleSubmit('Availability');
+      });
   }
 
   async saveAvailability(e) {
     e.preventDefault();
     e.persist();
     this.saveAvailabilityInfo(true);
+  }
+
+  saveAndGoBack() {
+    const { previousPage } = this.props;
+    this.saveAvailabilityInfo(false);
+    previousPage();
   }
 
   handleSubmit(menuItem) {
@@ -111,7 +123,7 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   render() {
-    const { p, previousPage, onClose } = this.props;
+    const { p, onClose } = this.props;
     const { startDate, endDate, isAvailable } = this.state;
 
     const today = new Date();
@@ -211,8 +223,8 @@ class AddTruckFormTwo extends PureComponent {
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="secondary" type="button" onClick={previousPage} >Back</Button>
-                  <Button color="primary" type="submit">Next</Button>
+                  <Button color="secondary" type="button" onClick={this.saveAndGoBack} >Back</Button>
+                  <Button color="primary" type="submit" className="next">Next</Button>
                 </ButtonToolbar>
               </Row>
 
