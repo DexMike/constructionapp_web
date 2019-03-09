@@ -109,7 +109,7 @@ class AddTruckFormOne extends PureComponent {
     const { onTruckFullInfo } = this.props;
     // validation is pending now
 
-    //console.log(onTruckFullInfo());
+    // console.log(onTruckFullInfo());
 
     // set states for checkboxes
     let chargeBy = '';

@@ -8,26 +8,10 @@ import {
   Container,
   Row
 } from 'reactstrap';
-// import classnames from 'classnames';
-// import moment from 'moment';
-// import { Select } from '@material-ui/core';
-// import NumberFormat from 'react-number-format';
-// import TSelect from '../common/TSelect';
-// import TDateTimePicker from '../common/TDateTimePicker';
 import TTable from '../common/TTable';
+import TFormat from '../common/TFormat';
 
-// import truckImage from '../../img/default_truck.png';
 import UserService from '../../api/UserService';
-// import LookupsService from '../../api/LookupsService';
-// import CompanyService from '../../api/CompanyService';
-// import AddressService from '../../api/AddressService';
-// import ProfileService from '../../api/ProfileService';
-
-// import JobCreateForm from '../jobs/JobCreateForm';
-
-// import JobMaterialsService from '../../api/JobMaterialsService';
-// import JobsService from '../../api/JobsService';
-// import AgentService from '../../api/AgentService';
 
 class UserCustomerListPage extends Component {
   constructor(props) {
@@ -88,7 +72,14 @@ class UserCustomerListPage extends Component {
   }
 
   render() {
-    const { users } = this.state;
+    let { users } = this.state;
+
+    users = users.map((user) => {
+      const newUser = user;
+      newUser.newMobilePhone = TFormat.asPhone(user.mobilePhone);
+      return newUser;
+    });
+
     return (
       <Container className="dashboard">
         {this.renderGoTo()}
@@ -135,7 +126,7 @@ class UserCustomerListPage extends Component {
                       displayName: 'Last Name'
                     },
                     {
-                      name: 'mobilePhone',
+                      name: 'newMobilePhone',
                       displayName: 'Mobile Phone'
                     }
                   ]}
