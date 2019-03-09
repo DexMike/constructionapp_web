@@ -152,6 +152,23 @@ class TFormat {
       />
     );
   }
+
+  materialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
+  }
+
 }
 
 export default TFormat;

@@ -77,6 +77,7 @@ class UserCustomerListPage extends Component {
     users = users.map((user) => {
       const newUser = user;
       newUser.newMobilePhone = TFormat.asPhone(user.mobilePhone);
+      return newUser;
     });
 
     return (
