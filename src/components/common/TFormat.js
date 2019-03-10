@@ -139,7 +139,7 @@ class TFormat {
   }
 
   static asDateTime(inputValue) {
-    return moment(inputValue).format("MM/DD/YYYY HH:mm");
+    return moment(inputValue).format("MM/DD/YYYY hh:mm");
   }
 
   static asZip5(inputValue) {
@@ -149,6 +149,36 @@ class TFormat {
         type="text"
         format="#####"
         mask="_"
+      />
+    );
+  }
+
+  static asWholeNumber(inputValue) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={0}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=""
+      />
+    );
+  }
+
+  static asNumber(inputValue) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={2}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=""
       />
     );
   }
