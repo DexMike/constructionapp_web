@@ -40,7 +40,7 @@ class AddTruck extends PureComponent {
   // Pull trucks
   async fetchCompanyTrucks() {
     const { match } = this.props;
-    const materials = await EquipmentsService.getEquipmentByCompanyIdAndType(
+    const materials = await EquipmentsService.getEquipmentByequipmentIdAndType(
       match.params.id,
       'Truck'
     );

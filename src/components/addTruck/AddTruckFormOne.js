@@ -17,6 +17,7 @@ import TCheckBox from '../common/TCheckBox';
 import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
+import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 
 // import validate from '../common/validate ';
 
@@ -56,6 +57,7 @@ class AddTruckFormOne extends PureComponent {
     await this.fetchMaterials();
   }
 
+  /*
   componentWillReceiveProps(nextProps) {
     if (nextProps.equipment) {
       const { equipment } = nextProps;
@@ -69,9 +71,9 @@ class AddTruckFormOne extends PureComponent {
       this.setState({ ...equipment });
     }
   }
+  */
 
   handleMultiChange(data) {
-    console.log('>>HANDLEMULTICHANGE', data);
     this.setState({ selectedMaterials: data });
   }
 
@@ -86,8 +88,6 @@ class AddTruckFormOne extends PureComponent {
   }
 
   saveTruckInfo(redir) {
-    console.log('>>SAVING TRUCK INFO');
-    const { company } = this.props;
     const {
       id,
       selectedMaterials,
@@ -109,8 +109,6 @@ class AddTruckFormOne extends PureComponent {
     const { onTruckFullInfo } = this.props;
     // validation is pending now
 
-    // console.log(onTruckFullInfo());
-
     // set states for checkboxes
     let chargeBy = '';
     if (ratesByBoth) {
@@ -130,7 +128,7 @@ class AddTruckFormOne extends PureComponent {
     let end = new Date();
 
     // dates if preloaded
-    const { getTruckFullInfo } = this.props;
+    const { getTruckFullInfo, equipmentId } = this.props;
     const preloaded = getTruckFullInfo();
     // load info from cached (if coming back from next tabs)
     if (typeof preloaded.info !== 'undefined') {
@@ -139,8 +137,6 @@ class AddTruckFormOne extends PureComponent {
         end = preloaded.info.endAvailability;
       }
     }
-
-    console.log('>>DATES BEFORE SAVING:', start, end);
 
     // TODO-> Ask which params are required
     const saveValues = {
@@ -166,7 +162,7 @@ class AddTruckFormOne extends PureComponent {
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
-      companyId: company.id,
+      equipmentId,
       defaultDriverId, // unasigned
       driverEquipmentsId: 0, // unasigned
       driversId, // THIS IS A FK
@@ -184,9 +180,6 @@ class AddTruckFormOne extends PureComponent {
       redir
     };
 
-    console.log('BEFORE SAVING DATE:');
-    console.log(saveValues);
-
     // save info in the parent
     onTruckFullInfo(saveValues);
     this.handleSubmit('Truck');
@@ -194,7 +187,6 @@ class AddTruckFormOne extends PureComponent {
 
   isFormValid() {
     const { maxCapacity } = this.state;
-    // console.log(maxCapacity);
     if (maxCapacity === 0) {
       return false;
     }
@@ -215,7 +207,6 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    // // console.log(e);
     let { value } = e.target;
     // const { ratesByHour, ratesByTon } = this.state;
     if (e.target.name === 'ratesByBoth') {
@@ -268,14 +259,11 @@ class AddTruckFormOne extends PureComponent {
     });
 
     // check if there is preloaded info
-    const { getTruckFullInfo, passedTruckFullInfo } = this.props;
+    const { getTruckFullInfo, passedTruckFullInfo, equipmentId } = this.props;
     const preloaded = getTruckFullInfo();
 
     // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
-      console.log('>> Seems that there is cached information');
-      console.log(preloaded);
-      console.log(passedTruckFullInfo);
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,
@@ -288,13 +276,28 @@ class AddTruckFormOne extends PureComponent {
         maxDistanceToPickup: preloaded.info.maxDistance,
         ratesCostPerTon: preloaded.info.tonRate,
         ratesCostPerHour: preloaded.info.hourRate,
-        truckType: preloaded.info.type
+        truckType: preloaded.info.type,
+        selectedMaterials: preloaded.info.selectedMaterials
       });
       // Materials Hauled is missing
     }
 
     // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
+      // console.log(equipmentId);
+      // we have to load the materials for this particular truck
+      let truckMaterials = await
+      EquipmentMaterialsService.getEquipmentMaterialsByCompanyId(equipmentId);
+
+      truckMaterials = truckMaterials.map(material => ({
+        // careful here, the ID is that of the equipmentMaterial, not from the Material
+        // we should probably be saving the materialId instead of the name.
+        value: String(material.id),
+        label: material.value
+      }));
+
+      // console.log(truckMaterials);
+
       this.setState({
         id: passedTruckFullInfo.id,
         driversId: passedTruckFullInfo.driversId,
@@ -307,7 +310,8 @@ class AddTruckFormOne extends PureComponent {
         maxDistanceToPickup: passedTruckFullInfo.maxDistance,
         ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
         ratesCostPerHour: passedTruckFullInfo.hourRate,
-        truckType: passedTruckFullInfo.type
+        truckType: passedTruckFullInfo.type,
+        selectedMaterials: truckMaterials
       });
       // set booleans
       if (passedTruckFullInfo.rateType === 'Both') {
@@ -325,7 +329,6 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleImg(e) {
-    // // console.log(e);
     return e;
   }
 
@@ -655,14 +658,9 @@ class AddTruckFormOne extends PureComponent {
 }
 
 AddTruckFormOne.propTypes = {
-  equipment: PropTypes.shape({
-    id: PropTypes.number
-  }),
   p: PropTypes.number,
-  company: PropTypes.shape({
-    name: PropTypes.string,
-    id: PropTypes.number
-  }),
+  equipmentId: PropTypes.number,
+  // companyId: PropTypes.number,
   getTruckFullInfo: PropTypes.func.isRequired,
   onTruckFullInfo: PropTypes.func.isRequired,
   passedTruckFullInfo: PropTypes.shape({
@@ -673,8 +671,8 @@ AddTruckFormOne.propTypes = {
 
 AddTruckFormOne.defaultProps = {
   p: null,
-  company: null,
-  equipment: null,
+  equipmentId: null,
+  // companyId: null,
   passedTruckFullInfo: null
 };
 

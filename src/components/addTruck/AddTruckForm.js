@@ -98,7 +98,7 @@ class AddTruckForm extends PureComponent {
     // let's keep the info from the truck in memory
     const { availabilityCachedInfo, page } = this.state;
     availabilityCachedInfo.info = e;
-    console.log(e);
+    // console.log(e);
     // not receiving the redir
     if (e.redir) {
       this.setState({ page: page + 1 });
@@ -152,7 +152,7 @@ class AddTruckForm extends PureComponent {
   }
 
   render() {
-    const { company } = this.props;
+    const { equipmentId, companyId } = this.props;
     const {
       page,
       loaded,
@@ -214,7 +214,8 @@ class AddTruckForm extends PureComponent {
                       && (
                       <AddTruckFormOne
                         p={page}
-                        company={company}
+                        equipmentId={equipmentId}
+                        // companyId={companyId}
                         onTruckFullInfo={this.handleTruckSave}
                         handleSubmit={this.nextPage}
                         onClose={this.closeNow}
@@ -226,10 +227,7 @@ class AddTruckForm extends PureComponent {
                       && (
                       <AddTruckFormTwo
                         p={page}
-                        // onSubmit={this.nextPage}
-                        company={company}
-                        // what about this? do we need it?
-                        // onTruckFullInfo={this.handleTruckSave}
+                        equipmentId={equipmentId}
                         onAvailabilityFullInfo={this.handleAvailabilitySave}
                         previousPage={this.previousPage}
                         handleSubmit={this.nextPage}
@@ -240,8 +238,9 @@ class AddTruckForm extends PureComponent {
                     {page === 3
                       && (
                         <AddTruckFormThree
+                          equipmentId={equipmentId}
+                          // companyId={companyId}
                           previousPage={this.previousPage}
-                          company={company}
                           onUserFullInfo={this.handleUserSave}
                           onClose={this.closeNow}
                           handleSubmit={this.nextPage}
@@ -253,7 +252,8 @@ class AddTruckForm extends PureComponent {
                     {page === 4
                       && (
                       <AddTruckFormFour
-                        company={company}
+                        equipmentId={equipmentId}
+                        companyId={companyId}
                         previousPage={this.previousPage}
                         truckFullInfo={truckCachedInfo}
                         availabilityFullInfo={availabilityCachedInfo}
@@ -282,11 +282,8 @@ class AddTruckForm extends PureComponent {
 }
 
 AddTruckForm.propTypes = {
-  company: PropTypes.shape({
-    id: PropTypes.number,
-    page: PropTypes.number
-  }),
-  // id: PropTypes.number,
+  equipmentId: PropTypes.number,
+  companyId: PropTypes.number,
   incomingPage: PropTypes.number,
   toggle: PropTypes.func.isRequired,
   passedInfo: PropTypes.shape({
@@ -295,15 +292,8 @@ AddTruckForm.propTypes = {
 };
 
 AddTruckForm.defaultProps = {
-  company: PropTypes.shape({
-    id: PropTypes.number,
-    page: PropTypes.number
-  })
-  // onSubmit: PropTypes.func.isRequired
-};
-
-AddTruckForm.defaultProps = {
-  company: null,
+  equipmentId: 0,
+  companyId: 0,
   incomingPage: 0,
   passedInfo: null
   // id: null
