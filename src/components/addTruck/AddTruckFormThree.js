@@ -215,8 +215,8 @@ class AddTruckFormThree extends PureComponent {
       userStatus,
       reqHandlerFName,
       reqHandlerLName,
-      reqHandlerEmail,
-      reqHandlerPhone
+      reqHandlerEmail/* ,
+      // reqHandlerPhone */
     } = this.state;
     return (
       <Col md={12} lg={12}>
