@@ -18,7 +18,6 @@ class AddTruckFormTwo extends PureComponent {
     this.state = {
       startDate: new Date(),
       endDate: new Date(),
-      isAvailable: false,
       reqHandlerStartDate: {
         touched: false,
         error: 'Please select a start date for when your truck is available'
@@ -26,13 +25,16 @@ class AddTruckFormTwo extends PureComponent {
       reqHandlerEndDate: {
         touched: false,
         error: 'Please select an end date for when your truck is available'
-      }
+      },
+      isAvailable: true,
+      redir: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.startDateChange = this.startDateChange.bind(this);
     this.endDateChange = this.endDateChange.bind(this);
     this.makeAvailable = this.makeAvailable.bind(this);
     this.availableButtonColor = this.availableButtonColor.bind(this);
+    this.saveAndGoBack = this.saveAndGoBack.bind(this);
   }
 
   componentDidMount() {
@@ -40,9 +42,18 @@ class AddTruckFormTwo extends PureComponent {
     const { getAvailiabilityFullInfo } = this.props;
     const preloaded = getAvailiabilityFullInfo();
     if (Object.keys(preloaded).length > 0) {
+      console.log(preloaded);
       this.setState({
-        isAvailable: preloaded.info.isAvailable
+        isAvailable: preloaded.info.isAvailable,
+        startDate: preloaded.info.startDate,
+        endDate: preloaded.info.endDate
+      },
+      function wait() { // wait until it loads
+        // // console.log(this.state);
+        this.saveAvailabilityInfo(false);
       });
+    } else {
+      console.log(47);
     }
   }
 
@@ -67,6 +78,10 @@ class AddTruckFormTwo extends PureComponent {
     return isAvailable ? 'minimal' : 'success';
   }
 
+  unavailableButtonColor(isAvailable) {
+    return isAvailable ? 'minimal' : 'warning';
+  }
+
   makeAvailable() {
     const { isAvailable } = this.state;
     const newValue = !isAvailable;
@@ -75,8 +90,12 @@ class AddTruckFormTwo extends PureComponent {
 
   startDateChange(data) {
     const { reqHandlerStartDate } = this.state;
-    // console.log(data);
-    this.setState({ startDate: data });
+
+    this.setState({ startDate: data },
+      function wait() {
+        this.saveAvailabilityInfo(false);
+      });
+
     this.setState({
       reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
         touched: false
@@ -86,7 +105,12 @@ class AddTruckFormTwo extends PureComponent {
 
   endDateChange(data) {
     const { reqHandlerEndDate } = this.state;
-    this.setState({ endDate: data });
+    this.setState({ endDate: data },
+
+      function wait() {
+        this.saveAvailabilityInfo(false);
+      });
+
     this.setState({
       reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
         touched: false
@@ -127,38 +151,41 @@ class AddTruckFormTwo extends PureComponent {
     return false;
   }
 
-  async saveAvailability(e) {
-    e.preventDefault();
-    e.persist();
+  saveAvailabilityInfo(redir) {
     const { onAvailabilityFullInfo } = this.props;
 
     if (!this.isFormValid()) {
       return;
     }
 
-    onAvailabilityFullInfo(this.state);
-    this.handleSubmit('Truck');
+    this.setState({ redir },
+      function wait() {
+        onAvailabilityFullInfo(this.state);
+        this.handleSubmit('Availability');
+      });
   }
 
-  /*
-  async saveUser(e) {
+  async saveAvailability(e) {
     e.preventDefault();
     e.persist();
-    const { onUserFullInfo } = this.props;
-    const availability = this.state;
-    onUserFullInfo(availability);
-    this.handleSubmit('User');
+    this.saveAvailabilityInfo(true);
   }
-  */
+
+  saveAndGoBack() {
+    const { previousPage } = this.props;
+    this.saveAvailabilityInfo(false);
+    previousPage();
+  }
 
   handleSubmit(menuItem) {
+    // // console.log(menuItem);
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
   }
 
   render() {
-    const { p, previousPage } = this.props;
+    const { p, onClose } = this.props;
     const {
       startDate,
       endDate,
@@ -189,7 +216,7 @@ class AddTruckFormTwo extends PureComponent {
           <CardBody>
             <div className="card__title">
               <h5 className="bold-text">
-                Configure your schedule (p)
+                Configure your schedule
               </h5>
             </div>
 
@@ -199,7 +226,7 @@ class AddTruckFormTwo extends PureComponent {
               onSubmit={e => this.saveAvailability(e)}
             >
 
-              <Row>
+              <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
                   <h4 className="subhead">
                     <br />
@@ -238,7 +265,21 @@ class AddTruckFormTwo extends PureComponent {
                     meta={reqHandlerEndDate}
                   />
                 </div>
+              </Row>
 
+              <Row className="col-md-12">
+                <div className="col-md-3 form__form-group">
+                  <h4 className="subhead">Availability</h4>
+                </div>
+                <div className="col-md-9 form__form-group">
+                  {/* color={availableButtonColor(true)} */}
+                  <Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
+                    Available
+                  </Button>
+                  <Button color={this.unavailableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
+                    Un-available
+                  </Button>
+                </div>
               </Row>
 
               <Row className="col-md-12">
@@ -246,27 +287,15 @@ class AddTruckFormTwo extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-3 form__form-group">
-                  <span className="form__form-group-label">Toggle Availability</span>
-                </div>
-                <div className="col-md-9 form__form-group">
-                  {/* color={availableButtonColor(true)} */}
-                  <Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
-                    Available
+                <ButtonToolbar className="col-md-6 wizard__toolbar">
+                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                    Cancel
                   </Button>
-                  <Button color={this.availableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
-                    Un-available
-                  </Button>
-                </div>
-              </Row>
-
-              <Row>
-                <div className="col-md-12 form__form-group">
-                  <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" className="previous" onClick={previousPage} >Back</Button>
-                    <Button color="primary" type="submit" className="next">Next</Button>
-                  </ButtonToolbar>
-                </div>
+                </ButtonToolbar>
+                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                  <Button color="secondary" type="button" onClick={this.saveAndGoBack} >Back</Button>
+                  <Button color="primary" type="submit" className="next">Next</Button>
+                </ButtonToolbar>
               </Row>
 
             </form>
@@ -282,7 +311,8 @@ AddTruckFormTwo.propTypes = {
   p: PropTypes.number,
   previousPage: PropTypes.func.isRequired,
   getAvailiabilityFullInfo: PropTypes.func.isRequired,
-  onAvailabilityFullInfo: PropTypes.func.isRequired
+  onAvailabilityFullInfo: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormTwo.defaultProps = {

@@ -28,22 +28,10 @@ class AddTruckFormThree extends PureComponent {
       isBanned: 0,
       preferredLanguage: 'eng',
       userStatus: 'New',
-      reqHandlerFName: {
-        touched: false,
-        error: 'Please enter a first name for the driver'
-      },
-      reqHandlerLName: {
-        touched: false,
-        error: 'Please enter a last name for the driver'
-      },
-      reqHandlerEmail: {
-        touched: false,
-        error: 'Please enter a mobile phone for the driver'
-      },
-      reqHandlerPhone: {
-        touched: false,
-        error: 'Please enter an email for the driver'
-      }
+      reqHandlerFName: { touched: false, error: '' },
+      reqHandlerLName: { touched: false, error: '' },
+      reqHandlerEmail: { touched: false, error: '' },
+      reqHandlerPhone: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.getAndSetExistingUser = this.getAndSetExistingUser.bind(this);
@@ -64,7 +52,8 @@ class AddTruckFormThree extends PureComponent {
 
     // check for existing user (if this is loaded data)
     // TODO -> use only a bool to check for this (only pass the id)
-    if (passedTruckFullInfoId !== 0) {
+    // console.log(passedTruckFullInfoId);
+    if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
     }
   }
@@ -79,14 +68,34 @@ class AddTruckFormThree extends PureComponent {
       lastName: user.lastName,
       mobilePhone: user.mobilePhone,
       email: user.email
+    },
+    function setUserInfo() { // wait until it loads
+      this.saveUserInfo(false);
     });
+    // , this.saveUserInfo(false));
   }
 
   handleInputChange(e) {
     let { value } = e.target;
+    let reqHandler = '';
     if (e.target.name === 'isArchived') {
       value = e.target.checked ? Number(1) : Number(0);
     }
+
+    if (e.target.name === 'firstName') {
+      reqHandler = 'reqHandlerFName';
+    } else if (e.target.name === 'lastName') {
+      reqHandler = 'reqHandlerLName';
+    } else if (e.target.name === 'email') {
+      reqHandler = 'reqHandlerEmail';
+    } else if (e.target.name === 'mobilePhone') {
+      reqHandler = 'reqHandlerPhone';
+    }
+    this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
     this.setState({ [e.target.name]: value });
   }
 
@@ -100,10 +109,14 @@ class AddTruckFormThree extends PureComponent {
     } = this.state;
     let isValid = true;
 
+    console.log(truck.firstName);
+    console.log(truck.firstName.length);
+
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
         reqHandlerFName: Object.assign({}, reqHandlerFName, {
-          touched: true
+          touched: true,
+          error: 'Please enter a first name for the driver'
         })
       });
       isValid = false;
@@ -112,7 +125,8 @@ class AddTruckFormThree extends PureComponent {
     if (truck.lastName === null || truck.lastName.length === 0) {
       this.setState({
         reqHandlerLName: Object.assign({}, reqHandlerLName, {
-          touched: true
+          touched: true,
+          error: 'Please enter a last name for the driver'
         })
       });
       isValid = false;
@@ -121,7 +135,8 @@ class AddTruckFormThree extends PureComponent {
     if (truck.email === null || truck.email.length === 0) {
       this.setState({
         reqHandlerEmail: Object.assign({}, reqHandlerEmail, {
-          touched: true
+          touched: true,
+          error: 'Please enter a email for the driver'
         })
       });
       isValid = false;
@@ -130,7 +145,8 @@ class AddTruckFormThree extends PureComponent {
     if (truck.mobilePhone === null || truck.mobilePhone.length === 0) {
       this.setState({
         reqHandlerPhone: Object.assign({}, reqHandlerPhone, {
-          touched: true
+          touched: true,
+          error: 'Please enter an mobile phone for the driver'
         })
       });
       isValid = false;
@@ -143,18 +159,38 @@ class AddTruckFormThree extends PureComponent {
     return false;
   }
 
+  saveUserInfo(redir) {
+    const { onUserFullInfo } = this.props;
+    const {
+      id, // only to track if this is an edit
+      firstName,
+      lastName,
+      mobilePhone,
+      email
+    } = this.state;
+    const userInfo = {
+      id, // only to track if this is an edit
+      firstName,
+      lastName,
+      mobilePhone,
+      email
+    };
+
+    userInfo.redir = redir;
+    onUserFullInfo(userInfo);
+    this.handleSubmit('User');
+    // this.saveUserInfo(true);
+  }
+
   async saveUser(e) {
     e.preventDefault();
     e.persist();
-    const { onUserFullInfo } = this.props;
-    const availability = this.state;
 
     if (!this.isFormValid()) {
       return;
     }
 
-    onUserFullInfo(availability);
-    this.handleSubmit('User');
+    this.saveUserInfo(true);
   }
 
   handleSubmit(menuItem) {
@@ -164,7 +200,7 @@ class AddTruckFormThree extends PureComponent {
   }
 
   render() {
-    const { previousPage } = this.props;
+    const { previousPage, onClose } = this.props;
     const {
       id,
       firstName,
@@ -279,12 +315,15 @@ class AddTruckFormThree extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <ButtonToolbar className="form__button-toolbar wizard__toolbar">
-                    <Button color="primary" type="button" onClick={previousPage} className="previous">Back</Button>
-                    <Button color="primary" type="submit" className="next">Next</Button>
-                  </ButtonToolbar>
-                </div>
+                <ButtonToolbar className="col-md-6 wizard__toolbar">
+                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                    Cancel
+                  </Button>
+                </ButtonToolbar>
+                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                  <Button color="secondary" type="button" onClick={previousPage} className="previous">Back</Button>
+                  <Button color="primary" type="submit" className="next">Next</Button>
+                </ButtonToolbar>
               </Row>
 
             </form>
@@ -303,7 +342,8 @@ AddTruckFormThree.propTypes = {
   getUserFullInfo: PropTypes.func.isRequired,
   onUserFullInfo: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
-  passedTruckFullInfoId: PropTypes.number
+  passedTruckFullInfoId: PropTypes.number,
+  onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {
