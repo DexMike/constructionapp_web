@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
+import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
@@ -168,9 +169,10 @@ class JobForm extends Component {
           marginBottom: '20px'
         }}
         >
-          {job.name}
+          Customer Status: {job.status}
+          &nbsp;-&nbsp;
+          Job: {job.name}
         </h4>
-        <h3>this is carrier job detail (customer)</h3>
         <Row>
           <Col xl={3} lg={4} md={6} sm={12}>
             <div className="form__form-group">
@@ -201,14 +203,6 @@ class JobForm extends Component {
           </Col>
           <Col xl={3} lg={4} md={6} sm={12}>
             <div className="form__form-group">
-              <span className="form__form-group-label">Status</span>
-              <div className="form__form-group-field">
-                <span>{job.status}</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
               <span className="form__form-group-label">Materials</span>
               <div className="form__form-group-field">
                 <span>{this.materialsAsString(job.materials)}</span>
@@ -220,6 +214,16 @@ class JobForm extends Component {
               <span className="form__form-group-label">Rate</span>
               <div className="form__form-group-field">
                 ${job.rate} / {job.rateType}
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Potential Cost</span>
+              <div className="form__form-group-field">
+                <span>{
+                  TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+                }</span>
               </div>
             </div>
           </Col>

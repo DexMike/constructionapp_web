@@ -8,6 +8,7 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes from 'prop-types';
+import NumberFormat from 'react-number-format';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
@@ -280,17 +281,13 @@ class AddTruckFormThree extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Mobile Phone</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'mobilePhone',
-                        value: mobilePhone
-                      }
-                    }
-                    placeholder=""
+                  <NumberFormat
+                    name="mobilePhone"
                     type="text"
-                    meta={reqHandlerPhone}
+                    format="(###) ###-####"
+                    mask="_"
+                    value={mobilePhone}
+                    onChange={this.handleInputChange}
                   />
                 </div>
                 <div className="col-md-6 form__form-group">
