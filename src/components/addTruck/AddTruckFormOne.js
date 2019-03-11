@@ -493,7 +493,7 @@ class AddTruckFormOne extends PureComponent {
                   <i className="material-icons iconSet">schedule</i>
                 </div>
                 <div className="col-md-3 form__form-group">
-                  Min Rate per Hour $
+                  Minimum
                 </div>
                 <div className="col-md-2 form__form-group">
                   <input
