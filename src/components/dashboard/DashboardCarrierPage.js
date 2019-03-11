@@ -140,7 +140,7 @@ class DashboardCarrierPage extends Component {
       if (newJob.status === 'In Progress') {
         inProgressJobCount += 1;
       }
-      if (newJob.status === 'Completed') {
+      if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
       if (newJob.rateType === 'Hour') {

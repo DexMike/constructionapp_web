@@ -193,7 +193,7 @@ class JobCarrierListPage extends Component {
                       },
                       {
                         name: 'estimatedIncome',
-                        displayName: 'Est. Income'
+                        displayName: 'Potential Earnings'
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
