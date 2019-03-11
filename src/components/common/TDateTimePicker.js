@@ -6,7 +6,7 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: new Date(props.givenDate)
+      startDate: new Date()
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -43,12 +43,12 @@ TDateTimePickerField.propTypes = {
     onChange: PropTypes.func,
     name: PropTypes.string
   }).isRequired,
-  givenDate: PropTypes.number,
+  // givenDate: PropTypes.number,
   dateFormat: PropTypes.string
 };
 
 TDateTimePickerField.defaultProps = {
-  givenDate: PropTypes.number,
+  // givenDate: PropTypes.number,
   dateFormat: 'MMMM dd, yyyy hh:mm aaa'
 };
 
