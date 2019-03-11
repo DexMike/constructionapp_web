@@ -350,29 +350,10 @@ class AddTruckFormOne extends PureComponent {
     const { getTruckFullInfo, passedTruckFullInfo, equipmentId } = this.props;
     const preloaded = getTruckFullInfo();
 
-    // load info from cached (if coming back from next tabs)
-    if (Object.keys(preloaded).length > 0) {
-      this.setState({
-        maxCapacity: preloaded.info.maxCapacity,
-        description: preloaded.info.description,
-        vin: preloaded.info.vin,
-        licensePlate: preloaded.info.licensePlate,
-        ratesByBoth: preloaded.info.ratesByBoth,
-        ratesByHour: preloaded.info.ratesByHour,
-        ratesByTon: preloaded.info.ratesByTon,
-        minOperatingTime: preloaded.info.minHours,
-        maxDistanceToPickup: preloaded.info.maxDistance,
-        ratesCostPerTon: preloaded.info.tonRate,
-        ratesCostPerHour: preloaded.info.hourRate,
-        truckType: preloaded.info.type,
-        selectedMaterials: preloaded.info.selectedMaterials
-      });
-      // Materials Hauled is missing
-    }
-
     // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
-      // console.log(equipmentId);
+      console.log(377);
+      console.log(equipmentId);
       // we have to load the materials for this particular truck
       let truckMaterials = await
       EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(equipmentId);
@@ -412,6 +393,29 @@ class AddTruckFormOne extends PureComponent {
         this.setState({ ratesByHour: true });
       }
     }
+
+    // load info from cached (if coming back from next tabs)
+    if (Object.keys(preloaded).length > 0) {
+      console.log(355);
+      console.log(preloaded);
+      this.setState({
+        maxCapacity: preloaded.info.maxCapacity,
+        description: preloaded.info.description,
+        vin: preloaded.info.vin,
+        licensePlate: preloaded.info.licensePlate,
+        ratesByBoth: preloaded.info.ratesByBoth,
+        ratesByHour: preloaded.info.ratesByHour,
+        ratesByTon: preloaded.info.ratesByTon,
+        minOperatingTime: preloaded.info.minHours,
+        maxDistanceToPickup: preloaded.info.maxDistance,
+        ratesCostPerTon: preloaded.info.tonRate,
+        ratesCostPerHour: preloaded.info.hourRate,
+        truckType: preloaded.info.type,
+        selectedMaterials: preloaded.info.selectedMaterials
+      });
+      // Materials Hauled is missing
+    }
+
     this.saveTruckInfo(false);
     // let's cache this info, in case we want to go back
   }
