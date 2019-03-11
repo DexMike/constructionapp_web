@@ -284,7 +284,7 @@ class AddTruckFormOne extends PureComponent {
       // console.log(equipmentId);
       // we have to load the materials for this particular truck
       let truckMaterials = await
-      EquipmentMaterialsService.getEquipmentMaterialsByCompanyId(equipmentId);
+      EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(equipmentId);
 
       truckMaterials = truckMaterials.map(material => ({
         // careful here, the ID is that of the equipmentMaterial, not from the Material
