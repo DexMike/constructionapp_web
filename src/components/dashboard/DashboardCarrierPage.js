@@ -163,9 +163,9 @@ class DashboardCarrierPage extends Component {
 
     jobsCompleted = newJobCount * 20;
     totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
-    earningsPerJob = TFormat.asMoney( (potentialIncome * 3.14159) / (jobsCompleted) );
+    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
     cancelledJobs = 1;
-    jobsPerTruck = TFormat.asNumber(newJobCount / .7);
+    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
     idleTrucks = 1;
 
     potentialIncome = TFormat.asMoney(potentialIncome);
@@ -236,7 +236,7 @@ class DashboardCarrierPage extends Component {
             <div className="card">
               <div className="dashboard__card-widget card-body">
                 <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
-                 <span><center><h4>{potentialIncome}</h4></center></span>
+                <span><center><h4>{potentialIncome}</h4></center></span>
               </div>
             </div>
           </div>

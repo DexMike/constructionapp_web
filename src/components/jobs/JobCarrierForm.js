@@ -224,7 +224,8 @@ class JobCarrierForm extends Component {
               <div className="form__form-group-field">
                 <span>{
                   TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-                }</span>
+                }
+                </span>
               </div>
             </div>
           </Col>

@@ -24,7 +24,7 @@ class EquipmentMaterialsService extends AgentService {
   }
 
   static async getEquipmentMaterialsByCompanyId(companyId) {
-    const response = await this.get(`${PATH}/${companyId}/companies`);
+    const response = await this.get(`/companies/${companyId}/${PATH}`);
     return (response);
   }
 
@@ -34,7 +34,7 @@ class EquipmentMaterialsService extends AgentService {
   }
 
   static async createAllEquipmentMaterials(allEquipment, id) {
-    const response = await super.post(`${PATH}/${id}/equipment`, allEquipment);
+    const response = await super.post(`/equipments/${id}${PATH}`, allEquipment);
     return (response);
   }
 
