@@ -35,6 +35,7 @@ class JobCreateForm extends Component {
   }
 
   async componentDidMount() {
+    // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid } = this.state;
     const { selectedEquipment } = this.props;
@@ -171,8 +172,8 @@ class JobCreateForm extends Component {
 
       return false;
     }
-    return false;
-    // return true;
+    // return false;
+    return true;
   }
 
   renderSelectedEquipment() {
@@ -296,14 +297,15 @@ class JobCreateForm extends Component {
                     {
                       onChange: this.handleJobInputChange,
                       name: 'name',
-                      value: ''
+                      value: job.name
                     }
                   }
                   placeholder="Job # 242423"
                   type="text"
                   meta={
                     {
-                      touched: true,
+                      touched: false,
+                      touched: false,
                       error: 'Job Name field shouldn’t be empty'
                     }
                   }
