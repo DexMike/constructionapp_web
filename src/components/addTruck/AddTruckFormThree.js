@@ -37,6 +37,8 @@ class AddTruckFormThree extends PureComponent {
     // check fo cached info
     const { getUserFullInfo, passedTruckFullInfoId } = this.props;
     const preloaded = getUserFullInfo();
+    // console.log('>>USER PRELOADED INFO:');
+    // console.log(preloaded);
     if (Object.keys(preloaded).length > 0) {
       this.setState({
         firstName: preloaded.info.firstName,
