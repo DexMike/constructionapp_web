@@ -57,22 +57,6 @@ class AddTruckFormOne extends PureComponent {
     await this.fetchMaterials();
   }
 
-  /*
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.equipment) {
-      const { equipment } = nextProps;
-      Object.keys(equipment)
-        .map((key) => {
-          if (equipment[key] === null) {
-            equipment[key] = '';
-          }
-          return true;
-        });
-      this.setState({ ...equipment });
-    }
-  }
-  */
-
   handleMultiChange(data) {
     this.setState({ selectedMaterials: data });
   }
@@ -128,13 +112,26 @@ class AddTruckFormOne extends PureComponent {
     let end = new Date();
 
     // dates if preloaded
-    const { getTruckFullInfo, equipmentId } = this.props;
+    const {
+      getTruckFullInfo,
+      getAvailiabilityFullInfo,
+      equipmentId
+    } = this.props;
     const preloaded = getTruckFullInfo();
+    const preloadedAvailability = getAvailiabilityFullInfo();
+
     // load info from cached (if coming back from next tabs)
     if (typeof preloaded.info !== 'undefined') {
       if (Object.keys(preloaded.info).length > 0) {
         start = preloaded.info.startAvailability;
         end = preloaded.info.endAvailability;
+      }
+    }
+    // however, if there is already saved dates, we'll use that one
+    if (typeof preloadedAvailability.info !== 'undefined') {
+      if (Object.keys(preloadedAvailability.info).length > 0) {
+        start = preloadedAvailability.info.startDate;
+        end = preloadedAvailability.info.endDate;
       }
     }
 
@@ -662,6 +659,7 @@ AddTruckFormOne.propTypes = {
   equipmentId: PropTypes.number,
   // companyId: PropTypes.number,
   getTruckFullInfo: PropTypes.func.isRequired,
+  getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onTruckFullInfo: PropTypes.func.isRequired,
   passedTruckFullInfo: PropTypes.shape({
     info: PropTypes.object

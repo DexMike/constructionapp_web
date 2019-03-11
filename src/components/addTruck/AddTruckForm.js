@@ -106,7 +106,7 @@ class AddTruckForm extends PureComponent {
   }
 
   handleUserSave(e) {
-    // // console.log('>USER SAVE', e);
+    console.log('>USER SAVE', e);
     // let's keep the info from the truck in memory
     const { userCachedInfo, page } = this.state;
     userCachedInfo.info = e;
@@ -221,6 +221,7 @@ class AddTruckForm extends PureComponent {
                         onClose={this.closeNow}
                         getTruckFullInfo={this.getTruckInfo}
                         passedTruckFullInfo={truckPassedInfo}
+                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
                       />
                       )}
                     {page === 2

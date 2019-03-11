@@ -37,6 +37,7 @@ class EquipmentListPage extends Component {
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggle = this.toggle.bind(this);
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
+    this.toggleAddTruckModalClear = this.toggleAddTruckModalClear.bind(this);
   }
 
   async componentDidMount() {
@@ -68,6 +69,15 @@ class EquipmentListPage extends Component {
   toggleAddTruckModal() {
     const { modal } = this.state;
     this.setState({
+      modal: !modal
+    }, this.loadEquipments);
+  }
+
+  toggleAddTruckModalClear() {
+    const { modal } = this.state;
+    this.setState({
+      equipmentId: 0, // reset equipmentID, not companyID
+      selectedItemData: {},
       modal: !modal
     }, this.loadEquipments);
   }
@@ -169,7 +179,11 @@ class EquipmentListPage extends Component {
             </Row>
             <Row>
               <Col md={12}>
-                <Button color="secondary" onClick={this.toggleAddTruckModal} type="button">
+                <Button
+                  color="secondary"
+                  onClick={this.toggleAddTruckModalClear}
+                  type="button"
+                >
                   Add a Truck
                 </Button>
               </Col>

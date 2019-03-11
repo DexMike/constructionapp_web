@@ -177,12 +177,6 @@ class AddTruckFormThree extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Mobile Phone</span>
-                  {/*<input*/}
-                    {/*name="mobilePhone"*/}
-                    {/*type="text"*/}
-                    {/*value={mobilePhone}*/}
-                    {/*onChange={this.handleInputChange}*/}
-                  {/*/>*/}
                   <NumberFormat
                     name="mobilePhone"
                     type="text"

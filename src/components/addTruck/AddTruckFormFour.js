@@ -75,7 +75,6 @@ class AddTruckFormFour extends PureComponent {
       userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
       await UserService.updateUser(userFullInfo.info);
 
-      // return false;
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(
         truckFullInfo.info.selectedMaterials,
@@ -87,11 +86,11 @@ class AddTruckFormFour extends PureComponent {
       // setup info for user
       delete userFullInfo.info.redir;
       delete userFullInfo.info.id;
-      userFullInfo.info.equipmentId = equipmentId;
+      userFullInfo.info.companyId = companyId;
+      // userFullInfo.info.equipmentId = 1; // setting as 1 since I don't have the ID yet
       userFullInfo.info.preferredLanguage = 'English';
       userFullInfo.info.isBanned = 0;
       userFullInfo.info.userStatus = 'New';
-
       const newUser = await UserService.createUser(userFullInfo.info);
       // return false;
 
@@ -102,13 +101,13 @@ class AddTruckFormFour extends PureComponent {
       const newDriver = await DriverService.createDriver(driver);
 
       truckFullInfo.info.driversId = newDriver.id;
+      truckFullInfo.info.companyId = companyId;
       truckFullInfo.info.defaultDriverId = newDriver.id; // set as default as well
       truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
       const selectedTruckMaterials = truckFullInfo.info.selectedMaterials;
 
       // remove unnecesary info
       delete truckFullInfo.info.id;
-      // delete truckFullInfo.info.selectedMaterials;
       delete truckFullInfo.info.redir;
       delete truckFullInfo.info.ratesByBoth;
       delete truckFullInfo.info.ratesByHour;
@@ -148,14 +147,6 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
-
-    // do we have good info?
-    /*
-    console.log(Object.keys(getAvailiabilityFullInfo().info).length);
-    console.log(Object.keys(getTruckFullInfo().info).length);
-    console.log(Object.keys(getUserFullInfo().info).length);
-    */
-
 
     // show selected materials
     let allMaterials = '';
@@ -241,9 +232,11 @@ class AddTruckFormFour extends PureComponent {
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="secondary" type="button" className="previous" onClick={previousPage} >No, go back</Button>
+                  <Button color="secondary" type="button" className="previous" onClick={previousPage} >
+                    Go back
+                  </Button>
                   <Button color="primary" onClick={this.saveInfo} type="submit" className="next">
-                    Yes, save now
+                    Save now
                   </Button>
                 </ButtonToolbar>
               </div>
