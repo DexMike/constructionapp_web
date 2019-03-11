@@ -23,13 +23,18 @@ class EquipmentMaterialsService extends AgentService {
     return (response);
   }
 
+  static async getEquipmentMaterialsByEquipmentId(equipmentId) {
+    const response = await this.get(`/equipments/${equipmentId}${PATH}`);
+    return (response);
+  }
+
   static async createEquipmentMaterials(equipment) {
     const response = await super.post(PATH, equipment);
     return (response);
   }
 
   static async createAllEquipmentMaterials(allEquipment, id) {
-    const response = await super.post(`${PATH}/${id}/equipment`, allEquipment);
+    const response = await super.post(`/equipments/${id}${PATH}`, allEquipment);
     return (response);
   }
 

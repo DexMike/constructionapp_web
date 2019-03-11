@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-import TFormat from "../common/TFormat";
+import TFormat from '../common/TFormat';
 import TTable from '../common/TTable';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
@@ -80,7 +80,7 @@ class JobCarrierListPage extends Component {
   }
 
   async fetchJobs() {
-    let jobs = await JobService.getJobs();
+    const jobs = await JobService.getJobs();
 
     // AJ: commenting out because we don't want to modify the timestamps, unless we save data
     // jobs = jobs.map((job) => {
@@ -123,9 +123,9 @@ class JobCarrierListPage extends Component {
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       } else {
-        newJob.newSize = "Invalid Rate Type";
-        newJob.newRate = "Invalid Rate Type";
-        newJob.estimatedIncome = "Invalid Rate Type";
+        newJob.newSize = 'Invalid Rate Type';
+        newJob.newRate = 'Invalid Rate Type';
+        newJob.estimatedIncome = 'Invalid Rate Type';
       }
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");

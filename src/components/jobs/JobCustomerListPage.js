@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
 import TTable from '../common/TTable';
-import TFormat from "../common/TFormat";
+import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
@@ -90,7 +90,7 @@ class JobCustomerListPage extends Component {
   }
 
   async fetchJobs() {
-    let jobs = await JobService.getJobs();
+    const jobs = await JobService.getJobs();
 
     // AJ: commenting out because we don't want to modify the timestamps, unless we save data
     // jobs = jobs.map((job) => {

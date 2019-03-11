@@ -10,6 +10,7 @@ import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
+import TField from '../common/TField';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -147,9 +148,13 @@ class JobCreateForm extends Component {
   }
 
   isFormValid() {
-    const { startAddress, job, endAddress } = this.state;
+    const {
+      // startAddress,
+      job
+      // endAddress
+    } = this.state;
     // start address
-    if (!startAddress.name || !startAddress.companyId) {
+    /* if (!startAddress.name || !startAddress.companyId) {
       return false;
     }
     // job
@@ -159,8 +164,15 @@ class JobCreateForm extends Component {
     // end address
     if (job.rateType === 'Ton' && (!endAddress.name || !endAddress.companyId)) {
       return false;
+    } */
+    // console.log(164);
+    if (!job.name) {
+      // console.log(job.name.props);
+
+      return false;
     }
-    return true;
+    return false;
+    // return true;
   }
 
   renderSelectedEquipment() {
@@ -273,11 +285,28 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <h4 className="form__form-group-label">Job Name</h4>
               <div className="form__form-group-field">
-                <input name="name"
+                { /* <input name="name"
                       style={{ width: '100%' }}
                       type="text"
                       placeholder="Job # 242423"
                       onChange={this.handleJobInputChange}
+                /> */ }
+                <TField
+                  input={
+                    {
+                      onChange: this.handleJobInputChange,
+                      name: 'name',
+                      value: ''
+                    }
+                  }
+                  placeholder="Job # 242423"
+                  type="text"
+                  meta={
+                    {
+                      touched: true,
+                      error: 'Job Name field shouldn’t be empty'
+                    }
+                  }
                 />
               </div>
             </div>

@@ -45,18 +45,12 @@ class AddTruckFormFour extends PureComponent {
   async saveInfo() {
     // save new or update?
     const {
-
-      getTruckFullInfo, // cached info
-      /*
-      getAvailiabilityFullInfo,
-      getUserFullInfo,
-      */
       truckFullInfo, // saved info
       userFullInfo,
       availabilityFullInfo,
       onClose,
-      company
-      // availability FullInfo
+      equipmentId,
+      companyId
     } = this.props;
 
     // not saving, updating instead
@@ -65,18 +59,26 @@ class AddTruckFormFour extends PureComponent {
       const available = availabilityFullInfo.info.isAvailable;
       const start = new Date(availabilityFullInfo.info.startDate);
       const end = new Date(availabilityFullInfo.info.endDate);
+      truckFullInfo.info.id = equipmentId;
+      truckFullInfo.info.companyId = companyId;
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
+
       await EquipmentService.updateEquipment(truckFullInfo.info);
+      // return;
 
       // now let's save the user
+      userFullInfo.info.companyId = companyId;
+      userFullInfo.info.isBanned = 0; // TODO read from current profile
+      userFullInfo.info.preferredLanguage = 'English'; // TODO read from current profile
+      userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
       await UserService.updateUser(userFullInfo.info);
 
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(
-        getTruckFullInfo().info.id,
-        JSON.stringify(availabilityFullInfo.info.selectedMaterials)
+        truckFullInfo.info.selectedMaterials,
+        equipmentId
       );
 
       onClose();
@@ -84,11 +86,11 @@ class AddTruckFormFour extends PureComponent {
       // setup info for user
       delete userFullInfo.info.redir;
       delete userFullInfo.info.id;
-      userFullInfo.info.companyId = company.id;
+      userFullInfo.info.companyId = companyId;
+      // userFullInfo.info.equipmentId = 1; // setting as 1 since I don't have the ID yet
       userFullInfo.info.preferredLanguage = 'English';
       userFullInfo.info.isBanned = 0;
       userFullInfo.info.userStatus = 'New';
-
       const newUser = await UserService.createUser(userFullInfo.info);
       // return false;
 
@@ -99,13 +101,13 @@ class AddTruckFormFour extends PureComponent {
       const newDriver = await DriverService.createDriver(driver);
 
       truckFullInfo.info.driversId = newDriver.id;
+      truckFullInfo.info.companyId = companyId;
       truckFullInfo.info.defaultDriverId = newDriver.id; // set as default as well
       truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
       const selectedTruckMaterials = truckFullInfo.info.selectedMaterials;
 
       // remove unnecesary info
       delete truckFullInfo.info.id;
-      // delete truckFullInfo.info.selectedMaterials;
       delete truckFullInfo.info.redir;
       delete truckFullInfo.info.ratesByBoth;
       delete truckFullInfo.info.ratesByHour;
@@ -145,14 +147,6 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
-
-    // do we have good info?
-    /*
-    console.log(Object.keys(getAvailiabilityFullInfo().info).length);
-    console.log(Object.keys(getTruckFullInfo().info).length);
-    console.log(Object.keys(getUserFullInfo().info).length);
-    */
-
 
     // show selected materials
     let allMaterials = '';
@@ -238,9 +232,11 @@ class AddTruckFormFour extends PureComponent {
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="secondary" type="button" className="previous" onClick={previousPage} >No, go back</Button>
+                  <Button color="secondary" type="button" className="previous" onClick={previousPage} >
+                    Go back
+                  </Button>
                   <Button color="primary" onClick={this.saveInfo} type="submit" className="next">
-                    Yes, save now
+                    Save now
                   </Button>
                 </ButtonToolbar>
               </div>
@@ -267,10 +263,8 @@ AddTruckFormFour.propTypes = {
   userFullInfo: PropTypes.shape({
     info: object
   }),
-  company: PropTypes.shape({
-    name: PropTypes.string,
-    id: PropTypes.number
-  }),
+  equipmentId: PropTypes.number,
+  companyId: PropTypes.number,
   previousPage: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   // fields for loaded info
@@ -281,7 +275,8 @@ AddTruckFormFour.propTypes = {
 
 AddTruckFormFour.defaultProps = {
   truckFullInfo: null,
-  company: null,
+  equipmentId: null,
+  companyId: null,
   availabilityFullInfo: null,
   userFullInfo: null
 };

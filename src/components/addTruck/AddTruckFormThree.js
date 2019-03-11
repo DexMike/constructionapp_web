@@ -9,13 +9,14 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import NumberFormat from 'react-number-format';
+import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
     super(props);
-    const { company } = this.props;
+    const { equipmentId } = this.props;
     this.state = {
       // showPassword: false
       id: 0, // only to track if this is an edit
@@ -23,11 +24,15 @@ class AddTruckFormThree extends PureComponent {
       lastName: '',
       mobilePhone: '',
       email: '',
-      companyId: company.id,
+      equipmentId,
       parentId: 4, // THIS IS A FK
       isBanned: 0,
       preferredLanguage: 'eng',
-      userStatus: 'New'
+      userStatus: 'New',
+      reqHandlerFName: { touched: false, error: '' },
+      reqHandlerLName: { touched: false, error: '' },
+      reqHandlerEmail: { touched: false, error: '' },
+      reqHandlerPhone: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.getAndSetExistingUser = this.getAndSetExistingUser.bind(this);
@@ -37,6 +42,8 @@ class AddTruckFormThree extends PureComponent {
     // check fo cached info
     const { getUserFullInfo, passedTruckFullInfoId } = this.props;
     const preloaded = getUserFullInfo();
+    // console.log('>>USER PRELOADED INFO:');
+    // console.log(preloaded);
     if (Object.keys(preloaded).length > 0) {
       this.setState({
         firstName: preloaded.info.firstName,
@@ -65,7 +72,7 @@ class AddTruckFormThree extends PureComponent {
       mobilePhone: user.mobilePhone,
       email: user.email
     },
-    function chido() { // wait until it loads
+    function setUserInfo() { // wait until it loads
       this.saveUserInfo(false);
     });
     // , this.saveUserInfo(false));
@@ -73,10 +80,86 @@ class AddTruckFormThree extends PureComponent {
 
   handleInputChange(e) {
     let { value } = e.target;
+    let reqHandler = '';
     if (e.target.name === 'isArchived') {
       value = e.target.checked ? Number(1) : Number(0);
     }
+
+    if (e.target.name === 'firstName') {
+      reqHandler = 'reqHandlerFName';
+    } else if (e.target.name === 'lastName') {
+      reqHandler = 'reqHandlerLName';
+    } else if (e.target.name === 'email') {
+      reqHandler = 'reqHandlerEmail';
+    } else if (e.target.name === 'mobilePhone') {
+      reqHandler = 'reqHandlerPhone';
+    }
+    this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
     this.setState({ [e.target.name]: value });
+  }
+
+  isFormValid() {
+    const truck = this.state;
+    const {
+      reqHandlerFName,
+      reqHandlerLName,
+      reqHandlerEmail,
+      reqHandlerPhone
+    } = this.state;
+    let isValid = true;
+
+    // console.log(truck.firstName);
+    // console.log(truck.firstName.length);
+
+    if (truck.firstName === null || truck.firstName.length === 0) {
+      this.setState({
+        reqHandlerFName: Object.assign({}, reqHandlerFName, {
+          touched: true,
+          error: 'Please enter a first name for the driver'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.lastName === null || truck.lastName.length === 0) {
+      this.setState({
+        reqHandlerLName: Object.assign({}, reqHandlerLName, {
+          touched: true,
+          error: 'Please enter a last name for the driver'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.email === null || truck.email.length === 0) {
+      this.setState({
+        reqHandlerEmail: Object.assign({}, reqHandlerEmail, {
+          touched: true,
+          error: 'Please enter a email for the driver'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.mobilePhone === null || truck.mobilePhone.length === 0) {
+      this.setState({
+        reqHandlerPhone: Object.assign({}, reqHandlerPhone, {
+          touched: true,
+          error: 'Please enter an mobile phone for the driver'
+        })
+      });
+      isValid = false;
+    }
+
+    if (isValid) {
+      return true;
+    }
+
+    return false;
   }
 
   saveUserInfo(redir) {
@@ -95,14 +178,21 @@ class AddTruckFormThree extends PureComponent {
       mobilePhone,
       email
     };
+
     userInfo.redir = redir;
     onUserFullInfo(userInfo);
     this.handleSubmit('User');
+    // this.saveUserInfo(true);
   }
 
   async saveUser(e) {
     e.preventDefault();
     e.persist();
+
+    if (!this.isFormValid()) {
+      return;
+    }
+
     this.saveUserInfo(true);
   }
 
@@ -120,11 +210,15 @@ class AddTruckFormThree extends PureComponent {
       lastName,
       mobilePhone,
       email,
-      companyId,
+      equipmentId,
       parentId,
       isBanned,
       preferredLanguage,
-      userStatus
+      userStatus,
+      reqHandlerFName,
+      reqHandlerLName,
+      reqHandlerEmail/* ,
+      // reqHandlerPhone */
     } = this.state;
     return (
       <Col md={12} lg={12}>
@@ -154,21 +248,33 @@ class AddTruckFormThree extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">First Name</span>
-                  <input
-                    name="firstName"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'firstName',
+                        value: firstName
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={firstName}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerFName}
                   />
-                  <input type="hidden" value={companyId} />
+                  <input type="hidden" value={equipmentId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Last Name</span>
-                  <input
-                    name="lastName"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'lastName',
+                        value: lastName
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={lastName}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerLName}
                   />
                 </div>
               </Row>
@@ -177,12 +283,6 @@ class AddTruckFormThree extends PureComponent {
 
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Mobile Phone</span>
-                  {/*<input*/}
-                    {/*name="mobilePhone"*/}
-                    {/*type="text"*/}
-                    {/*value={mobilePhone}*/}
-                    {/*onChange={this.handleInputChange}*/}
-                  {/*/>*/}
                   <NumberFormat
                     name="mobilePhone"
                     type="text"
@@ -191,15 +291,20 @@ class AddTruckFormThree extends PureComponent {
                     value={mobilePhone}
                     onChange={this.handleInputChange}
                   />
-
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Email</span>
-                  <input
-                    name="email"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'email',
+                        value: email
+                      }
+                    }
+                    placeholder=""
                     type="text"
-                    value={email}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerEmail}
                   />
                 </div>
               </Row>
@@ -229,10 +334,7 @@ class AddTruckFormThree extends PureComponent {
 }
 
 AddTruckFormThree.propTypes = {
-  company: PropTypes.shape({
-    name: PropTypes.string,
-    id: PropTypes.number
-  }),
+  equipmentId: PropTypes.number,
   getUserFullInfo: PropTypes.func.isRequired,
   onUserFullInfo: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
@@ -241,7 +343,7 @@ AddTruckFormThree.propTypes = {
 };
 
 AddTruckFormThree.defaultProps = {
-  company: null,
+  equipmentId: null,
   passedTruckFullInfoId: null
 };
 

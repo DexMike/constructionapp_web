@@ -2,50 +2,28 @@ import React, { PureComponent } from 'react';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 
-class SelectField extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  handleChange(selectedOption) {
-    const { onChange } = this.props;
-    onChange(selectedOption);
-  }
-
+class TSelectField extends PureComponent {
   render() {
     const {
-      value, name, placeholder, options
+      input, placeholder, options, meta: { touched, error }
     } = this.props;
 
     return (
-      <Select
-        name={name}
-        value={value}
-        onChange={this.handleChange}
-        options={options}
-        clearable={false}
-        className="form__form-group-select"
-        placeholder={placeholder}
-      />
+      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+        <Select
+          {...input}
+          placeholder={placeholder}
+          options={options}
+          clearable={false}
+          className="form__form-group-select"
+        />
+        {touched && error && <span className="form__form-group-error">{error}</span>}
+      </div>
     );
   }
 }
 
-const renderSelectField = function renderSelectField({ input, options, placeholder, meta }) {
-  return (
-    <div className="form__form-group-input-wrap">
-      <SelectField
-        {...input}
-        options={options}
-        placeholder={placeholder}
-      />
-      {meta.touched && meta.error && <span className="form__form-group-error">{meta.error}</span>}
-    </div>
-  );
-};
-
-renderSelectField.propTypes = {
+TSelectField.propTypes = {
   input: PropTypes.shape({
     onChange: PropTypes.func,
     name: PropTypes.string
@@ -61,32 +39,13 @@ renderSelectField.propTypes = {
   placeholder: PropTypes.string
 };
 
-SelectField.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
-  options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string,
-    label: PropTypes.string
-  })),
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.shape({
-      value: PropTypes.string,
-      label: PropTypes.string
-    })
-  ]).isRequired
-};
-
-SelectField.defaultProps = {
+TSelectField.defaultProps = {
+  meta: PropTypes.shape({
+    value: false,
+    label: ''
+  }),
   placeholder: '',
   options: []
 };
 
-renderSelectField.defaultProps = {
-  meta: null,
-  options: [],
-  placeholder: ''
-};
-
-export default renderSelectField;
+export default TSelectField;

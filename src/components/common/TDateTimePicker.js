@@ -6,7 +6,7 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: new Date(props.givenDate)
+      startDate: new Date()
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -22,7 +22,6 @@ class TDateTimePickerField extends PureComponent {
   render() {
     const { startDate } = this.state;
     const { dateFormat } = this.props;
-    // console.log(input.dateFormat);
     return (
       <div className="date-picker">
         <DatePicker
@@ -38,32 +37,19 @@ class TDateTimePickerField extends PureComponent {
   }
 }
 
-const renderTDateTimePickerField = function renderTDateTimePickerField(props) {
-  const { input } = props;
-  return (
-    <TDateTimePickerField
-      {...input}
-    />
-  );
-};
-
-renderTDateTimePickerField.propTypes = {
+TDateTimePickerField.propTypes = {
   onChange: PropTypes.func.isRequired,
   input: PropTypes.shape({
     onChange: PropTypes.func,
     name: PropTypes.string
-  }).isRequired
-};
-
-TDateTimePickerField.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  givenDate: PropTypes.number,
+  }).isRequired,
+  // givenDate: PropTypes.number,
   dateFormat: PropTypes.string
 };
 
 TDateTimePickerField.defaultProps = {
-  givenDate: PropTypes.number,
+  // givenDate: PropTypes.number,
   dateFormat: 'MMMM dd, yyyy hh:mm aaa'
 };
 
-export default renderTDateTimePickerField;
+export default TDateTimePickerField;

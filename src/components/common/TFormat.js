@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { /* Component */ } from 'react';
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
 
@@ -58,7 +58,7 @@ class TFormat {
     if (inputRateType === 'Ton') {
       return TFormat.asMoney(inputRate * inputRateEstimate);
     }
-    return "$ 0.00";
+    return '$ 0.00';
   }
 
   static asHours(inputValue) {
@@ -107,7 +107,7 @@ class TFormat {
     );
   }
 
-  static asTonsByHours(inputeValue) {
+  static asTonsByHours(inputValue) {
     return (
       <NumberFormat
         value={inputValue}
@@ -135,11 +135,11 @@ class TFormat {
   }
 
   static asDate(inputValue) {
-    return moment(inputValue).format("MM/DD/YYYY");
+    return moment(inputValue).format('MM/DD/YYYY');
   }
 
   static asDateTime(inputValue) {
-    return moment(inputValue).format("MM/DD/YYYY hh:mm");
+    return moment(inputValue).format('MM/DD/YYYY hh:mm');
   }
 
   static asZip5(inputValue) {
@@ -198,7 +198,6 @@ class TFormat {
     }
     return materialsString;
   }
-
 }
 
 export default TFormat;

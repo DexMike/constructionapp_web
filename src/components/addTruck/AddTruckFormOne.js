@@ -14,9 +14,11 @@ import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 // import TField from '../common/TField';
 import TCheckBox from '../common/TCheckBox';
+import TField from '../common/TField';
 import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
+import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 
 // import validate from '../common/validate ';
 
@@ -43,8 +45,12 @@ class AddTruckFormOne extends PureComponent {
       ratesCostPerHour: 0,
       minOperatingTime: 0,
       maxDistanceToPickup: 0,
-      truckType: ''// ,
-      // class: 'shown'
+      truckType: '',
+      reqHandlerTruckType: { touched: false, error: '' },
+      reqHandlerMaterials: { touched: false, error: '' },
+      reqHandlerMinRate: { touched: false, error: '' },
+      reqHandlerMinTime: { touched: false, error: '' },
+      reqHandlerCostTon: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -56,27 +62,92 @@ class AddTruckFormOne extends PureComponent {
     await this.fetchMaterials();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.equipment) {
-      const { equipment } = nextProps;
-      Object.keys(equipment)
-        .map((key) => {
-          if (equipment[key] === null) {
-            equipment[key] = '';
-          }
-          return true;
-        });
-      this.setState({ ...equipment });
-    }
-  }
-
   handleMultiChange(data) {
-    console.log('>>HANDLEMULTICHANGE', data);
+    const { reqHandlerMaterials } = this.state;
+    this.setState({
+      reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
+        touched: false
+      })
+    });
     this.setState({ selectedMaterials: data });
   }
 
   selectChange(data) {
+    const { reqHandlerTruckType } = this.state;
+    this.setState({
+      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
+        touched: false
+      })
+    });
     this.setState({ truckType: data.value });
+  }
+
+  isFormValid() {
+    const truck = this.state;
+    const {
+      reqHandlerMaterials,
+      reqHandlerTruckType,
+      reqHandlerMinRate,
+      reqHandlerMinTime,
+      reqHandlerCostTon
+    } = this.state;
+    let isValid = true;
+
+    if (truck.truckType.length === 0) {
+      this.setState({
+        reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
+          touched: true,
+          error: 'Please select the type of truck you are adding'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.selectedMaterials.length === 0) {
+      this.setState({
+        reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
+          touched: true,
+          error: 'Please select all of the types of materials you are willing to haul'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.ratesCostPerHour === 0) {
+      this.setState({
+        reqHandlerMinRate: Object.assign({}, reqHandlerMinRate, {
+          touched: true,
+          error: 'Please enter the hourly rate for this truck'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.minOperatingTime === 0) {
+      this.setState({
+        reqHandlerMinTime: Object.assign({}, reqHandlerMinTime, {
+          touched: true,
+          error: 'Please enter minimum number of hours that this truck must be rented for'
+        })
+      });
+      isValid = false;
+    }
+
+    if (truck.ratesCostPerTon === 0) {
+      this.setState({
+        reqHandlerCostTon: Object.assign({}, reqHandlerCostTon, {
+          touched: true,
+          error: 'Please enter the minimum number of tons you are willing to haul'
+        })
+      });
+      isValid = false;
+    }
+
+    if (isValid) {
+      return true;
+    }
+
+    return false;
   }
 
   async handleSubmit(menuItem) {
@@ -86,8 +157,6 @@ class AddTruckFormOne extends PureComponent {
   }
 
   saveTruckInfo(redir) {
-    console.log('>>SAVING TRUCK INFO');
-    const { company } = this.props;
     const {
       id,
       selectedMaterials,
@@ -107,9 +176,6 @@ class AddTruckFormOne extends PureComponent {
       maxDistanceToPickup
     } = this.state;
     const { onTruckFullInfo } = this.props;
-    // validation is pending now
-
-    // console.log(onTruckFullInfo());
 
     // set states for checkboxes
     let chargeBy = '';
@@ -130,8 +196,14 @@ class AddTruckFormOne extends PureComponent {
     let end = new Date();
 
     // dates if preloaded
-    const { getTruckFullInfo } = this.props;
+    const {
+      getTruckFullInfo,
+      getAvailiabilityFullInfo,
+      equipmentId
+    } = this.props;
     const preloaded = getTruckFullInfo();
+    const preloadedAvailability = getAvailiabilityFullInfo();
+
     // load info from cached (if coming back from next tabs)
     if (typeof preloaded.info !== 'undefined') {
       if (Object.keys(preloaded.info).length > 0) {
@@ -139,8 +211,13 @@ class AddTruckFormOne extends PureComponent {
         end = preloaded.info.endAvailability;
       }
     }
-
-    console.log('>>DATES BEFORE SAVING:', start, end);
+    // however, if there is already saved dates, we'll use that one
+    if (typeof preloadedAvailability.info !== 'undefined') {
+      if (Object.keys(preloadedAvailability.info).length > 0) {
+        start = preloadedAvailability.info.startDate;
+        end = preloadedAvailability.info.endDate;
+      }
+    }
 
     // TODO-> Ask which params are required
     const saveValues = {
@@ -166,7 +243,7 @@ class AddTruckFormOne extends PureComponent {
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
       rateType: chargeBy, // PENDING
-      companyId: company.id,
+      equipmentId,
       defaultDriverId, // unasigned
       driverEquipmentsId: 0, // unasigned
       driversId, // THIS IS A FK
@@ -184,40 +261,26 @@ class AddTruckFormOne extends PureComponent {
       redir
     };
 
-    console.log('BEFORE SAVING DATE:');
-    console.log(saveValues);
-
     // save info in the parent
     onTruckFullInfo(saveValues);
     this.handleSubmit('Truck');
   }
 
-  isFormValid() {
-    const { maxCapacity } = this.state;
-    // console.log(maxCapacity);
-    if (maxCapacity === 0) {
-      return false;
-    }
-    return true;
-    // return !!(maxCapacity.maxCapacity);
-  }
-
   async saveTruck(e) {
     e.preventDefault();
     e.persist();
-    /*
+
     if (!this.isFormValid()) {
-      this.setState({ maxCapacityTouched: true });
+      // this.setState({ maxCapacityTouched: true });
       return;
     }
-    */
+
     this.saveTruckInfo(true);
   }
 
   handleInputChange(e) {
-    // // console.log(e);
     let { value } = e.target;
-    // const { ratesByHour, ratesByTon } = this.state;
+    let reqHandler = '';
     if (e.target.name === 'ratesByBoth') {
       value = e.target.checked ? Number(1) : Number(0);
       if (e.target.checked) {
@@ -241,6 +304,22 @@ class AddTruckFormOne extends PureComponent {
     if (e.target.name === 'maxCapacity') {
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
+
+    // We take the input name prop to set the respective requiredHandler
+    if (e.target.name === 'ratesCostPerHour') {
+      reqHandler = 'reqHandlerMinRate';
+    } else if (e.target.name === 'minOperatingTime') {
+      reqHandler = 'reqHandlerMinTime';
+    } else if (e.target.name === 'ratesCostPerTon') {
+      reqHandler = 'reqHandlerCostTon';
+    }
+    // Then we set the touched prop to false, hiding the error label
+    this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
+
     this.setState({ [e.target.name]: value });
   }
 
@@ -268,33 +347,26 @@ class AddTruckFormOne extends PureComponent {
     });
 
     // check if there is preloaded info
-    const { getTruckFullInfo, passedTruckFullInfo } = this.props;
+    const { getTruckFullInfo, passedTruckFullInfo, equipmentId } = this.props;
     const preloaded = getTruckFullInfo();
-
-    // load info from cached (if coming back from next tabs)
-    if (Object.keys(preloaded).length > 0) {
-      console.log('>> Seems that there is cached information');
-      console.log(preloaded);
-      console.log(passedTruckFullInfo);
-      this.setState({
-        maxCapacity: preloaded.info.maxCapacity,
-        description: preloaded.info.description,
-        vin: preloaded.info.vin,
-        licensePlate: preloaded.info.licensePlate,
-        ratesByBoth: preloaded.info.ratesByBoth,
-        ratesByHour: preloaded.info.ratesByHour,
-        ratesByTon: preloaded.info.ratesByTon,
-        minOperatingTime: preloaded.info.minHours,
-        maxDistanceToPickup: preloaded.info.maxDistance,
-        ratesCostPerTon: preloaded.info.tonRate,
-        ratesCostPerHour: preloaded.info.hourRate,
-        truckType: preloaded.info.type
-      });
-      // Materials Hauled is missing
-    }
 
     // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
+      console.log(377);
+      console.log(equipmentId);
+      // we have to load the materials for this particular truck
+      let truckMaterials = await
+      EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(equipmentId);
+
+      truckMaterials = truckMaterials.map(material => ({
+        // careful here, the ID is that of the equipmentMaterial, not from the Material
+        // we should probably be saving the materialId instead of the name.
+        value: String(material.id),
+        label: material.value
+      }));
+
+      // console.log(truckMaterials);
+
       this.setState({
         id: passedTruckFullInfo.id,
         driversId: passedTruckFullInfo.driversId,
@@ -307,7 +379,8 @@ class AddTruckFormOne extends PureComponent {
         maxDistanceToPickup: passedTruckFullInfo.maxDistance,
         ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
         ratesCostPerHour: passedTruckFullInfo.hourRate,
-        truckType: passedTruckFullInfo.type
+        truckType: passedTruckFullInfo.type,
+        selectedMaterials: truckMaterials
       });
       // set booleans
       if (passedTruckFullInfo.rateType === 'Both') {
@@ -320,12 +393,34 @@ class AddTruckFormOne extends PureComponent {
         this.setState({ ratesByHour: true });
       }
     }
+
+    // load info from cached (if coming back from next tabs)
+    if (Object.keys(preloaded).length > 0) {
+      console.log(355);
+      console.log(preloaded);
+      this.setState({
+        maxCapacity: preloaded.info.maxCapacity,
+        description: preloaded.info.description,
+        vin: preloaded.info.vin,
+        licensePlate: preloaded.info.licensePlate,
+        ratesByBoth: preloaded.info.ratesByBoth,
+        ratesByHour: preloaded.info.ratesByHour,
+        ratesByTon: preloaded.info.ratesByTon,
+        minOperatingTime: preloaded.info.minHours,
+        maxDistanceToPickup: preloaded.info.maxDistance,
+        ratesCostPerTon: preloaded.info.tonRate,
+        ratesCostPerHour: preloaded.info.hourRate,
+        truckType: preloaded.info.type,
+        selectedMaterials: preloaded.info.selectedMaterials
+      });
+      // Materials Hauled is missing
+    }
+
     this.saveTruckInfo(false);
     // let's cache this info, in case we want to go back
   }
 
   handleImg(e) {
-    // // console.log(e);
     return e;
   }
 
@@ -352,7 +447,12 @@ class AddTruckFormOne extends PureComponent {
       ratesCostPerTon,
       minOperatingTime,
       maxDistanceToPickup,
-      truckTypes
+      truckTypes,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerMinRate,
+      reqHandlerMinTime,
+      reqHandlerCostTon
     } = this.state;
     const { p, onClose } = this.props;
     return (
@@ -399,12 +499,7 @@ class AddTruckFormOne extends PureComponent {
                         value: truckType
                       }
                     }
-                    meta={
-                      {
-                        touched: false,
-                        error: 'Unable to select'
-                      }
-                    }
+                    meta={reqHandlerTruckType}
                     value={truckType}
                     options={truckTypes}
                     placeholder="Truck Type"
@@ -425,12 +520,7 @@ class AddTruckFormOne extends PureComponent {
                         value: selectedMaterials
                       }
                     }
-                    meta={
-                      {
-                        touched: false,
-                        error: 'Unable to reach fields'
-                      }
-                    }
+                    meta={reqHandlerMaterials}
                     options={allMaterials}
                     placeholder="Materials"
                   />
@@ -496,11 +586,17 @@ class AddTruckFormOne extends PureComponent {
                   Minimum
                 </div>
                 <div className="col-md-2 form__form-group">
-                  <input
-                    name="ratesCostPerHour"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'ratesCostPerHour',
+                        value: ratesCostPerHour
+                      }
+                    }
+                    placeholder="0"
                     type="number"
-                    value={ratesCostPerHour}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerMinRate}
                   />
                 </div>
                 <div className="col-md-2 form__form-group moveleft">
@@ -525,11 +621,17 @@ class AddTruckFormOne extends PureComponent {
                   Minimum Booking Time
                 </div>
                 <div className="col-md-2 form__form-group">
-                  <input
-                    name="minOperatingTime"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'minOperatingTime',
+                        value: minOperatingTime
+                      }
+                    }
+                    placeholder="0"
                     type="number"
-                    value={minOperatingTime}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerMinTime}
                   />
                 </div>
                 <div className="col-md-6 form__form-group">
@@ -549,11 +651,17 @@ class AddTruckFormOne extends PureComponent {
                   Cost per Ton $
                 </div>
                 <div className="col-md-2 form__form-group">
-                  <input
-                    name="ratesCostPerTon"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'ratesCostPerTon',
+                        value: ratesCostPerTon
+                      }
+                    }
+                    placeholder="0"
                     type="number"
-                    value={ratesCostPerTon}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerCostTon}
                   />
                 </div>
                 <div className="col-md-2 form__form-group">
@@ -655,15 +763,11 @@ class AddTruckFormOne extends PureComponent {
 }
 
 AddTruckFormOne.propTypes = {
-  equipment: PropTypes.shape({
-    id: PropTypes.number
-  }),
   p: PropTypes.number,
-  company: PropTypes.shape({
-    name: PropTypes.string,
-    id: PropTypes.number
-  }),
+  equipmentId: PropTypes.number,
+  // companyId: PropTypes.number,
   getTruckFullInfo: PropTypes.func.isRequired,
+  getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onTruckFullInfo: PropTypes.func.isRequired,
   passedTruckFullInfo: PropTypes.shape({
     info: PropTypes.object
@@ -673,8 +777,8 @@ AddTruckFormOne.propTypes = {
 
 AddTruckFormOne.defaultProps = {
   p: null,
-  company: null,
-  equipment: null,
+  equipmentId: null,
+  // companyId: null,
   passedTruckFullInfo: null
 };
 
