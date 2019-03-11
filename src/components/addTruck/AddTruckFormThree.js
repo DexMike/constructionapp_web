@@ -16,7 +16,7 @@ import DriverService from '../../api/DriverService';
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
     super(props);
-    const { company } = this.props;
+    const { equipmentId } = this.props;
     this.state = {
       // showPassword: false
       id: 0, // only to track if this is an edit
@@ -24,7 +24,7 @@ class AddTruckFormThree extends PureComponent {
       lastName: '',
       mobilePhone: '',
       email: '',
-      companyId: company.id,
+      equipmentId,
       parentId: 4, // THIS IS A FK
       isBanned: 0,
       preferredLanguage: 'eng',
@@ -42,6 +42,8 @@ class AddTruckFormThree extends PureComponent {
     // check fo cached info
     const { getUserFullInfo, passedTruckFullInfoId } = this.props;
     const preloaded = getUserFullInfo();
+    // console.log('>>USER PRELOADED INFO:');
+    // console.log(preloaded);
     if (Object.keys(preloaded).length > 0) {
       this.setState({
         firstName: preloaded.info.firstName,
@@ -110,8 +112,8 @@ class AddTruckFormThree extends PureComponent {
     } = this.state;
     let isValid = true;
 
-    console.log(truck.firstName);
-    console.log(truck.firstName.length);
+    // console.log(truck.firstName);
+    // console.log(truck.firstName.length);
 
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
@@ -208,7 +210,7 @@ class AddTruckFormThree extends PureComponent {
       lastName,
       mobilePhone,
       email,
-      companyId,
+      equipmentId,
       parentId,
       isBanned,
       preferredLanguage,
@@ -258,7 +260,7 @@ class AddTruckFormThree extends PureComponent {
                     type="text"
                     meta={reqHandlerFName}
                   />
-                  <input type="hidden" value={companyId} />
+                  <input type="hidden" value={equipmentId} />
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Last Name</span>
@@ -332,10 +334,7 @@ class AddTruckFormThree extends PureComponent {
 }
 
 AddTruckFormThree.propTypes = {
-  company: PropTypes.shape({
-    name: PropTypes.string,
-    id: PropTypes.number
-  }),
+  equipmentId: PropTypes.number,
   getUserFullInfo: PropTypes.func.isRequired,
   onUserFullInfo: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
@@ -344,7 +343,7 @@ AddTruckFormThree.propTypes = {
 };
 
 AddTruckFormThree.defaultProps = {
-  company: null,
+  equipmentId: null,
   passedTruckFullInfoId: null
 };
 

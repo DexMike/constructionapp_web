@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-const renderTField = function renderTField({ input, placeholder, type, meta: { touched, error } }) {
-  return (
-    <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
-      <input
-        {...input}
-        placeholder={placeholder}
-        type={type}
-      />
-      {touched && error && <span className="form__form-group-error">{error}</span>}
-    </div>
-  );
-};
+class TField extends PureComponent {
+  render() {
+    const {
+      input, placeholder, type, meta: { touched, error }
+    } = this.props;
 
-renderTField.propTypes = {
+    return (
+      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+        <input
+          {...input}
+          placeholder={placeholder}
+          type={type}
+        />
+        {touched && error && <span className="form__form-group-error">{error}</span>}
+      </div>
+    );
+  }
+}
+
+TField.propTypes = {
   input: PropTypes.shape({
     onChange: PropTypes.func,
     name: PropTypes.string
@@ -27,10 +33,10 @@ renderTField.propTypes = {
   type: PropTypes.string
 };
 
-renderTField.defaultProps = {
+TField.defaultProps = {
   placeholder: '',
   meta: null,
   type: 'text'
 };
 
-export default renderTField;
+export default TField;

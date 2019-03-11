@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+// import { Redirect } from 'react-router-dom';
 import {
   Card,
   CardBody,
@@ -22,24 +22,27 @@ class EquipmentListPage extends Component {
     super(props);
 
     this.state = {
-      companyId: 0,
       activeTab: '1',
       equipments: [],
-      goToDashboard: false,
-      goToAddEquipment: false,
-      goToUpdateEquipment: false,
+      // goToDashboard: false,
+      // goToAddEquipment: false,
+      // goToUpdateEquipment: false,
       equipmentId: 0,
+      companyId: 0,
       modal: false,
       selectedItemData: {}
     };
 
-    this.renderGoTo = this.renderGoTo.bind(this);
+    // this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggle = this.toggle.bind(this);
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
+    this.toggleAddTruckModalClear = this.toggleAddTruckModalClear.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ companyId: profile.companyId });
     this.loadEquipments();
   }
 
@@ -70,22 +73,17 @@ class EquipmentListPage extends Component {
     }, this.loadEquipments);
   }
 
-  async fetchEquipments() {
-    const profile = await ProfileService.getProfile();
+  toggleAddTruckModalClear() {
+    const { modal } = this.state;
     this.setState({
-      companyId: profile.companyId
-    });
+      equipmentId: 0, // reset equipmentID, not companyID
+      selectedItemData: {},
+      modal: !modal
+    }, this.loadEquipments);
+  }
 
-    let equipments = await EquipmentService.getEquipments();
-    // equipments = equipments.map((equipment) => {
-    //   const newEquipment = equipment;
-    //   newEquipment.modifiedOn = moment(equipment.modifiedOn)
-    //     .format();
-    //   newEquipment.createdOn = moment(equipment.createdOn)
-    //     .format();
-    //   return newEquipment;
-    // });
-    return equipments;
+  async fetchEquipments() {
+    return EquipmentService.getEquipments();
   }
 
   handlePageClick(menuItem) {
@@ -108,46 +106,26 @@ class EquipmentListPage extends Component {
 
   handleEquipmentEdit(id) {
     this.returnItemData(id);
-    /*
+    /**/
     this.setState({
-      goToUpdateEquipment: true,
       equipmentId: id
+    }, function launchModal() {
+      this.toggleAddTruckModal();
     });
-    */
-    // instead of going to the edit, let's call up the modal
-    this.toggleAddTruckModal();
-  }
-
-  renderGoTo() {
-    const { goToDashboard, goToAddEquipment, goToUpdateEquipment, equipmentId } = this.state;
-    if (goToDashboard) {
-      return <Redirect push to="/" />;
-    }
-    if (goToAddEquipment) {
-      return <Redirect push to="/trucks/save" />;
-    }
-    if (goToUpdateEquipment) {
-      return <Redirect push to={`/trucks/save/${equipmentId}`} />;
-    }
-    return true;
   }
 
   renderModal() {
-    // const { match } = this.props;
     const {
       totalTrucks,
       modal,
-      companyId,
-      selectedItemData
+      selectedItemData,
+      equipmentId,
+      companyId
     } = this.state;
     let tabShow = 1;
     if (totalTrucks > 0) {
       tabShow = 3;
     }
-    const company = {
-      name: '',
-      id: companyId
-    };
     return (
       <Modal
         isOpen={modal}
@@ -156,8 +134,8 @@ class EquipmentListPage extends Component {
       >
         <div className="modal__body" style={{ padding: '0px' }}>
           <AddTruckForm
-            id={companyId}
-            company={company}
+            equipmentId={equipmentId}
+            companyId={companyId}
             incomingPage={tabShow}
             handlePageClick={() => {}}
             toggle={this.toggleAddTruckModal}
@@ -188,7 +166,6 @@ class EquipmentListPage extends Component {
         <React.Fragment>
           { this.renderModal() }
           <Container className="dashboard">
-            {this.renderGoTo()}
             <button type="button" className="app-link"
               onClick={() => this.handlePageClick('Dashboard')}
             >
@@ -202,7 +179,11 @@ class EquipmentListPage extends Component {
             </Row>
             <Row>
               <Col md={12}>
-                <Button color="secondary" onClick={this.toggleAddTruckModal} type="button">
+                <Button
+                  color="secondary"
+                  onClick={this.toggleAddTruckModalClear}
+                  type="button"
+                >
                   Add a Truck
                 </Button>
               </Col>

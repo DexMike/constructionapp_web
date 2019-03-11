@@ -42,18 +42,16 @@ class AddTruckFormTwo extends PureComponent {
     const { getAvailiabilityFullInfo } = this.props;
     const preloaded = getAvailiabilityFullInfo();
     if (Object.keys(preloaded).length > 0) {
-      console.log(preloaded);
       this.setState({
         isAvailable: preloaded.info.isAvailable,
         startDate: preloaded.info.startDate,
         endDate: preloaded.info.endDate
       },
       function wait() { // wait until it loads
-        // // console.log(this.state);
         this.saveAvailabilityInfo(false);
       });
     } else {
-      console.log(47);
+      // console.log(47);
     }
   }
 

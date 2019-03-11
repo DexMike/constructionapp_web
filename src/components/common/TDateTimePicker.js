@@ -6,7 +6,7 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: new Date(props.givenDate)
+      startDate: new Date()
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -22,7 +22,6 @@ class TDateTimePickerField extends PureComponent {
   render() {
     const { startDate } = this.state;
     const { dateFormat } = this.props;
-    // console.log(input.dateFormat);
     return (
       <div className="date-picker">
         <DatePicker
@@ -38,57 +37,19 @@ class TDateTimePickerField extends PureComponent {
   }
 }
 
-const renderTDateTimePickerField = function renderTDateTimePickerField(
-  { input, options, meta: { touched, error } }
-) {
-  return (
-    <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
-      <TDateTimePickerField
-        {...input}
-        options={options}
-      />
-      {touched && error && <span className="form__form-group-error">{error}</span>}
-    </div>
-  );
-};
-
-renderTDateTimePickerField.propTypes = {
+TDateTimePickerField.propTypes = {
   onChange: PropTypes.func.isRequired,
   input: PropTypes.shape({
     onChange: PropTypes.func,
     name: PropTypes.string
   }).isRequired,
-  meta: PropTypes.shape({
-    touched: PropTypes.bool,
-    error: PropTypes.string
-  }),
-  options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string,
-    label: PropTypes.string
-  })),
-  placeholder: PropTypes.string
-};
-
-renderTDateTimePickerField.defaultProps = {
-  meta: { touched: false, error: '' },
-  options: [],
-  placeholder: ''
-};
-
-TDateTimePickerField.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  givenDate: PropTypes.number,
-  dateFormat: PropTypes.string,
-  meta: PropTypes.shape({
-    touched: PropTypes.bool,
-    error: PropTypes.string
-  })
+  // givenDate: PropTypes.number,
+  dateFormat: PropTypes.string
 };
 
 TDateTimePickerField.defaultProps = {
-  givenDate: PropTypes.number,
-  dateFormat: 'MMMM dd, yyyy hh:mm aaa',
-  meta: { touched: false, error: '' }
+  // givenDate: PropTypes.number,
+  dateFormat: 'MMMM dd, yyyy hh:mm aaa'
 };
 
-export default renderTDateTimePickerField;
+export default TDateTimePickerField;

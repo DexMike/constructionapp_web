@@ -47,6 +47,7 @@ class JobCreateForm extends Component {
   }
 
   async componentDidMount() {
+    // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid } = this.state;
     const { selectedEquipment } = this.props;
@@ -176,6 +177,7 @@ class JobCreateForm extends Component {
       reqHandlerEZip
     } = this.state;
     let isValid = true;
+
     // start address
     /* if (!startAddress.name || !startAddress.companyId) {
       return false;
@@ -445,7 +447,7 @@ class JobCreateForm extends Component {
                     {
                       onChange: this.handleJobInputChange,
                       name: 'name',
-                      value: ''
+                      value: job.name
                     }
                   }
                   placeholder="Job # 242423"
