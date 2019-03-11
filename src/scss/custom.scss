@@ -84,3 +84,8 @@ $turquoise: rgb(84,142,168);
 }
 
 // ---- customer dashboard page
+
+// ---- form validation error
+.form.form--horizontal .form__form-group-input-wrap--error-above .form__form-group-error {
+  width: 20em;
+}
