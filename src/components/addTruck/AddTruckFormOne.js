@@ -326,6 +326,7 @@ class AddTruckFormOne extends PureComponent {
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
 
+    // This takes the input name prop to set the respective requiredHandler
     if (e.target.name === 'ratesCostPerHour') {
       reqHandler = 'reqHandlerMinRate';
     } else if (e.target.name === 'minOperatingTime') {
@@ -333,6 +334,7 @@ class AddTruckFormOne extends PureComponent {
     } else if (e.target.name === 'ratesCostPerTon') {
       reqHandler = 'reqHandlerCostTon';
     }
+    // Then set its state
     this.setState({
       [reqHandler]: Object.assign({}, reqHandler, {
         touched: false
