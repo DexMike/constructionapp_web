@@ -112,8 +112,8 @@ class AddTruckFormThree extends PureComponent {
     } = this.state;
     let isValid = true;
 
-    console.log(truck.firstName);
-    console.log(truck.firstName.length);
+    // console.log(truck.firstName);
+    // console.log(truck.firstName.length);
 
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({

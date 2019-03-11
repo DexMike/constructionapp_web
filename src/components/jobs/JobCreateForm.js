@@ -148,7 +148,11 @@ class JobCreateForm extends Component {
   }
 
   isFormValid() {
-    const { startAddress, job, endAddress } = this.state;
+    const {
+      // startAddress,
+      job
+      // endAddress
+    } = this.state;
     // start address
     /* if (!startAddress.name || !startAddress.companyId) {
       return false;
@@ -161,9 +165,9 @@ class JobCreateForm extends Component {
     if (job.rateType === 'Ton' && (!endAddress.name || !endAddress.companyId)) {
       return false;
     } */
-    console.log(164);
+    // console.log(164);
     if (!job.name) {
-      console.log(job.name.props);
+      // console.log(job.name.props);
 
       return false;
     }
