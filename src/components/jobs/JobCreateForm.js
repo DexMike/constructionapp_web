@@ -78,19 +78,68 @@ class JobCreateForm extends Component {
 
   handleJobInputChange(e) {
     const { job } = this.state;
+    let reqHandler = '';
     job[e.target.name] = e.target.value;
+
+    if (e.target.name === 'name') {
+      reqHandler = 'reqHandlerName';
+    } else if (e.target.name === 'startTime') {
+      reqHandler = 'reqHandlerDate';
+    } else if (e.target.name === 'rateEstimate') {
+      reqHandler = 'reqHandlerEstHours';
+    }
+    this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
+
     this.setState({ job });
   }
 
   handleStartAddressInputChange(e) {
     const { startAddress } = this.state;
+    let reqHandler = '';
     startAddress[e.target.name] = e.target.value;
+
+    if (e.target.name === 'address1') {
+      reqHandler = 'reqHandlerSAddress';
+    } else if (e.target.name === 'city') {
+      reqHandler = 'reqHandlerSCity';
+    } else if (e.target.name === 'state') {
+      reqHandler = 'reqHandlerSState';
+    } else if (e.target.name === 'zipCode') {
+      reqHandler = 'reqHandlerSZip';
+    }
+    this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
+
     this.setState({ startAddress });
   }
 
   handleEndAddressInputChange(e) {
     const { endAddress } = this.state;
+    let reqHandler = '';
     endAddress[e.target.name] = e.target.value;
+
+    if (e.target.name === 'address1') {
+      reqHandler = 'reqHandlerEAddress';
+    } else if (e.target.name === 'city') {
+      reqHandler = 'reqHandlerECity';
+    } else if (e.target.name === 'state') {
+      reqHandler = 'reqHandlerEState';
+    } else if (e.target.name === 'zipCode') {
+      reqHandler = 'reqHandlerEZip';
+    }
+    this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
+
     this.setState({ endAddress });
   }
 
@@ -213,7 +262,7 @@ class JobCreateForm extends Component {
       isValid = false;
     }
 
-    if (job.job.rateEstimate.length === 0) {
+    if (job.job.rateEstimate.length === 0 || job.job.rateEstimate === 0) {
       this.setState({
         reqHandlerEstHours: Object.assign({}, reqHandlerEstHours, {
           touched: true,
@@ -482,7 +531,7 @@ class JobCreateForm extends Component {
                       dateFormat: 'MM-dd-yy'
                     }
                   }
-                  onChange={this.handleJobInputChange}
+                  onChange={this.handleStartTimeChange}
                   meta={reqHandlerDate}
                 />
               </div>
@@ -506,7 +555,7 @@ class JobCreateForm extends Component {
                     }
                   }
                   placeholder="0"
-                  type="text"
+                  type="number"
                   meta={reqHandlerEstHours}
                 />
               </div>
@@ -548,7 +597,7 @@ class JobCreateForm extends Component {
                     value: startAddress.address1
                   }
                 }
-                placeholder="0"
+                placeholder="Address #1"
                 type="text"
                 meta={reqHandlerSAddress}
               />
@@ -578,7 +627,7 @@ class JobCreateForm extends Component {
                     value: startAddress.city
                   }
                 }
-                placeholder="0"
+                placeholder="City"
                 type="text"
                 meta={reqHandlerSCity}
               />
@@ -594,7 +643,7 @@ class JobCreateForm extends Component {
                     value: startAddress.state
                   }
                 }
-                placeholder="0"
+                placeholder="State"
                 type="text"
                 meta={reqHandlerSState}
               />
@@ -610,7 +659,7 @@ class JobCreateForm extends Component {
                     value: startAddress.zipCode
                   }
                 }
-                placeholder="0"
+                placeholder="Zip Code"
                 type="text"
                 meta={reqHandlerSZip}
               />
@@ -652,7 +701,7 @@ class JobCreateForm extends Component {
                     value: endAddress.address1
                   }
                 }
-                placeholder="0"
+                placeholder="Address #1"
                 type="text"
                 meta={reqHandlerEAddress}
               />
@@ -682,7 +731,7 @@ class JobCreateForm extends Component {
                     value: endAddress.city
                   }
                 }
-                placeholder="0"
+                placeholder="City"
                 type="text"
                 meta={reqHandlerECity}
               />
@@ -698,7 +747,7 @@ class JobCreateForm extends Component {
                     value: endAddress.state
                   }
                 }
-                placeholder="0"
+                placeholder="State"
                 type="text"
                 meta={reqHandlerEState}
               />
@@ -714,7 +763,7 @@ class JobCreateForm extends Component {
                     value: endAddress.zipCode
                   }
                 }
-                placeholder="0"
+                placeholder="Zip Code"
                 type="text"
                 meta={reqHandlerEZip}
               />
