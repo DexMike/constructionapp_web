@@ -202,7 +202,6 @@ class DashboardCustomerPage extends Component {
   }
 
   handleMultiChange(data) {
-    console.log(data);
     const { filters } = this.state;
     filters.materialType = data;
     this.setState({
@@ -210,7 +209,7 @@ class DashboardCustomerPage extends Component {
       filters
     }, async function changed() {
       await this.fetchEquipments();
-      console.log(this.state);
+      // console.log(this.state);
     });
     /**/
   }
@@ -259,8 +258,6 @@ class DashboardCustomerPage extends Component {
 
   returnSelectedMaterials() {
     const { filters } = this.state;
-    console.log('>> RETURNING SELECTED...');
-    console.log(filters);
     return filters.materialType;
   }
 

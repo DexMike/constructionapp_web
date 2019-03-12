@@ -66,8 +66,6 @@ class JobCreateForm extends Component {
       endAddress,
       bid,
       availableMaterials: selectedMaterials()
-    }, function assigned() {
-      console.log(this.state);
     });
   }
 
@@ -96,14 +94,9 @@ class JobCreateForm extends Component {
   }
 
   handleMultiChange(data) {
-    // console.log(data);
-    // const { materials } = this.state;
     this.setState({
       materials: data
-    }, async function changed() {
-      console.log(this.state);
     });
-    /**/
   }
 
   toggleJobRateType() {

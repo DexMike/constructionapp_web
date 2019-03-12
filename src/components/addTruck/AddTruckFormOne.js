@@ -352,8 +352,6 @@ class AddTruckFormOne extends PureComponent {
 
     // if this is loaded from the list instead
     if (Object.keys(passedTruckFullInfo).length > 0) {
-      console.log(377);
-      console.log(equipmentId);
       // we have to load the materials for this particular truck
       let truckMaterials = await
       EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(equipmentId);
@@ -396,8 +394,6 @@ class AddTruckFormOne extends PureComponent {
 
     // load info from cached (if coming back from next tabs)
     if (Object.keys(preloaded).length > 0) {
-      console.log(355);
-      console.log(preloaded);
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,
