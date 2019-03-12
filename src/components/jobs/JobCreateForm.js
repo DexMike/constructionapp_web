@@ -354,44 +354,47 @@ class JobCreateForm extends Component {
       isValid = false;
     }
 
-    if (job.endAddress.address1.length === 0) {
-      this.setState({
-        reqHandlerEAddress: Object.assign({}, reqHandlerEAddress, {
-          touched: true,
-          error: 'Please enter a destination or end address for this job'
-        })
-      });
-      isValid = false;
-    }
+    // if it's job per hour, do not validate endAddress
+    if (job.job.rateType !== 'Hour') {
+      if (job.endAddress.address1.length === 0) {
+        this.setState({
+          reqHandlerEAddress: Object.assign({}, reqHandlerEAddress, {
+            touched: true,
+            error: 'Please enter a destination or end address for this job'
+          })
+        });
+        isValid = false;
+      }
 
-    if (job.endAddress.city.length === 0) {
-      this.setState({
-        reqHandlerECity: Object.assign({}, reqHandlerECity, {
-          touched: true,
-          error: 'This field is required'
-        })
-      });
-      isValid = false;
-    }
+      if (job.endAddress.city.length === 0) {
+        this.setState({
+          reqHandlerECity: Object.assign({}, reqHandlerECity, {
+            touched: true,
+            error: 'This field is required'
+          })
+        });
+        isValid = false;
+      }
 
-    if (job.endAddress.state.length === 0) {
-      this.setState({
-        reqHandlerEState: Object.assign({}, reqHandlerEState, {
-          touched: true,
-          error: 'This field is required'
-        })
-      });
-      isValid = false;
-    }
+      if (job.endAddress.state.length === 0) {
+        this.setState({
+          reqHandlerEState: Object.assign({}, reqHandlerEState, {
+            touched: true,
+            error: 'This field is required'
+          })
+        });
+        isValid = false;
+      }
 
-    if (job.endAddress.zipCode.length === 0) {
-      this.setState({
-        reqHandlerEZip: Object.assign({}, reqHandlerEZip, {
-          touched: true,
-          error: 'This field is required'
-        })
-      });
-      isValid = false;
+      if (job.endAddress.zipCode.length === 0) {
+        this.setState({
+          reqHandlerEZip: Object.assign({}, reqHandlerEZip, {
+            touched: true,
+            error: 'This field is required'
+          })
+        });
+        isValid = false;
+      }
     }
 
     if (isValid) {
