@@ -7,10 +7,12 @@ import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
 import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
+import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
+import SelectField from '../common/TSelect';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -21,6 +23,7 @@ class JobCreateForm extends Component {
     // job.
     this.state = {
       job,
+      states: [],
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
       bid: BidService.getDefaultBid(),
@@ -39,7 +42,9 @@ class JobCreateForm extends Component {
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
+    this.handleStartStateChange = this.handleStartStateChange.bind(this);
     this.handleEndAddressInputChange = this.handleEndAddressInputChange.bind(this);
+    this.handleEndStateChange = this.handleEndStateChange.bind(this);
     this.toggleJobRateType = this.toggleJobRateType.bind(this);
     this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
     this.createJob = this.createJob.bind(this);
@@ -68,12 +73,26 @@ class JobCreateForm extends Component {
     bid.userId = profile.userId;
     bid.createdBy = profile.userId;
     bid.modifiedBy = profile.userId;
+    await this.fetchForeignValues();
     this.setState({
       job,
       startAddress,
       endAddress,
       bid
     });
+  }
+
+  async fetchForeignValues() {
+    const lookups = await LookupsService.getLookups();
+    let states = [];
+    Object.values(lookups).forEach((itm) => {
+      if (itm.key === 'States') states.push(itm);
+    });
+    states = states.map(state => ({
+      value: String(state.val1),
+      label: state.val1
+    }));
+    this.setState({ states });
   }
 
   handleJobInputChange(e) {
@@ -120,6 +139,20 @@ class JobCreateForm extends Component {
     this.setState({ startAddress });
   }
 
+  handleStartStateChange(e) {
+    const { startAddress } = this.state;
+    const reqHandler = '';
+    startAddress.state = e.value;
+
+    this.setState({
+      reqHandlerSState: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
+
+    this.setState({ startAddress });
+  }
+
   handleEndAddressInputChange(e) {
     const { endAddress } = this.state;
     let reqHandler = '';
@@ -136,6 +169,20 @@ class JobCreateForm extends Component {
     }
     this.setState({
       [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      })
+    });
+
+    this.setState({ endAddress });
+  }
+
+  handleEndStateChange(e) {
+    const { endAddress } = this.state;
+    const reqHandler = '';
+    endAddress.state = e.value;
+
+    this.setState({
+      reqHandlerEState: Object.assign({}, reqHandler, {
         touched: false
       })
     });
@@ -227,21 +274,6 @@ class JobCreateForm extends Component {
     } = this.state;
     let isValid = true;
 
-    // start address
-    /* if (!startAddress.name || !startAddress.companyId) {
-      return false;
-    }
-    // job
-    if (!job.companiesId || !job.name || !job.status || !job.rateType) {
-      return false;
-    }
-    // end address
-    if (job.rateType === 'Ton' && (!endAddress.name || !endAddress.companyId)) {
-      return false;
-    } */
-
-    console.log(job);
-
     if (job.job.name.length === 0) {
       this.setState({
         reqHandlerName: Object.assign({}, reqHandlerName, {
@@ -262,7 +294,7 @@ class JobCreateForm extends Component {
       isValid = false;
     }
 
-    if (job.job.rateEstimate.length === 0 || job.job.rateEstimate === 0) {
+    if (job.job.rateEstimate.length === 0 || job.job.rateEstimate <= 0) {
       this.setState({
         reqHandlerEstHours: Object.assign({}, reqHandlerEstHours, {
           touched: true,
@@ -272,7 +304,7 @@ class JobCreateForm extends Component {
       isValid = false;
     }
 
-    if (job.job.rateEstimate.length === 0) {
+    if (job.job.rateEstimate.length === 0 || job.job.rateEstimate <= 0) {
       this.setState({
         reqHandlerEstTons: Object.assign({}, reqHandlerEstTons, {
           touched: true,
@@ -568,6 +600,7 @@ class JobCreateForm extends Component {
 
   renderJobStartLocation() {
     const {
+      states,
       startAddress,
       reqHandlerSAddress,
       reqHandlerSCity,
@@ -635,17 +668,18 @@ class JobCreateForm extends Component {
           </div>
           <div className="col-sm-2">
             <div className="form__form-group">
-              <TField
+              <SelectField
                 input={
                   {
-                    onChange: this.handleStartAddressInputChange,
+                    onChange: this.handleStartStateChange,
                     name: 'state',
                     value: startAddress.state
                   }
                 }
-                placeholder="State"
-                type="text"
                 meta={reqHandlerSState}
+                value={startAddress.state}
+                options={states}
+                placeholder="State"
               />
             </div>
           </div>
@@ -660,7 +694,7 @@ class JobCreateForm extends Component {
                   }
                 }
                 placeholder="Zip Code"
-                type="text"
+                type="number"
                 meta={reqHandlerSZip}
               />
             </div>
@@ -672,6 +706,7 @@ class JobCreateForm extends Component {
 
   renderJobEndLocation() {
     const {
+      states,
       endAddress,
       reqHandlerEAddress,
       reqHandlerECity,
@@ -739,17 +774,18 @@ class JobCreateForm extends Component {
           </div>
           <div className="col-sm-2">
             <div className="form__form-group">
-              <TField
+              <SelectField
                 input={
                   {
-                    onChange: this.handleEndAddressInputChange,
+                    onChange: this.handleEndStateChange,
                     name: 'state',
                     value: endAddress.state
                   }
                 }
-                placeholder="State"
-                type="text"
                 meta={reqHandlerEState}
+                value={endAddress.state}
+                options={states}
+                placeholder="State"
               />
             </div>
           </div>
@@ -764,7 +800,7 @@ class JobCreateForm extends Component {
                   }
                 }
                 placeholder="Zip Code"
-                type="text"
+                type="number"
                 meta={reqHandlerEZip}
               />
             </div>
