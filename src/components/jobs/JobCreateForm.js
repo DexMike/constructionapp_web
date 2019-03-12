@@ -11,6 +11,7 @@ import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
+import MultiSelect from '../common/TMultiSelect';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -23,7 +24,9 @@ class JobCreateForm extends Component {
       job,
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
-      bid: BidService.getDefaultBid()
+      bid: BidService.getDefaultBid(),
+      materials: [],
+      availableMaterials: []
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
@@ -32,13 +35,14 @@ class JobCreateForm extends Component {
     this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
     this.createJob = this.createJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
+    this.handleMultiChange = this.handleMultiChange.bind(this);
   }
 
   async componentDidMount() {
     // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid } = this.state;
-    const { selectedEquipment } = this.props;
+    const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
@@ -60,7 +64,10 @@ class JobCreateForm extends Component {
       job,
       startAddress,
       endAddress,
-      bid
+      bid,
+      availableMaterials: selectedMaterials()
+    }, function assigned() {
+      console.log(this.state);
     });
   }
 
@@ -86,6 +93,17 @@ class JobCreateForm extends Component {
     const { job } = this.state;
     job.startTime = e;
     this.setState({ job });
+  }
+
+  handleMultiChange(data) {
+    // console.log(data);
+    // const { materials } = this.state;
+    this.setState({
+      materials: data
+    }, async function changed() {
+      console.log(this.state);
+    });
+    /**/
   }
 
   toggleJobRateType() {
@@ -177,7 +195,7 @@ class JobCreateForm extends Component {
   }
 
   renderSelectedEquipment() {
-    const { job } = this.state;
+    const { job, materials, availableMaterials } = this.state;
     const { selectedEquipment } = this.props;
     return (
       <React.Fragment>
@@ -219,7 +237,26 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Materials</span>
               <div className="form__form-group-field">
-                {this.renderEquipmentMaterials()}
+                {/* this.renderEquipmentMaterials() */}
+                <MultiSelect
+                  input={
+                    {
+                      onChange: this.handleMultiChange,
+                      // onChange: this.handleSelectFilterChange,
+                      name: 'materialType',
+                      value: materials
+                    }
+                  }
+                  meta={
+                    {
+                      touched: false,
+                      error: 'Unable to select'
+                    }
+                  }
+                  options={availableMaterials}
+                  // placeholder="Materials"
+                  placeholder="Select materials"
+                />
               </div>
             </div>
           </div>
@@ -304,7 +341,6 @@ class JobCreateForm extends Component {
                   type="text"
                   meta={
                     {
-                      touched: false,
                       touched: false,
                       error: 'Job Name field shouldn’t be empty'
                     }
@@ -565,7 +601,8 @@ JobCreateForm.propTypes = {
   selectedEquipment: PropTypes.shape({
     id: PropTypes.number
   }).isRequired,
-  closeModal: PropTypes.func.isRequired
+  closeModal: PropTypes.func.isRequired,
+  selectedMaterials: PropTypes.func.isRequired
 };
 
 export default JobCreateForm;
