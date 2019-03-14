@@ -25,6 +25,7 @@ import ProfileService from '../../api/ProfileService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
+import MultiSelect from '../common/TMultiSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
 
 class DashboardCustomerPage extends Component {
@@ -62,7 +63,8 @@ class DashboardCustomerPage extends Component {
         endAvailability: new Date(),
         truckType: '',
         minCapacity: '',
-        materialType: '',
+        // materialType: '',
+        materialType: [],
         zipCode: '',
         rateType: '',
         sortBy: sortByList[0]
@@ -83,6 +85,8 @@ class DashboardCustomerPage extends Component {
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
+    this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
   }
 
   async componentDidMount() {
@@ -197,6 +201,19 @@ class DashboardCustomerPage extends Component {
     this.setState({ filters });
   }
 
+  handleMultiChange(data) {
+    const { filters } = this.state;
+    filters.materialType = data;
+    this.setState({
+      // selectedMaterials: data
+      filters
+    }, async function changed() {
+      await this.fetchEquipments();
+      // console.log(this.state);
+    });
+    /**/
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
@@ -237,6 +254,11 @@ class DashboardCustomerPage extends Component {
     this.setState({
       modal: !modal
     });
+  }
+
+  returnSelectedMaterials() {
+    const { filters } = this.state;
+    return filters.materialType;
   }
 
   renderGoTo() {
@@ -282,6 +304,7 @@ class DashboardCustomerPage extends Component {
           <JobCreateForm
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
+            selectedMaterials={this.returnSelectedMaterials}
           />
         </div>
       </Modal>
@@ -424,10 +447,11 @@ class DashboardCustomerPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'materialType',
                             value: filters.materialType
                           }
@@ -438,14 +462,14 @@ class DashboardCustomerPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.materialType}
                         options={
                           materialTypeList.map(materialType => ({
                             name: 'materialType',
-                            value: materialType,
-                            label: materialType
+                            value: materialType.trim(),
+                            label: materialType.trim()
                           }))
                         }
+                        // placeholder="Materials"
                         placeholder={materialTypeList[0]}
                       />
                     </Col>

@@ -12,6 +12,7 @@ import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
+import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 
 class JobCreateForm extends Component {
@@ -27,6 +28,8 @@ class JobCreateForm extends Component {
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
       bid: BidService.getDefaultBid(),
+      materials: [],
+      availableMaterials: [],
       reqHandlerName: { touched: false, error: '' },
       reqHandlerDate: { touched: false, error: '' },
       reqHandlerEstHours: { touched: false, error: '' },
@@ -49,13 +52,14 @@ class JobCreateForm extends Component {
     this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
     this.createJob = this.createJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
+    this.handleMultiChange = this.handleMultiChange.bind(this);
   }
 
   async componentDidMount() {
     // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid } = this.state;
-    const { selectedEquipment } = this.props;
+    const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
@@ -78,7 +82,8 @@ class JobCreateForm extends Component {
       job,
       startAddress,
       endAddress,
-      bid
+      bid,
+      availableMaterials: selectedMaterials()
     });
   }
 
@@ -194,6 +199,12 @@ class JobCreateForm extends Component {
     const { job } = this.state;
     job.startTime = e;
     this.setState({ job });
+  }
+
+  handleMultiChange(data) {
+    this.setState({
+      materials: data
+    });
   }
 
   toggleJobRateType() {
@@ -405,7 +416,7 @@ class JobCreateForm extends Component {
   }
 
   renderSelectedEquipment() {
-    const { job } = this.state;
+    const { job, materials, availableMaterials } = this.state;
     const { selectedEquipment } = this.props;
     return (
       <React.Fragment>
@@ -447,7 +458,26 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Materials</span>
               <div className="form__form-group-field">
-                {this.renderEquipmentMaterials()}
+                {/* this.renderEquipmentMaterials() */}
+                <MultiSelect
+                  input={
+                    {
+                      onChange: this.handleMultiChange,
+                      // onChange: this.handleSelectFilterChange,
+                      name: 'materialType',
+                      value: materials
+                    }
+                  }
+                  meta={
+                    {
+                      touched: false,
+                      error: 'Unable to select'
+                    }
+                  }
+                  options={availableMaterials}
+                  // placeholder="Materials"
+                  placeholder="Select materials"
+                />
               </div>
             </div>
           </div>
@@ -870,7 +900,8 @@ JobCreateForm.propTypes = {
   selectedEquipment: PropTypes.shape({
     id: PropTypes.number
   }).isRequired,
-  closeModal: PropTypes.func.isRequired
+  closeModal: PropTypes.func.isRequired,
+  selectedMaterials: PropTypes.func.isRequired
 };
 
 export default JobCreateForm;
