@@ -86,6 +86,20 @@ $turquoise: rgb(84,142,168);
 // ---- customer dashboard page
 
 // ---- form validation error
-.form.form--horizontal .form__form-group-input-wrap--error-above .form__form-group-error {
-  width: 20em;
+.form.form--horizontal .form__form-group-input-wrap--error-above .form__form-group-error,
+span.form__form-group-error {
+  top: 0;
+  margin-top: -3em !important;
 }
+// ---- form validation error
+
+// ---- sidebar icons
+.sidebar__content i.material-icons {
+    font-size: 13px;
+}
+.sidebar__content img.customIcon {
+  height: 13px;
+  width: 13px;
+  filter: contrast(30%);
+}
+// ---- sidebar icons
