@@ -4,11 +4,64 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
+// import { GoogleMap, Marker } from 'react-google-maps';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
+
+// Map test ////////////////////////////////////////////////////
+const { compose, withProps, lifecycle } = require('recompose');
+const {
+  withScriptjs,
+  withGoogleMap,
+  GoogleMap,
+  DirectionsRenderer
+} = require('react-google-maps');
+const MapWithADirectionsRenderer = compose(
+  withProps({
+    googleMapURL: 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAsnyBy0GMNoCQxfm0CxaAF-ys_2HNDCOc&v=3.exp&libraries=geometry,drawing,places',
+    loadingElement: <div style={{ height: '100%' }} />,
+    containerElement: <div style={{ height: '400px' }} />,
+    mapElement: <div style={{ height: '100%' }} />
+  }),
+  withScriptjs,
+  withGoogleMap,
+  lifecycle({
+    componentDidMount() {
+      const DirectionsService = new google.maps.DirectionsService();
+
+      const address1 = '100 Congress Austin Texas 78701';
+      const address2 = '400 Bowie St, Austin, TX 78703';
+
+      DirectionsService.route({
+        // origin: new google.maps.LatLng(41.8507300, -87.6512600),
+        // destination: new google.maps.LatLng(41.8525800, -87.6514100),
+        origin: address1,
+        destination: address2,
+        travelMode: google.maps.TravelMode.DRIVING,
+      }, (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+          this.setState({
+            directions: result
+          });
+        } else {
+          console.error(`error fetching directions ${result}`);
+        }
+      });
+    }
+  })
+)(props =>
+  <GoogleMap
+    defaultZoom={7}
+    defaultCenter={new google.maps.LatLng(41.8507300, -87.6512600)}
+  >
+    {props.directions && <DirectionsRenderer directions={props.directions} />}
+  </GoogleMap>
+);
+// Map test ends //////////////////////////////////////////////
+
 
 class JobForm extends Component {
   constructor(props) {
@@ -318,7 +371,7 @@ class JobForm extends Component {
           marginBottom: '20px'
         }}
         >
-          Comments
+          Comments 321
         </h4>
         <Row>
           <Col xl={3} lg={4} md={6} sm={12}>
@@ -329,6 +382,15 @@ class JobForm extends Component {
             </div>
           </Col>
         </Row>
+      </React.Fragment>
+    );
+  }
+
+  renderMap() {
+    return (
+      <React.Fragment>
+        MAP
+        <MapWithADirectionsRenderer />
       </React.Fragment>
     );
   }
@@ -350,6 +412,13 @@ class JobForm extends Component {
                 </React.Fragment>
               )}
               {this.renderJobBottom(job)}
+            </CardBody>
+          </Card>
+        </Col>
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
+              {this.renderMap()}
             </CardBody>
           </Card>
         </Col>
