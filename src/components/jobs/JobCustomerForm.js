@@ -7,10 +7,11 @@ import { Card, CardBody, Col, Row } from 'reactstrap';
 // import { GoogleMap, Marker } from 'react-google-maps';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
-// import CompanyService from '../../api/CompanyService';
+// import JobCreateFormanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/JobMap';
+// import './Job.css';
 
 class JobForm extends Component {
   constructor(props) {
@@ -320,7 +321,7 @@ class JobForm extends Component {
           marginBottom: '20px'
         }}
         >
-          Comments 321
+          Comments
         </h4>
         <Row>
           <Col xl={3} lg={4} md={6} sm={12}>
@@ -335,42 +336,45 @@ class JobForm extends Component {
     );
   }
 
-  renderMap() {
-    return (
-      <React.Fragment>
-        MAP
-        <TMap
-          input={
-            {
-              origin: '100 Congress Austin Texas 78701',
-              destination: '400 Bowie St, Austin, TX 78703'
-            }
-          }
-        />
-      </React.Fragment>
-    );
-  }
-
   render() {
     const { job } = this.props;
+    const origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    const destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
     return (
       <React.Fragment>
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
               {this.renderJobTop(job)}
-              <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
-              {this.renderAddress(job.startAddress)}
-              {job.endAddress && (
-                <React.Fragment>
-                  <h4 style={{ borderBottom: '3px solid #ccc' }}>End Location</h4>
-                  {this.renderAddress(job.endAddress)}
-                </React.Fragment>
-              )}
-              {this.renderJobBottom(job)}
+
+              <Row>
+                <Col className="col-md-8 backo">
+                  <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
+                  {this.renderAddress(job.startAddress)}
+                  {job.endAddress && (
+                    <React.Fragment>
+                      <h4 style={{ borderBottom: '3px solid #ccc' }}>End Location</h4>
+                      {this.renderAddress(job.endAddress)}
+                    </React.Fragment>
+                  )}
+                  {this.renderJobBottom(job)}
+                </Col>
+                <Col className="col-md-4 backo_red">
+                  <TMap
+                    input={
+                      {
+                        origin,
+                        destination
+                      }
+                    }
+                  />
+                </Col>
+              </Row>
+
             </CardBody>
           </Card>
         </Col>
+        {/*
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
@@ -378,6 +382,7 @@ class JobForm extends Component {
             </CardBody>
           </Card>
         </Col>
+        */}
       </React.Fragment>
     );
   }
