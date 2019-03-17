@@ -26,7 +26,7 @@ import ProfileService from '../../api/ProfileService';
 // import JobsService from '../../api/JobsService';
 // import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
+import TIntervalDatePicker from '../common/TIntervalDatePicker';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -53,14 +53,14 @@ class DashboardCustomerPage extends Component {
 
       modal: false,
       goToDashboard: false,
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
 
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
-        startAvailability: new Date(),
-        endAvailability: new Date(),
+        startAvailability: null,
+        endAvailability: null,
         truckType: '',
         minCapacity: '',
         // materialType: '',
@@ -86,6 +86,7 @@ class DashboardCustomerPage extends Component {
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
   }
 
@@ -249,6 +250,14 @@ class DashboardCustomerPage extends Component {
     this.setState({ filters });
   }
 
+  async handleIntervalInputChange(e) {
+    const { filters } = this.state;
+    filters.startAvailability = e.start;
+    filters.endAvailability = e.end;
+    await this.fetchEquipments();
+    this.setState({ filters });
+  }
+
   toggleAddJobModal() {
     const { modal } = this.state;
     this.setState({
@@ -359,11 +368,8 @@ class DashboardCustomerPage extends Component {
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col className="filter-item-title">
-                      Start Availability
-                    </Col>
-                    <Col className="filter-item-title">
-                      End Availability
+                    <Col sm="3" className="filter-item-title">
+                      Availability
                     </Col>
                     <Col className="filter-item-title">
                       Truck Type
@@ -382,8 +388,8 @@ class DashboardCustomerPage extends Component {
                     </Col>
                   </Row>
                   <Row lg={12} id="filter-input-row">
-                    <Col>
-                      <TDateTimePicker
+                    <Col sm="3">
+                      {/* <TDateTimePicker
                           input={
                             {
                               onChange: this.handleStartDateChange,
@@ -392,7 +398,7 @@ class DashboardCustomerPage extends Component {
                               givenDate: new Date(startDate).getTime()
                             }
                           }
-                          onChange={this.handleFilterChange}
+                          onChange={this.handleStartDateChange}
                           dateFormat="MM-dd-yy"
                       />
                     </Col>
@@ -407,8 +413,15 @@ class DashboardCustomerPage extends Component {
                               givenDate: new Date(endDate).getTime()
                             }
                           }
-                          onChange={this.handleFilterChange}
+                          onChange={this.handleEndDateChange}
                           dateFormat="MM-dd-yy"
+                      /> */}
+                      <TIntervalDatePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        name="dateInterval"
+                        onChange={this.handleIntervalInputChange}
+                        dateFormat="MM/dd/yy"
                       />
                     </Col>
                     <Col>
