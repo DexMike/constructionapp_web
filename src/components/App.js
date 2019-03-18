@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history';
 import Amplify from 'aws-amplify';
 import {
   ConfirmSignIn,
@@ -28,7 +28,7 @@ Amplify.configure({
   }
 });
 
-export const history = createHistory();
+export const history = createBrowserHistory();
 
 class App extends Component {
   constructor(props) {

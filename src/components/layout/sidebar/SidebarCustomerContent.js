@@ -37,6 +37,29 @@ class SidebarCustomerContent extends Component {
             route="/Jobs"
             onClick={this.hideSidebar}
           />
+          <SidebarLink
+            title="Create Job"
+            route="#"
+            onClick={this.hideSidebar}
+          />
+        </ul>
+
+        <ul className="sidebar__block">
+          <SidebarLink
+            title="Search for Trucks"
+            customIcon="dump_truck"
+            route="/Dashboard"
+            onClick={this.hideSidebar}
+          />
+        </ul>
+
+        <ul className="sidebar__block">
+          <SidebarLink
+            title="Settings"
+            icon="settings"
+            route="#"
+            onClick={this.hideSidebar}
+          />
         </ul>
       </div>
     );
