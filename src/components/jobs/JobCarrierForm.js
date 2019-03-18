@@ -12,6 +12,7 @@ import JobService from '../../api/JobService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/TMapOriginDestination';
+import './jobs.css';
 
 class JobCarrierForm extends Component {
   constructor(props) {
@@ -360,11 +361,23 @@ class JobCarrierForm extends Component {
               {this.renderJobTop(job)}
               <Row>
                 <Col className="col-md-7 backo">
-                  <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
+                  <h4 style={{ borderBottom: '3px solid #ccc' }}>
+                    <img
+                      src={`${window.location.origin}/img/PinA.png`}
+                      alt="avatar"
+                      className="pinSize"
+                    /> Start Location
+                  </h4>
                   {this.renderAddress(job.startAddress)}
                   {job.endAddress && (
                     <React.Fragment>
-                      <h4 style={{ borderBottom: '3px solid #ccc' }}>End Location</h4>
+                      <h4 style={{ borderBottom: '3px solid #ccc' }}>
+                        <img
+                          src={`${window.location.origin}/img/PinB.png`}
+                          alt="avatar"
+                          className="pinSize"
+                        /> End Location
+                      </h4>
                       {this.renderAddress(job.endAddress)}
                     </React.Fragment>
                   )}
