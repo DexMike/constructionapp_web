@@ -10,7 +10,7 @@ import JobService from '../../api/JobService';
 // import JobCreateFormanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
-import TMap from '../common/JobMap';
+import TMap from '../common/TMapOriginDestination';
 // import './Job.css';
 
 class JobForm extends Component {
@@ -338,17 +338,21 @@ class JobForm extends Component {
 
   render() {
     const { job } = this.props;
-    const origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    const destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    let origin = '';
+    let destination = '';
+    if (job.startAddress.address1) {
+      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    }
+
     return (
       <React.Fragment>
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
               {this.renderJobTop(job)}
-
               <Row>
-                <Col className="col-md-8 backo">
+                <Col className="col-md-7 backo">
                   <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
                   {this.renderAddress(job.startAddress)}
                   {job.endAddress && (
@@ -359,7 +363,7 @@ class JobForm extends Component {
                   )}
                   {this.renderJobBottom(job)}
                 </Col>
-                <Col className="col-md-4 backo_red">
+                <Col className="col-md-5 backo_red">
                   <TMap
                     input={
                       {
@@ -370,7 +374,6 @@ class JobForm extends Component {
                   />
                 </Col>
               </Row>
-
             </CardBody>
           </Card>
         </Col>
