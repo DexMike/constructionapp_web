@@ -33,6 +33,8 @@ class TMap extends PureComponent {
   }
 
   render() {
+    // Map test ////////////////////////////////////////////////////
+
     const { input } = this.props;
 
     const props = withProps({
@@ -69,25 +71,23 @@ class TMap extends PureComponent {
       withScriptjs,
       withGoogleMap,
       lifecycleMap
-    )(
-      function chido(props) {
-        return (
-          <GoogleMap
-            defaultZoom={7}
-            defaultCenter={
-              new google.maps.LatLng(41.8507300, -87.6512600)
-            }
-          >
-            {props.directions && <DirectionsRenderer directions={props.directions} />}
-          </GoogleMap>
-        );
-      }
-    );
+    )(props => (
+      <GoogleMap
+        defaultZoom={7}
+        defaultCenter={
+          new google.maps.LatLng(41.8507300, -87.6512600)
+        }
+      >
+        {props.directions && <DirectionsRenderer directions={props.directions} />}
+      </GoogleMap>
+    ));
 
     return (
       <MapWithADirectionsRenderer />
     );
   }
+
+  // Map test ends //////////////////////////////////////////////
 }
 
 TMap.propTypes = {
