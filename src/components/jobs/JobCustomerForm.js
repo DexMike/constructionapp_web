@@ -4,11 +4,14 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
+// import { GoogleMap, Marker } from 'react-google-maps';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
-// import CompanyService from '../../api/CompanyService';
+// import JobCreateFormanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
+import TMap from '../common/TMapOriginDestination';
+// import './Job.css';
 
 class JobForm extends Component {
   constructor(props) {
@@ -335,24 +338,66 @@ class JobForm extends Component {
 
   render() {
     const { job } = this.props;
+    let origin = '';
+    let destination = '';
+
+    if (!job.startAddress && job.endAddress) {
+      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    }
+    if (job.startAddress && !job.endAddress) {
+      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    }
+    if (job.startAddress && job.endAddress) {
+      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    }
+
+    // console.log(origin);
+    // console.log(destination);
+
     return (
       <React.Fragment>
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
               {this.renderJobTop(job)}
-              <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
-              {this.renderAddress(job.startAddress)}
-              {job.endAddress && (
-                <React.Fragment>
-                  <h4 style={{ borderBottom: '3px solid #ccc' }}>End Location</h4>
-                  {this.renderAddress(job.endAddress)}
-                </React.Fragment>
-              )}
-              {this.renderJobBottom(job)}
+              <Row>
+                <Col className="col-md-7 backo">
+                  <h4 style={{ borderBottom: '3px solid #ccc' }}>Start Location</h4>
+                  {this.renderAddress(job.startAddress)}
+                  {job.endAddress && (
+                    <React.Fragment>
+                      <h4 style={{ borderBottom: '3px solid #ccc' }}>End Location</h4>
+                      {this.renderAddress(job.endAddress)}
+                    </React.Fragment>
+                  )}
+                  {this.renderJobBottom(job)}
+                </Col>
+                <Col className="col-md-5 backo_red">
+                  <TMap
+                    input={
+                      {
+                        origin,
+                        destination
+                      }
+                    }
+                  />
+                </Col>
+              </Row>
             </CardBody>
           </Card>
         </Col>
+        {/*
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
+              {this.renderMap()}
+            </CardBody>
+          </Card>
+        </Col>
+        */}
       </React.Fragment>
     );
   }
