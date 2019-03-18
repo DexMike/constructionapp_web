@@ -389,33 +389,6 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col sm="3">
-                      {/* <TDateTimePicker
-                          input={
-                            {
-                              onChange: this.handleStartDateChange,
-                              name: 'startAvailability',
-                              value: { startDate },
-                              givenDate: new Date(startDate).getTime()
-                            }
-                          }
-                          onChange={this.handleStartDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    </Col>
-                    <Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              className: 'filter-text',
-                              onChange: this.handleEndDateChange,
-                              name: 'endAvailability',
-                              value: { endDate },
-                              givenDate: new Date(endDate).getTime()
-                            }
-                          }
-                          onChange={this.handleEndDateChange}
-                          dateFormat="MM-dd-yy"
-                      /> */}
                       <TIntervalDatePicker
                         startDate={startDate}
                         endDate={endDate}
