@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import PropTypes from 'prop-types';
 import TFormat from '../common/TFormat';
 import TTable from '../common/TTable';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import JobPage from './JobPage';
 
 class JobCarrierListPage extends Component {
   constructor(props) {
@@ -80,7 +82,9 @@ class JobCarrierListPage extends Component {
   }
 
   async fetchJobs() {
-    const jobs = await JobService.getJobs();
+    // const jobs = await JobService.getJobs();
+    const { companyId } = this.props;
+    const jobs = await JobService.getJobsByCompanyId(companyId);
 
     // AJ: commenting out because we don't want to modify the timestamps, unless we save data
     // jobs = jobs.map((job) => {
@@ -213,5 +217,13 @@ class JobCarrierListPage extends Component {
     );
   }
 }
+
+JobPage.propTypes = {
+  companyId: PropTypes.number.isRequired
+};
+
+JobPage.defaultProps = {
+  companyId: null
+};
 
 export default JobCarrierListPage;
