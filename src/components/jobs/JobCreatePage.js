@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container } from 'reactstrap';
 
-class DashboardCustomerPage extends Component {
+class JobCreatePage extends Component {
   constructor(props) {
     super(props);
 
@@ -30,4 +30,4 @@ class DashboardCustomerPage extends Component {
   }
 }
 
-export default DashboardCustomerPage;
+export default JobCreatePage;
