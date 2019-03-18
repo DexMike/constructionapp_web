@@ -354,8 +354,8 @@ class JobForm extends Component {
       destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
     }
 
-    console.log(origin);
-    console.log(destination);
+    // console.log(origin);
+    // console.log(destination);
 
     return (
       <React.Fragment>
