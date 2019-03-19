@@ -14,7 +14,6 @@ class DriverService extends AgentService {
   }
 
   static async getDriverByCompanyId(companyId) {
-    console.log(companyId);
     const response = await this.get(`/companies/${companyId}${PATH}`);
     return (response);
   }
