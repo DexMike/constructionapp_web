@@ -29,8 +29,18 @@ class IntervalDatePickerField extends PureComponent {
     const { onChange } = this.props;
 
     const { startDate, endDate } = this.state;
-    changedStartDate = changedStartDate || startDate;
-    changedEndDate = changedEndDate || endDate;
+
+    if (changedStartDate === null) { // if input is set to empty
+      changedStartDate = null;
+    } else {
+      changedStartDate = changedStartDate || startDate;
+    }
+
+    if (changedEndDate === null) { // if input is set to empty
+      changedEndDate = null;
+    } else {
+      changedEndDate = changedEndDate || endDate;
+    }
 
     if (moment(changedStartDate).isAfter(moment(changedEndDate))) {
       changedEndDate = changedStartDate;
