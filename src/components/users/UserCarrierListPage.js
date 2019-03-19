@@ -3,8 +3,9 @@ import { Redirect } from 'react-router-dom';
 // import moment from 'moment';
 import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 import TTable from '../common/TTable';
-
+import DriverService from '../../api/DriverService';
 import UserService from '../../api/UserService';
+import ProfileService from '../../api/ProfileService';
 // import JobService from '../../api/JobService';
 // import ProfileService from '../../api/ProfileService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
@@ -30,7 +31,9 @@ class UserCarrierListPage extends Component {
   }
 
   async fetchUsers() {
-    let users = await UserService.getUsers();
+    // let users = await DriverService.getUsers();
+    const profile = await ProfileService.getProfile();
+    let users = await DriverService.getDriverByCompanyId(profile.companyId);
     users = users.map((user) => {
       const newUser = user;
       // newUser.modifiedOn = moment(user.modifiedOn).format();
@@ -81,7 +84,7 @@ class UserCarrierListPage extends Component {
         &nbsp;&#62; Users
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Carrier Users</h3>
+            <h3 className="page-title">Carrier Drivers</h3>
           </Col>
         </Row>
         <Row>
@@ -93,15 +96,17 @@ class UserCarrierListPage extends Component {
                   className="btn btn-primary account__btn account__btn--small"
                   onClick={() => this.handlePageClick('AddUser')}
                 >
-                  Add User
+                  Add User 96
                 </Button>
                 <hr/>
                 <TTable
                   columns={[
+                    /*
                     {
                       name: 'id',
                       displayName: 'ID'
                     },
+                    */
                     {
                       name: 'email',
                       displayName: 'Email'

@@ -76,7 +76,7 @@ class UserListPage extends Component {
           className="app-link"
           onClick={() => this.handlePageClick('Dashboard')}
         >
-          Dashboard
+          Dashboard 79
         </button>
         &nbsp;&#62; Users
         <Row>
