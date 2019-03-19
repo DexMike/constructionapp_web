@@ -60,7 +60,7 @@ class JobCreateForm extends Component {
     // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid } = this.state;
-    const { selectedEquipment } = this.props;
+    const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
