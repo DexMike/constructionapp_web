@@ -96,7 +96,7 @@ class UserCarrierListPage extends Component {
                   className="btn btn-primary account__btn account__btn--small"
                   onClick={() => this.handlePageClick('AddUser')}
                 >
-                  Add User 96
+                  Add User
                 </Button>
                 <hr/>
                 <TTable
