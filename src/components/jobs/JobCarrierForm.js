@@ -13,6 +13,8 @@ import JobService from '../../api/JobService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
+import pinAImage from '../../img/PinA.png';
+import pinBImage from '../../img/PinB.png';
 
 class JobCarrierForm extends Component {
   constructor(props) {
@@ -363,7 +365,7 @@ class JobCarrierForm extends Component {
                 <Col className="col-md-7 backo">
                   <h4 style={{ borderBottom: '3px solid #ccc' }}>
                     <img
-                      src={`${window.location.origin}/img/PinA.png`}
+                      src={`${window.location.origin}/${pinAImage}`}
                       alt="avatar"
                       className="pinSize"
                     /> Start Location
@@ -373,7 +375,7 @@ class JobCarrierForm extends Component {
                     <React.Fragment>
                       <h4 style={{ borderBottom: '3px solid #ccc' }}>
                         <img
-                          src={`${window.location.origin}/img/PinB.png`}
+                          src={`${window.location.origin}/${pinBImage}`}
                           alt="avatar"
                           className="pinSize"
                         /> End Location
