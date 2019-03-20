@@ -25,21 +25,7 @@ class SidebarCustomerContent extends Component {
           <SidebarLink
             title="Dashboard"
             icon="home"
-            route="/Dashboard"
-            onClick={this.hideSidebar}
-          />
-        </ul>
-
-        <ul className="sidebar__block">
-          <SidebarLink
-            title="Jobs"
-            icon="business_center"
             route="/Jobs"
-            onClick={this.hideSidebar}
-          />
-          <SidebarLink
-            title="Create Job"
-            route="/JobCreate"
             onClick={this.hideSidebar}
           />
         </ul>
@@ -49,6 +35,15 @@ class SidebarCustomerContent extends Component {
             title="Search for Trucks"
             customIcon="dump_truck"
             route="/TrucksList"
+            onClick={this.hideSidebar}
+          />
+        </ul>
+
+        <ul className="sidebar__block">
+          <SidebarLink
+            title="Reports"
+            icon="assignment"
+            route="/Reports"
             onClick={this.hideSidebar}
           />
         </ul>

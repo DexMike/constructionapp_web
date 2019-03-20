@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
@@ -159,7 +159,14 @@ class JobCustomerListPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                Job Customer List Page
+                <Button
+                  style={{ width: '150px' }}
+                  className="btn btn-primary account__btn account__btn--small"
+                  onClick={() => this.handlePageClick('AddJob')}
+                >
+                  Create Job
+                </Button>
+                <hr/>
                 <TTable
                   columns={
                     [

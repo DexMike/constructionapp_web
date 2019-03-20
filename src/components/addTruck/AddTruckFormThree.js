@@ -40,7 +40,7 @@ class AddTruckFormThree extends PureComponent {
 
   componentDidMount() {
     // check fo cached info
-    const { getUserFullInfo, passedTruckFullInfoId } = this.props;
+    const { getUserFullInfo, passedTruckFullInfoId, editDriverId } = this.props;
     const preloaded = getUserFullInfo();
     // console.log('>>USER PRELOADED INFO:');
     // console.log(preloaded);
@@ -58,6 +58,10 @@ class AddTruckFormThree extends PureComponent {
     // console.log(passedTruckFullInfoId);
     if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
+    }
+    // check for existing driver (we're coming from Driver's List)
+    if (editDriverId) {
+      this.getAndSetExistingUser(editDriverId);
     }
   }
 
@@ -339,12 +343,14 @@ AddTruckFormThree.propTypes = {
   onUserFullInfo: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   passedTruckFullInfoId: PropTypes.number,
+  editDriverId: PropTypes.number,
   onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {
   equipmentId: null,
-  passedTruckFullInfoId: null
+  passedTruckFullInfoId: null,
+  editDriverId: 0
 };
 
 export default AddTruckFormThree;

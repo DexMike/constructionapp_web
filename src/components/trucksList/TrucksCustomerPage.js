@@ -328,7 +328,7 @@ class DashboardCustomerPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Dashboard
+        &#62;Find a Truck
       </div>
     );
   }
@@ -337,7 +337,7 @@ class DashboardCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Dashboard</h3>
+          <h3 className="page-title">Find a Truck</h3>
         </Col>
       </Row>
     );
@@ -362,8 +362,6 @@ class DashboardCustomerPage extends Component {
         <Col md={12}>
           <Card>
             <CardBody>
-              <h3 id="filter-title">Filters</h3>
-
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
 
                 <Col lg={12}>
