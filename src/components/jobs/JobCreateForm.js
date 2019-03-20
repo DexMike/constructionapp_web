@@ -12,6 +12,7 @@ import BidService from '../../api/BidService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
+import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 
@@ -264,6 +265,14 @@ class JobCreateForm extends Component {
     bid.createdOn = moment()
       .unix() * 1000;
     await BidService.createBid(bid);
+    // Let's make a call to Twilio to send an SMS
+    // We need to change later get the body from the lookups table
+    // We need to get the phone number from the carrier co
+    const notification = {
+      to: '16129990787',
+      body: 'You have a new job offer, please log in to https://www.mytrelar.com'
+    };
+    const createSMS = await TwilioService.createSms(notification);
     closeModal();
   }
 
