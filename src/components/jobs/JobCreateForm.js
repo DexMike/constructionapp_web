@@ -75,7 +75,14 @@ class JobCreateForm extends Component {
     endAddress.modifiedBy = profile.userId;
     endAddress.createdBy = profile.userId;
     bid.hasCustomerAccepted = 1;
-    bid.userId = profile.userId;
+
+    // bid.userId should be the userid of the driver likned to that equipment
+    if (selectedEquipment.defaultDriverId != null) {
+      bid.userId = profile.selectedEquipment.defaultDriverId;
+    } else {
+      bid.userId = profile.userId;
+    }
+
     bid.createdBy = profile.userId;
     bid.modifiedBy = profile.userId;
     await this.fetchForeignValues();
