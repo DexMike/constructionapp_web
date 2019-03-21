@@ -83,7 +83,8 @@ class EquipmentListPage extends Component {
   }
 
   async fetchEquipments() {
-    return EquipmentService.getEquipments();
+    const { companyId } = this.state;
+    return EquipmentService.getEquipmentByCompanyId(companyId);
   }
 
   handlePageClick(menuItem) {
