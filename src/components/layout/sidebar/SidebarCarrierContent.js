@@ -32,9 +32,9 @@ class SidebarCarrierContent extends Component {
 
         <ul className="sidebar__block">
           <SidebarLink
-            title="Jobs"
-            icon="business_center"
-            route="/jobs"
+            title="Marketplace"
+            icon="store"
+            route="/marketplace"
             onClick={this.hideSidebar}
           />
         </ul>
@@ -48,11 +48,38 @@ class SidebarCarrierContent extends Component {
           />
         </ul>
 
+        {/* <ul className="sidebar__block">
+          <SidebarLink
+            title="Jobs"
+            icon="business_center"
+            route="/jobs"
+            onClick={this.hideSidebar}
+          />
+        </ul> */}
+
         <ul className="sidebar__block">
           <SidebarLink
             title="Drivers"
             icon="people"
-            route="/users"
+            route="/drivers"
+            onClick={this.hideSidebar}
+          />
+        </ul>
+
+        <ul className="sidebar__block">
+          <SidebarLink
+            title="Reports"
+            icon="assignment"
+            route="/Reports"
+            onClick={this.hideSidebar}
+          />
+        </ul>
+
+        <ul className="sidebar__block">
+          <SidebarLink
+            title="Settings"
+            icon="settings"
+            route="/Settings"
             onClick={this.hideSidebar}
           />
         </ul>

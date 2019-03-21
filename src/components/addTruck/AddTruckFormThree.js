@@ -8,6 +8,8 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes from 'prop-types';
+import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
@@ -25,9 +27,10 @@ class AddTruckFormThree extends PureComponent {
       mobilePhone: '',
       email: '',
       equipmentId,
+      companyId: 0,
       parentId: 4, // THIS IS A FK
       isBanned: 0,
-      preferredLanguage: 'eng',
+      preferredLanguage: 'English',
       userStatus: 'New',
       reqHandlerFName: { touched: false, error: '' },
       reqHandlerLName: { touched: false, error: '' },
@@ -35,12 +38,13 @@ class AddTruckFormThree extends PureComponent {
       reqHandlerPhone: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.onSubmitDriver = this.onSubmitDriver.bind(this);
     this.getAndSetExistingUser = this.getAndSetExistingUser.bind(this);
   }
 
   componentDidMount() {
     // check fo cached info
-    const { getUserFullInfo, passedTruckFullInfoId } = this.props;
+    const { getUserFullInfo, passedTruckFullInfoId, editDriverId } = this.props;
     const preloaded = getUserFullInfo();
     // console.log('>>USER PRELOADED INFO:');
     // console.log(preloaded);
@@ -59,6 +63,26 @@ class AddTruckFormThree extends PureComponent {
     if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
     }
+    // check for existing driver (we're coming from Driver's List)
+    if (editDriverId) {
+      this.getAndSetExistingUser(editDriverId);
+    }
+  }
+
+  async onSubmitDriver() {
+    // const user = this.state;
+    const { onClose } = this.props;
+    const user = CloneDeep(this.state);
+    delete user.equipmentId;
+    delete user.parentId;
+    delete user.reqHandlerEmail;
+    delete user.reqHandlerFName;
+    delete user.reqHandlerLName;
+    delete user.reqHandlerPhone;
+    user.modifiedOn = moment()
+      .unix() * 1000;
+    await UserService.updateUser(user);
+    onClose();
   }
 
   async getAndSetExistingUser(id) {
@@ -70,7 +94,11 @@ class AddTruckFormThree extends PureComponent {
       firstName: user.firstName,
       lastName: user.lastName,
       mobilePhone: user.mobilePhone,
-      email: user.email
+      email: user.email,
+      companyId: user.companyId,
+      isBanned: user.isBanned,
+      preferredLanguage: user.preferredLanguage,
+      userStatus: user.userStatus
     },
     function setUserInfo() { // wait until it loads
       this.saveUserInfo(false);
@@ -203,7 +231,7 @@ class AddTruckFormThree extends PureComponent {
   }
 
   render() {
-    const { previousPage, onClose } = this.props;
+    const { previousPage, onClose, editDriverId } = this.props;
     const {
       id,
       firstName,
@@ -220,6 +248,15 @@ class AddTruckFormThree extends PureComponent {
       reqHandlerEmail/* ,
       // reqHandlerPhone */
     } = this.state;
+    const buttons = [];
+
+    if (editDriverId) { // We are in Drivers List
+      buttons.push(<Button key="1" color="primary" onClick={this.onSubmitDriver}>Update Driver</Button>);
+    } else {
+      buttons.push(<Button key="1" color="secondary" type="button" onClick={previousPage} className="previous">Back</Button>);
+      buttons.push(<Button key="2" color="primary" type="submit" className="next">Next</Button>);
+    }
+
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -320,8 +357,7 @@ class AddTruckFormThree extends PureComponent {
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="secondary" type="button" onClick={previousPage} className="previous">Back</Button>
-                  <Button color="primary" type="submit" className="next">Next</Button>
+                  {buttons}
                 </ButtonToolbar>
               </Row>
 
@@ -339,12 +375,14 @@ AddTruckFormThree.propTypes = {
   onUserFullInfo: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   passedTruckFullInfoId: PropTypes.number,
+  editDriverId: PropTypes.number,
   onClose: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {
   equipmentId: null,
-  passedTruckFullInfoId: null
+  passedTruckFullInfoId: null,
+  editDriverId: 0
 };
 
 export default AddTruckFormThree;

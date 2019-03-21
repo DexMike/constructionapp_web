@@ -131,11 +131,17 @@ class AddTruckForm extends PureComponent {
   }
 
   firstPage() {
-    this.setState({ page: 1 });
+    const { editDriverId } = this.props;
+    if (!editDriverId) { // we're coming from Drivers List, disable tabs other than 3
+      this.setState({ page: 1 });
+    }
   }
 
   secondPage() {
-    this.setState({ page: 2 });
+    const { editDriverId } = this.props;
+    if (!editDriverId) {
+      this.setState({ page: 2 });
+    }
   }
 
   thirdPage() {
@@ -143,7 +149,10 @@ class AddTruckForm extends PureComponent {
   }
 
   fourthPage() {
-    this.setState({ page: 4 });
+    const { editDriverId } = this.props;
+    if (!editDriverId) {
+      this.setState({ page: 4 });
+    }
   }
 
   closeNow() {
@@ -152,7 +161,7 @@ class AddTruckForm extends PureComponent {
   }
 
   render() {
-    const { equipmentId, companyId } = this.props;
+    const { equipmentId, companyId, editDriverId } = this.props;
     const {
       page,
       loaded,
@@ -253,6 +262,7 @@ class AddTruckForm extends PureComponent {
                           getUserFullInfo={this.getUserInfo}
                           // this is to track if we are editing
                           passedTruckFullInfoId={truckPassedInfo.driversId}
+                          editDriverId={editDriverId}
                         />
                       )}
                     {page === 4
@@ -294,15 +304,16 @@ AddTruckForm.propTypes = {
   toggle: PropTypes.func.isRequired,
   passedInfo: PropTypes.shape({
     info: PropTypes.object
-  })
+  }),
+  editDriverId: PropTypes.number
 };
 
 AddTruckForm.defaultProps = {
   equipmentId: 0,
   companyId: 0,
   incomingPage: 0,
-  passedInfo: null
-  // id: null
+  passedInfo: null,
+  editDriverId: null
 };
 
 export default AddTruckForm;
