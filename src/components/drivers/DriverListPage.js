@@ -90,9 +90,10 @@ class DriverListPage extends Component {
     }
   }
 
-  toggleAddTruckModal() {
+  async toggleAddTruckModal() {
     const { modal } = this.state;
     this.setState({ modal: !modal });
+    await this.fetchDrivers();
   }
 
   async toggleAddTruckModalClear(id) {

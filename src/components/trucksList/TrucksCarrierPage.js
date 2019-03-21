@@ -11,7 +11,7 @@ import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
 
-class DashboardCarrierPage extends Component {
+class TrucksCarrierPage extends Component {
   constructor(props) {
     super(props);
 
@@ -386,4 +386,4 @@ class DashboardCarrierPage extends Component {
   }
 }
 
-export default DashboardCarrierPage;
+export default TrucksCarrierPage;
