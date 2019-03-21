@@ -24,7 +24,7 @@ class UserService extends AgentService {
   }
 
   static async getDriversWithUserInfo() {
-    const response = await this.get('/driversInfo');
+    const response = await this.get('/driversinfo');
     return (response);
   }
 
