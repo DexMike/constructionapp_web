@@ -243,7 +243,7 @@ class AddTruckFormTwo extends PureComponent {
                         givenDate: currentDate
                       }
                     }
-                    onChange={this.handleInputChange}
+                    onChange={this.startDateChange}
                     meta={reqHandlerStartDate}
                   />
                   <input type="hidden" value={p} />
@@ -259,7 +259,7 @@ class AddTruckFormTwo extends PureComponent {
                         givenDate: tomorrowDate
                       }
                     }
-                    onChange={this.handleInputChange}
+                    onChange={this.endDateChange}
                     meta={reqHandlerEndDate}
                   />
                 </div>

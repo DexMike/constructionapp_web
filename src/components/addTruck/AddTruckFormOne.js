@@ -33,7 +33,7 @@ class AddTruckFormOne extends PureComponent {
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
-      maxCapacity: 0,
+      maxCapacity: '',
       // maxCapacityTouched: false,
       description: '',
       vin: '',
@@ -41,10 +41,10 @@ class AddTruckFormOne extends PureComponent {
       ratesByBoth: false, // this only tracks the select
       ratesByHour: false,
       ratesByTon: false,
-      ratesCostPerTon: 0,
-      ratesCostPerHour: 0,
-      minOperatingTime: 0,
-      maxDistanceToPickup: 0,
+      ratesCostPerTon: '',
+      ratesCostPerHour: '',
+      minOperatingTime: '',
+      maxDistanceToPickup: '',
       truckType: '',
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
@@ -95,6 +95,9 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate: {
         touched: false
       },
+      reqHandlerMinTime: {
+        touched: false
+      },
       reqHandlerCostTon: {
         touched: false
       }
@@ -120,7 +123,7 @@ class AddTruckFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (truck.ratesCostPerHour === 0
+    if (!truck.ratesCostPerHour
       && (ratesByHour === 'on' || ratesByBoth === 1)) { // 'By Hour' check
       this.setState({
         reqHandlerMinRate: {
@@ -131,7 +134,8 @@ class AddTruckFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (truck.minOperatingTime === 0) {
+    if (!truck.minOperatingTime
+      && (ratesByHour === 'on' || ratesByBoth === 1)) { // 'By Hour' check
       this.setState({
         reqHandlerMinTime: {
           touched: true,
@@ -141,7 +145,7 @@ class AddTruckFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (truck.ratesCostPerTon === 0
+    if (!truck.ratesCostPerTon
       && (ratesByTon === 'on' || ratesByBoth === 1)) { // 'By Ton' check
       this.setState({
         reqHandlerCostTon: {
@@ -605,7 +609,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-2 form__form-group moveleft">
-                  Hours
+                  / Hours
                 </div>
               </Row>
 

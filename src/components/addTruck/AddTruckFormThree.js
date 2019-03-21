@@ -132,53 +132,44 @@ class AddTruckFormThree extends PureComponent {
 
   isFormValid() {
     const truck = this.state;
-    const {
-      reqHandlerFName,
-      reqHandlerLName,
-      reqHandlerEmail,
-      reqHandlerPhone
-    } = this.state;
     let isValid = true;
-
-    // console.log(truck.firstName);
-    // console.log(truck.firstName.length);
 
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
-        reqHandlerFName: Object.assign({}, reqHandlerFName, {
+        reqHandlerFName: {
           touched: true,
           error: 'Please enter a first name for the driver'
-        })
+        }
       });
       isValid = false;
     }
 
     if (truck.lastName === null || truck.lastName.length === 0) {
       this.setState({
-        reqHandlerLName: Object.assign({}, reqHandlerLName, {
+        reqHandlerLName: {
           touched: true,
           error: 'Please enter a last name for the driver'
-        })
+        }
       });
       isValid = false;
     }
 
     if (truck.email === null || truck.email.length === 0) {
       this.setState({
-        reqHandlerEmail: Object.assign({}, reqHandlerEmail, {
+        reqHandlerEmail: {
           touched: true,
           error: 'Please enter a email for the driver'
-        })
+        }
       });
       isValid = false;
     }
 
     if (truck.mobilePhone === null || truck.mobilePhone.length === 0) {
       this.setState({
-        reqHandlerPhone: Object.assign({}, reqHandlerPhone, {
+        reqHandlerPhone: {
           touched: true,
           error: 'Please enter an mobile phone for the driver'
-        })
+        }
       });
       isValid = false;
     }
