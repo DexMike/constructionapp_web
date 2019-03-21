@@ -131,11 +131,17 @@ class AddTruckForm extends PureComponent {
   }
 
   firstPage() {
-    this.setState({ page: 1 });
+    const { editDriverId } = this.props;
+    if (!editDriverId) { // we're coming from Drivers List, disable tabs other than 3
+      this.setState({ page: 1 });
+    }
   }
 
   secondPage() {
-    this.setState({ page: 2 });
+    const { editDriverId } = this.props;
+    if (!editDriverId) {
+      this.setState({ page: 2 });
+    }
   }
 
   thirdPage() {
@@ -143,7 +149,10 @@ class AddTruckForm extends PureComponent {
   }
 
   fourthPage() {
-    this.setState({ page: 4 });
+    const { editDriverId } = this.props;
+    if (!editDriverId) {
+      this.setState({ page: 4 });
+    }
   }
 
   closeNow() {
