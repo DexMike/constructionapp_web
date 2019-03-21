@@ -16,6 +16,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getJobsByCompanyIdAndCustomerAccepted(companyId) {
+    const response = await this.get(`/companies/${companyId}${PATH}/bids`);
+    return (response);
+  }
+
   // getJobsByCompanyIdAndStatus
   // input
   //    companyID: id of company
