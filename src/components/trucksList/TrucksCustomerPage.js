@@ -27,6 +27,7 @@ import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
+import './Truck.css';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -52,6 +53,7 @@ class DashboardCustomerPage extends Component {
       selectedEquipment: {},
 
       modal: false,
+      modalSelectMaterials: false,
       goToDashboard: false,
       startDate: null,
       endDate: null,
@@ -265,9 +267,20 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  toggleSelectMaterialsModal() {
+    const { modalSelectMaterials } = this.state;
+    this.setState({
+      modalSelectMaterials: !modalSelectMaterials
+    });
+  }
+
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
+  }
+
+  preventModal() {
+    this.setState({ modal: false });
   }
 
   renderGoTo() {
@@ -284,6 +297,34 @@ class DashboardCustomerPage extends Component {
     return false;
   }
 
+  // renderSelectMaterialModal
+  renderSelectMaterialModal() {
+    const {
+      modalSelectMaterials
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalSelectMaterials}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__header">
+          <button
+            type="button"
+            className="lnr lnr-cross modal__close-btn"
+            onClick={this.toggleSelectMaterialsModal}
+          />
+          <h4 className="bold-text modal__title white_title">
+            Select material
+          </h4>
+        </div>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+          Please select a material type for this job
+        </div>
+      </Modal>
+    );
+  }
+
   renderModal() {
     const {
       // equipments,
@@ -297,6 +338,15 @@ class DashboardCustomerPage extends Component {
       modal,
       selectedEquipment
     } = this.state;
+
+    const mats = this.returnSelectedMaterials();
+    if (mats.length < 1 && modal) {
+      this.toggleSelectMaterialsModal();
+      this.preventModal();
+      return false;
+      // alert('Please select a material type for this job');
+    }
+
     return (
       <Modal
         isOpen={modal}
@@ -756,6 +806,7 @@ class DashboardCustomerPage extends Component {
     return (
       <Container className="dashboard">
         {this.renderModal()}
+        {this.renderSelectMaterialModal()}
         {this.renderGoTo()}
         {this.renderBreadcrumb()}
         {this.renderTitle()}
