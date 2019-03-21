@@ -6,9 +6,9 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
-import CompanyService from '../../api/CompanyService';
-import JobMaterialsService from '../../api/JobMaterialsService';
-import AddressService from '../../api/AddressService';
+// import CompanyService from '../../api/CompanyService';
+// import JobMaterialsService from '../../api/JobMaterialsService';
+// import AddressService from '../../api/AddressService';
 
 class JobCustomerListPage extends Component {
   constructor(props) {
@@ -28,31 +28,7 @@ class JobCustomerListPage extends Component {
 
   async componentDidMount() {
     const jobs = await this.fetchJobs();
-
-    Promise.all(
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        // console.log(companyName);
-        // console.log(job.companyName);
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        return newJob;
-      })
-    );
     this.setState({ jobs });
-    // console.log(jobs);
   }
 
   getState() {
@@ -90,17 +66,9 @@ class JobCustomerListPage extends Component {
   }
 
   async fetchJobs() {
-    const jobs = await JobService.getJobs();
-
-    // AJ: commenting out because we don't want to modify the timestamps, unless we save data
-    // jobs = jobs.map((job) => {
-    //   const newJob = job;
-    //   newJob.modifiedOn = moment(job.modifiedOn)
-    //     .format();
-    //   newJob.createdOn = moment(job.createdOn)
-    //     .format();
-    //   return newJob;
-    // });
+    // const jobs = await JobService.getJobs();
+    const { companyId } = this.props;
+    const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     return jobs;
   }
 
@@ -149,7 +117,7 @@ class JobCustomerListPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Jobs
+        &#62;Jobs 159
         <Row>
           <Col md={12}>
             <h3 className="page-title">Jobs</h3>

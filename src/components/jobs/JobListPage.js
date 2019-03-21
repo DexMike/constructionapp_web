@@ -7,6 +7,7 @@ import { Redirect } from 'react-router-dom';
 import ProfileService from '../../api/ProfileService';
 import JobCarrierListPage from './JobCarrierListPage';
 import JobCustomerListPage from './JobCustomerListPage';
+// import CompanyService from '../../api/CompanyService';
 
 class JobListPage extends Component {
   constructor(props) {
@@ -19,7 +20,8 @@ class JobListPage extends Component {
       goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
-      companyType: null
+      companyType: null,
+      companyId: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -28,8 +30,10 @@ class JobListPage extends Component {
 
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
-    this.setState({ companyType: profile.companyType });
-    //    await this.fetchJobs();
+    this.setState({
+      companyType: profile.companyType,
+      companyId: profile.companyId
+    });
   }
 
   getState() {
@@ -51,11 +55,17 @@ class JobListPage extends Component {
   }
 
   renderJobListFromCompanyType() {
-    const { companyType } = this.state;
+    const { companyType, companyId } = this.state;
     return (
       <React.Fragment>
-        { companyType === 'Carrier' && <JobCarrierListPage/>}
-        { companyType === 'Customer' && <JobCustomerListPage/>}
+        {
+          companyType === 'Carrier'
+          && <JobCarrierListPage companyId={companyId} />
+        }
+        {
+          companyType === 'Customer'
+          && <JobCustomerListPage companyId={companyId}/>
+        }
       </React.Fragment>
     );
   }
