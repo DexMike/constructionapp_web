@@ -50,7 +50,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerMinRate: { touched: false, error: '' },
       reqHandlerMinTime: { touched: false, error: '' },
-      reqHandlerCostTon: { touched: false, error: '' }
+      reqHandlerCostTon: { touched: false, error: '' },
+      reqHandlerChecks: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -92,15 +93,12 @@ class AddTruckFormOne extends PureComponent {
     let isValid = true;
 
     this.setState({
-      reqHandlerMinRate: {
-        touched: false
-      },
-      reqHandlerMinTime: {
-        touched: false
-      },
-      reqHandlerCostTon: {
-        touched: false
-      }
+      reqHandlerTruckType: { touched: false },
+      reqHandlerMaterials: { touched: false },
+      reqHandlerMinRate: { touched: false },
+      reqHandlerMinTime: { touched: false },
+      reqHandlerCostTon: { touched: false },
+      reqHandlerChecks: { touched: false }
     });
 
     if (truck.truckType.length === 0) {
@@ -118,6 +116,19 @@ class AddTruckFormOne extends PureComponent {
         reqHandlerMaterials: {
           touched: true,
           error: 'Please select all of the types of materials you are willing to haul'
+        }
+      });
+      isValid = false;
+    }
+
+    console.log(ratesByHour);
+    console.log(ratesByBoth);
+
+    if ((!ratesByHour && !ratesByBoth && !ratesByTon)) { // Checkboxes
+      this.setState({
+        reqHandlerChecks: {
+          touched: true,
+          error: 'Please select if you want to charge by hour, by ton, or by either'
         }
       });
       isValid = false;
@@ -325,6 +336,12 @@ class AddTruckFormOne extends PureComponent {
       reqHandler = 'reqHandlerMinTime';
     } else if (e.target.name === 'ratesCostPerTon') {
       reqHandler = 'reqHandlerCostTon';
+    } else if (
+      e.target.name === 'ratesByTon'
+      || e.target.name === 'ratesByHour'
+      || e.target.name === 'ratesByBoth'
+    ) {
+      reqHandler = 'reqHandlerChecks';
     }
     // Then we set the touched prop to false, hiding the error label
     this.setState({
@@ -461,7 +478,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMaterials,
       reqHandlerMinRate,
       reqHandlerMinTime,
-      reqHandlerCostTon
+      reqHandlerCostTon,
+      reqHandlerChecks
     } = this.state;
     const { p, onClose } = this.props;
     return (
@@ -571,8 +589,12 @@ class AddTruckFormOne extends PureComponent {
                 {/* FIRST ROW */}
                 <div className="col-md-4 form__form-group">
                   <div className="form__form-group">
-                    <TCheckBox onChange={this.handleInputChange} name="ratesByBoth"
-                               value={!!ratesByBoth} label="By Both"
+                    <TCheckBox
+                      onChange={this.handleInputChange}
+                      name="ratesByBoth"
+                      value={!!ratesByBoth}
+                      label="By Both"
+                      meta={reqHandlerChecks}
                     />
                   </div>
                 </div>
@@ -584,8 +606,11 @@ class AddTruckFormOne extends PureComponent {
 
                 {/* SECOND ROW */}
                 <div className="col-md-4 form__form-group">
-                  <TCheckBox onChange={this.handleInputChange} name="ratesByHour"
-                             value={!!ratesByHour} label="By Hour"
+                  <TCheckBox
+                    onChange={this.handleInputChange}
+                    name="ratesByHour"
+                    value={!!ratesByHour}
+                    label="By Hour"
                   />
                 </div>
                 <div className="col-md-1 ">

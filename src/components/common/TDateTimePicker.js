@@ -57,7 +57,10 @@ TDateTimePickerField.propTypes = {
 TDateTimePickerField.defaultProps = {
   // givenDate: PropTypes.number,
   dateFormat: 'MMMM dd, yyyy hh:mm aaa',
-  meta: null
+  meta: {
+    touched: null,
+    error: null
+  }
 };
 
 export default TDateTimePickerField;
