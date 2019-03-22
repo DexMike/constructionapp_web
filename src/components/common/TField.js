@@ -35,7 +35,10 @@ TField.propTypes = {
 
 TField.defaultProps = {
   placeholder: '',
-  meta: null,
+  meta: {
+    value: null,
+    label: null
+  },
   type: 'text'
 };
 

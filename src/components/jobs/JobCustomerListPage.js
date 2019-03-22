@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
+import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -15,6 +16,7 @@ class JobCustomerListPage extends Component {
     super(props);
 
     this.state = {
+      loaded: false,
       jobs: [],
       goToDashboard: false,
       goToAddJob: false,
@@ -28,7 +30,7 @@ class JobCustomerListPage extends Component {
 
   async componentDidMount() {
     const jobs = await this.fetchJobs();
-    this.setState({ jobs });
+    this.setState({ jobs, loaded: true });
   }
 
   getState() {
@@ -66,7 +68,6 @@ class JobCustomerListPage extends Component {
   }
 
   async fetchJobs() {
-    // const jobs = await JobService.getJobs();
     const { companyId } = this.props;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     return jobs;
@@ -88,6 +89,7 @@ class JobCustomerListPage extends Component {
 
   render() {
     let { jobs } = this.state;
+    const { loaded } = this.state;
 
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -109,76 +111,91 @@ class JobCustomerListPage extends Component {
       return newJob;
     });
 
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderGoTo()}
+          <button type="button" className="app-link"
+                  onClick={() => this.handlePageClick('Dashboard')}
+          >
+            Dashboard
+          </button>
+          &#62;Jobs
+          <Row>
+            <Col md={12}>
+              <h3 className="page-title">Jobs</h3>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12}>
+              <Card>
+                <CardBody>
+                  <Button
+                    style={{ width: '150px' }}
+                    className="btn btn-primary account__btn account__btn--small"
+                    onClick={() => this.handlePageClick('AddJob')}
+                  >
+                    Create Job
+                  </Button>
+                  <hr/>
+                  <TTable
+                    columns={
+                      [
+                        {
+                          name: 'name',
+                          displayName: 'Job Name'
+                        },
+                        {
+                          name: 'companyName',
+                          displayName: 'Customer'
+                        },
+                        {
+                          name: 'material',
+                          displayName: 'Material'
+                        },
+                        {
+                          name: 'newSize',
+                          displayName: 'Size'
+                        },
+                        {
+                          name: 'newStartDate',
+                          displayName: 'Start Date'
+                        },
+                        {
+                          name: 'zip',
+                          displayName: 'Start Zip'
+                        }
+                        // ,
+                        // {
+                        //   name: 'rateEstimate',
+                        //   displayName: 'Est Income'
+                        // }
+                      ]
+                    }
+                    data={jobs}
+                    handleIdClick={this.handleJobEdit}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      );
+    }
     return (
       <Container className="dashboard">
-        {this.renderGoTo()}
-        <button type="button" className="app-link"
-                onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &#62;Jobs 159
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Jobs</h3>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={12}>
-            <Card>
-              <CardBody>
-                <Button
-                  style={{ width: '150px' }}
-                  className="btn btn-primary account__btn account__btn--small"
-                  onClick={() => this.handlePageClick('AddJob')}
-                >
-                  Create Job
-                </Button>
-                <hr/>
-                <TTable
-                  columns={
-                    [
-                      {
-                        name: 'name',
-                        displayName: 'Job Name'
-                      },
-                      {
-                        name: 'companyName',
-                        displayName: 'Customer'
-                      },
-                      {
-                        name: 'material',
-                        displayName: 'Material'
-                      },
-                      {
-                        name: 'newSize',
-                        displayName: 'Size'
-                      },
-                      {
-                        name: 'newStartDate',
-                        displayName: 'Start Date'
-                      },
-                      {
-                        name: 'zip',
-                        displayName: 'Start Zip'
-                      }
-                      // ,
-                      // {
-                      //   name: 'rateEstimate',
-                      //   displayName: 'Est Income'
-                      // }
-                    ]
-                  }
-                  data={jobs}
-                  handleIdClick={this.handleJobEdit}
-                />
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+        Loading...
       </Container>
     );
   }
 }
+
+JobCustomerListPage.propTypes = {
+  companyId: PropTypes.number.isRequired
+};
+
+JobCustomerListPage.defaultProps = {
+  // companyId: null
+};
 
 export default JobCustomerListPage;
