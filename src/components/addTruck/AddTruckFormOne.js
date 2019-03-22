@@ -722,12 +722,6 @@ class AddTruckFormOne extends PureComponent {
                   <span className="form__form-group-label">
                     Maximum Capacity (Tons)
                   </span>
-                  {/* <input
-                    name="maxCapacity"
-                    type="number"
-                    value={maxCapacity}
-                    onChange={this.handleInputChange}
-                  /> */}
                   <TField
                     input={
                       {
