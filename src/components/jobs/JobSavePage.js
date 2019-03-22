@@ -99,9 +99,6 @@ class JobSavePage extends Component {
 
   render() {
     const { job, companyType, loaded } = this.state;
-    console.log(companyType);
-    console.log(job);
-    console.log(loaded);
     if (loaded) {
       // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
