@@ -117,7 +117,7 @@ class JobCustomerListPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Jobs 159
+        &#62;Jobs
         <Row>
           <Col md={12}>
             <h3 className="page-title">Jobs</h3>

@@ -19,6 +19,7 @@ class JobSavePage extends Component {
     super(props);
 
     this.state = {
+      loaded: false,
       goToDashboard: false,
       goToJob: false,
       job: {
@@ -61,7 +62,7 @@ class JobSavePage extends Component {
       job.startAddress = startAddress;
       job.endAddress = endAddress;
       job.materials = materials.map(material => material.value);
-      this.setState({ job });
+      this.setState({ job, loaded: true });
     }
 
     // moved the loader to the mount function
@@ -97,46 +98,48 @@ class JobSavePage extends Component {
   }
 
   render() {
-    const { job, companyType } = this.state;
-    // waiting for jobs and type to be available
-    if (companyType !== null && job !== null) {
-      let type = '';
-      // console.log(companyType);
-      // get the <JobCarrierForm> inside parentheses so that jsx doesn't complain
-      if (companyType === 'Carrier') {
-        type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick} />);
-      } else {
-        type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick} />);
-      }
-      return (
-        <div className="container">
-          {this.renderGoTo()}
-          <button type="button" className="app-link"
-            onClick={() => this.handlePageClick('Dashboard')}
-          >
-            Dashboard
-          </button>
-          &#62;
-          <button type="button" className="app-link" onClick={() => this.handlePageClick('Job')}>
-            Jobs
-          </button>
-          &nbsp;&#62;&nbsp;
-          {job.company.legalName}
-          &nbsp;&#62;&nbsp;
-          {job.name}
+    const { job, companyType, loaded } = this.state;
+    if (loaded) {
+      // waiting for jobs and type to be available
+      if (companyType !== null && job !== null) {
+        let type = '';
+        // console.log(companyType);
+        // get the <JobCarrierForm> inside parentheses so that jsx doesn't complain
+        if (companyType === 'Carrier') {
+          type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick} />);
+        } else {
+          type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick} />);
+        }
+        return (
+          <div className="container">
+            {this.renderGoTo()}
+            <button type="button" className="app-link"
+              onClick={() => this.handlePageClick('Dashboard')}
+            >
+              Dashboard
+            </button>
+            &#62;
+            <button type="button" className="app-link" onClick={() => this.handlePageClick('Job')}>
+              Jobs
+            </button>
+            &nbsp;&#62;&nbsp;
+            {job.company.legalName}
+            &nbsp;&#62;&nbsp;
+            {job.name}
 
-          <div className="row">
-            <div className="col-md-12">
-              <h3 className="page-title">
-                Job Details
-              </h3>
+            <div className="row">
+              <div className="col-md-12">
+                <h3 className="page-title">
+                  Job Details
+                </h3>
+              </div>
             </div>
+            {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
+            {/* this.carrierOrCustomerForm(job) */}
+            {type}
           </div>
-          {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
-          {/* this.carrierOrCustomerForm(job) */}
-          {type}
-        </div>
-      );
+        );
+      }
     }
     return (
       <Container className="dashboard">

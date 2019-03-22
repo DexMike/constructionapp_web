@@ -39,15 +39,17 @@ class AddTruckForm extends PureComponent {
     const { incomingPage, passedInfo } = this.props;
     // this is to prevent mounting if we must go to page three
     if (incomingPage === 3) {
-      this.setState({ page: 3, loaded: true });
+      this.setState({ page: 3 });
     } else {
-      this.setState({ page: 1, loaded: true });
+      this.setState({ page: 1 });
     }
 
     // force load from previous page
     if (Object.keys(passedInfo).length > 0) {
       this.setState({ truckPassedInfo: passedInfo });
     }
+
+    this.setState({ loaded: true });
   }
 
   getTruckInfo() {

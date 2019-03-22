@@ -28,6 +28,7 @@ class AddTruck extends PureComponent {
 
   async componentDidMount() {
     await this.fetchCompanyTrucks();
+    this.setState({ loaded: true });
   }
 
   toggleAddTruckModal() {
@@ -46,10 +47,7 @@ class AddTruck extends PureComponent {
     );
     // console.log(materials);
     this.toggleAddTruckModal();
-    this.setState({
-      totalTrucks: materials.length,
-      loaded: true
-    });
+    this.setState({ totalTrucks: materials.length });
   }
 
   nextPage() {
