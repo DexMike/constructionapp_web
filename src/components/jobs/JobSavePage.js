@@ -62,12 +62,12 @@ class JobSavePage extends Component {
       job.startAddress = startAddress;
       job.endAddress = endAddress;
       job.materials = materials.map(material => material.value);
-      this.setState({ job, loaded: true });
+      this.setState({ job });
     }
 
     // moved the loader to the mount function
     const profile = await ProfileService.getProfile();
-    this.setState({ companyType: profile.companyType },
+    this.setState({ companyType: profile.companyType, loaded: true },
       () => {
         // console.log('setState completed', this.state);
       });
@@ -99,6 +99,9 @@ class JobSavePage extends Component {
 
   render() {
     const { job, companyType, loaded } = this.state;
+    console.log(companyType);
+    console.log(job);
+    console.log(loaded);
     if (loaded) {
       // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
