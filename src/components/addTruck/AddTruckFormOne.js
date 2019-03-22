@@ -121,9 +121,6 @@ class AddTruckFormOne extends PureComponent {
       isValid = false;
     }
 
-    console.log(ratesByHour);
-    console.log(ratesByBoth);
-
     if ((!ratesByHour && !ratesByBoth && !ratesByTon)) { // Checkboxes
       this.setState({
         reqHandlerChecks: {
@@ -392,8 +389,6 @@ class AddTruckFormOne extends PureComponent {
         value: String(material.id),
         label: material.value
       }));
-
-      // console.log(truckMaterials);
 
       this.setState({
         id: passedTruckFullInfo.id,
