@@ -12,45 +12,48 @@ class TCheckBox extends Component {
 
   render() {
     const {
-      disabled, className, name, value, onChange, label, color
+      disabled, className, name, value, onChange, label, color, meta: { touched, error }
     } = this.props;
     const CheckboxClass = classNames({
       'checkbox-btn': true,
       disabled
     });
     return (
-      <label htmlFor={name}
-             className={`${CheckboxClass} ${className ? ` checkbox-btn--${className}` : ''}`}
-      >
-        <input
-          className="checkbox-btn__checkbox"
-          type="checkbox"
-          id={name}
-          name={name}
-          onChange={onChange}
-          checked={value}
-          disabled={disabled}
-        />
-        <span
-          className="checkbox-btn__checkbox-custom"
-          style={color ? {
-            background: color,
-            borderColor: color
-          } : {}}
+      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+        <label htmlFor={name}
+          className={`${CheckboxClass} ${className ? ` checkbox-btn--${className}` : ''}`}
         >
-          <CheckIcon/>
-        </span>
-        {className === 'button'
-          ? (
-            <span className="checkbox-btn__label-svg">
-              <CheckIcon className="checkbox-btn__label-check"/>
-              <CloseIcon className="checkbox-btn__label-uncheck"/>
-            </span>
-          ) : ''}
-        <span className="checkbox-btn__label">
-          {label}
-        </span>
-      </label>
+          <input
+            className="checkbox-btn__checkbox"
+            type="checkbox"
+            id={name}
+            name={name}
+            onChange={onChange}
+            checked={value}
+            disabled={disabled}
+          />
+          <span
+            className="checkbox-btn__checkbox-custom"
+            style={color ? {
+              background: color,
+              borderColor: color
+            } : {}}
+          >
+            <CheckIcon/>
+          </span>
+          {className === 'button'
+            ? (
+              <span className="checkbox-btn__label-svg">
+                <CheckIcon className="checkbox-btn__label-check"/>
+                <CloseIcon className="checkbox-btn__label-uncheck"/>
+              </span>
+            ) : ''}
+          <span className="checkbox-btn__label">
+            {label}
+          </span>
+        </label>
+        {touched && error && <span className="form__form-group-error">{error}</span>}
+      </div>
     );
   }
 }
@@ -66,7 +69,11 @@ TCheckBox.propTypes = {
   // defaultChecked: PropTypes.bool,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  color: PropTypes.string
+  color: PropTypes.string,
+  meta: PropTypes.shape({
+    touched: PropTypes.bool,
+    error: PropTypes.string
+  })
 };
 
 TCheckBox.defaultProps = {
@@ -74,7 +81,11 @@ TCheckBox.defaultProps = {
   // defaultChecked: false,
   disabled: false,
   className: '',
-  color: ''
+  color: '',
+  meta: {
+    value: null,
+    label: null
+  }
 };
 
 export default TCheckBox;
