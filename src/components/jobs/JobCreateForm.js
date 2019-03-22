@@ -425,8 +425,23 @@ class JobCreateForm extends Component {
   }
 
   renderSelectedEquipment() {
-    const { job, materials, availableMaterials } = this.state;
-    const { selectedEquipment } = this.props;
+    const { job, materials } = this.state;
+    let { availableMaterials } = this.state;
+    const { selectedEquipment, getAllMaterials } = this.props;
+
+    // if ANY is selected, let's show all materials
+    if (availableMaterials.length > 0) {
+      for (const mat in availableMaterials) {
+        if (availableMaterials[mat].value === 'Any') {
+          availableMaterials = getAllMaterials().map(rateType => ({
+            name: 'rateType',
+            value: rateType,
+            label: rateType
+          }));
+        }
+      }
+    }
+
     return (
       <React.Fragment>
         <h4>{selectedEquipment.name}</h4>
@@ -909,6 +924,7 @@ JobCreateForm.propTypes = {
   selectedEquipment: PropTypes.shape({
     id: PropTypes.number
   }).isRequired,
+  getAllMaterials: PropTypes.func.isRequired,
   closeModal: PropTypes.func.isRequired,
   selectedMaterials: PropTypes.func.isRequired
 };

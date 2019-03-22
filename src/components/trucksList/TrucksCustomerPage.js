@@ -6,7 +6,8 @@ import {
   Col,
   Container,
   Modal,
-  Row
+  Row,
+  Button
 } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
@@ -90,12 +91,19 @@ class DashboardCustomerPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
+    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
   }
 
   async componentDidMount() {
     // await this.fetchJobs();
     await this.fetchEquipments();
     await this.fetchFilterLists();
+  }
+
+  retrieveAllMaterials() {
+    const { materialTypeList } = this.state;
+    return materialTypeList;
   }
 
   async fetchFilterLists() {
@@ -183,7 +191,6 @@ class DashboardCustomerPage extends Component {
           .format();
         return newEquipment;
       });
-      // );
       this.setState({ equipments });
     }
   }
@@ -321,6 +328,22 @@ class DashboardCustomerPage extends Component {
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           Please select a material type for this job
         </div>
+
+        <Row className="col-md-12">
+          <div className="col-md-6">
+            &nbsp;
+          </div>
+          <div className="col-md-6">
+            <Button
+              color="primary"
+              onClick={this.toggleSelectMaterialsModal}
+              type="button"
+              className="next float-right"
+            >
+              Close
+            </Button>
+          </div>
+        </Row>
       </Modal>
     );
   }
@@ -337,6 +360,7 @@ class DashboardCustomerPage extends Component {
       // rateType,
       modal,
       selectedEquipment
+      // equipments
     } = this.state;
 
     const mats = this.returnSelectedMaterials();
@@ -364,6 +388,7 @@ class DashboardCustomerPage extends Component {
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
+            getAllMaterials={this.retrieveAllMaterials}
           />
         </div>
       </Modal>
@@ -437,33 +462,6 @@ class DashboardCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col sm="3">
-                      {/* <TDateTimePicker
-                          input={
-                            {
-                              onChange: this.handleStartDateChange,
-                              name: 'startAvailability',
-                              value: { startDate },
-                              givenDate: new Date(startDate).getTime()
-                            }
-                          }
-                          onChange={this.handleStartDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    </Col>
-                    <Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              className: 'filter-text',
-                              onChange: this.handleEndDateChange,
-                              name: 'endAvailability',
-                              value: { endDate },
-                              givenDate: new Date(endDate).getTime()
-                            }
-                          }
-                          onChange={this.handleEndDateChange}
-                          dateFormat="MM-dd-yy"
-                      /> */}
                       <TIntervalDatePicker
                         startDate={startDate}
                         endDate={endDate}
@@ -566,7 +564,7 @@ class DashboardCustomerPage extends Component {
                             label: rateType
                           }))
                         }
-                        placeholder={rateTypeList[0]}
+                        placeholder="Select materials"
                       />
                     </Col>
                   </Row>
