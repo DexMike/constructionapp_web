@@ -11,7 +11,8 @@ class TopbarSidebarButton extends Component {
     return (
       <div>
         <button type="button" className="topbar__button topbar__button--desktop" onClick={changeSidebarVisibility}>
-          <img src={`${window.location.origin}/${icon}`} alt="" className="topbar__button-icon" />
+          {/* <img src={`${window.location.origin}/${icon}`} alt="" className="topbar__button-icon" /> */}
+          <i className="material-icons iconSet">menu</i>
         </button>
         <button type="button" className="topbar__button topbar__button--mobile" onClick={changeMobileSidebarVisibility}>
           <img src={`${window.location.origin}/${icon}`} alt="" className="topbar__button-icon" />

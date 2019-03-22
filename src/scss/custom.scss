@@ -1,7 +1,9 @@
+
 // Custom color palette
 $color-dark-turquoise: rgb(59,98,115);
 $grey-top-border: rgb(172,187,198);
 $turquoise: rgb(84,142,168);
+$primary-green: rgb(0,111,83);
 
 .app-link {
   color: -webkit-link;
@@ -18,6 +20,120 @@ $turquoise: rgb(84,142,168);
     color: #ddd;
   }
 }
+
+// ---- TUI (Trelar User Interface) ---- //
+// ---- TUI Misc
+.primaryButton {
+  background: #006F53; /* green */
+  color: #FFFFFF;
+  border: 2px solid #FFFFFF;
+  border-radius: 4px;
+  font-family: Interstate-Regular;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 24px;
+  padding-right: 12px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  object-fit: contain;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.secondaryButton {
+  background: #FFFFFF;
+  color: #006F53;
+  border: 2px solid #006F53; /* green */
+  border-radius: 4px;
+  font-family: Interstate-Regular;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 24px;
+  padding-right: 12px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  object-fit: contain;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.tertiaryButton {
+  background: #FFFFFF;
+  color: #666666; /* gray3 */
+  border: 2px solid #808080;
+  border-radius: 4px;
+  font-family: Interstate-Regular;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 24px;
+  padding-right: 12px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  object-fit: contain;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.disabledButton {
+  background: #FFFFFF;
+  color: #CCCCCC; /* lightgray6 /
+  _border: 2px solid #CCCCCC; /_ lightgray6 */
+  border-radius: 4px;
+  font-family: Interstate-Regular;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 24px;
+  padding-right: 12px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  object-fit: contain;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+// ---- TUI Misc
+
+// ---- TUI Topbar
+.topbar__wrapper {
+  background-color: $primary-green;
+}
+.topbar__button {
+  i.material-icons {
+    color: white;
+  }
+  &:hover, &:focus, &:active {
+    i.material-icons {
+      color: $color-gray
+    }
+  }
+}
+.topbar__avatar {
+  .topbar__avatar-name {
+    color: white;
+  }
+  &:hover, &:focus, &:active {
+    .topbar__avatar-name {
+      color: $color-gray
+    }
+  }
+}
+// ---- TUI Topbar
+
+// ---- TUI Sidebar
+.sidebar__link, .topbar__link {
+  &:before {
+    background: $primary-green;
+  }
+}
+// ---- TUI Sidebar
+// ---- TUI (Trelar User Interface) ---- //
 
 // ---- customer dashboard page
 #filter-title {
