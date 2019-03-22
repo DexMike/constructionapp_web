@@ -85,60 +85,69 @@ class AddTruckFormOne extends PureComponent {
   isFormValid() {
     const truck = this.state;
     const {
-      reqHandlerMaterials,
-      reqHandlerTruckType,
-      reqHandlerMinRate,
-      reqHandlerMinTime,
-      reqHandlerCostTon
+      ratesByBoth,
+      ratesByTon,
+      ratesByHour
     } = this.state;
     let isValid = true;
 
+    this.setState({
+      reqHandlerMinRate: {
+        touched: false
+      },
+      reqHandlerCostTon: {
+        touched: false
+      }
+    });
+
     if (truck.truckType.length === 0) {
       this.setState({
-        reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
+        reqHandlerTruckType: {
           touched: true,
           error: 'Please select the type of truck you are adding'
-        })
+        }
       });
       isValid = false;
     }
 
     if (truck.selectedMaterials.length === 0) {
       this.setState({
-        reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
+        reqHandlerMaterials: {
           touched: true,
           error: 'Please select all of the types of materials you are willing to haul'
-        })
+        }
       });
       isValid = false;
     }
 
-    if (truck.ratesCostPerHour === 0) {
+    if (truck.ratesCostPerHour === 0
+      && (ratesByHour === 'on' || ratesByBoth === 1)) { // 'By Hour' check
       this.setState({
-        reqHandlerMinRate: Object.assign({}, reqHandlerMinRate, {
+        reqHandlerMinRate: {
           touched: true,
           error: 'Please enter the hourly rate for this truck'
-        })
+        }
       });
       isValid = false;
     }
 
     if (truck.minOperatingTime === 0) {
       this.setState({
-        reqHandlerMinTime: Object.assign({}, reqHandlerMinTime, {
+        reqHandlerMinTime: {
           touched: true,
           error: 'Please enter minimum number of hours that this truck must be rented for'
-        })
+        }
       });
       isValid = false;
     }
 
-    if (truck.ratesCostPerTon === 0) {
+    if (truck.ratesCostPerTon === 0
+      && (ratesByTon === 'on' || ratesByBoth === 1)) { // 'By Ton' check
       this.setState({
-        reqHandlerCostTon: Object.assign({}, reqHandlerCostTon, {
+        reqHandlerCostTon: {
           touched: true,
           error: 'Please enter the minimum number of tons you are willing to haul'
-        })
+        }
       });
       isValid = false;
     }

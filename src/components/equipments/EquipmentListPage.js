@@ -198,10 +198,10 @@ class EquipmentListPage extends Component {
                         <TTable
                           columns={
                             [
-                              {
+                              /* {
                                 name: 'id',
                                 displayName: 'ID'
-                              },
+                              }, */
                               {
                                 name: 'image',
                                 displayName: 'Truck Image'
