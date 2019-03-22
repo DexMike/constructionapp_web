@@ -25,6 +25,12 @@ Amplify.configure({
     userPoolId: process.env.AWS_USER_POOL_ID,
     identityPoolId: process.env.AWS_IDENTITY_POOL_ID,
     userPoolWebClientId: process.env.AWS_USER_POOL_WEB_CLIENT_ID
+  },
+  Storage: {
+    AWSS3: {
+      bucket: 'dev.uploads.mytrelar.com',
+      region: process.env.AWS_REGION
+    }
   }
 });
 
