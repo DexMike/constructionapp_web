@@ -272,7 +272,7 @@ class JobCreateForm extends Component {
       to: '16129990787',
       body: 'You have a new job offer, please log in to https://www.mytrelar.com'
     };
-    const createSMS = await TwilioService.createSms(notification);
+    await TwilioService.createSms(notification);
     closeModal();
   }
 

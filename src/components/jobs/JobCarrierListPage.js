@@ -8,7 +8,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
-import JobPage from './JobPage';
+// import JobPage from './JobPage';
 
 class JobCarrierListPage extends Component {
   constructor(props) {
@@ -24,6 +24,7 @@ class JobCarrierListPage extends Component {
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.fetchJobs = this.fetchJobs.bind(this);
   }
 
   async componentDidMount() {
@@ -218,12 +219,12 @@ class JobCarrierListPage extends Component {
   }
 }
 
-JobPage.propTypes = {
+JobCarrierListPage.propTypes = {
   companyId: PropTypes.number.isRequired
 };
 
-JobPage.defaultProps = {
-  companyId: null
+JobCarrierListPage.defaultProps = {
+  // companyId: null
 };
 
 export default JobCarrierListPage;

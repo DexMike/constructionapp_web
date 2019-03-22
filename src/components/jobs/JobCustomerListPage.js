@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
+import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -66,7 +67,6 @@ class JobCustomerListPage extends Component {
   }
 
   async fetchJobs() {
-    // const jobs = await JobService.getJobs();
     const { companyId } = this.props;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     return jobs;
@@ -180,5 +180,13 @@ class JobCustomerListPage extends Component {
     );
   }
 }
+
+JobCustomerListPage.propTypes = {
+  companyId: PropTypes.number.isRequired
+};
+
+JobCustomerListPage.defaultProps = {
+  // companyId: null
+};
 
 export default JobCustomerListPage;
