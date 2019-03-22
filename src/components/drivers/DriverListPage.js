@@ -179,10 +179,10 @@ class DriverListPage extends Component {
                 <CardBody>
                   <TTable
                     columns={[
-                      {
+                      /* {
                         name: 'id',
                         displayName: 'ID'
-                      },
+                      }, */
                       {
                         name: 'firstName',
                         displayName: 'First Name'
