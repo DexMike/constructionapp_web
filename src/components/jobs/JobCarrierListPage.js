@@ -15,6 +15,7 @@ class JobCarrierListPage extends Component {
     super(props);
 
     this.state = {
+      loaded: false,
       jobs: [],
       goToDashboard: false,
       goToAddJob: false,
@@ -49,7 +50,7 @@ class JobCarrierListPage extends Component {
         return newJob;
       })
     );
-    this.setState({ jobs });
+    this.setState({ jobs, loaded: true });
     // console.log(jobs);
   }
 
@@ -115,6 +116,7 @@ class JobCarrierListPage extends Component {
 
   render() {
     let { jobs } = this.state;
+    const { loaded } = this.state;
 
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -139,81 +141,87 @@ class JobCarrierListPage extends Component {
       return newJob;
     });
 
-    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderGoTo()}
+          <button type="button" className="app-link"
+                  onClick={() => this.handlePageClick('Dashboard')}
+          >
+            Dashboard
+          </button>
+          &#62;Jobs
+
+
+          <Row>
+            <Col md={12}>
+              <h3 className="page-title">Jobs</h3>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12}>
+              <Card>
+                <CardBody>
+                  Job Carrier List Page
+                  <TTable
+                    columns={
+                      [
+                        // {
+                        //   name: 'id',
+                        //   displayName: 'Job Id'
+                        // },
+                        {
+                          name: 'name',
+                          displayName: 'Job Name'
+                        },
+                        {
+                          name: 'status',
+                          displayName: 'Job Status'
+                        },
+                        {
+                          name: 'companyName',
+                          displayName: 'Customer'
+                        },
+                        {
+                          name: 'newStartDate',
+                          displayName: 'Start Date'
+                        },
+                        {
+                          name: 'zip',
+                          displayName: 'Start Zip'
+                        },
+                        {
+                          name: 'newSize',
+                          displayName: 'Size'
+                        },
+                        {
+                          name: 'newRate',
+                          displayName: 'Rate'
+                        },
+                        {
+                          name: 'estimatedIncome',
+                          displayName: 'Potential Earnings'
+                        },
+                        {
+                          // the materials needs to come from the the JobMaterials Table
+                          name: 'material',
+                          displayName: 'Materials'
+                        }
+                      ]
+                    }
+                    data={jobs}
+                    handleIdClick={this.handleJobEdit}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      );
+    }
     return (
       <Container className="dashboard">
-        {this.renderGoTo()}
-        <button type="button" className="app-link"
-                onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &#62;Jobs
-
-
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Jobs</h3>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={12}>
-            <Card>
-              <CardBody>
-                Job Carrier List Page
-                <TTable
-                  columns={
-                    [
-                      // {
-                      //   name: 'id',
-                      //   displayName: 'Job Id'
-                      // },
-                      {
-                        name: 'name',
-                        displayName: 'Job Name'
-                      },
-                      {
-                        name: 'status',
-                        displayName: 'Job Status'
-                      },
-                      {
-                        name: 'companyName',
-                        displayName: 'Customer'
-                      },
-                      {
-                        name: 'newStartDate',
-                        displayName: 'Start Date'
-                      },
-                      {
-                        name: 'zip',
-                        displayName: 'Start Zip'
-                      },
-                      {
-                        name: 'newSize',
-                        displayName: 'Size'
-                      },
-                      {
-                        name: 'newRate',
-                        displayName: 'Rate'
-                      },
-                      {
-                        name: 'estimatedIncome',
-                        displayName: 'Potential Earnings'
-                      },
-                      {
-                        // the materials needs to come from the the JobMaterials Table
-                        name: 'material',
-                        displayName: 'Materials'
-                      }
-                    ]
-                  }
-                  data={jobs}
-                  handleIdClick={this.handleJobEdit}
-                />
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+        Loading...
       </Container>
     );
   }

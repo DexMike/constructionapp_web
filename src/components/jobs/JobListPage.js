@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
+import { Container } from 'reactstrap';
 // import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // import moment from 'moment';
 // import TTable from '../common/TTable';
@@ -15,6 +16,7 @@ class JobListPage extends Component {
 
     // todo set companyType to Customer | Carrier to show appropriate page
     this.state = {
+      loaded: false,
       // jobs: [],
       goToDashboard: false,
       goToAddJob: false,
@@ -34,6 +36,7 @@ class JobListPage extends Component {
       companyType: profile.companyType,
       companyId: profile.companyId
     });
+    this.setState({ loaded: true });
   }
 
   getState() {
@@ -85,11 +88,18 @@ class JobListPage extends Component {
   }
 
   render() {
-    const { companyType } = this.state;
+    const { companyType, loaded } = this.state;
+    if (loaded) {
+      return (
+        <React.Fragment>
+          { !!companyType && this.renderJobListFromCompanyType()}
+        </React.Fragment>
+      );
+    }
     return (
-      <React.Fragment>
-        { !!companyType && this.renderJobListFromCompanyType()}
-      </React.Fragment>
+      <Container className="dashboard">
+        Loading...
+      </Container>
     );
   }
 }
