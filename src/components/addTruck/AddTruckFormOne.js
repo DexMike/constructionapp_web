@@ -51,7 +51,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate: { touched: false, error: '' },
       reqHandlerMinTime: { touched: false, error: '' },
       reqHandlerCostTon: { touched: false, error: '' },
-      reqHandlerChecks: { touched: false, error: '' }
+      reqHandlerChecks: { touched: false, error: '' },
+      reqHandlerMaxCapacity: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -98,7 +99,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate: { touched: false },
       reqHandlerMinTime: { touched: false },
       reqHandlerCostTon: { touched: false },
-      reqHandlerChecks: { touched: false }
+      reqHandlerChecks: { touched: false },
+      reqHandlerMaxCapacity: { touched: false }
     });
 
     if (truck.truckType.length === 0) {
@@ -116,6 +118,16 @@ class AddTruckFormOne extends PureComponent {
         reqHandlerMaterials: {
           touched: true,
           error: 'Please select all of the types of materials you are willing to haul'
+        }
+      });
+      isValid = false;
+    }
+
+    if (!truck.maxCapacity) {
+      this.setState({
+        reqHandlerMaxCapacity: {
+          touched: true,
+          error: 'Please enter the maximum number of tons you are willing to haul'
         }
       });
       isValid = false;
@@ -333,6 +345,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandler = 'reqHandlerMinTime';
     } else if (e.target.name === 'ratesCostPerTon') {
       reqHandler = 'reqHandlerCostTon';
+    } else if (e.target.name === 'maxCapacity') {
+      reqHandler = 'reqHandlerMaxCapacity';
     } else if (
       e.target.name === 'ratesByTon'
       || e.target.name === 'ratesByHour'
@@ -474,7 +488,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate,
       reqHandlerMinTime,
       reqHandlerCostTon,
-      reqHandlerChecks
+      reqHandlerChecks,
+      reqHandlerMaxCapacity
     } = this.state;
     const { p, onClose } = this.props;
     return (
@@ -707,11 +722,23 @@ class AddTruckFormOne extends PureComponent {
                   <span className="form__form-group-label">
                     Maximum Capacity (Tons)
                   </span>
-                  <input
+                  {/* <input
                     name="maxCapacity"
                     type="number"
                     value={maxCapacity}
                     onChange={this.handleInputChange}
+                  /> */}
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'maxCapacity',
+                        value: maxCapacity
+                      }
+                    }
+                    placeholder="0"
+                    type="number"
+                    meta={reqHandlerMaxCapacity}
                   />
                 </div>
                 <div className="col-md-6 form__form-group">
