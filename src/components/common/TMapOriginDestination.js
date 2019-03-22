@@ -69,14 +69,14 @@ class TMap extends PureComponent {
       withScriptjs,
       withGoogleMap,
       lifecycleMap
-    )(props => (
+    )(propsB => (
       <GoogleMap
         defaultZoom={7}
         defaultCenter={
           new window.google.maps.LatLng(41.8507300, -87.6512600)
         }
       >
-        {props.directions && <DirectionsRenderer directions={props.directions} />}
+        {propsB.directions && <DirectionsRenderer directions={propsB.directions} />}
       </GoogleMap>
     ));
 
