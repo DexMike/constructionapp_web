@@ -27,8 +27,8 @@ class TableRoutes extends Component {
 
         <Route
           exact
-          path="/jobs"
-          component={JobListPage}
+          path="/dashboard"
+          component={DashboardPage}
         />
         <Route
           exact

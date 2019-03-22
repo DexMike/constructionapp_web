@@ -8,6 +8,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import ProfileService from '../../api/ProfileService';
 // import JobPage from './JobPage';
 
 class JobCarrierListPage extends Component {
@@ -85,7 +86,8 @@ class JobCarrierListPage extends Component {
 
   async fetchJobs() {
     // const jobs = await JobService.getJobs();
-    const { companyId } = this.props;
+    const profile = await ProfileService.getProfile();
+    const companyId = profile.companyId;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
 
     // AJ: commenting out because we don't want to modify the timestamps, unless we save data
