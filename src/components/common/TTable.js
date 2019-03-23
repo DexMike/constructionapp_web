@@ -146,7 +146,7 @@ class TTable extends Component {
                   {/* Setting the image to default truck image for now */}
                   {/* Eventually need to pull real image of truck */}
                   {shallowItem[key] && shallowItem[key].trim().length <= 0 && <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt="" style={{ width: '100px' }}/> }
-                  {shallowItem[key] && shallowItem[key].trim().length > 0 && <img width="100" height="85" src={shallowItem[key]} alt="" style={{width: '100px'}}/> }
+                  {shallowItem[key] && shallowItem[key].trim().length > 0 && <img width="100" height="85" src={shallowItem[key]} alt="" style={{ width: '100px' }}/> }
                   {!shallowItem[key] && <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt="" style={{ width: '100px' }}/> }
                 </TableCell>
               );
