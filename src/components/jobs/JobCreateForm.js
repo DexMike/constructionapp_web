@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
+import { Container } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
@@ -24,6 +25,7 @@ class JobCreateForm extends Component {
     delete job.endTime;
     // job.
     this.state = {
+      loaded: false,
       job,
       states: [],
       startAddress: AddressService.getDefaultAddress(),
@@ -75,7 +77,14 @@ class JobCreateForm extends Component {
     endAddress.modifiedBy = profile.userId;
     endAddress.createdBy = profile.userId;
     bid.hasCustomerAccepted = 1;
-    bid.userId = profile.userId;
+
+    // bid.userId should be the userid of the driver likned to that equipment
+    if (!selectedEquipment.defaultDriverId) {
+      bid.userId = profile.selectedEquipment.defaultDriverId;
+    } else {
+      bid.userId = profile.userId;
+    }
+
     bid.createdBy = profile.userId;
     bid.modifiedBy = profile.userId;
     await this.fetchForeignValues();
@@ -86,6 +95,7 @@ class JobCreateForm extends Component {
       bid,
       availableMaterials: selectedMaterials()
     });
+    this.setState({ loaded: true });
   }
 
   async fetchForeignValues() {
@@ -891,16 +901,23 @@ class JobCreateForm extends Component {
   }
 
   render() {
-    const { job } = this.state;
+    const { job, loaded } = this.state;
+    if (loaded) {
+      return (
+        <form id="job-request" onSubmit={e => this.createJob(e)}>
+          {this.renderSelectedEquipment()}
+          {this.renderJobTop()}
+          {this.renderJobStartLocation()}
+          {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
+          {this.renderJobBottom()}
+          {this.renderJobFormButtons()}
+        </form>
+      );
+    }
     return (
-      <form id="job-request" onSubmit={e => this.createJob(e)}>
-        {this.renderSelectedEquipment()}
-        {this.renderJobTop()}
-        {this.renderJobStartLocation()}
-        {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
-        {this.renderJobBottom()}
-        {this.renderJobFormButtons()}
-      </form>
+      <Container className="dashboard">
+        Loading...
+      </Container>
     );
   }
 }

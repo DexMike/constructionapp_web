@@ -22,6 +22,7 @@ class DriverListPage extends Component {
     super(props);
 
     this.state = {
+      loaded: false,
       drivers: [],
       activeTab: '3',
       goToDashboard: false,
@@ -44,6 +45,7 @@ class DriverListPage extends Component {
 
   async componentDidMount() {
     await this.fetchDrivers();
+    this.setState({ loaded: true });
   }
 
   async fetchDrivers() {
@@ -65,7 +67,7 @@ class DriverListPage extends Component {
         return newDriver;
       }
     });
-    this.setState({ drivers: driversWithInfo, loaded: true });
+    this.setState({ drivers: driversWithInfo });
   }
 
   handlePageClick(menuItem) {
@@ -179,10 +181,10 @@ class DriverListPage extends Component {
                 <CardBody>
                   <TTable
                     columns={[
-                      {
+                      /* {
                         name: 'id',
                         displayName: 'ID'
-                      },
+                      }, */
                       {
                         name: 'firstName',
                         displayName: 'First Name'

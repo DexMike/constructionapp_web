@@ -22,6 +22,7 @@ class EquipmentListPage extends Component {
     super(props);
 
     this.state = {
+      loaded: false,
       activeTab: '1',
       equipments: [],
       // goToDashboard: false,
@@ -44,6 +45,7 @@ class EquipmentListPage extends Component {
     const profile = await ProfileService.getProfile();
     this.setState({ companyId: profile.companyId });
     this.loadEquipments();
+    this.setState({ loaded: true });
   }
 
   async loadEquipments() {
@@ -51,7 +53,6 @@ class EquipmentListPage extends Component {
     // load only if the modal is not present
     if (!modal) {
       await this.fetchEquipments();
-      this.setState({ loaded: true });
       const equipments = await this.fetchEquipments();
       this.setState({ equipments });
     }
@@ -198,10 +199,10 @@ class EquipmentListPage extends Component {
                         <TTable
                           columns={
                             [
-                              {
+                              /* {
                                 name: 'id',
                                 displayName: 'ID'
-                              },
+                              }, */
                               {
                                 name: 'image',
                                 displayName: 'Truck Image'

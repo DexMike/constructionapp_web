@@ -40,10 +40,10 @@ TSelectField.propTypes = {
 };
 
 TSelectField.defaultProps = {
-  meta: PropTypes.shape({
-    value: false,
-    label: ''
-  }),
+  meta: {
+    value: null,
+    label: null
+  },
   placeholder: '',
   options: []
 };

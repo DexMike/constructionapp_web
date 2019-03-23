@@ -28,7 +28,7 @@ import ProfileService from '../../api/ProfileService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 
-class DashboardCustomerPage extends Component {
+class TrucksCustomerPage extends Component {
   constructor(props) {
     super(props);
 
@@ -39,6 +39,7 @@ class DashboardCustomerPage extends Component {
 
     // Comment
     this.state = {
+      loaded: false,
 
       // Look up lists
       equipmentTypeList: [],
@@ -94,6 +95,7 @@ class DashboardCustomerPage extends Component {
     // await this.fetchJobs();
     await this.fetchEquipments();
     await this.fetchFilterLists();
+    this.setState({ loaded: true });
   }
 
   async fetchFilterLists() {
@@ -328,7 +330,7 @@ class DashboardCustomerPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Find a Truck
+        &#62;Find a Truckk
       </div>
     );
   }
@@ -753,18 +755,26 @@ class DashboardCustomerPage extends Component {
   }
 
   render() {
+    const { loaded } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderModal()}
+          {this.renderGoTo()}
+          {this.renderBreadcrumb()}
+          {this.renderTitle()}
+          {this.renderFilter()}
+          {/* {this.renderTable()} */}
+          {this.renderEquipmentTable()}
+        </Container>
+      );
+    }
     return (
       <Container className="dashboard">
-        {this.renderModal()}
-        {this.renderGoTo()}
-        {this.renderBreadcrumb()}
-        {this.renderTitle()}
-        {this.renderFilter()}
-        {/* {this.renderTable()} */}
-        {this.renderEquipmentTable()}
+        Loading...
       </Container>
     );
   }
 }
 
-export default DashboardCustomerPage;
+export default TrucksCustomerPage;

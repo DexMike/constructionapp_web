@@ -37,9 +37,9 @@ class AddTruckFormOne extends PureComponent {
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
-      maxCapacity: 0,
       files: [],
       image: '',
+      maxCapacity: '',
       // maxCapacityTouched: false,
       description: '',
       vin: '',
@@ -47,31 +47,18 @@ class AddTruckFormOne extends PureComponent {
       ratesByBoth: false, // this only tracks the select
       ratesByHour: false,
       ratesByTon: false,
-      ratesCostPerTon: 0,
-      ratesCostPerHour: 0,
-      minOperatingTime: 0,
-      maxDistanceToPickup: 0,
+      ratesCostPerTon: '',
+      ratesCostPerHour: '',
+      minOperatingTime: '',
+      maxDistanceToPickup: '',
       truckType: '',
-      reqHandlerTruckType: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerMaterials: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerMinRate: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerMinTime: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerCostTon: {
-        touched: false,
-        error: ''
-      }
+      reqHandlerTruckType: { touched: false, error: '' },
+      reqHandlerMaterials: { touched: false, error: '' },
+      reqHandlerMinRate: { touched: false, error: '' },
+      reqHandlerMinTime: { touched: false, error: '' },
+      reqHandlerCostTon: { touched: false, error: '' },
+      reqHandlerChecks: { touched: false, error: '' },
+      reqHandlerMaxCapacity: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
@@ -107,60 +94,91 @@ class AddTruckFormOne extends PureComponent {
   isFormValid() {
     const truck = this.state;
     const {
-      reqHandlerMaterials,
-      reqHandlerTruckType,
-      reqHandlerMinRate,
-      reqHandlerMinTime,
-      reqHandlerCostTon
+      ratesByBoth,
+      ratesByTon,
+      ratesByHour
     } = this.state;
     let isValid = true;
 
+    this.setState({
+      reqHandlerTruckType: { touched: false },
+      reqHandlerMaterials: { touched: false },
+      reqHandlerMinRate: { touched: false },
+      reqHandlerMinTime: { touched: false },
+      reqHandlerCostTon: { touched: false },
+      reqHandlerChecks: { touched: false },
+      reqHandlerMaxCapacity: { touched: false }
+    });
+
     if (truck.truckType.length === 0) {
       this.setState({
-        reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
+        reqHandlerTruckType: {
           touched: true,
           error: 'Please select the type of truck you are adding'
-        })
+        }
       });
       isValid = false;
     }
 
     if (truck.selectedMaterials.length === 0) {
       this.setState({
-        reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
+        reqHandlerMaterials: {
           touched: true,
           error: 'Please select all of the types of materials you are willing to haul'
-        })
+        }
       });
       isValid = false;
     }
 
-    if (truck.ratesCostPerHour === 0) {
+    if (!truck.maxCapacity) {
       this.setState({
-        reqHandlerMinRate: Object.assign({}, reqHandlerMinRate, {
+        reqHandlerMaxCapacity: {
+          touched: true,
+          error: 'Please enter the maximum number of tons you are willing to haul'
+        }
+      });
+      isValid = false;
+    }
+
+    if ((!ratesByHour && !ratesByBoth && !ratesByTon)) { // Checkboxes
+      this.setState({
+        reqHandlerChecks: {
+          touched: true,
+          error: 'Please select if you want to charge by hour, by ton, or by either'
+        }
+      });
+      isValid = false;
+    }
+
+    if (!truck.ratesCostPerHour
+      && (ratesByHour === 'on' || ratesByBoth === 1)) { // 'By Hour' check
+      this.setState({
+        reqHandlerMinRate: {
           touched: true,
           error: 'Please enter the hourly rate for this truck'
-        })
+        }
       });
       isValid = false;
     }
 
-    if (truck.minOperatingTime === 0) {
+    if (!truck.minOperatingTime
+      && (ratesByHour === 'on' || ratesByBoth === 1)) { // 'By Hour' check
       this.setState({
-        reqHandlerMinTime: Object.assign({}, reqHandlerMinTime, {
+        reqHandlerMinTime: {
           touched: true,
           error: 'Please enter minimum number of hours that this truck must be rented for'
-        })
+        }
       });
       isValid = false;
     }
 
-    if (truck.ratesCostPerTon === 0) {
+    if (!truck.ratesCostPerTon
+      && (ratesByTon === 'on' || ratesByBoth === 1)) { // 'By Ton' check
       this.setState({
-        reqHandlerCostTon: Object.assign({}, reqHandlerCostTon, {
+        reqHandlerCostTon: {
           touched: true,
           error: 'Please enter the minimum number of tons you are willing to haul'
-        })
+        }
       });
       isValid = false;
     }
@@ -335,6 +353,14 @@ class AddTruckFormOne extends PureComponent {
       reqHandler = 'reqHandlerMinTime';
     } else if (e.target.name === 'ratesCostPerTon') {
       reqHandler = 'reqHandlerCostTon';
+    } else if (e.target.name === 'maxCapacity') {
+      reqHandler = 'reqHandlerMaxCapacity';
+    } else if (
+      e.target.name === 'ratesByTon'
+      || e.target.name === 'ratesByHour'
+      || e.target.name === 'ratesByBoth'
+    ) {
+      reqHandler = 'reqHandlerChecks';
     }
     // Then we set the touched prop to false, hiding the error label
     this.setState({
@@ -386,7 +412,6 @@ class AddTruckFormOne extends PureComponent {
         value: String(material.id),
         label: material.value
       }));
-
       // console.log(truckMaterials);
       let { files } = this.state;
       if (passedTruckFullInfo.image
@@ -400,7 +425,6 @@ class AddTruckFormOne extends PureComponent {
           }
         ];
       }
-
       this.setState({
         id: passedTruckFullInfo.id,
         driversId: passedTruckFullInfo.driversId,
@@ -524,7 +548,9 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate,
       reqHandlerMinTime,
       reqHandlerCostTon,
-      imageUploading
+      imageUploading,
+      reqHandlerChecks,
+      reqHandlerMaxCapacity
     } = this.state;
     const { p, onClose } = this.props;
     return (
@@ -634,8 +660,12 @@ class AddTruckFormOne extends PureComponent {
                 {/* FIRST ROW */}
                 <div className="col-md-4 form__form-group">
                   <div className="form__form-group">
-                    <TCheckBox onChange={this.handleInputChange} name="ratesByBoth"
-                               value={!!ratesByBoth} label="By Both"
+                    <TCheckBox
+                      onChange={this.handleInputChange}
+                      name="ratesByBoth"
+                      value={!!ratesByBoth}
+                      label="By Both"
+                      meta={reqHandlerChecks}
                     />
                   </div>
                 </div>
@@ -647,8 +677,11 @@ class AddTruckFormOne extends PureComponent {
 
                 {/* SECOND ROW */}
                 <div className="col-md-4 form__form-group">
-                  <TCheckBox onChange={this.handleInputChange} name="ratesByHour"
-                             value={!!ratesByHour} label="By Hour"
+                  <TCheckBox
+                    onChange={this.handleInputChange}
+                    name="ratesByHour"
+                    value={!!ratesByHour}
+                    label="By Hour"
                   />
                 </div>
                 <div className="col-md-1 ">
@@ -672,7 +705,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-2 form__form-group moveleft">
-                  Hours
+                  / Hours
                 </div>
               </Row>
 
@@ -750,11 +783,17 @@ class AddTruckFormOne extends PureComponent {
                   <span className="form__form-group-label">
                     Maximum Capacity (Tons)
                   </span>
-                  <input
-                    name="maxCapacity"
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'maxCapacity',
+                        value: maxCapacity
+                      }
+                    }
+                    placeholder="0"
                     type="number"
-                    value={maxCapacity}
-                    onChange={this.handleInputChange}
+                    meta={reqHandlerMaxCapacity}
                   />
                 </div>
                 <div className="col-md-6 form__form-group">

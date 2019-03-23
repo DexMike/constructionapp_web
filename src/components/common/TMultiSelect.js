@@ -68,7 +68,10 @@ renderMultiSelectField.propTypes = {
 };
 
 renderMultiSelectField.defaultProps = {
-  meta: null,
+  meta: {
+    value: null,
+    label: null
+  },
   options: [],
   placeholder: ''
 };
