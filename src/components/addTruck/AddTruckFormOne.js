@@ -8,7 +8,8 @@ import {
   Row
 } from 'reactstrap';
 import moment from 'moment';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
+import { Storage } from 'aws-amplify';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
@@ -19,6 +20,8 @@ import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
+import TFileUploadSingle from '../common/TFileUploadSingle';
+import StringGenerator from '../../utils/StringGenerator';
 
 // import validate from '../common/validate ';
 
@@ -26,6 +29,7 @@ class AddTruckFormOne extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      imageUploading: false,
       // ...equipment,
       id: 0, // for use if we are editing
       driversId: 0, // for use if we are editing
@@ -34,6 +38,8 @@ class AddTruckFormOne extends PureComponent {
       allMaterials: [],
       truckTypes: [],
       maxCapacity: 0,
+      files: [],
+      image: '',
       // maxCapacityTouched: false,
       description: '',
       vin: '',
@@ -46,16 +52,32 @@ class AddTruckFormOne extends PureComponent {
       minOperatingTime: 0,
       maxDistanceToPickup: 0,
       truckType: '',
-      reqHandlerTruckType: { touched: false, error: '' },
-      reqHandlerMaterials: { touched: false, error: '' },
-      reqHandlerMinRate: { touched: false, error: '' },
-      reqHandlerMinTime: { touched: false, error: '' },
-      reqHandlerCostTon: { touched: false, error: '' }
+      reqHandlerTruckType: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerMaterials: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerMinRate: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerMinTime: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerCostTon: {
+        touched: false,
+        error: ''
+      }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleImageUpload = this.handleImageUpload.bind(this);
   }
 
   async componentDidMount() {
@@ -164,6 +186,7 @@ class AddTruckFormOne extends PureComponent {
       driversId,
       truckType,
       maxCapacity,
+      image,
       description,
       vin,
       licensePlate,
@@ -233,7 +256,7 @@ class AddTruckFormOne extends PureComponent {
       description,
       licensePlate,
       vin,
-      image: '', // unasigned
+      image,
       currentAvailability: 1, // unasigned
       startAvailability: start, // careful here, it's date unless it exists
       endAvailability: end,
@@ -334,13 +357,14 @@ class AddTruckFormOne extends PureComponent {
     }));
 
     const allTruckTypes = [];
-    Object.values(truckTypes).forEach((itm) => {
-      const inside = {
-        label: itm.val1,
-        value: itm.val1
-      };
-      allTruckTypes.push(inside);
-    });
+    Object.values(truckTypes)
+      .forEach((itm) => {
+        const inside = {
+          label: itm.val1,
+          value: itm.val1
+        };
+        allTruckTypes.push(inside);
+      });
     this.setState({
       allMaterials: materials,
       truckTypes: allTruckTypes
@@ -364,12 +388,26 @@ class AddTruckFormOne extends PureComponent {
       }));
 
       // console.log(truckMaterials);
+      let { files } = this.state;
+      if (passedTruckFullInfo.image
+        && passedTruckFullInfo.image.trim().length > 0) {
+        const urlPieces = passedTruckFullInfo.image.split('/');
+        const name = (urlPieces.length > 0) ? urlPieces[urlPieces.length - 1] : 'undefined';
+        files = [
+          {
+            name,
+            preview: passedTruckFullInfo.image
+          }
+        ];
+      }
 
       this.setState({
         id: passedTruckFullInfo.id,
         driversId: passedTruckFullInfo.driversId,
         defaultDriverId: passedTruckFullInfo.defaultDriverId,
         maxCapacity: passedTruckFullInfo.maxCapacity,
+        image: passedTruckFullInfo.image,
+        files,
         description: passedTruckFullInfo.description,
         vin: passedTruckFullInfo.vin,
         licensePlate: passedTruckFullInfo.licensePlate,
@@ -393,7 +431,19 @@ class AddTruckFormOne extends PureComponent {
     }
 
     // load info from cached (if coming back from next tabs)
-    if (Object.keys(preloaded).length > 0) {
+    if (Object.keys(preloaded).length > 0 && preloaded.info) {
+      let { files } = this.state;
+      if (preloaded.info.image
+        && preloaded.info.image.trim().length > 0) {
+        const urlPieces = preloaded.info.image.split('/');
+        const name = (urlPieces.length > 0) ? urlPieces[urlPieces.length - 1] : 'undefined';
+        files = [
+          {
+            name,
+            preview: preloaded.info.image
+          }
+        ];
+      }
       this.setState({
         maxCapacity: preloaded.info.maxCapacity,
         description: preloaded.info.description,
@@ -407,7 +457,9 @@ class AddTruckFormOne extends PureComponent {
         ratesCostPerTon: preloaded.info.tonRate,
         ratesCostPerHour: preloaded.info.hourRate,
         truckType: preloaded.info.type,
-        selectedMaterials: preloaded.info.selectedMaterials
+        selectedMaterials: preloaded.info.selectedMaterials,
+        image: preloaded.info.image,
+        files
       });
       // Materials Hauled is missing
     }
@@ -416,8 +468,30 @@ class AddTruckFormOne extends PureComponent {
     // let's cache this info, in case we want to go back
   }
 
-  handleImg(e) {
-    return e;
+  async handleImageUpload(filesToUpload) {
+    this.setState({ files: filesToUpload });
+    const files = filesToUpload;
+    if (files.length > 0) {
+      const file = files[0];
+      const year = moment().format('YYYY');
+      const month = moment().format('MM');
+      const fileName = StringGenerator.makeId(6);
+      const fileNamePieces = file.name.split(/[\s.]+/);
+      const fileExtension = fileNamePieces[fileNamePieces.length - 1];
+      // try {
+      this.setState({ imageUploading: true });
+      const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
+      this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
+      this.setState({ imageUploading: false });
+      // console.log(result);
+      // } catch (err) {
+      //   console.log(err);
+      // }
+      // .then(result => console.log(result))
+      // .catch(err =>);
+      // {key: "2019/52/rb3zYH.png"}
+      // this.showResults(this.state.files)
+    }
   }
 
   render() {
@@ -431,6 +505,7 @@ class AddTruckFormOne extends PureComponent {
       allMaterials,
       truckType,
       maxCapacity,
+      files,
       // maxCapacityTouched,
       description,
       // descriptionTouched,
@@ -448,7 +523,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMaterials,
       reqHandlerMinRate,
       reqHandlerMinTime,
-      reqHandlerCostTon
+      reqHandlerCostTon,
+      imageUploading
     } = this.state;
     const { p, onClose } = this.props;
     return (
@@ -480,10 +556,10 @@ class AddTruckFormOne extends PureComponent {
                     value={description}
                     onChange={this.handleInputChange}
                   />
-                  <input type="hidden" val={p} />
-                  <input type="hidden" val={id} />
-                  <input type="hidden" val={defaultDriverId} />
-                  <input type="hidden" val={driversId} />
+                  <input type="hidden" val={p}/>
+                  <input type="hidden" val={id}/>
+                  <input type="hidden" val={defaultDriverId}/>
+                  <input type="hidden" val={driversId}/>
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Truck Type</span>
@@ -601,7 +677,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
@@ -666,7 +742,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
@@ -697,7 +773,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
@@ -711,15 +787,19 @@ class AddTruckFormOne extends PureComponent {
                     We&apos;ll show a picture of it when a customer searches for Trucks
                   </h3>
                 </div>
-                <div className="col-md-12 form__form-group">
-                  <p>picture goes here</p>
-                </div>
+                {/* <div className="col-md-12 form__form-group"> */}
+                {/* <p>picture goes here</p> */}
+                {/* </div> */}
               </Row>
 
               <Row className="col-md-12">
-                <hr className="bighr" />
+                <hr className="bighr"/>
               </Row>
 
+              <Row className="col-md-12">
+                <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
+                {imageUploading && <span>Uploading Image...</span>}
+              </Row>
               {/*
               <Row>
                 <DropZoneMultipleField
@@ -736,7 +816,9 @@ class AddTruckFormOne extends PureComponent {
 
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                  <Button color="minimal" className="btn btn-outline-secondary" type="button"
+                          onClick={onClose} disabled={imageUploading}
+                  >
                     Cancel
                   </Button>
                 </ButtonToolbar>
@@ -746,7 +828,11 @@ class AddTruckFormOne extends PureComponent {
                   >
                     Back
                   </Button>
-                  <Button color="primary" type="submit" className="next">Next</Button>
+                  <Button color="primary" type="submit" className="next"
+                          disabled={imageUploading}
+                  >
+                    Next
+                  </Button>
                 </ButtonToolbar>
               </Row>
 

@@ -28,7 +28,7 @@ Amplify.configure({
   },
   Storage: {
     AWSS3: {
-      bucket: 'dev.uploads.mytrelar.com',
+      bucket: process.env.AWS_UPLOADS_BUCKET,
       region: process.env.AWS_REGION
     }
   }

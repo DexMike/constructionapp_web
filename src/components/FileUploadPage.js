@@ -10,7 +10,8 @@ class FileUploadPage extends Component {
     super(props);
 
     this.state = {
-      files: []
+      files: [],
+      imageUploading: false
     };
     this.reset = this.reset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -30,9 +31,17 @@ class FileUploadPage extends Component {
     const fileName = StringGenerator.makeId(6);
     const fileNamePieces = file.name.split(/[\s.]+/);
     const fileExtension = fileNamePieces[fileNamePieces.length - 1];
+    let contentType = 'image/png';
+    if (fileExtension === 'png') {
+      contentType = 'image/png';
+    } else {
+      contentType = 'image/jpeg';
+    }
     // try {
     // const result =
-    await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
+    this.setState({ imageUploading: true });
+    await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file, { contentType });
+    this.setState({ imageUploading: false });
     // console.log(result);
     // }
     // catch (err) {
@@ -49,7 +58,7 @@ class FileUploadPage extends Component {
   }
 
   render() {
-    const { files } = this.state;
+    const { files, imageUploading } = this.state;
 
     return (
       <Card>
@@ -57,11 +66,16 @@ class FileUploadPage extends Component {
           <div className="card__title">
             <h5 className="bold-text">File Upload</h5>
           </div>
-          <form className="form" onSubmit={e => this.handleSubmit(e)}>
-            <TFileUploadSingle name="fileupload" files={files} onChange={this.onChange} />
+          <form onSubmit={e => this.handleSubmit(e)}>
+            <TFileUploadSingle name="fileupload" files={files} onChange={this.onChange}/>
+            {imageUploading && <span>Loading...</span>}
             <ButtonToolbar className="form__button-toolbar">
-              <Button color="primary" type="submit">Submit</Button>
-              <Button type="button" onClick={this.reset}>Cancel</Button>
+              <Button color="primary" type="submit" disabled={imageUploading}>Submit</Button>
+              <Button type="button" onClick={this.reset}
+                      disabled={imageUploading}
+              >
+                Cancel
+              </Button>
             </ButtonToolbar>
           </form>
         </CardBody>
