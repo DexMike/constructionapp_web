@@ -124,13 +124,23 @@ $primary-green: rgb(0,111,83);
     }
   }
 }
+.topbar__button-icon {
+  width: 60px;
+}
 // ---- TUI Topbar
 
 // ---- TUI Sidebar
+.sidebar__link-active .sidebar__link {
+  box-shadow: 0px 1px 3px #eff1f5, 0px -1px 3px #eff1f5;
+}
 .sidebar__link, .topbar__link {
   &:before {
     background: $primary-green;
   }
+}
+.sidebar__block {
+  padding: 10px 0;
+  border-bottom: none !important;
 }
 // ---- TUI Sidebar
 // ---- TUI (Trelar User Interface) ---- //
