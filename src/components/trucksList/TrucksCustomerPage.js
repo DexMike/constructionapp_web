@@ -29,6 +29,7 @@ import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
+import './Truck.css';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -53,6 +54,7 @@ class TrucksCustomerPage extends Component {
       selectedEquipment: {},
 
       modal: false,
+      modalSelectMaterials: false,
       modalAddJob: false,
       goToDashboard: false,
       startDate: null,
@@ -84,6 +86,8 @@ class TrucksCustomerPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
+    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
   }
 
   async componentDidMount() {
@@ -91,6 +95,11 @@ class TrucksCustomerPage extends Component {
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({ loaded: true });
+  }
+
+  retrieveAllMaterials() {
+    const { materialTypeList } = this.state;
+    return materialTypeList;
   }
 
   async fetchFilterLists() {
@@ -178,7 +187,6 @@ class TrucksCustomerPage extends Component {
           .format();
         return newEquipment;
       });
-      // );
       this.setState({ equipments });
     }
   }
@@ -262,8 +270,15 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  toggleSelectMaterialsModal() {
+    // console.log(274);
+    const { modalSelectMaterials } = this.state;
+    this.setState({
+      modalSelectMaterials: !modalSelectMaterials
+    });
+  }
+
   toggleNewJobModal() {
-    console.log(264);
     const { modalAddJob } = this.state;
     this.setState({
       modalAddJob: !modalAddJob
@@ -273,6 +288,10 @@ class TrucksCustomerPage extends Component {
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
+  }
+
+  preventModal() {
+    this.setState({ modal: false });
   }
 
   renderGoTo() {
@@ -289,11 +308,71 @@ class TrucksCustomerPage extends Component {
     return false;
   }
 
+  // renderSelectMaterialModal
+  renderSelectMaterialModal() {
+    const {
+      modalSelectMaterials,
+      toggleSelectMaterialsModal
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalSelectMaterials}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__header">
+          <button
+            type="button"
+            className="lnr lnr-cross modal__close-btn"
+            onClick={!toggleSelectMaterialsModal}
+          />
+          <h4 className="bold-text modal__title white_title">
+            Select material
+          </h4>
+        </div>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+          Please select a material type for this job
+        </div>
+
+        <Row className="col-md-12">
+          <div className="col-md-6">
+            &nbsp;
+          </div>
+          <div className="col-md-6">
+            <Button
+              color="primary"
+              onClick={!toggleSelectMaterialsModal}
+              type="button"
+              className="next float-right"
+            >
+              Close
+            </Button>
+          </div>
+        </Row>
+      </Modal>
+    );
+  }
+
   renderModal() {
     const {
       modal,
-      selectedEquipment
+      selectedEquipment,
+      materialTypeList
+      // equipments
     } = this.state;
+    let { modalSelectMaterials } = this.state;
+
+    const mats = this.returnSelectedMaterials();
+
+    if (mats.length < 1 && modal && materialTypeList.length > 0) {
+      // console.log(367);
+      // this.toggleSelectMaterialsModal();
+      // modalSelectMaterials = !modalSelectMaterials;
+      this.preventModal();
+      return false;
+      // alert('Please select a material type for this job');
+    }
+
     return (
       <Modal
         isOpen={modal}
@@ -311,6 +390,7 @@ class TrucksCustomerPage extends Component {
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
+            getAllMaterials={this.retrieveAllMaterials}
           />
         </div>
       </Modal>
@@ -508,7 +588,7 @@ class TrucksCustomerPage extends Component {
                             label: rateType
                           }))
                         }
-                        placeholder={rateTypeList[0]}
+                        placeholder="Select materials"
                       />
                     </Col>
                   </Row>
@@ -761,9 +841,9 @@ class TrucksCustomerPage extends Component {
       );
     }
     return (
-      <Container className="dashboard">
+      <div>
         Loading...
-      </Container>
+      </div>
     );
   }
 }
