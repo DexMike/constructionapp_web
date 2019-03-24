@@ -266,9 +266,6 @@ class TrucksCustomerPage extends Component {
     const { modalAddJob } = this.state;
     this.setState({
       modalAddJob: !modalAddJob
-    }, function chido() {
-      console.log('>>OPEN!');
-      console.log(modalAddJob);
     });
   }
 
@@ -320,7 +317,6 @@ class TrucksCustomerPage extends Component {
   }
 
   renderNewJobModal() {
-    console.log('>rendering modal...');
     const {
       modalAddJob
     } = this.state;
