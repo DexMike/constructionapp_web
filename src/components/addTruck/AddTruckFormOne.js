@@ -855,26 +855,20 @@ class AddTruckFormOne extends PureComponent {
 
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button color="minimal" className="btn btn-outline-secondary" type="button"
+                  <Button className="tertiaryButton" type="button"
                           onClick={onClose} disabled={imageUploading}
                   >
                     Cancel
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="primary" type="button" disabled
-                          className="previous"
-                  >
-                    Back
-                  </Button>
-                  <Button color="primary" type="submit" className="next"
-                          disabled={imageUploading}
+                  <Button type="button" disabled className="secondaryButton">Back</Button>
+                  <Button type="submit" className="primaryButton"disabled={imageUploading}
                   >
                     Next
                   </Button>
                 </ButtonToolbar>
               </Row>
-
             </form>
           </CardBody>
         </Card>
