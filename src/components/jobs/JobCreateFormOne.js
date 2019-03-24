@@ -152,7 +152,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   saveTruckInfo(redir) {
-    console.log('Se');
+    // console.log('Se');
   }
 
   async saveTruck(e) {
