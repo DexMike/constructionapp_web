@@ -7,8 +7,7 @@ import {
   Col,
   Container,
   Modal,
-  Row,
-  Button
+  Row
 } from 'reactstrap';
 // import classnames from 'classnames';
 import moment from 'moment';
@@ -272,6 +271,7 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleSelectMaterialsModal() {
+    // console.log(274);
     const { modalSelectMaterials } = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
@@ -279,7 +279,6 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleNewJobModal() {
-    console.log(264);
     const { modalAddJob } = this.state;
     this.setState({
       modalAddJob: !modalAddJob
@@ -312,7 +311,8 @@ class TrucksCustomerPage extends Component {
   // renderSelectMaterialModal
   renderSelectMaterialModal() {
     const {
-      modalSelectMaterials
+      modalSelectMaterials,
+      toggleSelectMaterialsModal
     } = this.state;
     return (
       <Modal
@@ -324,7 +324,7 @@ class TrucksCustomerPage extends Component {
           <button
             type="button"
             className="lnr lnr-cross modal__close-btn"
-            onClick={this.toggleSelectMaterialsModal}
+            onClick={!toggleSelectMaterialsModal}
           />
           <h4 className="bold-text modal__title white_title">
             Select material
@@ -341,7 +341,7 @@ class TrucksCustomerPage extends Component {
           <div className="col-md-6">
             <Button
               color="primary"
-              onClick={this.toggleSelectMaterialsModal}
+              onClick={!toggleSelectMaterialsModal}
               type="button"
               className="next float-right"
             >
@@ -356,13 +356,18 @@ class TrucksCustomerPage extends Component {
   renderModal() {
     const {
       modal,
-      selectedEquipment
+      selectedEquipment,
+      materialTypeList
       // equipments
     } = this.state;
+    let { modalSelectMaterials } = this.state;
 
     const mats = this.returnSelectedMaterials();
-    if (mats.length < 1 && modal) {
-      this.toggleSelectMaterialsModal();
+
+    if (mats.length < 1 && modal && materialTypeList.length > 0) {
+      // console.log(367);
+      // this.toggleSelectMaterialsModal();
+      // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
       return false;
       // alert('Please select a material type for this job');
@@ -836,16 +841,9 @@ class TrucksCustomerPage extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        {this.renderModal()}
-        {this.renderSelectMaterialModal()}
-        {this.renderGoTo()}
-        {this.renderBreadcrumb()}
-        {this.renderTitle()}
-        {this.renderFilter()}
-        {/* {this.renderTable()} */}
-        {this.renderEquipmentTable()}
-      </Container>
+      <div>
+        Loading...
+      </div>
     );
   }
 }
