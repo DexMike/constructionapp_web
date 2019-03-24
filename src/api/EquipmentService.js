@@ -23,7 +23,7 @@ class EquipmentService extends AgentService {
     return (response);
   }
 
-  static async getEquipmentByEquipmentIdAndType(companyId, type) {
+  static async getEquipmentByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/equipments`);
     return (response);
   }

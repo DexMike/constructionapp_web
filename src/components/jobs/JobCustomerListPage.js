@@ -7,6 +7,7 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
+import ProfileService from '../../api/ProfileService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
@@ -68,7 +69,8 @@ class JobCustomerListPage extends Component {
   }
 
   async fetchJobs() {
-    const { companyId } = this.props;
+    const profile = await ProfileService.getProfile();
+    const companyId = profile.companyId;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     return jobs;
   }
