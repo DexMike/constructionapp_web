@@ -1,8 +1,3 @@
-// Custom color palette
-$color-dark-turquoise: rgb(59,98,115);
-$grey-top-border: rgb(172,187,198);
-$turquoise: rgb(84,142,168);
-
 .app-link {
   color: -webkit-link;
   cursor: pointer;
@@ -18,6 +13,55 @@ $turquoise: rgb(84,142,168);
     color: #ddd;
   }
 }
+
+// ---- TUI (Trelar User Interface) ---- //
+// ---- TUI Misc
+// ---- TUI Misc
+
+// ---- TUI Topbar
+.topbar__wrapper {
+  background-color: $primary-green;
+}
+.topbar__button {
+  i.material-icons {
+    color: white;
+  }
+  &:hover, &:focus, &:active {
+    i.material-icons {
+      color: $color-gray
+    }
+  }
+}
+.topbar__avatar {
+  .topbar__avatar-name {
+    color: white;
+  }
+  &:hover, &:focus, &:active {
+    .topbar__avatar-name {
+      color: $color-gray
+    }
+  }
+}
+.topbar__button-icon {
+  width: 60px;
+}
+// ---- TUI Topbar
+
+// ---- TUI Sidebar
+.sidebar__link-active .sidebar__link {
+  box-shadow: 0px 1px 3px #eff1f5, 0px -1px 3px #eff1f5;
+}
+.sidebar__link, .topbar__link {
+  &:before {
+    background: $primary-green;
+  }
+}
+.sidebar__block {
+  padding: 10px 0;
+  border-bottom: none !important;
+}
+// ---- TUI Sidebar
+// ---- TUI (Trelar User Interface) ---- //
 
 // ---- customer dashboard page
 #filter-title {
