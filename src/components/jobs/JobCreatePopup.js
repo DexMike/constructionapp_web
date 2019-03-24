@@ -85,7 +85,7 @@ class JobCreatePopup extends Component {
                       onClick={this.firstPage}
                       className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
                     >
-                      <p>Add Truck</p>
+                      <p>Create Job</p>
                     </div>
                     <div
                       role="link"
@@ -94,7 +94,7 @@ class JobCreatePopup extends Component {
                       onClick={this.secondPage}
                       className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
-                      <p>Add Schedule</p>
+                      <p>Send Job</p>
                     </div>
                   </div>
 

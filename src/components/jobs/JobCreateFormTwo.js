@@ -193,7 +193,7 @@ class JobCreateFormTwo extends PureComponent {
               className="form form--horizontal addtruck__form"
               onSubmit={e => this.saveTruck(e)}
             >
-              Coman mejillones
+              Second tab
               <Row className="col-md-12">
                 <hr className="bighr"/>
               </Row>
