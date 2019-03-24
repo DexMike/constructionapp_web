@@ -19,6 +19,7 @@ import UserSavePage from '../users/UserSavePage';
 import TrucksList from '../trucksList/TrucksList';
 import SettingsPage from '../settings/SettingsPage';
 import JobCreatePage from '../jobs/JobCreatePage';
+import FileUploadPage from '../FileUploadPage';
 
 // import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
 
@@ -135,6 +136,12 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/settings"
             component={SettingsPage}
+          />
+
+          <Route
+            exact
+            path="/fileupload"
+            component={FileUploadPage}
           />
 
         </div>
