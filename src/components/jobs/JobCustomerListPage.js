@@ -133,9 +133,8 @@ class JobCustomerListPage extends Component {
               <Card>
                 <CardBody>
                   <Button
-                    style={{ width: '150px' }}
-                    className="btn btn-primary account__btn account__btn--small"
                     onClick={() => this.handlePageClick('AddJob')}
+                    className="primaryButton"
                   >
                     Create Job
                   </Button>

@@ -184,9 +184,9 @@ class EquipmentListPage extends Component {
             <Row>
               <Col md={12}>
                 <Button
-                  color="secondary"
                   onClick={this.toggleAddTruckModalClear}
                   type="button"
+                  className="primaryButton"
                 >
                   Add a Truck
                 </Button>

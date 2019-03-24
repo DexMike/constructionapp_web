@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import icon from '../../../img/burger.svg';
-
-// const icon = `${process.env.PUBLIC_URL}/img/burger.svg`;
 
 class TopbarSidebarButton extends Component {
   render() {

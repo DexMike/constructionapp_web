@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import {
+  Button,
   Card,
   CardBody,
   Col,
@@ -330,7 +331,7 @@ class TrucksCustomerPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Find a Truckk
+        &#62;Find a Truck
       </div>
     );
   }
@@ -669,13 +670,13 @@ class TrucksCustomerPage extends Component {
                 <br/>
               </Col>
               <Col>
-                <button type="button"
-                        className="btn btn-primary"
-                        onClick={() => this.handleEquipmentEdit(equipment.id)}
-                        style={{ marginTop: '10px' }}
+                <Button
+                  onClick={() => this.handleEquipmentEdit(equipment.id)}
+                  className="primaryButton"
+                  style={{ marginTop: '10px' }}
                 >
-                  Request
-                </button>
+                  Add a Truck
+                </Button>
               </Col>
             </Row>
           </Col>

@@ -9,6 +9,19 @@
   overflow: hidden;
   z-index: 0;
 
+  /*&before,
+  &.btn-primary, &.btn-secondary {
+    &:not, &:active:before, &:hover:before, &:focus:before{
+      background-color: unset;
+    }
+  }*/
+
+  &:before,
+  &.btn-primary:hover:before, &.btn-primary:active:before, &.btn-primary:focus:before,
+  &.btn-secondary:hover:before, &.btn-secondary:active:before, &.btn-secondary:focus:before {
+    background-color: unset;
+  }
+
   &:last-child {
     margin-right: 0;
   }
@@ -355,6 +368,84 @@
       }
     }
   }
+  
+  &.primaryButton { // TUI
+    background: $primary-green;
+    color: #FFFFFF;
+    border: 2px solid #FFFFFF;
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+    &:before {
+      color: white;
+      background-color: $primary-dark-green;
+    }
+
+    &:hover, &:focus, &:active, &:active:focus {
+      color: white;
+      border-color: $primary-dark-green;
+      background-color: $primary-dark-green;
+    }
+  }
+
+  &.secondaryButton { // TUI
+    background: #FFFFFF;
+    color: $primary-green;
+    border: 2px solid $primary-green;
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+    &:before {
+      color: white;
+      background-color: $primary-green;
+    }
+
+    &:hover, &:focus, &:active, &:active:focus {
+      color: white;
+      background-color: $primary-green;
+      border: 2px solid $primary-green;
+    }
+  }
+
+  &.tertiaryButton { // TUI
+    background: #FFFFFF;
+    color: $color-gray3; /* gray3 */
+    border: 2px solid #808080;
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+    &:before {
+      color: white;
+      background-color: $color-gray3;
+    }
+
+    &:hover, &:focus, &:active, &:active:focus {
+      color: white;
+      background-color: $color-gray3;
+      border: 2px solid $color-gray3;
+    }
+  }
+
+  &.disabledButton { // TUI
+    background: #FFFFFF;
+    color: $color-lightgray6; /* lightgray6 /
+    _border: 2px solid $color-lightgray6; /_ lightgray6 */
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+  }
 }
 
 .btn-toolbar {
@@ -431,3 +522,4 @@ button:focus, button:active {
     background-color: themed('colorBackground');
   }
 }
+
