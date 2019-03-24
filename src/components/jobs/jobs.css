@@ -2,3 +2,11 @@
   height: 32px;
   width: auto;
 }
+.rateTab{
+  background-color:rgb(243, 243, 243);
+}
+/*
+.wizard__step__rate{
+  height: 36px !important;
+}
+*/

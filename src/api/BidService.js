@@ -1,5 +1,3 @@
-// consider using this type of file (independent from AgentService)
-// in order to keep al files separated
 import moment from 'moment';
 import AgentService from './AgentService';
 
