@@ -130,7 +130,7 @@ class ReportsCustomerPage extends Component {
               <h3 className="page-title">Reports</h3>
             </Col>
           </Row>
-          
+
           <Row>
             <Col md={12}>
               <Card>

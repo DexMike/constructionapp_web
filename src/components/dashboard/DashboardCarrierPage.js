@@ -130,6 +130,7 @@ class DashboardCarrierPage extends Component {
     let cancelledJobs = 0;
     let jobsPerTruck = 0;
     let idleTrucks = 0;
+    let completedOffersPercent = 0;
 
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -171,6 +172,9 @@ class DashboardCarrierPage extends Component {
     jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
     idleTrucks = 1;
 
+    // Jobs completed / Job offers responded to
+    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+
     potentialIncome = TFormat.asMoney(potentialIncome);
 
     // console.log(jobs);
@@ -192,14 +196,6 @@ class DashboardCarrierPage extends Component {
           </Row>
 
           <div className="row">
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Total Jobs</center></h5>
-                  <span><center><h4>{jobs.length}</h4></center></span>
-                </div>
-              </div>
-            </div>
 
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
@@ -222,17 +218,8 @@ class DashboardCarrierPage extends Component {
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
+                  <h5 className="card__title bold-text"><center>Jobs Booked</center></h5>
                   <span><center><h4>{acceptedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                  <span><center><h4>{completedJobCount}</h4></center></span>
                 </div>
               </div>
             </div>
@@ -246,20 +233,11 @@ class DashboardCarrierPage extends Component {
               </div>
             </div>
 
-          </div>
-
-          <Row>
-            <Col md={12}>
-              <h3 className="page-title">Last 30 days</h3>
-            </Col>
-          </Row>
-
-          <div className="row">
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
-                  <span><center><h4>{jobsCompleted}</h4></center></span>
+                  <span><center><h4>{completedJobCount}</h4></center></span>
                 </div>
               </div>
             </div>
@@ -267,58 +245,14 @@ class DashboardCarrierPage extends Component {
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
-                  <span><center><h4>{totalEarnings}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
-                  <span><center><h4>{earningsPerJob}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
-                  <span><center><h4>{cancelledJobs}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
-                  <span><center><h4>{jobsPerTruck}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
-                  <span><center><h4>{idleTrucks}</h4></center></span>
+                  <h5 className="card__title bold-text"><center>% completed</center></h5>
+                  <span><center><h4>{completedOffersPercent}</h4></center></span>
                 </div>
               </div>
             </div>
 
           </div>
 
-          <br />
-
-          {/* {this.renderGoTo()} */}
-          {/* <button type="button" className="app-link" */}
-          {/* onClick={() => this.handlePageClick('Dashboard')} */}
-          {/* > */}
-          {/* Dashboard */}
-          {/* </button> */}
           <Row>
             <Col md={12}>
               <h3 className="page-title">Jobs</h3>
