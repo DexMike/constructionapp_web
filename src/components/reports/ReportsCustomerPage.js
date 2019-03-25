@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import {
-  Card,
-  CardBody,
-  Col,
-  Container,
-  Row,
-  Modal
-} from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
 import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
@@ -15,12 +8,13 @@ import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
-import JobCreatePopup from './JobCreatePopup';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
 
-class JobCustomerListPage extends Component {
+// NOTE: this is a copy of DashboardCustomerPage
+
+class ReportsCustomerPage extends Component {
   constructor(props) {
     super(props);
 
@@ -30,13 +24,11 @@ class JobCustomerListPage extends Component {
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
-      jobId: 0,
-      modalAddJob: false
+      jobId: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
-    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -85,14 +77,6 @@ class JobCustomerListPage extends Component {
     return jobs;
   }
 
-  toggleNewJobModal() {
-    // console.log(89);
-    const { modalAddJob } = this.state;
-    this.setState({
-      modalAddJob: !modalAddJob
-    });
-  }
-
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -105,23 +89,6 @@ class JobCustomerListPage extends Component {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
-  }
-
-  renderNewJobModal() {
-    const {
-      modalAddJob
-    } = this.state;
-    return (
-      <Modal
-        isOpen={modalAddJob}
-        toggle={this.toggleNewJobModal}
-        className="modal-dialog--primary modal-dialog--header"
-      >
-        <JobCreatePopup
-          toggle={this.toggleNewJobModal}
-        />
-      </Modal>
-    );
   }
 
   render() {
@@ -151,95 +118,66 @@ class JobCustomerListPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderNewJobModal()}
           {this.renderGoTo()}
           <button type="button" className="app-link"
                   onClick={() => this.handlePageClick('Dashboard')}
           >
             Dashboard
           </button>
-          &#62;Jobs 125
+          &#62;Jobs
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Jobs</h3>
+              <h3 className="page-title">Reports</h3>
             </Col>
           </Row>
+          
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  {/*
-                  <Button
-                    onClick={() => this.handlePageClick('AddJob')}
-                    className="primaryButton"
-                  >
-                    Create Job
-                  </Button>
-                  */}
-                  <button type="button" className="app-link"
-                    onClick={this.toggleNewJobModal}
-                  >
-                    ADD A JOB
-                  </button>
-                  <hr/>
-                  <TTable
-                    columns={
-                      [
-                        {
-                          name: 'name',
-                          displayName: 'Job Name'
-                        },
-                        {
-                          name: 'companyName',
-                          displayName: 'Customer'
-                        },
-                        {
-                          name: 'material',
-                          displayName: 'Material'
-                        },
-                        {
-                          name: 'newSize',
-                          displayName: 'Size'
-                        },
-                        {
-                          name: 'newStartDate',
-                          displayName: 'Start Date'
-                        },
-                        {
-                          name: 'zip',
-                          displayName: 'Start Zip'
-                        }
-                        // ,
-                        // {
-                        //   name: 'rateEstimate',
-                        //   displayName: 'Est Income'
-                        // }
-                      ]
-                    }
-                    data={jobs}
-                    handleIdClick={this.handleJobEdit}
-                  />
+                  Report #1
                 </CardBody>
               </Card>
             </Col>
           </Row>
+
+          <Row>
+            <Col md={12}>
+              <Card>
+                <CardBody>
+                  Report #2
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col md={12}>
+              <Card>
+                <CardBody>
+                  Report #3
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+
         </Container>
       );
     }
     return (
       <Container className="dashboard">
-        Loading...
+        Loading Customer Reports Page...
       </Container>
     );
   }
 }
 
-JobCustomerListPage.propTypes = {
-  companyId: PropTypes.number.isRequired
+ReportsCustomerPage.propTypes = {
+  // companyId: PropTypes.number.isRequired
 };
 
-JobCustomerListPage.defaultProps = {
+ReportsCustomerPage.defaultProps = {
   // companyId: null
 };
 
-export default JobCustomerListPage;
+export default ReportsCustomerPage;

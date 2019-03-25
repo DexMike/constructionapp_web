@@ -242,10 +242,10 @@ class AddTruckFormThree extends PureComponent {
     const buttons = [];
 
     if (editDriverId) { // We are in Drivers List
-      buttons.push(<Button key="1" color="primary" onClick={this.onSubmitDriver}>Update Driver</Button>);
+      buttons.push(<Button key="1" onClick={this.onSubmitDriver} className="primaryButton">Update Driver</Button>);
     } else {
-      buttons.push(<Button key="1" color="secondary" type="button" onClick={previousPage} className="previous">Back</Button>);
-      buttons.push(<Button key="2" color="primary" type="submit" className="next">Next</Button>);
+      buttons.push(<Button key="1" type="button" className="secondaryButton" onClick={previousPage}>Back</Button>);
+      buttons.push(<Button key="2" type="submit" className="primaryButton">Next</Button>);
     }
 
     return (
@@ -343,7 +343,7 @@ class AddTruckFormThree extends PureComponent {
 
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                  <Button type="button" className="tertiaryButton" onClick={onClose}>
                     Cancel
                   </Button>
                 </ButtonToolbar>
