@@ -4,7 +4,7 @@ $themes: (
     colorBackgroundBody: #f2f4f7,
     colorText: #646777,
     colorTextAdditional: #646777,
-    logoImg: url(../img/logo/logo_light_t.png),
+    logoImg: url(../img/logo/logo_dark_t_v2.png),
     colorHover: #fafbfe,
     colorBorder: #eff1f5,
     colorIcon: #dddddd,
@@ -20,7 +20,7 @@ $themes: (
     colorBackgroundBody: #2a2a31,
     colorText: #dddddd,
     colorTextAdditional: #999999,
-    logoImg: url(../img/logo/logo_dark_t.png),
+    logoImg: url(../img/logo/logo_dark_t_v2.png),
     colorHover: #38373f,
     colorBorder: #333246,
     colorIcon: #605f7b,
@@ -68,3 +68,32 @@ $color-blue: #70bbfd;
 $color-blue-hover: darken($color-blue, 10%);
 
 $color-gray: #787985;
+
+// Custom color palette
+$color-dark-turquoise: rgb(59,98,115);
+$grey-top-border: rgb(172,187,198);
+$turquoise: rgb(84,142,168);
+$primary-green: rgb(0, 111, 83);
+$primary-dark-green: #00513D;
+$color-darkgreen: #00543c;
+// $color-blue: #0333b9;
+$color-darkblue: #0b1e6d;
+$color-brown: #4f271a;
+// $color-red: #a00505;
+$color-orange: #ff7900;
+// $color-yellow: #ffd400;
+$color-chartreuse: #aee01d;
+$color-white: #ffffff;
+$color-lightgray1: #f9f9f9;
+$color-lightgray2: #f5f5f5;
+$color-lightgray3: #f0f0f0;
+$color-lightgray4: #eeeeee;
+$color-lightgray5: #dddddd;
+$color-lightgray6: #cccccc;
+$color-gray1: #999999;
+$color-gray2: #808080;
+$color-gray3: #666666;
+$color-darkgray1: #555555;
+$color-darkgray2: #444444;
+$color-charcoal: #333333;
+$color-black: #000000;

@@ -227,17 +227,13 @@ class AddTruckFormFour extends PureComponent {
               <hr className="bighr" />
               <div className="profile__stats">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                  <Button type="button" className="tertiaryButton" onClick={onClose}>
                     Cancel
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="secondary" type="button" className="previous" onClick={previousPage} >
-                    Go back
-                  </Button>
-                  <Button color="primary" onClick={this.saveInfo} type="submit" className="next">
-                    Save now
-                  </Button>
+                  <Button type="button" className="secondaryButton" onClick={previousPage}>Go back</Button>
+                  <Button onClick={this.saveInfo} type="submit" className="primaryButton">Save now</Button>
                 </ButtonToolbar>
               </div>
             </CardBody>

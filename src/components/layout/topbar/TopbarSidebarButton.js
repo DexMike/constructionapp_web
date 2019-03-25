@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import icon from '../../../img/burger.svg';
-
-// const icon = `${process.env.PUBLIC_URL}/img/burger.svg`;
 
 class TopbarSidebarButton extends Component {
   render() {
@@ -11,10 +8,10 @@ class TopbarSidebarButton extends Component {
     return (
       <div>
         <button type="button" className="topbar__button topbar__button--desktop" onClick={changeSidebarVisibility}>
-          <img src={`${window.location.origin}/${icon}`} alt="" className="topbar__button-icon" />
+          <i className="material-icons">menu</i>
         </button>
         <button type="button" className="topbar__button topbar__button--mobile" onClick={changeMobileSidebarVisibility}>
-          <img src={`${window.location.origin}/${icon}`} alt="" className="topbar__button-icon" />
+          <i className="material-icons topbar__button-icon">menu</i>
         </button>
       </div>
     );

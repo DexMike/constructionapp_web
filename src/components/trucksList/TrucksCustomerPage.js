@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import {
+  Button,
   Card,
   CardBody,
   Col,
@@ -17,6 +18,7 @@ import TSelect from '../common/TSelect';
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
+import JobCreatePopup from '../jobs/JobCreatePopup';
 
 import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
@@ -27,6 +29,7 @@ import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
+import './Truck.css';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -46,13 +49,13 @@ class TrucksCustomerPage extends Component {
       materialTypeList: [],
       rateTypeList: [],
       sortByList,
-      // Filters
-      // sortBy: 1,
 
       equipments: [],
       selectedEquipment: {},
 
       modal: false,
+      modalSelectMaterials: false,
+      modalAddJob: false,
       goToDashboard: false,
       startDate: null,
       endDate: null,
@@ -70,18 +73,12 @@ class TrucksCustomerPage extends Component {
         rateType: '',
         sortBy: sortByList[0]
       }
-
-      // ...equipment
-      // goToAddJob: false,
-      // goToUpdateJob: false,
-      // goToCreateJob: false,
-      // jobId: 0
-
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
@@ -89,6 +86,8 @@ class TrucksCustomerPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
+    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
   }
 
   async componentDidMount() {
@@ -96,6 +95,11 @@ class TrucksCustomerPage extends Component {
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({ loaded: true });
+  }
+
+  retrieveAllMaterials() {
+    const { materialTypeList } = this.state;
+    return materialTypeList;
   }
 
   async fetchFilterLists() {
@@ -167,7 +171,6 @@ class TrucksCustomerPage extends Component {
           .format();
         return newEquipment;
       });
-      // );
       this.setState({ equipments });
     }
   }
@@ -251,9 +254,28 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  toggleSelectMaterialsModal() {
+    // console.log(274);
+    const { modalSelectMaterials } = this.state;
+    this.setState({
+      modalSelectMaterials: !modalSelectMaterials
+    });
+  }
+
+  toggleNewJobModal() {
+    const { modalAddJob } = this.state;
+    this.setState({
+      modalAddJob: !modalAddJob
+    });
+  }
+
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
+  }
+
+  preventModal() {
+    this.setState({ modal: false });
   }
 
   renderGoTo() {
@@ -270,19 +292,71 @@ class TrucksCustomerPage extends Component {
     return false;
   }
 
+  // renderSelectMaterialModal
+  renderSelectMaterialModal() {
+    const {
+      modalSelectMaterials,
+      toggleSelectMaterialsModal
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalSelectMaterials}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__header">
+          <button
+            type="button"
+            className="lnr lnr-cross modal__close-btn"
+            onClick={!toggleSelectMaterialsModal}
+          />
+          <h4 className="bold-text modal__title white_title">
+            Select material
+          </h4>
+        </div>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+          Please select a material type for this job
+        </div>
+
+        <Row className="col-md-12">
+          <div className="col-md-6">
+            &nbsp;
+          </div>
+          <div className="col-md-6">
+            <Button
+              color="primary"
+              onClick={!toggleSelectMaterialsModal}
+              type="button"
+              className="next float-right"
+            >
+              Close
+            </Button>
+          </div>
+        </Row>
+      </Modal>
+    );
+  }
+
   renderModal() {
     const {
-      // equipments,
-      // startAvailability,
-      // endAvailability,
-      // truckType,
-      // minCapacity,
-      // materials,
-      // zipCode,
-      // rateType,
       modal,
-      selectedEquipment
+      selectedEquipment,
+      materialTypeList
+      // equipments
     } = this.state;
+    let { modalSelectMaterials } = this.state;
+
+    const mats = this.returnSelectedMaterials();
+
+    if (mats.length < 1 && modal && materialTypeList.length > 0) {
+      // console.log(367);
+      // this.toggleSelectMaterialsModal();
+      // modalSelectMaterials = !modalSelectMaterials;
+      this.preventModal();
+      return false;
+      // alert('Please select a material type for this job');
+    }
+
     return (
       <Modal
         isOpen={modal}
@@ -300,8 +374,26 @@ class TrucksCustomerPage extends Component {
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
+            getAllMaterials={this.retrieveAllMaterials}
           />
         </div>
+      </Modal>
+    );
+  }
+
+  renderNewJobModal() {
+    const {
+      modalAddJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJob}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleAddJobModal}
+        />
       </Modal>
     );
   }
@@ -315,6 +407,11 @@ class TrucksCustomerPage extends Component {
           Dashboard
         </button>
         &#62;Find a Truck
+        <button type="button" className="app-link"
+                onClick={this.toggleNewJobModal}
+        >
+          ADD A JOB
+        </button>
       </div>
     );
   }
@@ -373,33 +470,6 @@ class TrucksCustomerPage extends Component {
                   </Row>
                   <Row lg={12} id="filter-input-row">
                     <Col sm="3">
-                      {/* <TDateTimePicker
-                          input={
-                            {
-                              onChange: this.handleStartDateChange,
-                              name: 'startAvailability',
-                              value: { startDate },
-                              givenDate: new Date(startDate).getTime()
-                            }
-                          }
-                          onChange={this.handleStartDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    </Col>
-                    <Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              className: 'filter-text',
-                              onChange: this.handleEndDateChange,
-                              name: 'endAvailability',
-                              value: { endDate },
-                              givenDate: new Date(endDate).getTime()
-                            }
-                          }
-                          onChange={this.handleEndDateChange}
-                          dateFormat="MM-dd-yy"
-                      /> */}
                       <TIntervalDatePicker
                         startDate={startDate}
                         endDate={endDate}
@@ -502,7 +572,7 @@ class TrucksCustomerPage extends Component {
                             label: rateType
                           }))
                         }
-                        placeholder={rateTypeList[0]}
+                        placeholder="Select materials"
                       />
                     </Col>
                   </Row>
@@ -653,13 +723,13 @@ class TrucksCustomerPage extends Component {
                 <br/>
               </Col>
               <Col>
-                <button type="button"
-                        className="btn btn-primary"
-                        onClick={() => this.handleEquipmentEdit(equipment.id)}
-                        style={{ marginTop: '10px' }}
+                <Button
+                  onClick={() => this.handleEquipmentEdit(equipment.id)}
+                  className="primaryButton"
+                  style={{ marginTop: '10px' }}
                 >
-                  Request
-                </button>
+                  Add a Truck
+                </Button>
               </Col>
             </Row>
           </Col>
@@ -744,6 +814,7 @@ class TrucksCustomerPage extends Component {
       return (
         <Container className="dashboard">
           {this.renderModal()}
+          {this.renderNewJobModal()}
           {this.renderGoTo()}
           {this.renderBreadcrumb()}
           {this.renderTitle()}
@@ -754,9 +825,9 @@ class TrucksCustomerPage extends Component {
       );
     }
     return (
-      <Container className="dashboard">
+      <div>
         Loading...
-      </Container>
+      </div>
     );
   }
 }

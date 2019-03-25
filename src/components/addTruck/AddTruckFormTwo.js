@@ -286,13 +286,13 @@ class AddTruckFormTwo extends PureComponent {
 
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                  <Button type="button" className="tertiaryButton" onClick={onClose}>
                     Cancel
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button color="secondary" type="button" onClick={this.saveAndGoBack} >Back</Button>
-                  <Button color="primary" type="submit" className="next">Next</Button>
+                  <Button type="button" className="secondaryButton" onClick={this.saveAndGoBack} >Back</Button>
+                  <Button type="submit" className="primaryButton">Next</Button>
                 </ButtonToolbar>
               </Row>
 

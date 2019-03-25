@@ -73,7 +73,6 @@ p, h1, h2, h3, h4, h5, h6 {
 }
 .btn-toolbar:last-child {
     margin-top: 0px !important;
-    margin-bottom: -10px !important;
 }
 .card-body {
     padding-top: 20px;
