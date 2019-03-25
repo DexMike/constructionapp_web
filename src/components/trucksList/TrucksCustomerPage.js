@@ -18,7 +18,6 @@ import TSelect from '../common/TSelect';
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
-import JobCreatePopup from '../jobs/JobCreatePopup';
 
 import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
@@ -54,8 +53,6 @@ class TrucksCustomerPage extends Component {
       selectedEquipment: {},
 
       modal: false,
-      modalSelectMaterials: false,
-      modalAddJob: false,
       goToDashboard: false,
       startDate: null,
       endDate: null,
@@ -78,7 +75,6 @@ class TrucksCustomerPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
-    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
@@ -262,13 +258,6 @@ class TrucksCustomerPage extends Component {
     });
   }
 
-  toggleNewJobModal() {
-    const { modalAddJob } = this.state;
-    this.setState({
-      modalAddJob: !modalAddJob
-    });
-  }
-
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
@@ -381,23 +370,6 @@ class TrucksCustomerPage extends Component {
     );
   }
 
-  renderNewJobModal() {
-    const {
-      modalAddJob
-    } = this.state;
-    return (
-      <Modal
-        isOpen={modalAddJob}
-        toggle={this.toggleAddJobModal}
-        className="modal-dialog--primary modal-dialog--header"
-      >
-        <JobCreatePopup
-          toggle={this.toggleAddJobModal}
-        />
-      </Modal>
-    );
-  }
-
   renderBreadcrumb() {
     return (
       <div>
@@ -407,11 +379,6 @@ class TrucksCustomerPage extends Component {
           Dashboard
         </button>
         &#62;Find a Truck
-        <button type="button" className="app-link"
-                onClick={this.toggleNewJobModal}
-        >
-          ADD A JOB
-        </button>
       </div>
     );
   }
@@ -814,7 +781,6 @@ class TrucksCustomerPage extends Component {
       return (
         <Container className="dashboard">
           {this.renderModal()}
-          {this.renderNewJobModal()}
           {this.renderGoTo()}
           {this.renderBreadcrumb()}
           {this.renderTitle()}
