@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
 import AddressService from '../../api/AddressService';
 import JobService from '../../api/JobService';
+import BidService from '../../api/BidService';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -58,7 +59,7 @@ class JobCreateFormTwo extends PureComponent {
     e.persist();
     const { firstTabData } = this.props;
     const d = firstTabData();
-    // console.log(d);
+    console.log(d);
 
     // start location
     const address1 = {
@@ -104,7 +105,22 @@ class JobCreateFormTwo extends PureComponent {
       numberOfTrucks: d.capacity // check if this one is alright
     };
 
-    await JobService.createJob(job);
+    const newJob = await JobService.createJob(job);
+
+    // bid
+    const bid = {
+      jobId: newJob.id,
+      hasCustomerAccepted: 0,
+      hasSchedulerAccepted: 0,
+      status: 'New',
+      userId: profile.userId,
+      rateType: 'Ton',
+      rate: 0,
+      rateEstimate: 0,
+      notes: d.instructions
+    };
+
+    await BidService.createBid(bid);
 
     // return false;
     const { onClose } = this.props;
