@@ -130,6 +130,7 @@ class ReportsCarrierPage extends Component {
     let cancelledJobs = 0;
     let jobsPerTruck = 0;
     let idleTrucks = 0;
+    let completedOffersPercent = 0;
 
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -171,6 +172,9 @@ class ReportsCarrierPage extends Component {
     jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
     idleTrucks = 1;
 
+    // Jobs completed / Job offers responded to
+    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+
     potentialIncome = TFormat.asMoney(potentialIncome);
 
     // console.log(jobs);
@@ -192,14 +196,6 @@ class ReportsCarrierPage extends Component {
           </Row>
 
           <div className="row">
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Total Jobs</center></h5>
-                  <span><center><h4>{jobs.length}</h4></center></span>
-                </div>
-              </div>
-            </div>
 
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
@@ -222,17 +218,8 @@ class ReportsCarrierPage extends Component {
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
+                  <h5 className="card__title bold-text"><center>Jobs Booked</center></h5>
                   <span><center><h4>{acceptedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                  <span><center><h4>{completedJobCount}</h4></center></span>
                 </div>
               </div>
             </div>
@@ -242,6 +229,24 @@ class ReportsCarrierPage extends Component {
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
                   <span><center><h4>{potentialIncome}</h4></center></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-12 col-md-2 col-lg-2">
+              <div className="card">
+                <div className="dashboard__card-widget card-body">
+                  <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
+                  <span><center><h4>{completedJobCount}</h4></center></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-12 col-md-2 col-lg-2">
+              <div className="card">
+                <div className="dashboard__card-widget card-body">
+                  <h5 className="card__title bold-text"><center>% completed</center></h5>
+                  <span><center><h4>{completedOffersPercent}</h4></center></span>
                 </div>
               </div>
             </div>
