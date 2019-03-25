@@ -1,9 +1,9 @@
 //TUI
 @font-face {
   font-family: 'Interstate-Regular';
-  src:  url('/../../fonts/interstate-regular-webfont.woff2') format('woff2'),
-        url('/../../fonts/interstate-regular-webfont.woff') format('woff'),
-        url('/../../fonts/interstate-regular-webfont.ttf') format('truetype');
+  src:  url('./../fonts/interstate-regular-webfont.woff2') format('woff2'),
+        url('./../fonts/interstate-regular-webfont.woff') format('woff'),
+        url('./../fonts/interstate-regular-webfont.ttf') format('truetype');
 }
 
 button, input, optgroup, select, textarea {
