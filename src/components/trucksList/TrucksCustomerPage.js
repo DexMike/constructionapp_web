@@ -728,7 +728,7 @@ class TrucksCustomerPage extends Component {
                   className="primaryButton"
                   style={{ marginTop: '10px' }}
                 >
-                  Add a Truck
+                  Request
                 </Button>
               </Col>
             </Row>
