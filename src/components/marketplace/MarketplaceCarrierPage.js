@@ -1,83 +1,260 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Col,
+  Container,
+  Modal,
+  Row
+} from 'reactstrap';
+// import classnames from 'classnames';
 import moment from 'moment';
-
+// import { Select } from '@material-ui/core';
+import NumberFormat from 'react-number-format';
+import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
+import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
+import LookupsService from '../../api/LookupsService';
+import JobCreateForm from '../jobs/JobCreateForm';
+
+import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
-import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import ProfileService from '../../api/ProfileService';
+import JobMaterialsService from '../../api/JobMaterialsService';
+import JobsService from '../../api/JobService';
+import AgentService from '../../api/AgentService';
+import MultiSelect from '../common/TMultiSelect';
+import TDateTimePicker from '../common/TDateTimePicker';
+import TIntervalDatePicker from '../common/TIntervalDatePicker';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
     super(props);
 
+    // NOTE: if you update this list you have to update
+    // Orion.EquipmentDao.filtersOrderByClause
+    const sortByList = ['Hourly ascending', 'Hourly descending',
+      'Tonnage ascending', 'Tonnage descending'];
+
+    // Comment
     this.state = {
+      loaded: false,
       jobs: [],
+      selectedJob: {},
+
+      // Look up lists
+      equipmentTypeList: [],
+      materialTypeList: [],
+      rateTypeList: [],
+      sortByList,       // array from above
+      // sortBy: 1,
+
+      equipments: [],
+      selectedEquipment: {},
+
+      modal: false,
       goToDashboard: false,
-      goToAddJob: false,
-      goToUpdateJob: false,
-      jobId: 0
-      // profile: null
+      startDate: null,
+      endDate: null,
+
+      // TODO: Refactor to a single filter object
+      // Filter values
+      filters: {
+        rateType: '',
+
+        startAvailability: null,
+        endAvailability: null,
+        rate: 'Any',
+        minTons: 'Any',
+        minHours: '',
+
+        truckType: '',
+        numTrucks: 1,
+        zipCode: '',
+        materialType: [],
+
+        sortBy: sortByList[0]
+      }
+
+      // ...equipment
+      // goToAddJob: false,
+      // goToUpdateJob: false,
+      // goToCreateJob: false,
+      // jobId: 0
+
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.handleStartDateChange = this.handleStartDateChange.bind(this);
+    this.handleEndDateChange = this.handleEndDateChange.bind(this);
+    this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
+    this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
   }
 
   async componentDidMount() {
+    console.log("componentDidMount BEFORE");
     const jobs = await this.fetchJobs();
+    await this.fetchFilterLists();
+    console.log("componentDidMount AFTER");
+    console.log(jobs);
+    console.log("componentDidMount SHOW");
 
-    Promise.all(
-      jobs.map(async (job) => {
-        const newJob = job;
+    if (jobs) {
+      // Promise.all(
+        jobs.map(async (job) => {
+          const newJob = job;
 
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
+          const company = await CompanyService.getCompanyById(newJob.companiesId);
+          newJob.companyName = company.legalName;
 
-        // console.log(companyName);
-        // console.log(job.companyName);
+          // console.log(companyName);
+          // console.log(job.companyName);
 
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
+          const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+          const materials = materialsList.map(materialItem => materialItem.value);
+          newJob.material = this.equipmentMaterialsAsString(materials);
+          // console.log(companyName);
+          // console.log(job.material);
 
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
+          const address = await AddressService.getAddressById(newJob.startAddress);
+          newJob.zip = address.zipCode;
 
-        return newJob;
-      })
+          return newJob;
+        })
+      // );
+    }
+
+    this.setState(
+      {
+        jobs,
+        loaded: true
+      }
     );
-    this.setState({ jobs });
-    // console.log(jobs);
+    console.log("componentDidMount SETSTATE 1");
+    console.log(jobs);
+    console.log("componentDidMount SETSTATE 2");
   }
 
-  equipmentMaterialsAsString(materials) {
-    let materialsString = '';
-    if (materials) {
-      let index = 0;
-      for (const material of materials) {
-        if (index !== materials.length - 1) {
-          materialsString += `${material}, `;
-        } else {
-          materialsString += material;
-        }
-        index += 1;
+  async fetchFilterLists() {
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+    const profile = await ProfileService.getProfile();
+
+    if (profile.companyId) {
+      const company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        const address = await AddressService.getAddressById(company.addressId);
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
       }
     }
-    return materialsString;
+
+    // TODO need to refactor above to do the filtering on the Orion
+    // LookupDao Hibernate side
+
+    const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
+    Object.values(lookupEquipmentList)
+      .forEach((itm) => {
+        equipmentTypeList.push(itm.val1);
+      });
+
+    const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
+    Object.values(lookupMaterialTypeList)
+      .forEach((itm) => {
+        materialTypeList.push(itm.val1);
+      });
+
+    const lookupRateTypelist = await LookupsService.getLookupsByType('RateType');
+    Object.values(lookupRateTypelist)
+      .forEach((itm) => {
+        rateTypeList.push(itm.val1);
+      });
+
+    [filters.truckType] = equipmentTypeList;
+    [filters.materials] = materialTypeList;
+    [filters.rateType] = rateTypeList;
+    this.setState({
+      filters,
+      equipmentTypeList,
+      materialTypeList,
+      rateTypeList
+    });
   }
 
-  handleJobEdit(id) {
+  async fetchJobs() {
+    const { filters } = this.state;
+    // console.log("fetchJobs");
+    // console.log(filters);
+    console.log("fetchJobs BEFORE");
+    let jobs = await JobService.getJobByFilters(filters);
+    console.log("fetchJobs AFTER");
+    console.log(jobs);
+    console.log("fetchJobs SHOW");
+
+    if (jobs) {
+      // NOTE let's try not to use Promise.all and use full api calls
+      // Promise.all(
+      if (jobs != null) {
+        jobs.map((job) => {
+          const newJob = job;
+          //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
+          //     newEquipment.companyName = company.legalName;
+          // console.log(companyName);
+          // console.log(job.companyName)
+          // const materialsList = await EquipmentMaterialsService
+          // .getEquipmentMaterialsByJobId(job.id);
+          // const materials = materialsList.map(materialItem => materialItem.value);
+          // newJob.material = this.equipmentMaterialsAsString(materials);
+          // console.log(companyName);
+          // console.log(job.material);
+          newJob.modifiedOn = moment(job.modifiedOn)
+            .format();
+          newJob.createdOn = moment(job.createdOn)
+            .format();
+          return job;
+        });
+      }
+
+      this.setState({ jobs });
+    }
+    return jobs;
+  }
+
+  async handleFilterChange(e) {
+    const { value } = e.target;
+    const { filters } = this.state;
+    filters[e.target.name] = value;
+    await this.fetchJobs();
+    this.setState({ filters });
+  }
+
+  async handleSelectFilterChange(option) {
+    const { value, name } = option;
+    const { filters } = this.state;
+    filters[name] = value;
+    await this.fetchJobs();
+    this.setState({ filters });
+  }
+
+  handleMultiChange(data) {
+    const { filters } = this.state;
+    filters.materialType = data;
     this.setState({
-      goToUpdateJob: true,
-      jobId: id
+      // selectedMaterials: data
+      filters
+    }, async function changed() {
+      await this.fetchJobs();
+      // console.log(this.state);
     });
+    /**/
   }
 
   handlePageClick(menuItem) {
@@ -86,17 +263,53 @@ class MarketplaceCarrierPage extends Component {
     }
   }
 
-  async fetchJobs() {
-    let jobs = await JobService.getJobs();
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      newJob.modifiedOn = moment(job.modifiedOn)
-        .format();
-      newJob.createdOn = moment(job.createdOn)
-        .format();
-      return newJob;
+  handleJobEdit(id) {
+    const { jobs } = this.state;
+    const [selectedJob] = jobs.filter((job) => {
+      if (id === job.id) {
+        return job;
+      }
+      return false;
+    }, id);
+    selectedJob.materials = ['Any'];
+    this.setState({
+      selectedJob,
+      modal: true
     });
-    return jobs;
+  }
+
+  async handleStartDateChange(e) {
+    const { filters } = this.state;
+    filters.startAvailability = e;
+    await this.fetchJobs();
+    this.setState({ filters });
+  }
+
+  async handleEndDateChange(e) {
+    const { filters } = this.state;
+    filters.endAvailability = e;
+    await this.fetchJobs();
+    this.setState({ filters });
+  }
+
+  async handleIntervalInputChange(e) {
+    const { filters } = this.state;
+    filters.startAvailability = e.start;
+    filters.endAvailability = e.end;
+    await this.fetchJobs();
+    this.setState({ filters });
+  }
+
+  toggleAddJobModal() {
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
+    });
+  }
+
+  returnSelectedMaterials() {
+    const { filters } = this.state;
+    return filters.materialType;
   }
 
   renderGoTo() {
@@ -104,221 +317,140 @@ class MarketplaceCarrierPage extends Component {
     if (status.goToDashboard) {
       return <Redirect push to="/"/>;
     }
-    if (status.goToAddJob) {
-      return <Redirect push to="/jobs/save"/>;
-    }
-    if (status.goToUpdateJob) {
-      return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
-    }
+    // if (status.goToAddJob) {
+    //   return <Redirect push to="/jobs/save"/>;
+    // }
+    // if (status.goToUpdateJob) {
+    //   return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
+    // }
     return false;
   }
 
-  render() {
-    let { jobs } = this.state;
-    let newJobCount = 0;
-    let acceptedJobCount = 0;
-    let inProgressJobCount = 0;
-    let completedJobCount = 0;
-    let potentialIncome = 0;
-
-    let jobsCompleted = 0;
-    let totalEarnings = 0;
-    let earningsPerJob = 0;
-    let cancelledJobs = 0;
-    let jobsPerTruck = 0;
-    let idleTrucks = 0;
-
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      const tempRate = newJob.rate;
-      if (newJob.status === 'New') {
-        newJobCount += 1;
-      }
-      if (newJob.status === 'Accepted') {
-        acceptedJobCount += 1;
-      }
-      if (newJob.status === 'In Progress') {
-        inProgressJobCount += 1;
-      }
-      if (newJob.status === 'Job Completed') {
-        completedJobCount += 1;
-      }
-      if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-      }
-      if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-      }
-
-      newJob.newStartDate = TFormat.asDate(job.startTime);
-
-      potentialIncome += tempRate * newJob.rateEstimate;
-
-      return newJob;
-    });
-
-    jobsCompleted = newJobCount * 20;
-    totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
-    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
-    cancelledJobs = 1;
-    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
-    idleTrucks = 1;
-
-    potentialIncome = TFormat.asMoney(potentialIncome);
-
-    // console.log(jobs);
+  renderModal() {
+    const {
+      // equipments,
+      // startAvailability,
+      // endAvailability,
+      // truckType,
+      // minCapacity,
+      // materials,
+      // zipCode,
+      // rateType,
+      modal,
+      selectedEquipment
+    } = this.state;
     return (
-      <Container className="dashboard">
-        {this.renderGoTo()}
+      <Modal
+        isOpen={modal}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleAddJobModal}
+          />
+          <h4 className="bold-text modal__title">Job Request</h4>
+        </div>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+          <JobCreateForm
+            selectedEquipment={selectedEquipment}
+            closeModal={this.toggleAddJobModal}
+            selectedMaterials={this.returnSelectedMaterials}
+          />
+        </div>
+      </Modal>
+    );
+  }
+
+  renderBreadcrumb() {
+    return (
+      <div>
         <button type="button" className="app-link"
                 onClick={() => this.handlePageClick('Dashboard')}
         >
           Dashboard
         </button>
+        &#62;Find a Job By Ton
+      </div>
+    );
+  }
 
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Dashboard</h3>
-          </Col>
-        </Row>
+  renderTitle() {
+    return (
+      <Row>
+        <Col md={12}>
+          <h3 className="page-title">Find a Job</h3>
+        </Col>
+      </Row>
+    );
+  }
 
-        <div className="row">
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Total Jobs</center></h5>
-                <span><center><h4>{jobs.length}</h4></center></span>
-              </div>
-            </div>
-          </div>
+  renderJobList() {
+    let {
+      // Lists
+      // equipmentTypeList,
+      // materialTypeList,
+      // rateTypeList,
+      // startDate,
+      // endDate,
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>New Offers</center></h5>
-                <span><center><h4>{newJobCount}</h4></center></span>
-              </div>
-            </div>
-          </div>
+      // filters
+      // filters,
+      jobs
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Jobs in Progress</center></h5>
-                <span><center><h4>{inProgressJobCount}</h4></center></span>
-              </div>
-            </div>
-          </div>
+    } = this.state;
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
-                <span><center><h4>{acceptedJobCount}</h4></center></span>
-              </div>
-            </div>
-          </div>
+    console.log("renderJobList");
+    console.log(jobs);
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                <span><center><h4>{completedJobCount}</h4></center></span>
-              </div>
-            </div>
-          </div>
+    if (jobs) {
+      Promise.all(
+        jobs = jobs.map((job) => {
+          const newJob = job;
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
-                <span><center><h4>{potentialIncome}</h4></center></span>
-              </div>
-            </div>
-          </div>
+          // const company = await CompanyService.getCompanyById(newJob.companiesId);
+          // newJob.companyName = company.legalName;
+          //
+          // // console.log(companyName);
+          // // console.log(job.companyName);
+          //
+          // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+          // const materials = materialsList.map(materialItem => materialItem.value);
+          // newJob.material = this.equipmentMaterialsAsString(materials);
+          // // console.log(companyName);
+          // // console.log(job.material);
+          //
+          // const address = await AddressService.getAddressById(newJob.startAddress);
+          // newJob.zip = address.zipCode;
 
-        </div>
+          const tempRate = newJob.rate;
+          if (newJob.rateType === 'Hour') {
+            newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+            newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+            newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          }
+          if (newJob.rateType === 'Ton') {
+            newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+            newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+            newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          }
 
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Last 30 days</h3>
-          </Col>
-        </Row>
+          newJob.newStartDate = TFormat.asDate(job.startTime);
 
-        <div className="row">
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
-                <span><center><h4>{jobsCompleted}</h4></center></span>
-              </div>
-            </div>
-          </div>
+          return newJob;
+        }
+        ));
+    }
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
-                <span><center><h4>{totalEarnings}</h4></center></span>
-              </div>
-            </div>
-          </div>
 
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
-                <span><center><h4>{earningsPerJob}</h4></center></span>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
-                <span><center><h4>{cancelledJobs}</h4></center></span>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
-                <span><center><h4>{jobsPerTruck}</h4></center></span>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-2 col-lg-2">
-            <div className="card">
-              <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
-                <span><center><h4>{idleTrucks}</h4></center></span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <br />
-
+    return (
+      <Container className="dashboard">
         {/* {this.renderGoTo()} */}
         {/* <button type="button" className="app-link" */}
         {/* onClick={() => this.handlePageClick('Dashboard')} */}
         {/* > */}
         {/* Dashboard */}
         {/* </button> */}
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Jobs</h3>
-          </Col>
-        </Row>
         <Row>
           <Col md={12}>
             <Card>
@@ -332,55 +464,510 @@ class MarketplaceCarrierPage extends Component {
                       //   displayName: 'Job Id'
                       // },
                       {
-                        name: 'name',
-                        displayName: 'Job Name'
-                      },
-                      {
-                        name: 'image',
-                        displayName: 'Truck Image'
-                      },
-                      {
-                        name: 'status',
-                        displayName: 'Job Status'
-                      },
-                      {
-                        name: 'companyName',
-                        displayName: 'Customer'
-                      },
-                      {
                         name: 'newStartDate',
                         displayName: 'Start Date'
-                      },
-                      {
-                        name: 'zip',
-                        displayName: 'Start Zip'
-                      },
-                      {
-                        name: 'newSize',
-                        displayName: 'Size'
-                      },
-                      {
-                        name: 'newRate',
-                        displayName: 'Rate'
                       },
                       {
                         name: 'estimatedIncome',
                         displayName: 'Est. Income'
                       },
                       {
+                        name: 'newRate',
+                        displayName: 'Hourly Rate'
+                      },
+                      {
+                        name: 'newSize',
+                        displayName: 'Min Hours'
+                      },
+                      {
+                        name: 'zip',
+                        displayName: 'Zip Code'
+                      },
+                      {
                         // the materials needs to come from the the JobMaterials Table
                         name: 'material',
                         displayName: 'Materials'
+                      },
+                      {
+                        name: 'zip',
+                        displayName: 'Truck Type'
+                      },
+                      {
+                        name: 'numberOfTrucks',
+                        displayName: 'Number of Trucks'
                       }
                     ]
                   }
                   data={jobs}
                   handleIdClick={this.handleJobEdit}
                 />
+
               </CardBody>
             </Card>
           </Col>
         </Row>
+      </Container>
+    );
+  }
+
+  renderFilter() {
+    const {
+      // Lists
+      equipmentTypeList,
+      materialTypeList,
+      rateTypeList,
+      startDate,
+      endDate,
+
+      // filters
+      filters
+
+    } = this.state;
+
+    return (
+      <Row>
+        <Col md={12}>
+          <Card>
+            <CardBody>
+              <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
+                <Col lg={12}>
+
+                  <Col>
+                    Select by:
+                    <TSelect
+                      input={
+                        {
+                          onChange: this.handleSelectFilterChange,
+                          name: 'rateType',
+                          value: filters.rateType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      value={filters.rateType}
+                      options={
+                        rateTypeList.map(rateType => ({
+                          name: 'rateType',
+                          value: rateType,
+                          label: rateType
+                        }))
+                      }
+                      placeholder={rateTypeList[0]}
+                    />
+                  </Col>
+                </Col>
+
+                <Col lg={12}>
+                  <Row lg={12} style={{ background: '#eef4f8' }}>
+                    <Col className="filter-item-title">
+                      Start Date
+                    </Col>
+                    <Col className="filter-item-title">
+                      Rate
+                    </Col>
+                    <Col className="filter-item-title">
+                      Min Tons
+                    </Col>
+                    <Col className="filter-item-title">
+                      Truck Type
+                    </Col>
+                    <Col className="filter-item-title">
+                      # of Trucks
+                    </Col>
+                    <Col className="filter-item-title">
+                      Zip Code
+                    </Col>
+                    <Col className="filter-item-title">
+                      Materials
+                    </Col>
+                  </Row>
+                  <Row lg={12} id="filter-input-row">
+                    <Col>
+                      <TDateTimePicker
+                          input={
+                            {
+                              onChange: this.handleStartDateChange,
+                              name: 'startAvailability',
+                              value: { startDate },
+                              givenDate: new Date(startDate).getTime()
+                            }
+                          }
+                          onChange={this.handleStartDateChange}
+                          dateFormat="MM-dd-yy"
+                      />
+                      {/*
+                    </Col>
+                    <Col>
+                      <TDateTimePicker
+                          input={
+                            {
+                              className: 'filter-text',
+                              onChange: this.handleEndDateChange,
+                              name: 'endAvailability',
+                              value: { endDate },
+                              givenDate: new Date(endDate).getTime()
+                            }
+                          }
+                          onChange={this.handleEndDateChange}
+                          dateFormat="MM-dd-yy"
+                      />
+                      <TIntervalDatePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        name="dateInterval"
+                        onChange={this.handleIntervalInputChange}
+                        dateFormat="MM/dd/yy"
+                      />
+                      */}
+                    </Col>
+                    <Col>
+                      $<input name="rate"
+                             className="filter-text"
+                             type="text"
+                             placeholder="Any"
+                             value={filters.rate}
+                             onChange={this.handleFilterChange}
+                      />
+                      per Ton
+                    </Col>
+                    <Col>
+                      <input name="minTons"
+                             className="filter-text"
+                             type="text"
+                             placeholder="Any"
+                             value={filters.minTons}
+                             onChange={this.handleFilterChange}
+                      />
+                    </Col>
+                    <Col>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'truckType',
+                            value: filters.truckType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.truckType}
+                        options={
+                          equipmentTypeList.map(equipmentType => ({
+                            name: 'truckType',
+                            value: equipmentType,
+                            label: equipmentType
+                          }))
+                        }
+                        placeholder={equipmentTypeList[0]}
+                      />
+                    </Col>
+                    <Col>
+                      <input name="numTrucks"
+                             className="filter-text"
+                             type="text"
+                             placeholder="1"
+                             value={filters.numTrucks}
+                             onChange={this.handleFilterChange}
+                      />
+                    </Col>
+                    <Col>
+                      <input name="zipCode"
+                             className="filter-text"
+                             type="text"
+                             placeholder="Zip Code"
+                             value={filters.zipCode}
+                             onChange={this.handleFilterChange}
+                      />
+                    </Col>
+                    <Col>
+                      <MultiSelect
+                        input={
+                          {
+                            onChange: this.handleMultiChange,
+                            // onChange: this.handleSelectFilterChange,
+                            name: 'materialType',
+                            value: filters.materialType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        options={
+                          materialTypeList.map(materialType => ({
+                            name: 'materialType',
+                            value: materialType.trim(),
+                            label: materialType.trim()
+                          }))
+                        }
+                        // placeholder="Materials"
+                        placeholder={materialTypeList[0]}
+                      />
+                    </Col>
+
+                  </Row>
+                </Col>
+
+                <br/>
+
+              </form>
+
+            </CardBody>
+          </Card>
+        </Col>
+
+      </Row>
+    );
+  }
+
+  renderEquipmentRow(equipment) {
+    return (
+      <React.Fragment>
+        <Row md={12} style={{ width: '100%' }}>
+          {/* 100 85 */}
+          <Col md={2}>
+            <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
+                 style={{ width: '118px' }}
+            />
+          </Col>
+
+          <Col md={4}>
+            <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
+              <Col className="customer-truck-results-title">
+                Type: {equipment.type}
+              </Col>
+              <Col className="customer-truck-results-title">
+                Capacity:
+                <NumberFormat
+                  value={equipment.maxCapacity}
+                  displayType="text"
+                  decimalSeparator="."
+                  decimalScale={0}
+                  fixedDecimalScale
+                  thousandSeparator
+                  prefix=" "
+                  suffix=" Tons"
+                />
+              </Col>
+            </Row>
+            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
+              <Col>
+                Rate
+              </Col>
+              <Col>
+                Minimum
+              </Col>
+            </Row>
+            {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
+              <Row>
+                <Col>
+
+                  <span>
+                    <NumberFormat
+                      value={equipment.hourRate}
+                      displayType="text"
+                      decimalSeparator="."
+                      decimalScale={2}
+                      fixedDecimalScale
+                      thousandSeparator
+                      prefix="$ "
+                      suffix=" / Hour"
+                    />
+                  </span>
+
+                </Col>
+                <Col>
+                  <NumberFormat
+                    value={equipment.minHours}
+                    displayType="text"
+                    decimalSeparator="."
+                    decimalScale={2}
+                    fixedDecimalScale
+                    thousandSeparator
+                    suffix=" hours min"
+                  />
+                </Col>
+              </Row>
+            )}
+            {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
+              <Row>
+                <Col>
+
+                  <span>
+                    <NumberFormat
+                      value={equipment.tonRate}
+                      displayType="text"
+                      decimalSeparator="."
+                      decimalScale={2}
+                      fixedDecimalScale
+                      thousandSeparator
+                      prefix="$ "
+                      suffix=" / Ton"
+                    />
+                  </span>
+
+                </Col>
+                <Col>
+                  <NumberFormat
+                    value={equipment.minCapacity}
+                    displayType="text"
+                    decimalSeparator="."
+                    decimalScale={2}
+                    fixedDecimalScale
+                    thousandSeparator
+                    suffix=" tons min"
+                  />
+                </Col>
+              </Row>
+            )}
+          </Col>
+
+          <Col md={6}>
+            <Row style={{ background: '#c7dde8' }}>
+              <Col className="customer-truck-results-title">
+                Name: {equipment.name}
+              </Col>
+              {/* <Col md={6} className="customer-truck-results-title> */}
+              {/* Company: {equipment.companyName} */}
+              {/* </Col> */}
+            </Row>
+            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
+            {/* <Col> */}
+            {/* TODO needs API for equipment materials */}
+            {/* Materials Hauled */}
+            {/* </Col> */}
+            {/* </Row> */}
+            <Row>
+              <Col>
+                {/* HMA */}
+                <br/>
+                {/* Stone */}
+                <br/>
+                {/* Sand */}
+                <br/>
+              </Col>
+              <Col>
+                {/* Gravel */}
+                <br/>
+                {/* Recycling */}
+                <br/>
+              </Col>
+              <Col>
+                <button type="button"
+                        className="btn btn-primary"
+                        onClick={() => this.handleJobEdit(job.id)}
+                        style={{ marginTop: '10px' }}
+                >
+                  Request
+                </button>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+        <hr/>
+      </React.Fragment>
+    );
+  }
+
+  renderEquipmentTable() {
+    const {
+      sortByList,
+      filters,
+      equipments,
+      jobs
+    } = this.state;
+
+    return (
+      <Row>
+        <Col md={12}>
+          <Card>
+            <CardBody>
+              <Row>
+                <Col md={6} id="equipment-display-count">
+                  Displaying&nbsp;
+                  {jobs.length}
+                  &nbsp;of&nbsp;
+                  {jobs.length}
+                </Col>
+                <Col md={6}>
+                  <Row>
+                    <Col md={6} id="sortby">Sort By</Col>
+                    <Col md={6}>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'sortBy',
+                            value: filters.sortBy
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.sortBy}
+                        options={
+                          sortByList.map(sortBy => ({
+                            name: 'sortBy',
+                            value: sortBy,
+                            label: sortBy
+                          }))
+                        }
+                        placeholder={sortByList[0]}
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+
+              <Row style={{ marginTop: '10px' }}>
+                {
+                  equipments.map(equipment => (
+                    <React.Fragment key={equipment.id}>
+                      {this.renderEquipmentRow(equipment)}
+                    </React.Fragment>
+                  ))
+                }
+              </Row>
+
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+    );
+  }
+
+  render() {
+    const { loaded } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderModal()}
+          {this.renderGoTo()}
+          {this.renderBreadcrumb()}
+          {this.renderTitle()}
+          {this.renderFilter()}
+          {/* {this.renderTable()} */}
+          {/* {this.renderEquipmentTable()} */}
+          {this.renderJobList()}
+        </Container>
+      );
+    }
+    return (
+      <Container className="dashboard">
+        Loading...
       </Container>
     );
   }

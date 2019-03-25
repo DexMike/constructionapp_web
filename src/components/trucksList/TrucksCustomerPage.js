@@ -110,22 +110,6 @@ class TrucksCustomerPage extends Component {
       }
     }
 
-    // const lookups = await LookupsService.getLookups();
-    //
-    // Object.values(lookups)
-    //   .forEach((itm) => {
-    //     if (itm.key === 'EquipmentType') equipmentTypeList.push(itm.val1);
-    //   });
-    // Object.values(lookups)
-    //   .forEach((itm) => {
-    //     if (itm.key === 'MaterialType') materialTypeList.push(itm.val1);
-    //   });
-    //
-    // Object.values(lookups)
-    //   .forEach((itm) => {
-    //     if (itm.key === 'RateType') rateTypeList.push(itm.val1);
-    //   });
-
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
 
@@ -330,7 +314,7 @@ class TrucksCustomerPage extends Component {
         >
           Dashboard
         </button>
-        &#62;Find a Truckk
+        &#62;Find a Truck
       </div>
     );
   }

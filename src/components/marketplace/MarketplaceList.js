@@ -3,11 +3,9 @@ import React, { Component } from 'react';
 // import JobService from '../../api/JobService';
 // import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import { Container } from 'reactstrap';
-import TrucksCarrierPage from './TrucksCarrierPage';
-import TrucksCustomerPage from './TrucksCustomerPage';
+import MarketplaceCarrierPage from './MarketplaceCarrierPage';
+import MarketplaceCustomerPage from './MarketplaceCustomerPage';
 import ProfileService from '../../api/ProfileService';
-// import EquipmentsService from '../../api/EquipmentService';
-// import AddTruckForm from '../addTruck/AddTruckForm';
 import '../addTruck/AddTruck.css';
 
 class MarketplaceList extends Component {
@@ -18,7 +16,8 @@ class MarketplaceList extends Component {
       companyType: null,
       // companyId: 0,
       // totalTrucks: 0,
-      modal: false
+      modal: false,
+      byTonByHour: 'Hour' // default to byTon
     };
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
   } // constructor
@@ -55,9 +54,12 @@ class MarketplaceList extends Component {
   }
   /**/
 
-  renderTrucksFromCompanyType() {
-    // console.log(56);
-    const { companyType } = this.state;
+  renderMarketplaceFromCompanyType() {
+    const {
+      companyType,
+      byTonByHour
+    } = this.state;
+
     return (
       <React.Fragment>
         { companyType === 'Carrier' && <MarketplaceCarrierPage/>}
@@ -74,7 +76,7 @@ class MarketplaceList extends Component {
           {/*
             !!companyType && companyType === 'Carrier' && totalTrucks >= 0 && this.renderModal()
           */}
-          { !!companyType && this.renderTrucksFromCompanyType()}
+          { !!companyType && this.renderMarketplaceFromCompanyType()}
         </React.Fragment>
       );
     }
