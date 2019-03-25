@@ -169,32 +169,34 @@
   }
 
   &.btn-primary {
-    background-color: $color-blue;
-    border-color: $color-blue;
+    background-color: $primary-green;
+    border-color: $primary-green;
 
     &:before {
-      background-color: $color-blue-hover;
+      border-color: $color-darkgreen;
+      background-color: $color-darkgreen;
     }
 
     &:hover, &:focus, &:active, &:active:focus {
-      border-color: $color-blue-hover;
+      border-color: $color-darkgreen;
+      background-color: $color-darkgreen;
     }
   }
 
   &.btn-outline-primary {
-    color: $color-blue;
-    border-color: $color-blue;
+    color: $primary-green;
+    border-color: $primary-green;
 
     p {
-      color: $color-blue;
+      color: $primary-green;
     }
 
     svg {
-      fill: $color-blue;
+      fill: $primary-green;
     }
 
     &:before {
-      background-color: $color-blue;
+      background-color: $primary-green;
     }
   }
 
@@ -381,13 +383,13 @@
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
     &:before {
       color: white;
-      background-color: $primary-dark-green;
+      background-color: $color-darkgreen;
     }
 
     &:hover, &:focus, &:active, &:active:focus {
       color: white;
-      border-color: $primary-dark-green;
-      background-color: $primary-dark-green;
+      border-color: $color-darkgreen;
+      background-color: $color-darkgreen;
     }
   }
 
