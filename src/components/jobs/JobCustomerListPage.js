@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Col,
+  Container,
+  Row,
+  Modal
+} from 'reactstrap';
 // Button,
 import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
@@ -8,6 +15,7 @@ import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
+import JobCreatePopup from './JobCreatePopup';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
@@ -22,11 +30,13 @@ class JobCustomerListPage extends Component {
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
-      jobId: 0
+      jobId: 0,
+      modalAddJob: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -75,6 +85,14 @@ class JobCustomerListPage extends Component {
     return jobs;
   }
 
+  toggleNewJobModal() {
+    // console.log(89);
+    const { modalAddJob } = this.state;
+    this.setState({
+      modalAddJob: !modalAddJob
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -87,6 +105,23 @@ class JobCustomerListPage extends Component {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
+  }
+
+  renderNewJobModal() {
+    const {
+      modalAddJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJob}
+        toggle={this.toggleNewJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleNewJobModal}
+        />
+      </Modal>
+    );
   }
 
   render() {
@@ -116,13 +151,14 @@ class JobCustomerListPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          {this.renderNewJobModal()}
           {this.renderGoTo()}
           <button type="button" className="app-link"
                   onClick={() => this.handlePageClick('Dashboard')}
           >
             Dashboard
           </button>
-          &#62;Jobs
+          &#62;Jobs 125
           <Row>
             <Col md={12}>
               <h3 className="page-title">Jobs</h3>
@@ -132,6 +168,7 @@ class JobCustomerListPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
+                  {/*
                   <Button
                     style={{ width: '150px' }}
                     className="btn btn-primary account__btn account__btn--small"
@@ -139,6 +176,12 @@ class JobCustomerListPage extends Component {
                   >
                     Create Job
                   </Button>
+                  */}
+                  <button type="button" className="app-link"
+                    onClick={this.toggleNewJobModal}
+                  >
+                    ADD A JOB
+                  </button>
                   <hr/>
                   <TTable
                     columns={

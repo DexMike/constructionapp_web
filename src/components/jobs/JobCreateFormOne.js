@@ -62,6 +62,7 @@ class CreateJobFormOne extends PureComponent {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.firstPage = this.firstPage.bind(this);
     this.secondPage = this.secondPage.bind(this);
+    this.goToSecondFromFirst = this.goToSecondFromFirst.bind(this);
   }
 
   async componentDidMount() {
@@ -193,6 +194,11 @@ class CreateJobFormOne extends PureComponent {
 
   secondPage() {
     this.setState({ rateTab: 2 });
+  }
+
+  goToSecondFromFirst() {
+    const { gotoSecond } = this.props;
+    gotoSecond(this.state);
   }
 
   render() {
@@ -521,9 +527,6 @@ class CreateJobFormOne extends PureComponent {
                     placeholder="Zip"
                   />
                 </div>
-                <div className="col-md-8 form__form-group">
-                  ONE
-                </div>
               </Row>
 
               <Row className="col-md-12">
@@ -537,7 +540,7 @@ class CreateJobFormOne extends PureComponent {
                   </h3>
                 </div>
                 <div className="col-md-12 form__form-group">
-                  <input
+                  <textarea
                     name="instructions"
                     type="text"
                     value={instructions}
@@ -559,7 +562,14 @@ class CreateJobFormOne extends PureComponent {
                   >
                     Back
                   </Button>
-                  <Button color="primary" type="submit" className="next">Next</Button>
+                  <Button
+                    color="primary"
+                    type="submit"
+                    className="next"
+                    onClick={this.goToSecondFromFirst}
+                  >
+                    Next
+                  </Button>
                 </ButtonToolbar>
               </Row>
 
@@ -573,7 +583,8 @@ class CreateJobFormOne extends PureComponent {
 
 CreateJobFormOne.propTypes = {
   // getJobFullInfo: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  gotoSecond: PropTypes.func.isRequired
 };
 
 CreateJobFormOne.defaultProps = {

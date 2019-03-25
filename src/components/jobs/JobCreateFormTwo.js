@@ -7,78 +7,38 @@ import {
   ButtonToolbar,
   Row
 } from 'reactstrap';
-import moment from 'moment';
+// import moment from 'moment';
 import PropTypes from 'prop-types';
-// import validate from '../common/validate ';
+import ProfileService from '../../api/ProfileService';
+import AddressService from '../../api/AddressService';
+import JobService from '../../api/JobService';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      // ...equipment,
-      id: 0, // for use if we are editing
-      driversId: 0, // for use if we are editing
-      defaultDriverId: 0 // for use if we are editing      
+      // ...equipment
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleMultiChange = this.handleMultiChange.bind(this);
-    this.selectChange = this.selectChange.bind(this);
+    // this.handleMultiChange = this.handleMultiChange.bind(this);
+    // this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async componentDidMount() {
-    await this.fetchMaterials();
-  }
-
-  handleMultiChange(data) {
-    const { reqHandlerMaterials } = this.state;
-    this.setState({
-      reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
-        touched: false
-      })
-    });
-    this.setState({ selectedMaterials: data });
-  }
-
-  selectChange(data) {
-    const { reqHandlerTruckType } = this.state;
-    this.setState({
-      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
-        touched: false
-      })
-    });
-    this.setState({ truckType: data.value });
+    // await this.fetchMaterials();
   }
 
   isFormValid() {
+    /*
     const truck = this.state;
     const {
-      /*
       ratesByBoth,
       ratesByTon,
       ratesByHour
-      */
     } = this.state;
-    let isValid = true;
-
-    this.setState({
-      /*
-      reqHandlerTruckType: { touched: false },
-      reqHandlerMaterials: { touched: false },
-      */
-    });
-
-    /*
-    if (truck.truckType.length === 0) {
-      this.setState({
-        reqHandlerTruckType: {
-          touched: true,
-          error: 'Please select the type of truck you are adding'
-        }
-      });
-      isValid = false;
-    }
     */
+    let isValid = true;
 
     if (isValid) {
       return true;
@@ -93,20 +53,68 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
-  saveTruckInfo(redir) {
-    console.log('se');
-  }
-
   async saveTruck(e) {
     e.preventDefault();
     e.persist();
+    const { firstTabData } = this.props;
+    const d = firstTabData();
+    // console.log(d);
 
+    // start location
+    const address1 = {
+      type: 'Delivery',
+      name: 'Delivery Start Location',
+      companyId: 19, // 'this should change',
+      address1: d.startLocationAddress1,
+      address2: d.startLocationAddress2,
+      city: d.startLocationCity,
+      state: d.startLocationState,
+      zipCode: d.startLocationZip
+    };
+
+    // end location
+    const address2 = {
+      type: 'Delivery',
+      name: 'Delivery End Location',
+      companyId: 19, // 'this should change',
+      address1: d.endLocationAddress1,
+      address2: d.endLocationAddress2,
+      city: d.endLocationCity,
+      state: d.endLocationState,
+      zipCode: d.endLocationZip
+    };
+
+    // save two addresses
+    const startAddress = await AddressService.createAddress(address1);
+    const endAddress = await AddressService.createAddress(address2);
+
+    // job
+    const profile = await ProfileService.getProfile();
+    const job = {
+      companiesId: profile.companyId,
+      name: d.name,
+      status: 'New', // check if this one is alright
+      startAddress: startAddress.id,
+      endAddress: endAddress.id,
+      rateType: 'Ton',
+      rate: d.tonnage,
+      notes: d.instructions,
+      rateEstimate: 0,
+      rateTotal: 0,
+      numberOfTrucks: d.capacity // check if this one is alright
+    };
+
+    await JobService.createJob(job);
+
+    // return false;
+    const { onClose } = this.props;
+    onClose();
+    /*
     if (!this.isFormValid()) {
       // this.setState({ maxCapacityTouched: true });
       return;
     }
-
-    this.saveTruckInfo(true);
+    */
   }
 
   handleInputChange(e) {
@@ -162,16 +170,6 @@ class JobCreateFormTwo extends PureComponent {
     this.setState({ [e.target.name]: value });
   }
 
-  // Pull materials
-  async fetchMaterials() {
-    this.saveTruckInfo(false);
-    // let's cache this info, in case we want to go back
-  }
-
-  handleImg(e) {
-    return e;
-  }
-
   render() {
     const {
       // multiInput,
@@ -209,12 +207,20 @@ class JobCreateFormTwo extends PureComponent {
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                  {/*
                   <Button color="primary" type="button" disabled
                           className="previous"
                   >
                     Back
                   </Button>
-                  <Button color="primary" type="submit" className="next">Next</Button>
+                  */}
+                  <Button
+                    color="primary"
+                    type="submit"
+                    className="next"
+                  >
+                    Send Job
+                  </Button>
                 </ButtonToolbar>
               </Row>
 
@@ -228,7 +234,8 @@ class JobCreateFormTwo extends PureComponent {
 
 JobCreateFormTwo.propTypes = {
   // getJobFullInfo: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  firstTabData: PropTypes.func.isRequired
 };
 
 JobCreateFormTwo.defaultProps = {

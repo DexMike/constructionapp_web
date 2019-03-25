@@ -16,7 +16,8 @@ class JobCreatePopup extends Component {
 
     this.state = {
       page: 1,
-      loaded: true
+      loaded: true,
+      firstTabInfo: {}
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -24,6 +25,8 @@ class JobCreatePopup extends Component {
     this.firstPage = this.firstPage.bind(this);
     this.secondPage = this.secondPage.bind(this);
     this.closeNow = this.closeNow.bind(this);
+    this.saveAndGoToSecondPage = this.saveAndGoToSecondPage.bind(this);
+    this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
   }
 
   async componentDidMount() {
@@ -53,20 +56,28 @@ class JobCreatePopup extends Component {
     this.setState({ page: 2 });
   }
 
+  saveAndGoToSecondPage(e) {
+    // console.log(e);
+    this.setState({ firstTabInfo: e });
+    this.setState({ page: 2 });
+  }
+
   closeNow() {
+    // console.log(57);
     const { toggle } = this.props;
     toggle();
+  }
+
+  getFirstTabInfo() {
+    const { firstTabInfo } = this.state;
+    return firstTabInfo;
   }
 
   render() {
     const { equipmentId, companyId, editDriverId } = this.props;
     const {
       page,
-      loaded,
-      truckCachedInfo,
-      availabilityCachedInfo,
-      userCachedInfo,
-      truckPassedInfo
+      loaded
     } = this.state;
     if (loaded) {
       return (
@@ -108,26 +119,16 @@ class JobCreatePopup extends Component {
                       && (
                       <JobCreateFormOne
                         p={page}
-                        equipmentId={equipmentId}
-                        // companyId={companyId}
-                        onTruckFullInfo={this.handleTruckSave}
-                        handleSubmit={this.nextPage}
                         onClose={this.closeNow}
-                        getTruckFullInfo={this.getTruckInfo}
-                        passedTruckFullInfo={truckPassedInfo}
-                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
+                        gotoSecond={this.saveAndGoToSecondPage}
                       />
                       )}
                     {page === 2
                       && (
                       <JobCreateFormTwo
                         p={page}
-                        equipmentId={equipmentId}
-                        onAvailabilityFullInfo={this.handleAvailabilitySave}
-                        previousPage={this.previousPage}
-                        handleSubmit={this.nextPage}
                         onClose={this.closeNow}
-                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
+                        firstTabData={this.getFirstTabInfo}
                       />
                       )}
                     {/* onSubmit={onSubmit} */}
