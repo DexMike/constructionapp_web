@@ -102,12 +102,11 @@ class MarketplaceCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    console.log("componentDidMount BEFORE");
     const jobs = await this.fetchJobs();
     await this.fetchFilterLists();
-    console.log("componentDidMount AFTER");
-    console.log(jobs);
-    console.log("componentDidMount SHOW");
+    // console.log("componentDidMount AFTER");
+    // console.log(jobs);
+    // console.log("componentDidMount SHOW");
 
     if (jobs) {
       // Promise.all(
@@ -140,9 +139,22 @@ class MarketplaceCarrierPage extends Component {
         loaded: true
       }
     );
-    console.log("componentDidMount SETSTATE 1");
-    console.log(jobs);
-    console.log("componentDidMount SETSTATE 2");
+  }
+
+  equipmentMaterialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
   }
 
   async fetchFilterLists() {
@@ -191,13 +203,7 @@ class MarketplaceCarrierPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-    // console.log("fetchJobs");
-    // console.log(filters);
-    console.log("fetchJobs BEFORE");
     let jobs = await JobService.getJobByFilters(filters);
-    console.log("fetchJobs AFTER");
-    console.log(jobs);
-    console.log("fetchJobs SHOW");
 
     if (jobs) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -400,9 +406,6 @@ class MarketplaceCarrierPage extends Component {
 
     } = this.state;
 
-    console.log("renderJobList");
-    console.log(jobs);
-
     if (jobs) {
       Promise.all(
         jobs = jobs.map((job) => {
@@ -489,7 +492,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Materials'
                       },
                       {
-                        name: 'zip',
+                        name: 'status',
                         displayName: 'Truck Type'
                       },
                       {
