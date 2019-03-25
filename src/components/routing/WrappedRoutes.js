@@ -21,6 +21,7 @@ import MarketplaceList from '../marketplace/MarketplaceList';
 import SettingsPage from '../settings/SettingsPage';
 import JobCreatePage from '../jobs/JobCreatePage';
 import FileUploadPage from '../FileUploadPage';
+import ReportsPage from '../reports/ReportsPage';
 
 // import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
 
@@ -68,6 +69,12 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/marketplace"
             component={MarketplaceList}
+          />
+
+          <Route
+            exact
+            path="/reports"
+            component={ReportsPage}
           />
 
           <Route
