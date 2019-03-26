@@ -87,7 +87,6 @@ class JobCarrierListPage extends Component {
   async fetchJobs() {
     // const jobs = await JobService.getJobs();
     const profile = await ProfileService.getProfile();
-    console.log(90, profile);
     const { companyId } = profile;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
 
