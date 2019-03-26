@@ -13,16 +13,17 @@ import ProfileService from '../../api/ProfileService';
 import AddressService from '../../api/AddressService';
 import JobService from '../../api/JobService';
 import BidService from '../../api/BidService';
+import TCheckBox from '../common/TCheckBox';
+import './jobs.css';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      // ...equipment
+      sendToMkt: true
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    // this.handleMultiChange = this.handleMultiChange.bind(this);
-    // this.selectChange = this.selectChange.bind(this);
+    // this.jobChangeDate = this.jobChangeDate.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -110,8 +111,8 @@ class JobCreateFormTwo extends PureComponent {
     // bid
     const bid = {
       jobId: newJob.id,
-      hasCustomerAccepted: 0,
-      hasSchedulerAccepted: 0,
+      hasCustomerAccepted: 1,
+      hasSchedulerAccepted: 1,
       status: 'New',
       userId: profile.userId,
       rateType: 'Ton',
@@ -134,6 +135,7 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   handleInputChange(e) {
+    console.log(e);
     let { value } = e.target;
     let reqHandler = '';
     if (e.target.name === 'ratesByBoth') {
@@ -188,28 +190,34 @@ class JobCreateFormTwo extends PureComponent {
 
   render() {
     const {
-      // multiInput,
-      // multiMeta,
+      sendToMkt
     } = this.state;
     const { onClose } = this.props;
     return (
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            <div className="card__title">
-              <h5 className="bold-text">
-                Welcome to Trelar, Lets add a truck so customers can find you
-              </h5>
-            </div>
 
             {/* this.handleSubmit  */}
             <form
               className="form form--horizontal addtruck__form"
               onSubmit={e => this.saveTruck(e)}
             >
-              Second tab
               <Row className="col-md-12">
-                <hr className="bighr"/>
+                {/* FOURTH ROW */}
+                <div className="col-md-1 form__form-group">
+                  <TCheckBox
+                    onChange={this.handleInputChange}
+                    name="sendToMkt"
+                    value={!!sendToMkt}
+                  />
+                </div>
+                <div className="col-md-11 form__form-group">
+                  <h4 className="talign">
+                    Yes! Send to Trelar Marketplace
+                  </h4>
+                  * Note - This job will be sent to all Trelar Partners for review
+                </div>
               </Row>
 
               <Row className="col-md-12">

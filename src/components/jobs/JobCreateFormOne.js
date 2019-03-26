@@ -11,7 +11,6 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
-import TCheckBox from '../common/TCheckBox';
 import TField from '../common/TField';
 import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
@@ -62,12 +61,11 @@ class CreateJobFormOne extends PureComponent {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.firstPage = this.firstPage.bind(this);
     this.secondPage = this.secondPage.bind(this);
+    this.jobDateChange = this.jobDateChange.bind(this);
     this.goToSecondFromFirst = this.goToSecondFromFirst.bind(this);
   }
 
   async componentDidMount() {
-    // await this.fetchMaterials();
-
     let allMaterials = await LookupsService.getLookupsByType('MaterialType');
     const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
     const allTruckTypes = [];
@@ -170,7 +168,6 @@ class CreateJobFormOne extends PureComponent {
 
   handleInputChange(e) {
     let { value } = e.target;
-
     this.setState({ [e.target.name]: value });
   }
 
@@ -257,7 +254,7 @@ class CreateJobFormOne extends PureComponent {
                   <input type="hidden" val={driversId} />
                   */}
                 </div>
-                <div className="col-md-4 form__form-group">
+                <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">Truck Type</span>
                   <SelectField
                     input={
@@ -273,7 +270,7 @@ class CreateJobFormOne extends PureComponent {
                     placeholder="Truck Type"
                   />
                 </div>
-                <div className="col-md-4 form__form-group">
+                <div className="col-md-6 form__form-group calign">
                   <span className="form__form-group-label">Capacity</span>
                   <input
                     name="capacity"
@@ -283,7 +280,10 @@ class CreateJobFormOne extends PureComponent {
                     placeholder="Capacity"
                   />
                 </div>
-                <div className="col-md-4 form__form-group">
+              </Row>
+
+              <Row className="col-md-12">
+                <div className="col-md-12 form__form-group">
                   <span className="form__form-group-label">Materials</span>
                   <MultiSelect
                     input={
@@ -453,10 +453,12 @@ class CreateJobFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-4 form__form-group">
+                <div className="col-md-12 form__form-group">
+                  <h3 className="subhead">
                     Select Date of Job
+                  </h3>
                 </div>
-                <div className="col-md-8 form__form-group">
+                <div className="col-md-12 form__form-group">
                   <TDateTimePicker
                     input={
                       {
@@ -467,6 +469,7 @@ class CreateJobFormOne extends PureComponent {
                       }
                     }
                     onChange={this.jobDateChange}
+                    dateFormat="MMMM-dd-yyyy"
                     // meta={reqHandlerStartDate}
                   />
                 </div>
@@ -546,6 +549,7 @@ class CreateJobFormOne extends PureComponent {
                     value={instructions}
                     onChange={this.handleInputChange}
                     placeholder="instructions"
+                    maxLength="255"
                   />
                 </div>
               </Row>
@@ -584,7 +588,8 @@ class CreateJobFormOne extends PureComponent {
 CreateJobFormOne.propTypes = {
   // getJobFullInfo: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-  gotoSecond: PropTypes.func.isRequired
+  gotoSecond: PropTypes.func.isRequired,
+  firstTabData: PropTypes.func.isRequired
 };
 
 CreateJobFormOne.defaultProps = {
