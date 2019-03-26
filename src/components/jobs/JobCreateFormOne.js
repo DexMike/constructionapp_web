@@ -118,7 +118,7 @@ class CreateJobFormOne extends PureComponent {
       ratesByHour
       */
     } = this.state;
-    let isValid = true;
+    const isValid = true;
 
     this.setState({
       /*
@@ -169,7 +169,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    let { value } = e.target;
+    const { value } = e.target;
 
     this.setState({ [e.target.name]: value });
   }
@@ -230,7 +230,7 @@ class CreateJobFormOne extends PureComponent {
       instructions
     } = this.state;
     const today = new Date();
-    let currentDate = today.getTime();
+    const currentDate = today.getTime();
     const { onClose } = this.props;
     return (
       <Col md={12} lg={12}>
