@@ -101,7 +101,7 @@ class CreateJobFormOne extends PureComponent {
         // job properties
         name: p.name,
         instructions: p.instructions
-      }, function loaded() { console.log(this.state); });
+      });
     } else {
       // we don't have preloaded info, let's hit the server
       let allMaterials = await LookupsService.getLookupsByType('MaterialType');
@@ -146,7 +146,6 @@ class CreateJobFormOne extends PureComponent {
   }
 
   isFormValid() {
-    const truck = this.state;
     const isValid = true;
 
     if (isValid) {
@@ -213,9 +212,11 @@ class CreateJobFormOne extends PureComponent {
       capacity,
       allMaterials,
       selectedMaterials,
+      /*
       ratebyBoth,
       rateByTon,
       rateByHour,
+      */
       rateTab,
       tonnage,
       hourEstimatedHours,

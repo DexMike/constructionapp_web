@@ -124,10 +124,10 @@
   right: 0;
 
   a {
-    color: $color-blue;
+    color: $primary-green;
 
     &:hover {
-      color: $color-blue-hover;
+      color: $color-darkgreen;
       text-decoration: none;
     }
   }
@@ -205,7 +205,7 @@
 .account__head {
   margin-bottom: 30px;
   padding-left: 10px;
-  border-left: 4px solid $color-blue;
+  border-left: 4px solid $primary-green;
 }
 
 .account__logo {
@@ -213,7 +213,7 @@
 }
 
 .account__logo-accent {
-  color: $color-blue;
+  color: $primary-green;
 }
 
 .account__have-account {
@@ -221,11 +221,11 @@
   margin-top: 20px;
 
   a {
-    color: $color-blue;
+    color: $primary-green;
     transition: all 0.3s;
 
     &:hover {
-      color: $color-blue-hover;
+      color: $color-darkgreen;
       text-decoration: none;
     }
   }

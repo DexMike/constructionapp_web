@@ -39,13 +39,11 @@ class JobCreatePopup extends Component {
   }
 
   saveAndGoToSecondPage(e) {
-    // console.log(e);
     this.setState({ firstTabInfo: e });
     this.setState({ page: 2 });
   }
 
   closeNow() {
-    // console.log(57);
     const { toggle } = this.props;
     toggle();
   }

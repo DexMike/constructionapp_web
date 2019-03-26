@@ -207,7 +207,7 @@ class TrucksCustomerPage extends Component {
   }
 
   handleEquipmentEdit(id) {
-    const { equipments } = this.state;
+    const { equipments, filters } = this.state;
     const [selectedEquipment] = equipments.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
@@ -215,10 +215,18 @@ class TrucksCustomerPage extends Component {
       return false;
     }, id);
     selectedEquipment.materials = ['Any'];
+
+    // prevent dialog if no selected materials
+    if (filters.materialType.length === 0) {
+      alert('Please select a some materials');
+      return false;
+    }
+
     this.setState({
       selectedEquipment,
       modal: true
     });
+    return true;
   }
 
   async handleStartDateChange(e) {
@@ -333,7 +341,7 @@ class TrucksCustomerPage extends Component {
       materialTypeList
       // equipments
     } = this.state;
-    const { modalSelectMaterials } = this.state;
+    // let { modalSelectMaterials } = this.state;
 
     const mats = this.returnSelectedMaterials();
 

@@ -16,6 +16,12 @@
 
 // ---- TUI (Trelar User Interface) ---- //
 // ---- TUI Misc
+.material-table,
+.material-table__pagination,
+.material-table__wrap,
+.MuiTypography-caption-62 { //overrides Material UI pagination font
+  font-family: "Interstate-Regular", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+}
 // ---- TUI Misc
 
 // ---- TUI Topbar

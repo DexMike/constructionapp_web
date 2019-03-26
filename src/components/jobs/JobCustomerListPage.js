@@ -82,7 +82,7 @@ class JobCustomerListPage extends Component {
   async fetchJobs() {
     const profile = await ProfileService.getProfile();
     const { companyId } = profile;
-    const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
+    const jobs = await JobService.getJobsByCompanyId(companyId);
     return jobs;
   }
 

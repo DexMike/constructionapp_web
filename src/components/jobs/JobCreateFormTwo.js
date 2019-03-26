@@ -60,7 +60,6 @@ class JobCreateFormTwo extends PureComponent {
     e.persist();
     const { firstTabData } = this.props;
     const d = firstTabData();
-    console.log(d);
 
     // start location
     const address1 = {
@@ -135,56 +134,7 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   handleInputChange(e) {
-    console.log(e);
-    let { value } = e.target;
-    let reqHandler = '';
-    if (e.target.name === 'ratesByBoth') {
-      value = e.target.checked ? Number(1) : Number(0);
-      if (e.target.checked) {
-        this.setState({
-          ratesByHour: 1,
-          ratesByTon: 1
-        });
-      } else {
-        this.setState({
-          ratesByHour: 0,
-          ratesByTon: 0
-        });
-      }
-    }
-    if (e.target.name === 'ratesByHour' && e.target.checked) {
-      this.setState({ ratesByTon: 0 });
-    }
-    if (e.target.name === 'ratesByTon' && e.target.checked) {
-      this.setState({ ratesByHour: 0 });
-    }
-    if (e.target.name === 'maxCapacity') {
-      // this.RenderField('renderField', 'coman', 'number', 'Throw error');
-    }
-
-    // We take the input name prop to set the respective requiredHandler
-    if (e.target.name === 'ratesCostPerHour') {
-      reqHandler = 'reqHandlerMinRate';
-    } else if (e.target.name === 'minOperatingTime') {
-      reqHandler = 'reqHandlerMinTime';
-    } else if (e.target.name === 'ratesCostPerTon') {
-      reqHandler = 'reqHandlerCostTon';
-    } else if (e.target.name === 'maxCapacity') {
-      reqHandler = 'reqHandlerMaxCapacity';
-    } else if (
-      e.target.name === 'ratesByTon'
-      || e.target.name === 'ratesByHour'
-      || e.target.name === 'ratesByBoth'
-    ) {
-      reqHandler = 'reqHandlerChecks';
-    }
-    // Then we set the touched prop to false, hiding the error label
-    this.setState({
-      [reqHandler]: Object.assign({}, reqHandler, {
-        touched: false
-      })
-    });
-
+    const { value } = e.target;
     this.setState({ [e.target.name]: value });
   }
 

@@ -153,6 +153,21 @@ class TFormat {
     );
   }
 
+  static asPercent(inputValue, decimal = 0) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={decimal}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix="%"
+      />
+    );
+  }
+
   static asWholeNumber(inputValue) {
     return (
       <NumberFormat
@@ -167,6 +182,7 @@ class TFormat {
       />
     );
   }
+
 
   static asNumber(inputValue) {
     return (
