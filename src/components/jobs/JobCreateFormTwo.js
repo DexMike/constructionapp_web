@@ -40,7 +40,7 @@ class JobCreateFormTwo extends PureComponent {
       ratesByHour
     } = this.state;
     */
-    let isValid = true;
+    const isValid = true;
 
     if (isValid) {
       return true;

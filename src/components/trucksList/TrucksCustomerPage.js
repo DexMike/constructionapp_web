@@ -333,7 +333,7 @@ class TrucksCustomerPage extends Component {
       materialTypeList
       // equipments
     } = this.state;
-    let { modalSelectMaterials } = this.state;
+    const { modalSelectMaterials } = this.state;
 
     const mats = this.returnSelectedMaterials();
 

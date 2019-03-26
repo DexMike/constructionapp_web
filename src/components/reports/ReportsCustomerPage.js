@@ -72,7 +72,7 @@ class ReportsCustomerPage extends Component {
 
   async fetchJobs() {
     const profile = await ProfileService.getProfile();
-    const companyId = profile.companyId;
+    const { companyId } = profile;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     return jobs;
   }
@@ -130,7 +130,7 @@ class ReportsCustomerPage extends Component {
               <h3 className="page-title">Reports</h3>
             </Col>
           </Row>
-          
+
           <Row>
             <Col md={12}>
               <Card>

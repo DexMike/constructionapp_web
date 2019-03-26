@@ -87,7 +87,7 @@ class JobCarrierListPage extends Component {
   async fetchJobs() {
     // const jobs = await JobService.getJobs();
     const profile = await ProfileService.getProfile();
-    const companyId = profile.companyId;
+    const { companyId } = profile;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
 
     // AJ: commenting out because we don't want to modify the timestamps, unless we save data

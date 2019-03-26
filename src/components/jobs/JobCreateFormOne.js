@@ -7,17 +7,12 @@ import {
   ButtonToolbar,
   Row
 } from 'reactstrap';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
-import TField from '../common/TField';
 import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
-import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import './jobs.css';
-
-// import validate from '../common/validate ';
 
 class CreateJobFormOne extends PureComponent {
   constructor(props) {
@@ -66,25 +61,68 @@ class CreateJobFormOne extends PureComponent {
   }
 
   async componentDidMount() {
-    let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-    const allTruckTypes = [];
-    allMaterials = allMaterials.map(material => ({
-      value: String(material.id),
-      label: material.val1
-    }));
+    const { firstTabData } = this.props;
 
-    Object.values(truckTypes).forEach((itm) => {
-      const inside = {
-        label: itm.val1,
-        value: itm.val1
-      };
-      allTruckTypes.push(inside);
-    });
-    this.setState({
-      allMaterials,
-      allTruckTypes
-    });
+    // if we have preloaded info, let's set it
+    if (Object.keys(firstTabData()).length > 0) {
+      const p = firstTabData();
+
+      // TODO -> There should be a way to map directly to state
+      // this is not very nice
+      this.setState({
+        userCompanyId: p.userCompanyId,
+        // truck properties
+        truckType: p.truckType,
+        allTruckTypes: p.allTruckTypes,
+        capacity: p.capacity,
+        allMaterials: p.allMaterials,
+        selectedMaterials: p.selectedMaterials,
+        // rates
+        ratebyBoth: p.ratebyBoth,
+        rateByTon: p.rateByTon,
+        rateByHour: p.rateByHour,
+        tonnage: p.tonnage, // estimated amount of tonnage
+        hourEstimatedHours: p.hourEstimatedHours,
+        hourTrucksNumber: p.hourTrucksNumber,
+        rateTab: 1,
+        // location
+        endLocationAddress1: p.endLocationAddress1,
+        endLocationAddress2: p.endLocationAddress2,
+        endLocationCity: p.endLocationCity,
+        endLocationState: p.endLocationState,
+        endLocationZip: p.endLocationZip,
+        // date
+        jobDate: p.jobDate,
+        startLocationAddress1: p.startLocationAddress1,
+        startLocationAddress2: p.startLocationAddress2,
+        startLocationCity: p.startLocationCity,
+        startLocationState: p.startLocationState,
+        startLocationZip: p.startLocationZip,
+        // job properties
+        name: p.name,
+        instructions: p.instructions
+      }, function loaded() { console.log(this.state); });
+    } else {
+      // we don't have preloaded info, let's hit the server
+      let allMaterials = await LookupsService.getLookupsByType('MaterialType');
+      const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+      const allTruckTypes = [];
+      allMaterials = allMaterials.map(material => ({
+        value: String(material.id),
+        label: material.val1
+      }));
+      Object.values(truckTypes).forEach((itm) => {
+        const inside = {
+          label: itm.val1,
+          value: itm.val1
+        };
+        allTruckTypes.push(inside);
+      });
+      this.setState({
+        allMaterials,
+        allTruckTypes
+      });
+    }
   }
 
   handleMultiChange(data) {
@@ -109,33 +147,7 @@ class CreateJobFormOne extends PureComponent {
 
   isFormValid() {
     const truck = this.state;
-    const {
-      /*
-      ratesByBoth,
-      ratesByTon,
-      ratesByHour
-      */
-    } = this.state;
-    let isValid = true;
-
-    this.setState({
-      /*
-      reqHandlerTruckType: { touched: false },
-      reqHandlerMaterials: { touched: false },
-      */
-    });
-
-    /*
-    if (truck.truckType.length === 0) {
-      this.setState({
-        reqHandlerTruckType: {
-          touched: true,
-          error: 'Please select the type of truck you are adding'
-        }
-      });
-      isValid = false;
-    }
-    */
+    const isValid = true;
 
     if (isValid) {
       return true;
@@ -148,10 +160,6 @@ class CreateJobFormOne extends PureComponent {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
-  }
-
-  saveTruckInfo(redir) {
-    // console.log('Se');
   }
 
   async saveTruck(e) {
@@ -167,7 +175,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    let { value } = e.target;
+    const { value } = e.target;
     this.setState({ [e.target.name]: value });
   }
 
@@ -227,7 +235,7 @@ class CreateJobFormOne extends PureComponent {
       instructions
     } = this.state;
     const today = new Date();
-    let currentDate = today.getTime();
+    const currentDate = today.getTime();
     const { onClose } = this.props;
     return (
       <Col md={12} lg={12}>
