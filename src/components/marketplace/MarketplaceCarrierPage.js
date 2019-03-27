@@ -141,6 +141,11 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
+  retrieveAllMaterials() {
+    const { materialTypeList } = this.state;
+    return materialTypeList;
+  }
+
   equipmentMaterialsAsString(materials) {
     let materialsString = '';
     if (materials) {
@@ -362,22 +367,10 @@ class MarketplaceCarrierPage extends Component {
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
+            getAllMaterials={this.retrieveAllMaterials}
           />
         </div>
       </Modal>
-    );
-  }
-
-  renderBreadcrumb() {
-    return (
-      <div>
-        <button type="button" className="app-link"
-                onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &#62;Find a Job By Ton
-      </div>
     );
   }
 
@@ -448,12 +441,6 @@ class MarketplaceCarrierPage extends Component {
 
     return (
       <Container className="dashboard">
-        {/* {this.renderGoTo()} */}
-        {/* <button type="button" className="app-link" */}
-        {/* onClick={() => this.handlePageClick('Dashboard')} */}
-        {/* > */}
-        {/* Dashboard */}
-        {/* </button> */}
         <Row>
           <Col md={12}>
             <Card>
@@ -959,7 +946,6 @@ class MarketplaceCarrierPage extends Component {
         <Container className="dashboard">
           {this.renderModal()}
           {this.renderGoTo()}
-          {this.renderBreadcrumb()}
           {this.renderTitle()}
           {this.renderFilter()}
           {/* {this.renderTable()} */}
