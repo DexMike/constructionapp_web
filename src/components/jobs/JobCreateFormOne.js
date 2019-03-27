@@ -148,6 +148,13 @@ class CreateJobFormOne extends PureComponent {
   isFormValid() {
     const isValid = true;
 
+    this.setState({
+      /*
+      reqHandlerTruckType: { touched: false },
+      reqHandlerMaterials: { touched: false },
+      */
+    });
+
     if (isValid) {
       return true;
     }
