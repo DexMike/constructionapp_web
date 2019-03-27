@@ -863,8 +863,7 @@ class AddTruckFormOne extends PureComponent {
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
                   <Button type="button" disabled className="secondaryButton">Back</Button>
-                  <Button type="submit" className="primaryButton"disabled={imageUploading}
-                  >
+                  <Button type="submit" className="primaryButton" disabled={imageUploading}>
                     Next
                   </Button>
                 </ButtonToolbar>

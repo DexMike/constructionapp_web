@@ -69,11 +69,33 @@ class AddTruckFormFour extends PureComponent {
       // return;
 
       // now let's save the user
-      userFullInfo.info.companyId = companyId;
-      userFullInfo.info.isBanned = 0; // TODO read from current profile
-      userFullInfo.info.preferredLanguage = 'English'; // TODO read from current profile
-      userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
-      await UserService.updateUser(userFullInfo.info);
+      if (userFullInfo.info.id === 0) {
+        // setup info for user
+        delete userFullInfo.info.redir;
+        delete userFullInfo.info.id;
+        userFullInfo.info.companyId = companyId;
+        // userFullInfo.info.equipmentId = 1; // setting as 1 since I don't have the ID yet
+        userFullInfo.info.preferredLanguage = 'English';
+        userFullInfo.info.isBanned = 0;
+        userFullInfo.info.userStatus = 'New';
+        const newUser = await UserService.createUser(userFullInfo.info);
+        userFullInfo.info.id = newUser.id;
+
+        const driver = {
+          id: truckFullInfo.info.driversId,
+          usersId: newUser.id,
+          driverLicenseId: 1 // THIS IS A FK
+        };
+        await DriverService.updateDriver(driver);
+        // return false;
+      } else {
+        userFullInfo.info.companyId = companyId;
+        userFullInfo.info.isBanned = 0; // TODO read from current profile
+        userFullInfo.info.preferredLanguage = 'English'; // TODO read from current profile
+        userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
+        await UserService.updateUser(userFullInfo.info);
+      }
+
 
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(
