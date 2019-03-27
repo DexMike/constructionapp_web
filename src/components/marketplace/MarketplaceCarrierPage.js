@@ -51,7 +51,7 @@ class MarketplaceCarrierPage extends Component {
       equipmentTypeList: [],
       materialTypeList: [],
       rateTypeList: [],
-      sortByList,       // array from above
+      sortByList, // array from above
       // sortBy: 1,
 
       equipments: [],
@@ -110,26 +110,26 @@ class MarketplaceCarrierPage extends Component {
 
     if (jobs) {
       // Promise.all(
-        jobs.map(async (job) => {
-          const newJob = job;
+      jobs.map(async (job) => {
+        const newJob = job;
 
-          const company = await CompanyService.getCompanyById(newJob.companiesId);
-          newJob.companyName = company.legalName;
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
 
-          // console.log(companyName);
-          // console.log(job.companyName);
+        // console.log(companyName);
+        // console.log(job.companyName);
 
-          const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-          const materials = materialsList.map(materialItem => materialItem.value);
-          newJob.material = this.equipmentMaterialsAsString(materials);
-          // console.log(companyName);
-          // console.log(job.material);
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+        // console.log(companyName);
+        // console.log(job.material);
 
-          const address = await AddressService.getAddressById(newJob.startAddress);
-          newJob.zip = address.zipCode;
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
 
-          return newJob;
-        })
+        return newJob;
+      });
       // );
     }
 
@@ -208,7 +208,7 @@ class MarketplaceCarrierPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-    let jobs = await JobService.getJobByFilters(filters);
+    const jobs = await JobService.getJobByFilters(filters);
 
     if (jobs) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -434,8 +434,8 @@ class MarketplaceCarrierPage extends Component {
           newJob.newStartDate = TFormat.asDate(job.startTime);
 
           return newJob;
-        }
-        ));
+        })
+      );
     }
 
 

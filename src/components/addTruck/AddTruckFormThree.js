@@ -88,21 +88,32 @@ class AddTruckFormThree extends PureComponent {
   async getAndSetExistingUser(id) {
     // I only have the driverId, so I have to work from there
     const driver = await DriverService.getDriverById(id);
-    const user = await UserService.getUserById(driver.usersId);
-    this.setState({
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      mobilePhone: user.mobilePhone,
-      email: user.email,
-      companyId: user.companyId,
-      isBanned: user.isBanned,
-      preferredLanguage: user.preferredLanguage,
-      userStatus: user.userStatus
-    },
-    function setUserInfo() { // wait until it loads
-      this.saveUserInfo(false);
-    });
+    let user;
+    try {
+      user = await UserService.getUserById(driver.usersId);
+    } catch (e) {
+      /* console.log(e); */
+    }
+    if (user) {
+      this.setState({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        mobilePhone: user.mobilePhone,
+        email: user.email,
+        companyId: user.companyId,
+        isBanned: user.isBanned,
+        preferredLanguage: user.preferredLanguage,
+        userStatus: user.userStatus
+      },
+      function setUserInfo() { // wait until it loads
+        this.saveUserInfo(false);
+      });
+    } else {
+      this.setState({
+        id: 0
+      });
+    }
     // , this.saveUserInfo(false));
   }
 

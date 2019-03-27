@@ -33,19 +33,19 @@ class JobCreatePopup extends Component {
     // this.setState({ loaded: true });
   }
 
-  gotoPage(pageNumber) {
-    this.setState({ page: pageNumber });
+  getFirstTabInfo() {
+    const { firstTabInfo } = this.state;
+    return firstTabInfo;
   }
 
-  previousPage() {
-    const { page } = this.state;
-    this.setState({ page: page - 1 });
+  saveAndGoToSecondPage(e) {
+    this.setState({ firstTabInfo: e });
+    this.setState({ page: 2 });
   }
 
-  nextPage() {
-    const { page } = this.state;
-    // just checking if the state changeo
-    this.setState({ page: page + 1 });
+  closeNow() {
+    const { toggle } = this.props;
+    toggle();
   }
 
   firstPage() {
@@ -56,21 +56,19 @@ class JobCreatePopup extends Component {
     this.setState({ page: 2 });
   }
 
-  saveAndGoToSecondPage(e) {
-    // console.log(e);
-    this.setState({ firstTabInfo: e });
-    this.setState({ page: 2 });
+  nextPage() {
+    const { page } = this.state;
+    // just checking if the state changeo
+    this.setState({ page: page + 1 });
   }
 
-  closeNow() {
-    // console.log(57);
-    const { toggle } = this.props;
-    toggle();
+  previousPage() {
+    const { page } = this.state;
+    this.setState({ page: page - 1 });
   }
 
-  getFirstTabInfo() {
-    const { firstTabInfo } = this.state;
-    return firstTabInfo;
+  gotoPage(pageNumber) {
+    this.setState({ page: pageNumber });
   }
 
   render() {
@@ -121,6 +119,7 @@ class JobCreatePopup extends Component {
                         p={page}
                         onClose={this.closeNow}
                         gotoSecond={this.saveAndGoToSecondPage}
+                        firstTabData={this.getFirstTabInfo}
                       />
                       )}
                     {page === 2
