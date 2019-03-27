@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
 import moment from 'moment';
 
+import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -11,6 +12,7 @@ import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
+import JobCreatePopup from '../jobs/JobCreatePopup';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -22,12 +24,13 @@ class DashboardCustomerPage extends Component {
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
-      jobId: 0
-      // profile: null
+      jobId: 0,
+      modalAddJob: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -40,7 +43,7 @@ class DashboardCustomerPage extends Component {
       const company = await CompanyService.getCompanyById(newJob.companiesId);
       newJob.companyName = company.legalName;
 
-      console.log('Company ID ', newJob.companiesId, ' ', newJob.companyName, ' has ', jobs.length, ' Jobs ',);
+      // console.log('Company ID ', newJob.companiesId, ' ', newJob.companyName, ' has ', jobs.length, ' Jobs ',);
 
       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
       const materials = materialsList.map(materialItem => materialItem.value);
@@ -102,6 +105,17 @@ class DashboardCustomerPage extends Component {
     return jobs;
   }
 
+  async toggleNewJobModal() {
+    const { modalAddJob } = this.state;
+    if (modalAddJob) {
+      const jobs = await this.fetchJobs();
+      this.setState({ jobs, loaded: true });
+    }
+    this.setState({
+      modalAddJob: !modalAddJob
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -114,6 +128,23 @@ class DashboardCustomerPage extends Component {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
+  }
+
+  renderNewJobModal() {
+    const {
+      modalAddJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJob}
+        toggle={this.toggleNewJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleNewJobModal}
+        />
+      </Modal>
+    );
   }
 
   render() {
@@ -183,12 +214,8 @@ class DashboardCustomerPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          {this.renderNewJobModal()}
           {this.renderGoTo()}
-          {/*<button type="button" className="app-link"*/}
-                  {/*onClick={() => this.handlePageClick('Dashboard')}*/}
-          {/*>*/}
-            {/*Dashboard*/}
-          {/*</button>*/}
 
           <Row>
             <Col md={12}>
@@ -254,13 +281,14 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <button
-                    style={{ width: '150px' }}
-                    className="btn btn-primary account__btn account__btn--small"
-                    onClick={() => this.handlePageClick('AddJob')}
+                  <Button
+                    onClick={this.toggleNewJobModal}
+                    type="button"
+                    className="primaryButton"
                   >
-                    Create New Job
-                  </button>
+                    ADD A JOB
+                  </Button>
+
                   <hr/>
                   <TTable
                     columns={
@@ -325,5 +353,9 @@ class DashboardCustomerPage extends Component {
     );
   }
 }
+
+// DashboardCustomerPage.propTypes = {
+//   companyId: PropTypes.number.isRequired
+// };
 
 export default DashboardCustomerPage;
