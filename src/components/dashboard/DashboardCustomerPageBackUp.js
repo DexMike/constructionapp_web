@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -70,7 +70,7 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobs() {
     const profile = await ProfileService.getProfile();
-    const companyId = profile.companyId;
+    const { companyId } = profile;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     return jobs;
   }

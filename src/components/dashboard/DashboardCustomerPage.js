@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
 import moment from 'moment';
 
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -43,7 +43,8 @@ class DashboardCustomerPage extends Component {
       const company = await CompanyService.getCompanyById(newJob.companiesId);
       newJob.companyName = company.legalName;
 
-      // console.log('Company ID ', newJob.companiesId, ' ', newJob.companyName, ' has ', jobs.length, ' Jobs ',);
+      // console.log('Company ID ', newJob.companiesId, ' ',
+      // newJob.companyName, ' has ', jobs.length, ' Jobs ',);
 
       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
       const materials = materialsList.map(materialItem => materialItem.value);
