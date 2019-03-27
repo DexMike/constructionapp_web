@@ -45,8 +45,6 @@ class DashboardCustomerPage extends Component {
       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
       const materials = materialsList.map(materialItem => materialItem.value);
       newJob.material = this.equipmentMaterialsAsString(materials);
-      // console.log(companyName);
-      // console.log(job.material);
 
       const address = await AddressService.getAddressById(newJob.startAddress);
       newJob.zip = address.zipCode;
@@ -160,7 +158,9 @@ class DashboardCustomerPage extends Component {
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
+      newJob.newRate = `$${newJob.rate}`;
 
+      // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
       potentialIncome += tempRate * newJob.rateEstimate;
@@ -180,17 +180,15 @@ class DashboardCustomerPage extends Component {
 
     potentialIncome = TFormat.asMoney(potentialIncome);
 
-    // console.log(jobs);
-
     if (loaded) {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
-          <button type="button" className="app-link"
-                  onClick={() => this.handlePageClick('Dashboard')}
-          >
-            Dashboard
-          </button>
+          {/*<button type="button" className="app-link"*/}
+                  {/*onClick={() => this.handlePageClick('Dashboard')}*/}
+          {/*>*/}
+            {/*Dashboard*/}
+          {/*</button>*/}
 
           <Row>
             <Col md={12}>
@@ -256,7 +254,14 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Customer
+                  <button
+                    style={{ width: '150px' }}
+                    className="btn btn-primary account__btn account__btn--small"
+                    onClick={() => this.handlePageClick('AddJob')}
+                  >
+                    Create New Job
+                  </button>
+                  <hr/>
                   <TTable
                     columns={
                       [
@@ -277,16 +282,16 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Customer'
                         },
                         {
+                          name: 'newSize',
+                          displayName: 'Size'
+                        },
+                        {
                           name: 'newStartDate',
                           displayName: 'Start Date'
                         },
                         {
                           name: 'zip',
                           displayName: 'Start Zip'
-                        },
-                        {
-                          name: 'newSize',
-                          displayName: 'Size'
                         },
                         {
                           name: 'newRate',
@@ -314,7 +319,7 @@ class DashboardCustomerPage extends Component {
       );
     }
     return (
-      <Container>
+      <Container className="dashboard">
         Loading...
       </Container>
     );

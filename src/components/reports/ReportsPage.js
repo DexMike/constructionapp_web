@@ -13,7 +13,7 @@ class ReportsPage extends Component {
     super(props);
 
     this.state = {
-      companyType: null,
+      companyType: null
     };
   } // constructor
 

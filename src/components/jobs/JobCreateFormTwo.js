@@ -13,16 +13,17 @@ import ProfileService from '../../api/ProfileService';
 import AddressService from '../../api/AddressService';
 import JobService from '../../api/JobService';
 import BidService from '../../api/BidService';
+import TCheckBox from '../common/TCheckBox';
+import './jobs.css';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      // ...equipment
+      sendToMkt: true
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    // this.handleMultiChange = this.handleMultiChange.bind(this);
-    // this.selectChange = this.selectChange.bind(this);
+    // this.jobChangeDate = this.jobChangeDate.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -39,7 +40,7 @@ class JobCreateFormTwo extends PureComponent {
       ratesByHour
     } = this.state;
     */
-    let isValid = true;
+    const isValid = true;
 
     if (isValid) {
       return true;
@@ -59,7 +60,6 @@ class JobCreateFormTwo extends PureComponent {
     e.persist();
     const { firstTabData } = this.props;
     const d = firstTabData();
-    console.log(d);
 
     // start location
     const address1 = {
@@ -110,8 +110,8 @@ class JobCreateFormTwo extends PureComponent {
     // bid
     const bid = {
       jobId: newJob.id,
-      hasCustomerAccepted: 0,
-      hasSchedulerAccepted: 0,
+      hasCustomerAccepted: 1,
+      hasSchedulerAccepted: 1,
       status: 'New',
       userId: profile.userId,
       rateType: 'Ton',
@@ -134,82 +134,40 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   handleInputChange(e) {
-    let { value } = e.target;
-    let reqHandler = '';
-    if (e.target.name === 'ratesByBoth') {
-      value = e.target.checked ? Number(1) : Number(0);
-      if (e.target.checked) {
-        this.setState({
-          ratesByHour: 1,
-          ratesByTon: 1
-        });
-      } else {
-        this.setState({
-          ratesByHour: 0,
-          ratesByTon: 0
-        });
-      }
-    }
-    if (e.target.name === 'ratesByHour' && e.target.checked) {
-      this.setState({ ratesByTon: 0 });
-    }
-    if (e.target.name === 'ratesByTon' && e.target.checked) {
-      this.setState({ ratesByHour: 0 });
-    }
-    if (e.target.name === 'maxCapacity') {
-      // this.RenderField('renderField', 'coman', 'number', 'Throw error');
-    }
-
-    // We take the input name prop to set the respective requiredHandler
-    if (e.target.name === 'ratesCostPerHour') {
-      reqHandler = 'reqHandlerMinRate';
-    } else if (e.target.name === 'minOperatingTime') {
-      reqHandler = 'reqHandlerMinTime';
-    } else if (e.target.name === 'ratesCostPerTon') {
-      reqHandler = 'reqHandlerCostTon';
-    } else if (e.target.name === 'maxCapacity') {
-      reqHandler = 'reqHandlerMaxCapacity';
-    } else if (
-      e.target.name === 'ratesByTon'
-      || e.target.name === 'ratesByHour'
-      || e.target.name === 'ratesByBoth'
-    ) {
-      reqHandler = 'reqHandlerChecks';
-    }
-    // Then we set the touched prop to false, hiding the error label
-    this.setState({
-      [reqHandler]: Object.assign({}, reqHandler, {
-        touched: false
-      })
-    });
-
+    const { value } = e.target;
     this.setState({ [e.target.name]: value });
   }
 
   render() {
     const {
-      // multiInput,
-      // multiMeta,
+      sendToMkt
     } = this.state;
     const { onClose } = this.props;
     return (
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            <div className="card__title">
-              <h5 className="bold-text">
-                Welcome to Trelar, Lets add a truck so customers can find you
-              </h5>
-            </div>
 
             {/* this.handleSubmit  */}
             <form
               className="form form--horizontal addtruck__form"
               onSubmit={e => this.saveTruck(e)}
             >
-              Second tab
               <Row className="col-md-12">
-                <hr className="bighr"/>
+                {/* FOURTH ROW */}
+                <div className="col-md-1 form__form-group">
+                  <TCheckBox
+                    onChange={this.handleInputChange}
+                    name="sendToMkt"
+                    value={!!sendToMkt}
+                  />
+                </div>
+                <div className="col-md-11 form__form-group">
+                  <h4 className="talign">
+                    Yes! Send to Trelar Marketplace
+                  </h4>
+                  * Note - This job will be sent to all Trelar Partners for review
+                </div>
               </Row>
 
               <Row className="col-md-12">
