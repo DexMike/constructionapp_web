@@ -226,6 +226,7 @@ class TrucksCustomerPage extends Component {
       selectedEquipment,
       modal: true
     });
+    return true;
   }
 
   async handleStartDateChange(e) {

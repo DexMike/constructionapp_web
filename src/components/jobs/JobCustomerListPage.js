@@ -6,7 +6,8 @@ import {
   Col,
   Container,
   Row,
-  Modal
+  Modal,
+  Button
 } from 'reactstrap';
 // Button,
 import PropTypes from 'prop-types';
@@ -81,13 +82,16 @@ class JobCustomerListPage extends Component {
   async fetchJobs() {
     const profile = await ProfileService.getProfile();
     const { companyId } = profile;
-    const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
+    const jobs = await JobService.getJobsByCompanyId(companyId);
     return jobs;
   }
 
-  toggleNewJobModal() {
-    // console.log(89);
+  async toggleNewJobModal() {
     const { modalAddJob } = this.state;
+    if (modalAddJob) {
+      const jobs = await this.fetchJobs();
+      this.setState({ jobs, loaded: true });
+    }
     this.setState({
       modalAddJob: !modalAddJob
     });
@@ -176,11 +180,13 @@ class JobCustomerListPage extends Component {
                     Create Job
                   </Button>
                   */}
-                  <button type="button" className="app-link"
+                  <Button
                     onClick={this.toggleNewJobModal}
+                    type="button"
+                    className="primaryButton"
                   >
                     ADD A JOB
-                  </button>
+                  </Button>
                   <hr/>
                   <TTable
                     columns={

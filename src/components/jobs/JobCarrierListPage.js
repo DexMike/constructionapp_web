@@ -119,6 +119,7 @@ class JobCarrierListPage extends Component {
   render() {
     let { jobs } = this.state;
     const { loaded } = this.state;
+    const { companyId } = this.props;
 
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -223,7 +224,7 @@ class JobCarrierListPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        Loading ({companyId})...
       </Container>
     );
   }
