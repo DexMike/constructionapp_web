@@ -46,20 +46,7 @@ class LoginPage extends SignIn {
   }
 
   async loginRouting() {
-    const profile = await ProfileService.getProfile();
-    if (profile.companyType === 'Carrier') {
-      window.location = '/';
-    }
-
-    if (profile.companyType === 'Customer') {
-      // TODO move this to JobService when it is ready
-      const jobs = await AgentService.get(`/companies/${profile.companyId}/jobs`);
-      if (jobs && jobs.length > 0) {
-        window.location = '/jobs';
-      } else {
-        window.location = '/'; // go to the equipments listing as the customer needs to create a job.
-      }
-    }
+    window.location = '/'; // go to the equipments listing as the customer needs to create a job.
   }
 
   async onSignIn() {

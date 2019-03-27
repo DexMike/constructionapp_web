@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import {
-  Card,
-  CardBody,
-  Col,
-  Container,
-  Row,
-  Modal
-} from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
 import PropTypes from 'prop-types';
 import TTable from '../common/TTable';
@@ -15,12 +8,11 @@ import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
-import JobCreatePopup from './JobCreatePopup';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
 
-class JobCustomerListPage extends Component {
+class DashboardCustomerPage extends Component {
   constructor(props) {
     super(props);
 
@@ -30,13 +22,11 @@ class JobCustomerListPage extends Component {
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
-      jobId: 0,
-      modalAddJob: false
+      jobId: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
-    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -85,14 +75,6 @@ class JobCustomerListPage extends Component {
     return jobs;
   }
 
-  toggleNewJobModal() {
-    // console.log(89);
-    const { modalAddJob } = this.state;
-    this.setState({
-      modalAddJob: !modalAddJob
-    });
-  }
-
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -105,23 +87,6 @@ class JobCustomerListPage extends Component {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
-  }
-
-  renderNewJobModal() {
-    const {
-      modalAddJob
-    } = this.state;
-    return (
-      <Modal
-        isOpen={modalAddJob}
-        toggle={this.toggleNewJobModal}
-        className="modal-dialog--primary modal-dialog--header"
-      >
-        <JobCreatePopup
-          toggle={this.toggleNewJobModal}
-        />
-      </Modal>
-    );
   }
 
   render() {
@@ -151,36 +116,29 @@ class JobCustomerListPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderNewJobModal()}
           {this.renderGoTo()}
           <button type="button" className="app-link"
                   onClick={() => this.handlePageClick('Dashboard')}
           >
             Dashboard
           </button>
-          &#62;Number of Jobs {jobs.length}
+          &#62;Jobs
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Jobs inside JobCustomerListPage</h3>
+              <h3 className="page-title">My Jobs inside Customer Dashboard</h3>
             </Col>
           </Row>
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  {/*
                   <Button
+                    style={{ width: '150px' }}
+                    className="btn btn-primary account__btn account__btn--small"
                     onClick={() => this.handlePageClick('AddJob')}
-                    className="primaryButton"
                   >
                     Create Job
                   </Button>
-                  */}
-                  <button type="button" className="app-link"
-                    onClick={this.toggleNewJobModal}
-                  >
-                    ADD A JOB
-                  </button>
                   <hr/>
                   <TTable
                     columns={
@@ -234,12 +192,12 @@ class JobCustomerListPage extends Component {
   }
 }
 
-JobCustomerListPage.propTypes = {
-  companyId: PropTypes.number.isRequired
+DashboardCustomerPage.propTypes = {
+  // companyId: PropTypes.number.isRequired
 };
 
-JobCustomerListPage.defaultProps = {
+DashboardCustomerPage.defaultProps = {
   // companyId: null
 };
 
-export default JobCustomerListPage;
+export default DashboardCustomerPage;
