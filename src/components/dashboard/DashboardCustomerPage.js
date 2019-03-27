@@ -10,6 +10,7 @@ import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import ProfileService from '../../api/ProfileService';
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -39,8 +40,7 @@ class DashboardCustomerPage extends Component {
       const company = await CompanyService.getCompanyById(newJob.companiesId);
       newJob.companyName = company.legalName;
 
-      // console.log(companyName);
-      // console.log(job.companyName);
+      console.log('Company ID ', newJob.companiesId, ' ', newJob.companyName, ' has ', jobs.length, ' Jobs ',);
 
       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
       const materials = materialsList.map(materialItem => materialItem.value);
@@ -89,7 +89,10 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchJobs() {
-    let jobs = await JobService.getJobs();
+    const profile = await ProfileService.getProfile();
+    const companyId = profile.companyId;
+
+    let jobs = await JobService.getJobsByCompanyId(companyId);
     jobs = jobs.map((job) => {
       const newJob = job;
       newJob.modifiedOn = moment(job.modifiedOn)
@@ -200,7 +203,7 @@ class DashboardCustomerPage extends Component {
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>New Offers</center></h5>
+                  <h5 className="card__title bold-text"><center>Jobs Offered</center></h5>
                   <span><center><h4>{newJobCount}</h4></center></span>
                 </div>
               </div>
@@ -227,16 +230,7 @@ class DashboardCustomerPage extends Component {
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
-                  <span><center><h4>{potentialIncome}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
+                  <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
                   <span><center><h4>{completedJobCount}</h4></center></span>
                 </div>
               </div>
@@ -298,10 +292,10 @@ class DashboardCustomerPage extends Component {
                           name: 'newRate',
                           displayName: 'Rate'
                         },
-                        {
-                          name: 'estimatedIncome',
-                          displayName: 'Est. Income'
-                        },
+                        // {
+                        //   name: 'estimatedIncome',
+                        //   displayName: 'Est. Income'
+                        // },
                         {
                           // the materials needs to come from the the JobMaterials Table
                           name: 'material',
