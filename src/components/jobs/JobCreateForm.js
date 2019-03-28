@@ -17,6 +17,7 @@ import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 
+
 class JobCreateForm extends Component {
   constructor(props) {
     super(props);
@@ -275,6 +276,8 @@ class JobCreateForm extends Component {
     bid.createdOn = moment()
       .unix() * 1000;
     await BidService.createBid(bid);
+    // Now we need to create a Booking
+
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
     // We need to get the phone number from the carrier co
