@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import moment from 'moment';
 
-import TTable from '../common/TTable';
+// import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';

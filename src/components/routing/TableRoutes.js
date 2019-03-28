@@ -8,7 +8,7 @@ import { Route } from 'react-router-dom';
 // import UserSavePage from '../users/UserSavePage';
 // import BookingListPage from '../bookings/BookingListPage';
 // import BookingSavePage from '../bookings/BookingSavePage';
-import JobListPage from '../jobs/JobListPage';
+// import JobListPage from '../jobs/JobListPage';
 // import JobCarrierListPage from '../jobs/JobCarrierListPage';
 // import JobCustomerListPage from '../jobs/JobCustomerListPage';
 // import JobPage from '../jobs/JobPage';
@@ -19,6 +19,7 @@ import JobSavePage from '../jobs/JobSavePage';
 // import LookupSavePage from '../lookups/LookupSavePage';
 // import BidListPage from '../bids/BidListPage';
 // import BidSavePage from '../bids/BidSavePage';
+import DashboardPage from '../dashboard/DashboardPage';
 
 class TableRoutes extends Component {
   render() {
