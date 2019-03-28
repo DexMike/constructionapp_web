@@ -16,7 +16,7 @@ import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
-
+import BookingService from '../../api/BookingService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -32,6 +32,7 @@ class JobCreateForm extends Component {
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
       bid: BidService.getDefaultBid(),
+      booking: BookingService.getDefaultBooking(),
       materials: [],
       availableMaterials: [],
       reqHandlerName: { touched: false, error: '' },
@@ -62,7 +63,7 @@ class JobCreateForm extends Component {
   async componentDidMount() {
     // debugger;
     const profile = await ProfileService.getProfile();
-    const { job, startAddress, endAddress, bid } = this.state;
+    const { job, startAddress, endAddress, bid, booking } = this.state;
     const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     job.numberOfTrucks = 1;
@@ -79,21 +80,34 @@ class JobCreateForm extends Component {
     endAddress.createdBy = profile.userId;
     bid.hasCustomerAccepted = 1;
 
-    // bid.userId should be the userid of the driver likned to that equipment
+    // bid.userId should be the userid of the driver linked to that equipment
     if (!selectedEquipment.defaultDriverId) {
       bid.userId = profile.selectedEquipment.defaultDriverId;
+      booking.schedulersCompanyId = bid.companyId;
     } else {
       bid.userId = profile.userId;
+      booking.schedulersCompanyId = bid.companyId;
     }
 
     bid.createdBy = profile.userId;
     bid.modifiedBy = profile.userId;
+
+    // set booking information based on job and bid
+    booking.createdBy = profile.userId;
+    booking.modifiedOn = profile.userId;
+    booking.rateType = job.rateType;
+    booking.startAddress = job.startAddress;
+    booking.endAddress = job.endAddress;
+    booking.startTime = job.startTime;
+    booking.endTime = job.endTime;
+
     await this.fetchForeignValues();
     this.setState({
       job,
       startAddress,
       endAddress,
       bid,
+      booking,
       availableMaterials: selectedMaterials()
     });
     this.setState({ loaded: true });
@@ -236,7 +250,7 @@ class JobCreateForm extends Component {
   async createJob(e) {
     e.preventDefault();
     const { closeModal, selectedEquipment } = this.props;
-    const { startAddress, job, endAddress, bid } = this.state;
+    const { startAddress, job, endAddress, bid, booking } = this.state;
     const newJob = CloneDeep(job);
     startAddress.name = `Job: ${newJob.name}`;
     endAddress.name = `Job: ${newJob.name}`;
@@ -269,14 +283,20 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     const createdJob = await JobService.createJob(newJob);
     bid.jobId = createdJob.id;
+    booking.bidId = bid.id;
     bid.rate = createdJob.rate;
     bid.rateEstimate = createdJob.rateEstimate;
     bid.modifiedOn = moment()
       .unix() * 1000;
     bid.createdOn = moment()
       .unix() * 1000;
+    booking.modifiedOn = moment()
+      .unix() * 1000;
+    booking.createdOn = moment()
+      .unix() * 1000;
     await BidService.createBid(bid);
     // Now we need to create a Booking
+    await BookingService.createBooking(booking);
 
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
