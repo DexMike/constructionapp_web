@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 // Button,
 // import PropTypes from 'prop-types';
-// import TTable from '../common/TTable';
+import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
@@ -12,9 +12,7 @@ import ProfileService from '../../api/ProfileService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
 
-// NOTE: this is a copy of DashboardCustomerPage
-
-class ReportsCustomerPage extends Component {
+class DashboardCustomerPage extends Component {
   constructor(props) {
     super(props);
 
@@ -127,57 +125,79 @@ class ReportsCustomerPage extends Component {
           &#62;Jobs
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Reports</h3>
+              <h3 className="page-title">My Jobs inside Customer Dashboard</h3>
             </Col>
           </Row>
-
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Report #1
+                  <Button
+                    style={{ width: '150px' }}
+                    className="btn btn-primary account__btn account__btn--small"
+                    onClick={() => this.handlePageClick('AddJob')}
+                  >
+                    Create Job
+                  </Button>
+                  <hr/>
+                  <TTable
+                    columns={
+                      [
+                        {
+                          name: 'name',
+                          displayName: 'Job Name'
+                        },
+                        {
+                          name: 'companyName',
+                          displayName: 'Customer'
+                        },
+                        {
+                          name: 'material',
+                          displayName: 'Material'
+                        },
+                        {
+                          name: 'newSize',
+                          displayName: 'Size'
+                        },
+                        {
+                          name: 'newStartDate',
+                          displayName: 'Start Date'
+                        },
+                        {
+                          name: 'zip',
+                          displayName: 'Start Zip'
+                        }
+                        // ,
+                        // {
+                        //   name: 'rateEstimate',
+                        //   displayName: 'Est Income'
+                        // }
+                      ]
+                    }
+                    data={jobs}
+                    handleIdClick={this.handleJobEdit}
+                  />
                 </CardBody>
               </Card>
             </Col>
           </Row>
-
-          <Row>
-            <Col md={12}>
-              <Card>
-                <CardBody>
-                  Report #2
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-
-          <Row>
-            <Col md={12}>
-              <Card>
-                <CardBody>
-                  Report #3
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-
         </Container>
       );
     }
     return (
       <Container className="dashboard">
-        Loading Customer Reports Page...
+        Loading...
       </Container>
     );
   }
 }
 
-ReportsCustomerPage.propTypes = {
+DashboardCustomerPage.propTypes = {
   // companyId: PropTypes.number.isRequired
 };
 
-ReportsCustomerPage.defaultProps = {
+DashboardCustomerPage.defaultProps = {
   // companyId: null
 };
 
-export default ReportsCustomerPage;
+export default DashboardCustomerPage;

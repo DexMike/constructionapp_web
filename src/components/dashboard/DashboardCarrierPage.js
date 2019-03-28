@@ -191,7 +191,7 @@ class DashboardCarrierPage extends Component {
 
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Dashboard</h3>
+              <h3 className="page-title">Dashboard for Carrier (DashboardCarrierPage)</h3>
             </Col>
           </Row>
 
