@@ -29,6 +29,7 @@ import ProfileService from '../../api/ProfileService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
+import GroupService from '../../api/GroupService';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -142,6 +143,32 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  async fetchFavoriteEquipments(equipments) {
+    // we get all groups.companyId that have name 'Favorite'
+    const groups = await GroupService.getGroups();
+    const companyIds = groups.map((item) => {
+      if (item.name === 'Favorite') {
+        return item.companyId;
+      }
+      return null;
+    });
+
+    if (companyIds) {
+      // then if we find the equipment's companyId in
+      // companyIds[] we favorite it
+      equipments.map((equipment) => {
+        const newEquipment = equipment;
+        if (companyIds.includes(newEquipment.companyId)) {
+          newEquipment.favorite = true;
+        } else {
+          newEquipment.favorite = false;
+        }
+        return newEquipment;
+      });
+      this.setState({ equipments });
+    }
+  }
+
   async fetchEquipments() {
     const { filters } = this.state;
     const equipments = await EquipmentService.getEquipmentByFilters(filters);
@@ -149,6 +176,9 @@ class TrucksCustomerPage extends Component {
     if (equipments) {
       // NOTE let's try not to use Promise.all and use full api calls
       // Promise.all(
+
+      this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
+
       equipments.map((equipment) => {
         const newEquipment = equipment;
         //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
@@ -206,6 +236,38 @@ class TrucksCustomerPage extends Component {
     }
   }
 
+  async handleSetFavorite(companyId) {
+    const { equipments } = this.state;
+
+    try {
+      const group = await GroupService.getGroupByCompanyId(companyId);
+      const profile = await ProfileService.getProfile();
+
+      // we get check for groups.companyId = companyId that have name 'Favorite'
+      group.map((item) => {
+        if (item.name === 'Favorite') {
+          return item.companyId;
+        }
+        return null;
+      });
+
+      // if we got a group with companyId
+      if (group.length > 0) { // delete
+        await GroupService.deleteGroupById(group[0].id);
+      } else { // create "Favorite" Group record
+        const groupData = {
+          name: 'Favorite',
+          companyId,
+          usersId: profile.userId
+        };
+        await GroupService.createGroup(groupData);
+      }
+      this.fetchFavoriteEquipments(equipments);
+    } catch (error) {
+      this.setState({ equipments });
+    }
+  }
+
   handleEquipmentEdit(id) {
     const { equipments, filters } = this.state;
     const [selectedEquipment] = equipments.filter((equipment) => {
@@ -259,7 +321,6 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleSelectMaterialsModal() {
-    // console.log(274);
     const { modalSelectMaterials } = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
@@ -578,7 +639,7 @@ class TrucksCustomerPage extends Component {
 
           <Col md={4}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-              <Col className="customer-truck-results-title">
+              <Col lg={4} className="customer-truck-results-title">
                 Type: {equipment.type}
               </Col>
               <Col className="customer-truck-results-title">
@@ -669,8 +730,17 @@ class TrucksCustomerPage extends Component {
 
           <Col md={6}>
             <Row style={{ background: '#c7dde8' }}>
-              <Col className="customer-truck-results-title">
+              <Col md={11} className="customer-truck-results-title">
                 Name: {equipment.name}
+              </Col>
+              <Col md={1} className="customer-truck-results-title">
+                <Button
+                  color="link"
+                  onClick={() => this.handleSetFavorite(equipment.companyId)}
+                  className="material-icons favoriteIcon"
+                >
+                  {equipment.favorite ? 'favorite' : 'favorite_border'}
+                </Button>
               </Col>
               {/* <Col md={6} className="customer-truck-results-title> */}
               {/* Company: {equipment.companyName} */}
