@@ -15,6 +15,9 @@
 .talign {
   margin-top: -4px;
 }
+.hidden {
+  display:none;
+}
 /*
 .wizard__step__rate{
   height: 36px !important;
