@@ -68,11 +68,27 @@
 }
 // ---- TUI Sidebar
 
-// ---- TUI Truck List Filter page
+// ---- TUI Trucks List
+.customer-truck-results-title .favoriteIcon{
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  font-size: 22px;
+}
+.btn-link.favoriteIcon {
+  color: $primary-green;
+  &:hover, &:active {
+    color: white;
+    background-color: $primary-green;
+  }
+  &:before, &:focus {
+    background-color: unset;
+  }
+}
 .trucksListMaterialsHauled {
   white-space: pre-wrap;
 }
-// ---- TUI Truck List Filter page
+// ---- TUI Trucks List
 
 
 // ---- TUI (Trelar User Interface) ---- //
