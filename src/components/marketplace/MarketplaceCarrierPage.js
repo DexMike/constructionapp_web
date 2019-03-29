@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   Col,
+  Button,
   Container,
   Modal,
   Row
@@ -59,8 +60,11 @@ class MarketplaceCarrierPage extends Component {
 
       modal: false,
       goToDashboard: false,
-      startDate: null,
-      endDate: null,
+      startDate: null,          // values for date control
+      endDate: null,            // values for date control
+
+      // Rate Type Button toggle
+      isAvailable: true,
 
       // TODO: Refactor to a single filter object
       // Filter values
@@ -106,14 +110,21 @@ class MarketplaceCarrierPage extends Component {
   async componentDidMount() {
     let {
       startDate,
-      endDate
+      endDate,
+      filters
     } = this.state;
+
+    startDate = new Date();
+    endDate = new Date();
+    endDate.setDate(startDate.getDate() + 7);
+    filters.startAvailability = startDate;
+    filters.endAvailability = endDate;
+
+    console.log("componentDidMount");
+    console.log(filters);
 
     const jobs = await this.fetchJobs();
     await this.fetchFilterLists();
-    // console.log("componentDidMount AFTER");
-    // console.log(jobs);
-    // console.log("componentDidMount SHOW");
 
     if (jobs) {
       // Promise.all(
@@ -123,14 +134,9 @@ class MarketplaceCarrierPage extends Component {
         const company = await CompanyService.getCompanyById(newJob.companiesId);
         newJob.companyName = company.legalName;
 
-        // console.log(companyName);
-        // console.log(job.companyName);
-
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         const materials = materialsList.map(materialItem => materialItem.value);
         newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
 
         const address = await AddressService.getAddressById(newJob.startAddress);
         newJob.zip = address.zipCode;
@@ -139,17 +145,16 @@ class MarketplaceCarrierPage extends Component {
       });
       // );
 
-      startDate = new Date();
-      endDate = new Date();
-      endDate.setDate(startDate.getDate()+7);
     }
 
     this.setState(
       {
         jobs,
+        filters,
         loaded: true,
         startDate,
-        endDate
+        endDate,
+        isAvailable: true
       }
     );
   }
@@ -219,13 +224,36 @@ class MarketplaceCarrierPage extends Component {
     });
   }
 
+  availableButtonColor(isAvailable) {
+    return isAvailable ? 'success' : 'minimal';
+  }
+
+  unavailableButtonColor(isAvailable) {
+    return isAvailable ? 'success' : 'minimal';
+  }
+
+  makeAvailable() {
+    const {
+      isAvailable
+    } = this.state;
+    console.log('Before swap: ' + isAvailable);
+    const newValue = !isAvailable;
+    console.log('switching makeAvailable to ' + newValue);
+    this.setState({ isAvailable: newValue });
+  }
+
   async fetchJobs() {
     const { filters } = this.state;
+
+    console.log("fetchJobs");
+    console.log(filters);
+
     const jobs = await JobService.getJobByFilters(filters);
 
+    console.log("fetchJobs Jobs");
+    console.log(jobs);
+
     if (jobs) {
-      // NOTE let's try not to use Promise.all and use full api calls
-      // Promise.all(
       if (jobs != null) {
         jobs.map((job) => {
           const newJob = job;
@@ -341,12 +369,6 @@ class MarketplaceCarrierPage extends Component {
     if (status.goToDashboard) {
       return <Redirect push to="/"/>;
     }
-    // if (status.goToAddJob) {
-    //   return <Redirect push to="/jobs/save"/>;
-    // }
-    // if (status.goToUpdateJob) {
-    //   return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
-    // }
     return false;
   }
 
@@ -413,44 +435,43 @@ class MarketplaceCarrierPage extends Component {
     } = this.state;
 
     if (jobs) {
-      Promise.all(
-        jobs = jobs.map((job) => {
-          const newJob = job;
+      // Promise.all(
+      jobs = jobs.map((job) => {
+        const newJob = job;
 
-          // const company = await CompanyService.getCompanyById(newJob.companiesId);
-          // newJob.companyName = company.legalName;
-          //
-          // // console.log(companyName);
-          // // console.log(job.companyName);
-          //
-          // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-          // const materials = materialsList.map(materialItem => materialItem.value);
-          // newJob.material = this.equipmentMaterialsAsString(materials);
-          // // console.log(companyName);
-          // // console.log(job.material);
-          //
-          // const address = await AddressService.getAddressById(newJob.startAddress);
-          // newJob.zip = address.zipCode;
+        // const company = await CompanyService.getCompanyById(newJob.companiesId);
+        // newJob.companyName = company.legalName;
+        //
+        // // console.log(companyName);
+        // // console.log(job.companyName);
+        //
+        // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        // const materials = materialsList.map(materialItem => materialItem.value);
+        // newJob.material = this.equipmentMaterialsAsString(materials);
+        // // console.log(companyName);
+        // // console.log(job.material);
+        //
+        // const address = await AddressService.getAddressById(newJob.startAddress);
+        // newJob.zip = address.zipCode;
 
-          const tempRate = newJob.rate;
-          if (newJob.rateType === 'Hour') {
-            newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-            newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-            newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-          }
-          if (newJob.rateType === 'Ton') {
-            newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-            newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-            newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-          }
+        const tempRate = newJob.rate;
+        if (newJob.rateType === 'Hour') {
+          newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+          newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        }
+        if (newJob.rateType === 'Ton') {
+          newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+          newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        }
 
-          newJob.newStartDate = TFormat.asDate(job.startTime);
+        newJob.newStartDate = TFormat.asDate(job.startTime);
 
-          return newJob;
-        })
-      );
+        return newJob;
+      })
+      // );
     }
-
 
     return (
       <Container className="dashboard">
@@ -511,6 +532,71 @@ class MarketplaceCarrierPage extends Component {
         </Row>
       </Container>
     );
+  }
+
+  renderToggle() {
+    const {
+      // Lists
+      rateTypeList,
+      isAvailable,
+      filters
+    } = this.state;
+
+    return (
+      <Row>
+        <Col md={12}>
+          <Card>
+            <CardBody>
+
+            <Col lg={12}>
+
+              <Col>
+                Select by:
+
+                <Button color={this.availableButtonColor(isAvailable)}
+                        type="button"
+                        onClick={this.makeAvailable}
+                        className="previous">
+                  Hour
+                </Button>
+                <Button color={this.unavailableButtonColor(!isAvailable)}
+                        type="button"
+                        onClick={this.makeAvailable}
+                        className="previous">
+                  Ton
+                </Button>
+
+                <TSelect
+                  input={
+                    {
+                      onChange: this.handleSelectFilterChange,
+                      name: 'rateType',
+                      value: filters.rateType
+                    }
+                  }
+                  meta={
+                    {
+                      touched: false,
+                      error: 'Unable to select'
+                    }
+                  }
+                  value={filters.rateType}
+                  options={
+                    rateTypeList.map(rateType => ({
+                      name: 'rateType',
+                      value: rateType,
+                      label: rateType
+                    }))
+                  }
+                  placeholder={rateTypeList[0]}
+                />
+              </Col>
+            </Col>
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+    )
   }
 
   renderFilter() {
@@ -620,8 +706,8 @@ class MarketplaceCarrierPage extends Component {
                     */}
                     <Col>
                       <TIntervalDatePicker
-                        startDate={startDate}
-                        endDate={endDate}
+                        startDate={filters.startAvailability}
+                        endDate={filters.endAvailability}
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
                         dateFormat="MM/dd/yy"
@@ -961,6 +1047,7 @@ class MarketplaceCarrierPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
+          {this.renderToggle()}
           {this.renderFilter()}
           {/* {this.renderTable()} */}
           {/* {this.renderEquipmentTable()} */}
