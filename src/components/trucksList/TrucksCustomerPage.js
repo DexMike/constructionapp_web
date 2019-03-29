@@ -153,7 +153,15 @@ class TrucksCustomerPage extends Component {
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
-        newEquipments[key].materials = truckMaterials.map(e => e.material).join('\n');
+
+        if ((truckMaterials[0].material).includes('Any')) { // If we have 'Any', show all materials
+          let allMaterials = await LookupsService.getLookupsByType('MaterialType'); // Get all materials from Lookups
+          allMaterials = allMaterials.map(item => item.val1); // Get only val1 values
+          allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
+          newEquipments[key].materials = allMaterials.join('\n');
+        } else {
+          newEquipments[key].materials = truckMaterials.map(e => e.material).join('\n');
+        }
       } catch (error) {
         newEquipments[key].materials = '';
       }
