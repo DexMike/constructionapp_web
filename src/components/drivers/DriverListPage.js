@@ -51,22 +51,25 @@ class DriverListPage extends Component {
   async fetchDrivers() {
     const drivers = await UserService.getDriversWithUserInfo();
     let driversWithInfo = [];
-    driversWithInfo = drivers.map((driver) => {
-      try {
-        const newDriver = {
-          id: driver.driverId,
-          firstName: driver.firstName,
-          lastName: driver.lastName,
-          mobilePhone: driver.mobilePhone,
-          email: driver.email,
-          userId: driver.id
-        };
-        return newDriver;
-      } catch (error) {
-        const newDriver = driver;
-        return newDriver;
-      }
-    });
+
+    if (drivers) {
+      driversWithInfo = drivers.map((driver) => {
+        try {
+          const newDriver = {
+            id: driver.driverId,
+            firstName: driver.firstName,
+            lastName: driver.lastName,
+            mobilePhone: driver.mobilePhone,
+            email: driver.email,
+            userId: driver.id
+          };
+          return newDriver;
+        } catch (error) {
+          const newDriver = driver;
+          return newDriver;
+        }
+      });
+    }
     this.setState({ drivers: driversWithInfo });
   }
 

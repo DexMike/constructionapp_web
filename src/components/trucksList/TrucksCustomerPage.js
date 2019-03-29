@@ -16,6 +16,7 @@ import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
 
 import EquipmentService from '../../api/EquipmentService';
+import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
@@ -143,6 +144,24 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  async fetchEquipmentMaterials(equipments) {
+    const newEquipments = equipments;
+    /* eslint-disable no-await-in-loop */
+    for (const [key, value] of Object.entries(equipments)) {
+      try {
+        let truckMaterials = await
+        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
+        truckMaterials = truckMaterials.map(material => ({
+          material: material.value
+        }));
+        newEquipments[key].materials = truckMaterials.map(e => e.material).join('\n');
+      } catch (error) {
+        newEquipments[key].materials = '';
+      }
+    }
+    this.setState({ equipments: newEquipments });
+  }
+
   async fetchFavoriteEquipments(equipments) {
     // we get all groups.companyId that have name 'Favorite'
     const groups = await GroupService.getGroups();
@@ -178,6 +197,7 @@ class TrucksCustomerPage extends Component {
       // Promise.all(
 
       this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
+      this.fetchEquipmentMaterials(equipments);
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
@@ -221,13 +241,10 @@ class TrucksCustomerPage extends Component {
     const { filters } = this.state;
     filters.materialType = data;
     this.setState({
-      // selectedMaterials: data
       filters
     }, async function changed() {
       await this.fetchEquipments();
-      // console.log(this.state);
     });
-    /**/
   }
 
   handlePageClick(menuItem) {
@@ -746,26 +763,14 @@ class TrucksCustomerPage extends Component {
               {/* Company: {equipment.companyName} */}
               {/* </Col> */}
             </Row>
-            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
-            {/* <Col> */}
-            {/* TODO needs API for equipment materials */}
-            {/* Materials Hauled */}
-            {/* </Col> */}
-            {/* </Row> */}
-            <Row>
+            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
               <Col>
-                {/* HMA */}
-                <br/>
-                {/* Stone */}
-                <br/>
-                {/* Sand */}
-                <br/>
+                Materials Hauled
               </Col>
-              <Col>
-                {/* Gravel */}
-                <br/>
-                {/* Recycling */}
-                <br/>
+            </Row>
+            <Row>
+              <Col className="trucksListMaterialsHauled">
+                {equipment.materials}
               </Col>
               <Col>
                 <Button
