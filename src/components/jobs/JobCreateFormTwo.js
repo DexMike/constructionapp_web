@@ -129,12 +129,6 @@ class JobCreateFormTwo extends PureComponent {
     // return false;
     const { onClose } = this.props;
     onClose();
-    /*
-    if (!this.isFormValid()) {
-      // this.setState({ maxCapacityTouched: true });
-      return;
-    }
-    */
   }
 
   handleInputChange(e) {
@@ -155,8 +149,6 @@ class JobCreateFormTwo extends PureComponent {
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
-
-              {/* this.handleSubmit  */}
               <form
                 className="form form--horizontal addtruck__form"
                 onSubmit={e => this.saveJob(e)}
@@ -204,13 +196,6 @@ class JobCreateFormTwo extends PureComponent {
                     </Button>
                   </ButtonToolbar>
                   <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                    {/*
-                    <Button color="primary" type="button" disabled
-                            className="previous"
-                    >
-                      Back
-                    </Button>
-                    */}
                     <Button
                       color="primary"
                       type="submit"
@@ -236,7 +221,6 @@ class JobCreateFormTwo extends PureComponent {
 }
 
 JobCreateFormTwo.propTypes = {
-  // getJobFullInfo: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   firstTabData: PropTypes.func.isRequired
 };
