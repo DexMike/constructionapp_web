@@ -72,13 +72,15 @@ class MarketplaceCarrierPage extends Component {
         rate: 'Any',
         minTons: 'Any',
         minHours: '',
+        minCapacity: '',
 
-        truckType: '',
-        numTrucks: 1,
+        equipmentType: '',
+        numEquipments: '',
         zipCode: '',
         materialType: [],
 
         sortBy: sortByList[0]
+
       }
 
       // ...equipment
@@ -102,6 +104,11 @@ class MarketplaceCarrierPage extends Component {
   }
 
   async componentDidMount() {
+    let {
+      startDate,
+      endDate
+    } = this.state;
+
     const jobs = await this.fetchJobs();
     await this.fetchFilterLists();
     // console.log("componentDidMount AFTER");
@@ -131,12 +138,18 @@ class MarketplaceCarrierPage extends Component {
         return newJob;
       });
       // );
+
+      startDate = new Date();
+      endDate = new Date();
+      endDate.setDate(startDate.getDate()+7);
     }
 
     this.setState(
       {
         jobs,
-        loaded: true
+        loaded: true,
+        startDate,
+        endDate
       }
     );
   }
@@ -195,7 +208,7 @@ class MarketplaceCarrierPage extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.truckType] = equipmentTypeList;
+    [filters.equipmentType] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -342,7 +355,7 @@ class MarketplaceCarrierPage extends Component {
       // equipments,
       // startAvailability,
       // endAvailability,
-      // truckType,
+      // equipmentType,
       // minCapacity,
       // materials,
       // zipCode,
@@ -557,7 +570,7 @@ class MarketplaceCarrierPage extends Component {
                       Start Date
                     </Col>
                     <Col className="filter-item-title">
-                      Rate
+                      Min Rate
                     </Col>
                     <Col className="filter-item-title">
                       Min Tons
@@ -576,6 +589,7 @@ class MarketplaceCarrierPage extends Component {
                     </Col>
                   </Row>
                   <Row lg={12} id="filter-input-row">
+                    {/*
                     <Col>
                       <TDateTimePicker
                           input={
@@ -589,9 +603,7 @@ class MarketplaceCarrierPage extends Component {
                           onChange={this.handleStartDateChange}
                           dateFormat="MM-dd-yy"
                       />
-                      {/*
                     </Col>
-                    <Col>
                       <TDateTimePicker
                           input={
                             {
@@ -605,6 +617,8 @@ class MarketplaceCarrierPage extends Component {
                           onChange={this.handleEndDateChange}
                           dateFormat="MM-dd-yy"
                       />
+                    */}
+                    <Col>
                       <TIntervalDatePicker
                         startDate={startDate}
                         endDate={endDate}
@@ -612,7 +626,7 @@ class MarketplaceCarrierPage extends Component {
                         onChange={this.handleIntervalInputChange}
                         dateFormat="MM/dd/yy"
                       />
-                      */}
+
                     </Col>
                     <Col>
                       $<input name="rate"
@@ -638,8 +652,8 @@ class MarketplaceCarrierPage extends Component {
                         input={
                           {
                             onChange: this.handleSelectFilterChange,
-                            name: 'truckType',
-                            value: filters.truckType
+                            name: 'equipmentType',
+                            value: filters.equipmentType
                           }
                         }
                         meta={
@@ -648,10 +662,10 @@ class MarketplaceCarrierPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.truckType}
+                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
-                            name: 'truckType',
+                            name: 'equipmentType',
                             value: equipmentType,
                             label: equipmentType
                           }))
@@ -660,11 +674,11 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="numTrucks"
+                      <input name="numEquipments"
                              className="filter-text"
                              type="text"
                              placeholder="1"
-                             value={filters.numTrucks}
+                             value={filters.numEquipments}
                              onChange={this.handleFilterChange}
                       />
                     </Col>
