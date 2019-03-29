@@ -120,9 +120,6 @@ class MarketplaceCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    console.log("componentDidMount");
-    console.log(filters);
-
     const jobs = await this.fetchJobs();
     await this.fetchFilterLists();
 
@@ -245,13 +242,7 @@ class MarketplaceCarrierPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
 
-    console.log("fetchJobs");
-    console.log(filters);
-
     const jobs = await JobService.getJobByFilters(filters);
-
-    console.log("fetchJobs Jobs");
-    console.log(jobs);
 
     if (jobs) {
       if (jobs != null) {
