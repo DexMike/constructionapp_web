@@ -16,6 +16,7 @@ import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
 
 import EquipmentService from '../../api/EquipmentService';
+import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
@@ -29,6 +30,7 @@ import ProfileService from '../../api/ProfileService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
+import GroupService from '../../api/GroupService';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -142,6 +144,58 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  async fetchEquipmentMaterials(equipments) {
+    const newEquipments = equipments;
+    /* eslint-disable no-await-in-loop */
+    for (const [key, value] of Object.entries(equipments)) {
+      try {
+        let truckMaterials = await
+        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
+        truckMaterials = truckMaterials.map(material => ({
+          material: material.value
+        }));
+
+        if ((truckMaterials[0].material).includes('Any')) { // If we have 'Any', show all materials
+          let allMaterials = await LookupsService.getLookupsByType('MaterialType'); // Get all materials from Lookups
+          allMaterials = allMaterials.map(item => item.val1); // Get only val1 values
+          allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
+          newEquipments[key].materials = allMaterials.join('\n');
+        } else {
+          newEquipments[key].materials = truckMaterials.map(e => e.material).join('\n');
+        }
+      } catch (error) {
+        newEquipments[key].materials = '';
+      }
+    }
+    this.setState({ equipments: newEquipments });
+  }
+
+  async fetchFavoriteEquipments(equipments) {
+    // we get all groups.companyId that have name 'Favorite'
+    const groups = await GroupService.getGroups();
+    const companyIds = groups.map((item) => {
+      if (item.name === 'Favorite') {
+        return item.companyId;
+      }
+      return null;
+    });
+
+    if (companyIds) {
+      // then if we find the equipment's companyId in
+      // companyIds[] we favorite it
+      equipments.map((equipment) => {
+        const newEquipment = equipment;
+        if (companyIds.includes(newEquipment.companyId)) {
+          newEquipment.favorite = true;
+        } else {
+          newEquipment.favorite = false;
+        }
+        return newEquipment;
+      });
+      this.setState({ equipments });
+    }
+  }
+
   async fetchEquipments() {
     const { filters } = this.state;
     const equipments = await EquipmentService.getEquipmentByFilters(filters);
@@ -149,6 +203,10 @@ class TrucksCustomerPage extends Component {
     if (equipments) {
       // NOTE let's try not to use Promise.all and use full api calls
       // Promise.all(
+
+      this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
+      this.fetchEquipmentMaterials(equipments);
+
       equipments.map((equipment) => {
         const newEquipment = equipment;
         //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
@@ -191,18 +249,47 @@ class TrucksCustomerPage extends Component {
     const { filters } = this.state;
     filters.materialType = data;
     this.setState({
-      // selectedMaterials: data
       filters
     }, async function changed() {
       await this.fetchEquipments();
-      // console.log(this.state);
     });
-    /**/
   }
 
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
+    }
+  }
+
+  async handleSetFavorite(companyId) {
+    const { equipments } = this.state;
+
+    try {
+      const group = await GroupService.getGroupByCompanyId(companyId);
+      const profile = await ProfileService.getProfile();
+
+      // we get check for groups.companyId = companyId that have name 'Favorite'
+      group.map((item) => {
+        if (item.name === 'Favorite') {
+          return item.companyId;
+        }
+        return null;
+      });
+
+      // if we got a group with companyId
+      if (group.length > 0) { // delete
+        await GroupService.deleteGroupById(group[0].id);
+      } else { // create "Favorite" Group record
+        const groupData = {
+          name: 'Favorite',
+          companyId,
+          usersId: profile.userId
+        };
+        await GroupService.createGroup(groupData);
+      }
+      this.fetchFavoriteEquipments(equipments);
+    } catch (error) {
+      this.setState({ equipments });
     }
   }
 
@@ -259,7 +346,6 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleSelectMaterialsModal() {
-    // console.log(274);
     const { modalSelectMaterials } = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
@@ -578,7 +664,7 @@ class TrucksCustomerPage extends Component {
 
           <Col md={4}>
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-              <Col className="customer-truck-results-title">
+              <Col lg={4} className="customer-truck-results-title">
                 Type: {equipment.type}
               </Col>
               <Col className="customer-truck-results-title">
@@ -669,33 +755,30 @@ class TrucksCustomerPage extends Component {
 
           <Col md={6}>
             <Row style={{ background: '#c7dde8' }}>
-              <Col className="customer-truck-results-title">
+              <Col md={11} className="customer-truck-results-title">
                 Name: {equipment.name}
+              </Col>
+              <Col md={1} className="customer-truck-results-title">
+                <Button
+                  color="link"
+                  onClick={() => this.handleSetFavorite(equipment.companyId)}
+                  className="material-icons favoriteIcon"
+                >
+                  {equipment.favorite ? 'favorite' : 'favorite_border'}
+                </Button>
               </Col>
               {/* <Col md={6} className="customer-truck-results-title> */}
               {/* Company: {equipment.companyName} */}
               {/* </Col> */}
             </Row>
-            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
-            {/* <Col> */}
-            {/* TODO needs API for equipment materials */}
-            {/* Materials Hauled */}
-            {/* </Col> */}
-            {/* </Row> */}
-            <Row>
+            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
               <Col>
-                {/* HMA */}
-                <br/>
-                {/* Stone */}
-                <br/>
-                {/* Sand */}
-                <br/>
+                Materials Hauled
               </Col>
-              <Col>
-                {/* Gravel */}
-                <br/>
-                {/* Recycling */}
-                <br/>
+            </Row>
+            <Row>
+              <Col className="trucksListMaterialsHauled">
+                {equipment.materials}
               </Col>
               <Col>
                 <Button

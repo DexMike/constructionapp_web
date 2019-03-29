@@ -5,7 +5,8 @@ import {
   Col,
   Button,
   ButtonToolbar,
-  Row
+  Row,
+  Container
 } from 'reactstrap';
 // import moment from 'moment';
 import PropTypes from 'prop-types';
@@ -13,6 +14,7 @@ import ProfileService from '../../api/ProfileService';
 import AddressService from '../../api/AddressService';
 import JobService from '../../api/JobService';
 import BidService from '../../api/BidService';
+import GroupService from '../../api/GroupService';
 import TCheckBox from '../common/TCheckBox';
 import './jobs.css';
 
@@ -20,26 +22,28 @@ class JobCreateFormTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      sendToMkt: true
+      sendToMkt: true,
+      sendToFavorites: true,
+      showSendtoFavorites: false,
+      loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    // this.jobChangeDate = this.jobChangeDate.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async componentDidMount() {
-    // await this.fetchMaterials();
+    // does this customer has favorites?
+    const profile = await ProfileService.getProfile();
+    const favorites = await GroupService.getGroupByFavoriteAndCompanyId(profile.companyId);
+    if (Number(favorites[0]) > 0) {
+      this.setState({
+        showSendtoFavorites: true
+      });
+    }
+    this.setState({ loaded: true });
   }
 
   isFormValid() {
-    /*
-    const truck = this.state;
-    const {
-      ratesByBoth,
-      ratesByTon,
-      ratesByHour
-    } = this.state;
-    */
     const isValid = true;
 
     if (isValid) {
@@ -55,7 +59,7 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
-  async saveTruck(e) {
+  async saveJob(e) {
     e.preventDefault();
     e.persist();
     const { firstTabData } = this.props;
@@ -125,12 +129,6 @@ class JobCreateFormTwo extends PureComponent {
     // return false;
     const { onClose } = this.props;
     onClose();
-    /*
-    if (!this.isFormValid()) {
-      // this.setState({ maxCapacityTouched: true });
-      return;
-    }
-    */
   }
 
   handleInputChange(e) {
@@ -140,74 +138,89 @@ class JobCreateFormTwo extends PureComponent {
 
   render() {
     const {
-      sendToMkt
+      sendToMkt,
+      sendToFavorites,
+      showSendtoFavorites,
+      loaded
     } = this.state;
     const { onClose } = this.props;
+    if (loaded) {
+      return (
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
+              <form
+                className="form form--horizontal addtruck__form"
+                onSubmit={e => this.saveJob(e)}
+              >
+                <Row className="col-md-12">
+
+                  <div className={showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}>
+                    <TCheckBox
+                      onChange={this.handleInputChange}
+                      name="sendToMkt"
+                      value={!!sendToFavorites}
+                    />
+                  </div>
+                  <div className="col-md-11 form__form-group">
+                    <h4 className="talign">
+                      Send to Favorites
+                    </h4>
+                  </div>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-1 form__form-group">
+                    <TCheckBox
+                      onChange={this.handleInputChange}
+                      name="sendToMkt"
+                      value={!!sendToMkt}
+                    />
+                  </div>
+                  <div className="col-md-11 form__form-group">
+                    <h4 className="talign">
+                      Yes! Send to Trelar Marketplace
+                    </h4>
+                    * Note - This job will be sent to all Trelar Partners for review
+                  </div>
+                </Row>
+
+                <Row className="col-md-12">
+                  <hr />
+                </Row>
+
+                <Row className="col-md-12">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    <Button
+                      color="primary"
+                      type="submit"
+                      className="next"
+                    >
+                      Send Job
+                    </Button>
+                  </ButtonToolbar>
+                </Row>
+
+              </form>
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
     return (
-      <Col md={12} lg={12}>
-        <Card>
-          <CardBody>
-
-            {/* this.handleSubmit  */}
-            <form
-              className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveTruck(e)}
-            >
-              <Row className="col-md-12">
-                {/* FOURTH ROW */}
-                <div className="col-md-1 form__form-group">
-                  <TCheckBox
-                    onChange={this.handleInputChange}
-                    name="sendToMkt"
-                    value={!!sendToMkt}
-                  />
-                </div>
-                <div className="col-md-11 form__form-group">
-                  <h4 className="talign">
-                    Yes! Send to Trelar Marketplace
-                  </h4>
-                  * Note - This job will be sent to all Trelar Partners for review
-                </div>
-              </Row>
-
-              <Row className="col-md-12">
-                <hr />
-              </Row>
-
-              <Row className="col-md-12">
-                <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
-                    Cancel
-                  </Button>
-                </ButtonToolbar>
-                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  {/*
-                  <Button color="primary" type="button" disabled
-                          className="previous"
-                  >
-                    Back
-                  </Button>
-                  */}
-                  <Button
-                    color="primary"
-                    type="submit"
-                    className="next"
-                  >
-                    Send Job
-                  </Button>
-                </ButtonToolbar>
-              </Row>
-
-            </form>
-          </CardBody>
-        </Card>
-      </Col>
+      <Container>
+        Loading...
+      </Container>
     );
   }
 }
 
 JobCreateFormTwo.propTypes = {
-  // getJobFullInfo: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   firstTabData: PropTypes.func.isRequired
 };
