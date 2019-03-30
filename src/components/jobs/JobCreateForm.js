@@ -10,6 +10,7 @@ import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
+import BookingService from '../../api/BookingService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
@@ -31,6 +32,7 @@ class JobCreateForm extends Component {
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
       bid: BidService.getDefaultBid(),
+      booking: BookingService.getDefaultBooking(),
       materials: [],
       availableMaterials: [],
       reqHandlerName: { touched: false, error: '' },
@@ -61,10 +63,12 @@ class JobCreateForm extends Component {
   async componentDidMount() {
     // debugger;
     const profile = await ProfileService.getProfile();
-    const { job, startAddress, endAddress, bid } = this.state;
+    const { job, startAddress, endAddress, bid, booking } = this.state;
     const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
-    job.numberOfTrucks = 1;
+    // I commented the line below as I am not sure what it is used for
+    // in the DB we have numEquipments
+    // job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
     job.createdBy = profile.userId;
     if (selectedEquipment.rateType !== 'All') {
@@ -78,7 +82,7 @@ class JobCreateForm extends Component {
     endAddress.createdBy = profile.userId;
     bid.hasCustomerAccepted = 1;
 
-    // bid.userId should be the userid of the driver likned to that equipment
+    // bid.userId should be the userid of the driver linked to that equipment
     if (!selectedEquipment.defaultDriverId) {
       bid.userId = profile.selectedEquipment.defaultDriverId;
     } else {
@@ -87,12 +91,23 @@ class JobCreateForm extends Component {
 
     bid.createdBy = profile.userId;
     bid.modifiedBy = profile.userId;
+
+    // set booking information based on job and bid
+    booking.createdBy = profile.userId;
+    booking.modifiedBy = profile.userId;
+    booking.rateType = job.rateType;
+    booking.startAddress = job.startAddress;
+    booking.endAddress = job.endAddress;
+    booking.startTime = job.startTime;
+    booking.endTime = job.endTime;
+
     await this.fetchForeignValues();
     this.setState({
       job,
       startAddress,
       endAddress,
       bid,
+      booking,
       availableMaterials: selectedMaterials()
     });
     this.setState({ loaded: true });
@@ -235,7 +250,7 @@ class JobCreateForm extends Component {
   async createJob(e) {
     e.preventDefault();
     const { closeModal, selectedEquipment } = this.props;
-    const { startAddress, job, endAddress, bid } = this.state;
+    const { startAddress, job, endAddress, bid, booking } = this.state;
     const newJob = CloneDeep(job);
     startAddress.name = `Job: ${newJob.name}`;
     endAddress.name = `Job: ${newJob.name}`;
@@ -266,6 +281,19 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     newJob.createdOn = moment()
       .unix() * 1000;
+    console.log('selectedEquipment type: ', selectedEquipment.type);
+    console.log('newJob: ', newJob);
+
+    newJob.equipmentType = selectedEquipment.type;
+    // In this scenario we are not letting a customer create a job with
+    // more than 1 truck so here we set the numEquipments to 1
+    // in the new job creation method we need to set it to the actual
+    // number they set in the field
+    newJob.numEquipments = 1;
+    console.log('selectedEquipment: ', selectedEquipment);
+
+    // console.log('selectedEquipment.equipmentType: ', selectedEquipment.equipmentType);
+    // console.log('equipmentType: ', newJob.equipmentType);
     const createdJob = await JobService.createJob(newJob);
     bid.jobId = createdJob.id;
     bid.rate = createdJob.rate;
@@ -274,7 +302,20 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     bid.createdOn = moment()
       .unix() * 1000;
-    await BidService.createBid(bid);
+    booking.modifiedOn = moment()
+      .unix() * 1000;
+    booking.createdOn = moment()
+      .unix() * 1000;
+    const createdBid = await BidService.createBid(bid);
+    // Now we need to create a Booking
+    booking.bidId = createdBid.id;
+    booking.schedulersCompanyId = selectedEquipment.companyId;
+    booking.sourceAddressId = newJob.startAddress;
+    console.log('createdBid ', createdBid);
+    console.log('booking bidId is ', booking.bidId);
+    console.log('booking ', booking);
+    await BookingService.createBooking(booking);
+
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
     // We need to get the phone number from the carrier co
