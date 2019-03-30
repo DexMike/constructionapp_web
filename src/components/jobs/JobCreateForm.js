@@ -10,13 +10,13 @@ import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
+import BookingService from '../../api/BookingService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
-import BookingService from '../../api/BookingService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -66,7 +66,9 @@ class JobCreateForm extends Component {
     const { job, startAddress, endAddress, bid, booking } = this.state;
     const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
-    job.numberOfTrucks = 1;
+    // I commented the line below as I am not sure what it is used for
+    // in the DB we have numEquipments
+    // job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
     job.createdBy = profile.userId;
     if (selectedEquipment.rateType !== 'All') {
@@ -83,10 +85,8 @@ class JobCreateForm extends Component {
     // bid.userId should be the userid of the driver linked to that equipment
     if (!selectedEquipment.defaultDriverId) {
       bid.userId = profile.selectedEquipment.defaultDriverId;
-      booking.schedulersCompanyId = bid.companyId;
     } else {
       bid.userId = profile.userId;
-      booking.schedulersCompanyId = bid.companyId;
     }
 
     bid.createdBy = profile.userId;
@@ -94,7 +94,7 @@ class JobCreateForm extends Component {
 
     // set booking information based on job and bid
     booking.createdBy = profile.userId;
-    booking.modifiedOn = profile.userId;
+    booking.modifiedBy = profile.userId;
     booking.rateType = job.rateType;
     booking.startAddress = job.startAddress;
     booking.endAddress = job.endAddress;
@@ -281,9 +281,21 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     newJob.createdOn = moment()
       .unix() * 1000;
+    console.log('selectedEquipment type: ', selectedEquipment.type);
+    console.log('newJob: ', newJob);
+
+    newJob.equipmentType = selectedEquipment.type;
+    // In this scenario we are not letting a customer create a job with
+    // more than 1 truck so here we set the numEquipments to 1
+    // in the new job creation method we need to set it to the actual
+    // number they set in the field
+    newJob.numEquipments = 1;
+    console.log('selectedEquipment: ', selectedEquipment);
+
+    // console.log('selectedEquipment.equipmentType: ', selectedEquipment.equipmentType);
+    // console.log('equipmentType: ', newJob.equipmentType);
     const createdJob = await JobService.createJob(newJob);
     bid.jobId = createdJob.id;
-    booking.bidId = bid.id;
     bid.rate = createdJob.rate;
     bid.rateEstimate = createdJob.rateEstimate;
     bid.modifiedOn = moment()
@@ -294,8 +306,14 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     booking.createdOn = moment()
       .unix() * 1000;
-    await BidService.createBid(bid);
+    const createdBid = await BidService.createBid(bid);
     // Now we need to create a Booking
+    booking.bidId = createdBid.id;
+    booking.schedulersCompanyId = selectedEquipment.companyId;
+    booking.sourceAddressId = newJob.startAddress;
+    console.log('createdBid ', createdBid);
+    console.log('booking bidId is ', booking.bidId);
+    console.log('booking ', booking);
     await BookingService.createBooking(booking);
 
     // Let's make a call to Twilio to send an SMS
