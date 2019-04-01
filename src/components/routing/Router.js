@@ -10,7 +10,7 @@ class Router extends Component {
       <MainWrapper theme={this.context}>
         <main>
           <Switch>
-            <Route exact path="/log_in" component={LoginPage}/>
+            <Route exact path="/login" component={LoginPage}/>
             <Route path="/" component={WrappedRoutes}/>
           </Switch>
         </main>
