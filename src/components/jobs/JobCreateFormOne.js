@@ -351,112 +351,112 @@ class CreateJobFormOne extends PureComponent {
                       <div className="wizard__form-wrapper">
                         {/* onSubmit={this.nextPage} */}
                         {rateTab === 2
-                          && (
-                            <Row className="col-md-12">
-                              {/* FIRST ROW */}
-                              <div className="col-md-5 form__form-group">
-                                Estimated Amount of Tonnage
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="tonnage"
-                                  type="number"
-                                  value={tonnage}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Capacity"
-                                />
-                              </div>
-                              <div className="col-md-4 form__form-group">
-                                &nbsp;
-                              </div>
-                              {/* END LOCATION */}
-                              <div className="col-md-12 form__form-group">
-                                <h3 className="subhead">
-                                  End Location
-                                </h3>
-                              </div>
-                              <div className="col-md-12 form__form-group">
-                                <input
-                                  name="endLocationAddress1"
-                                  type="text"
-                                  value={endLocationAddress1}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Address 1"
-                                />
-                              </div>
-                              <div className="col-md-12 form__form-group">
-                                <input
-                                  name="endLocationAddress2"
-                                  type="text"
-                                  value={endLocationAddress2}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Address 2"
-                                />
-                              </div>
-                              <div className="col-md-7 form__form-group">
-                                <input
-                                  name="endLocationCity"
-                                  type="text"
-                                  value={endLocationCity}
-                                  onChange={this.handleInputChange}
-                                  placeholder="City"
-                                />
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="endLocationState"
-                                  type="text"
-                                  value={endLocationState}
-                                  onChange={this.handleInputChange}
-                                  placeholder="State"
-                                />
-                              </div>
-                              <div className="col-md-2 form__form-group">
-                                <input
-                                  name="startLocationZip"
-                                  type="text"
-                                  value={endLocationZip}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Zip"
-                                />
-                              </div>
-                            </Row>
-                          )}
+                        && (
+                          <Row className="col-md-12">
+                            {/* FIRST ROW */}
+                            <div className="col-md-5 form__form-group">
+                              Estimated Amount of Tonnage
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <input
+                                name="tonnage"
+                                type="number"
+                                value={tonnage}
+                                onChange={this.handleInputChange}
+                                placeholder="Capacity"
+                              />
+                            </div>
+                            <div className="col-md-4 form__form-group">
+                              &nbsp;
+                            </div>
+                            {/* END LOCATION */}
+                            <div className="col-md-12 form__form-group">
+                              <h3 className="subhead">
+                                End Location
+                              </h3>
+                            </div>
+                            <div className="col-md-12 form__form-group">
+                              <input
+                                name="endLocationAddress1"
+                                type="text"
+                                value={endLocationAddress1}
+                                onChange={this.handleInputChange}
+                                placeholder="Address 1"
+                              />
+                            </div>
+                            <div className="col-md-12 form__form-group">
+                              <input
+                                name="endLocationAddress2"
+                                type="text"
+                                value={endLocationAddress2}
+                                onChange={this.handleInputChange}
+                                placeholder="Address 2"
+                              />
+                            </div>
+                            <div className="col-md-7 form__form-group">
+                              <input
+                                name="endLocationCity"
+                                type="text"
+                                value={endLocationCity}
+                                onChange={this.handleInputChange}
+                                placeholder="City"
+                              />
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <input
+                                name="endLocationState"
+                                type="text"
+                                value={endLocationState}
+                                onChange={this.handleInputChange}
+                                placeholder="State"
+                              />
+                            </div>
+                            <div className="col-md-2 form__form-group">
+                              <input
+                                name="startLocationZip"
+                                type="text"
+                                value={endLocationZip}
+                                onChange={this.handleInputChange}
+                                placeholder="Zip"
+                              />
+                            </div>
+                          </Row>
+                        )}
                         {rateTab === 1
-                          && (
-                            <Row className="col-md-12">
-                              {/* FIRST ROW */}
-                              <div className="col-md-7 form__form-group">
-                                How many hours do you estimate for this job?
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="hourEstimatedHours"
-                                  type="number"
-                                  value={hourEstimatedHours}
-                                  onChange={this.handleInputChange}
-                                />
-                              </div>
-                              <div className="col-md-2 form__form-group">
-                                &nbsp;
-                              </div>
-                              {/* SECOND ROW */}
-                              <div className="col-md-7 form__form-group">
-                                How many trucks will you require for this job?
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="hourTrucksNumber"
-                                  type="number"
-                                  value={hourTrucksNumber}
-                                  onChange={this.handleInputChange}
-                                />
-                              </div>
-                              <div className="col-md-2 form__form-group">
-                                &nbsp;
-                              </div>
-                            </Row>
-                          )}
+                        && (
+                          <Row className="col-md-12">
+                            {/* FIRST ROW */}
+                            <div className="col-md-7 form__form-group">
+                              How many hours do you estimate for this job?
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <input
+                                name="hourEstimatedHours"
+                                type="number"
+                                value={hourEstimatedHours}
+                                onChange={this.handleInputChange}
+                              />
+                            </div>
+                            <div className="col-md-2 form__form-group">
+                              &nbsp;
+                            </div>
+                            {/* SECOND ROW */}
+                            <div className="col-md-7 form__form-group">
+                              How many trucks will you require for this job?
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <input
+                                name="hourTrucksNumber"
+                                type="number"
+                                value={hourTrucksNumber}
+                                onChange={this.handleInputChange}
+                              />
+                            </div>
+                            <div className="col-md-2 form__form-group">
+                              &nbsp;
+                            </div>
+                          </Row>
+                        )}
                         {/* onSubmit={onSubmit} */}
                       </div>
                     </div>

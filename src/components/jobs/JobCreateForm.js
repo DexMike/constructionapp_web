@@ -651,7 +651,7 @@ class JobCreateForm extends Component {
           <div className="row">
             <div className="col-sm-4">
               <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
-                            buttonTwo="Ton" onChange={this.toggleJobRateType}
+                             buttonTwo="Ton" onChange={this.toggleJobRateType}
               />
             </div>
           </div>
@@ -855,10 +855,10 @@ class JobCreateForm extends Component {
           <div className="col-sm-12">
             <div className="form__form-group">
               <input name="address2"
-                    type="text"
-                    placeholder="Address #2"
-                    value={endAddress.address2}
-                    onChange={this.handleEndAddressInputChange}
+                     type="text"
+                     placeholder="Address #2"
+                     value={endAddress.address2}
+                     onChange={this.handleEndAddressInputChange}
               />
             </div>
           </div>
