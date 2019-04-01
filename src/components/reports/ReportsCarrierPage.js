@@ -5,7 +5,8 @@ import moment from 'moment';
 
 // import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-
+import TSelect from '../common/TSelect';
+import TDateTimePicker from '../common/TDateTimePicker';
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -21,12 +22,23 @@ class ReportsCarrierPage extends Component {
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
-      jobId: 0
+      jobId: 0,
+      startDate: new Date(),
+      endDate: new Date(),
+      timeRanges: [
+        { name: 'Last 30 days', value: 30 },
+        { name: 'Last 60 days', value: 60 },
+        { name: 'Last 90 days', value: 90 }
+      ],
+      selectedRange: 30
       // profile: null
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.fromDateChange = this.fromDateChange.bind(this);
+    this.toDateChange = this.toDateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -101,6 +113,23 @@ class ReportsCarrierPage extends Component {
     return jobs;
   }
 
+  async handleSelectFilterChange(option) {
+    const { value, name } = option;
+    this.setState({ selectedRange: value });
+    console.log(117, name);
+    console.log(118, value);
+  }
+
+  fromDateChange(data) {
+    this.setState({ startDate: data });
+    console.log(116, data);
+  }
+
+  toDateChange(data) {
+    this.setState({ endDate: data });
+    console.log(121, data);
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -116,7 +145,13 @@ class ReportsCarrierPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const { loaded, timeRanges, startDate, endDate, selectedRange } = this.state;
+    /*
+    console.log(149, startDate);
+    console.log(150, endDate);
+    console.log(151, selectedRange);
+    */
+
     let { jobs } = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
@@ -177,6 +212,11 @@ class ReportsCarrierPage extends Component {
 
     potentialIncome = TFormat.asMoney(potentialIncome);
 
+    const today = new Date();
+    const date = new Date();
+    const tomorrowDate = date.setDate(date.getDate() + 1);
+    const currentDate = today.getTime();
+
     // console.log(jobs);
 
     if (loaded) {
@@ -191,9 +231,83 @@ class ReportsCarrierPage extends Component {
 
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Reports</h3>
+              <h3 className="page-title">Reporting</h3>
             </Col>
           </Row>
+
+          <div className="row">
+            <div className="col-12 col-md-12 col-lg-12">
+              <div className="card">
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-2 form__form-group">
+                      <span className="form__form-group-label">Time Range</span>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: timeRanges[0].name,
+                            value: timeRanges[0].value
+                          }
+                        }                      
+                        value={timeRanges[0].value.toString()}
+                        options={
+                          timeRanges.map(timeRange => ({
+                            name: timeRange.name,
+                            value: timeRange.value.toString(),
+                            label: timeRange.name
+                          }))
+                        }
+                        placeholder={timeRanges[0].name}
+                      />
+                    </div>
+                    <div className="col-md-2 form__form-group">
+                      <span className="form__form-group-label">From</span>
+                      <div className="row">
+                        <div className="col-10">
+                          <TDateTimePicker
+                            input={
+                              {
+                                onChange: this.FromDateChange,
+                                name: 'startDate',
+                                value: { currentDate },
+                                givenDate: currentDate
+                              }
+                            }
+                            onChange={this.fromDateChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <i className="material-icons iconSet">calendar_today</i>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-2 form__form-group">
+                      <span className="form__form-group-label">To</span>
+                      <div className="row">
+                        <div className="col-10">
+                          <TDateTimePicker
+                            input={
+                              {
+                                onChange: this.ToDateChange,
+                                name: 'startDate',
+                                value: { currentDate },
+                                givenDate: currentDate
+                              }
+                            }
+                            onChange={this.toDateChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <i className="material-icons iconSet">calendar_today</i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="row">
 
