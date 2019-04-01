@@ -45,7 +45,7 @@ class LoginPage extends SignIn {
     });
   }
 
-  async loginRouting() {
+  loginRouting() {
     window.location = '/'; // go to the equipments listing as the customer needs to create a job.
   }
 
@@ -65,9 +65,11 @@ class LoginPage extends SignIn {
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
       if (data.signInUserSession !== null) {
-        this.props.onStateChange('authenticated', data);
+        if (this.props.onStateChange) {
+          this.props.onStateChange('authenticated', data);
+        }
         // window.location = '/';
-        await this.loginRouting();
+        this.loginRouting();
         return;
       }
 

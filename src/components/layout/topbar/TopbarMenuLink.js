@@ -5,8 +5,15 @@ import { Auth } from 'aws-amplify';
 import ThemeContext from '../../ThemeContext';
 
 class TopbarMenuLink extends Component {
-  logOut() {
-    Auth.signOut({ global: true });
+  async logOut() {
+    try {
+      await Auth.signOut({ global: true });
+    } catch (err) {
+      // POST https://cognito-idp.us-east-1.amazonaws.com/ 400
+      // Uncaught (in promise) {code: "NotAuthorizedException",
+      // name: "NotAuthorizedException", message: "Access Token has been revoked"}
+      window.location = '/login';
+    }
   }
 
   render() {
@@ -29,7 +36,7 @@ class TopbarMenuLink extends Component {
             )}
           </ThemeContext.Consumer>
         )}
-        { title !== 'Log Out' && title !== 'Toggle Theme' && (
+        {title !== 'Log Out' && title !== 'Toggle Theme' && (
           <Link className="topbar__link" to={path}>
             <span className={`topbar__link-icon lnr lnr-${icon}`}/>
             <p className="topbar__link-title">{title}</p>
