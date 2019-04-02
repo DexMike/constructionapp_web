@@ -315,6 +315,11 @@ class JobCreateForm extends Component {
     console.log('booking ', booking);
     await BookingService.createBooking(booking);
 
+    // now we need to create a BookingEquipment record
+    // Since in this scenario we are only allowing 1 truck for one booking
+    // we are going to create one BookingEquipment.  NOTE: the idea going forward is
+    // to allow multiple trucks per booking
+
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
     // We need to get the phone number from the carrier co
