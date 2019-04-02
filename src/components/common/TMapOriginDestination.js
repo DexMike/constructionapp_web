@@ -32,10 +32,10 @@ class TMap extends PureComponent {
 
     const { input } = this.props;
     let DirectionsService;
-    // let map;
+    const gmaps = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API}&v=3.exp&libraries=geometry,drawing,places`;
 
     const props = withProps({
-      googleMapURL: 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAsnyBy0GMNoCQxfm0CxaAF-ys_2HNDCOc&v=3.exp&libraries=geometry,drawing,places',
+      googleMapURL: gmaps,
       loadingElement: <div style={{ height: '100%' }} />,
       containerElement: <div style={{ height: '400px' }} />,
       mapElement: <div style={{ height: '100%' }} />
