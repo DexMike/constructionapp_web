@@ -635,7 +635,7 @@ class MarketplaceCarrierPage extends Component {
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
                     <Col className="filter-item-title">
-                      Start Date
+                      Date Range
                     </Col>
                     <Col className="filter-item-title">
                       Min Rate
