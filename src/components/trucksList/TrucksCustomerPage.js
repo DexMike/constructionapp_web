@@ -31,6 +31,7 @@ import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
 import GroupService from '../../api/GroupService';
+import GroupListService from '../../api/GroupListService';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -172,20 +173,14 @@ class TrucksCustomerPage extends Component {
 
   async fetchFavoriteEquipments(equipments) {
     // we get all groups.companyId that have name 'Favorite'
-    const groups = await GroupService.getGroups();
-    const companyIds = groups.map((item) => {
-      if (item.name === 'Favorite') {
-        return item.companyId;
-      }
-      return null;
-    });
+    const groupsFavorites = await GroupListService.getGroupListsFavorites();
 
-    if (companyIds) {
-      // then if we find the equipment's companyId in
-      // companyIds[] we favorite it
+    if (groupsFavorites) {
+      // if we find the equipment's companyId in
+      // groupsFavorites we favorite it
       equipments.map((equipment) => {
         const newEquipment = equipment;
-        if (companyIds.includes(newEquipment.companyId)) {
+        if (groupsFavorites.includes(newEquipment.companyId)) {
           newEquipment.favorite = true;
         } else {
           newEquipment.favorite = false;
@@ -265,7 +260,7 @@ class TrucksCustomerPage extends Component {
     const { equipments } = this.state;
 
     try {
-      const group = await GroupService.getGroupByCompanyId(companyId);
+      const group = await GroupListService.getGroupListsByCompanyId(companyId);
       const profile = await ProfileService.getProfile();
 
       // we get check for groups.companyId = companyId that have name 'Favorite'
@@ -278,14 +273,16 @@ class TrucksCustomerPage extends Component {
 
       // if we got a group with companyId
       if (group.length > 0) { // delete
-        await GroupService.deleteGroupById(group[0].id);
+        // first we delete the Group List
+        await GroupListService.deleteGroupListById(group[0].id);
+        // then the Group
+        await GroupService.deleteGroupById(group[0].groupId);
       } else { // create "Favorite" Group record
         const groupData = {
-          name: 'Favorite',
-          companyId,
-          usersId: profile.userId
+          createdBy: profile.userId,
+          companyId
         };
-        await GroupService.createGroup(groupData);
+        await GroupListService.createFavoriteGroupList(groupData);
       }
       this.fetchFavoriteEquipments(equipments);
     } catch (error) {
