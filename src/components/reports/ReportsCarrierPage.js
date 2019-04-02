@@ -15,7 +15,8 @@ import AddressService from '../../api/AddressService';
 class ReportsCarrierPage extends Component {
   constructor(props) {
     super(props);
-
+    const sortByList = ['Hourly ascending', 'Hourly descending',
+      'Tonnage ascending', 'Tonnage descending'];
     this.state = {
       loaded: false,
       jobs: [],
@@ -23,14 +24,33 @@ class ReportsCarrierPage extends Component {
       goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       timeRanges: [
+        { name: 'Custom', value: 0 },
         { name: 'Last 30 days', value: 30 },
         { name: 'Last 60 days', value: 60 },
         { name: 'Last 90 days', value: 90 }
       ],
-      selectedRange: 30
+      selectedRange: 30,
+      filters: {
+        rateType: '',
+
+        startAvailability: null,
+        endAvailability: null,
+        rate: 'Any',
+        minTons: 'Any',
+        minHours: '',
+        minCapacity: '',
+
+        equipmentType: '',
+        numEquipments: '',
+        zipCode: '',
+        materialType: [],
+
+        sortBy: sortByList[0]
+
+      }
       // profile: null
     };
 
@@ -42,10 +62,22 @@ class ReportsCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    const jobs = await this.fetchJobs();
+    let {
+      startDate,
+      endDate,
+      filters,
+      selectedRange
+    } = this.state;
 
+    startDate = new Date();
+    endDate = new Date();
+    endDate.setDate(startDate.getDate() - selectedRange);
+    filters.startAvailability = startDate;
+    filters.endAvailability = endDate;
+
+    await this.fetchJobs();
     // Promise.all(
-    jobs.map(async (job) => {
+    /*jobs.map(async (job) => {
       const newJob = job;
 
       const company = await CompanyService.getCompanyById(newJob.companiesId);
@@ -68,7 +100,12 @@ class ReportsCarrierPage extends Component {
       return newJob;
     });
     // );
-    this.setState({ jobs });
+    this.setState({
+      jobs,
+      filters,
+      startDate,
+      endDate
+    });*/
   }
 
   equipmentMaterialsAsString(materials) {
@@ -101,8 +138,10 @@ class ReportsCarrierPage extends Component {
   }
 
   async fetchJobs() {
-    let jobs = await JobService.getJobs();
-    jobs = jobs.map((job) => {
+    const { filters } = this.state;
+    let jobs = await JobService.getJobByFilters(filters);
+    console.log(143, jobs);
+    /*jobs = jobs.map((job) => {
       const newJob = job;
       newJob.modifiedOn = moment(job.modifiedOn)
         .format();
@@ -110,24 +149,25 @@ class ReportsCarrierPage extends Component {
         .format();
       return newJob;
     });
-    return jobs;
+    return jobs;*/
   }
 
   async handleSelectFilterChange(option) {
-    const { value, name } = option;
-    this.setState({ selectedRange: value });
-    console.log(117, name);
-    console.log(118, value);
+    const { value } = option;
+    const today = new Date();
+    this.setState({ selectedRange: value,
+      startDate: today.getDate() - value,
+      endDate: today.getDate() });
+    console.log(137, today.getDate());
+    console.log(138, this.state);
   }
 
   fromDateChange(data) {
     this.setState({ startDate: data });
-    console.log(116, data);
   }
 
   toDateChange(data) {
     this.setState({ endDate: data });
-    console.log(121, data);
   }
 
   renderGoTo() {
@@ -145,13 +185,7 @@ class ReportsCarrierPage extends Component {
   }
 
   render() {
-    const { loaded, timeRanges, startDate, endDate, selectedRange } = this.state;
-    /*
-    console.log(149, startDate);
-    console.log(150, endDate);
-    console.log(151, selectedRange);
-    */
-
+    const { loaded, timeRanges, startDate, endDate } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
@@ -212,11 +246,6 @@ class ReportsCarrierPage extends Component {
 
     potentialIncome = TFormat.asMoney(potentialIncome);
 
-    const today = new Date();
-    const date = new Date();
-    const tomorrowDate = date.setDate(date.getDate() + 1);
-    const currentDate = today.getTime();
-
     // console.log(jobs);
 
     if (loaded) {
@@ -246,11 +275,11 @@ class ReportsCarrierPage extends Component {
                         input={
                           {
                             onChange: this.handleSelectFilterChange,
-                            name: timeRanges[0].name,
-                            value: timeRanges[0].value
+                            name: timeRanges[1].name,
+                            value: timeRanges[1].value
                           }
                         }                      
-                        value={timeRanges[0].value.toString()}
+                        value={timeRanges[1].value.toString()}
                         options={
                           timeRanges.map(timeRange => ({
                             name: timeRange.name,
@@ -258,7 +287,7 @@ class ReportsCarrierPage extends Component {
                             label: timeRange.name
                           }))
                         }
-                        placeholder={timeRanges[0].name}
+                        placeholder={timeRanges[1].name}
                       />
                     </div>
                     <div className="col-md-2 form__form-group">
@@ -270,8 +299,8 @@ class ReportsCarrierPage extends Component {
                               {
                                 onChange: this.FromDateChange,
                                 name: 'startDate',
-                                value: { currentDate },
-                                givenDate: currentDate
+                                value: startDate,
+                                givenDate: startDate
                               }
                             }
                             onChange={this.fromDateChange}
@@ -291,8 +320,8 @@ class ReportsCarrierPage extends Component {
                               {
                                 onChange: this.ToDateChange,
                                 name: 'startDate',
-                                value: { currentDate },
-                                givenDate: currentDate
+                                value: endDate,
+                                givenDate: endDate
                               }
                             }
                             onChange={this.toDateChange}
