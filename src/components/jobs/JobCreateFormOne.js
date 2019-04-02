@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, { PureComponent } from 'react';
 import {
   Card,
   CardBody,
@@ -51,20 +51,20 @@ class CreateJobFormOne extends PureComponent {
       name: '',
       instructions: '',
       // Request Handlers
-      reqHandlerTonnage: {touched: false, error: ''},
-      reqHandlerDate: {touched: false, error: ''},
-      reqHandlerTruckType: {touched: false, error: ''},
-      reqHandlerMaterials: {touched: false, error: ''},
-      reqHandlerHoursEstimate: {touched: false, error: ''},
-      reqHandleTrucksEstimate: {touched: false, error: ''},
-      reqHandlerStartAddress: {touched: false, error: ''},
-      reqHandlerStartCity: {touched: false, error: ''},
-      reqHandlerStartZip: {touched: false, error: ''},
-      reqHandlerStartState: {touched: false, error: ''},
-      reqHandlerEndCity: {touched: false, error: ''},
-      reqHandlerEndZip: {touched: false, error: ''},
-      reqHandlerEndState: {touched: false, error: ''},
-      reqHandlerEndAddress: {touched: false, error: ''}
+      reqHandlerTonnage: { touched: false, error: '' },
+      reqHandlerDate: { touched: false, error: '' },
+      reqHandlerTruckType: { touched: false, error: '' },
+      reqHandlerMaterials: { touched: false, error: '' },
+      reqHandlerHoursEstimate: { touched: false, error: '' },
+      reqHandleTrucksEstimate: { touched: false, error: '' },
+      reqHandlerStartAddress: { touched: false, error: '' },
+      reqHandlerStartCity: { touched: false, error: '' },
+      reqHandlerStartZip: { touched: false, error: '' },
+      reqHandlerStartState: { touched: false, error: '' },
+      reqHandlerEndCity: { touched: false, error: '' },
+      reqHandlerEndZip: { touched: false, error: '' },
+      reqHandlerEndState: { touched: false, error: '' },
+      reqHandlerEndAddress: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleTruckTypeChange = this.handleTruckTypeChange.bind(this);
@@ -149,9 +149,7 @@ class CreateJobFormOne extends PureComponent {
   handleMaterialsChange(data) {
     const {reqHandlerMaterials} = this.state;
     this.setState({
-      reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
-        touched: false
-      })
+      reqHandlerMaterials: {...reqHandlerMaterials, touched: false}
     });
     this.setState({selectedMaterials: data});
   }
@@ -159,79 +157,79 @@ class CreateJobFormOne extends PureComponent {
   handleTruckTypeChange(data) {
     const {reqHandlerTruckType} = this.state;
     this.setState({
-      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
-        touched: false
-      })
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
     });
     this.setState({truckType: data});
   }
 
   handleEndAddressChange(e) {
     let reqHandler = '';
-    if (e.target.name === 'endLocationAddress1') {
-      reqHandler = 'reqHandlerEndAddress';
-    } else if (e.target.name === 'endLocationCity') {
-      reqHandler = 'reqHandlerEndCity';
-    } else if (e.target.name === 'endLocationState') {
-      reqHandler = 'reqHandlerEndState';
-    } else if (e.target.name === 'endLocationZip') {
-      reqHandler = 'reqHandlerEndZip';
+    switch (e.target.name) {
+      case 'endLocationAddress1':
+        reqHandler = 'reqHandlerEndAddress';
+        break;
+      case 'endLocationCity':
+        reqHandler = 'reqHandlerEndCity';
+        break;
+      case 'endLocationState':
+        reqHandler = 'reqHandlerEndState';
+        break;
+      case 'endLocationZip':
+        reqHandler = 'reqHandlerEndZip';
+        break;
+      default:
     }
-    this.setState(
-      {
-        [reqHandler]: Object.assign({}, reqHandler, {
-          touched: false
-        })
-      }
-    );
+    this.setState({
+      [reqHandler]: {...reqHandler, touched: false}
+    });
     this.setState({[e.target.name]: e.target.value});
   }
 
   handleTonnageDetails(e) {
-    const reqHandler = 'reqHandlerTonnage';
+    const {reqHandlerTonnage} = this.state;
     this.setState({
-      [reqHandler]: Object.assign({}, reqHandler, {
-        touched: false
-      })
+      reqHandlerTonnage: {...reqHandlerTonnage, touched: false}
     });
     this.setState({[e.target.name]: e.target.value});
   }
 
   handleHourDetails(e) {
     let reqHandler = '';
-    if (e.target.name === 'hourEstimatedHours') {
-      reqHandler = 'reqHandlerHoursEstimate';
-    } else if (e.target.name === 'hourTrucksNumber') {
-      reqHandler = 'reqHandlerTrucksEstimate';
+    switch (e.target.name) {
+      case 'hourEstimatedHours':
+        reqHandler = 'reqHandlerHoursEstimate';
+        break;
+      case 'hourTrucksNumber':
+        reqHandler = 'reqHandlerTrucksEstimate';
+        break;
+      default:
     }
-    this.setState(
-      {
-        [reqHandler]: Object.assign({}, reqHandler, {
-          touched: false
-        })
-      }
-    );
+    this.setState({
+      [reqHandler]: {...reqHandler, touched: false}
+    });
     this.setState({[e.target.name]: e.target.value});
   }
 
   handleStartAddressChange(e) {
     let reqHandler = '';
-    if (e.target.name === 'startLocationAddress1') {
-      reqHandler = 'reqHandlerStartAddress';
-    } else if (e.target.name === 'startLocationCity') {
-      reqHandler = 'reqHandlerStartCity';
-    } else if (e.target.name === 'startLocationState') {
-      reqHandler = 'reqHandlerStartState';
-    } else if (e.target.name === 'startLocationZip') {
-      reqHandler = 'reqHandlerStartZip';
+    switch (e.target.name) {
+      case 'startLocationAddress1':
+        reqHandler = 'reqHandlerStartAddress';
+        break;
+      case 'startLocationCity':
+        reqHandler = 'reqHandlerStartCity';
+        break;
+      case 'startLocationState':
+        reqHandler = 'reqHandlerStartState';
+        break;
+      case 'startLocationZip':
+        reqHandler = 'reqHandlerStartZip';
+        break;
+      default:
     }
-    this.setState(
-      {
-        [reqHandler]: Object.assign({}, reqHandler, {
-          touched: false
-        })
-      }
-    );
+    this.setState({
+      [reqHandler]: {...reqHandler, touched: false}
+    });
     this.setState({[e.target.name]: e.target.value});
   }
 
@@ -239,9 +237,7 @@ class CreateJobFormOne extends PureComponent {
   selectChange(data) {
     const {reqHandlerTruckType} = this.state;
     this.setState({
-      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
-        touched: false
-      })
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
     });
     this.setState({truckType: data.value});
   }
