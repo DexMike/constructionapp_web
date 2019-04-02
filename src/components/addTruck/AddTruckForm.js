@@ -189,7 +189,7 @@ class AddTruckForm extends PureComponent {
                       onClick={this.firstPage}
                       className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
                     >
-                      <p>Add Truck</p>
+                      <p>Truck</p>
                     </div>
                     <div
                       role="link"
@@ -198,7 +198,7 @@ class AddTruckForm extends PureComponent {
                       onClick={this.secondPage}
                       className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
-                      <p>Add Schedule</p>
+                      <p>Schedule</p>
                     </div>
                     <div
                       role="link"
@@ -207,7 +207,7 @@ class AddTruckForm extends PureComponent {
                       onClick={this.thirdPage}
                       className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
                     >
-                      <p>Add Driver</p>
+                      <p>Driver</p>
                     </div>
                     <div
                       role="link"
