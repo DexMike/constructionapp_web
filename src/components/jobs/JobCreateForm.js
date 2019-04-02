@@ -39,7 +39,7 @@ class JobCreateForm extends Component {
       reqHandlerDate: { touched: false, error: '' },
       reqHandlerEstHours: { touched: false, error: '' },
       reqHandlerEstTons: { touched: false, error: '' },
-      reqHandlerSAddress: { touched: false, error: '' },
+      reqHandlerStartAddress: { touched: false, error: '' },
       reqHandlerSCity: { touched: false, error: '' },
       reqHandlerSState: { touched: false, error: '' },
       reqHandlerSZip: { touched: false, error: '' },
@@ -151,9 +151,8 @@ class JobCreateForm extends Component {
     const { startAddress } = this.state;
     let reqHandler = '';
     startAddress[e.target.name] = e.target.value;
-
     if (e.target.name === 'address1') {
-      reqHandler = 'reqHandlerSAddress';
+      reqHandler = 'reqHandlerStartAddress';
     } else if (e.target.name === 'city') {
       reqHandler = 'reqHandlerSCity';
     } else if (e.target.name === 'state') {
@@ -334,7 +333,7 @@ class JobCreateForm extends Component {
       reqHandlerDate,
       reqHandlerEstHours,
       reqHandlerEstTons,
-      reqHandlerSAddress,
+      reqHandlerStartAddress,
       reqHandlerSCity,
       reqHandlerSState,
       reqHandlerSZip,
@@ -387,7 +386,7 @@ class JobCreateForm extends Component {
 
     if (job.startAddress.address1.length === 0) {
       this.setState({
-        reqHandlerSAddress: Object.assign({}, reqHandlerSAddress, {
+        reqHandlerStartAddress: Object.assign({}, reqHandlerStartAddress, {
           touched: true,
           error: 'Please enter a starting address for this job'
         })
@@ -468,11 +467,7 @@ class JobCreateForm extends Component {
       }
     }
 
-    if (isValid) {
-      return true;
-    }
-
-    return false;
+    return isValid;
   }
 
   renderSelectedEquipment() {
@@ -710,7 +705,7 @@ class JobCreateForm extends Component {
     const {
       states,
       startAddress,
-      reqHandlerSAddress,
+      reqHandlerStartAddress,
       reqHandlerSCity,
       reqHandlerSState,
       reqHandlerSZip
@@ -740,7 +735,7 @@ class JobCreateForm extends Component {
                 }
                 placeholder="Address #1"
                 type="text"
-                meta={reqHandlerSAddress}
+                meta={reqHandlerStartAddress}
               />
             </div>
           </div>
