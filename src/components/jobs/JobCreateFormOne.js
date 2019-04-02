@@ -264,20 +264,14 @@ class CreateJobFormOne extends PureComponent {
 
     if (job.selectedMaterials.length === 0) {
       this.setState({
-        reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
-          touched: true,
-          error: 'Required input'
-        })
+        reqHandlerMaterials: {...reqHandlerMaterials, touched: true, error: 'Required input'}
       });
       isValid = false;
     }
 
     if (job.truckType.length === 0) {
       this.setState({
-        reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
-          touched: true,
-          error: 'Required input'
-        })
+        reqHandlerTruckType: {...reqHandlerTruckType, touched: true, error: 'Required input'}
       });
       isValid = false;
     }
@@ -291,50 +285,35 @@ class CreateJobFormOne extends PureComponent {
 
     if (!job.jobDate || job.jobDate.getTime() < currDate.getTime()) {
       this.setState({
-        reqHandlerDate: Object.assign({}, reqHandlerDate, {
-          touched: true,
-          error: 'Required input'
-        })
+        reqHandlerDate: {...reqHandlerDate, touched: true, error: 'Required input'}
       });
       isValid = false;
     }
 
     if (job.startLocationAddress1.length === 0) {
       this.setState({
-        reqHandlerStartAddress: Object.assign({}, reqHandlerStartAddress, {
-          touched: true,
-          error: 'Missing starting address field'
-        })
+        reqHandlerStartAddress: {...reqHandlerStartAddress, touched: true, error: 'Missing starting address field'}
       });
       isValid = false;
     }
 
     if (job.startLocationCity.length === 0) {
       this.setState({
-        reqHandlerStartCity: Object.assign({}, reqHandlerStartCity, {
-          touched: true,
-          error: 'Missing starting city field'
-        })
+        reqHandlerStartCity: {...reqHandlerStartCity, touched: true, error: 'Missing starting city field'}
       });
       isValid = false;
     }
 
     if (job.startLocationZip.length === 0) {
       this.setState({
-        reqHandlerStartZip: Object.assign({}, reqHandlerStartZip, {
-          touched: true,
-          error: 'Missing starting zip code field'
-        })
+        reqHandlerStartZip: {...reqHandlerStartZip, touched: true, error: 'Missing starting zip code field'}
       });
       isValid = false;
     }
 
     if (job.startLocationState.length === 0) {
       this.setState({
-        reqHandlerStartState: Object.assign({}, reqHandlerStartState, {
-          touched: true,
-          error: 'Missing starting state field'
-        })
+        reqHandlerStartState: {...reqHandlerStartState, touched: true, error: 'Missing starting state field'}
       });
       isValid = false;
     }
@@ -342,50 +321,35 @@ class CreateJobFormOne extends PureComponent {
     if (job.rateTab === 2) {
       if (job.tonnage <= 0) {
         this.setState({
-          reqHandlerTonnage: Object.assign({}, reqHandlerTonnage, {
-            touched: true,
-            error: 'A value for number of tons must be set'
-          })
+          reqHandlerTonnage: {...reqHandlerTonnage, touched: true, error: 'A value for number of tons must be set'}
         });
         isValid = false;
       }
 
       if (job.endLocationAddress1.length === 0) {
         this.setState({
-          reqHandlerEndAddress: Object.assign({}, reqHandlerEndAddress, {
-            touched: true,
-            error: 'Missing ending address field'
-          })
+          reqHandlerEndAddress: {...reqHandlerEndAddress, touched: true, error: 'Missing ending address field'}
         });
         isValid = false;
       }
 
       if (job.endLocationCity.length === 0) {
         this.setState({
-          reqHandlerEndCity: Object.assign({}, reqHandlerEndCity, {
-            touched: true,
-            error: 'Missing ending city field'
-          })
+          reqHandlerEndCity: {...reqHandlerEndCity, touched: true, error: 'Missing ending city field'}
         });
         isValid = false;
       }
 
       if (job.endLocationState.length === 0) {
         this.setState({
-          reqHandlerEndState: Object.assign({}, reqHandlerEndState, {
-            touched: true,
-            error: 'Missing ending state field'
-          })
+          reqHandlerEndState: {...reqHandlerEndState, touched: true, error: 'Missing ending state field'}
         });
         isValid = false;
       }
 
       if (job.endLocationZip.length === 0) {
         this.setState({
-          reqHandlerEndZip: Object.assign({}, reqHandlerEndZip, {
-            touched: true,
-            error: 'Missing ending zip field'
-          })
+          reqHandlerEndZip: {...reqHandlerEndZip, touched: true, error: 'Missing ending zip field'}
         });
         isValid = false;
       }
@@ -394,19 +358,13 @@ class CreateJobFormOne extends PureComponent {
     if (job.rateTab === 1) {
       if (job.hourEstimatedHours <= 0) {
         this.setState({
-          reqHandlerHoursEstimate: Object.assign({}, reqHandlerHoursEstimate, {
-            touched: true,
-            error: 'Required input'
-          })
+          reqHandlerHoursEstimate: {...reqHandlerHoursEstimate, touched: true, error: 'Required input'}
         });
         isValid = false;
       }
       if (job.hourTrucksNumber <= 0) {
         this.setState({
-          reqHandlerTrucksEstimate: Object.assign({}, reqHandlerTrucksEstimate, {
-            touched: true,
-            error: 'Required input'
-          })
+          reqHandlerTrucksEstimate: {...reqHandlerTrucksEstimate, touched: true, error: 'Required input'}
         });
         isValid = false;
       }
