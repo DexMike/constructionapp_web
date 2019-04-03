@@ -16,22 +16,21 @@ import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-
-import EquipmentService from '../../api/EquipmentService';
-import JobService from '../../api/JobService';
-import LookupsService from '../../api/LookupsService';
-import JobCreateForm from '../jobs/JobCreateForm';
-
-import truckImage from '../../img/default_truck.png';
-import CompanyService from '../../api/CompanyService';
-import AddressService from '../../api/AddressService';
-import ProfileService from '../../api/ProfileService';
-import JobMaterialsService from '../../api/JobMaterialsService';
-import JobsService from '../../api/JobService';
-import AgentService from '../../api/AgentService';
-import MultiSelect from '../common/TMultiSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
+import MultiSelect from '../common/TMultiSelect';
+
+import AddressService from '../../api/AddressService';
+import AgentService from '../../api/AgentService';
+import CompanyService from '../../api/CompanyService';
+import EquipmentService from '../../api/EquipmentService';
+import JobService from '../../api/JobService';
+import JobCreateForm from '../jobs/JobCreateForm';
+import JobMaterialsService from '../../api/JobMaterialsService';
+import LookupsService from '../../api/LookupsService';
+import ProfileService from '../../api/ProfileService';
+
+import truckImage from '../../img/default_truck.png';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
