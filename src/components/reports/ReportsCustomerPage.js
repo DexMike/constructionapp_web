@@ -1,39 +1,111 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import moment from 'moment';
 // Button,
 // import PropTypes from 'prop-types';
 // import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-
+import TSelect from '../common/TSelect';
+import TDateTimePicker from '../common/TDateTimePicker';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
-// import CompanyService from '../../api/CompanyService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
-// import AddressService from '../../api/AddressService';
-
+import CompanyService from '../../api/CompanyService';
+import JobMaterialsService from '../../api/JobMaterialsService';
+import AddressService from '../../api/AddressService';
+import './Reports.css';
 // NOTE: this is a copy of DashboardCustomerPage
 
 class ReportsCustomerPage extends Component {
   constructor(props) {
     super(props);
+    const sortByList = ['Hourly ascending', 'Hourly descending',
+      'Tonnage ascending', 'Tonnage descending'];
 
+    this.timeRanges = [
+      { name: 'Custom', value: 0 },
+      { name: 'Last Week', value: 7 },
+      { name: 'Last 30 days', value: 30 },
+      { name: 'Last 60 days', value: 60 },
+      { name: 'Last 90 days', value: 90 }
+    ];
     this.state = {
       loaded: false,
       jobs: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
-      jobId: 0
+      jobId: 0,
+      endDate: null,
+      selectIndex: 2,
+      selectedRange: 0,
+      isCustomRange: null,
+      filters: {
+        companiesId: 29,
+        rateType: '',
+        startAvailability: null,
+        endAvailability: null,
+        rate: 'Any',
+        minTons: 'Any',
+        minHours: '',
+        minCapacity: '',
+        equipmentType: '',
+        numEquipments: '',
+        zipCode: '',
+        materialType: [],
+        sortBy: sortByList[0]
+      }
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+    this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.startDateChange = this.startDateChange.bind(this);
+    this.endDateChange = this.endDateChange.bind(this);
   }
 
   async componentDidMount() {
+    let {
+      startDate,
+      endDate,
+      filters,
+      isCustomRange,
+      selectedRange
+    } = this.state;
+
+    isCustomRange = false;
+    selectedRange = 30;
+    const currentDate = new Date();
+    startDate = new Date();
+    endDate = currentDate;
+    startDate.setDate(currentDate.getDate() - selectedRange);
+    filters.startAvailability = startDate;
+    filters.endAvailability = endDate;
     const jobs = await this.fetchJobs();
-    this.setState({ jobs, loaded: true });
+
+    if (jobs) {
+      jobs.map(async (job) => {
+        const newJob = job;
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+        return newJob;
+      });
+    }
+
+    this.setState({
+      loaded: true,
+      jobs,
+      filters,
+      startDate,
+      endDate,
+      isCustomRange,
+      selectedRange
+    });
   }
 
   getState() {
@@ -73,8 +145,98 @@ class ReportsCustomerPage extends Component {
   async fetchJobs() {
     const profile = await ProfileService.getProfile();
     const { companyId } = profile;
+    console.log(148, companyId);
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
+
+    /*
+    const { filters } = this.state;
+    const jobs = await JobService.getJobByFilters(filters);
+    */
+    if (jobs) {
+      if (jobs != null) {
+        jobs.map((job) => {
+          const newJob = job;
+          newJob.modifiedOn = moment(job.modifiedOn)
+            .format();
+          newJob.createdOn = moment(job.createdOn)
+            .format();
+          return job;
+        });
+      }
+      this.setState({ jobs });
+    }
     return jobs;
+  }
+
+  async handleSelectFilterChange(option) {
+    const { value, name } = option;
+
+    let {
+      startDate,
+      endDate,
+      filters,
+      isCustomRange,
+      selectedRange,
+      selectIndex
+    } = this.state;
+
+    if (value === '0') {
+      isCustomRange = true;
+    } else {
+      isCustomRange = false;
+    }
+    selectIndex = this.timeRanges.findIndex(x => x.name === name);
+    selectedRange = value;
+    const currentDate = new Date();
+    startDate = new Date();
+    endDate = currentDate;
+    startDate.setDate(currentDate.getDate() - selectedRange);
+    filters.startAvailability = startDate;
+    filters.endAvailability = endDate;
+    const jobs = await this.fetchJobs();
+
+    this.setState({
+      jobs,
+      loaded: true,
+      filters,
+      startDate,
+      endDate,
+      isCustomRange,
+      selectedRange,
+      selectIndex
+    });
+  }
+
+  async startDateChange(data) {
+    let { startDate, filters } = this.state;
+    startDate = data;
+    filters.startAvailability = startDate;
+    const jobs = await this.fetchJobs();
+    this.setState({
+      jobs,
+      startDate,
+      filters
+    });
+  }
+
+  async endDateChange(data) {
+    let { endDate, filters } = this.state;
+    endDate = data;
+    filters.endAvailability = endDate;
+    const jobs = await this.fetchJobs();
+    this.setState({
+      jobs,
+      endDate,
+      filters
+    });
+  }
+
+  async handleIntervalInputChange(e) {
+    const { filters } = this.state;
+    filters.startAvailability = e.start;
+    filters.endAvailability = e.end;
+    await this.fetchJobs();
+    this.setState({ filters });
   }
 
   renderGoTo() {
@@ -92,81 +254,329 @@ class ReportsCustomerPage extends Component {
   }
 
   render() {
+    const { loaded, startDate, endDate, isCustomRange, selectIndex, selectedRange } = this.state;
     let { jobs } = this.state;
-    const { loaded } = this.state;
+    let newJobCount = 0;
+    let acceptedJobCount = 0;
+    let totalJobs = jobs.length;
+    let inProgressJobCount = 0;
+    let completedJobCount = 0;
+    let potentialIncome = 0;
+    let jobsCompleted = 0;
+    let totalEarnings = 0;
+    let earningsPerJob = 0;
+    let cancelledJobs = 0;
+    let jobsPerTruck = 0;
+    let idleTrucks = 0;
+    let completedOffersPercent = 0;
+
 
     jobs = jobs.map((job) => {
       const newJob = job;
-
       const tempRate = newJob.rate;
+      if (newJob.status === 'New') {
+        newJobCount += 1;
+      }
+
+      if (newJob.status === 'Accepted') {
+        acceptedJobCount += 1;
+      }
+
+      if (newJob.status === 'In Progress') {
+        inProgressJobCount += 1;
+      }
+
+      if (newJob.status === 'Job Completed') {
+        completedJobCount += 1;
+      }
+
       if (newJob.rateType === 'Hour') {
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = `${newJob.rateEstimate} Hours`;
+        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
+
       if (newJob.rateType === 'Ton') {
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = `${newJob.rateEstimate} Tons`;
+        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-      newJob.newRate = `$${newJob.rate}`;
-
-      // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
-
+      potentialIncome += tempRate * newJob.rateEstimate;
       return newJob;
     });
 
+
+    jobsCompleted = newJobCount * 20;
+    totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
+    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
+    cancelledJobs = 1;
+    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    idleTrucks = 1;
+    // Jobs completed / Job offers responded to
+    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+    potentialIncome = TFormat.asMoney(potentialIncome);
+    // console.log(jobs);
+    const today = new Date();
+    const date = new Date();
+    const lastDate = date.setDate(date.getDate() - selectedRange);
+    const currentDate = today.getTime();
     if (loaded) {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
           <button type="button" className="app-link"
-                  onClick={() => this.handlePageClick('Dashboard')}
+            onClick={() => this.handlePageClick('Dashboard')}
           >
             Dashboard
           </button>
-          &#62;Jobs
-          <Row>
-            <Col md={12}>
-              <h3 className="page-title">Reports</h3>
-            </Col>
-          </Row>
 
           <Row>
             <Col md={12}>
-              <Card>
-                <CardBody>
-                  Report #1
-                </CardBody>
-              </Card>
+              <h3 className="page-title">Reporting</h3>
             </Col>
           </Row>
 
-          <Row>
-            <Col md={12}>
-              <Card>
-                <CardBody>
-                  Report #2
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
+          <div className="row kpi-filter">
+            <div className="col-12 col-md-12 col-lg-12">
+              <div className="card">
+                <div className="card-body kpi-filter-body">
+                  <div className="row">
+                    <div className="col-sm-4 col-md-2 form__form-group">
+                      <span className="form__form-group-label">Time Range</span>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: this.timeRanges[selectIndex].name,
+                            value: this.timeRanges[selectIndex].value
+                          }
+                        }
+                        value={this.timeRanges[selectIndex].value.toString()}
+                        options={
+                          this.timeRanges.map(timeRange => ({
+                            name: timeRange.name,
+                            value: timeRange.value.toString(),
+                            label: timeRange.name
+                          }))
+                        }
+                        placeholder={this.timeRanges[selectIndex].name}
+                      />
+                    </div>
+                    <div className="col-sm-4 col-md-2 form__form-group">
+                      <span className="form__form-group-label">From</span>
+                      <div className="row">
+                        <div className="col-12">
+                          <TDateTimePicker
+                            input={
+                              {
+                                onChange: this.startDateChange,
+                                name: 'startAvailability',
+                                value: { startDate },
+                                givenDate: new Date(startDate).getTime()
+                              }
+                            }
+                            onChange={this.startDateChange}
+                            dateFormat="MM-dd-yy"
+                            disabled={!isCustomRange}
+                          />
+                          <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-sm-4 col-md-2 form__form-group">
+                      <span className="form__form-group-label">To</span>
+                      <div className="row">
+                        <div className="col-12">
+                          <TDateTimePicker
+                            input={
+                              {
+                                onChange: this.endDateChange,
+                                name: 'endAvailability',
+                                value: { endDate },
+                                givenDate: new Date(endDate).getTime()
+                              }
+                            }
+                            onChange={this.endDateChange}
+                            dateFormat="MM-dd-yy"
+                            disabled={!isCustomRange}
+                          />
 
-          <Row>
-            <Col md={12}>
-              <Card>
-                <CardBody>
-                  Report #3
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
+                          <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <div className="kpi-container">
+            <div className="row upper-kpi">
+              <div className="col-12 col-md-3 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Jobs In Progress</center></h5>
+                    <span><center><h3>{inProgressJobCount}</h3></center></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-3 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
+                    <span><center><h3>{acceptedJobCount}</h3></center></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-3 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>New Offers</center></h5>
+                    <span><center><h3>{newJobCount}</h3></center></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-3 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
+                    <div className="my-auto">
+                      <span><center><h4>{potentialIncome}</h4></center></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-3 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <div className="my-auto">
+                      <h5 className="card__title bold-text"><center>Job Completion Rate</center></h5>
+                      <span><center><h4>{completedOffersPercent}</h4></center></span>
+                      <div className="text-center pt-3">
+                        <span className="form__form-group-label">completed:</span>&nbsp;<span>{completedJobCount}</span>
+                        &nbsp;&nbsp;
+                        <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-3 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
+                    <span><center><h3>{completedJobCount}</h3></center></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Last 30 days</h3>
+              </Col>
+            </Row>
+
+            <div className="row">
+              <div className="col-12 col-md-2 col-lg-2">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
+                    <span><center><h4>{jobsCompleted}</h4></center></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-2 col-lg-2">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
+                    <span><center><h4>{totalEarnings}</h4></center></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-2 col-lg-2">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
+                    <span><center><h4>{earningsPerJob}</h4></center></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-2 col-lg-2">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
+                    <span><center><h4>{cancelledJobs}</h4></center></span>
+                  </div>
+                </div>
+              </div>
+              <div className="col-12 col-md-2 col-lg-2">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
+                    <span><center><h4>{jobsPerTruck}</h4></center></span>
+                  </div>
+                </div>
+              </div>
+              <div className="col-12 col-md-2 col-lg-2">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
+                    <span><center><h4>{idleTrucks}</h4></center></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Additional Reports</h3>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <Card>
+                  <CardBody>
+                    Report #1
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <Card>
+                  <CardBody>
+                    Report #2
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <Card>
+                  <CardBody>
+                    Report #3
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          </div> 
         </Container>
       );
     }
     return (
-      <Container className="dashboard">
-        Loading Customer Reports Page...
+      <Container>
+        Loading Carrier Reports Page...
       </Container>
     );
   }
