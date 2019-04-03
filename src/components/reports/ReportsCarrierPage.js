@@ -197,7 +197,7 @@ class ReportsCarrierPage extends Component {
 
           <div className="row">
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>New Offers</center></h5>
@@ -206,7 +206,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Jobs in Progress</center></h5>
@@ -215,7 +215,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Jobs Booked</center></h5>
@@ -224,7 +224,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
@@ -233,7 +233,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
@@ -242,7 +242,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>% completed</center></h5>
@@ -260,7 +260,7 @@ class ReportsCarrierPage extends Component {
           </Row>
 
           <div className="row">
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
@@ -269,7 +269,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
@@ -278,7 +278,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
@@ -287,7 +287,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
@@ -296,7 +296,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
@@ -305,7 +305,7 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
 
-            <div className="col-12 col-md-2 col-lg-2">
+            <div className="col-12 col-md-4 col-lg-4">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
                   <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
