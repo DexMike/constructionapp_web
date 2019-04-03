@@ -130,7 +130,7 @@ class MarketplaceCarrierPage extends Component {
 
         const company = await CompanyService.getCompanyById(newJob.companiesId);
         newJob.companyName = company.legalName;
-
+        // console.log('Name ', newJob.companyName);
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         const materials = materialsList.map(materialItem => materialItem.value);
         newJob.material = this.equipmentMaterialsAsString(materials);
@@ -373,6 +373,7 @@ class MarketplaceCarrierPage extends Component {
       // materials,
       // zipCode,
       // rateType,
+      company,
       modal,
       selectedEquipment
     } = this.state;
@@ -386,7 +387,9 @@ class MarketplaceCarrierPage extends Component {
           <button type="button" className="lnr lnr-cross modal__close-btn"
                   onClick={this.toggleAddJobModal}
           />
-          <h4 className="bold-text modal__title">Job Request</h4>
+      {/*    const company = await CompanyService.getCompanyById(selectedJob.companiesId);*/}
+      {/*/!*selectedJob.companyName = company.legalName;*!/*/}
+      {/*    <h4 className="bold-text modal__title">{company.legalName}</h4>*/}
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobCreateForm
