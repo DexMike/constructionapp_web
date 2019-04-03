@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
+    console.log(8, this.props);
     this.state = {
       startDate: new Date()
     };
@@ -21,7 +22,7 @@ class TDateTimePickerField extends PureComponent {
 
   render() {
     const { startDate } = this.state;
-    const { dateFormat, meta: { touched, error } } = this.props;
+    const { dateFormat, meta: { touched, error }, disabled } = this.props;
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
@@ -32,6 +33,7 @@ class TDateTimePickerField extends PureComponent {
             // showTimeSelect //shows Time picker as well
             onChange={this.handleChange}
             dateFormat={dateFormat}
+            disabled={disabled}
           />
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>
@@ -51,7 +53,8 @@ TDateTimePickerField.propTypes = {
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
-  })
+  }),
+  disabled: PropTypes.bool
 };
 
 TDateTimePickerField.defaultProps = {
@@ -60,7 +63,8 @@ TDateTimePickerField.defaultProps = {
   meta: {
     touched: null,
     error: null
-  }
+  },
+  disabled: false
 };
 
 export default TDateTimePickerField;

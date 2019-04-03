@@ -45,18 +45,8 @@ class JobService extends AgentService {
     return (response);
   }
 
-  static async getJobByFilters(filters) {
+  static async getJobByFilters(filters) {    
     const response = await super.post(`${PATH}/filters`, filters);
-    return (response);
-  }
-
-  static async getJobByCustomTimeRange(filters) {
-    const response = await super.post(`${PATH}/filters`, filters);
-    return (response);
-  }
-
-  static async getJobByTimeRange(range) {
-    const response = await super.get(`${PATH}/range/${range}`);
     return (response);
   }
 
