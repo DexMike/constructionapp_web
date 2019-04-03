@@ -14,13 +14,7 @@ import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
 import {useTranslation} from "react-i18next";
-
-function DashboardTitle({title}) {
-  const {t} = useTranslation();
-  return <h5 className="card__title bold-text">
-    <center>{t(title)}</center>
-  </h5>
-}
+import {DashboardObject} from "./DashboardObject";
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -257,52 +251,11 @@ class DashboardCustomerPage extends Component {
           </Row>
 
           <div className="row">
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <DashboardTitle title="Offered Jobs"/>
-                  <span><center><h4>{newJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <DashboardTitle title="Jobs in Progress"/>
-                  <span><center><h4>{inProgressJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <DashboardTitle title="Booked Jobs"/>
-                  <span><center><h4>{acceptedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <DashboardTitle title="Completed Jobs"/>
-                  <span><center><h4>{completedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <DashboardTitle title="% Completed"/>
-                  <span><center><h4>{completedOffersPercent}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
+            <DashboardObject title="Offered Jobs" val = {newJobCount}/>
+            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
+            <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
+            <DashboardObject title="Completed Jobs" val={completedJobCount}/>
+            <DashboardObject title="% Completed" val = {completedOffersPercent}/>
           </div>
 
           <PageTitle/>

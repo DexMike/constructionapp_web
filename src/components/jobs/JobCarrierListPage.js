@@ -8,7 +8,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
-import ProfileService from '../../api/ProfileService';
+import {useTranslation} from "react-i18next";
 // import JobPage from './JobPage';
 
 class JobCarrierListPage extends Component {
@@ -143,7 +143,7 @@ class JobCarrierListPage extends Component {
 
       return newJob;
     });
-
+    const { t } = useTranslation();
     if (loaded) {
       return (
         <Container className="dashboard">
