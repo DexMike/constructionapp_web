@@ -7,6 +7,7 @@ import moment from 'moment';
 import TFormat from '../common/TFormat';
 import TSelect from '../common/TSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
+import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -19,6 +20,7 @@ class ReportsCarrierPage extends Component {
     super(props);
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
+    // Fixed options for Time Range filtering
     this.timeRanges = [
       { name: 'Custom', value: 0 },
       { name: 'Last Week', value: 7 },
@@ -34,11 +36,13 @@ class ReportsCarrierPage extends Component {
       goToUpdateJob: false,
       jobId: 0,
       startDate: null,
-      endDate: null,      
-      selectIndex: 2,
-      selectedRange: 0,
+      endDate: null,
+      selectIndex: 2, // Parameter for setting the dropdown default option.
+      selectedRange: 0, // Parameter for setting startDate.
       isCustomRange: null,
+      // ↑ Prameter for enable/disable the datePickers if 'Custom' option is selected or not.
       filters: {
+        companiesId: 0,
         rateType: '',
 
         startAvailability: null,
@@ -67,13 +71,21 @@ class ReportsCarrierPage extends Component {
   }
 
   async componentDidMount() {
+    const { filters } = this.state;
     let {
       startDate,
       endDate,
-      filters,
       isCustomRange,
       selectedRange
     } = this.state;
+
+    const profile = await ProfileService.getProfile();
+    if (profile.companyId) {
+      filters.companiesId = profile.companyId;
+      // delete filters.companiesId;
+    } else {
+      delete filters.companiesId;
+    }
 
     isCustomRange = false;
     selectedRange = 30;
@@ -84,9 +96,8 @@ class ReportsCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
     if (jobs) {
-      // Promise.all(
       jobs.map(async (job) => {
         const newJob = job;
 
@@ -102,8 +113,8 @@ class ReportsCarrierPage extends Component {
 
         return newJob;
       });
-      // );
     }
+
     this.setState({
       loaded: true,
       jobs,
@@ -144,8 +155,7 @@ class ReportsCarrierPage extends Component {
     }
   }
 
-  async fetchJobs() {
-    const { filters } = this.state;
+  async fetchJobs(filters) {
     const jobs = await JobService.getJobByFilters(filters);
     if (jobs) {
       if (jobs != null) {
@@ -182,11 +192,10 @@ class ReportsCarrierPage extends Component {
 
   async handleSelectFilterChange(option) {
     const { value, name } = option;
-
+    const { filters } = this.state;
     let {
       startDate,
       endDate,
-      filters,
       isCustomRange,
       selectedRange,
       selectIndex
@@ -205,10 +214,8 @@ class ReportsCarrierPage extends Component {
     startDate = new Date();
     endDate = currentDate;
     startDate.setDate(currentDate.getDate() - selectedRange);
-    console.log(startDate);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-
     const jobs = await this.fetchJobs();
 
     this.setState({
@@ -220,13 +227,12 @@ class ReportsCarrierPage extends Component {
       isCustomRange,
       selectedRange,
       selectIndex
-    }, function setted() {
-      this.state
     });
   }
 
   async startDateChange(data) {
-    let { startDate, filters } = this.state;
+    const { filters } = this.state;
+    let { startDate } = this.state;
     startDate = data;
     filters.startAvailability = startDate;
     const jobs = await this.fetchJobs();
@@ -238,7 +244,8 @@ class ReportsCarrierPage extends Component {
   }
 
   async endDateChange(data) {
-    let { endDate, filters } = this.state;
+    const { filters } = this.state;
+    let { endDate } = this.state;
     endDate = data;
     filters.endAvailability = endDate;
     const jobs = await this.fetchJobs();
@@ -247,14 +254,6 @@ class ReportsCarrierPage extends Component {
       endDate,
       filters
     });
-  }
-
-  async handleIntervalInputChange(e) {
-    const { filters } = this.state;
-    filters.startAvailability = e.start;
-    filters.endAvailability = e.end;
-    await this.fetchJobs();
-    this.setState({ filters });
   }
 
   renderGoTo() {
@@ -272,11 +271,11 @@ class ReportsCarrierPage extends Component {
   }
 
   render() {
-    const { loaded, startDate, endDate, isCustomRange, selectIndex, selectedRange } = this.state;
+    const { loaded, startDate, endDate, isCustomRange, selectIndex } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
-    let totalJobs = jobs.length;
+    const totalJobs = jobs.length;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let potentialIncome = 0;
@@ -333,12 +332,7 @@ class ReportsCarrierPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-
     // console.log(jobs);
-    const today = new Date();
-    const date = new Date();
-    const lastDate = date.setDate(date.getDate() - selectedRange);
-    const currentDate = today.getTime();
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -360,7 +354,7 @@ class ReportsCarrierPage extends Component {
               <div className="card">
                 <div className="card-body kpi-filter-body">
                   <div className="row">
-                    <div className="col-sm-4 col-md-2 form__form-group">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">Time Range</span>
                       <TSelect
                         input={
@@ -369,7 +363,7 @@ class ReportsCarrierPage extends Component {
                             name: this.timeRanges[selectIndex].name,
                             value: this.timeRanges[selectIndex].value
                           }
-                        }
+                        }                      
                         value={this.timeRanges[selectIndex].value.toString()}
                         options={
                           this.timeRanges.map(timeRange => ({
@@ -381,7 +375,7 @@ class ReportsCarrierPage extends Component {
                         placeholder={this.timeRanges[selectIndex].name}
                       />
                     </div>
-                    <div className="col-sm-4 col-md-2 form__form-group">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">From</span>
                       <div className="row">
                         <div className="col-12">
@@ -402,7 +396,7 @@ class ReportsCarrierPage extends Component {
                         </div>
                       </div>
                     </div>
-                    <div className="col-sm-4 col-md-2 form__form-group">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">To</span>
                       <div className="row">
                         <div className="col-12">
@@ -429,8 +423,14 @@ class ReportsCarrierPage extends Component {
             </div>
           </div>
           <div className="kpi-container">
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
+              </Col>
+            </Row>
+
             <div className="row upper-kpi">
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Jobs In Progress</center></h5>
@@ -439,7 +439,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
@@ -448,7 +448,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>New Offers</center></h5>
@@ -457,7 +457,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
@@ -468,7 +468,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <div className="my-auto">
@@ -484,7 +484,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>

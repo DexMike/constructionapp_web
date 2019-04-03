@@ -5,12 +5,13 @@ import PropTypes from 'prop-types';
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
-    console.log(8, this.props);
     this.state = {
       startDate: new Date()
     };
     this.handleChange = this.handleChange.bind(this);
   }
+  // ComponentWillReceiveProps was added in order to change the
+  // datePicker date from a given props value.
 
   componentWillReceiveProps(props) {
     let dueDate = 0;
