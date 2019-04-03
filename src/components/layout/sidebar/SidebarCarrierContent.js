@@ -36,18 +36,18 @@ class SidebarCarrierContent extends Component {
   render() {
     return (
       <div className="sidebar__content">
-        <SideElement title="Dashboard"
-                       icon="home"
-                       route="/dashboard"
-                       onClick={this.hideSidebar}/>
+        <SideElement title="Jobs"
+                     icon="home"
+                     route="/dashboard"
+                     onClick={this.hideSidebar}/>
         <SideElement title="Marketplace"
-                       icon="store"
-                       route="/marketplace"
-                       onClick={this.hideSidebar}/>
+                     icon="store"
+                     route="/marketplace"
+                     onClick={this.hideSidebar}/>
         <SideElement title="Trucks"
-                       custom="dump_truck"
-                       route="/trucks"
-                       onClick={this.hideSidebar}/>
+                     custom="dump_truck"
+                     route="/trucks"
+                     onClick={this.hideSidebar}/>
 
 
         {/* <ul className="sidebar__block">
@@ -59,17 +59,17 @@ class SidebarCarrierContent extends Component {
           />
         </ul> */}
         <SideElement title="Drivers"
-                       icon="people"
-                       route="/drivers"
-                       onClick={this.hideSidebar}/>
+                     icon="people"
+                     route="/drivers"
+                     onClick={this.hideSidebar}/>
         <SideElement title="Reports"
-                       icon="assignment"
-                       route="/Reports"
-                       onClick={this.hideSidebar}/>
+                     icon="assignment"
+                     route="/Reports"
+                     onClick={this.hideSidebar}/>
         <SideElement title="Settings"
-                       icon="settings"
-                       route="/Settings"
-                       onClick={this.hideSidebar}/>
+                     icon="settings"
+                     route="/Settings"
+                     onClick={this.hideSidebar}/>
       </div>
     );
   }
