@@ -23,7 +23,7 @@ class SidebarCarrierContent extends Component {
 
         <ul className="sidebar__block">
           <SidebarLink
-            title="Dashboard"
+            title="Jobs"
             icon="home"
             route="/dashboard"
             onClick={this.hideSidebar}

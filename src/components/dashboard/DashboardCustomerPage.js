@@ -220,7 +220,7 @@ class DashboardCustomerPage extends Component {
 
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Dashboard for Customer (DashboardCustomerPage)</h3>
+              <h3 className="page-title">Jobs</h3>
             </Col>
           </Row>
 
@@ -229,7 +229,7 @@ class DashboardCustomerPage extends Component {
             <div className="col-12 col-md-2 col-lg-2">
               <div className="card">
                 <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs Offered</center></h5>
+                  <h5 className="card__title bold-text"><center>Pending Jobs</center></h5>
                   <span><center><h4>{newJobCount}</h4></center></span>
                 </div>
               </div>
@@ -273,11 +273,6 @@ class DashboardCustomerPage extends Component {
 
           </div>
 
-          <Row>
-            <Col md={12}>
-              <h3 className="page-title">Jobs</h3>
-            </Col>
-          </Row>
           <Row>
             <Col md={12}>
               <Card>

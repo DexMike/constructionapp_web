@@ -183,15 +183,10 @@ class DashboardCarrierPage extends Component {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
-          <button type="button" className="app-link"
-                  onClick={() => this.handlePageClick('Dashboard')}
-          >
-            Dashboard
-          </button>
 
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Dashboard for Carrier (DashboardCarrierPage)</h3>
+              <h3 className="page-title">Jobs</h3>
             </Col>
           </Row>
 
@@ -253,11 +248,6 @@ class DashboardCarrierPage extends Component {
 
           </div>
 
-          <Row>
-            <Col md={12}>
-              <h3 className="page-title">Jobs</h3>
-            </Col>
-          </Row>
           <Row>
             <Col md={12}>
               <Card>
