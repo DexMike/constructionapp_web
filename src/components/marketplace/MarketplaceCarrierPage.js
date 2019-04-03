@@ -20,7 +20,7 @@ import TFormat from '../common/TFormat';
 import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
-import JobCreateForm from '../jobs/JobCreateForm';
+import JobViewForm from '../marketplace/JobViewForm';
 
 import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
@@ -392,7 +392,8 @@ class MarketplaceCarrierPage extends Component {
       {/*    <h4 className="bold-text modal__title">{company.legalName}</h4>*/}
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm
+
+          <JobViewForm
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
