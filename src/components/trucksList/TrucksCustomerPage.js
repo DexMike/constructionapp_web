@@ -486,15 +486,15 @@ class TrucksCustomerPage extends Component {
     } = this.state;
 
     return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
+
+        <div>
+
+
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col sm="3" className="filter-item-title">
+                    <Col className="filter-item-title">
                       Availability
                     </Col>
                     <Col className="filter-item-title">
@@ -514,7 +514,7 @@ class TrucksCustomerPage extends Component {
                     </Col>
                   </Row>
                   <Row lg={12} id="filter-input-row">
-                    <Col sm="3">
+                    <Col>
                       <TIntervalDatePicker
                         startDate={startDate}
                         endDate={endDate}
@@ -627,11 +627,9 @@ class TrucksCustomerPage extends Component {
 
               </form>
 
-            </CardBody>
-          </Card>
-        </Col>
 
-      </Row>
+        </div>
+
     );
   }
 
@@ -640,15 +638,15 @@ class TrucksCustomerPage extends Component {
       <React.Fragment>
         <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
-          <Col md={2}>
+          <div className="truck-image">
             <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
                  style={{ width: '118px' }}
             />
-          </Col>
-
-          <Col md={4}>
+          </div>
+          
+          <Col md={5}>
             {/* this was: c7dde8*/}
-            <Row lg={4} sm={8} style={{ background: '#ffffff' }}>
+            <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
               <Col lg={4} className="customer-truck-results-title">
                 Type: {equipment.type}
               </Col>
@@ -738,9 +736,9 @@ class TrucksCustomerPage extends Component {
             )}
           </Col>
 
-          <Col md={6}>
+          <Col md={5}>
             {/* this was: c7dde8*/}
-            <Row style={{ background: '#ffffff' }}>
+            <Row style={{ background: '#c7dde8' }}>
               <Col md={11} className="customer-truck-results-title">
                 Name: {equipment.name}
               </Col>
@@ -835,7 +833,7 @@ class TrucksCustomerPage extends Component {
                 </Col>
               </Row>
 
-              <Row style={{ marginTop: '10px' }}>
+              <div style={{ marginTop: '30px' }}>
                 {
                   equipments.map(equipment => (
                     <React.Fragment key={equipment.id}>
@@ -843,7 +841,7 @@ class TrucksCustomerPage extends Component {
                     </React.Fragment>
                   ))
                 }
-              </Row>
+              </div>
 
             </CardBody>
           </Card>
@@ -860,9 +858,11 @@ class TrucksCustomerPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          {this.renderFilter()}
-          {/* {this.renderTable()} */}
-          {this.renderEquipmentTable()}
+          <div className="truck-container">
+            {this.renderFilter()}
+            {/* {this.renderTable()} */}
+            {this.renderEquipmentTable()}
+          </div>
         </Container>
       );
     }
