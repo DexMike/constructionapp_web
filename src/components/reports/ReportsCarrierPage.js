@@ -95,7 +95,7 @@ class ReportsCarrierPage extends Component {
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-
+    console.log(filters);
     const jobs = await this.fetchJobs(filters);
     if (jobs) {
       jobs.map(async (job) => {
@@ -216,7 +216,7 @@ class ReportsCarrierPage extends Component {
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
 
     this.setState({
       jobs,
@@ -235,7 +235,7 @@ class ReportsCarrierPage extends Component {
     let { startDate } = this.state;
     startDate = data;
     filters.startAvailability = startDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
     this.setState({
       jobs,
       startDate,
@@ -248,7 +248,7 @@ class ReportsCarrierPage extends Component {
     let { endDate } = this.state;
     endDate = data;
     filters.endAvailability = endDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
     this.setState({
       jobs,
       endDate,
@@ -423,12 +423,15 @@ class ReportsCarrierPage extends Component {
             </div>
           </div>
           <div className="kpi-container">
+            {
+            /*
             <Row>
               <Col md={12}>
                 <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
               </Col>
             </Row>
-
+            */
+            }
             <div className="row upper-kpi">
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
@@ -496,7 +499,7 @@ class ReportsCarrierPage extends Component {
 
             <Row>
               <Col md={12}>
-                <h3 className="page-title">Last 30 days</h3>
+                <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
               </Col>
             </Row>
 
