@@ -10,6 +10,7 @@ import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import DashboardTitle, {DashboardObject} from './DashboardObject';
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -234,61 +235,12 @@ class DashboardCarrierPage extends Component {
           {/*{this.renderGoTo()}*/}
 
           <div className="row">
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>New Offers</center></h5>
-                  <span><center><h4>{newJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs in Progress</center></h5>
-                  <span><center><h4>{inProgressJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs Booked</center></h5>
-                  <span><center><h4>{acceptedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
-                  <span><center><h4>{potentialIncome}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
-                  <span><center><h4>{completedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>% completed</center></h5>
-                  <span><center><h4>{completedOffersPercent}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
+            <DashboardObject title="New Offers" val = {newJobCount}/>
+            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
+            <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
+            <DashboardObject title="Potential Earnings" val={potentialIncome}/>
+            <DashboardObject title="Completed Jobs" val={completedJobCount}/>
+            <DashboardObject title="% Completed" val = {completedOffersPercent}/>
           </div>
         </Container>
       );

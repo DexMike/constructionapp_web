@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
+import {Button, Card, CardBody, Col, Container, Modal, Row} from 'reactstrap';
 import moment from 'moment';
 
 // import PropTypes from 'prop-types';
@@ -13,6 +13,32 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
+import {useTranslation} from "react-i18next";
+import {DashboardObject} from "./DashboardObject";
+
+function PageTitle() {
+  const {t} = useTranslation();
+  return (
+    <Row>
+      <Col md={12}>
+        <h3 className="page-title">{t("Jobs")}</h3>
+      </Col>
+    </Row>
+  )
+}
+
+function AddJobButton({handle}) {
+  const {t} = useTranslation();
+  return (
+    <Button
+      onClick={handle}
+      type="button"
+      className="primaryButton"
+    >
+      {t("ADD A JOB")}
+    </Button>
+  )
+}
 
 class DashboardCustomerPage extends Component {
   constructor(props) {
@@ -53,12 +79,12 @@ class DashboardCustomerPage extends Component {
       const address = await AddressService.getAddressById(newJob.startAddress);
       newJob.zip = address.zipCode;
 
-      this.setState({ loaded: true });
+      this.setState({loaded: true});
 
       return newJob;
     });
     // );
-    this.setState({ jobs });
+    this.setState({jobs});
   }
 
   equipmentMaterialsAsString(materials) {
@@ -86,7 +112,7 @@ class DashboardCustomerPage extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -107,10 +133,10 @@ class DashboardCustomerPage extends Component {
   }
 
   async toggleNewJobModal() {
-    const { modalAddJob } = this.state;
+    const {modalAddJob} = this.state;
     if (modalAddJob) {
       const jobs = await this.fetchJobs();
-      this.setState({ jobs, loaded: true });
+      this.setState({jobs, loaded: true});
     }
     this.setState({
       modalAddJob: !modalAddJob
@@ -149,8 +175,8 @@ class DashboardCustomerPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
-    let { jobs } = this.state;
+    const {loaded} = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
@@ -225,66 +251,19 @@ class DashboardCustomerPage extends Component {
           </Row>
 
           <div className="row">
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Pending Jobs</center></h5>
-                  <span><center><h4>{newJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs in Progress</center></h5>
-                  <span><center><h4>{inProgressJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Jobs Booked</center></h5>
-                  <span><center><h4>{acceptedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                  <span><center><h4>{completedJobCount}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-2 col-lg-2">
-              <div className="card">
-                <div className="dashboard__card-widget card-body">
-                  <h5 className="card__title bold-text"><center>% completed</center></h5>
-                  <span><center><h4>{completedOffersPercent}</h4></center></span>
-                </div>
-              </div>
-            </div>
-
+            <DashboardObject title="Offered Jobs" val = {newJobCount}/>
+            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
+            <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
+            <DashboardObject title="Completed Jobs" val={completedJobCount}/>
+            <DashboardObject title="% Completed" val = {completedOffersPercent}/>
           </div>
 
+          <PageTitle/>
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <Button
-                    onClick={this.toggleNewJobModal}
-                    type="button"
-                    className="primaryButton"
-                  >
-                    ADD A JOB
-                  </Button>
-
+                  <AddJobButton handle={this.toggleNewJobModal}/>
                   <hr/>
                   <TTable
                     columns={
