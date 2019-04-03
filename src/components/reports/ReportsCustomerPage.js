@@ -41,7 +41,7 @@ class ReportsCustomerPage extends Component {
       selectedRange: 0,
       isCustomRange: null,
       filters: {
-        companiesId: 29,
+        companiesId: 0,
         rateType: '',
         startAvailability: null,
         endAvailability: null,
@@ -65,14 +65,19 @@ class ReportsCustomerPage extends Component {
   }
 
   async componentDidMount() {
+    const { filters } = this.state;
     let {
       startDate,
       endDate,
-      filters,
       isCustomRange,
       selectedRange
     } = this.state;
 
+    const profile = await ProfileService.getProfile();
+    if (profile.companyId) {
+      filters.companiesId = profile.companyId;
+    }
+    console.log(80, filters.companiesId);
     isCustomRange = false;
     selectedRange = 30;
     const currentDate = new Date();
@@ -81,7 +86,7 @@ class ReportsCustomerPage extends Component {
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
 
     if (jobs) {
       jobs.map(async (job) => {
@@ -142,16 +147,14 @@ class ReportsCustomerPage extends Component {
     }
   }
 
-  async fetchJobs() {
+  async fetchJobs(filters) {
+    /*
     const profile = await ProfileService.getProfile();
     const { companyId } = profile;
-    console.log(148, companyId);
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
-
-    /*
-    const { filters } = this.state;
-    const jobs = await JobService.getJobByFilters(filters);
     */
+    const jobs = await JobService.getJobByFilters(filters);
+
     if (jobs) {
       if (jobs != null) {
         jobs.map((job) => {
@@ -170,11 +173,10 @@ class ReportsCustomerPage extends Component {
 
   async handleSelectFilterChange(option) {
     const { value, name } = option;
-
+    const { filters } = this.state;
     let {
       startDate,
       endDate,
-      filters,
       isCustomRange,
       selectedRange,
       selectIndex
@@ -185,7 +187,9 @@ class ReportsCustomerPage extends Component {
     } else {
       isCustomRange = false;
     }
+
     selectIndex = this.timeRanges.findIndex(x => x.name === name);
+
     selectedRange = value;
     const currentDate = new Date();
     startDate = new Date();
@@ -193,7 +197,7 @@ class ReportsCustomerPage extends Component {
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
 
     this.setState({
       jobs,
@@ -208,10 +212,11 @@ class ReportsCustomerPage extends Component {
   }
 
   async startDateChange(data) {
-    let { startDate, filters } = this.state;
+    const { filters } = this.state;
+    let { startDate } = this.state;
     startDate = data;
     filters.startAvailability = startDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
     this.setState({
       jobs,
       startDate,
@@ -220,10 +225,11 @@ class ReportsCustomerPage extends Component {
   }
 
   async endDateChange(data) {
-    let { endDate, filters } = this.state;
+    const { filters } = this.state;
+    let { endDate } = this.state;
     endDate = data;
     filters.endAvailability = endDate;
-    const jobs = await this.fetchJobs();
+    const jobs = await this.fetchJobs(filters);
     this.setState({
       jobs,
       endDate,
@@ -231,6 +237,7 @@ class ReportsCustomerPage extends Component {
     });
   }
 
+  /*
   async handleIntervalInputChange(e) {
     const { filters } = this.state;
     filters.startAvailability = e.start;
@@ -238,6 +245,7 @@ class ReportsCustomerPage extends Component {
     await this.fetchJobs();
     this.setState({ filters });
   }
+  */
 
   renderGoTo() {
     const status = this.state;
@@ -254,14 +262,15 @@ class ReportsCustomerPage extends Component {
   }
 
   render() {
-    const { loaded, startDate, endDate, isCustomRange, selectIndex, selectedRange } = this.state;
+    const { loaded, startDate, endDate, isCustomRange, selectIndex } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
-    let totalJobs = jobs.length;
+    const totalJobs = jobs.length;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let potentialIncome = 0;
+
     let jobsCompleted = 0;
     let totalEarnings = 0;
     let earningsPerJob = 0;
@@ -270,42 +279,38 @@ class ReportsCustomerPage extends Component {
     let idleTrucks = 0;
     let completedOffersPercent = 0;
 
-
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
       if (newJob.status === 'New') {
         newJobCount += 1;
       }
-
       if (newJob.status === 'Accepted') {
         acceptedJobCount += 1;
       }
-
       if (newJob.status === 'In Progress') {
         inProgressJobCount += 1;
       }
-
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
-
       if (newJob.rateType === 'Hour') {
         newJob.newSize = TFormat.asHours(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-
       if (newJob.rateType === 'Ton') {
         newJob.newSize = TFormat.asTons(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
+
       newJob.newStartDate = TFormat.asDate(job.startTime);
+
       potentialIncome += tempRate * newJob.rateEstimate;
+
       return newJob;
     });
-
 
     jobsCompleted = newJobCount * 20;
     totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
@@ -313,20 +318,18 @@ class ReportsCustomerPage extends Component {
     cancelledJobs = 1;
     jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
     idleTrucks = 1;
+
     // Jobs completed / Job offers responded to
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+
     potentialIncome = TFormat.asMoney(potentialIncome);
     // console.log(jobs);
-    const today = new Date();
-    const date = new Date();
-    const lastDate = date.setDate(date.getDate() - selectedRange);
-    const currentDate = today.getTime();
     if (loaded) {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
           <button type="button" className="app-link"
-            onClick={() => this.handlePageClick('Dashboard')}
+                  onClick={() => this.handlePageClick('Dashboard')}
           >
             Dashboard
           </button>
@@ -342,7 +345,7 @@ class ReportsCustomerPage extends Component {
               <div className="card">
                 <div className="card-body kpi-filter-body">
                   <div className="row">
-                    <div className="col-sm-4 col-md-2 form__form-group">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">Time Range</span>
                       <TSelect
                         input={
@@ -351,7 +354,7 @@ class ReportsCustomerPage extends Component {
                             name: this.timeRanges[selectIndex].name,
                             value: this.timeRanges[selectIndex].value
                           }
-                        }
+                        }                      
                         value={this.timeRanges[selectIndex].value.toString()}
                         options={
                           this.timeRanges.map(timeRange => ({
@@ -363,7 +366,7 @@ class ReportsCustomerPage extends Component {
                         placeholder={this.timeRanges[selectIndex].name}
                       />
                     </div>
-                    <div className="col-sm-4 col-md-2 form__form-group">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">From</span>
                       <div className="row">
                         <div className="col-12">
@@ -384,7 +387,7 @@ class ReportsCustomerPage extends Component {
                         </div>
                       </div>
                     </div>
-                    <div className="col-sm-4 col-md-2 form__form-group">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">To</span>
                       <div className="row">
                         <div className="col-12">
@@ -401,7 +404,6 @@ class ReportsCustomerPage extends Component {
                             dateFormat="MM-dd-yy"
                             disabled={!isCustomRange}
                           />
-
                           <i className="material-icons iconSet calendarIcon">calendar_today</i>
                         </div>
                       </div>
@@ -411,10 +413,18 @@ class ReportsCustomerPage extends Component {
               </div>
             </div>
           </div>
-
           <div className="kpi-container">
+            {
+            /*
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
+              </Col>
+            </Row>
+            */
+            }
             <div className="row upper-kpi">
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Jobs In Progress</center></h5>
@@ -423,7 +433,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
@@ -432,7 +442,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>New Offers</center></h5>
@@ -441,7 +451,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
@@ -452,7 +462,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <div className="my-auto">
@@ -468,7 +478,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-3 col-lg-3">
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
@@ -480,7 +490,7 @@ class ReportsCustomerPage extends Component {
 
             <Row>
               <Col md={12}>
-                <h3 className="page-title">Last 30 days</h3>
+                <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
               </Col>
             </Row>
 
@@ -520,6 +530,7 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
+
               <div className="col-12 col-md-2 col-lg-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
@@ -528,6 +539,7 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
+
               <div className="col-12 col-md-2 col-lg-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
@@ -536,6 +548,7 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
+
             </div>
 
             <Row>
@@ -543,6 +556,7 @@ class ReportsCustomerPage extends Component {
                 <h3 className="page-title">Additional Reports</h3>
               </Col>
             </Row>
+
             <Row>
               <Col md={12}>
                 <Card>
@@ -552,6 +566,7 @@ class ReportsCustomerPage extends Component {
                 </Card>
               </Col>
             </Row>
+
             <Row>
               <Col md={12}>
                 <Card>
@@ -561,6 +576,7 @@ class ReportsCustomerPage extends Component {
                 </Card>
               </Col>
             </Row>
+
             <Row>
               <Col md={12}>
                 <Card>
@@ -570,13 +586,13 @@ class ReportsCustomerPage extends Component {
                 </Card>
               </Col>
             </Row>
-          </div> 
+          </div>
         </Container>
       );
     }
     return (
       <Container>
-        Loading Carrier Reports Page...
+        Loading Customer Reports Page...
       </Container>
     );
   }
