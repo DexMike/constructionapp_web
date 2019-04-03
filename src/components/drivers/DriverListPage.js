@@ -166,13 +166,6 @@ class DriverListPage extends Component {
         <Container className="dashboard">
           {this.renderModal()}
           {this.renderGoTo()}
-          <button type="button"
-            className="app-link"
-            onClick={() => this.handlePageClick('Dashboard')}
-          >
-            Dashboard
-          </button>
-          &nbsp;&#62; Drivers
           <Row>
             <Col md={12}>
               <h3 className="page-title">Drivers</h3>

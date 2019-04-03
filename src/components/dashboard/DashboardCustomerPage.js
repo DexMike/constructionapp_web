@@ -246,7 +246,7 @@ class DashboardCustomerPage extends Component {
 
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Dashboard for Customer (DashboardCustomerPage)</h3>
+              <h3 className="page-title">Jobs</h3>
             </Col>
           </Row>
 

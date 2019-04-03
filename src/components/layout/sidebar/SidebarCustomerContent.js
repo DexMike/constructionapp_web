@@ -41,7 +41,7 @@ class SidebarCustomerContent extends Component {
   render() {
     return (
       <div className="sidebar__content">
-        <SideElement title = "Dashboard" icon="home" route="/" handle={this.hideSidebar}/>
+        <SideElement title = "Jobs" icon="home" route="/" handle={this.hideSidebar}/>
         <SideElement title = "Search for Trucks" custom="dump_truck" route="/TrucksList" handle={this.hideSidebar}/>
         <SideElement title = "Reports" icon="settings" route="/Reports" handle={this.hideSidebar}/>
         <SideElement title = "Settings" icon="assignment" route="/Settings" handle={this.hideSidebar}/>
