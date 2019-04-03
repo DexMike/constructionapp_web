@@ -14,6 +14,7 @@ import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import './jobs.css';
 import TField from '../common/TField';
+import USstates from '../../utils/usStates';
 
 class CreateJobFormOne extends PureComponent {
   constructor(props) {
@@ -26,6 +27,7 @@ class CreateJobFormOne extends PureComponent {
       capacity: 0,
       allMaterials: [],
       selectedMaterials: [],
+      allUSstates: USstates.getStates(),
       // rates
       ratebyBoth: false,
       rateByTon: true,
@@ -75,10 +77,12 @@ class CreateJobFormOne extends PureComponent {
     this.handleEndAddressChange = this.handleEndAddressChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.firstPage = this.firstPage.bind(this);
-    this.secondPage = this.secondPage.bind(this);
+    this.tabFirstPage = this.tabFirstPage.bind(this);
+    this.tabSecondPage = this.tabSecondPage.bind(this);
     this.jobDateChange = this.jobDateChange.bind(this);
     this.goToSecondFromFirst = this.goToSecondFromFirst.bind(this);
+    this.handleEndLocationChange = this.handleEndLocationChange.bind(this);
+    this.handleStartLocationChange = this.handleStartLocationChange.bind(this);
   }
 
   async componentDidMount() {
@@ -128,6 +132,7 @@ class CreateJobFormOne extends PureComponent {
       let allMaterials = await LookupsService.getLookupsByType('MaterialType');
       const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
       const allTruckTypes = [];
+
       allMaterials = allMaterials.map(material => ({
         value: String(material.id),
         label: material.val1
@@ -162,6 +167,20 @@ class CreateJobFormOne extends PureComponent {
     this.setState({truckType: data});
   }
 
+  handleStartLocationChange(e) {
+    this.setState({
+      reqHandlerStartState: {touched: false}
+    });
+    this.setState({startLocationState: e.value});
+  }
+
+  handleEndLocationChange(e) {
+    this.setState({
+      reqHandlerEndState: {touched: false}
+    });
+    this.setState({endLocationState: e.value});
+  }
+
   handleEndAddressChange(e) {
     let reqHandler = '';
     switch (e.target.name) {
@@ -171,9 +190,11 @@ class CreateJobFormOne extends PureComponent {
       case 'endLocationCity':
         reqHandler = 'reqHandlerEndCity';
         break;
+      /*
       case 'endLocationState':
         reqHandler = 'reqHandlerEndState';
         break;
+      */
       case 'endLocationZip':
         reqHandler = 'reqHandlerEndZip';
         break;
@@ -416,11 +437,11 @@ class CreateJobFormOne extends PureComponent {
     this.setState({jobDate: data});
   }
 
-  firstPage() {
+  tabFirstPage() {
     this.setState({rateTab: 1});
   }
 
-  secondPage() {
+  tabSecondPage() {
     this.setState({rateTab: 2});
   }
 
@@ -441,6 +462,7 @@ class CreateJobFormOne extends PureComponent {
       capacity,
       allMaterials,
       selectedMaterials,
+      allUSstates,
       /*
       ratebyBoth,
       rateByTon,
@@ -489,6 +511,7 @@ class CreateJobFormOne extends PureComponent {
             <form
               className="form form--horizontal addtruck__form"
               onSubmit={e => this.saveTruck(e)}
+              autoComplete="off"
             >
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
@@ -560,180 +583,182 @@ class CreateJobFormOne extends PureComponent {
 
               {/* RATES */}
               <Row className="col-md-12 rateTab">
-                <Col>
-                  <Card>
-                    <div className="wizard">
-                      <div className="col-md-6 wizard__steps">
-                        {/* onClick={this.gotoPage(1)} */}
-                        <div
-                          role="link"
-                          tabIndex="0"
-                          onKeyPress={this.handleKeyPress}
-                          onClick={this.firstPage}
-                          className={`wizard__step${rateTab === 1 ? ' wizard__step--active' : ''}`}
-                        >
-                          <p>Hour</p>
-                        </div>
-                        <div
-                          role="link"
-                          tabIndex="0"
-                          onKeyPress={this.handleKeyPress}
-                          onClick={this.secondPage}
-                          className={`wizard__step${rateTab === 2 ? ' wizard__step--active' : ''}`}
-                        >
-                          <p>Ton</p>
-                        </div>
-                      </div>
-
-                      <div className="wizard__form-wrapper">
-                        {/* onSubmit={this.nextPage} */}
-                        {rateTab === 2
-                        && (
-                          <Row className="col-md-12">
-                            {/* FIRST ROW */}
-                            <div className="col-md-5 form__form-group">
-                              Estimated Amount of Tonnage
-                            </div>
-                            <div className="col-md-3 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleTonnageDetails,
-                                    name: 'tonnage',
-                                    value: tonnage
-                                  }
-                                }
-                                placeholder="Capacity"
-                                type="number"
-                                meta={reqHandlerTonnage}
-                              />
-                            </div>
-                            <div className="col-md-4 form__form-group">
-                              &nbsp;
-                            </div>
-                            {/* END LOCATION */}
-                            <div className="col-md-12 form__form-group">
-                              <h3 className="subhead">
-                                End Location
-                              </h3>
-                            </div>
-                            <div className="col-md-12 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationAddress1',
-                                    value: endLocationAddress1
-                                  }
-                                }
-                                placeholder="Address 1"
-                                type="text"
-                                meta={reqHandlerEndAddress}
-                              />
-                            </div>
-                            <div className="col-md-12 form__form-group">
-                              <input
-                                name="endLocationAddress2"
-                                type="text"
-                                value={endLocationAddress2}
-                                onChange={this.handleEndAddressChange}
-                                placeholder="Address 2"
-                              />
-                            </div>
-                            <div className="col-md-7 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationCity',
-                                    value: endLocationCity
-                                  }
-                                }
-                                placeholder="City"
-                                type="text"
-                                meta={reqHandlerEndCity}
-                              />
-                            </div>
-                            <div className="col-md-3 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationState',
-                                    value: endLocationState
-                                  }
-                                }
-                                placeholder="State"
-                                type="text"
-                                meta={reqHandlerEndState}
-                              />
-                            </div>
-                            <div className="col-md-2 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationZip',
-                                    value: endLocationZip
-                                  }
-                                }
-                                placeholder="Zip"
-                                type="text"
-                                meta={reqHandlerEndZip}
-                              />
-                            </div>
-                          </Row>
-                        )}
-                        {rateTab === 1
-                        && (
-                          <Row className="col-md-12">
-                            {/* FIRST ROW */}
-                            <div className="col-md-7 form__form-group">
-                              How many hours do you estimate for this job?
-                            </div>
-                            <div className="col-md-3 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleHourDetails,
-                                    name: 'hourEstimatedHours',
-                                    value: hourEstimatedHours
-                                  }
-                                }
-                                type="number"
-                                meta={reqHandlerHoursEstimate}
-                              />
-                            </div>
-                            <div className="col-md-2 form__form-group">
-                              &nbsp;
-                            </div>
-                            {/* SECOND ROW */}
-                            <div className="col-md-7 form__form-group">
-                              How many trucks will you require for this job?
-                            </div>
-                            <div className="col-md-3 form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleHourDetails,
-                                    name: 'hourTrucksNumber',
-                                    value: hourTrucksNumber
-                                  }
-                                }
-                                type="number"
-                                meta={reqHandlerTrucksEstimate}
-                              />
-                            </div>
-                            <div className="col-md-2 form__form-group">
-                              &nbsp;
-                            </div>
-                          </Row>
-                        )}
-                        {/* onSubmit={onSubmit} */}
-                      </div>
+                <div className="col-md-12 form__form-group">
+                  <h3 className="subhead">
+                    What are the rates?
+                  </h3>
+                </div>
+                <div className="col-md-12 wizard">
+                  <div className="col-md-6 wizard__steps">
+                    <div
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      onClick={this.tabFirstPage}
+                      className={`wizard__step${rateTab === 1 ? ' wizard__step--active' : ''}`}
+                    >
+                      <p>By the Hour</p>
                     </div>
-                  </Card>
-                </Col>
+                    <div
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      onClick={this.tabSecondPage}
+                      className={`wizard__step${rateTab === 2 ? ' wizard__step--active' : ''}`}
+                    >
+                      <p>By Tonnage</p>
+                    </div>
+                  </div>
+
+                  <div className="wizard__form-wrapper">
+                    {/* onSubmit={this.nextPage} */}
+                    {rateTab === 2
+                    && (
+                      <Row className="col-md-12">
+                        {/* FIRST ROW */}
+                        <div className="col-md-5 form__form-group">
+                          Estimated Amount of Tonnage
+                        </div>
+                        <div className="col-md-3 form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleTonnageDetails,
+                                name: 'tonnage',
+                                value: tonnage
+                              }
+                            }
+                            placeholder="Capacity"
+                            type="number"
+                            meta={reqHandlerTonnage}
+                          />
+                        </div>
+                        <div className="col-md-4 form__form-group">
+                          &nbsp;
+                        </div>
+                        {/* END LOCATION */}
+                        <div className="col-md-12 form__form-group">
+                          <h3 className="subhead">
+                            End Location
+                          </h3>
+                        </div>
+                        <div className="col-md-12 form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationAddress1',
+                                value: endLocationAddress1
+                              }
+                            }
+                            placeholder="Address 1"
+                            type="text"
+                            meta={reqHandlerEndAddress}
+                          />
+                        </div>
+                        <div className="col-md-12 form__form-group">
+                          <input
+                            name="endLocationAddress2"
+                            type="text"
+                            value={endLocationAddress2}
+                            onChange={this.handleEndAddressChange}
+                            placeholder="Address 2"
+                            autoComplete="new-password"
+                          />
+                        </div>
+                        <div className="col-md-7 form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationCity',
+                                value: endLocationCity
+                              }
+                            }
+                            placeholder="City"
+                            type="text"
+                            meta={reqHandlerEndCity}
+                          />
+                        </div>
+                        <div className="col-md-3 form__form-group">
+                          <SelectField
+                            input={
+                              {
+                                onChange: this.handleStartLocationChange,
+                                name: 'startLocationState',
+                                value: startLocationState
+                              }
+                            }
+                            placeholder="State"
+                            meta={reqHandlerStartState}
+                            value={startLocationState}
+                            options={allUSstates}
+                          />
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationZip',
+                                value: endLocationZip
+                              }
+                            }
+                            placeholder="Zip"
+                            type="text"
+                            meta={reqHandlerEndZip}
+                          />
+                        </div>
+                      </Row>
+                    )}
+                    {rateTab === 1
+                    && (
+                      <Row className="col-md-12">
+                        {/* FIRST ROW */}
+                        <div className="col-md-7 form__form-group">
+                          How many hours do you estimate for this job?
+                        </div>
+                        <div className="col-md-3 form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleHourDetails,
+                                name: 'hourEstimatedHours',
+                                value: hourEstimatedHours
+                              }
+                            }
+                            type="number"
+                            meta={reqHandlerHoursEstimate}
+                          />
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          &nbsp;
+                        </div>
+                        {/* SECOND ROW */}
+                        <div className="col-md-7 form__form-group">
+                          How many trucks will you require for this job?
+                        </div>
+                        <div className="col-md-3 form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleHourDetails,
+                                name: 'hourTrucksNumber',
+                                value: hourTrucksNumber
+                              }
+                            }
+                            type="number"
+                            meta={reqHandlerTrucksEstimate}
+                          />
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          &nbsp;
+                        </div>
+                      </Row>
+                    )}
+                    {/* onSubmit={onSubmit} */}
+                  </div>
+                </div>
               </Row>
 
               <Row className="col-md-12">
@@ -786,7 +811,6 @@ class CreateJobFormOne extends PureComponent {
                     type="text"
                     meta={reqHandlerStartAddress}
                   />
-
                 </div>
                 <div className="col-md-12 form__form-group">
                   <input
@@ -812,17 +836,18 @@ class CreateJobFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-3 form__form-group">
-                  <TField
+                  <SelectField
                     input={
                       {
-                        onChange: this.handleStartAddressChange,
-                        name: 'startLocationState',
-                        value: startLocationState
+                        onChange: this.handleEndLocationChange,
+                        name: 'endLocationState',
+                        value: endLocationState
                       }
                     }
                     placeholder="State"
-                    type="text"
-                    meta={reqHandlerStartState}
+                    meta={reqHandlerEndState}
+                    value={endLocationState}
+                    options={allUSstates}
                   />
                 </div>
                 <div className="col-md-2 form__form-group">

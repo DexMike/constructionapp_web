@@ -76,8 +76,12 @@ class JobCreateFormTwo extends PureComponent {
       state: d.startLocationState,
       zipCode: d.startLocationZip
     };
+    const startAddress = await AddressService.createAddress(address1);
 
     // end location
+    let endAddressId = null;
+    console.log(d.endLocationAddress1);
+    // return false;
     const address2 = {
       type: 'Delivery',
       name: 'Delivery End Location',
@@ -90,7 +94,6 @@ class JobCreateFormTwo extends PureComponent {
     };
 
     // save two addresses
-    const startAddress = await AddressService.createAddress(address1);
     const endAddress = await AddressService.createAddress(address2);
 
     // job
