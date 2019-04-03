@@ -1,13 +1,14 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import { Auth } from 'aws-amplify';
+import {Link} from 'react-router-dom';
+import {Auth} from 'aws-amplify';
 import ThemeContext from '../../ThemeContext';
+
 
 class TopbarMenuLink extends Component {
   async logOut() {
     try {
-      await Auth.signOut({ global: true });
+      await Auth.signOut({global: true});
     } catch (err) {
       // POST https://cognito-idp.us-east-1.amazonaws.com/ 400
       // Uncaught (in promise) {code: "NotAuthorizedException",
@@ -17,8 +18,7 @@ class TopbarMenuLink extends Component {
   }
 
   render() {
-    const { title, icon, path } = this.props;
-
+    const {title, icon, path} = this.props;
     return (
       <React.Fragment>
         {title === 'Log Out' && (
@@ -29,10 +29,11 @@ class TopbarMenuLink extends Component {
         )}
         {title === 'Toggle Theme' && (
           <ThemeContext.Consumer>
-            {({ toggleTheme }) => (
-              <button type="button" className="sidebar__link" onClick={toggleTheme}>
-                <p className="sidebar__link-title">Toggle Theme</p>
-              </button>
+            {({toggleTheme}) => (
+              <Link className="topbar__link" to="" onClick={toggleTheme}>
+                <span className={`topbar__link-icon lnr lnr-${icon}`}/>
+                <p className="topbar__link-title">Toggle Theme</p>
+              </Link>
             )}
           </ThemeContext.Consumer>
         )}
