@@ -12,6 +12,15 @@ class TDateTimePickerField extends PureComponent {
     this.handleChange = this.handleChange.bind(this);
   }
 
+  componentWillReceiveProps(props) {
+    let dueDate = 0;
+    if (props.input.value.startDate) {
+      dueDate = props.input.value.startDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+  }
+
   handleChange(date) {
     this.setState({
       startDate: date
@@ -46,7 +55,8 @@ TDateTimePickerField.propTypes = {
   onChange: PropTypes.func.isRequired,
   input: PropTypes.shape({
     onChange: PropTypes.func,
-    name: PropTypes.string
+    name: PropTypes.string,
+    value: PropTypes.object
   }).isRequired,
   // givenDate: PropTypes.number,
   dateFormat: PropTypes.string,

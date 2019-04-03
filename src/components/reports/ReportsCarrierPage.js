@@ -205,6 +205,7 @@ class ReportsCarrierPage extends Component {
     startDate = new Date();
     endDate = currentDate;
     startDate.setDate(currentDate.getDate() - selectedRange);
+    console.log(startDate);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
@@ -219,6 +220,8 @@ class ReportsCarrierPage extends Component {
       isCustomRange,
       selectedRange,
       selectIndex
+    }, function setted() {
+      this.state
     });
   }
 
@@ -366,7 +369,7 @@ class ReportsCarrierPage extends Component {
                             name: this.timeRanges[selectIndex].name,
                             value: this.timeRanges[selectIndex].value
                           }
-                        }                      
+                        }
                         value={this.timeRanges[selectIndex].value.toString()}
                         options={
                           this.timeRanges.map(timeRange => ({
@@ -476,7 +479,7 @@ class ReportsCarrierPage extends Component {
                         &nbsp;&nbsp;
                         <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>
                       </div>
-                    </div>                  
+                    </div>
                   </div>
                 </div>
               </div>
@@ -588,8 +591,8 @@ class ReportsCarrierPage extends Component {
                   </CardBody>
                 </Card>
               </Col>
-            </Row>                
-          </div> 
+            </Row>
+          </div>
         </Container>
       );
     }
