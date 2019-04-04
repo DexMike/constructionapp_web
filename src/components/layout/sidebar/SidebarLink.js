@@ -20,7 +20,8 @@ class SidebarLink extends Component {
           {icon ? <i className="material-icons iconSet">{icon}</i> : ''}
           {/* Custom icon. Note: first import image at the top */}
           {customIcon === 'dump_truck' ? <img className="customIcon" src={DumpTruckIcon} alt=""/> : ''}
-          <p className="sidebar__link-title">
+          <p className="
+          sidebar__link-title">
             {title}
             {newLink ? <Badge className="sidebar__link-badge"><span>New</span></Badge> : ''}
           </p>
