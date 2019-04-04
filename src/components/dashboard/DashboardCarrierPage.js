@@ -428,7 +428,7 @@ class DashboardCarrierPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Job</h3>
+          <h3 className="page-title">Job Dashboard</h3>
         </Col>
       </Row>
     );
@@ -507,11 +507,11 @@ class DashboardCarrierPage extends Component {
           {/*{this.renderGoTo()}*/}
 
           <div className="row">
-            <DashboardObject title="New Offers" val = {newJobCount}/>
             <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
+            <DashboardObject title="New Offers" val = {newJobCount}/>
             <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
-            <DashboardObject title="Potential Earnings" val={potentialIncome}/>
             <DashboardObject title="Completed Jobs" val={completedJobCount}/>
+            <DashboardObject title="Potential Earnings" val={potentialIncome}/>
             <DashboardObject title="% Completed" val = {completedOffersPercent}/>
           </div>
         </Container>
@@ -820,7 +820,7 @@ class DashboardCarrierPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Carrier
+                  Displaying 80 of {newJobCount}
                   <TTable
                     columns={
                       [
@@ -829,40 +829,38 @@ class DashboardCarrierPage extends Component {
                         //   displayName: 'Job Id'
                         // },
                         {
-                          name: 'name',
-                          displayName: 'Job Name'
-                        },
-                        {
-                          name: 'image',
-                          displayName: 'Truck Image'
-                        },
-                        {
-                          name: 'status',
-                          displayName: 'Job Status'
+                          name: 'newStartDate',
+                          displayName: 'Start Date'
                         },
                         {
                           name: 'companyName',
                           displayName: 'Customer'
                         },
                         {
-                          name: 'newStartDate',
-                          displayName: 'Start Date'
-                        },
-                        {
                           name: 'zip',
                           displayName: 'Start Zip'
                         },
                         {
-                          name: 'newSize',
-                          displayName: 'Size'
+                          name: 'estimatedIncome',
+                          displayName: 'Est. Income'
                         },
                         {
                           name: 'newRate',
                           displayName: 'Rate'
                         },
+                        // {
+                        //   name: 'name',
+                        //   displayName: 'Job Name'
+                        // },
+                        // {
+                        //   name: 'status',
+                        //   displayName: 'Job Status'
+                        // },
+
+
                         {
-                          name: 'estimatedIncome',
-                          displayName: 'Est. Income'
+                          name: 'newSize',
+                          displayName: 'Size'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table

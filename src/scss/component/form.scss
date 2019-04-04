@@ -166,7 +166,7 @@
       background: transparent;
 
       @include themify($themes) {
-        border: 1px solid themed('colorFieldsBorder');
+        border: 1px solid #cccccc;
       }
     }
 

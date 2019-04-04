@@ -2,7 +2,7 @@
   width: 100%;
   position: fixed;
   top: 0;
-  height: 60px;
+  height: 40px;
   z-index: 101;
   box-shadow: 0 2px 15px 0 rgba(0, 0, 0, 0.05);
 
@@ -14,12 +14,13 @@
 .topbar__wrapper {
   position: relative;
   display: flex;
-  height: 60px;
+  height: 40px;
 }
 
 .topbar__button {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 40px;
+  padding: 4px;
   display: flex;
   background: transparent;
   border: none;
@@ -49,8 +50,8 @@
 }
 
 .topbar__logo {
-  width: 150px;
-  height: 32px;
+  width: 77px;
+  height: 18px;
   margin: auto 0;
   background-repeat: no-repeat;
   background-position-y: center;

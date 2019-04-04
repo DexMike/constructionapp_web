@@ -48,6 +48,7 @@
     }
   }
 }
+
 .topbar__button-icon {
   width: 60px;
 }
@@ -104,28 +105,32 @@
 //}
 
 .filter-item-title {
-  background-color:#efefef;
+  background-color:#F9F9F7;
   //font-weight: bold;
   padding-left: 15px;
-  padding-top: 10px;
-  color: #006f53;
+  padding-top: 8px;
+  color: #666666;
   text-align: left;
-  font-size: 12px;
+  font-size: 11px;
 }
 
-
+.dashboard__card-widget .card-body {
+  &:hover, &:active {
+    border: 1px solid #006f53;
+  }
+}
 
 #filter-input-row {
-  background: #efefef;
+  background: #F9F9F7;
   input {
     background-color: white;
   }
   input.filter-text {
     padding: 5px;
-    margin: 10px 0 10px 0;
+    margin: 4px 0 8px 0;
   }
-  .Select-control, .date-picker, .form__form-group-input-wrap {
-    margin-top: 10px;
+  .Select-control, .date-picker {
+    margin-top: 4px;
     background-color: white;
   }
 

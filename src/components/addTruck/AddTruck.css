@@ -23,8 +23,8 @@ hr {
     max-width: 100% !important;
 }
 .form input, .form textarea {
-    border: 1px solid #f2f4f7 !important;
-    color: #646777 !important;
+    border: 1px solid #cccccc !important;
+    color: #666666 !important;
 }
 .checkbox-btn:hover .checkbox-btn__checkbox-custom {
     border-color: #4ce1b6 !important;
@@ -55,8 +55,14 @@ p, h1, h2, h3, h4, h5, h6 {
 }
 
 .iconSet{
-    color: #646777;
-    font-size: 35px;
+    color: #666666;
+    font-size: 24px !important;
+    margin-top: -5px;
+    left: 0px;
+    width: auto;
+    position: relative;
+    margin-left: -75px;
+    margin-right: 12px;
 }
 
 /*
