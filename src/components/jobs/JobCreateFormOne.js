@@ -83,7 +83,6 @@ class CreateJobFormOne extends PureComponent {
 
   async componentDidMount() {
     const {firstTabData} = this.props;
-
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
       const p = firstTabData();
@@ -143,6 +142,13 @@ class CreateJobFormOne extends PureComponent {
         allMaterials,
         allTruckTypes
       });
+    }
+  }
+
+
+  componentWillReceiveProps(nextProps, nextContext) {
+    if (nextProps.validateOnTabClick) {
+      this.goToSecondFromFirst();
     }
   }
 
