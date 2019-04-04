@@ -359,7 +359,7 @@ class ReportsCarrierPage extends Component {
                             name: this.timeRanges[selectIndex].name,
                             value: this.timeRanges[selectIndex].value
                           }
-                        }                      
+                        }
                         value={this.timeRanges[selectIndex].value.toString()}
                         options={
                           this.timeRanges.map(timeRange => ({

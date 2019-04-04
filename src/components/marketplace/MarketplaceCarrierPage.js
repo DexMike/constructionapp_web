@@ -60,8 +60,8 @@ class MarketplaceCarrierPage extends Component {
 
       modal: false,
       goToDashboard: false,
-      startDate: null,          // values for date control
-      endDate: null,            // values for date control
+      startDate: null, // values for date control
+      endDate: null, // values for date control
 
       // Rate Type Button toggle
       isAvailable: true,
@@ -141,7 +141,6 @@ class MarketplaceCarrierPage extends Component {
         return newJob;
       });
       // );
-
     }
 
     this.setState(
@@ -233,9 +232,9 @@ class MarketplaceCarrierPage extends Component {
     const {
       isAvailable
     } = this.state;
-    console.log('Before swap: ' + isAvailable);
+    console.log(`Before swap: ${isAvailable}`);
     const newValue = !isAvailable;
-    console.log('switching makeAvailable to ' + newValue);
+    console.log(`switching makeAvailable to ${newValue}`);
     this.setState({ isAvailable: newValue });
   }
 
@@ -460,7 +459,7 @@ class MarketplaceCarrierPage extends Component {
         newJob.newStartDate = TFormat.asDate(job.startTime);
 
         return newJob;
-      })
+      });
       // );
     }
 
@@ -539,25 +538,27 @@ class MarketplaceCarrierPage extends Component {
           <Card>
             <CardBody>
 
-            <Col lg={12}>
+              <Col lg={12}>
 
-              <Col>
+                <Col>
                 Select by:
 
-                <Button color={this.availableButtonColor(isAvailable)}
+                  <Button color={this.availableButtonColor(isAvailable)}
                         type="button"
                         onClick={this.makeAvailable}
-                        className="previous">
+                        className="previous"
+                  >
                   Hour
-                </Button>
-                <Button color={this.unavailableButtonColor(!isAvailable)}
+                  </Button>
+                  <Button color={this.unavailableButtonColor(!isAvailable)}
                         type="button"
                         onClick={this.makeAvailable}
-                        className="previous">
+                        className="previous"
+                  >
                   Ton
-                </Button>
+                  </Button>
 
-                <TSelect
+                  <TSelect
                   input={
                     {
                       onChange: this.handleSelectFilterChange,
@@ -580,14 +581,14 @@ class MarketplaceCarrierPage extends Component {
                     }))
                   }
                   placeholder={rateTypeList[0]}
-                />
+                  />
+                </Col>
               </Col>
-            </Col>
             </CardBody>
           </Card>
         </Col>
       </Row>
-    )
+    );
   }
 
   renderFilter() {
