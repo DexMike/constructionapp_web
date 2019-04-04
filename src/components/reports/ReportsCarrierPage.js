@@ -39,7 +39,6 @@ class ReportsCarrierPage extends Component {
       endDate: null,
       selectIndex: 2, // Parameter for setting the dropdown default option.
       selectedRange: 0, // Parameter for setting startDate.
-      isCustomRange: null,
       // ↑ Prameter for enable/disable the datePickers if 'Custom' option is selected or not.
       filters: {
         companiesId: 0,
@@ -81,7 +80,8 @@ class ReportsCarrierPage extends Component {
 
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
-      filters.companiesId = profile.companyId;
+      // filters.companiesId = profile.companyId;
+      filters.companiesId = 51;
     }
 
     isCustomRange = false;
@@ -227,11 +227,14 @@ class ReportsCarrierPage extends Component {
   }
 
   async startDateChange(data) {
-    const { filters } = this.state;
+    const { filters, endDate } = this.state;
     let { startDate } = this.state;
+
     startDate = data;
     filters.startAvailability = startDate;
     const jobs = await this.fetchJobs(filters);
+
+    this.isCustomRange(startDate, endDate);
     this.setState({
       jobs,
       startDate,
@@ -240,15 +243,47 @@ class ReportsCarrierPage extends Component {
   }
 
   async endDateChange(data) {
-    const { filters } = this.state;
+    const { filters, startDate } = this.state;
     let { endDate } = this.state;
+
     endDate = data;
     filters.endAvailability = endDate;
     const jobs = await this.fetchJobs(filters);
+
+    this.isCustomRange(startDate, endDate);
     this.setState({
       jobs,
       endDate,
       filters
+    });
+  }
+
+  async isCustomRange(startDate, endDate) {
+    let { selectIndex } = this.state;
+    const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
+    const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
+
+    const currentDate = new Date();
+    const currentDateId = `${currentDate.getDate()}${currentDate.getMonth()}${currentDate.getFullYear()}`;
+
+    if (endDateId === currentDateId) {
+      for (let i = 1; i < this.timeRanges.length; i += 1) {
+        currentDate.setDate(currentDate.getDate() - this.timeRanges[i].value);
+        const lastDateId = `${currentDate.getDate()}${currentDate.getMonth()}${currentDate.getFullYear()}`;
+        currentDate.setDate(currentDate.getDate() + this.timeRanges[i].value);
+        if (startDateId === lastDateId) {
+          selectIndex = i;
+          i = this.timeRanges.length;
+        } else {
+          selectIndex = 0;
+        }
+      }
+    } else {
+      selectIndex = 0;
+    }
+
+    this.setState({
+      selectIndex
     });
   }
 
@@ -267,7 +302,7 @@ class ReportsCarrierPage extends Component {
   }
 
   render() {
-    const { loaded, startDate, endDate, isCustomRange, selectIndex } = this.state;
+    const { loaded, startDate, endDate, selectIndex } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
@@ -386,7 +421,6 @@ class ReportsCarrierPage extends Component {
                             }
                             onChange={this.startDateChange}
                             dateFormat="MM-dd-yy"
-                            disabled={!isCustomRange}
                           />
                           <i className="material-icons iconSet calendarIcon">calendar_today</i>
                         </div>
@@ -407,7 +441,6 @@ class ReportsCarrierPage extends Component {
                             }
                             onChange={this.endDateChange}
                             dateFormat="MM-dd-yy"
-                            disabled={!isCustomRange}
                           />
                           <i className="material-icons iconSet calendarIcon">calendar_today</i>
                         </div>
