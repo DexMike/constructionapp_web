@@ -27,6 +27,7 @@ class JobCreatePopup extends Component {
     this.saveAndGoToSecondPage = this.saveAndGoToSecondPage.bind(this);
     this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
     this.validateFormOne = this.validateFormOne.bind(this);
+    this.validateFormOneRes = this.validateFormOneRes.bind(this);
   }
 
   async componentDidMount() {
@@ -45,6 +46,10 @@ class JobCreatePopup extends Component {
 
   validateFormOne() {
     this.setState({ validateFormOne: true });
+  }
+
+  validateFormOneRes(res) {
+    this.setState({ validateFormOne: res });
   }
 
   closeNow() {
@@ -122,6 +127,7 @@ class JobCreatePopup extends Component {
                         gotoSecond={this.saveAndGoToSecondPage}
                         firstTabData={this.getFirstTabInfo}
                         validateOnTabClick={validateFormOne}
+                        validateRes={this.validateFormOneRes}
                       />
                       )}
                     {page === 2
