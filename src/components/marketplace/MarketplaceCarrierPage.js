@@ -4,7 +4,6 @@ import {
   Card,
   CardBody,
   Col,
-  Button,
   Container,
   Modal,
   Row
@@ -12,25 +11,20 @@ import {
 // import classnames from 'classnames';
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
-import NumberFormat from 'react-number-format';
+import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
-import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
-import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
-import JobsService from '../../api/JobService';
-import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 
 class MarketplaceCarrierPage extends Component {
@@ -46,22 +40,21 @@ class MarketplaceCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
-      selectedJob: {},
 
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
       rateTypeList: [],
-      sortByList, // array from above
+      // sortByList, // array from above
       // sortBy: 1,
 
-      equipments: [],
+      // equipments: [],
       selectedEquipment: {},
 
       modal: false,
       goToDashboard: false,
-      startDate: null,          // values for date control
-      endDate: null,            // values for date control
+      startDate: null, // values for date control
+      endDate: null, // values for date control
 
       // Rate Type Button toggle
       isAvailable: true,
@@ -73,8 +66,8 @@ class MarketplaceCarrierPage extends Component {
 
         startAvailability: null,
         endAvailability: null,
-        rate: 'Any',
-        minTons: 'Any',
+        rate: '',
+        minTons: '',
         minHours: '',
         minCapacity: '',
 
@@ -105,25 +98,30 @@ class MarketplaceCarrierPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
   }
 
   async componentDidMount() {
+    const { filters } = this.state;
     let {
       startDate,
-      endDate,
-      filters
+      endDate
     } = this.state;
 
     startDate = new Date();
+    startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();
     endDate.setDate(startDate.getDate() + 7);
+    endDate.setHours(23, 59, 59); // 23:59:59
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    const jobs = await this.fetchJobs();
+    await this.fetchJobs();
     await this.fetchFilterLists();
 
-    if (jobs) {
+    /* if (jobs) {
+      this.fetchJobMaterials(jobs);
+
       // Promise.all(
       jobs.map(async (job) => {
         const newJob = job;
@@ -141,13 +139,10 @@ class MarketplaceCarrierPage extends Component {
         return newJob;
       });
       // );
-
-    }
+    } */
 
     this.setState(
       {
-        jobs,
-        filters,
         loaded: true,
         startDate,
         endDate,
@@ -233,42 +228,79 @@ class MarketplaceCarrierPage extends Component {
     const {
       isAvailable
     } = this.state;
-    console.log('Before swap: ' + isAvailable);
+    // console.log(`Before swap: ${isAvailable}`);
     const newValue = !isAvailable;
-    console.log('switching makeAvailable to ' + newValue);
+    // console.log(`switching makeAvailable to ${newValue}`);
     this.setState({ isAvailable: newValue });
+  }
+
+  async fetchJobMaterials(jobs) {
+    const newJobs = jobs;
+    /* eslint-disable no-await-in-loop */
+    for (const [key, value] of Object.entries(jobs)) {
+      try {
+        let truckMaterials = await
+        JobMaterialsService.getJobMaterialsByJobId(value.id);
+        truckMaterials = truckMaterials.map(material => ({
+          material: material.value
+        }));
+
+        if ((truckMaterials[0].material).includes('Any')) { // If we have 'Any', show all materials
+          let allMaterials = await LookupsService.getLookupsByType('MaterialType'); // Get all materials from Lookups
+          allMaterials = allMaterials.map(item => item.val1); // Get only val1 values
+          allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
+          newJobs[key].materials = allMaterials.join(', \n');
+        } else {
+          newJobs[key].materials = truckMaterials.map(e => e.material).join('\n');
+        }
+      } catch (error) {
+        newJobs[key].materials = '';
+      }
+    }
+    this.setState({ jobs: newJobs });
   }
 
   async fetchJobs() {
     const { filters } = this.state;
-
     const jobs = await JobService.getJobByFilters(filters);
 
     if (jobs) {
-      if (jobs != null) {
-        jobs.map((job) => {
-          const newJob = job;
-          //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-          //     newEquipment.companyName = company.legalName;
-          // console.log(companyName);
-          // console.log(job.companyName)
-          // const materialsList = await EquipmentMaterialsService
-          // .getEquipmentMaterialsByJobId(job.id);
-          // const materials = materialsList.map(materialItem => materialItem.value);
-          // newJob.material = this.equipmentMaterialsAsString(materials);
-          // console.log(companyName);
-          // console.log(job.material);
-          newJob.modifiedOn = moment(job.modifiedOn)
-            .format();
-          newJob.createdOn = moment(job.createdOn)
-            .format();
-          return job;
-        });
-      }
+      this.fetchJobMaterials(jobs);
 
+      jobs.map(async (job) => {
+        const newJob = job;
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+        newJob.modifiedOn = moment(job.modifiedOn)
+          .format();
+        newJob.createdOn = moment(job.createdOn)
+          .format();
+
+        return newJob;
+      });
       this.setState({ jobs });
     }
-    return jobs;
+  }
+
+  handleFilterChangeDelayed(e) {
+    const self = this;
+    const { value } = e.target;
+    const { filters } = this.state;
+
+    if (self.state.typingTimeout) {
+      clearTimeout(self.state.typingTimeout);
+    }
+
+    filters[e.target.name] = value;
+
+    self.setState({
+      typing: false,
+      typingTimeout: setTimeout(async () => {
+        await this.fetchJobs();
+      }, 1000),
+      filters
+    });
   }
 
   async handleFilterChange(e) {
@@ -291,13 +323,10 @@ class MarketplaceCarrierPage extends Component {
     const { filters } = this.state;
     filters.materialType = data;
     this.setState({
-      // selectedMaterials: data
       filters
     }, async function changed() {
       await this.fetchJobs();
-      // console.log(this.state);
     });
-    /**/
   }
 
   handlePageClick(menuItem) {
@@ -316,7 +345,7 @@ class MarketplaceCarrierPage extends Component {
     }, id);
     selectedJob.materials = ['Any'];
     this.setState({
-      selectedJob,
+      // selectedJob,
       modal: true
     });
   }
@@ -416,7 +445,6 @@ class MarketplaceCarrierPage extends Component {
     } = this.state;
 
     if (jobs) {
-      // Promise.all(
       jobs = jobs.map((job) => {
         const newJob = job;
 
@@ -450,8 +478,7 @@ class MarketplaceCarrierPage extends Component {
         newJob.newStartDate = TFormat.asDate(job.startTime);
 
         return newJob;
-      })
-      // );
+      });
     }
 
     return (
@@ -490,7 +517,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
-                        name: 'material',
+                        name: 'materials',
                         displayName: 'Materials'
                       },
                       {
@@ -515,14 +542,79 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
+  renderToggle() {
+    const {
+      // Lists
+      rateTypeList,
+      // isAvailable,
+      filters
+    } = this.state;
+
+    return (
+      <Row>
+        <Col md={12}>
+          <Card>
+            <CardBody>
+
+              <Col sm="12" md={{ size: 2, offset: 5 }}>
+
+                <Col>
+                Select by:
+
+                  {/* <Button color={this.availableButtonColor(isAvailable)}
+                          type="button"
+                          onClick={this.makeAvailable}
+                          className="previous">
+                    Hour
+                  </Button>
+                  <Button color={this.unavailableButtonColor(!isAvailable)}
+                          type="button"
+                          onClick={this.makeAvailable}
+                          className="previous">
+                    Ton
+                    </Button> */}
+
+                  <TSelect
+                    input={
+                      {
+                        onChange: this.handleSelectFilterChange,
+                        name: 'rateType',
+                        value: filters.rateType
+                      }
+                    }
+                    meta={
+                      {
+                        touched: false,
+                        error: 'Unable to select'
+                      }
+                    }
+                    value={filters.rateType}
+                    options={
+                      rateTypeList.map(rateType => ({
+                        name: 'rateType',
+                        value: rateType,
+                        label: rateType
+                      }))
+                    }
+                    placeholder={rateTypeList[0]}
+                  />
+                </Col>
+              </Col>
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+    );
+  }
+
   renderFilter() {
     const {
       // Lists
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
-      startDate,
-      endDate,
+      // startDate,
+      // endDate,
 
       // filters
       filters
@@ -537,33 +629,33 @@ class MarketplaceCarrierPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
 
-                  {/*<Col>*/}
-                    {/*Select by:*/}
-                    {/*<TSelect*/}
-                      {/*input={*/}
-                        {/*{*/}
-                          {/*onChange: this.handleSelectFilterChange,*/}
-                          {/*name: 'rateType',*/}
-                          {/*value: filters.rateType*/}
-                        {/*}*/}
-                      {/*}*/}
-                      {/*meta={*/}
-                        {/*{*/}
-                          {/*touched: false,*/}
-                          {/*error: 'Unable to select'*/}
-                        {/*}*/}
-                      {/*}*/}
-                      {/*value={filters.rateType}*/}
-                      {/*options={*/}
-                        {/*rateTypeList.map(rateType => ({*/}
-                          {/*name: 'rateType',*/}
-                          {/*value: rateType,*/}
-                          {/*label: rateType*/}
-                        {/*}))*/}
-                      {/*}*/}
-                      {/*placeholder={rateTypeList[0]}*/}
-                    {/*/>*/}
-                  {/*</Col>*/}
+                  {/* <Col>
+                    Select by:
+                    <TSelect
+                      input={
+                        {
+                          onChange: this.handleSelectFilterChange,
+                          name: 'rateType',
+                          value: filters.rateType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      value={filters.rateType}
+                      options={
+                        rateTypeList.map(rateType => ({
+                          name: 'rateType',
+                          value: rateType,
+                          label: rateType
+                        }))
+                      }
+                      placeholder={rateTypeList[0]}
+                    />
+                  </Col> */}
 
                 </Col>
 
@@ -661,21 +753,31 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="rate"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Any"
-                             value={filters.rate}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'rate',
+                            value: filters.rate
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
-                      <input name="minTons"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Any"
-                             value={filters.minTons}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'minTons',
+                            value: filters.minTons
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
@@ -705,12 +807,17 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="numEquipments"
-                             className="filter-text"
-                             type="text"
-                             placeholder="1"
-                             value={filters.numEquipments}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'numEquipments',
+                            value: filters.numEquipments
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
@@ -765,11 +872,10 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
-  renderEquipmentRow(equipment) {
+  /* renderEquipmentRow(equipment) {
     return (
       <React.Fragment>
         <Row md={12} style={{ width: '100%' }}>
-          {/* 100 85 */}
           <Col md={2}>
             <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
                  style={{ width: '118px' }}
@@ -872,29 +978,29 @@ class MarketplaceCarrierPage extends Component {
               <Col className="customer-truck-results-title">
                 Name: {equipment.name}
               </Col>
-              {/* <Col md={6} className="customer-truck-results-title> */}
-              {/* Company: {equipment.companyName} */}
-              {/* </Col> */}
+              {// <Col md={6} className="customer-truck-results-title> }
+              {// Company: {equipment.companyName} }
+              {// </Col> }
             </Row>
-            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
-            {/* <Col> */}
-            {/* TODO needs API for equipment materials */}
-            {/* Materials Hauled */}
-            {/* </Col> */}
-            {/* </Row> */}
+            {// <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> }
+            {// <Col> }
+            {// TODO needs API for equipment materials }
+            {// Materials Hauled }
+            {// </Col> }
+            {// </Row> }
             <Row>
               <Col>
-                {/* HMA */}
+                {// HMA //}
                 <br/>
-                {/* Stone */}
+                {// Stone //}
                 <br/>
-                {/* Sand */}
+                {// Sand //}
                 <br/>
               </Col>
               <Col>
-                {/* Gravel */}
+                {// Gravel //}
                 <br/>
-                {/* Recycling */}
+                {// Recycling //}
                 <br/>
               </Col>
               <Col>
@@ -912,9 +1018,9 @@ class MarketplaceCarrierPage extends Component {
         <hr/>
       </React.Fragment>
     );
-  }
+  } */
 
-  renderEquipmentTable() {
+  /* renderEquipmentTable() {
     const {
       sortByList,
       filters,
@@ -982,7 +1088,7 @@ class MarketplaceCarrierPage extends Component {
         </Col>
       </Row>
     );
-  }
+  } */
 
   render() {
     const { loaded } = this.state;
