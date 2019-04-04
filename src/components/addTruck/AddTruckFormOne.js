@@ -92,7 +92,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    console.log(nextProps.validateOnTabOneClick);
+    // console.log(nextProps.validateOnTabOneClick);
     const {validateResOne} = this.props;
     if (nextProps.validateOnTabOneClick) {
       if(this.isFormValid()) {
