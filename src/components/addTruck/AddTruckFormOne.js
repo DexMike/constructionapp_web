@@ -91,6 +91,19 @@ class AddTruckFormOne extends PureComponent {
     this.setState({ truckType: data.value });
   }
 
+  componentWillReceiveProps(nextProps, nextContext) {
+    console.log(nextProps.validateOnTabOneClick);
+    const {validateRes} = this.props;
+    if (nextProps.validateOnTabOneClick) {
+      validateRes(false);
+      if(this.isFormValid()) {
+        const {secondPage} = this.props;
+        secondPage(this.state)
+      }
+    }
+  }
+
+
   isFormValid() {
     const truck = this.state;
     const {

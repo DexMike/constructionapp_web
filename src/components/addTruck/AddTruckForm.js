@@ -17,6 +17,7 @@ class AddTruckForm extends PureComponent {
       truckCachedInfo: {},
       availabilityCachedInfo: {},
       userCachedInfo: {},
+      validateFormOne: false,
       truckPassedInfo: {} // info that comes from the parent list
     };
     this.nextPage = this.nextPage.bind(this);
@@ -33,6 +34,8 @@ class AddTruckForm extends PureComponent {
     this.getAvailiabilityInfo = this.getAvailiabilityInfo.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
     this.closeNow = this.closeNow.bind(this);
+    this.validateFormOnePress = this.validateFormOnePress.bind(this);
+    this.validateFormOneResults = this.validateFormOneResults.bind(this);
   }
 
   async componentDidMount() {
@@ -146,6 +149,17 @@ class AddTruckForm extends PureComponent {
     }
   }
 
+  validateFormOnePress() {
+    const { validateOnTabOneClick } = this.state;
+    this.setState({ validateOnTabOneClick: !validateOnTabOneClick });
+  }
+
+
+  validateFormOneResults(res) {
+    this.setState({ validateOnTabOneClick: res });
+  }
+
+
   thirdPage() {
     this.setState({ page: 3 });
   }
@@ -170,7 +184,8 @@ class AddTruckForm extends PureComponent {
       truckCachedInfo,
       availabilityCachedInfo,
       userCachedInfo,
-      truckPassedInfo
+      truckPassedInfo,
+      validateOnTabOneClick
     } = this.state;
     if (loaded) {
       return (
@@ -195,7 +210,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.secondPage}
+                      onClick={this.validateFormOnePress}
                       className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Schedule</p>
@@ -238,6 +253,9 @@ class AddTruckForm extends PureComponent {
                         getTruckFullInfo={this.getTruckInfo}
                         passedTruckFullInfo={truckPassedInfo}
                         getAvailiabilityFullInfo={this.getAvailiabilityInfo}
+                        secondPage={this.secondPage}
+                        validateRes={this.validateFormOneResults}
+                        validateOnTabOneClick={validateOnTabOneClick}
                       />
                       )}
                     {page === 2
