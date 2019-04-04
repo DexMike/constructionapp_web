@@ -488,7 +488,8 @@ class MarketplaceCarrierPage extends Component {
         return newJob;
       });
     } else {
-      console.log("MarketPlaceCarrierPage: no Jobs");
+      // console.log("MarketPlaceCarrierPage: no Jobs");
+      jobs = [];
     }
 
     return (
@@ -515,7 +516,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'newRate',
-                        displayName: 'Hourly Rate'
+                        displayName: 'Hourly Rate',
                       },
                       {
                         name: 'newSize',
