@@ -20,6 +20,11 @@ class TDateTimePickerField extends PureComponent {
       const parsedDate = new Date(dueDate);
       this.setState({ startDate: parsedDate });
     }
+    if (props.input.value.endDate) {
+      dueDate = props.input.value.endDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
   }
 
   handleChange(date) {
