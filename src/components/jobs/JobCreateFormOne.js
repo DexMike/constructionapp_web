@@ -147,7 +147,7 @@ class CreateJobFormOne extends PureComponent {
 
 
   componentWillReceiveProps(nextProps, nextContext) {
-    console.log(nextProps.validateOnTabClick);
+    // console.log(nextProps.validateOnTabClick);
     if (nextProps.validateOnTabClick) {
       this.goToSecondFromFirst();
     }
