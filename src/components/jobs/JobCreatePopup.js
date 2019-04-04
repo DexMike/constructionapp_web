@@ -8,7 +8,6 @@ import {
 } from 'reactstrap';
 import JobCreateFormOne from './JobCreateFormOne';
 import JobCreateFormTwo from './JobCreateFormTwo';
-import ProfileService from '../../api/ProfileService';
 
 class JobCreatePopup extends Component {
   constructor(props) {
@@ -17,16 +16,18 @@ class JobCreatePopup extends Component {
     this.state = {
       page: 1,
       loaded: true,
+      validateFormOne: false,
       firstTabInfo: {}
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
     this.gotoPage.bind(this);
     this.firstPage = this.firstPage.bind(this);
-    this.secondPage = this.secondPage.bind(this);
     this.closeNow = this.closeNow.bind(this);
     this.saveAndGoToSecondPage = this.saveAndGoToSecondPage.bind(this);
     this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
+    this.validateFormOne = this.validateFormOne.bind(this);
+    this.validateFormOneRes = this.validateFormOneRes.bind(this);
   }
 
   async componentDidMount() {
@@ -43,6 +44,14 @@ class JobCreatePopup extends Component {
     this.setState({ page: 2 });
   }
 
+  validateFormOne() {
+    this.setState({ validateFormOne: true });
+  }
+
+  validateFormOneRes(res) {
+    this.setState({ validateFormOne: res });
+  }
+
   closeNow() {
     const { toggle } = this.props;
     toggle();
@@ -50,10 +59,6 @@ class JobCreatePopup extends Component {
 
   firstPage() {
     this.setState({ page: 1 });
-  }
-
-  secondPage() {
-    this.setState({ page: 2 });
   }
 
   nextPage() {
@@ -75,7 +80,8 @@ class JobCreatePopup extends Component {
     const { equipmentId, companyId, editDriverId } = this.props;
     const {
       page,
-      loaded
+      loaded,
+      validateFormOne
     } = this.state;
     if (loaded) {
       return (
@@ -100,7 +106,7 @@ class JobCreatePopup extends Component {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.secondPage}
+                      onClick={this.validateFormOne}
                       className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Send Job</p>
@@ -120,6 +126,8 @@ class JobCreatePopup extends Component {
                         onClose={this.closeNow}
                         gotoSecond={this.saveAndGoToSecondPage}
                         firstTabData={this.getFirstTabInfo}
+                        validateOnTabClick={validateFormOne}
+                        validateRes={this.validateFormOneRes}
                       />
                       )}
                     {page === 2
