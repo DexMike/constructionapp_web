@@ -10,6 +10,37 @@ class TDateTimePickerField extends PureComponent {
     };
     this.handleChange = this.handleChange.bind(this);
   }
+  // ComponentWillReceiveProps was added in order to change the
+  // datePicker date from a given props value.
+
+  componentDidMount() {
+    const { input } = this.props;
+    let dueDate = 0;
+    if (input.value.startDate) {
+      dueDate = input.value.startDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+    if (input.value.endDate) {
+      dueDate = input.value.endDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+  }
+
+  componentWillReceiveProps(props) {
+    let dueDate = 0;
+    if (props.input.value.startDate) {
+      dueDate = props.input.value.startDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+    if (props.input.value.endDate) {
+      dueDate = props.input.value.endDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+  }
 
   handleChange(date) {
     this.setState({
@@ -21,7 +52,7 @@ class TDateTimePickerField extends PureComponent {
 
   render() {
     const { startDate } = this.state;
-    const { dateFormat, meta: { touched, error } } = this.props;
+    const { dateFormat, meta: { touched, error }, disabled } = this.props;
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
@@ -32,6 +63,7 @@ class TDateTimePickerField extends PureComponent {
             // showTimeSelect //shows Time picker as well
             onChange={this.handleChange}
             dateFormat={dateFormat}
+            disabled={disabled}
           />
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>
@@ -44,14 +76,16 @@ TDateTimePickerField.propTypes = {
   onChange: PropTypes.func.isRequired,
   input: PropTypes.shape({
     onChange: PropTypes.func,
-    name: PropTypes.string
+    name: PropTypes.string,
+    value: PropTypes.object
   }).isRequired,
   // givenDate: PropTypes.number,
   dateFormat: PropTypes.string,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
-  })
+  }),
+  disabled: PropTypes.bool
 };
 
 TDateTimePickerField.defaultProps = {
@@ -60,7 +94,8 @@ TDateTimePickerField.defaultProps = {
   meta: {
     touched: null,
     error: null
-  }
+  },
+  disabled: false
 };
 
 export default TDateTimePickerField;
