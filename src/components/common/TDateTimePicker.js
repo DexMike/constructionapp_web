@@ -13,6 +13,21 @@ class TDateTimePickerField extends PureComponent {
   // ComponentWillReceiveProps was added in order to change the
   // datePicker date from a given props value.
 
+  componentDidMount() {
+    const { input } = this.props;
+    let dueDate = 0;
+    if (input.value.startDate) {
+      dueDate = input.value.startDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+    if (input.value.endDate) {
+      dueDate = input.value.endDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+  }
+
   componentWillReceiveProps(props) {
     let dueDate = 0;
     if (props.input.value.startDate) {
