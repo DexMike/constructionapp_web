@@ -39,7 +39,6 @@ class ReportsCustomerPage extends Component {
       endDate: null,
       selectIndex: 2,
       selectedRange: 0,
-      isCustomRange: null,
       filters: {
         companiesId: 0,
         rateType: '',
@@ -77,7 +76,6 @@ class ReportsCustomerPage extends Component {
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
     }
-    console.log(80, filters.companiesId);
     isCustomRange = false;
     selectedRange = 30;
     const currentDate = new Date();
@@ -212,11 +210,13 @@ class ReportsCustomerPage extends Component {
   }
 
   async startDateChange(data) {
-    const { filters } = this.state;
+    const { filters, endDate } = this.state;
     let { startDate } = this.state;
     startDate = data;
     filters.startAvailability = startDate;
     const jobs = await this.fetchJobs(filters);
+
+    this.isCustomRange(startDate, endDate);
     this.setState({
       jobs,
       startDate,
@@ -225,11 +225,13 @@ class ReportsCustomerPage extends Component {
   }
 
   async endDateChange(data) {
-    const { filters } = this.state;
+    const { filters, startDate } = this.state;
     let { endDate } = this.state;
     endDate = data;
     filters.endAvailability = endDate;
     const jobs = await this.fetchJobs(filters);
+
+    this.isCustomRange(startDate, endDate);
     this.setState({
       jobs,
       endDate,
@@ -247,6 +249,35 @@ class ReportsCustomerPage extends Component {
   }
   */
 
+  async isCustomRange(startDate, endDate) {
+    let { selectIndex } = this.state;
+    const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
+    const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
+
+    const currentDate = new Date();
+    const currentDateId = `${currentDate.getDate()}${currentDate.getMonth()}${currentDate.getFullYear()}`;
+
+    if (endDateId === currentDateId) {
+      for (let i = 1; i < this.timeRanges.length; i += 1) {
+        currentDate.setDate(currentDate.getDate() - this.timeRanges[i].value);
+        const lastDateId = `${currentDate.getDate()}${currentDate.getMonth()}${currentDate.getFullYear()}`;
+        currentDate.setDate(currentDate.getDate() + this.timeRanges[i].value);
+        if (startDateId === lastDateId) {
+          selectIndex = i;
+          i = this.timeRanges.length;
+        } else {
+          selectIndex = 0;
+        }
+      }
+    } else {
+      selectIndex = 0;
+    }
+
+    this.setState({
+      selectIndex
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -262,7 +293,7 @@ class ReportsCustomerPage extends Component {
   }
 
   render() {
-    const { loaded, startDate, endDate, isCustomRange, selectIndex } = this.state;
+    const { loaded, startDate, endDate, selectIndex } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
