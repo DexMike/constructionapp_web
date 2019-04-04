@@ -441,7 +441,28 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
-
+              {
+              /*
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Pending Jobs</center></h5>
+                    <span><center><h3>{completedJobCount}</h3></center></span>
+                  </div>
+                </div>
+              </div>
+              */
+              }
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
+                    <span><center><h3>{completedJobCount}</h3></center></span>
+                  </div>
+                </div>
+              </div>
+              {
+              /*
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
@@ -461,7 +482,8 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
-
+              */
+            }
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
@@ -474,15 +496,6 @@ class ReportsCustomerPage extends Component {
                         <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                    <span><center><h3>{completedJobCount}</h3></center></span>
                   </div>
                 </div>
               </div>
