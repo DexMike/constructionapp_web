@@ -13,6 +13,7 @@ import TFormat from '../common/TFormat';
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
 import NumberFormat from 'react-number-format';
+import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
@@ -28,7 +29,6 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
-
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -101,6 +101,8 @@ class DashboardCarrierPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
+
   }
 
   async componentDidMount() {
@@ -111,16 +113,18 @@ class DashboardCarrierPage extends Component {
     } = this.state;
 
     startDate = new Date();
+    startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();
     endDate.setDate(startDate.getDate() + 7);
+    endDate.setHours(23, 59, 59); // 23:59:59
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
-    await this.fetchFilterLists();
 
-    // Promise.all(
     if (jobs) {
+      await this.fetchFilterLists();
+
       jobs.map(async (job) => {
         const newJob = job;
 
@@ -134,12 +138,10 @@ class DashboardCarrierPage extends Component {
         const address = await AddressService.getAddressById(newJob.startAddress);
         newJob.zip = address.zipCode;
 
-        this.setState({ loaded: true });
+        // this.setState({ loaded: true });
 
         return newJob;
       });
-      // );
-      this.setState({ jobs });
     }
 
     this.setState(
@@ -263,6 +265,27 @@ class DashboardCarrierPage extends Component {
     // }
     this.setState({ jobs });
     return jobs;
+  }
+
+
+  handleFilterChangeDelayed(e) {
+    const self = this;
+    const { value } = e.target;
+    const { filters } = this.state;
+
+    if (self.state.typingTimeout) {
+      clearTimeout(self.state.typingTimeout);
+    }
+
+    filters[e.target.name] = value;
+
+    self.setState({
+      typing: false,
+      typingTimeout: setTimeout(async () => {
+        await this.fetchJobs();
+      }, 1000),
+      filters
+    });
   }
 
   async handleFilterChange(e) {
@@ -411,10 +434,10 @@ class DashboardCarrierPage extends Component {
     );
   }
 
-
   renderCards() {
     const { loaded } = this.state;
     let { jobs } = this.state;
+
     let newJobCount = 0;
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
@@ -429,38 +452,40 @@ class DashboardCarrierPage extends Component {
     let idleTrucks = 0;
     let completedOffersPercent = 0;
 
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      const tempRate = newJob.rate;
-      if (newJob.status === 'New') {
-        newJobCount += 1;
-      }
-      if (newJob.status === 'Accepted') {
-        acceptedJobCount += 1;
-      }
-      if (newJob.status === 'In Progress') {
-        inProgressJobCount += 1;
-      }
-      if (newJob.status === 'Job Completed') {
-        completedJobCount += 1;
-      }
-      if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-      }
-      if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-      }
+    if (jobs) {
+      jobs = jobs.map((job) => {
+        const newJob = job;
+        const tempRate = newJob.rate;
+        if (newJob.status === 'New') {
+          newJobCount += 1;
+        }
+        if (newJob.status === 'Accepted') {
+          acceptedJobCount += 1;
+        }
+        if (newJob.status === 'In Progress') {
+          inProgressJobCount += 1;
+        }
+        if (newJob.status === 'Job Completed') {
+          completedJobCount += 1;
+        }
+        if (newJob.rateType === 'Hour') {
+          newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+          newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        }
+        if (newJob.rateType === 'Ton') {
+          newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+          newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        }
 
-      newJob.newStartDate = TFormat.asDate(job.startTime);
+        newJob.newStartDate = TFormat.asDate(job.startTime);
 
-      potentialIncome += tempRate * newJob.rateEstimate;
+        potentialIncome += tempRate * newJob.rateEstimate;
 
-      return newJob;
-    });
+        return newJob;
+      });
+    }
 
     jobsCompleted = newJobCount * 20;
     // totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
@@ -519,37 +544,6 @@ class DashboardCarrierPage extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-                <Col lg={12}>
-
-                  {/*<Col>*/}
-                  {/*Select by:*/}
-                  {/*<TSelect*/}
-                  {/*input={*/}
-                  {/*{*/}
-                  {/*onChange: this.handleSelectFilterChange,*/}
-                  {/*name: 'rateType',*/}
-                  {/*value: filters.rateType*/}
-                  {/*}*/}
-                  {/*}*/}
-                  {/*meta={*/}
-                  {/*{*/}
-                  {/*touched: false,*/}
-                  {/*error: 'Unable to select'*/}
-                  {/*}*/}
-                  {/*}*/}
-                  {/*value={filters.rateType}*/}
-                  {/*options={*/}
-                  {/*rateTypeList.map(rateType => ({*/}
-                  {/*name: 'rateType',*/}
-                  {/*value: rateType,*/}
-                  {/*label: rateType*/}
-                  {/*}))*/}
-                  {/*}*/}
-                  {/*placeholder={rateTypeList[0]}*/}
-                  {/*/>*/}
-                  {/*</Col>*/}
-
-                </Col>
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
@@ -645,21 +639,31 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="rate"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Any"
-                             value={filters.rate}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'rate',
+                            value: filters.rate
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
-                      <input name="minTons"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Any"
-                             value={filters.minTons}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'minTons',
+                            value: filters.minTons
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
@@ -689,12 +693,17 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="numEquipments"
-                             className="filter-text"
-                             type="text"
-                             placeholder="1"
-                             value={filters.numEquipments}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'numEquipments',
+                            value: filters.numEquipments
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
