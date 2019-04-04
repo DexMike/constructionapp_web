@@ -270,41 +270,17 @@ class MarketplaceCarrierPage extends Component {
       jobs.map(async (job) => {
         const newJob = job;
 
-        // console.log(newJob);
-
-        /* const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        // console.log(materialsList);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        // console.log(materials);
-        newJob.material = this.equipmentMaterialsAsString(materials); */
-        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-        //     newEquipment.companyName = company.legalName;
-        // console.log(companyName);
-        // console.log(job.companyName)
-        // const materialsList = await EquipmentMaterialsService
-        // .getEquipmentMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-
         const address = await AddressService.getAddressById(newJob.startAddress);
         newJob.zip = address.zipCode;
-        // console.log(companyName);
-        // console.log(job.material);
         newJob.modifiedOn = moment(job.modifiedOn)
           .format();
         newJob.createdOn = moment(job.createdOn)
           .format();
 
-        // this.setState({ loaded: true });
-
         return newJob;
       });
       this.setState({ jobs });
-
-      // console.log(jobs);
     }
-    /* console.log(jobs); */
-    // return jobs;
   }
 
   handleFilterChangeDelayed(e) {
@@ -346,26 +322,11 @@ class MarketplaceCarrierPage extends Component {
   handleMultiChange(data) {
     const { filters } = this.state;
     filters.materialType = data;
-    /* this.setState({
-      // selectedMaterials: data
-      filters
-    }, async function changed() {
-      await this.fetchJobs();
-      // console.log(this.state);
-    }); */
-    /* this.setState({
-      filters
-    }, async function changed() {
-      await this.fetchJobs();
-    }); */
     this.setState({
       filters
     }, async function changed() {
       await this.fetchJobs();
     });
-    /* await this.fetchJobs();
-    this.setState({ filters }); */
-    /**/
   }
 
   handlePageClick(menuItem) {
