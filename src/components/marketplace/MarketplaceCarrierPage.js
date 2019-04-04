@@ -111,7 +111,8 @@ class MarketplaceCarrierPage extends Component {
     let {
       startDate,
       endDate,
-      filters
+      filters,
+      jobs
     } = this.state;
 
     startDate = new Date();
@@ -122,7 +123,7 @@ class MarketplaceCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    await this.fetchJobs();
+    jobs = await this.fetchJobs();
     await this.fetchFilterLists();
 
     if (jobs) {
@@ -290,6 +291,7 @@ class MarketplaceCarrierPage extends Component {
       });
       this.setState({ jobs });
     }
+    return jobs;
   }
 
   handleFilterChangeDelayed(e) {
@@ -491,6 +493,8 @@ class MarketplaceCarrierPage extends Component {
 
         return newJob;
       });
+    } else {
+      console.log("MarketPlaceCarrierPage: no Jobs");
     }
 
     return (
@@ -1107,13 +1111,13 @@ class MarketplaceCarrierPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {/*/!*{this.renderModal()}*!/*/}
-          {/*{this.renderGoTo()}*/}
-          {/*{this.renderTitle()}*/}
-          {/*{this.renderFilter()}*/}
-          {/* {this.renderTable()} */}
+          {this.renderModal()}
+          {this.renderGoTo()}
+          {this.renderTitle()}
+          {this.renderFilter()}
+           {/*{this.renderTable()} */}
           {/* {this.renderEquipmentTable()} */}
-          {/*{this.renderJobList()}*/}
+          {this.renderJobList()}
         </Container>
       );
     }
