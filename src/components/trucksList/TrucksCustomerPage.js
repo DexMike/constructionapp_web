@@ -461,24 +461,11 @@ class TrucksCustomerPage extends Component {
     );
   }
 
-  renderBreadcrumb() {
-    return (
-      <div>
-        <button type="button" className="app-link"
-                onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &#62;Find a Truck
-      </div>
-    );
-  }
-
   renderTitle() {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Find a Truck</h3>
+          <h3 className="page-title">Truck Search</h3>
         </Col>
       </Row>
     );
@@ -514,6 +501,9 @@ class TrucksCustomerPage extends Component {
                       Truck Type
                     </Col>
                     <Col className="filter-item-title">
+                      Rate Type
+                    </Col>
+                    <Col className="filter-item-title">
                       Min Capacity
                     </Col>
                     <Col className="filter-item-title">
@@ -521,9 +511,6 @@ class TrucksCustomerPage extends Component {
                     </Col>
                     <Col className="filter-item-title">
                       Zip Code
-                    </Col>
-                    <Col className="filter-item-title">
-                      Rate Type
                     </Col>
                   </Row>
                   <Row lg={12} id="filter-input-row">
@@ -560,6 +547,32 @@ class TrucksCustomerPage extends Component {
                           }))
                         }
                         placeholder={equipmentTypeList[0]}
+                      />
+                    </Col>
+                    <Col>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder="Select materials"
                       />
                     </Col>
                     <Col>
@@ -607,32 +620,6 @@ class TrucksCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'rateType',
-                            value: filters.rateType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.rateType}
-                        options={
-                          rateTypeList.map(rateType => ({
-                            name: 'rateType',
-                            value: rateType,
-                            label: rateType
-                          }))
-                        }
-                        placeholder="Select materials"
-                      />
-                    </Col>
                   </Row>
                 </Col>
 
@@ -660,7 +647,8 @@ class TrucksCustomerPage extends Component {
           </Col>
 
           <Col md={4}>
-            <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
+            {/* this was: c7dde8*/}
+            <Row lg={4} sm={8} style={{ background: '#ffffff' }}>
               <Col lg={4} className="customer-truck-results-title">
                 Type: {equipment.type}
               </Col>
@@ -751,7 +739,8 @@ class TrucksCustomerPage extends Component {
           </Col>
 
           <Col md={6}>
-            <Row style={{ background: '#c7dde8' }}>
+            {/* this was: c7dde8*/}
+            <Row style={{ background: '#ffffff' }}>
               <Col md={11} className="customer-truck-results-title">
                 Name: {equipment.name}
               </Col>
@@ -870,7 +859,6 @@ class TrucksCustomerPage extends Component {
         <Container className="dashboard">
           {this.renderModal()}
           {this.renderGoTo()}
-          {this.renderBreadcrumb()}
           {this.renderTitle()}
           {this.renderFilter()}
           {/* {this.renderTable()} */}

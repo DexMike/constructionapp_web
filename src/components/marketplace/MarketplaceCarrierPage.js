@@ -612,7 +612,7 @@ class MarketplaceCarrierPage extends Component {
       // Lists
       equipmentTypeList,
       materialTypeList,
-      // rateTypeList,
+      rateTypeList,
       // startDate,
       // endDate,
 
@@ -665,10 +665,13 @@ class MarketplaceCarrierPage extends Component {
                       Date Range
                     </Col>
                     <Col className="filter-item-title">
+                      Rate Type
+                    </Col>
+                    <Col className="filter-item-title">
                       Min Rate
                     </Col>
                     <Col className="filter-item-title">
-                      Min Tons/Hours
+                      Minimum
                     </Col>
                     <Col className="filter-item-title">
                       Truck Type
@@ -722,6 +725,32 @@ class MarketplaceCarrierPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
 
+                    </Col>
+                    <Col>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder={rateTypeList[0]}
+                      />
                     </Col>
                     <Col>
                       <TField
@@ -1069,7 +1098,6 @@ class MarketplaceCarrierPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          {this.renderToggle()}
           {this.renderFilter()}
           {/* {this.renderTable()} */}
           {/* {this.renderEquipmentTable()} */}
