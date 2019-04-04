@@ -34,6 +34,7 @@ class JobCreateFormTwo extends PureComponent {
   async componentDidMount() {
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
+    console.log(profile);
     const favorites = await GroupService.getGroupByFavoriteAndCompanyId(profile.companyId);
     if (Number(favorites[0]) > 0) {
       this.setState({
@@ -79,22 +80,20 @@ class JobCreateFormTwo extends PureComponent {
     const startAddress = await AddressService.createAddress(address1);
 
     // end location
-    let endAddressId = null;
-    console.log(d.endLocationAddress1);
-    // return false;
-    const address2 = {
-      type: 'Delivery',
-      name: 'Delivery End Location',
-      companyId: 19, // 'this should change',
-      address1: d.endLocationAddress1,
-      address2: d.endLocationAddress2,
-      city: d.endLocationCity,
-      state: d.endLocationState,
-      zipCode: d.endLocationZip
-    };
-
-    // save two addresses
-    const endAddress = await AddressService.createAddress(address2);
+    let endAddress = null;
+    if (d.rateTab === 2) {
+      const address2 = {
+        type: 'Delivery',
+        name: 'Delivery End Location',
+        companyId: 19, // 'this should change',
+        address1: d.endLocationAddress1,
+        address2: d.endLocationAddress2,
+        city: d.endLocationCity,
+        state: d.endLocationState,
+        zipCode: d.endLocationZip
+      };
+      endAddress = await AddressService.createAddress(address2);
+    }
 
     // job
     const profile = await ProfileService.getProfile();

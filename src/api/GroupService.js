@@ -1,6 +1,6 @@
 import AgentService from './AgentService';
 
-const PATH = '/groups';
+const PATH = '/grouplists';
 
 class GroupService extends AgentService {
   static async getGroups() {

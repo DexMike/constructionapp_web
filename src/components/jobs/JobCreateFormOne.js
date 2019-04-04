@@ -265,6 +265,7 @@ class CreateJobFormOne extends PureComponent {
 
   isFormValid() {
     const job = this.state;
+    const { rateTab } = this.state;
     const {
       reqHandlerTonnage,
       reqHandlerEndAddress,
@@ -282,6 +283,8 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerDate
     } = this.state;
     let isValid = true;
+
+    console.log(job);
 
     if (job.selectedMaterials.length === 0) {
       this.setState({
@@ -332,21 +335,22 @@ class CreateJobFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (job.startLocationState.length === 0) {
+    // only work if tab is 1
+    if (job.startLocationState.length === 0 && rateTab === 2) {
       this.setState({
         reqHandlerStartState: {...reqHandlerStartState, touched: true, error: 'Missing starting state field'}
       });
       isValid = false;
     }
+    // only work if tab is 1
+    if (job.tonnage <= 0 && rateTab === 2) {
+      this.setState({
+        reqHandlerTonnage: {...reqHandlerTonnage, touched: true, error: 'A value for number of tons must be set'}
+      });
+      isValid = false;
+    }
 
     if (job.rateTab === 2) {
-      if (job.tonnage <= 0) {
-        this.setState({
-          reqHandlerTonnage: {...reqHandlerTonnage, touched: true, error: 'A value for number of tons must be set'}
-        });
-        isValid = false;
-      }
-
       if (job.endLocationAddress1.length === 0) {
         this.setState({
           reqHandlerEndAddress: {...reqHandlerEndAddress, touched: true, error: 'Missing ending address field'}
@@ -377,13 +381,15 @@ class CreateJobFormOne extends PureComponent {
     }
 
     if (job.rateTab === 1) {
-      if (job.hourEstimatedHours <= 0) {
+      // work if rateTab is 1
+      if (job.hourEstimatedHours <= 0 && rateTab === 1) {
         this.setState({
           reqHandlerHoursEstimate: {...reqHandlerHoursEstimate, touched: true, error: 'Required input'}
         });
         isValid = false;
       }
-      if (job.hourTrucksNumber <= 0) {
+      // work if rateTab is 1
+      if (job.hourTrucksNumber <= 0 && rateTab === 1) {
         this.setState({
           reqHandlerTrucksEstimate: {...reqHandlerTrucksEstimate, touched: true, error: 'Required input'}
         });
@@ -438,17 +444,28 @@ class CreateJobFormOne extends PureComponent {
   }
 
   tabFirstPage() {
+    // clear all data from tab 2
+    this.setState({
+      endLocationAddress1: '',
+      endLocationAddress2: '',
+      endLocationCity: '',
+      endLocationState: '',
+      endLocationZip: ''
+    });
     this.setState({rateTab: 1});
   }
 
   tabSecondPage() {
+    // clear all from tab 1
+    this.setState({
+      hourEstimatedHours: 0,
+      hourTrucksNumber: 0
+    });
     this.setState({rateTab: 2});
   }
 
   goToSecondFromFirst() {
     if (!this.isFormValid()) {
-      // TODO display error message
-      // console.error('didnt put all the required fields.');
       return;
     }
     const {gotoSecond} = this.props;
@@ -666,7 +683,7 @@ class CreateJobFormOne extends PureComponent {
                             autoComplete="new-password"
                           />
                         </div>
-                        <div className="col-md-7 form__form-group">
+                        <div className="col-md-5 form__form-group">
                           <TField
                             input={
                               {
@@ -680,7 +697,7 @@ class CreateJobFormOne extends PureComponent {
                             meta={reqHandlerEndCity}
                           />
                         </div>
-                        <div className="col-md-3 form__form-group">
+                        <div className="col-md-5 form__form-group">
                           <SelectField
                             input={
                               {
@@ -821,7 +838,7 @@ class CreateJobFormOne extends PureComponent {
                     placeholder="Address 2"
                   />
                 </div>
-                <div className="col-md-7 form__form-group">
+                <div className="col-md-5 form__form-group">
                   <TField
                     input={
                       {
@@ -835,7 +852,7 @@ class CreateJobFormOne extends PureComponent {
                     meta={reqHandlerStartCity}
                   />
                 </div>
-                <div className="col-md-3 form__form-group">
+                <div className="col-md-5 form__form-group">
                   <SelectField
                     input={
                       {

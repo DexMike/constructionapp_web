@@ -92,6 +92,7 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobs() {
     const profile = await ProfileService.getProfile();
+    console.log(profile);
     const companyId = profile.companyId;
 
     let jobs = await JobService.getJobsByCompanyId(companyId);
