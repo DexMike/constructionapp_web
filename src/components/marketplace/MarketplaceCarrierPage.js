@@ -163,16 +163,16 @@ class MarketplaceCarrierPage extends Component {
   async toggleViewJobModal() {
     const { modal } = this.state;
     this.setState({ modal: !modal });
-    await this.fetchDrivers();
+    await this.fetchJobs();
   }
 
   async toggleViewJobModalClear(id) {
     const { modal } = this.state;
     this.setState({
-      equipmentId: 0, // reset equipmentID, not companyID
-      selectedItemData: {},
+      // equipmentId: 0, // reset equipmentID, not companyID
+      // selectedItemData: {},
       modal: !modal,
-      driverId: id
+      jobId: id
     });
   }
 
@@ -386,20 +386,19 @@ class MarketplaceCarrierPage extends Component {
         toggle={this.toggleViewJobModal}
         className="modal-dialog--primary modal-dialog--header"
       >
-        <div className="modal__header">
-          <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleViewJobModal}
-          />
+        {/*<div className="modal__header">*/}
+          {/*<button type="button" className="lnr lnr-cross modal__close-btn"*/}
+                  {/*onClick={this.toggleViewJobModal}*/}
+          {/*/>*/}
           {/*    const company = await CompanyService.getCompanyById(selectedJob.companiesId); */}
           {/* /!*selectedJob.companyName = company.legalName;*!/ */}
-          <h4 className="bold-text modal__title"> Hi </h4>
-        </div>
+          {/*<h4 className="bold-text modal__title"> Hi </h4>*/}
+        {/*</div>*/}
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
 
           <JobViewForm
             jobId={job.id}
-            closeModal={this.toggleAddJobModal}
-
+            toggle={this.toggleAddJobModal}
           />
         </div>
       </Modal>
