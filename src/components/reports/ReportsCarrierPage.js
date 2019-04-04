@@ -509,7 +509,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
@@ -518,7 +518,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
@@ -527,7 +527,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
@@ -536,7 +536,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
@@ -545,7 +545,7 @@ class ReportsCarrierPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
@@ -553,7 +553,6 @@ class ReportsCarrierPage extends Component {
                   </div>
                 </div>
               </div>
-
             </div>
 
             <Row>
