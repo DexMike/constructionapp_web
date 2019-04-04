@@ -4,7 +4,6 @@ import {
   Card,
   CardBody,
   Col,
-  Button,
   Container,
   Modal,
   Row
@@ -17,20 +16,16 @@ import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
-import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
-import JobViewForm from '../marketplace/JobViewForm';
+import JobViewForm from './JobViewForm';
 
 import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
-import JobsService from '../../api/JobService';
-import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 
 class MarketplaceCarrierPage extends Component {
@@ -46,7 +41,6 @@ class MarketplaceCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
-      selectedJob: {},
 
       // Look up lists
       equipmentTypeList: [],
@@ -56,12 +50,11 @@ class MarketplaceCarrierPage extends Component {
       // sortBy: 1,
 
       equipments: [],
-      selectedEquipment: {},
 
       modal: false,
       goToDashboard: false,
-      startDate: null,          // values for date control
-      endDate: null,            // values for date control
+      startDate: null, // values for date control
+      endDate: null, // values for date control
 
       // Rate Type Button toggle
       isAvailable: true,
@@ -105,6 +98,9 @@ class MarketplaceCarrierPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.toggleViewJobModal = this.toggleViewJobModal.bind(this);
+    this.toggle = this.toggle.bind(this);
+    this.toggleViewJobModalClear = this.toggleViewJobModalClear.bind(this);
   }
 
   async componentDidMount() {
@@ -141,7 +137,6 @@ class MarketplaceCarrierPage extends Component {
         return newJob;
       });
       // );
-
     }
 
     this.setState(
@@ -154,6 +149,31 @@ class MarketplaceCarrierPage extends Component {
         isAvailable: true
       }
     );
+  }
+
+  toggle(tab) {
+    const { activeTab } = this.state;
+    if (activeTab !== tab) {
+      this.setState({
+        activeTab: tab
+      });
+    }
+  }
+
+  async toggleViewJobModal() {
+    const { modal } = this.state;
+    this.setState({ modal: !modal });
+    await this.fetchDrivers();
+  }
+
+  async toggleViewJobModalClear(id) {
+    const { modal } = this.state;
+    this.setState({
+      equipmentId: 0, // reset equipmentID, not companyID
+      selectedItemData: {},
+      modal: !modal,
+      driverId: id
+    });
   }
 
   retrieveAllMaterials() {
@@ -233,9 +253,9 @@ class MarketplaceCarrierPage extends Component {
     const {
       isAvailable
     } = this.state;
-    console.log('Before swap: ' + isAvailable);
+    console.log(`Before swap: ${isAvailable}`);
     const newValue = !isAvailable;
-    console.log('switching makeAvailable to ' + newValue);
+    console.log(`switching makeAvailable to ${newValue}`);
     this.setState({ isAvailable: newValue });
   }
 
@@ -248,16 +268,7 @@ class MarketplaceCarrierPage extends Component {
       if (jobs != null) {
         jobs.map((job) => {
           const newJob = job;
-          //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-          //     newEquipment.companyName = company.legalName;
-          // console.log(companyName);
-          // console.log(job.companyName)
-          // const materialsList = await EquipmentMaterialsService
-          // .getEquipmentMaterialsByJobId(job.id);
-          // const materials = materialsList.map(materialItem => materialItem.value);
-          // newJob.material = this.equipmentMaterialsAsString(materials);
-          // console.log(companyName);
-          // console.log(job.material);
+          console.log('newJob ', newJob);
           newJob.modifiedOn = moment(job.modifiedOn)
             .format();
           newJob.createdOn = moment(job.createdOn)
@@ -310,11 +321,12 @@ class MarketplaceCarrierPage extends Component {
     const { jobs } = this.state;
     const [selectedJob] = jobs.filter((job) => {
       if (id === job.id) {
+        console.log('job  ', job);
         return job;
       }
       return false;
     }, id);
-    selectedJob.materials = ['Any'];
+    // selectedJob.materials = ['Any'];
     this.setState({
       selectedJob,
       modal: true
@@ -363,41 +375,31 @@ class MarketplaceCarrierPage extends Component {
     return false;
   }
 
-  renderModal() {
+  renderModal(job) {
+    console.log('In renderModal', job);
     const {
-      // equipments,
-      // startAvailability,
-      // endAvailability,
-      // equipmentType,
-      // minCapacity,
-      // materials,
-      // zipCode,
-      // rateType,
-      company,
-      modal,
-      selectedEquipment
+      modal
     } = this.state;
     return (
       <Modal
         isOpen={modal}
-        toggle={this.toggleAddJobModal}
+        toggle={this.toggleViewJobModal}
         className="modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleAddJobModal}
+                  onClick={this.toggleViewJobModal}
           />
-      {/*    const company = await CompanyService.getCompanyById(selectedJob.companiesId);*/}
-      {/*/!*selectedJob.companyName = company.legalName;*!/*/}
-      {/*    <h4 className="bold-text modal__title">{company.legalName}</h4>*/}
+          {/*    const company = await CompanyService.getCompanyById(selectedJob.companiesId); */}
+          {/* /!*selectedJob.companyName = company.legalName;*!/ */}
+          <h4 className="bold-text modal__title"> Hi </h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
 
           <JobViewForm
-            selectedEquipment={selectedEquipment}
+            jobId={job.id}
             closeModal={this.toggleAddJobModal}
-            selectedMaterials={this.returnSelectedMaterials}
-            getAllMaterials={this.retrieveAllMaterials}
+
           />
         </div>
       </Modal>
@@ -454,7 +456,7 @@ class MarketplaceCarrierPage extends Component {
         newJob.newStartDate = TFormat.asDate(job.startTime);
 
         return newJob;
-      })
+      });
       // );
     }
 
@@ -464,14 +466,14 @@ class MarketplaceCarrierPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                Carrier
+                Carrier Market Place
                 <TTable
                   columns={
                     [
-                      // {
-                      //   name: 'id',
-                      //   displayName: 'Job Id'
-                      // },
+                      {
+                        name: 'id',
+                        displayName: 'Job Id'
+                      },
                       {
                         name: 'newStartDate',
                         displayName: 'Start Date'
@@ -533,25 +535,25 @@ class MarketplaceCarrierPage extends Component {
           <Card>
             <CardBody>
 
-            <Col lg={12}>
+              <Col lg={12}>
 
-              <Col>
+                <Col>
                 Select by:
 
-                {/*<Button color={this.availableButtonColor(isAvailable)}*/}
-                        {/*type="button"*/}
-                        {/*onClick={this.makeAvailable}*/}
-                        {/*className="previous">*/}
-                  {/*Hour*/}
-                {/*</Button>*/}
-                {/*<Button color={this.unavailableButtonColor(!isAvailable)}*/}
-                        {/*type="button"*/}
-                        {/*onClick={this.makeAvailable}*/}
-                        {/*className="previous">*/}
-                  {/*Ton*/}
-                {/*</Button>*/}
+                  {/* <Button color={this.availableButtonColor(isAvailable)} */}
+                  {/* type="button" */}
+                  {/* onClick={this.makeAvailable} */}
+                  {/* className="previous"> */}
+                  {/* Hour */}
+                  {/* </Button> */}
+                  {/* <Button color={this.unavailableButtonColor(!isAvailable)} */}
+                  {/* type="button" */}
+                  {/* onClick={this.makeAvailable} */}
+                  {/* className="previous"> */}
+                  {/* Ton */}
+                  {/* </Button> */}
 
-                <TSelect
+                  <TSelect
                   input={
                     {
                       onChange: this.handleSelectFilterChange,
@@ -574,14 +576,14 @@ class MarketplaceCarrierPage extends Component {
                     }))
                   }
                   placeholder={rateTypeList[0]}
-                />
+                  />
+                </Col>
               </Col>
-            </Col>
             </CardBody>
           </Card>
         </Col>
       </Row>
-    )
+    );
   }
 
   renderFilter() {
@@ -606,33 +608,33 @@ class MarketplaceCarrierPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
 
-                  {/*<Col>*/}
-                    {/*Select by:*/}
-                    {/*<TSelect*/}
-                      {/*input={*/}
-                        {/*{*/}
-                          {/*onChange: this.handleSelectFilterChange,*/}
-                          {/*name: 'rateType',*/}
-                          {/*value: filters.rateType*/}
-                        {/*}*/}
-                      {/*}*/}
-                      {/*meta={*/}
-                        {/*{*/}
-                          {/*touched: false,*/}
-                          {/*error: 'Unable to select'*/}
-                        {/*}*/}
-                      {/*}*/}
-                      {/*value={filters.rateType}*/}
-                      {/*options={*/}
-                        {/*rateTypeList.map(rateType => ({*/}
-                          {/*name: 'rateType',*/}
-                          {/*value: rateType,*/}
-                          {/*label: rateType*/}
-                        {/*}))*/}
-                      {/*}*/}
-                      {/*placeholder={rateTypeList[0]}*/}
-                    {/*/>*/}
-                  {/*</Col>*/}
+                  {/* <Col> */}
+                  {/* Select by: */}
+                  {/* <TSelect */}
+                  {/* input={ */}
+                  {/* { */}
+                  {/* onChange: this.handleSelectFilterChange, */}
+                  {/* name: 'rateType', */}
+                  {/* value: filters.rateType */}
+                  {/* } */}
+                  {/* } */}
+                  {/* meta={ */}
+                  {/* { */}
+                  {/* touched: false, */}
+                  {/* error: 'Unable to select' */}
+                  {/* } */}
+                  {/* } */}
+                  {/* value={filters.rateType} */}
+                  {/* options={ */}
+                  {/* rateTypeList.map(rateType => ({ */}
+                  {/* name: 'rateType', */}
+                  {/* value: rateType, */}
+                  {/* label: rateType */}
+                  {/* })) */}
+                  {/* } */}
+                  {/* placeholder={rateTypeList[0]} */}
+                  {/* /> */}
+                  {/* </Col> */}
 
                 </Col>
 
@@ -805,9 +807,12 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
-  renderEquipmentRow(equipment) {
+  renderEquipmentRow(newJob) {
+    console.log(newJob);
     return (
       <React.Fragment>
+        {this.renderModal(newJob)}
+
         <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
           <Col md={2}>
@@ -940,7 +945,7 @@ class MarketplaceCarrierPage extends Component {
               <Col>
                 <button type="button"
                         className="btn btn-primary"
-                        onClick={() => this.handleJobEdit(job.id)}
+                        onClick={() => this.handleJobEdit(newJob)}
                         style={{ marginTop: '10px' }}
                 >
                   Request
@@ -1011,7 +1016,7 @@ class MarketplaceCarrierPage extends Component {
                 {
                   equipments.map(equipment => (
                     <React.Fragment key={equipment.id}>
-                      {this.renderEquipmentRow(equipment)}
+                      {this.renderEquipmentRow(selectedJob)}
                     </React.Fragment>
                   ))
                 }
