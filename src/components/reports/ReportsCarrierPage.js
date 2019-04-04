@@ -82,9 +82,6 @@ class ReportsCarrierPage extends Component {
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
-      // delete filters.companiesId;
-    } else {
-      delete filters.companiesId;
     }
 
     isCustomRange = false;
@@ -95,7 +92,6 @@ class ReportsCarrierPage extends Component {
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-    console.log(filters);
     const jobs = await this.fetchJobs(filters);
     if (jobs) {
       jobs.map(async (job) => {
