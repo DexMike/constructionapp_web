@@ -80,8 +80,7 @@ class ReportsCarrierPage extends Component {
 
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
-      // filters.companiesId = profile.companyId;
-      filters.companiesId = 51;
+      filters.companiesId = profile.companyId;
     }
 
     isCustomRange = false;
