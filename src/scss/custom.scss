@@ -99,22 +99,24 @@
   margin-bottom: 20px;
 }
 
-#filter-form {
-  border-top: 3px solid $grey-top-border;
-}
+//#filter-form {
+//  border-top: 3px solid $grey-top-border;
+//}
 
 .filter-item-title {
-  color: $color-dark-turquoise;
+  background-color:#efefef;
   //font-weight: bold;
-  padding: 5px;
-  text-align: center;
-  border-right: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  font-size: 16px;
+  padding-left: 15px;
+  padding-top: 10px;
+  color: #006f53;
+  text-align: left;
+  font-size: 12px;
 }
 
+
+
 #filter-input-row {
-  background: #c8dde7;
+  background: #efefef;
   input {
     background-color: white;
   }
@@ -122,16 +124,28 @@
     padding: 5px;
     margin: 10px 0 10px 0;
   }
-  .Select-control, .date-picker {
+  .Select-control, .date-picker, .form__form-group-input-wrap {
     margin-top: 10px;
     background-color: white;
   }
 
-  .col {
-    padding: 15px;
-    border-right: 1px solid #ccc;
-    border-left: 1px solid #ccc;
+  .Select-input input {
+   border:none !important;
   }
+
+  .col {
+    padding-left: 15px;
+  }
+}
+
+.truck-container {
+  background-color: #FFFFFF;
+  padding: 10px;
+}
+
+.truck-image {
+  padding-left: 4px;
+  padding-right: 24px;
 }
 
 #equipment-display-count {

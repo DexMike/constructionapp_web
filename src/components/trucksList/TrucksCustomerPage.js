@@ -461,24 +461,11 @@ class TrucksCustomerPage extends Component {
     );
   }
 
-  renderBreadcrumb() {
-    return (
-      <div>
-        <button type="button" className="app-link"
-                onClick={() => this.handlePageClick('Dashboard')}
-        >
-          Dashboard
-        </button>
-        &#62;Find a Truck
-      </div>
-    );
-  }
-
   renderTitle() {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Find a Truck</h3>
+          <h3 className="page-title">Truck Search</h3>
         </Col>
       </Row>
     );
@@ -499,19 +486,22 @@ class TrucksCustomerPage extends Component {
     } = this.state;
 
     return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
+
+        <div>
+
+
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col sm="3" className="filter-item-title">
+                    <Col className="filter-item-title">
                       Availability
                     </Col>
                     <Col className="filter-item-title">
                       Truck Type
+                    </Col>
+                    <Col className="filter-item-title">
+                      Rate Type
                     </Col>
                     <Col className="filter-item-title">
                       Min Capacity
@@ -522,12 +512,9 @@ class TrucksCustomerPage extends Component {
                     <Col className="filter-item-title">
                       Zip Code
                     </Col>
-                    <Col className="filter-item-title">
-                      Rate Type
-                    </Col>
                   </Row>
                   <Row lg={12} id="filter-input-row">
-                    <Col sm="3">
+                    <Col>
                       <TIntervalDatePicker
                         startDate={startDate}
                         endDate={endDate}
@@ -560,6 +547,32 @@ class TrucksCustomerPage extends Component {
                           }))
                         }
                         placeholder={equipmentTypeList[0]}
+                      />
+                    </Col>
+                    <Col>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder="Select materials"
                       />
                     </Col>
                     <Col>
@@ -607,32 +620,6 @@ class TrucksCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'rateType',
-                            value: filters.rateType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.rateType}
-                        options={
-                          rateTypeList.map(rateType => ({
-                            name: 'rateType',
-                            value: rateType,
-                            label: rateType
-                          }))
-                        }
-                        placeholder="Select materials"
-                      />
-                    </Col>
                   </Row>
                 </Col>
 
@@ -640,11 +627,9 @@ class TrucksCustomerPage extends Component {
 
               </form>
 
-            </CardBody>
-          </Card>
-        </Col>
 
-      </Row>
+        </div>
+
     );
   }
 
@@ -653,13 +638,14 @@ class TrucksCustomerPage extends Component {
       <React.Fragment>
         <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
-          <Col md={2}>
+          <div className="truck-image">
             <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
                  style={{ width: '118px' }}
             />
-          </Col>
-
-          <Col md={4}>
+          </div>
+          
+          <Col md={5}>
+            {/* this was: c7dde8*/}
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
               <Col lg={4} className="customer-truck-results-title">
                 Type: {equipment.type}
@@ -750,7 +736,8 @@ class TrucksCustomerPage extends Component {
             )}
           </Col>
 
-          <Col md={6}>
+          <Col md={5}>
+            {/* this was: c7dde8*/}
             <Row style={{ background: '#c7dde8' }}>
               <Col md={11} className="customer-truck-results-title">
                 Name: {equipment.name}
@@ -846,7 +833,7 @@ class TrucksCustomerPage extends Component {
                 </Col>
               </Row>
 
-              <Row style={{ marginTop: '10px' }}>
+              <div style={{ marginTop: '30px' }}>
                 {
                   equipments.map(equipment => (
                     <React.Fragment key={equipment.id}>
@@ -854,7 +841,7 @@ class TrucksCustomerPage extends Component {
                     </React.Fragment>
                   ))
                 }
-              </Row>
+              </div>
 
             </CardBody>
           </Card>
@@ -870,11 +857,12 @@ class TrucksCustomerPage extends Component {
         <Container className="dashboard">
           {this.renderModal()}
           {this.renderGoTo()}
-          {this.renderBreadcrumb()}
           {this.renderTitle()}
-          {this.renderFilter()}
-          {/* {this.renderTable()} */}
-          {this.renderEquipmentTable()}
+          <div className="truck-container">
+            {this.renderFilter()}
+            {/* {this.renderTable()} */}
+            {this.renderEquipmentTable()}
+          </div>
         </Container>
       );
     }
