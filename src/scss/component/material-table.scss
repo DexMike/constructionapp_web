@@ -63,11 +63,17 @@
   }
 }
 
-.material-table__cell, .material-table__sort-label, .material-table__toolbar-button {
+.material-table__sort-label {
+  color: #999999;
+}
+
+.material-table__cell, .material-table__toolbar-button {
 
   @include themify($themes) {
-    color: themed('colorText');
+    color: #333333;
+
   }
+  border-bottom: 1px solid #f9f9f9 !important;
 }
 
 .material-table__checkbox {

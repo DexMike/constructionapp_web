@@ -15,9 +15,9 @@ function SideElement ({title, icon, route, custom, handle}) {
   return (
     <ul className="sidebar__block">
       <SidebarLink
-        title={t(title)}
         icon={icon}
-        customIcon={custom}
+        title={t(title)}
+        // customIcon={custom}
         route={route}
         onClick={handle}
       />
@@ -41,10 +41,10 @@ class SidebarCustomerContent extends Component {
   render() {
     return (
       <div className="sidebar__content">
-        <SideElement title = "Jobs" icon="home" route="/" handle={this.hideSidebar}/>
-        <SideElement title = "Search for Trucks" custom="dump_truck" route="/TrucksList" handle={this.hideSidebar}/>
-        <SideElement title = "Reports" icon="settings" route="/Reports" handle={this.hideSidebar}/>
-        <SideElement title = "Settings" icon="assignment" route="/Settings" handle={this.hideSidebar}/>
+        <SideElement title="Job Dashboard" icon="ic_assignment" route="/" handle={this.hideSidebar}/>
+        <SideElement title="Truck Search" icon="ic_local_shipping" route="/TrucksList" handle={this.hideSidebar}/>
+        <SideElement title="Reporting" icon="ic_timeline" route="/Reports" handle={this.hideSidebar}/>
+        <SideElement title="Settings" icon="ic_settings" route="/Settings" handle={this.hideSidebar}/>
       </div>
     );
   }
