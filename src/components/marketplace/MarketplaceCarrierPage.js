@@ -41,6 +41,7 @@ class MarketplaceCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
+      jobId: 0,
 
       // Look up lists
       equipmentTypeList: [],
@@ -99,7 +100,6 @@ class MarketplaceCarrierPage extends Component {
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.toggleViewJobModal = this.toggleViewJobModal.bind(this);
-    this.toggle = this.toggle.bind(this);
     this.toggleViewJobModalClear = this.toggleViewJobModalClear.bind(this);
   }
 
@@ -149,31 +149,6 @@ class MarketplaceCarrierPage extends Component {
         isAvailable: true
       }
     );
-  }
-
-  toggle(tab) {
-    const { activeTab } = this.state;
-    if (activeTab !== tab) {
-      this.setState({
-        activeTab: tab
-      });
-    }
-  }
-
-  async toggleViewJobModal() {
-    const { modal } = this.state;
-    this.setState({ modal: !modal });
-    await this.fetchJobs();
-  }
-
-  async toggleViewJobModalClear(id) {
-    const { modal } = this.state;
-    this.setState({
-      // equipmentId: 0, // reset equipmentID, not companyID
-      // selectedItemData: {},
-      modal: !modal,
-      jobId: id
-    });
   }
 
   retrieveAllMaterials() {
@@ -367,6 +342,22 @@ class MarketplaceCarrierPage extends Component {
     return filters.materialType;
   }
 
+  async toggleViewJobModal() {
+    const { modal } = this.state;
+    this.setState({ modal: !modal });
+    await this.fetchJobs();
+  }
+
+  async toggleViewJobModalClear(id) {
+    const { modal } = this.state;
+    this.setState({
+      // equipmentId: 0, // reset equipmentID, not companyID
+      // selectedItemData: {},
+      modal: !modal,
+      jobId: id
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -375,10 +366,10 @@ class MarketplaceCarrierPage extends Component {
     return false;
   }
 
-  renderModal(job) {
-    console.log('In renderModal', job);
+  renderModal() {
     const {
-      modal
+      modal,
+      jobId
     } = this.state;
     return (
       <Modal
@@ -395,9 +386,8 @@ class MarketplaceCarrierPage extends Component {
           {/*<h4 className="bold-text modal__title"> Hi </h4>*/}
         {/*</div>*/}
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-
           <JobViewForm
-            jobId={job.id}
+            jobId={jobId}
             toggle={this.toggleAddJobModal}
           />
         </div>
@@ -509,7 +499,7 @@ class MarketplaceCarrierPage extends Component {
                     ]
                   }
                   data={jobs}
-                  handleIdClick={this.handleJobEdit}
+                  handleIdClick={this.toggleViewJobModalClear}
                 />
 
               </CardBody>
@@ -806,12 +796,9 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
-  renderEquipmentRow(newJob) {
-    console.log(newJob);
+  renderEquipmentRow() {
     return (
       <React.Fragment>
-        {this.renderModal(newJob)}
-
         <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
           <Col md={2}>

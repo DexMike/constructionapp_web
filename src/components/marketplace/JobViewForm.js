@@ -70,11 +70,11 @@ class JobViewForm extends Component {
 
 
   renderSelectedJob() {
-    const { job } = this.props;
-    console.log(job);
+    const { jobId } = this.props;
+    console.log(jobId);
     return (
       <div className="col-sm-8">
-        <h3>Job number is {job} </h3>
+        <h3>Job number is {jobId} </h3>
       </div>
     );
   }
@@ -126,9 +126,11 @@ class JobViewForm extends Component {
 }
 
 JobViewForm.propTypes = {
-  jobId: PropTypes.number.isRequired,
-  closeModal: PropTypes.func.isRequired
+  jobId: PropTypes.number
 };
 
+JobViewForm.defaultProps = {
+  jobId: null
+};
 
 export default JobViewForm;
