@@ -411,17 +411,7 @@ class MarketplaceCarrierPage extends Component {
 
   renderJobList() {
     let {
-      // Lists
-      // equipmentTypeList,
-      // materialTypeList,
-      // rateTypeList,
-      // startDate,
-      // endDate,
-
-      // filters
-      // filters,
       jobs
-
     } = this.state;
 
     if (jobs) {
@@ -438,8 +428,8 @@ class MarketplaceCarrierPage extends Component {
         // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         // const materials = materialsList.map(materialItem => materialItem.value);
         // newJob.material = this.equipmentMaterialsAsString(materials);
-        // // console.log(companyName);
-        // // console.log(job.material);
+        // console.log(companyName);
+        // console.log(job.material);
         //
         // const address = await AddressService.getAddressById(newJob.startAddress);
         // newJob.zip = address.zipCode;
@@ -507,7 +497,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Truck Type'
                       },
                       {
-                        name: 'numberOfTrucks',
+                        name: 'numEquipments',
                         displayName: 'Number of Trucks'
                       }
                     ]
@@ -521,73 +511,6 @@ class MarketplaceCarrierPage extends Component {
           </Col>
         </Row>
       </Container>
-    );
-  }
-
-  renderToggle() {
-    const {
-      // Lists
-      rateTypeList,
-      isAvailable,
-      filters
-    } = this.state;
-
-    return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-
-              <Col lg={12}>
-
-                <Col>
-                Select by:
-
-                  <Button color={this.availableButtonColor(isAvailable)}
-                        type="button"
-                        onClick={this.makeAvailable}
-                        className="previous"
-                  >
-                  Hour
-                  </Button>
-                  <Button color={this.unavailableButtonColor(!isAvailable)}
-                        type="button"
-                        onClick={this.makeAvailable}
-                        className="previous"
-                  >
-                  Ton
-                  </Button>
-
-                  <TSelect
-                  input={
-                    {
-                      onChange: this.handleSelectFilterChange,
-                      name: 'rateType',
-                      value: filters.rateType
-                    }
-                  }
-                  meta={
-                    {
-                      touched: false,
-                      error: 'Unable to select'
-                    }
-                  }
-                  value={filters.rateType}
-                  options={
-                    rateTypeList.map(rateType => ({
-                      name: 'rateType',
-                      value: rateType,
-                      label: rateType
-                    }))
-                  }
-                  placeholder={rateTypeList[0]}
-                  />
-                </Col>
-              </Col>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
     );
   }
 
@@ -613,45 +536,49 @@ class MarketplaceCarrierPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
 
-                  <Col>
-                    Select by:
-                    <TSelect
-                      input={
-                        {
-                          onChange: this.handleSelectFilterChange,
-                          name: 'rateType',
-                          value: filters.rateType
-                        }
-                      }
-                      meta={
-                        {
-                          touched: false,
-                          error: 'Unable to select'
-                        }
-                      }
-                      value={filters.rateType}
-                      options={
-                        rateTypeList.map(rateType => ({
-                          name: 'rateType',
-                          value: rateType,
-                          label: rateType
-                        }))
-                      }
-                      placeholder={rateTypeList[0]}
-                    />
-                  </Col>
+                  {/*<Col>*/}
+                    {/*Select by:*/}
+                    {/*<TSelect*/}
+                      {/*input={*/}
+                        {/*{*/}
+                          {/*onChange: this.handleSelectFilterChange,*/}
+                          {/*name: 'rateType',*/}
+                          {/*value: filters.rateType*/}
+                        {/*}*/}
+                      {/*}*/}
+                      {/*meta={*/}
+                        {/*{*/}
+                          {/*touched: false,*/}
+                          {/*error: 'Unable to select'*/}
+                        {/*}*/}
+                      {/*}*/}
+                      {/*value={filters.rateType}*/}
+                      {/*options={*/}
+                        {/*rateTypeList.map(rateType => ({*/}
+                          {/*name: 'rateType',*/}
+                          {/*value: rateType,*/}
+                          {/*label: rateType*/}
+                        {/*}))*/}
+                      {/*}*/}
+                      {/*placeholder={rateTypeList[0]}*/}
+                    {/*/>*/}
+                  {/*</Col>*/}
+
                 </Col>
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
                     <Col className="filter-item-title">
-                      Start Date
+                      Date Range
+                    </Col>
+                    <Col className="filter-item-title">
+                      Rate Type
                     </Col>
                     <Col className="filter-item-title">
                       Min Rate
                     </Col>
                     <Col className="filter-item-title">
-                      Min Tons
+                      Minimum
                     </Col>
                     <Col className="filter-item-title">
                       Truck Type
@@ -707,14 +634,39 @@ class MarketplaceCarrierPage extends Component {
 
                     </Col>
                     <Col>
-                      $<input name="rate"
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder={rateTypeList[0]}
+                      />
+                    </Col>
+                    <Col>
+                      <input name="rate"
                              className="filter-text"
                              type="text"
                              placeholder="Any"
                              value={filters.rate}
                              onChange={this.handleFilterChange}
                       />
-                      per Ton
                     </Col>
                     <Col>
                       <input name="minTons"
@@ -1039,7 +991,6 @@ class MarketplaceCarrierPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          {this.renderToggle()}
           {this.renderFilter()}
           {/* {this.renderTable()} */}
           {/* {this.renderEquipmentTable()} */}

@@ -11,6 +11,7 @@ import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
+import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
@@ -33,13 +34,14 @@ class JobCreateForm extends Component {
       endAddress: AddressService.getDefaultAddress(),
       bid: BidService.getDefaultBid(),
       booking: BookingService.getDefaultBooking(),
+      bookingEquipment: BookingEquipmentService.getDefaultBookingEquipment(),
       materials: [],
       availableMaterials: [],
       reqHandlerName: { touched: false, error: '' },
       reqHandlerDate: { touched: false, error: '' },
       reqHandlerEstHours: { touched: false, error: '' },
       reqHandlerEstTons: { touched: false, error: '' },
-      reqHandlerSAddress: { touched: false, error: '' },
+      reqHandlerStartAddress: { touched: false, error: '' },
       reqHandlerSCity: { touched: false, error: '' },
       reqHandlerSState: { touched: false, error: '' },
       reqHandlerSZip: { touched: false, error: '' },
@@ -63,7 +65,7 @@ class JobCreateForm extends Component {
   async componentDidMount() {
     // debugger;
     const profile = await ProfileService.getProfile();
-    const { job, startAddress, endAddress, bid, booking } = this.state;
+    const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
     const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     // I commented the line below as I am not sure what it is used for
@@ -74,6 +76,9 @@ class JobCreateForm extends Component {
     if (selectedEquipment.rateType !== 'All') {
       job.rateType = selectedEquipment.rateType;
     }
+
+    // why are we setting these fields to profile.??
+
     startAddress.companyId = profile.companyId;
     startAddress.modifiedBy = profile.userId;
     startAddress.createdBy = profile.userId;
@@ -89,12 +94,15 @@ class JobCreateForm extends Component {
       bid.userId = profile.userId;
     }
 
-    bid.createdBy = profile.userId;
-    bid.modifiedBy = profile.userId;
+    // The bid creator should be set to the selectedEquipment driverId
+    // bids are supposed to get created by carriers
+    bid.createdBy = selectedEquipment.driversId;
+    bid.modifiedBy = selectedEquipment.driversId;
 
     // set booking information based on job and bid
-    booking.createdBy = profile.userId;
-    booking.modifiedBy = profile.userId;
+    // createdBy and modifiedBy should be set to selectedEquipment.driversId
+    booking.createdBy = selectedEquipment.driversId;
+    booking.modifiedBy = selectedEquipment.driversId;
     booking.rateType = job.rateType;
     booking.startAddress = job.startAddress;
     booking.endAddress = job.endAddress;
@@ -108,6 +116,7 @@ class JobCreateForm extends Component {
       endAddress,
       bid,
       booking,
+      bookingEquipment,
       availableMaterials: selectedMaterials()
     });
     this.setState({ loaded: true });
@@ -151,9 +160,8 @@ class JobCreateForm extends Component {
     const { startAddress } = this.state;
     let reqHandler = '';
     startAddress[e.target.name] = e.target.value;
-
     if (e.target.name === 'address1') {
-      reqHandler = 'reqHandlerSAddress';
+      reqHandler = 'reqHandlerStartAddress';
     } else if (e.target.name === 'city') {
       reqHandler = 'reqHandlerSCity';
     } else if (e.target.name === 'state') {
@@ -250,7 +258,7 @@ class JobCreateForm extends Component {
   async createJob(e) {
     e.preventDefault();
     const { closeModal, selectedEquipment } = this.props;
-    const { startAddress, job, endAddress, bid, booking } = this.state;
+    const { startAddress, job, endAddress, bid, booking, bookingEquipment } = this.state;
     const newJob = CloneDeep(job);
     startAddress.name = `Job: ${newJob.name}`;
     endAddress.name = `Job: ${newJob.name}`;
@@ -316,6 +324,35 @@ class JobCreateForm extends Component {
     console.log('booking ', booking);
     await BookingService.createBooking(booking);
 
+    // now we need to create a BookingEquipment record
+    // Since in this scenario we are only allowing 1 truck for one booking
+    // we are going to create one BookingEquipment.  NOTE: the idea going forward is
+    // to allow multiple trucks per booking
+    bookingEquipment.bookingId = booking.id;
+    bookingEquipment.schedulerId = bid.userId;
+    bookingEquipment.driverId = selectedEquipment.driversId;
+    bookingEquipment.equipmentId = selectedEquipment.id;
+    bookingEquipment.rateType = bid.rateType;
+    // At this point we do not know what rateActual is, this will get set upon completion
+    // of the job
+    bookingEquipment.rateActual = 0;
+    // Lets copy the bid info
+    bookingEquipment.startTime = bid.startTime;
+    bookingEquipment.endTime = bid.endTime;
+    bookingEquipment.startAddress = bid.startAddress;
+    bookingEquipment.endAddress = bid.endAddress;
+    // Since this is booking method 1, we do not have any notes as this is getting created
+    // automatically and not by a user
+    bookingEquipment.notes = '';
+
+    bookingEquipment.createdBy = selectedEquipment.driversId;
+    bookingEquipment.modifiedBy = selectedEquipment.driversId;
+    bookingEquipment.modifiedOn = moment()
+      .unix() * 1000;
+    bookingEquipment.createdOn = moment()
+      .unix() * 1000;
+
+
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
     // We need to get the phone number from the carrier co
@@ -334,7 +371,7 @@ class JobCreateForm extends Component {
       reqHandlerDate,
       reqHandlerEstHours,
       reqHandlerEstTons,
-      reqHandlerSAddress,
+      reqHandlerStartAddress,
       reqHandlerSCity,
       reqHandlerSState,
       reqHandlerSZip,
@@ -387,7 +424,7 @@ class JobCreateForm extends Component {
 
     if (job.startAddress.address1.length === 0) {
       this.setState({
-        reqHandlerSAddress: Object.assign({}, reqHandlerSAddress, {
+        reqHandlerStartAddress: Object.assign({}, reqHandlerStartAddress, {
           touched: true,
           error: 'Please enter a starting address for this job'
         })
@@ -468,11 +505,7 @@ class JobCreateForm extends Component {
       }
     }
 
-    if (isValid) {
-      return true;
-    }
-
-    return false;
+    return isValid;
   }
 
   renderSelectedEquipment() {
@@ -710,7 +743,7 @@ class JobCreateForm extends Component {
     const {
       states,
       startAddress,
-      reqHandlerSAddress,
+      reqHandlerStartAddress,
       reqHandlerSCity,
       reqHandlerSState,
       reqHandlerSZip
@@ -740,7 +773,7 @@ class JobCreateForm extends Component {
                 }
                 placeholder="Address #1"
                 type="text"
-                meta={reqHandlerSAddress}
+                meta={reqHandlerStartAddress}
               />
             </div>
           </div>

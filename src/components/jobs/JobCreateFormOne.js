@@ -13,6 +13,7 @@ import SelectField from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import './jobs.css';
+import TField from '../common/TField';
 
 class CreateJobFormOne extends PureComponent {
   constructor(props) {
@@ -48,10 +49,30 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip: '',
       // job properties
       name: '',
-      instructions: ''
+      instructions: '',
+      // Request Handlers
+      reqHandlerTonnage: { touched: false, error: '' },
+      reqHandlerDate: { touched: false, error: '' },
+      reqHandlerTruckType: { touched: false, error: '' },
+      reqHandlerMaterials: { touched: false, error: '' },
+      reqHandlerHoursEstimate: { touched: false, error: '' },
+      reqHandleTrucksEstimate: { touched: false, error: '' },
+      reqHandlerStartAddress: { touched: false, error: '' },
+      reqHandlerStartCity: { touched: false, error: '' },
+      reqHandlerStartZip: { touched: false, error: '' },
+      reqHandlerStartState: { touched: false, error: '' },
+      reqHandlerEndCity: { touched: false, error: '' },
+      reqHandlerEndZip: { touched: false, error: '' },
+      reqHandlerEndState: { touched: false, error: '' },
+      reqHandlerEndAddress: { touched: false, error: '' }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleTruckTypeChange = this.handleTruckTypeChange.bind(this);
+    this.handleMaterialsChange = this.handleMaterialsChange.bind(this);
+    this.handleTonnageDetails = this.handleTonnageDetails.bind(this);
+    this.handleHourDetails = this.handleHourDetails.bind(this);
+    this.handleStartAddressChange = this.handleStartAddressChange.bind(this);
+    this.handleEndAddressChange = this.handleEndAddressChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.firstPage = this.firstPage.bind(this);
@@ -61,7 +82,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   async componentDidMount() {
-    const { firstTabData } = this.props;
+    const {firstTabData} = this.props;
 
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
@@ -125,46 +146,236 @@ class CreateJobFormOne extends PureComponent {
     }
   }
 
-  handleMultiChange(data) {
-    const { reqHandlerMaterials } = this.state;
+  handleMaterialsChange(data) {
+    const {reqHandlerMaterials} = this.state;
     this.setState({
-      reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
-        touched: false
-      })
+      reqHandlerMaterials: {...reqHandlerMaterials, touched: false}
     });
-    this.setState({ selectedMaterials: data });
+    this.setState({selectedMaterials: data});
   }
 
-  selectChange(data) {
-    const { reqHandlerTruckType } = this.state;
+  handleTruckTypeChange(data) {
+    const {reqHandlerTruckType} = this.state;
     this.setState({
-      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
-        touched: false
-      })
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
     });
-    this.setState({ truckType: data.value });
+    this.setState({truckType: data});
+  }
+
+  handleEndAddressChange(e) {
+    let reqHandler = '';
+    switch (e.target.name) {
+      case 'endLocationAddress1':
+        reqHandler = 'reqHandlerEndAddress';
+        break;
+      case 'endLocationCity':
+        reqHandler = 'reqHandlerEndCity';
+        break;
+      case 'endLocationState':
+        reqHandler = 'reqHandlerEndState';
+        break;
+      case 'endLocationZip':
+        reqHandler = 'reqHandlerEndZip';
+        break;
+      default:
+    }
+    this.setState({
+      [reqHandler]: {...reqHandler, touched: false}
+    });
+    this.setState({[e.target.name]: e.target.value});
+  }
+
+  handleTonnageDetails(e) {
+    const {reqHandlerTonnage} = this.state;
+    this.setState({
+      reqHandlerTonnage: {...reqHandlerTonnage, touched: false}
+    });
+    this.setState({[e.target.name]: e.target.value});
+  }
+
+  handleHourDetails(e) {
+    let reqHandler = '';
+    switch (e.target.name) {
+      case 'hourEstimatedHours':
+        reqHandler = 'reqHandlerHoursEstimate';
+        break;
+      case 'hourTrucksNumber':
+        reqHandler = 'reqHandlerTrucksEstimate';
+        break;
+      default:
+    }
+    this.setState({
+      [reqHandler]: {...reqHandler, touched: false}
+    });
+    this.setState({[e.target.name]: e.target.value});
+  }
+
+  handleStartAddressChange(e) {
+    let reqHandler = '';
+    switch (e.target.name) {
+      case 'startLocationAddress1':
+        reqHandler = 'reqHandlerStartAddress';
+        break;
+      case 'startLocationCity':
+        reqHandler = 'reqHandlerStartCity';
+        break;
+      case 'startLocationState':
+        reqHandler = 'reqHandlerStartState';
+        break;
+      case 'startLocationZip':
+        reqHandler = 'reqHandlerStartZip';
+        break;
+      default:
+    }
+    this.setState({
+      [reqHandler]: {...reqHandler, touched: false}
+    });
+    this.setState({[e.target.name]: e.target.value});
+  }
+
+
+  selectChange(data) {
+    const {reqHandlerTruckType} = this.state;
+    this.setState({
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
+    });
+    this.setState({truckType: data.value});
   }
 
   isFormValid() {
-    const isValid = true;
+    const job = this.state;
+    const {
+      reqHandlerTonnage,
+      reqHandlerEndAddress,
+      reqHandlerEndState,
+      reqHandlerEndCity,
+      reqHandlerEndZip,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartState,
+      reqHandlerStartZip,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerHoursEstimate,
+      reqHandlerTrucksEstimate,
+      reqHandlerDate
+    } = this.state;
+    let isValid = true;
 
-    this.setState({
-      /*
-      reqHandlerTruckType: { touched: false },
-      reqHandlerMaterials: { touched: false },
-      */
-    });
-
-    if (isValid) {
-      return true;
+    if (job.selectedMaterials.length === 0) {
+      this.setState({
+        reqHandlerMaterials: {...reqHandlerMaterials, touched: true, error: 'Required input'}
+      });
+      isValid = false;
     }
 
-    return false;
+    if (job.truckType.length === 0) {
+      this.setState({
+        reqHandlerTruckType: {...reqHandlerTruckType, touched: true, error: 'Required input'}
+      });
+      isValid = false;
+    }
+
+    const currDate = new Date();
+
+    if (job.jobDate) {
+      currDate.setHours(0, 0, 0, 0);
+      job.jobDate.setHours(0, 0, 0, 0);
+    }
+
+    if (!job.jobDate || job.jobDate.getTime() < currDate.getTime()) {
+      this.setState({
+        reqHandlerDate: {...reqHandlerDate, touched: true, error: 'Required input'}
+      });
+      isValid = false;
+    }
+
+    if (job.startLocationAddress1.length === 0) {
+      this.setState({
+        reqHandlerStartAddress: {...reqHandlerStartAddress, touched: true, error: 'Missing starting address field'}
+      });
+      isValid = false;
+    }
+
+    if (job.startLocationCity.length === 0) {
+      this.setState({
+        reqHandlerStartCity: {...reqHandlerStartCity, touched: true, error: 'Missing starting city field'}
+      });
+      isValid = false;
+    }
+
+    if (job.startLocationZip.length === 0) {
+      this.setState({
+        reqHandlerStartZip: {...reqHandlerStartZip, touched: true, error: 'Missing starting zip code field'}
+      });
+      isValid = false;
+    }
+
+    if (job.startLocationState.length === 0) {
+      this.setState({
+        reqHandlerStartState: {...reqHandlerStartState, touched: true, error: 'Missing starting state field'}
+      });
+      isValid = false;
+    }
+
+    if (job.rateTab === 2) {
+      if (job.tonnage <= 0) {
+        this.setState({
+          reqHandlerTonnage: {...reqHandlerTonnage, touched: true, error: 'A value for number of tons must be set'}
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerEndAddress: {...reqHandlerEndAddress, touched: true, error: 'Missing ending address field'}
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationCity.length === 0) {
+        this.setState({
+          reqHandlerEndCity: {...reqHandlerEndCity, touched: true, error: 'Missing ending city field'}
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationState.length === 0) {
+        this.setState({
+          reqHandlerEndState: {...reqHandlerEndState, touched: true, error: 'Missing ending state field'}
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationZip.length === 0) {
+        this.setState({
+          reqHandlerEndZip: {...reqHandlerEndZip, touched: true, error: 'Missing ending zip field'}
+        });
+        isValid = false;
+      }
+    }
+
+    if (job.rateTab === 1) {
+      if (job.hourEstimatedHours <= 0) {
+        this.setState({
+          reqHandlerHoursEstimate: {...reqHandlerHoursEstimate, touched: true, error: 'Required input'}
+        });
+        isValid = false;
+      }
+      if (job.hourTrucksNumber <= 0) {
+        this.setState({
+          reqHandlerTrucksEstimate: {...reqHandlerTrucksEstimate, touched: true, error: 'Required input'}
+        });
+        isValid = false;
+      }
+    }
+
+    return isValid;
   }
 
   async handleSubmit(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -181,8 +392,8 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    const { value } = e.target;
-    this.setState({ [e.target.name]: value });
+    const {value} = e.target;
+    this.setState({[e.target.name]: value});
   }
 
   // Pull materials
@@ -196,19 +407,30 @@ class CreateJobFormOne extends PureComponent {
   }
 
   jobDateChange(data) {
-    this.setState({ jobDate: data });
+    const {reqHandlerDate} = this.state;
+    this.setState({
+      reqHandlerDate: Object.assign({}, reqHandlerDate, {
+        touched: false
+      })
+    });
+    this.setState({jobDate: data});
   }
 
   firstPage() {
-    this.setState({ rateTab: 1 });
+    this.setState({rateTab: 1});
   }
 
   secondPage() {
-    this.setState({ rateTab: 2 });
+    this.setState({rateTab: 2});
   }
 
   goToSecondFromFirst() {
-    const { gotoSecond } = this.props;
+    if (!this.isFormValid()) {
+      // TODO display error message
+      // console.error('didnt put all the required fields.');
+      return;
+    }
+    const {gotoSecond} = this.props;
     gotoSecond(this.state);
   }
 
@@ -240,11 +462,25 @@ class CreateJobFormOne extends PureComponent {
       startLocationState,
       startLocationZip,
       name,
-      instructions
+      instructions,
+      reqHandlerTonnage,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerTrucksEstimate,
+      reqHandlerHoursEstimate,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartZip,
+      reqHandlerStartState,
+      reqHandlerEndAddress,
+      reqHandlerEndState,
+      reqHandlerEndZip,
+      reqHandlerEndCity,
+      reqHandlerDate
     } = this.state;
     const today = new Date();
     const currentDate = today.getTime();
-    const { onClose } = this.props;
+    const {onClose} = this.props;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -275,12 +511,12 @@ class CreateJobFormOne extends PureComponent {
                   <SelectField
                     input={
                       {
-                        onChange: this.selectChange,
-                        name: 'Truck Type',
+                        onChange: this.handleTruckTypeChange,
+                        name: 'truckType',
                         value: truckType
                       }
                     }
-                    // meta={reqHandlerTruckType}
+                    meta={reqHandlerTruckType}
                     value={truckType}
                     options={allTruckTypes}
                     placeholder="Truck Type"
@@ -304,20 +540,21 @@ class CreateJobFormOne extends PureComponent {
                   <MultiSelect
                     input={
                       {
-                        onChange: this.handleMultiChange,
-                        name: 'materials',
+                        onChange: this.handleMaterialsChange,
+                        name: 'selectedMaterials',
                         value: selectedMaterials
                       }
                     }
                     // meta={reqHandlerMaterials}
                     options={allMaterials}
                     placeholder="Materials"
+                    meta={reqHandlerMaterials}
                   />
                 </div>
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
                 {/* <hr className="bighr"/> */}
               </Row>
 
@@ -351,112 +588,147 @@ class CreateJobFormOne extends PureComponent {
                       <div className="wizard__form-wrapper">
                         {/* onSubmit={this.nextPage} */}
                         {rateTab === 2
-                          && (
-                            <Row className="col-md-12">
-                              {/* FIRST ROW */}
-                              <div className="col-md-5 form__form-group">
-                                Estimated Amount of Tonnage
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="tonnage"
-                                  type="number"
-                                  value={tonnage}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Capacity"
-                                />
-                              </div>
-                              <div className="col-md-4 form__form-group">
-                                &nbsp;
-                              </div>
-                              {/* END LOCATION */}
-                              <div className="col-md-12 form__form-group">
-                                <h3 className="subhead">
-                                  End Location
-                                </h3>
-                              </div>
-                              <div className="col-md-12 form__form-group">
-                                <input
-                                  name="endLocationAddress1"
-                                  type="text"
-                                  value={endLocationAddress1}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Address 1"
-                                />
-                              </div>
-                              <div className="col-md-12 form__form-group">
-                                <input
-                                  name="endLocationAddress2"
-                                  type="text"
-                                  value={endLocationAddress2}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Address 2"
-                                />
-                              </div>
-                              <div className="col-md-7 form__form-group">
-                                <input
-                                  name="endLocationCity"
-                                  type="text"
-                                  value={endLocationCity}
-                                  onChange={this.handleInputChange}
-                                  placeholder="City"
-                                />
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="endLocationState"
-                                  type="text"
-                                  value={endLocationState}
-                                  onChange={this.handleInputChange}
-                                  placeholder="State"
-                                />
-                              </div>
-                              <div className="col-md-2 form__form-group">
-                                <input
-                                  name="startLocationZip"
-                                  type="text"
-                                  value={endLocationZip}
-                                  onChange={this.handleInputChange}
-                                  placeholder="Zip"
-                                />
-                              </div>
-                            </Row>
-                          )}
+                        && (
+                          <Row className="col-md-12">
+                            {/* FIRST ROW */}
+                            <div className="col-md-5 form__form-group">
+                              Estimated Amount of Tonnage
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleTonnageDetails,
+                                    name: 'tonnage',
+                                    value: tonnage
+                                  }
+                                }
+                                placeholder="Capacity"
+                                type="number"
+                                meta={reqHandlerTonnage}
+                              />
+                            </div>
+                            <div className="col-md-4 form__form-group">
+                              &nbsp;
+                            </div>
+                            {/* END LOCATION */}
+                            <div className="col-md-12 form__form-group">
+                              <h3 className="subhead">
+                                End Location
+                              </h3>
+                            </div>
+                            <div className="col-md-12 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationAddress1',
+                                    value: endLocationAddress1
+                                  }
+                                }
+                                placeholder="Address 1"
+                                type="text"
+                                meta={reqHandlerEndAddress}
+                              />
+                            </div>
+                            <div className="col-md-12 form__form-group">
+                              <input
+                                name="endLocationAddress2"
+                                type="text"
+                                value={endLocationAddress2}
+                                onChange={this.handleEndAddressChange}
+                                placeholder="Address 2"
+                              />
+                            </div>
+                            <div className="col-md-7 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationCity',
+                                    value: endLocationCity
+                                  }
+                                }
+                                placeholder="City"
+                                type="text"
+                                meta={reqHandlerEndCity}
+                              />
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationState',
+                                    value: endLocationState
+                                  }
+                                }
+                                placeholder="State"
+                                type="text"
+                                meta={reqHandlerEndState}
+                              />
+                            </div>
+                            <div className="col-md-2 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationZip',
+                                    value: endLocationZip
+                                  }
+                                }
+                                placeholder="Zip"
+                                type="text"
+                                meta={reqHandlerEndZip}
+                              />
+                            </div>
+                          </Row>
+                        )}
                         {rateTab === 1
-                          && (
-                            <Row className="col-md-12">
-                              {/* FIRST ROW */}
-                              <div className="col-md-7 form__form-group">
-                                How many hours do you estimate for this job?
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="hourEstimatedHours"
-                                  type="number"
-                                  value={hourEstimatedHours}
-                                  onChange={this.handleInputChange}
-                                />
-                              </div>
-                              <div className="col-md-2 form__form-group">
-                                &nbsp;
-                              </div>
-                              {/* SECOND ROW */}
-                              <div className="col-md-7 form__form-group">
-                                How many trucks will you require for this job?
-                              </div>
-                              <div className="col-md-3 form__form-group">
-                                <input
-                                  name="hourTrucksNumber"
-                                  type="number"
-                                  value={hourTrucksNumber}
-                                  onChange={this.handleInputChange}
-                                />
-                              </div>
-                              <div className="col-md-2 form__form-group">
-                                &nbsp;
-                              </div>
-                            </Row>
-                          )}
+                        && (
+                          <Row className="col-md-12">
+                            {/* FIRST ROW */}
+                            <div className="col-md-7 form__form-group">
+                              How many hours do you estimate for this job?
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleHourDetails,
+                                    name: 'hourEstimatedHours',
+                                    value: hourEstimatedHours
+                                  }
+                                }
+                                type="number"
+                                meta={reqHandlerHoursEstimate}
+                              />
+                            </div>
+                            <div className="col-md-2 form__form-group">
+                              &nbsp;
+                            </div>
+                            {/* SECOND ROW */}
+                            <div className="col-md-7 form__form-group">
+                              How many trucks will you require for this job?
+                            </div>
+                            <div className="col-md-3 form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleHourDetails,
+                                    name: 'hourTrucksNumber',
+                                    value: hourTrucksNumber
+                                  }
+                                }
+                                type="number"
+                                meta={reqHandlerTrucksEstimate}
+                              />
+                            </div>
+                            <div className="col-md-2 form__form-group">
+                              &nbsp;
+                            </div>
+                          </Row>
+                        )}
                         {/* onSubmit={onSubmit} */}
                       </div>
                     </div>
@@ -465,7 +737,7 @@ class CreateJobFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
@@ -479,20 +751,20 @@ class CreateJobFormOne extends PureComponent {
                     input={
                       {
                         onChange: this.jobDateChange,
-                        name: 'startDate',
-                        value: { jobDate },
+                        name: 'jobDate',
+                        value: {jobDate},
                         givenDate: currentDate
                       }
                     }
                     onChange={this.jobDateChange}
                     dateFormat="MMMM-dd-yyyy"
-                    // meta={reqHandlerStartDate}
+                    meta={reqHandlerDate}
                   />
                 </div>
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
@@ -502,54 +774,75 @@ class CreateJobFormOne extends PureComponent {
                   </h3>
                 </div>
                 <div className="col-md-12 form__form-group">
-                  <input
-                    name="startLocationAddress1"
-                    type="text"
-                    value={startLocationAddress1}
-                    onChange={this.handleInputChange}
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleStartAddressChange,
+                        name: 'startLocationAddress1',
+                        value: startLocationAddress1
+                      }
+                    }
                     placeholder="Address 1"
+                    type="text"
+                    meta={reqHandlerStartAddress}
                   />
+
                 </div>
                 <div className="col-md-12 form__form-group">
                   <input
                     name="startLocationAddress2"
                     type="text"
                     value={startLocationAddress2}
-                    onChange={this.handleInputChange}
+                    onChange={this.handleStartAddressChange}
                     placeholder="Address 2"
                   />
                 </div>
                 <div className="col-md-7 form__form-group">
-                  <input
-                    name="startLocationCity"
-                    type="text"
-                    value={startLocationCity}
-                    onChange={this.handleInputChange}
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleStartAddressChange,
+                        name: 'startLocationCity',
+                        value: startLocationCity
+                      }
+                    }
                     placeholder="City"
+                    type="text"
+                    meta={reqHandlerStartCity}
                   />
                 </div>
                 <div className="col-md-3 form__form-group">
-                  <input
-                    name="startLocationState"
-                    type="text"
-                    value={startLocationState}
-                    onChange={this.handleInputChange}
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleStartAddressChange,
+                        name: 'startLocationState',
+                        value: startLocationState
+                      }
+                    }
                     placeholder="State"
+                    type="text"
+                    meta={reqHandlerStartState}
                   />
                 </div>
                 <div className="col-md-2 form__form-group">
-                  <input
-                    name="startLocationZip"
-                    type="text"
-                    value={startLocationZip}
-                    onChange={this.handleInputChange}
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleStartAddressChange,
+                        name: 'startLocationZip',
+                        value: startLocationZip
+                      }
+                    }
                     placeholder="Zip"
+                    type="text"
+                    meta={reqHandlerStartZip}
                   />
                 </div>
               </Row>
 
               <Row className="col-md-12">
-                <hr />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
