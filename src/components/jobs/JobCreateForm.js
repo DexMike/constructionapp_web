@@ -322,36 +322,38 @@ class JobCreateForm extends Component {
     console.log('createdBid ', createdBid);
     console.log('booking bidId is ', booking.bidId);
     console.log('booking ', booking);
-    await BookingService.createBooking(booking);
+    const createdBooking = await BookingService.createBooking(booking);
 
     // now we need to create a BookingEquipment record
     // Since in this scenario we are only allowing 1 truck for one booking
     // we are going to create one BookingEquipment.  NOTE: the idea going forward is
     // to allow multiple trucks per booking
-    bookingEquipment.bookingId = booking.id;
-    bookingEquipment.schedulerId = bid.userId;
+    bookingEquipment.bookingId = createdBooking.id;
+    // this needs to be createdBid.carrierCompanyId.adminId
+    bookingEquipment.schedulerId = createdBid.userId;
     bookingEquipment.driverId = selectedEquipment.driversId;
     bookingEquipment.equipmentId = selectedEquipment.id;
-    bookingEquipment.rateType = bid.rateType;
+    bookingEquipment.rateType = createdBid.rateType;
     // At this point we do not know what rateActual is, this will get set upon completion
     // of the job
     bookingEquipment.rateActual = 0;
     // Lets copy the bid info
-    bookingEquipment.startTime = bid.startTime;
-    bookingEquipment.endTime = bid.endTime;
-    bookingEquipment.startAddress = bid.startAddress;
-    bookingEquipment.endAddress = bid.endAddress;
+    bookingEquipment.startTime = createdBid.startTime;
+    bookingEquipment.endTime = createdBid.endTime;
+    bookingEquipment.startAddress = createdBid.startAddress;
+    bookingEquipment.endAddress = createdBid.endAddress;
     // Since this is booking method 1, we do not have any notes as this is getting created
     // automatically and not by a user
     bookingEquipment.notes = '';
 
+    // this needs to be createdBid.carrierCompanyId.adminId
     bookingEquipment.createdBy = selectedEquipment.driversId;
     bookingEquipment.modifiedBy = selectedEquipment.driversId;
     bookingEquipment.modifiedOn = moment()
       .unix() * 1000;
     bookingEquipment.createdOn = moment()
       .unix() * 1000;
-
+    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
 
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
