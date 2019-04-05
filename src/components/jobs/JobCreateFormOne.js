@@ -477,10 +477,11 @@ class CreateJobFormOne extends PureComponent {
   goToSecondFromFirst() {
     const {validateRes} = this.props;
     if (!this.isFormValid()) {
-      validateRes(false);
-      // TODO display error message
-      // console.error('didnt put all the required fields.');
-      return;
+      // Add this back before merging SG-170 back into the design.
+      // validateRes(false);
+      // // TODO display error message
+      // // console.error('didnt put all the required fields.');
+      // return;
     }
     validateRes(true);
     const {gotoSecond} = this.props;
