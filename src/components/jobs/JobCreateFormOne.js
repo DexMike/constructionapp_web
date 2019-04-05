@@ -160,7 +160,6 @@ class CreateJobFormOne extends PureComponent {
 
 
   componentWillReceiveProps(nextProps, nextContext) {
-    // console.log(nextProps.validateOnTabClick);
     if (nextProps.validateOnTabClick) {
       this.goToSecondFromFirst();
     }
@@ -298,8 +297,6 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerDate
     } = this.state;
     let isValid = true;
-
-    console.log(job);
 
     if (job.selectedMaterials.length === 0) {
       this.setState({

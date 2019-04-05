@@ -104,7 +104,6 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     // job p
-    console.log(d);
     const profile = await ProfileService.getProfile();
     const job = {
       companiesId: profile.companyId,
