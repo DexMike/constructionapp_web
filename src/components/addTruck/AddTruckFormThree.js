@@ -316,7 +316,7 @@ class AddTruckFormThree extends PureComponent {
 
               <Row className="col-md-12">
 
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6">
                   <span className="form__form-group-label">Mobile Phone</span>
                   <NumberFormat
                     name="mobilePhone"

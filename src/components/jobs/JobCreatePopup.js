@@ -112,11 +112,6 @@ class JobCreatePopup extends Component {
                       <p>Send Job</p>
                     </div>
                   </div>
-
-                  <div>
-                    <hr />
-                  </div>
-
                   <div className="wizard__form-wrapper">
                     {/* onSubmit={this.nextPage} */}
                     {page === 1
