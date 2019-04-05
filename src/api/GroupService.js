@@ -23,6 +23,11 @@ class GroupService extends AgentService {
     return (response);
   }
 
+  static async getGroupListByUserName(userId) {
+    const response = await this.get(`/user/${userId}/favorite${PATH}`);
+    return (response);
+  }
+
   static async createGroup(group) {
     const response = await super.post(PATH, group);
     return (response);

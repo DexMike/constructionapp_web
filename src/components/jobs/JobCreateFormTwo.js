@@ -25,6 +25,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToMkt: true,
       sendToFavorites: true,
       showSendtoFavorites: false,
+      favoriteCompanies: [],
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -34,11 +35,13 @@ class JobCreateFormTwo extends PureComponent {
   async componentDidMount() {
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
-    console.log(profile);
-    const favorites = await GroupService.getGroupByFavoriteAndCompanyId(profile.companyId);
-    if (Number(favorites[0]) > 0) {
+    const favorites = await GroupService.getGroupListByUserName(profile.userId);
+
+    // are there any favorite companies?
+    if (favorites.length > 0) {
       this.setState({
-        showSendtoFavorites: true
+        showSendtoFavorites: true,
+        favoriteCompanies: favorites
       });
     }
     this.setState({ loaded: true });
@@ -64,6 +67,11 @@ class JobCreateFormTwo extends PureComponent {
     e.preventDefault();
     e.persist();
     const { firstTabData } = this.props;
+    const {
+      favoriteCompanies,
+      showSendtoFavorites,
+      sendToFavorites
+    } = this.state;
     const d = firstTabData();
 
     // start location
@@ -95,14 +103,17 @@ class JobCreateFormTwo extends PureComponent {
       endAddress = await AddressService.createAddress(address2);
     }
 
-    // job
+    // job p
+    console.log(d);
     const profile = await ProfileService.getProfile();
     const job = {
       companiesId: profile.companyId,
       name: d.name,
       status: 'New', // check if this one is alright
+      isFavorited: showSendtoFavorites,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
+      equipmentType: d.truckType.value,
       rateType: 'Ton',
       rate: d.tonnage,
       notes: d.instructions,
@@ -110,14 +121,37 @@ class JobCreateFormTwo extends PureComponent {
       rateTotal: 0,
       numberOfTrucks: d.capacity // check if this one is alright
     };
-
     const newJob = await JobService.createJob(job);
+    // return false;
 
+    // create bids if this user has favorites:
+    if (showSendtoFavorites && sendToFavorites) {
+      const results = [];
+      for (const companyId of favoriteCompanies) {
+        // bid
+        const bid = {
+          jobId: newJob.id,
+          userId: profile.userId,
+          companyCarrierId: companyId,
+          hasCustomerAccepted: 1,
+          hasSchedulerAccepted: 0,
+          status: 'New',
+          rateType: 'Ton',
+          rate: 0,
+          rateEstimate: 0,
+          notes: d.instructions
+        };
+        results.push(BidService.createBid(bid));
+      }
+      await Promise.all(results);
+    }
+
+    /*
     // bid
     const bid = {
       jobId: newJob.id,
       hasCustomerAccepted: 1,
-      hasSchedulerAccepted: 1,
+      hasSchedulerAccepted: 0,
       status: 'New',
       userId: profile.userId,
       rateType: 'Ton',
@@ -125,8 +159,8 @@ class JobCreateFormTwo extends PureComponent {
       rateEstimate: 0,
       notes: d.instructions
     };
-
     await BidService.createBid(bid);
+    */
 
     // return false;
     const { onClose } = this.props;
@@ -184,6 +218,24 @@ class JobCreateFormTwo extends PureComponent {
                       Yes! Send to Trelar Marketplace
                     </h4>
                     * Note - This job will be sent to all Trelar Partners for review
+                  </div>
+                  <div className="col-md-3 form__form-group">
+                    Send Job in
+                  </div>
+                  <div className="col-md-3 form__form-group">
+                    <input
+                      name="delay"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <Button color="minimal" className="btn btn-outline-secondary" type="button">
+                      Hours
+                    </Button>
+                    <Button color="secondary" className="btn btn-outline-secondary" type="button">
+                      Days
+                    </Button>
                   </div>
                 </Row>
 

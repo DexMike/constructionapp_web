@@ -14,7 +14,7 @@ import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import './jobs.css';
 import TField from '../common/TField';
-import USstates from '../../utils/usStates';
+// import USstates from '../../utils/usStates';
 
 class CreateJobFormOne extends PureComponent {
   constructor(props) {
@@ -27,7 +27,7 @@ class CreateJobFormOne extends PureComponent {
       capacity: 0,
       allMaterials: [],
       selectedMaterials: [],
-      allUSstates: USstates.getStates(),
+      allUSstates: [],
       // rates
       ratebyBoth: false,
       rateByTon: true,
@@ -149,6 +149,14 @@ class CreateJobFormOne extends PureComponent {
         allTruckTypes
       });
     }
+
+    // US states
+    let states = await LookupsService.getLookupsByType('States');
+    states = states.map(state => ({
+      value: String(state.val1),
+      label: state.val1
+    }));
+    this.setState({ allUSstates: states });
   }
 
   handleMaterialsChange(data) {
