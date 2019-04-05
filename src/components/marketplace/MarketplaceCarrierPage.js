@@ -434,7 +434,7 @@ class MarketplaceCarrierPage extends Component {
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobViewForm
             jobId={jobId}
-            toggle={this.toggleAddJobModal}
+            toggle={this.toggleViewJobModal}
           />
         </div>
       </Modal>
