@@ -245,8 +245,11 @@ class DashboardCustomerPage extends Component {
           {this.renderGoTo()}
 
           <Row>
-            <Col md={12}>
-              <h3 className="page-title">Jobs</h3>
+            <Col md={10}>
+              <h3 className="page-title">Job Dashboard</h3>
+            </Col>
+            <Col md={2}>
+              <AddJobButton handle={this.toggleNewJobModal}/>
             </Col>
           </Row>
 
@@ -257,13 +260,10 @@ class DashboardCustomerPage extends Component {
             <DashboardObject title="Completed Jobs" val={completedJobCount}/>
             <DashboardObject title="% Completed" val = {completedOffersPercent}/>
           </div>
-
-          <PageTitle/>
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <AddJobButton handle={this.toggleNewJobModal}/>
                   <hr/>
                   <TTable
                     columns={

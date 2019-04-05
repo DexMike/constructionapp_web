@@ -11,8 +11,8 @@ function SideElement ({title, icon, route, custom, handle}) {
   return (
     <ul className="sidebar__block">
       <SidebarLink
-        title={t(title)}
         icon={icon}
+        title={t(title)}
         customIcon={custom}
         route={route}
         onClick={handle}
@@ -36,16 +36,16 @@ class SidebarCarrierContent extends Component {
   render() {
     return (
       <div className="sidebar__content">
-        <SideElement title="Jobs"
-                     icon="home"
+        <SideElement title="Job Dashboard"
+                     icon="ic_assignment"
                      route="/dashboard"
                      onClick={this.hideSidebar}/>
         <SideElement title="Marketplace"
-                     icon="store"
+                     icon="ic_work"
                      route="/marketplace"
                      onClick={this.hideSidebar}/>
         <SideElement title="Trucks"
-                     custom="dump_truck"
+                     icon="ic_local_shipping"
                      route="/trucks"
                      onClick={this.hideSidebar}/>
 
@@ -59,15 +59,15 @@ class SidebarCarrierContent extends Component {
           />
         </ul> */}
         <SideElement title="Drivers"
-                     icon="people"
+                     icon="ic_airline_seat_recline_normal"
                      route="/drivers"
                      onClick={this.hideSidebar}/>
         <SideElement title="Reports"
-                     icon="assignment"
+                     icon="ic_timeline"
                      route="/Reports"
                      onClick={this.hideSidebar}/>
         <SideElement title="Settings"
-                     icon="settings"
+                     icon="ic_settings"
                      route="/Settings"
                      onClick={this.hideSidebar}/>
       </div>

@@ -83,7 +83,6 @@ class CreateJobFormOne extends PureComponent {
 
   async componentDidMount() {
     const {firstTabData} = this.props;
-
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
       const p = firstTabData();
@@ -143,6 +142,14 @@ class CreateJobFormOne extends PureComponent {
         allMaterials,
         allTruckTypes
       });
+    }
+  }
+
+
+  componentWillReceiveProps(nextProps, nextContext) {
+    // console.log(nextProps.validateOnTabClick);
+    if (nextProps.validateOnTabClick) {
+      this.goToSecondFromFirst();
     }
   }
 
@@ -382,12 +389,10 @@ class CreateJobFormOne extends PureComponent {
   async saveTruck(e) {
     e.preventDefault();
     e.persist();
-
     if (!this.isFormValid()) {
       // this.setState({ maxCapacityTouched: true });
       return;
     }
-
     this.saveTruckInfo(true);
   }
 
@@ -425,11 +430,14 @@ class CreateJobFormOne extends PureComponent {
   }
 
   goToSecondFromFirst() {
+    const {validateRes} = this.props;
     if (!this.isFormValid()) {
+      validateRes(false);
       // TODO display error message
       // console.error('didnt put all the required fields.');
       return;
     }
+    validateRes(true);
     const {gotoSecond} = this.props;
     gotoSecond(this.state);
   }
