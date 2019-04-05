@@ -1,5 +1,5 @@
 {
-  "Dashboard": "Dashboard",
+  "Dashboard": "Tablero",
   "Search for Trucks": "Busca camiones",
   "Reports": "Informes",
   "Settings": "Configuración",
@@ -14,5 +14,8 @@
   "Potential Earnings": "Ganancias Potenciales",
   "Drivers": "Conductores",
   "Trucks": "Camiones",
-  "Marketplace": "Marketplace"
+  "Marketplace": "Mercado",
+  "Truck Search": "Buscar camiones",
+  "Job Dashboard": "Tablero de trabajos",
+  "Reporting": "Informes"
 }
