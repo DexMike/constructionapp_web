@@ -180,7 +180,7 @@
 
     input {
       width: 100% !important;
-      border: none;
+      border: none !important;
       padding: 0;
     }
 
@@ -285,7 +285,7 @@
 }
 
 .form__form-group {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   width: 100%;
   position: relative;
 }
@@ -305,7 +305,7 @@
 }
 
 .form__form-group-label {
-  margin-bottom: 4px;
+  //margin-bottom: 4px;
   display: inline-block;
 
   @include themify($themes) {

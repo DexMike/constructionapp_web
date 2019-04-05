@@ -20,6 +20,7 @@
 
 .wizard__steps {
   display: flex;
+  border-bottom: 1px #cccccc solid;
 }
 
 .wizard__step {
@@ -43,8 +44,8 @@
   }
 
   &.wizard__step--active {
-    background: $color-blue;
-    border-color: $color-blue;
+    background: #006f53;
+    border-color: #006f53;
 
     p {
       color: #ffffff;
@@ -68,4 +69,8 @@
   color: $color-additional;
   margin: 0;
   max-width: 410px;
+}
+
+.m-top20 {
+  margin:20px;
 }
