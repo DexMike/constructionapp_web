@@ -588,7 +588,7 @@ class AddTruckFormOne extends PureComponent {
                     Tell us about your truck
                   </h3>
                 </div>
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6 ">
                   <span className="form__form-group-label">Truck description</span>
                   <input
                     name="description"
@@ -601,7 +601,7 @@ class AddTruckFormOne extends PureComponent {
                   <input type="hidden" val={defaultDriverId}/>
                   <input type="hidden" val={driversId}/>
                 </div>
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6">
                   <span className="form__form-group-label">Truck Type</span>
                   <SelectField
                     input={
@@ -690,6 +690,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-3 form__form-group">
+                  <span className="label">$ Cost / Hour</span>
                   <TField
                     input={
                       {
@@ -698,12 +699,13 @@ class AddTruckFormOne extends PureComponent {
                         value: ratesCostPerHour,
                       }
                     }
-                    placeholder="Cost per Hour $"
+                    placeholder="0"
                     type="number"
                     meta={reqHandlerMinRate}
                   />
                 </div>
                 <div className="col-md-3 form__form-group">
+                  <span className="label">Minimum hours</span>
                   <TField
                     input={
                       {
@@ -712,7 +714,7 @@ class AddTruckFormOne extends PureComponent {
                         value: minOperatingTime
                       }
                     }
-                    placeholder="Minimum hours"
+                    placeholder="0"
                     type="number"
                     meta={reqHandlerMinTime}
                   />
@@ -726,6 +728,7 @@ class AddTruckFormOne extends PureComponent {
                   />
                 </div>
                 <div className="col-md-3 form__form-group">
+                  <span className="label">Cost per Ton $</span>
                   <TField
                     input={
                       {
@@ -734,7 +737,7 @@ class AddTruckFormOne extends PureComponent {
                         value: ratesCostPerTon
                       }
                     }
-                    placeholder="Cost per Ton $"
+                    placeholder="0"
                     type="number"
                     meta={reqHandlerCostTon}
                   />
@@ -746,7 +749,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6">
                   <span className="form__form-group-label">
                     Maximum Capacity (Tons)
                   </span>
