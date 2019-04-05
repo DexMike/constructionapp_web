@@ -1,0 +1,66 @@
+.kpi-filter .kpi-filter-body {
+    background-color: #F9F9F9 !important;
+}
+
+.kpi-filter .form__form-group-datepicker {
+    background-color: #FFF !important;
+    height: 28px !important;
+    width: 100% !important;
+    border-radius: 3px !important;
+    padding-left: 8px !important;  
+   
+    border: 1px solid #CACACA !important;
+    box-shadow: none !important;
+    outline :none !important;
+}
+.kpi-filter .form__form-group {
+    margin-bottom: 2px !important;
+}
+
+.kpi-filter .Select-input, .Select-control {
+    height: 26px !important;
+}
+
+.kpi-filter .Select-value {
+    line-height: 26px !important;
+}
+
+.kpi-filter .form__form-group-select {
+    height: 26px !important;
+    width: 100% !important;
+}
+
+.kpi-filter .calendarIcon {
+    position: absolute;
+    top: 0px;
+    right: 22px;
+    padding: 2px;
+}
+
+.kpi-container {
+    background-color: #f9f9f9;
+    margin: 0 !important;
+    padding: 16px !important; 
+}
+
+.kpi-container .upper-kpi .dashboard__card-widget {
+    height: 141px !important;
+    word-break: break-all;
+}
+
+.kpi-container .upper-kpi .card__title {
+    color: #333333;
+    font-size: 16px;
+    text-transform: none !important;
+}
+
+.kpi-container .upper-kpi h4 {
+    font-size: 38px;
+    color: #333333;
+}
+
+.kpi-container .upper-kpi h3 {
+    font-size: 62px;
+    color: #333333;
+    padding-top: 10px !important;
+}

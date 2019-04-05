@@ -188,17 +188,9 @@ class EquipmentListPage extends Component {
         <React.Fragment>
           { this.renderModal() }
           <Container className="dashboard">
-            <div className="breadcrumbs">
-              <button type="button" className="app-link"
-                onClick={() => this.handlePageClick('Dashboard')}
-              >
-                Dashboard
-              </button>
-              &nbsp;&#62; Trucks
-            </div>
             <Row>
               <Col md={12}>
-                <h3 className="page-title">Equipment</h3>
+                <h3 className="page-title">Trucks</h3>
               </Col>
             </Row>
             <Row>

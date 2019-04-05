@@ -4,34 +4,32 @@ import {
   Card,
   CardBody,
   Col,
-  Button,
   Container,
   Modal,
   Row
 } from 'reactstrap';
-// import classnames from 'classnames';
+
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
-import NumberFormat from 'react-number-format';
+import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-
-import EquipmentService from '../../api/EquipmentService';
-import JobService from '../../api/JobService';
-import LookupsService from '../../api/LookupsService';
-import JobCreateForm from '../jobs/JobCreateForm';
-
-import truckImage from '../../img/default_truck.png';
-import CompanyService from '../../api/CompanyService';
-import AddressService from '../../api/AddressService';
-import ProfileService from '../../api/ProfileService';
-import JobMaterialsService from '../../api/JobMaterialsService';
-import JobsService from '../../api/JobService';
-import AgentService from '../../api/AgentService';
-import MultiSelect from '../common/TMultiSelect';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
+import MultiSelect from '../common/TMultiSelect';
+
+import AddressService from '../../api/AddressService';
+import AgentService from '../../api/AgentService';
+import CompanyService from '../../api/CompanyService';
+import EquipmentService from '../../api/EquipmentService';
+import JobService from '../../api/JobService';
+import JobCreateForm from '../jobs/JobCreateForm';
+import JobMaterialsService from '../../api/JobMaterialsService';
+import LookupsService from '../../api/LookupsService';
+import ProfileService from '../../api/ProfileService';
+
+import truckImage from '../../img/default_truck.png';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
@@ -73,8 +71,8 @@ class MarketplaceCarrierPage extends Component {
 
         startAvailability: null,
         endAvailability: null,
-        rate: 'Any',
-        minTons: 'Any',
+        rate: '',
+        minTons: '',
         minHours: '',
         minCapacity: '',
 
@@ -97,6 +95,7 @@ class MarketplaceCarrierPage extends Component {
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
+
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
@@ -105,26 +104,32 @@ class MarketplaceCarrierPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
   }
 
   async componentDidMount() {
     let {
       startDate,
       endDate,
-      filters
+      filters,
+      jobs
     } = this.state;
 
     startDate = new Date();
+    startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();
     endDate.setDate(startDate.getDate() + 7);
+    endDate.setHours(23, 59, 59); // 23:59:59
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    const jobs = await this.fetchJobs();
+    await this.fetchJobs();
+    jobs = await this.fetchJobs();
     await this.fetchFilterLists();
 
     if (jobs) {
-      // Promise.all(
+      this.fetchJobMaterials(jobs);
+
       jobs.map(async (job) => {
         const newJob = job;
 
@@ -140,8 +145,6 @@ class MarketplaceCarrierPage extends Component {
 
         return newJob;
       });
-      // );
-
     }
 
     this.setState(
@@ -221,54 +224,91 @@ class MarketplaceCarrierPage extends Component {
     });
   }
 
-  availableButtonColor(isAvailable) {
-    return isAvailable ? 'success' : 'minimal';
-  }
+  // availableButtonColor(isAvailable) {
+  //   return isAvailable ? 'success' : 'minimal';
+  // }
+  //
+  // unavailableButtonColor(isAvailable) {
+  //   return isAvailable ? 'success' : 'minimal';
+  // }
+  //
+  // makeAvailable() {
+  //   const {
+  //     isAvailable
+  //   } = this.state;
+  //   // console.log(`Before swap: ${isAvailable}`);
+  //   const newValue = !isAvailable;
+  //   // console.log(`switching makeAvailable to ${newValue}`);
+  //   this.setState({ isAvailable: newValue });
+  // }
 
-  unavailableButtonColor(isAvailable) {
-    return isAvailable ? 'success' : 'minimal';
-  }
+  async fetchJobMaterials(jobs) {
+    const newJobs = jobs;
+    /* eslint-disable no-await-in-loop */
+    for (const [key, value] of Object.entries(jobs)) {
+      try {
+        let truckMaterials = await
+          JobMaterialsService.getJobMaterialsByJobId(value.id);
+        truckMaterials = truckMaterials.map(material => ({
+          material: material.value
+        }));
 
-  makeAvailable() {
-    const {
-      isAvailable
-    } = this.state;
-    console.log('Before swap: ' + isAvailable);
-    const newValue = !isAvailable;
-    console.log('switching makeAvailable to ' + newValue);
-    this.setState({ isAvailable: newValue });
+        if ((truckMaterials[0].material).includes('Any')) { // If we have 'Any', show all materials
+          let allMaterials = await LookupsService.getLookupsByType('MaterialType'); // Get all materials from Lookups
+          allMaterials = allMaterials.map(item => item.val1); // Get only val1 values
+          allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
+          newJobs[key].materials = allMaterials.join(', \n');
+        } else {
+          newJobs[key].materials = truckMaterials.map(e => e.material).join('\n');
+        }
+      } catch (error) {
+        newJobs[key].materials = '';
+      }
+    }
+    this.setState({ jobs: newJobs });
   }
 
   async fetchJobs() {
     const { filters } = this.state;
-
     const jobs = await JobService.getJobByFilters(filters);
 
     if (jobs) {
-      if (jobs != null) {
-        jobs.map((job) => {
-          const newJob = job;
-          //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-          //     newEquipment.companyName = company.legalName;
-          // console.log(companyName);
-          // console.log(job.companyName)
-          // const materialsList = await EquipmentMaterialsService
-          // .getEquipmentMaterialsByJobId(job.id);
-          // const materials = materialsList.map(materialItem => materialItem.value);
-          // newJob.material = this.equipmentMaterialsAsString(materials);
-          // console.log(companyName);
-          // console.log(job.material);
-          newJob.modifiedOn = moment(job.modifiedOn)
-            .format();
-          newJob.createdOn = moment(job.createdOn)
-            .format();
-          return job;
-        });
-      }
+      this.fetchJobMaterials(jobs);
 
+      jobs.map(async (job) => {
+        const newJob = job;
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+        newJob.modifiedOn = moment(job.modifiedOn)
+          .format();
+        newJob.createdOn = moment(job.createdOn)
+          .format();
+
+        return newJob;
+      });
       this.setState({ jobs });
     }
-    return jobs;
+  }
+
+  handleFilterChangeDelayed(e) {
+    const self = this;
+    const { value } = e.target;
+    const { filters } = this.state;
+
+    if (self.state.typingTimeout) {
+      clearTimeout(self.state.typingTimeout);
+    }
+
+    filters[e.target.name] = value;
+
+    self.setState({
+      typing: false,
+      typingTimeout: setTimeout(async () => {
+        await this.fetchJobs();
+      }, 1000),
+      filters
+    });
   }
 
   async handleFilterChange(e) {
@@ -291,13 +331,10 @@ class MarketplaceCarrierPage extends Component {
     const { filters } = this.state;
     filters.materialType = data;
     this.setState({
-      // selectedMaterials: data
       filters
     }, async function changed() {
       await this.fetchJobs();
-      // console.log(this.state);
     });
-    /**/
   }
 
   handlePageClick(menuItem) {
@@ -316,7 +353,7 @@ class MarketplaceCarrierPage extends Component {
     }, id);
     selectedJob.materials = ['Any'];
     this.setState({
-      selectedJob,
+      // selectedJob,
       modal: true
     });
   }
@@ -416,7 +453,6 @@ class MarketplaceCarrierPage extends Component {
     } = this.state;
 
     if (jobs) {
-      // Promise.all(
       jobs = jobs.map((job) => {
         const newJob = job;
 
@@ -450,8 +486,10 @@ class MarketplaceCarrierPage extends Component {
         newJob.newStartDate = TFormat.asDate(job.startTime);
 
         return newJob;
-      })
-      // );
+      });
+    } else {
+      // console.log("MarketPlaceCarrierPage: no Jobs");
+      jobs = [];
     }
 
     return (
@@ -478,7 +516,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'newRate',
-                        displayName: 'Hourly Rate'
+                        displayName: 'Hourly Rate',
                       },
                       {
                         name: 'newSize',
@@ -490,7 +528,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
-                        name: 'material',
+                        name: 'materials',
                         displayName: 'Materials'
                       },
                       {
@@ -515,71 +553,6 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
-  renderToggle() {
-    const {
-      // Lists
-      rateTypeList,
-      isAvailable,
-      filters
-    } = this.state;
-
-    return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-
-            <Col lg={12}>
-
-              <Col>
-                Select by:
-
-                {/*<Button color={this.availableButtonColor(isAvailable)}*/}
-                        {/*type="button"*/}
-                        {/*onClick={this.makeAvailable}*/}
-                        {/*className="previous">*/}
-                  {/*Hour*/}
-                {/*</Button>*/}
-                {/*<Button color={this.unavailableButtonColor(!isAvailable)}*/}
-                        {/*type="button"*/}
-                        {/*onClick={this.makeAvailable}*/}
-                        {/*className="previous">*/}
-                  {/*Ton*/}
-                {/*</Button>*/}
-
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handleSelectFilterChange,
-                      name: 'rateType',
-                      value: filters.rateType
-                    }
-                  }
-                  meta={
-                    {
-                      touched: false,
-                      error: 'Unable to select'
-                    }
-                  }
-                  value={filters.rateType}
-                  options={
-                    rateTypeList.map(rateType => ({
-                      name: 'rateType',
-                      value: rateType,
-                      label: rateType
-                    }))
-                  }
-                  placeholder={rateTypeList[0]}
-                />
-              </Col>
-            </Col>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    )
-  }
-
   renderFilter() {
     const {
       // Lists
@@ -600,37 +573,6 @@ class MarketplaceCarrierPage extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-                <Col lg={12}>
-
-                  {/*<Col>*/}
-                    {/*Select by:*/}
-                    {/*<TSelect*/}
-                      {/*input={*/}
-                        {/*{*/}
-                          {/*onChange: this.handleSelectFilterChange,*/}
-                          {/*name: 'rateType',*/}
-                          {/*value: filters.rateType*/}
-                        {/*}*/}
-                      {/*}*/}
-                      {/*meta={*/}
-                        {/*{*/}
-                          {/*touched: false,*/}
-                          {/*error: 'Unable to select'*/}
-                        {/*}*/}
-                      {/*}*/}
-                      {/*value={filters.rateType}*/}
-                      {/*options={*/}
-                        {/*rateTypeList.map(rateType => ({*/}
-                          {/*name: 'rateType',*/}
-                          {/*value: rateType,*/}
-                          {/*label: rateType*/}
-                        {/*}))*/}
-                      {/*}*/}
-                      {/*placeholder={rateTypeList[0]}*/}
-                    {/*/>*/}
-                  {/*</Col>*/}
-
-                </Col>
 
                 <Col lg={12}>
                   <Row lg={12} style={{ background: '#eef4f8' }}>
@@ -638,10 +580,13 @@ class MarketplaceCarrierPage extends Component {
                       Date Range
                     </Col>
                     <Col className="filter-item-title">
+                      Rate Type
+                    </Col>
+                    <Col className="filter-item-title">
                       Min Rate
                     </Col>
                     <Col className="filter-item-title">
-                      Min Tons
+                      Minimum
                     </Col>
                     <Col className="filter-item-title">
                       Truck Type
@@ -697,21 +642,57 @@ class MarketplaceCarrierPage extends Component {
 
                     </Col>
                     <Col>
-                      <input name="rate"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Any"
-                             value={filters.rate}
-                             onChange={this.handleFilterChange}
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder={rateTypeList[0]}
                       />
                     </Col>
                     <Col>
-                      <input name="minTons"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Any"
-                             value={filters.minTons}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'rate',
+                            value: filters.rate
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </Col>
+                    <Col>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'minTons',
+                            value: filters.minTons
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
@@ -741,12 +722,17 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
-                      <input name="numEquipments"
-                             className="filter-text"
-                             type="text"
-                             placeholder="1"
-                             value={filters.numEquipments}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'numEquipments',
+                            value: filters.numEquipments
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col>
@@ -801,225 +787,6 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
-  renderEquipmentRow(equipment) {
-    return (
-      <React.Fragment>
-        <Row md={12} style={{ width: '100%' }}>
-          {/* 100 85 */}
-          <Col md={2}>
-            <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
-                 style={{ width: '118px' }}
-            />
-          </Col>
-
-          <Col md={4}>
-            <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-              <Col className="customer-truck-results-title">
-                Type: {equipment.type}
-              </Col>
-              <Col className="customer-truck-results-title">
-                Capacity:
-                <NumberFormat
-                  value={equipment.maxCapacity}
-                  displayType="text"
-                  decimalSeparator="."
-                  decimalScale={0}
-                  fixedDecimalScale
-                  thousandSeparator
-                  prefix=" "
-                  suffix=" Tons"
-                />
-              </Col>
-            </Row>
-            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
-              <Col>
-                Rate
-              </Col>
-              <Col>
-                Minimum
-              </Col>
-            </Row>
-            {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
-              <Row>
-                <Col>
-
-                  <span>
-                    <NumberFormat
-                      value={equipment.hourRate}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix="$ "
-                      suffix=" / Hour"
-                    />
-                  </span>
-
-                </Col>
-                <Col>
-                  <NumberFormat
-                    value={equipment.minHours}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator
-                    suffix=" hours min"
-                  />
-                </Col>
-              </Row>
-            )}
-            {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
-              <Row>
-                <Col>
-
-                  <span>
-                    <NumberFormat
-                      value={equipment.tonRate}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix="$ "
-                      suffix=" / Ton"
-                    />
-                  </span>
-
-                </Col>
-                <Col>
-                  <NumberFormat
-                    value={equipment.minCapacity}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator
-                    suffix=" tons min"
-                  />
-                </Col>
-              </Row>
-            )}
-          </Col>
-
-          <Col md={6}>
-            <Row style={{ background: '#c7dde8' }}>
-              <Col className="customer-truck-results-title">
-                Name: {equipment.name}
-              </Col>
-              {/* <Col md={6} className="customer-truck-results-title> */}
-              {/* Company: {equipment.companyName} */}
-              {/* </Col> */}
-            </Row>
-            {/* <Row style={{borderBottom: '3px solid rgb(199, 221, 232)'}}> */}
-            {/* <Col> */}
-            {/* TODO needs API for equipment materials */}
-            {/* Materials Hauled */}
-            {/* </Col> */}
-            {/* </Row> */}
-            <Row>
-              <Col>
-                {/* HMA */}
-                <br/>
-                {/* Stone */}
-                <br/>
-                {/* Sand */}
-                <br/>
-              </Col>
-              <Col>
-                {/* Gravel */}
-                <br/>
-                {/* Recycling */}
-                <br/>
-              </Col>
-              <Col>
-                <button type="button"
-                        className="btn btn-primary"
-                        onClick={() => this.handleJobEdit(job.id)}
-                        style={{ marginTop: '10px' }}
-                >
-                  Request
-                </button>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-        <hr/>
-      </React.Fragment>
-    );
-  }
-
-  renderEquipmentTable() {
-    const {
-      sortByList,
-      filters,
-      equipments,
-      jobs
-    } = this.state;
-
-    return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-              <Row>
-                <Col md={6} id="equipment-display-count">
-                  Displaying&nbsp;
-                  {jobs.length}
-                  &nbsp;of&nbsp;
-                  {jobs.length}
-                </Col>
-                <Col md={6}>
-                  <Row>
-                    <Col md={6} id="sortby">Sort By</Col>
-                    <Col md={6}>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'sortBy',
-                            value: filters.sortBy
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.sortBy}
-                        options={
-                          sortByList.map(sortBy => ({
-                            name: 'sortBy',
-                            value: sortBy,
-                            label: sortBy
-                          }))
-                        }
-                        placeholder={sortByList[0]}
-                      />
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-
-              <Row style={{ marginTop: '10px' }}>
-                {
-                  equipments.map(equipment => (
-                    <React.Fragment key={equipment.id}>
-                      {this.renderEquipmentRow(equipment)}
-                    </React.Fragment>
-                  ))
-                }
-              </Row>
-
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    );
-  }
-
   render() {
     const { loaded } = this.state;
     if (loaded) {
@@ -1028,10 +795,7 @@ class MarketplaceCarrierPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          {this.renderToggle()}
           {this.renderFilter()}
-          {/* {this.renderTable()} */}
-          {/* {this.renderEquipmentTable()} */}
           {this.renderJobList()}
         </Container>
       );

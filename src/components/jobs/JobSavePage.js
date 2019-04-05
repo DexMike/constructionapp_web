@@ -113,16 +113,7 @@ class JobSavePage extends Component {
         return (
           <div className="container">
             {this.renderGoTo()}
-            <button type="button" className="app-link"
-              onClick={() => this.handlePageClick('Dashboard')}
-            >
-              Dashboard
-            </button>
-            &#62;
-            <button type="button" className="app-link" onClick={() => this.handlePageClick('Job')}>
-              Jobs
-            </button>
-            &nbsp;&#62;&nbsp;
+
             {job.company.legalName}
             &nbsp;&#62;&nbsp;
             {job.name}

@@ -384,6 +384,29 @@ class MarketplaceCustomerPage extends Component {
       </Container>
     );
   }
+
+  // render() {
+  //   const { loaded } = this.state;
+  //   if (loaded) {
+  //     return (
+  //       <Container className="dashboard">
+  //         {this.renderModal()}
+  //         {this.renderGoTo()}
+  //         {this.renderTitle()}
+  //         {this.renderFilter()}
+  //         {/* {this.renderTable()} */}
+  //         {/* {this.renderEquipmentTable()} */}
+  //         {this.renderJobList()}
+  //       </Container>
+  //     );
+  //   }
+  //   return (
+  //     <Container className="dashboard">
+  //       Loading...
+  //     </Container>
+  //   );
+  // }
+  //
 }
 
 export default MarketplaceCustomerPage;
