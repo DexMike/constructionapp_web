@@ -26,13 +26,8 @@ import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import JobViewForm from './JobViewForm';
-
-import CompanyService from '../../api/CompanyService';
-import AddressService from '../../api/AddressService';
-import ProfileService from '../../api/ProfileService';
 import JobCreateForm from '../jobs/JobCreateForm';
 import JobMaterialsService from '../../api/JobMaterialsService';
-import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
 
 import truckImage from '../../img/default_truck.png';
