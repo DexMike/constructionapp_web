@@ -1,6 +1,6 @@
 import AgentService from './AgentService';
 
-const PATH = '/groups';
+const PATH = '/grouplists';
 
 class GroupService extends AgentService {
   static async getGroups() {
@@ -20,6 +20,11 @@ class GroupService extends AgentService {
 
   static async getGroupByFavoriteAndCompanyId(companyId) {
     const response = await this.get(`/company/${companyId}/favorite${PATH}`);
+    return (response);
+  }
+
+  static async getGroupListByUserName(userId) {
+    const response = await this.get(`/user/${userId}/favorite${PATH}`);
     return (response);
   }
 

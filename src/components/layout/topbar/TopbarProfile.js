@@ -5,17 +5,14 @@ import { Auth } from 'aws-amplify';
 import TopbarMenuLink from './TopbarMenuLink';
 import Ava from '../../../img/ava.png';
 import i18n from "i18next";
-import SidebarLink from "../sidebar/SidebarLink";
-import ReactCountryFlag from "react-country-flag";
 import {Link} from "react-router-dom";
-import ThemeContext from "../../ThemeContext";
 
 // const Ava = `${process.env.PUBLIC_URL}/img/ava.png`;
 
 function ToggleLanguage({handle}) {
   let toggle_message = (i18n.language === "us") ? "Spanish" : ("English");
   return (
-    <Link className="topbar__link" to="" onClick={handle}>
+    <Link className="topbar__link" to={window.location.pathname} onClick={handle}>
       <span className={`topbar__link-icon lnr lnr-earth`}/>
       <p className="topbar__link-title">{toggle_message}</p>
     </Link>
