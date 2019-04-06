@@ -24,9 +24,10 @@ import AgentService from '../../api/AgentService';
 import CompanyService from '../../api/CompanyService';
 import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
+import LookupsService from '../../api/LookupsService';
+import JobViewForm from './JobViewForm';
 import JobCreateForm from '../jobs/JobCreateForm';
 import JobMaterialsService from '../../api/JobMaterialsService';
-import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
 
 import truckImage from '../../img/default_truck.png';
@@ -44,6 +45,7 @@ class MarketplaceCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
+      jobId: 0,
       selectedJob: {},
 
       // Look up lists
@@ -104,6 +106,8 @@ class MarketplaceCarrierPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.toggleViewJobModal = this.toggleViewJobModal.bind(this);
+    this.toggleViewJobModalClear = this.toggleViewJobModalClear.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
   }
 
@@ -135,7 +139,7 @@ class MarketplaceCarrierPage extends Component {
 
         const company = await CompanyService.getCompanyById(newJob.companiesId);
         newJob.companyName = company.legalName;
-
+        // console.log('Name ', newJob.companyName);
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         const materials = materialsList.map(materialItem => materialItem.value);
         newJob.material = this.equipmentMaterialsAsString(materials);
@@ -347,11 +351,12 @@ class MarketplaceCarrierPage extends Component {
     const { jobs } = this.state;
     const [selectedJob] = jobs.filter((job) => {
       if (id === job.id) {
+        console.log('job  ', job);
         return job;
       }
       return false;
     }, id);
-    selectedJob.materials = ['Any'];
+    // selectedJob.materials = ['Any'];
     this.setState({
       // selectedJob,
       modal: true
@@ -392,6 +397,22 @@ class MarketplaceCarrierPage extends Component {
     return filters.materialType;
   }
 
+  async toggleViewJobModal() {
+    const { modal } = this.state;
+    this.setState({ modal: !modal });
+    await this.fetchJobs();
+  }
+
+  async toggleViewJobModalClear(id) {
+    const { modal } = this.state;
+    this.setState({
+      // equipmentId: 0, // reset equipmentID, not companyID
+      // selectedItemData: {},
+      modal: !modal,
+      jobId: id
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -402,35 +423,27 @@ class MarketplaceCarrierPage extends Component {
 
   renderModal() {
     const {
-      // equipments,
-      // startAvailability,
-      // endAvailability,
-      // equipmentType,
-      // minCapacity,
-      // materials,
-      // zipCode,
-      // rateType,
       modal,
-      selectedEquipment
+      jobId
     } = this.state;
     return (
       <Modal
         isOpen={modal}
-        toggle={this.toggleAddJobModal}
+        toggle={this.toggleViewJobModal}
         className="modal-dialog--primary modal-dialog--header"
       >
-        <div className="modal__header">
-          <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleAddJobModal}
-          />
-          <h4 className="bold-text modal__title">Job Request</h4>
-        </div>
+        {/*<div className="modal__header">*/}
+          {/*<button type="button" className="lnr lnr-cross modal__close-btn"*/}
+                  {/*onClick={this.toggleViewJobModal}*/}
+          {/*/>*/}
+          {/*    const company = await CompanyService.getCompanyById(selectedJob.companiesId); */}
+          {/* /!*selectedJob.companyName = company.legalName;*!/ */}
+          {/*<h4 className="bold-text modal__title"> Hi </h4>*/}
+        {/*</div>*/}
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          <JobCreateForm
-            selectedEquipment={selectedEquipment}
-            closeModal={this.toggleAddJobModal}
-            selectedMaterials={this.returnSelectedMaterials}
-            getAllMaterials={this.retrieveAllMaterials}
+          <JobViewForm
+            jobId={jobId}
+            toggle={this.toggleViewJobModal}
           />
         </div>
       </Modal>
@@ -498,14 +511,14 @@ class MarketplaceCarrierPage extends Component {
           <Col md={12}>
             <Card>
               <CardBody>
-                Carrier
+                Carrier Market Place
                 <TTable
                   columns={
                     [
-                      // {
-                      //   name: 'id',
-                      //   displayName: 'Job Id'
-                      // },
+                      {
+                        name: 'id',
+                        displayName: 'Job Id'
+                      },
                       {
                         name: 'newStartDate',
                         displayName: 'Start Date'
@@ -542,7 +555,7 @@ class MarketplaceCarrierPage extends Component {
                     ]
                   }
                   data={jobs}
-                  handleIdClick={this.handleJobEdit}
+                  handleIdClick={this.toggleViewJobModalClear}
                 />
 
               </CardBody>
