@@ -138,7 +138,7 @@ class DashboardCarrierPage extends Component {
         const address = await AddressService.getAddressById(newJob.startAddress);
         newJob.zip = address.zipCode;
 
-        // this.setState({ loaded: true });
+        this.setState({ loaded: true });
 
         return newJob;
       });
@@ -266,7 +266,6 @@ class DashboardCarrierPage extends Component {
     this.setState({ jobs });
     return jobs;
   }
-
 
   handleFilterChangeDelayed(e) {
     const self = this;
@@ -820,7 +819,7 @@ class DashboardCarrierPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying 80 of {newJobCount}
+                  Displaying {newJobCount} of {newJobCount}
                   <TTable
                     columns={
                       [

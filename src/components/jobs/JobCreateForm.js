@@ -544,7 +544,7 @@ class JobCreateForm extends Component {
             </div>
           </div>
           <div className="col-sm-3">
-            <div className="form__form-group">
+            <div className="">
               <span className="form__form-group-label">Capacity</span>
               <div className="form__form-group-field">
                 <span>
@@ -664,6 +664,7 @@ class JobCreateForm extends Component {
                       placeholder="Job # 242423"
                       onChange={this.handleJobInputChange}
                 /> */ }
+                <span className="form__form-group-label">Job Name</span>
                 <TField
                   input={
                     {

@@ -361,12 +361,6 @@ class ReportsCarrierPage extends Component {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
-          <button type="button" className="app-link"
-                  onClick={() => this.handlePageClick('Dashboard')}
-          >
-            Dashboard
-          </button>
-
           <Row>
             <Col md={12}>
               <h3 className="page-title">Reporting</h3>
@@ -415,7 +409,7 @@ class ReportsCarrierPage extends Component {
                             onChange={this.startDateChange}
                             dateFormat="MM-dd-yy"
                           />
-                          
+
                         </div>
                         <i className="material-icons iconSet calendarIcon">calendar_today</i>
                       </div>
