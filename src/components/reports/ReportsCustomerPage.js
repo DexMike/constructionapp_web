@@ -395,8 +395,17 @@ class ReportsCustomerPage extends Component {
     }
     return false;
   }
+  renderTitle() {
+    return (
+      <Row>
+        <Col md={12}>
+          <h3 className="page-title">Find a Job</h3>
+        </Col>
+      </Row>
+    );
+  }
 
-  render() {
+  renderFilter() {
     const {
       loaded,
       startDate,
@@ -405,77 +414,70 @@ class ReportsCustomerPage extends Component {
       endDateComp,
       selectIndex
     } = this.state;
-    let { jobs } = this.state;
-    let newJobCount = 0;
-    let acceptedJobCount = 0;
-    const totalJobs = jobs.length;
-    let inProgressJobCount = 0;
-    let completedJobCount = 0;
-    let potentialIncome = 0;
-
-    let jobsCompleted = 0;
-    let totalEarnings = 0;
-    let earningsPerJob = 0;
-    let cancelledJobs = 0;
-    let jobsPerTruck = 0;
-    let idleTrucks = 0;
-    let completedOffersPercent = 0;
-
-    jobs = jobs.map((job) => {
-      const newJob = job;
-      const tempRate = newJob.rate;
-      if (newJob.status === 'New') {
-        newJobCount += 1;
-      }
-      if (newJob.status === 'Accepted') {
-        acceptedJobCount += 1;
-      }
-      if (newJob.status === 'In Progress') {
-        inProgressJobCount += 1;
-      }
-      if (newJob.status === 'Job Completed') {
-        completedJobCount += 1;
-      }
-      if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-      }
-      if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
-      }
-
-      newJob.newStartDate = TFormat.asDate(job.startTime);
-
-      potentialIncome += tempRate * newJob.rateEstimate;
-
-      return newJob;
-    });
-
-    jobsCompleted = newJobCount * 20;
-    totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
-    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
-    cancelledJobs = 1;
-    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
-    idleTrucks = 1;
-
-    // Jobs completed / Job offers responded to
-    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
-
-    potentialIncome = TFormat.asMoney(potentialIncome);
+    // let { jobs } = this.state;
+    // let newJobCount = 0;
+    // let acceptedJobCount = 0;
+    // const totalJobs = jobs.length;
+    // let inProgressJobCount = 0;
+    // let completedJobCount = 0;
+    // let potentialIncome = 0;
+    //
+    // let jobsCompleted = 0;
+    // let totalEarnings = 0;
+    // let earningsPerJob = 0;
+    // let cancelledJobs = 0;
+    // let jobsPerTruck = 0;
+    // let idleTrucks = 0;
+    // let completedOffersPercent = 0;
+    //
+    // jobs = jobs.map((job) => {
+    //   const newJob = job;
+    //   const tempRate = newJob.rate;
+    //   if (newJob.status === 'New') {
+    //     newJobCount += 1;
+    //   }
+    //   if (newJob.status === 'Accepted') {
+    //     acceptedJobCount += 1;
+    //   }
+    //   if (newJob.status === 'In Progress') {
+    //     inProgressJobCount += 1;
+    //   }
+    //   if (newJob.status === 'Job Completed') {
+    //     completedJobCount += 1;
+    //   }
+    //   if (newJob.rateType === 'Hour') {
+    //     newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+    //     newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+    //     newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+    //   }
+    //   if (newJob.rateType === 'Ton') {
+    //     newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+    //     newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+    //     newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+    //   }
+    //
+    //   newJob.newStartDate = TFormat.asDate(job.startTime);
+    //
+    //   potentialIncome += tempRate * newJob.rateEstimate;
+    //
+    //   return newJob;
+    // });
+    //
+    // jobsCompleted = newJobCount * 20;
+    // totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
+    // earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
+    // cancelledJobs = 1;
+    // jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    // idleTrucks = 1;
+    //
+    // // Jobs completed / Job offers responded to
+    // completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+    //
+    // potentialIncome = TFormat.asMoney(potentialIncome);
     // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderGoTo()}
-          <Row>
-            <Col md={12}>
-              <h3 className="page-title">Reporting</h3>
-            </Col>
-          </Row>
-
           <div className="row date-filter">
             <div className="col-12 col-md-12 col-lg-12">
               <div className="card">
@@ -613,16 +615,91 @@ class ReportsCustomerPage extends Component {
               </div>
             </div>
           </div>
+
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderTopCards() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex
+    } = this.state;
+    let { jobs } = this.state;
+    let newJobCount = 0;
+    let acceptedJobCount = 0;
+    const totalJobs = jobs.length;
+    let inProgressJobCount = 0;
+    let completedJobCount = 0;
+    let potentialIncome = 0;
+
+    let jobsCompleted = 0;
+    let totalEarnings = 0;
+    let earningsPerJob = 0;
+    let cancelledJobs = 0;
+    let jobsPerTruck = 0;
+    let idleTrucks = 0;
+    let completedOffersPercent = 0;
+
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      const tempRate = newJob.rate;
+      if (newJob.status === 'New') {
+        newJobCount += 1;
+      }
+      if (newJob.status === 'Accepted') {
+        acceptedJobCount += 1;
+      }
+      if (newJob.status === 'In Progress') {
+        inProgressJobCount += 1;
+      }
+      if (newJob.status === 'Job Completed') {
+        completedJobCount += 1;
+      }
+      if (newJob.rateType === 'Hour') {
+        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      }
+      if (newJob.rateType === 'Ton') {
+        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      }
+
+      newJob.newStartDate = TFormat.asDate(job.startTime);
+
+      potentialIncome += tempRate * newJob.rateEstimate;
+
+      return newJob;
+    });
+
+    jobsCompleted = newJobCount * 20;
+    totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
+    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
+    cancelledJobs = 1;
+    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    idleTrucks = 1;
+
+    // Jobs completed / Job offers responded to
+    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+
+    potentialIncome = TFormat.asMoney(potentialIncome);
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
           <div className="card-body">
-            {
-            /*
-            <Row>
-              <Col md={12}>
-                <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
-              </Col>
-            </Row>
-            */
-            }
             <div className="row">
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
@@ -641,28 +718,7 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
-              {
-              /*
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Pending Jobs</center></h5>
-                    <span><center><h4>{completedJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
-              */
-              }
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                    <span><center><h4>{completedJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
-              {
-              /*
+
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
@@ -682,8 +738,7 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
-              */
-            }
+
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
@@ -699,7 +754,103 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
+
+              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
+                <div className="card">
+                  <div className="dashboard__card-widget card-body">
+                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
+                    <span><center><h4>{completedJobCount}</h4></center></span>
+                  </div>
+                </div>
+              </div>
             </div>
+
+          </div>
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderComparisonCardReports() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex
+    } = this.state;
+    let { jobs } = this.state;
+    let newJobCount = 0;
+    let acceptedJobCount = 0;
+    const totalJobs = jobs.length;
+    let inProgressJobCount = 0;
+    let completedJobCount = 0;
+    let potentialIncome = 0;
+
+    let jobsCompleted = 0;
+    let totalEarnings = 0;
+    let earningsPerJob = 0;
+    let cancelledJobs = 0;
+    let jobsPerTruck = 0;
+    let idleTrucks = 0;
+    let completedOffersPercent = 0;
+
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      const tempRate = newJob.rate;
+      if (newJob.status === 'New') {
+        newJobCount += 1;
+      }
+      if (newJob.status === 'Accepted') {
+        acceptedJobCount += 1;
+      }
+      if (newJob.status === 'In Progress') {
+        inProgressJobCount += 1;
+      }
+      if (newJob.status === 'Job Completed') {
+        completedJobCount += 1;
+      }
+      if (newJob.rateType === 'Hour') {
+        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      }
+      if (newJob.rateType === 'Ton') {
+        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      }
+
+      newJob.newStartDate = TFormat.asDate(job.startTime);
+
+      potentialIncome += tempRate * newJob.rateEstimate;
+
+      return newJob;
+    });
+
+    jobsCompleted = newJobCount * 20;
+    totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
+    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
+    cancelledJobs = 1;
+    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    idleTrucks = 1;
+
+    // Jobs completed / Job offers responded to
+    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+
+    potentialIncome = TFormat.asMoney(potentialIncome);
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+
+          <div className="card-body">
 
             <Row>
               <Col md={12}>
@@ -708,7 +859,7 @@ class ReportsCustomerPage extends Component {
             </Row>
 
             <div className="row">
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-2 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
@@ -717,7 +868,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
@@ -726,7 +877,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
@@ -735,7 +886,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
@@ -744,7 +895,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
@@ -753,7 +904,7 @@ class ReportsCustomerPage extends Component {
                 </div>
               </div>
 
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
@@ -761,8 +912,94 @@ class ReportsCustomerPage extends Component {
                   </div>
                 </div>
               </div>
-
             </div>
+
+          </div>
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderAdditionalReports() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex
+    } = this.state;
+    let { jobs } = this.state;
+    let newJobCount = 0;
+    let acceptedJobCount = 0;
+    const totalJobs = jobs.length;
+    let inProgressJobCount = 0;
+    let completedJobCount = 0;
+    let potentialIncome = 0;
+
+    let jobsCompleted = 0;
+    let totalEarnings = 0;
+    let earningsPerJob = 0;
+    let cancelledJobs = 0;
+    let jobsPerTruck = 0;
+    let idleTrucks = 0;
+    let completedOffersPercent = 0;
+
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      const tempRate = newJob.rate;
+      if (newJob.status === 'New') {
+        newJobCount += 1;
+      }
+      if (newJob.status === 'Accepted') {
+        acceptedJobCount += 1;
+      }
+      if (newJob.status === 'In Progress') {
+        inProgressJobCount += 1;
+      }
+      if (newJob.status === 'Job Completed') {
+        completedJobCount += 1;
+      }
+      if (newJob.rateType === 'Hour') {
+        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      }
+      if (newJob.rateType === 'Ton') {
+        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+      }
+
+      newJob.newStartDate = TFormat.asDate(job.startTime);
+
+      potentialIncome += tempRate * newJob.rateEstimate;
+
+      return newJob;
+    });
+
+    jobsCompleted = newJobCount * 20;
+    totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
+    earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
+    cancelledJobs = 1;
+    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    idleTrucks = 1;
+
+    // Jobs completed / Job offers responded to
+    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+
+    potentialIncome = TFormat.asMoney(potentialIncome);
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+
+          <div className="card-body">
 
             <Row>
               <Col md={12}>
@@ -805,10 +1042,34 @@ class ReportsCustomerPage extends Component {
     }
     return (
       <Container>
-        Loading Customer Reports Page...
+        Loading Carrier Reports Page...
       </Container>
     );
   }
+
+  render() {
+    const { loaded } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {/*{this.renderNewJobModal()}*/}
+          {this.renderGoTo()}
+          {this.renderTitle()}
+          {this.renderFilter()}
+          {this.renderTopCards()}
+          {this.renderComparisonCardReports()}
+          {this.renderAdditionalReports()}
+          {/*{this.renderEverything()}*/}
+        </Container>
+      );
+    }
+    return (
+      <Container className="dashboard">
+        Loading...
+      </Container>
+    );
+  }
+
 }
 
 ReportsCustomerPage.propTypes = {
