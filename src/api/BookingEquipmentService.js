@@ -31,7 +31,6 @@ class BookingService extends AgentService {
 
   static getDefaultBookingEquipment() {
     return {
-      id: 0,
       bookingId: 0,
       schedulerId: 0,
       driverId: 0,
