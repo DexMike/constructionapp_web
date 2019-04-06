@@ -152,7 +152,7 @@ class JobCreateFormTwo extends PureComponent {
       }
       await Promise.all(results);
 
-      // now let's send them an SMS
+      // now  let's send them an SMS
       const allSms = [];
       for (const adminIdTel of favoriteAdminTels) {
         // send only to Jake
