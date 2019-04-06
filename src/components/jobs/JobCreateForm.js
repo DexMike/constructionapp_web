@@ -65,6 +65,7 @@ class JobCreateForm extends Component {
   async componentDidMount() {
     // debugger;
     const profile = await ProfileService.getProfile();
+    console.log(68, profile);
     const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
     const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
@@ -991,9 +992,11 @@ class JobCreateForm extends Component {
 
   render() {
     const { job, loaded } = this.state;
+    console.log(995);
     if (loaded) {
       return (
         <form id="job-request" onSubmit={e => this.createJob(e)}>
+          <h5>ASDASDASDADSDA</h5>
           {this.renderSelectedEquipment()}
           {this.renderJobTop()}
           {this.renderJobStartLocation()}
