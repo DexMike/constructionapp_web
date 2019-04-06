@@ -18,6 +18,7 @@ import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
+import CompanyService from '../../api/CompanyService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -289,8 +290,8 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     newJob.createdOn = moment()
       .unix() * 1000;
-    console.log('selectedEquipment type: ', selectedEquipment.type);
-    console.log('newJob: ', newJob);
+    // console.log('selectedEquipment type: ', selectedEquipment.type);
+    // console.log('newJob: ', newJob);
 
     newJob.equipmentType = selectedEquipment.type;
     // In this scenario we are not letting a customer create a job with
@@ -298,12 +299,14 @@ class JobCreateForm extends Component {
     // in the new job creation method we need to set it to the actual
     // number they set in the field
     newJob.numEquipments = 1;
-    console.log('selectedEquipment: ', selectedEquipment);
+    console.log('selectedEquipment: ');
+    console.log(selectedEquipment);
 
-    // console.log('selectedEquipment.equipmentType: ', selectedEquipment.equipmentType);
-    // console.log('equipmentType: ', newJob.equipmentType);
+    console.log('selectedEquipment.equipmentType: ', selectedEquipment.equipmentType);
+    console.log('equipmentType: ', newJob.equipmentType);
     const createdJob = await JobService.createJob(newJob);
     bid.jobId = createdJob.id;
+    bid.companyCarrierId = selectedEquipment.companyId;
     bid.rate = createdJob.rate;
     bid.rateEstimate = createdJob.rateEstimate;
     bid.modifiedOn = moment()
@@ -319,9 +322,13 @@ class JobCreateForm extends Component {
     booking.bidId = createdBid.id;
     booking.schedulersCompanyId = selectedEquipment.companyId;
     booking.sourceAddressId = newJob.startAddress;
-    console.log('createdBid ', createdBid);
+    console.log('createdBid ');
+    console.log(createdBid);
     console.log('booking bidId is ', booking.bidId);
-    console.log('booking ', booking);
+    console.log('booking ');
+    console.log(booking);
+    console.log('createdBid.companyCarrierId is ', createdBid.companyCarrierId);
+
     const createdBooking = await BookingService.createBooking(booking);
 
     // now we need to create a BookingEquipment record
@@ -329,6 +336,15 @@ class JobCreateForm extends Component {
     // we are going to create one BookingEquipment.  NOTE: the idea going forward is
     // to allow multiple trucks per booking
     bookingEquipment.bookingId = createdBooking.id;
+    console.log('bookingId ', createdBooking.id);
+    console.log('bookingEquipment');
+    console.log(bookingEquipment);
+
+    const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+    console.log('carrierCompany ');
+    console.log(carrierCompany);
+    // const carrierAdmin = await
+
     // this needs to be createdBid.carrierCompanyId.adminId
     bookingEquipment.schedulerId = createdBid.userId;
     bookingEquipment.driverId = selectedEquipment.driversId;

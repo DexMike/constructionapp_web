@@ -36,6 +36,7 @@ class BidService extends AgentService {
       hasSchedulerAccepted: 0,
       status: 'New',
       userId: 0,
+      companyCarrierId: 0,
       rateType: 'Hour',
       rate: '',
       rateEstimate: '',
