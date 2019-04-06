@@ -68,7 +68,6 @@ class ReportsCustomerPage extends Component {
     let {
       startDate,
       endDate,
-      isCustomRange,
       selectedRange
     } = this.state;
 
@@ -76,7 +75,6 @@ class ReportsCustomerPage extends Component {
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
     }
-    isCustomRange = false;
     selectedRange = 30;
     const currentDate = new Date();
     startDate = new Date();
@@ -106,7 +104,6 @@ class ReportsCustomerPage extends Component {
       filters,
       startDate,
       endDate,
-      isCustomRange,
       selectedRange
     });
   }
@@ -175,16 +172,9 @@ class ReportsCustomerPage extends Component {
     let {
       startDate,
       endDate,
-      isCustomRange,
       selectedRange,
       selectIndex
     } = this.state;
-
-    if (value === '0') {
-      isCustomRange = true;
-    } else {
-      isCustomRange = false;
-    }
 
     selectIndex = this.timeRanges.findIndex(x => x.name === name);
 
@@ -203,7 +193,6 @@ class ReportsCustomerPage extends Component {
       filters,
       startDate,
       endDate,
-      isCustomRange,
       selectedRange,
       selectIndex
     });
@@ -248,6 +237,11 @@ class ReportsCustomerPage extends Component {
     this.setState({ filters });
   }
   */
+
+  formatDate(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return (date.toLocaleDateString('en-US', options));
+  }
 
   async isCustomRange(startDate, endDate) {
     let { selectIndex } = this.state;
@@ -371,10 +365,10 @@ class ReportsCustomerPage extends Component {
             </Col>
           </Row>
 
-          <div className="row kpi-filter">
+          <div className="row date-filter">
             <div className="col-12 col-md-12 col-lg-12">
               <div className="card">
-                <div className="card-body kpi-filter-body">
+                <div className="card-body">
                   <div className="row">
                     <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
                       <span className="form__form-group-label">Time Range</span>
@@ -412,10 +406,9 @@ class ReportsCustomerPage extends Component {
                             }
                             onChange={this.startDateChange}
                             dateFormat="MM-dd-yy"
-                            disabled={!isCustomRange}
                           />
-                          <i className="material-icons iconSet calendarIcon">calendar_today</i>
                         </div>
+                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
                       </div>
                     </div>
                     <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
@@ -433,10 +426,9 @@ class ReportsCustomerPage extends Component {
                             }
                             onChange={this.endDateChange}
                             dateFormat="MM-dd-yy"
-                            disabled={!isCustomRange}
                           />
-                          <i className="material-icons iconSet calendarIcon">calendar_today</i>
                         </div>
+                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
                       </div>
                     </div>
                   </div>
@@ -444,7 +436,7 @@ class ReportsCustomerPage extends Component {
               </div>
             </div>
           </div>
-          <div className="kpi-container">
+          <div className="card-body">
             {
             /*
             <Row>
@@ -454,12 +446,12 @@ class ReportsCustomerPage extends Component {
             </Row>
             */
             }
-            <div className="row upper-kpi">
+            <div className="row">
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Jobs In Progress</center></h5>
-                    <span><center><h3>{inProgressJobCount}</h3></center></span>
+                    <span><center><h4>{inProgressJobCount}</h4></center></span>
                   </div>
                 </div>
               </div>
@@ -468,7 +460,7 @@ class ReportsCustomerPage extends Component {
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
-                    <span><center><h3>{acceptedJobCount}</h3></center></span>
+                    <span><center><h4>{acceptedJobCount}</h4></center></span>
                   </div>
                 </div>
               </div>
@@ -478,7 +470,7 @@ class ReportsCustomerPage extends Component {
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Pending Jobs</center></h5>
-                    <span><center><h3>{completedJobCount}</h3></center></span>
+                    <span><center><h4>{completedJobCount}</h4></center></span>
                   </div>
                 </div>
               </div>
@@ -488,7 +480,7 @@ class ReportsCustomerPage extends Component {
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                    <span><center><h3>{completedJobCount}</h3></center></span>
+                    <span><center><h4>{completedJobCount}</h4></center></span>
                   </div>
                 </div>
               </div>
@@ -498,7 +490,7 @@ class ReportsCustomerPage extends Component {
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text"><center>New Offers</center></h5>
-                    <span><center><h3>{newJobCount}</h3></center></span>
+                    <span><center><h4>{newJobCount}</h4></center></span>
                   </div>
                 </div>
               </div>
@@ -534,7 +526,7 @@ class ReportsCustomerPage extends Component {
 
             <Row>
               <Col md={12}>
-                <h3 className="page-title">{this.timeRanges[selectIndex].name}</h3>
+                <h3 className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>
               </Col>
             </Row>
 
