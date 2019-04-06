@@ -17,7 +17,6 @@ class AddTruckForm extends PureComponent {
       truckCachedInfo: {},
       availabilityCachedInfo: {},
       userCachedInfo: {},
-      validateFormOne: false,
       enableSecondTab: false,
       enableThirdTab: false,
       enableFourthTab: false,
@@ -46,14 +45,8 @@ class AddTruckForm extends PureComponent {
   }
 
   async componentDidMount() {
-    let { enableSecondTab, enableThirdTab } = this.state;
     const { incomingPage, passedInfo } = this.props;
     // this is to prevent mounting if we must go to page three
-    /*if (Object.keys(passedInfo).length) {
-      enableSecondTab = true;
-      enableThirdTab = true;
-    }*/
-
     if (incomingPage === 3) {
       this.setState({ page: 3 });
     } else {
@@ -61,14 +54,16 @@ class AddTruckForm extends PureComponent {
     }
 
     // force load from previous page
-    if (Object.keys(passedInfo).length > 0) {
-      this.setState({ truckPassedInfo: passedInfo });
+    if (Object.keys(passedInfo).length) {
+      this.setState({
+        truckPassedInfo: passedInfo,
+        enableSecondTab: true,
+        enableThirdTab: true,
+        enableFourthTab: false
+      });
     }
-
     this.setState({
-      loaded: true,
-      enableSecondTab,
-      enableThirdTab
+      loaded: true
     });
   }
 
@@ -160,63 +155,87 @@ class AddTruckForm extends PureComponent {
   }
 
   secondPage() {
-    const { validateOnTabOneClick } = this.state;
-    let { enableSecondTab } = this.state;
-
-    enableSecondTab = validateOnTabOneClick;
+    const { enableSecondTab } = this.state;
     const { editDriverId } = this.props;
     if (!editDriverId && enableSecondTab) {
-      this.setState({ page: 2, enableSecondTab });
+      this.setState({ page: 2 });
     }
   }
 
-  validateFormOnePress() {
-    const { validateOnTabOneClick } = this.state;
-    this.setState({ validateOnTabOneClick: !validateOnTabOneClick });
-  }
-
-  validateFormTwoPress() {
-    const { validateOnTabTwoClick } = this.state;
-    this.setState({ validateOnTabOneClick: !validateOnTabTwoClick });
-  }
-
-  validateFormThreePress() {
-    const { validateOnTabThreeClick } = this.state;
-    this.setState({ validateOnTabOneClick: !validateOnTabThreeClick });
-  }
-
-  validateFormOneResults(res) {
-    console.log(189, res);
-    this.setState({ validateOnTabOneClick: res });
-  }
-
-  validateFormTwoResults(res) {
-    console.log(194, res);
-    this.setState({ validateOnTabTwoClick: res });
-  }
-
-  validateFormThreeResults(res) {
-    console.log(199, res);
-    this.setState({ validateOnTabThreeClick: res });
-  }
-
   thirdPage() {
-    const { validateOnTabTwoClick } = this.state;
-    let { enableThirdTab } = this.state;
-    enableThirdTab = validateOnTabTwoClick;
+    const { enableThirdTab } = this.state;
     const { editDriverId } = this.props;
     if (!editDriverId && enableThirdTab) {
-      this.setState({ page: 3, enableThirdTab });
+      this.setState({ page: 3 });
     }
   }
 
   fourthPage() {
-    console.log(212, this.state);
     const { enableFourthTab } = this.state;
     const { editDriverId } = this.props;
     if (!editDriverId && enableFourthTab) {
       this.setState({ page: 4 });
     }
+  }
+
+  validateFormOnePress() {
+    const { validateOnTabOneClick } = this.state;
+    let { enableSecondTab } = this.state;
+    console.log(185, validateOnTabOneClick);
+    if (validateOnTabOneClick != null && !validateOnTabOneClick) {
+      console.log('asdasdsad');
+      enableSecondTab = true;
+      this.setState({ enableSecondTab });
+      if (enableSecondTab) {
+        this.setState({ page: 2 });
+      } else {
+        console.log('Something is wrong with the form');
+      }
+    }
+    this.setState({ validateOnTabOneClick: !validateOnTabOneClick });
+  }
+
+  validateFormTwoPress() {
+    const { validateOnTabTwoClick } = this.state;
+    let { enableThirdTab } = this.state;
+    if (validateOnTabTwoClick != null) {
+      enableThirdTab = !validateOnTabTwoClick;
+      this.setState({ enableThirdTab });
+      if (enableThirdTab) {
+        this.setState({ page: 3 });
+        console.log('ALV');
+      } else {
+        console.log('Something is wrong with the form');
+      }
+    }
+    this.setState({ validateOnTabTwoClick: !validateOnTabTwoClick });
+  }
+
+  validateFormThreePress() {
+    const { validateOnTabThreeClick } = this.state;
+    let { enableFourthTab } = this.state;
+    if (validateOnTabThreeClick != null) {
+      enableFourthTab = !validateOnTabThreeClick;
+      this.setState({ enableFourthTab });
+      if (enableFourthTab) {
+        this.setState({ page: 4 });
+      } else {
+        console.log('Something is wrong with the form');
+      }
+    }
+    this.setState({ validateOnTabThreeClick: !validateOnTabThreeClick });
+  }
+
+  validateFormOneResults(res) {
+    this.setState({ validateOnTabOneClick: res });
+  }
+
+  validateFormTwoResults(res) {
+    this.setState({ validateOnTabTwoClick: res });
+  }
+
+  validateFormThreeResults(res) {
+    this.setState({ validateOnTabThreeClick: res });
   }
 
   closeNow() {
@@ -237,6 +256,9 @@ class AddTruckForm extends PureComponent {
       validateOnTabTwoClick,
       validateOnTabThreeClick
     } = this.state;
+    // console.log(231, equipmentId);
+    // console.log(232, companyId);
+    // console.log(233, editDriverId);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -278,7 +300,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.validateFormThreePress}
+                      onClick={this.fourthPage}
                       className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Summary</p>

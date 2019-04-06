@@ -55,6 +55,18 @@ class AddTruckFormTwo extends PureComponent {
     }
   }
 
+  componentWillReceiveProps(nextProps, nextContext) {
+    const {validateResTwo} = this.props;
+    if (nextProps.validateOnTabTwoClick) {
+      if(this.isFormValid()) {
+        validateResTwo(true);
+        const {thirdPage} = this.props;
+        thirdPage(this.state);
+      }
+      validateResTwo(false);
+    }
+  }
+
   // on the login I can find something like this
   showPassword(e) {
     e.preventDefault();
