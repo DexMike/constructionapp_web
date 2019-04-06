@@ -102,7 +102,7 @@ class ReportsCustomerPage extends Component {
     endDate = currentDate;
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
-    filters.endAvailability = endDateComp;
+    filters.endAvailability = endDate;
 
     selectedRange = 30;
     const currentDate2 = new Date();

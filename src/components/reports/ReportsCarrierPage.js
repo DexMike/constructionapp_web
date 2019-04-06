@@ -101,7 +101,7 @@ class ReportsCarrierPage extends Component {
     endDate = currentDate;
     startDate.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailability = startDate;
-    filters.endAvailability = endDateComp;
+    filters.endAvailability = endDate;
 
     selectedRange = 30;
     const currentDate2 = new Date();
@@ -110,12 +110,6 @@ class ReportsCarrierPage extends Component {
     startDateComp.setDate(currentDate2.getDate() - selectedRange);
     filters.startAvailDateComp = startDateComp;
     filters.endAvailDateComp = endDateComp;
-
-    console.log('componentDidMount');
-    console.log('startDateComp');
-    console.log(startDateComp);
-    console.log('endDateComp');
-    console.log(endDateComp);
 
     const jobs = await this.fetchJobs(filters);
 
@@ -248,12 +242,6 @@ class ReportsCarrierPage extends Component {
     startDateComp.setDate(currentDate.getDate() - selectedRange);
     filters.startAvailDateComp = startDateComp;
     filters.endAvailDateComp = endDateComp;
-
-    console.log('handleSelectFilterChange');
-    console.log('startDateComp');
-    console.log(startDateComp);
-    console.log('endDateComp');
-    console.log(endDateComp);
 
     const jobs = await this.fetchJobs(filters);
 
