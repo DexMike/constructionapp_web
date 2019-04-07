@@ -31,17 +31,28 @@ class JobViewForm extends Component {
 
     this.state = {
       companyName: '',
+      customerAccepted: 0,
+      bidId: 0,
+      bidExists: false,
       ...job,
       loaded: false,
-      states: []
+      profile: []
     };
     this.closeNow = this.closeNow.bind(this);
+    this.saveJob = this.saveJob.bind(this);
   }
 
   async componentDidMount() {
-    let { job, companyName } = this.state;
+    let {
+      job,
+      companyName,
+      bidId,
+      bidExists,
+      customerAccepted,
+      profile
+    } = this.state;
     const { jobId } = this.props;
-    const profile = await ProfileService.getProfile();
+    profile = await ProfileService.getProfile();
 
     job = await JobService.getJobById(jobId);
 
@@ -53,6 +64,7 @@ class JobViewForm extends Component {
         endAddress = await AddressService.getAddressById(job.endAddress);
       }
       const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+      const bids = await BidService.getBidsByJobId(job.id);
 
       if (company) {
         companyName = company.legalName;
@@ -70,32 +82,147 @@ class JobViewForm extends Component {
         job.materials = materials.map(material => material.value);
       }
 
-      this.setState({
-        job,
-        companyName,
-        loaded: true
-      });
+      if (bids.length) { // we have a bid record
+        bidExists = true;
+        bidId = bids[0].id;
+        customerAccepted = bids[0].hasCustomerAccepted; // has customer accepted?
+      }
     }
+
+    this.setState({
+      job,
+      companyName,
+      bidId,
+      bidExists,
+      customerAccepted,
+      profile,
+      loaded: true
+    });
 
     // const { selectedJob, selectedMaterials } = this.props;
 
     // await this.fetchForeignValues();
   }
 
-  async viewJob(e) {
-    console.log('We are in ViewJob!');
-    // e.preventDefault();
-    const { closeModal, selectedEquipment } = this.props;
-    const { startAddress, job, endAddress, bid, booking, bookingEquipment } = this.state;
-    // const newJob = CloneDeep(job);
-    // startAddress.name = `Job: ${newJob.name}`;
-    // endAddress.name = `Job: ${newJob.name}`;
-    if (!this.isFormValid()) {
-      // TODO display error message
-      // console.error('didnt put all the required fields.');
-      return;
+  // save after the user has checked the info
+  async saveJob() {
+    // save new or update?
+    const {
+      job,
+      bidId,
+      customerAccepted,
+      profile
+    } = this.state;
+
+    let bid;
+    try {
+      bid = await BidService.getBidById(bidId);
+    } catch (e) {
+      // console.log('there is no Bid record');
     }
-    this.closeNow();
+
+    if (bid) { // we have a bid record
+      // if (bid.length) { // we have a bid record
+      if (customerAccepted === 1) { // we accept the job
+        console.log(job);
+        // console.log('accepting');
+        const newJob = CloneDeep(job);
+        const newBid = CloneDeep(bid);
+
+        newJob.status = 'Booked';
+        newJob.startAddress = newJob.startAddress.id;
+        newJob.endAddress = newJob.endAddress.id;
+        delete newJob.materials;
+
+        newBid.hasSchedulerAccepted = 1;
+        newBid.status = 'Accepted';
+        newBid.modifiedBy = profile.userId;
+        newBid.modifiedOn = moment()
+          .unix() * 1000;
+        await JobService.updateJob(newJob);
+        // await BidService.updateBid(newBid);
+        // Let's make a call to Twilio to send an SMS
+        // We need to change later get the body from the lookups table
+        // We need to get the phone number from the carrier co
+        const notification = {
+          to: '16129990787',
+          body: 'You have won this job! Congratulations.'
+        };
+        await TwilioService.createSms(notification);
+        // eslint-disable-next-line no-alert
+        alert('You have won this job! Congratulations.');
+        this.closeNow();
+      } else { // we request a job
+        // console.log('requesting');
+        const newBid = CloneDeep(bid);
+        newBid.hasSchedulerAccepted = 1;
+        newBid.status = 'New';
+        newBid.modifiedBy = profile.userId;
+        newBid.modifiedOn = moment()
+          .unix() * 1000;
+        newBid.createdOn = moment()
+          .unix() * 1000;
+        await BidService.updateBid(newBid);
+        // Let's make a call to Twilio to send an SMS
+        // We need to change later get the body from the lookups table
+        // We need to get the phone number from the carrier co
+        const notification = {
+          to: '16129990787',
+          body: 'Your Request has been sent.'
+        };
+        await TwilioService.createSms(notification);
+        // eslint-disable-next-line no-alert
+        alert('Your Request has been sent.');
+        this.closeNow();
+      }
+    } else { // no bid record, request a job
+      // console.log('requesting');
+      bid = {};
+      bid.jobId = job.id;
+      bid.userId = profile.userId;
+      bid.companyCarrierId = job.companiesId;
+      bid.hasCustomerAccepted = 0;
+      bid.hasSchedulerAccepted = 1;
+      bid.status = 'New';
+      bid.rateType = job.rateType;
+      bid.rate = job.rate;
+      bid.rateEstimate = job.rateEstimate;
+      bid.notes = job.notes;
+      bid.createdBy = profile.userId;
+      bid.modifiedBy = profile.userId;
+      bid.modifiedOn = moment()
+        .unix() * 1000;
+      bid.createdOn = moment()
+        .unix() * 1000;
+      await BidService.createBid(bid);
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // We need to get the phone number from the carrier co
+      const notification = {
+        to: '16129990787',
+        body: 'Your Request has been sent.'
+      };
+      await TwilioService.createSms(notification);
+      // eslint-disable-next-line no-alert
+      alert('Your Request has been sent.');
+      this.closeNow();
+    }
+  }
+
+  equipmentMaterialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
   }
 
   closeNow() {
@@ -103,43 +230,63 @@ class JobViewForm extends Component {
     toggle();
   }
 
-  isFormValid() {
-    const job = this.state;
-    const {} = this.state;
-    let isValid = true;
-
-    return isValid;
-  }
-
   renderJobTop(job) {
-    const { companyName } = this.state;
+    const {
+      companyName,
+      bidExists,
+      customerAccepted
+    } = this.state;
     return (
       <React.Fragment>
-        <h3 className="subhead">
-          {companyName}
-          &nbsp;/&nbsp;
-          {job.name}
-        </h3>
-        <Table>
-          <tbody>
-          <tr>
-            <td>Estimated Income</td>
-            <td>{TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}</td>
-          </tr>
-          <tr>
-            <td>Rate</td>
-            <td>${job.rate} Per {job.rateType}</td>
-          </tr>
-          <tr>
-            <td>Estimate</td>
-            <td>{job.rateEstimate} {job.rateType}(s)</td>
-          </tr>
-          <tr>
-            <td>Date of Job:</td>
-            <td> {moment(job.startTime).format('dddd, MMMM Do')}</td>
-          </tr>
-          </tbody>
-        </Table>
+        <Row style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          <Col md={8}>
+            <h4>
+              {companyName}
+              &nbsp;/&nbsp;
+              {job.name}
+            </h4>
+          </Col>
+          <Col md={4}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              onClick={this.saveJob}
+            >
+              {bidExists && customerAccepted === 1 ? 'Accept Job' : 'Request Job'}
+            </button>
+          </Col>
+        </Row>
+        <Row style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          <Col md={6}>
+            <Row>
+              {TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}
+            </Row>
+            <Row>
+              Estimated Income
+            </Row>
+          </Col>
+          <Col md={6}>
+            <Row>Rate ${job.rate} / {job.rateType}</Row>
+            <Row>Estimated - {job.rateEstimate} {job.rateType}(s)</Row>
+          </Col>
+        </Row>
+        <Row style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          <h4>
+            Date of Job: {moment(job.startTime).format('dddd, MMMM Do')}
+          </h4>
+        </Row>
       </React.Fragment>
     );
   }
@@ -184,7 +331,6 @@ class JobViewForm extends Component {
   }
 
   renderAddress(address, type) {
-    console.log(address);
     return (
       <Row>
         <Col sm={12}>
@@ -198,56 +344,73 @@ class JobViewForm extends Component {
         </Col>
         {address.address2 && (
           <Col sm={12}>
-            <div className="form__form-group">
-              <div className="form__form-group-field">
-                <span>{address.address2}</span>
-              </div>
-            </div>
+            {address.address2}
           </Col>
         )}
         {address.address3 && (
           <Col sm={12}>
-            <div className="form__form-group">
-              <div className="form__form-group-field">
-                <span>{address.address3}</span>
-              </div>
-            </div>
+            {address.address3}
           </Col>
         )}
         {address.address4 && (
           <Col sm={12}>
-            <div className="form__form-group">
-              <div className="form__form-group-field">
-                <span>{address.address4}</span>
-              </div>
-            </div>
+            {address.address4}
           </Col>
         )}
-        <Col xl={3} lg={4} md={6} sm={12}>
-          <div className="form__form-group">
-            <span className="form__form-group-label">City</span>
-            <div className="form__form-group-field">
-              <span>{address.city}</span>
-            </div>
-          </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={12}>
-          <div className="form__form-group">
-            <span className="form__form-group-label">State</span>
-            <div className="form__form-group-field">
-              <span>{address.state}</span>
-            </div>
-          </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={12}>
-          <div className="form__form-group">
-            <span className="form__form-group-label">Zip Code</span>
-            <div className="form__form-group-field">
-              <span>{address.zipCode}</span>
-            </div>
-          </div>
+        <Col md={12}>
+          {`${address.city}, `}
+          {`${address.state}, `}
+          {`${address.zipCode}`}
         </Col>
       </Row>
+    );
+  }
+
+  renderJobDetails(job) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col md={6}>
+            <Row>
+              <h4 style={{
+                borderBottom: '3px solid #ccc',
+                marginBottom: '20px'
+              }}
+              >
+                Job Details
+              </h4>
+            </Row>
+          </Col>
+          <Col md={6}>
+            <Row>
+              <h4 style={{
+                borderBottom: '3px solid #ccc',
+                marginBottom: '20px'
+              }}
+              >
+                Truck Details
+              </h4>
+            </Row>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={6}>
+            <Row>
+              <Col md={12}>
+                Materials
+              </Col>
+              <Col md={12}>
+                {this.equipmentMaterialsAsString(job.materials)}
+              </Col>
+            </Row>
+          </Col>
+          <Col md={6}>
+            <Row>
+              {job.equipmentType}
+            </Row>
+          </Col>
+        </Row>
+      </React.Fragment>
     );
   }
 
@@ -270,7 +433,7 @@ class JobViewForm extends Component {
     );
   }
 
-  renderSelectedJob() {
+  /* renderSelectedJob() {
     const { job } = this.state;
     console.log(job);
     return (
@@ -308,7 +471,7 @@ class JobViewForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Company Name</span>
               <div className="form__form-group-field">
-                <span>{/* job.company.legalName */}</span>
+                  <span>{ job.company.legalName }</span>
               </div>
             </div>
           </Col>
@@ -316,7 +479,7 @@ class JobViewForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Materials</span>
               <div className="form__form-group-field">
-                <span>{/* this.materialsAsString(job.materials) */}</span>
+                <span>{ this.materialsAsString(job.materials) }</span>
               </div>
             </div>
           </Col>
@@ -353,11 +516,9 @@ class JobViewForm extends Component {
         </Row>
       </React.Fragment>
     );
-  }
+  } */
 
   renderJobFormButtons() {
-    // const { closeModal } = this.props;
-
     return (
       <div className="row">
         <div className="col-sm-5"/>
@@ -372,11 +533,6 @@ class JobViewForm extends Component {
                 Cancel
               </button>
             </div>
-            <div className="col-sm-8">
-              <button type="submit" className="btn btn-primary">
-                Send Request
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -385,7 +541,6 @@ class JobViewForm extends Component {
 
   render() {
     const { job, loaded } = this.state;
-    console.log(job);
     if (loaded) {
       return (
         <React.Fragment>
@@ -394,16 +549,13 @@ class JobViewForm extends Component {
               <CardBody>
                 {this.renderJobTop(job)}
                 {this.renderJobAddresses(job)}
+                {this.renderJobDetails(job)}
                 {this.renderJobBottom(job)}
                 {this.renderJobFormButtons()}
               </CardBody>
             </Card>
           </Col>
         </React.Fragment>
-        /* <form id="job-request" onSubmit={e => this.viewJob(e)}>
-            {this.renderSelectedJob()}
-            {this.renderJobFormButtons()}
-          </form> */
       );
     }
     return (
