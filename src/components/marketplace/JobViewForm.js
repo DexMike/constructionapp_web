@@ -75,9 +75,7 @@ class JobViewForm extends Component {
         bidExists = true;
         bidId = bids[0].id;
         customerAccepted = bids[0].hasCustomerAccepted; // has customer accepted?
-      }/* else { // we do not have a bid record, Request
-
-      } */
+      }
     }
 
     this.setState({
