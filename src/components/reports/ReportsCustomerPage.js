@@ -353,12 +353,6 @@ class ReportsCustomerPage extends Component {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
-          <button type="button" className="app-link"
-                  onClick={() => this.handlePageClick('Dashboard')}
-          >
-            Dashboard
-          </button>
-
           <Row>
             <Col md={12}>
               <h3 className="page-title">Reporting</h3>
@@ -379,7 +373,7 @@ class ReportsCustomerPage extends Component {
                             name: this.timeRanges[selectIndex].name,
                             value: this.timeRanges[selectIndex].value
                           }
-                        }                      
+                        }
                         value={this.timeRanges[selectIndex].value.toString()}
                         options={
                           this.timeRanges.map(timeRange => ({
