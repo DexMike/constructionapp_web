@@ -4,10 +4,11 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
-
+import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
+import EquipmentService from '../../api/EquipmentService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
@@ -138,6 +139,10 @@ class JobCarrierForm extends Component {
 
   handleInputChange(e) {
     this.setState({ [e.target.name]: e.target.value });
+  }
+
+  handleImg(id) {
+    // console.log(145, id);
   }
 
   materialsAsString(materials) {
@@ -338,6 +343,11 @@ class JobCarrierForm extends Component {
   }
 
   render() {
+    const images = [
+      { id: 1, name: 'Truck Image 1', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'},
+      { id: 2, name: 'Truck Image 2', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'},
+      { id: 3, name: 'Truck Image 3', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'}
+    ];
     const { job } = this.props;
     let origin = '';
     let destination = '';
@@ -395,6 +405,20 @@ class JobCarrierForm extends Component {
                     }
                   />
                 </Col>
+              </Row>
+              <Row>
+                <TTable
+                  columns={
+                    [
+                      {
+                        name: 'image',
+                        displayName: 'Truck Image'
+                      }
+                    ]
+                  }
+                  data={images}
+                  handleIdClick={this.handleImg}
+                />
               </Row>
             </CardBody>
           </Card>
