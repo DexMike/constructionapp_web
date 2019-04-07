@@ -46,6 +46,10 @@ class ReportsCarrierPage extends Component {
       selectIndex: 2, // Parameter for setting the dropdown default option.
       selectedRange: 0, // Parameter for setting startDate.
       // ↑ Prameter for enable/disable the datePickers if 'Custom' option is selected or not.
+
+      selectIndexComp: 3, // Parameter for setting the dropdown default option.
+      selectedRangeComp: 0, // Parameter for setting startDate.
+
       filters: {
         companiesId: 0,
         rateType: '',
@@ -74,6 +78,7 @@ class ReportsCarrierPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
+    this.handleSelectFilterChangeComp = this.handleSelectFilterChangeComp.bind(this);
     this.startDateChange = this.startDateChange.bind(this);
     this.endDateChange = this.endDateChange.bind(this);
     this.startDateCompChange = this.startDateCompChange.bind(this);
@@ -87,7 +92,8 @@ class ReportsCarrierPage extends Component {
       endDate,
       startDateComp,
       endDateComp,
-      selectedRange
+      selectedRange,
+      selectedRangeComp
     } = this.state;
 
     const profile = await ProfileService.getProfile();
@@ -103,11 +109,11 @@ class ReportsCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    selectedRange = 30;
+    selectedRangeComp = 30;
     const currentDate2 = new Date();
     startDateComp = new Date();
     endDateComp = currentDate2;
-    startDateComp.setDate(currentDate2.getDate() - selectedRange);
+    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
     filters.startAvailDateComp = startDateComp;
     filters.endAvailDateComp = endDateComp;
 
@@ -139,7 +145,8 @@ class ReportsCarrierPage extends Component {
       endDate,
       startDateComp,
       endDateComp,
-      selectedRange
+      selectedRange,
+      selectedRangeComp
     });
   }
 
@@ -219,8 +226,6 @@ class ReportsCarrierPage extends Component {
     let {
       startDate,
       endDate,
-      startDateComp,
-      endDateComp,
       selectedRange,
       selectIndex
     } = this.state;
@@ -236,10 +241,37 @@ class ReportsCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    // const currentDate = new Date();
+    const jobs = await this.fetchJobs(filters);
+
+    this.setState({
+      jobs,
+      loaded: true,
+      filters,
+      startDate,
+      endDate,
+      selectedRange,
+      selectIndex
+    });
+  }
+
+  async handleSelectFilterChangeComp(option) {
+    const { value, name } = option;
+    const { filters } = this.state;
+    let {
+      startDateComp,
+      endDateComp,
+      selectedRangeComp,
+      selectIndexComp
+    } = this.state;
+
+    selectIndexComp = this.timeRanges.findIndex(x => x.name === name);
+
+    selectedRangeComp = value;
+
+    const currentDate = new Date();
     startDateComp = new Date();
     endDateComp = currentDate;
-    startDateComp.setDate(currentDate.getDate() - selectedRange);
+    startDateComp.setDate(currentDate.getDate() - selectedRangeComp);
     filters.startAvailDateComp = startDateComp;
     filters.endAvailDateComp = endDateComp;
 
@@ -249,15 +281,12 @@ class ReportsCarrierPage extends Component {
       jobs,
       loaded: true,
       filters,
-      startDate,
-      endDate,
       startDateComp,
-      startDateComp,
-      selectedRange,
-      selectIndex
+      endDateComp,
+      selectedRangeComp,
+      selectIndexComp
     });
   }
-
   async startDateChange(data) {
     const { filters, endDate } = this.state;
     let { startDate } = this.state;
@@ -282,7 +311,7 @@ class ReportsCarrierPage extends Component {
     filters.startAvailDateComp = startDateComp;
     const jobs = await this.fetchJobs(filters);
 
-    this.isCustomRange(startDateComp, endDateComp);
+    this.isCustomRangeComp(startDateComp, endDateComp);
     this.setState({
       jobs,
       startDateComp,
@@ -314,7 +343,7 @@ class ReportsCarrierPage extends Component {
     filters.endAvailDateComp = endDateComp;
     const jobs = await this.fetchJobs(filters);
 
-    this.isCustomRange(startDateComp, endDateComp);
+    this.isCustomRangeComp(startDateComp, endDateComp);
     this.setState({
       jobs,
       endDateComp,
@@ -356,6 +385,35 @@ class ReportsCarrierPage extends Component {
     });
   }
 
+  async isCustomRangeComp(startDate, endDate) {
+    let { selectIndexComp } = this.state;
+    const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
+    const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
+
+    const currentDate = new Date();
+    const currentDateId = `${currentDate.getDate()}${currentDate.getMonth()}${currentDate.getFullYear()}`;
+
+    if (endDateId === currentDateId) {
+      for (let i = 1; i < this.timeRanges.length; i += 1) {
+        currentDate.setDate(currentDate.getDate() - this.timeRanges[i].value);
+        const lastDateId = `${currentDate.getDate()}${currentDate.getMonth()}${currentDate.getFullYear()}`;
+        currentDate.setDate(currentDate.getDate() + this.timeRanges[i].value);
+        if (startDateId === lastDateId) {
+          selectIndexComp = i;
+          i = this.timeRanges.length;
+        } else {
+          selectIndexComp = 0;
+        }
+      }
+    } else {
+      selectIndexComp = 0;
+    }
+
+    this.setState({
+      selectIndexComp
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -387,7 +445,8 @@ class ReportsCarrierPage extends Component {
       endDate,
       startDateComp,
       endDateComp,
-      selectIndex
+      selectIndex,
+      selectIndexComp
     } = this.state;
 
     if (loaded) {
@@ -468,12 +527,12 @@ class ReportsCarrierPage extends Component {
                       <TSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
-                            name: this.timeRanges[selectIndex].name,
-                            value: this.timeRanges[selectIndex].value
+                            onChange: this.handleSelectFilterChangeComp,
+                            name: this.timeRanges[selectIndexComp].name,
+                            value: this.timeRanges[selectIndexComp].value
                           }
                         }
-                        value={this.timeRanges[selectIndex].value.toString()}
+                        value={this.timeRanges[selectIndexComp].value.toString()}
                         options={
                           this.timeRanges.map(timeRange => ({
                             name: timeRange.name,
@@ -481,7 +540,7 @@ class ReportsCarrierPage extends Component {
                             label: timeRange.name
                           }))
                         }
-                        placeholder={this.timeRanges[selectIndex].name}
+                        placeholder={this.timeRanges[selectIndexComp].name}
                       />
                     </div>
                     <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
@@ -548,7 +607,8 @@ class ReportsCarrierPage extends Component {
       endDate,
       startDateComp,
       endDateComp,
-      selectIndex
+      selectIndex,
+      selectIndexComp
     } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
@@ -698,7 +758,8 @@ class ReportsCarrierPage extends Component {
       endDate,
       startDateComp,
       endDateComp,
-      selectIndex
+      selectIndex,
+      selectIndexComp
     } = this.state;
     let { jobs } = this.state;
     let newJobCount = 0;
@@ -770,6 +831,7 @@ class ReportsCarrierPage extends Component {
             <Row>
               <Col md={12}>
                 <h3 className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>
+                <h3 className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>
               </Col>
             </Row>
 
@@ -962,6 +1024,544 @@ class ReportsCarrierPage extends Component {
     );
   }
 
+  renderMaterialMetrics() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex,
+      selectIndexComp
+    } = this.state;
+
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          <div className="card-body">
+
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Material Metrics</h3>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+              </Col>
+              <Col md={6}>
+                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={1}>
+                <div className="card__title bold-text">Material</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Cost</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Ton</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Hr</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Material</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Cost</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Ton</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Hr</div>
+              </Col>
+            </Row>
+
+            <div>
+                    {this.renderMaterialMetricsRow('RMA')}
+                    {this.renderMaterialMetricsRow('Stone')}
+                    {this.renderMaterialMetricsRow('Sand')}
+                    {this.renderMaterialMetricsRow('Gravel')}
+                    {this.renderMaterialMetricsRow('Recycling')}
+                    {this.renderMaterialMetricsRow('Other')}
+                    {this.renderMaterialMetricsRow('TOTALS')}
+            </div>
+          </div>
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderMaterialMetricsRow(row) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">15</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">175</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
+  renderCarrierMetrics() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex,
+      selectIndexComp
+    } = this.state;
+
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          <div className="card-body">
+
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Carrier Metrics</h3>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+              </Col>
+              <Col md={6}>
+                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={1}>
+                <div className="card__title bold-text">Carrier</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Earnings</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Ton</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Hr</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Carrier</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Earnings</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Ton</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Hr</div>
+              </Col>
+            </Row>
+
+            <div>
+              {this.renderCarrierMetricsRow('Irging Construction')}
+              {this.renderCarrierMetricsRow('Midlo Quarry')}
+              {this.renderCarrierMetricsRow('TexasTexas Dirt')}
+              {this.renderCarrierMetricsRow('Grovel R Us')}
+              {this.renderCarrierMetricsRow('Dump Buddies')}
+            </div>
+          </div>
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderCarrierMetricsRow(row) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">15</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">175</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
+  renderCustomerMetrics() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex,
+      selectIndexComp
+    } = this.state;
+
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          <div className="card-body">
+
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Customer Metrics</h3>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+              </Col>
+              <Col md={6}>
+                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={1}>
+                <div className="card__title bold-text">Customer</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Earnings</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Ton</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Hr</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Customer</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Earnings</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Ton</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg $/Hr</div>
+              </Col>
+            </Row>
+
+            <div>
+              {this.renderCustomerMetricsRow('DFW Airport')}
+              {this.renderCustomerMetricsRow('Midland Quarry')}
+              {this.renderCustomerMetricsRow('Dirt USA')}
+              {this.renderCustomerMetricsRow('Us')}
+              {this.renderCustomerMetricsRow('Buddy Dump 3')}
+            </div>
+          </div>
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderCustomerMetricsRow(row) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">15</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">175</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
+  renderSiteMetrics() {
+    const {
+      loaded,
+      startDate,
+      endDate,
+      startDateComp,
+      endDateComp,
+      selectIndex,
+      selectIndexComp
+    } = this.state;
+
+    // console.log(jobs);
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          <div className="card-body">
+
+            <Row>
+              <Col md={12}>
+                <h3 className="page-title">Site Metrics</h3>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+              </Col>
+              <Col md={6}>
+                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={1}>
+                <div className="card__title bold-text">Site</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Earnings</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg Time Spent</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg Idle Time</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Site</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text"># of Jobs</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Earnings</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Tons</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg Time Spent</div>
+              </Col>
+              <Col md={1}>
+                <div className="card__title bold-text">Avg Idle Time</div>
+              </Col>
+            </Row>
+
+            <div>
+              {this.renderSiteMetricsRow('Mega Site')}
+              {this.renderSiteMetricsRow('New Tower Riverside')}
+              {this.renderSiteMetricsRow('SMU Campus')}
+              {this.renderSiteMetricsRow('DFW Airport Facilities')}
+              {this.renderSiteMetricsRow('Amazon HQ3')}
+            </div>
+          </div>
+        </Container>
+      );
+    }
+    return (
+      <Container>
+        Loading Carrier Reports Page...
+      </Container>
+    );
+  }
+
+  renderSiteMetricsRow(row) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">15</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 56.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">{row}</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">175</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 23,456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">23,456</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+          <Col md={1}>
+            <span className="form__form-group-label">$ 456.00</span>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   render() {
     const { loaded } = this.state;
     if (loaded) {
@@ -972,7 +1572,14 @@ class ReportsCarrierPage extends Component {
           {this.renderTitle()}
           {this.renderFilter()}
           {this.renderTopCards()}
+
           {this.renderComparisonCardReports()}
+
+          {this.renderMaterialMetrics()}
+          {this.renderCarrierMetrics()}
+          {this.renderCustomerMetrics()}
+          {this.renderSiteMetrics()}
+
           {this.renderAdditionalReports()}
           {/*{this.renderEverything()}*/}
         </Container>
@@ -986,7 +1593,5 @@ class ReportsCarrierPage extends Component {
   }
 
 }
-
-
 
 export default ReportsCarrierPage;
