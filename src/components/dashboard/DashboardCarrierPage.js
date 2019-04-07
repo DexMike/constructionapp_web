@@ -121,10 +121,9 @@ class DashboardCarrierPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
+    this.fetchFilterLists();
 
     if (jobs) {
-      await this.fetchFilterLists();
-
       jobs.map(async (job) => {
         const newJob = job;
 
