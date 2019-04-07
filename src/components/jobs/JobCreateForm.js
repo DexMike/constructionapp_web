@@ -980,20 +980,17 @@ class JobCreateForm extends Component {
     const { closeModal } = this.props;
 
     return (
-      <div className="row">
-        <div className="col-sm-5"/>
-        <div className="col-sm-7">
-          <div className="row">
-            <div className="col-sm-4">
-              <button type="button" className="btn btn-secondary" onClick={() => closeModal()}>
-                Cancel
-              </button>
-            </div>
-            <div className="col-sm-8">
-              <button type="submit" className="btn btn-primary">
-                Accept Request
-              </button>
-            </div>
+      <div className="row float-right">
+        <div className="row">
+          <div className="col-sm-4">
+            <button type="button" className="btn btn-secondary" onClick={() => closeModal()}>
+              Cancel
+            </button>
+          </div>
+          <div className="col-sm-8">
+            <button type="submit" className="btn btn-primary">
+              Accept Request
+            </button>
           </div>
         </div>
       </div>
