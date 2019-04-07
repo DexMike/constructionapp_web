@@ -27,7 +27,11 @@ class ReportsCarrierPage extends Component {
       { name: 'Last Week', value: 7 },
       { name: 'Last 30 days', value: 30 },
       { name: 'Last 60 days', value: 60 },
-      { name: 'Last 90 days', value: 90 }
+      { name: 'Last 90 days', value: 90 },
+      // { name: 'Next Week', value: -7 },
+      // { name: 'Next 30 days', value: -30 },
+      // { name: 'Next 60 days', value: -60 },
+      // { name: 'Next 90 days', value: -90 }
     ];
 
     this.state = {
