@@ -15,22 +15,16 @@ import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
 
 import AddressService from '../../api/AddressService';
-import AgentService from '../../api/AgentService';
 import CompanyService from '../../api/CompanyService';
-import EquipmentService from '../../api/EquipmentService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import JobViewForm from './JobViewForm';
-import JobCreateForm from '../jobs/JobCreateForm';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import ProfileService from '../../api/ProfileService';
-
-import truckImage from '../../img/default_truck.png';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
@@ -46,25 +40,20 @@ class MarketplaceCarrierPage extends Component {
       loaded: false,
       jobs: [],
       jobId: 0,
-      selectedJob: {},
 
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
       rateTypeList: [],
-      sortByList, // array from above
       // sortBy: 1,
-
-      equipments: [],
-      selectedEquipment: {},
 
       modal: false,
       goToDashboard: false,
-      startDate: null,          // values for date control
-      endDate: null,            // values for date control
+      startDate: null, // values for date control
+      endDate: null, // values for date control
 
       // Rate Type Button toggle
-      isAvailable: true,
+      // isAvailable: true,
 
       // TODO: Refactor to a single filter object
       // Filter values
@@ -96,7 +85,7 @@ class MarketplaceCarrierPage extends Component {
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.handleJobEdit = this.handleJobEdit.bind(this);
+    // this.handleJobEdit = this.handleJobEdit.bind(this);
 
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -114,10 +103,9 @@ class MarketplaceCarrierPage extends Component {
   async componentDidMount() {
     let {
       startDate,
-      endDate,
-      filters,
-      jobs
+      endDate
     } = this.state;
+    const { filters } = this.state;
 
     startDate = new Date();
     startDate.setHours(0, 0, 0); // 00:00:00
@@ -127,9 +115,9 @@ class MarketplaceCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    await this.fetchJobs();
-    jobs = await this.fetchJobs();
-    await this.fetchFilterLists();
+    // await this.fetchJobs();
+    const jobs = await this.fetchJobs();
+    this.fetchFilterLists();
 
     if (jobs) {
       this.fetchJobMaterials(jobs);
@@ -139,7 +127,7 @@ class MarketplaceCarrierPage extends Component {
 
         const company = await CompanyService.getCompanyById(newJob.companiesId);
         newJob.companyName = company.legalName;
-        // console.log('Name ', newJob.companyName);
+
         const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
         const materials = materialsList.map(materialItem => materialItem.value);
         newJob.material = this.equipmentMaterialsAsString(materials);
@@ -153,12 +141,11 @@ class MarketplaceCarrierPage extends Component {
 
     this.setState(
       {
+        loaded: true,
         jobs,
         filters,
-        loaded: true,
         startDate,
-        endDate,
-        isAvailable: true
+        endDate
       }
     );
   }
@@ -252,7 +239,7 @@ class MarketplaceCarrierPage extends Component {
     for (const [key, value] of Object.entries(jobs)) {
       try {
         let truckMaterials = await
-          JobMaterialsService.getJobMaterialsByJobId(value.id);
+        JobMaterialsService.getJobMaterialsByJobId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
@@ -347,11 +334,10 @@ class MarketplaceCarrierPage extends Component {
     }
   }
 
-  handleJobEdit(id) {
+  /* handleJobEdit(id) {
     const { jobs } = this.state;
     const [selectedJob] = jobs.filter((job) => {
       if (id === job.id) {
-        console.log('job  ', job);
         return job;
       }
       return false;
@@ -361,7 +347,7 @@ class MarketplaceCarrierPage extends Component {
       // selectedJob,
       modal: true
     });
-  }
+  } */
 
   async handleStartDateChange(e) {
     const { filters } = this.state;
@@ -432,14 +418,6 @@ class MarketplaceCarrierPage extends Component {
         toggle={this.toggleViewJobModal}
         className="modal-dialog--primary modal-dialog--header"
       >
-        {/*<div className="modal__header">*/}
-          {/*<button type="button" className="lnr lnr-cross modal__close-btn"*/}
-                  {/*onClick={this.toggleViewJobModal}*/}
-          {/*/>*/}
-          {/*    const company = await CompanyService.getCompanyById(selectedJob.companiesId); */}
-          {/* /!*selectedJob.companyName = company.legalName;*!/ */}
-          {/*<h4 className="bold-text modal__title"> Hi </h4>*/}
-        {/*</div>*/}
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobViewForm
             jobId={jobId}
@@ -529,7 +507,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'newRate',
-                        displayName: 'Hourly Rate',
+                        displayName: 'Hourly Rate'
                       },
                       {
                         name: 'newSize',
@@ -545,7 +523,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Materials'
                       },
                       {
-                        name: 'status',
+                        name: 'equipmentType',
                         displayName: 'Truck Type'
                       },
                       {
@@ -572,8 +550,6 @@ class MarketplaceCarrierPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
-      startDate,
-      endDate,
 
       // filters
       filters
