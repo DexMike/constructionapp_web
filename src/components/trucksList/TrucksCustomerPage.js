@@ -151,7 +151,7 @@ class TrucksCustomerPage extends Component {
     for (const [key, value] of Object.entries(equipments)) {
       try {
         let truckMaterials = await
-          EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
+        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
@@ -293,20 +293,29 @@ class TrucksCustomerPage extends Component {
 
   handleEquipmentEdit(id) {
     const { equipments, filters } = this.state;
+
     const [selectedEquipment] = equipments.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
       }
       return false;
     }, id);
-    selectedEquipment.materials = ['Any'];
-
     // prevent dialog if no selected materials
     if (filters.materialType.length === 0) {
-      alert('Please select a some materials');
-      return false;
+      const hauledMaterials = selectedEquipment.materials.match(/[^\r\n]+/g);
+      const options = [];
+      hauledMaterials.forEach((material) => {
+        const m = {
+          label: material,
+          name: 'materialType',
+          value: material
+        };
+        options.push(m);
+      });
+      filters.materialType = options;
+      // alert('Please select a some materials');
+      // return false;
     }
-
     this.setState({
       selectedEquipment,
       modal: true
@@ -337,7 +346,13 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleAddJobModal() {
-    const { modal } = this.state;
+    const { modal, filters } = this.state;
+    if (modal) {
+      filters.materialType = [];
+      this.setState({
+        filters
+      });
+    }
     this.setState({
       modal: !modal
     });
@@ -646,7 +661,7 @@ class TrucksCustomerPage extends Component {
           </div>
 
           <Col md={5}>
-            {/* this was: c7dde8*/}
+            {/* this was: c7dde8 */}
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
               <Col lg={4} className="customer-truck-results-title">
                 Type: {equipment.type}
@@ -738,7 +753,7 @@ class TrucksCustomerPage extends Component {
           </Col>
 
           <Col md={5}>
-            {/* this was: c7dde8*/}
+            {/* this was: c7dde8 */}
             <Row style={{ background: '#c7dde8' }}>
               <Col md={11} className="customer-truck-results-title">
                 Name: {equipment.name}
