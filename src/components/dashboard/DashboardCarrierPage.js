@@ -74,8 +74,8 @@ class DashboardCarrierPage extends Component {
 
         startAvailability: null,
         endAvailability: null,
-        rate: 'Any',
-        minTons: 'Any',
+        rate: '',
+        minTons: '',
         minHours: '',
         minCapacity: '',
 
