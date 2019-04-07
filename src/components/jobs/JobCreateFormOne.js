@@ -1086,9 +1086,6 @@ class CreateJobFormOne extends PureComponent {
                       />
                 </div>
               </Row>
-              <Row className="col-md-12">
-                  <hr>
-              </Row>
               <Row className='col-md-12'>
                 <ButtonToolbar className='col-md-6 wizard__toolbar'>
                   <Button color='minimal' className='btn btn-outline-secondary'

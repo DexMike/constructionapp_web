@@ -441,13 +441,13 @@ class TrucksCustomerPage extends Component {
       <Modal
         isOpen={modal}
         toggle={this.toggleAddJobModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="modal-dialog--primary modal-dialog--header form"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"
                   onClick={this.toggleAddJobModal}
           />
-          <h4 className="bold-text modal__title">Job Request</h4>
+          <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobCreateForm
@@ -643,7 +643,7 @@ class TrucksCustomerPage extends Component {
                  style={{ width: '118px' }}
             />
           </div>
-          
+
           <Col md={5}>
             {/* this was: c7dde8*/}
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
