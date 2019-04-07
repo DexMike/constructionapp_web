@@ -22,6 +22,7 @@ import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import CompanyService from '../../api/CompanyService';
+import Table from 'reactstrap/es/Table';
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -69,7 +70,11 @@ class JobViewForm extends Component {
         job.materials = materials.map(material => material.value);
       }
 
-      this.setState({ job, companyName, loaded: true });
+      this.setState({
+        job,
+        companyName,
+        loaded: true
+      });
     }
 
     // const { selectedJob, selectedMaterials } = this.props;
@@ -110,44 +115,31 @@ class JobViewForm extends Component {
     const { companyName } = this.state;
     return (
       <React.Fragment>
-        <Row style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
-          <h4>
-            {companyName}
-            &nbsp;/&nbsp;
-            {job.name}
-          </h4>
-        </Row>
-        <Row style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
-          <Col md={6}>
-            <Row>
-              {TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}
-            </Row>
-            <Row>
-              Estimated Income
-            </Row>
-          </Col>
-          <Col md={6}>
-            <Row>Rate ${job.rate} / {job.rateType}</Row>
-            <Row>Estimated - {job.rateEstimate} {job.rateType}(s)</Row>
-          </Col>
-        </Row>
-        <Row style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
-          <h4>
-            Date of Job: {moment(job.startTime).format('dddd, MMMM Do')}
-          </h4>
-        </Row>
+        <h3 className="subhead">
+          {companyName}
+          &nbsp;/&nbsp;
+          {job.name}
+        </h3>
+        <Table>
+          <tbody>
+          <tr>
+            <td>Estimated Income</td>
+            <td>{TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}</td>
+          </tr>
+          <tr>
+            <td>Rate</td>
+            <td>${job.rate} Per {job.rateType}</td>
+          </tr>
+          <tr>
+            <td>Estimate</td>
+            <td>{job.rateEstimate} {job.rateType}(s)</td>
+          </tr>
+          <tr>
+            <td>Date of Job:</td>
+            <td> {moment(job.startTime).format('dddd, MMMM Do')}</td>
+          </tr>
+          </tbody>
+        </Table>
       </React.Fragment>
     );
   }
@@ -194,10 +186,11 @@ class JobViewForm extends Component {
   renderAddress(address, type) {
     console.log(address);
     return (
-      <Row style={{ marginTop: '20px' }}>
+      <Row>
         <Col sm={12}>
           <div className="form__form-group">
-            <span className="form__form-group-label">{type === 'start' ? 'Start Location' : 'End Location'}</span>
+            <span
+              className="form__form-group-label">{type === 'start' ? 'Start Location' : 'End Location'}</span>
             <div className="form__form-group-field">
               <span>{address.address1}</span>
             </div>
@@ -261,13 +254,9 @@ class JobViewForm extends Component {
   renderJobBottom(job) {
     return (
       <React.Fragment>
-        <h4 style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
+        <h3 className="subhead">
           Instructions
-        </h4>
+        </h3>
         <Row>
           <Col md={12}>
             <div className="form__form-group">
@@ -411,10 +400,10 @@ class JobViewForm extends Component {
             </Card>
           </Col>
         </React.Fragment>
-      /* <form id="job-request" onSubmit={e => this.viewJob(e)}>
-          {this.renderSelectedJob()}
-          {this.renderJobFormButtons()}
-        </form> */
+        /* <form id="job-request" onSubmit={e => this.viewJob(e)}>
+            {this.renderSelectedJob()}
+            {this.renderJobFormButtons()}
+          </form> */
       );
     }
     return (
