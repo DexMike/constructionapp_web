@@ -252,14 +252,6 @@ class DashboardCustomerPage extends Component {
     });
   }
 
-
-  handleJobEdit(id) {
-    this.setState({
-      goToUpdateJob: true,
-      jobId: id
-    });
-  }
-
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({[`goTo${menuItem}`]: true});
@@ -355,19 +347,26 @@ class DashboardCustomerPage extends Component {
   }
 
   handleJobEdit(id) {
-    const { jobs } = this.state;
-    const [selectedJob] = jobs.filter((job) => {
-      if (id === job.id) {
-        return job;
-      }
-      return false;
-    }, id);
-    selectedJob.materials = ['Any'];
     this.setState({
-      selectedJob,
-      modal: true
+      goToUpdateJob: true,
+      jobId: id
     });
   }
+
+  // handleJobEdit(id) {
+  //   const { jobs } = this.state;
+  //   const [selectedJob] = jobs.filter((job) => {
+  //     if (id === job.id) {
+  //       return job;
+  //     }
+  //     return false;
+  //   }, id);
+  //   selectedJob.materials = ['Any'];
+  //   this.setState({
+  //     selectedJob,
+  //     modal: true
+  //   });
+  // }
 
   async handleStartDateChange(e) {
     const { filters } = this.state;
