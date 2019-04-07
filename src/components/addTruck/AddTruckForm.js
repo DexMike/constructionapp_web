@@ -172,69 +172,63 @@ class AddTruckForm extends PureComponent {
 
   fourthPage() {
     const { enableFourthTab } = this.state;
+    const { validateOnTabOneClick, validateOnTabTwoClick, validateOnTabThreeClick } = this.state;
     const { editDriverId } = this.props;
-    if (!editDriverId && enableFourthTab) {
+
+    console.log(178, validateOnTabOneClick);
+    console.log(179, validateOnTabTwoClick);
+    console.log(180, validateOnTabThreeClick);
+
+    /*if (!editDriverId && enableFourthTab) {
       this.setState({ page: 4 });
-    }
+    }*/
   }
 
   validateFormOnePress() {
     const { validateOnTabOneClick } = this.state;
-    let { enableSecondTab } = this.state;
-    console.log(185, validateOnTabOneClick);
-    if (validateOnTabOneClick != null && !validateOnTabOneClick) {
-      console.log('asdasdsad');
-      enableSecondTab = true;
-      this.setState({ enableSecondTab });
-      if (enableSecondTab) {
-        this.setState({ page: 2 });
-      } else {
-        console.log('Something is wrong with the form');
-      }
-    }
     this.setState({ validateOnTabOneClick: !validateOnTabOneClick });
   }
 
   validateFormTwoPress() {
     const { validateOnTabTwoClick } = this.state;
-    let { enableThirdTab } = this.state;
-    if (validateOnTabTwoClick != null) {
-      enableThirdTab = !validateOnTabTwoClick;
-      this.setState({ enableThirdTab });
-      if (enableThirdTab) {
-        this.setState({ page: 3 });
-        console.log('ALV');
-      } else {
-        console.log('Something is wrong with the form');
-      }
-    }
     this.setState({ validateOnTabTwoClick: !validateOnTabTwoClick });
   }
 
   validateFormThreePress() {
     const { validateOnTabThreeClick } = this.state;
-    let { enableFourthTab } = this.state;
-    if (validateOnTabThreeClick != null) {
-      enableFourthTab = !validateOnTabThreeClick;
-      this.setState({ enableFourthTab });
-      if (enableFourthTab) {
-        this.setState({ page: 4 });
-      } else {
-        console.log('Something is wrong with the form');
-      }
-    }
     this.setState({ validateOnTabThreeClick: !validateOnTabThreeClick });
   }
 
   validateFormOneResults(res) {
+    if (res === false) {
+      this.setState({ enableSecondTab: false });
+    }
+    if (res === true) {
+      this.setState({ enableSecondTab: true });
+    }
+    this.secondPage();
     this.setState({ validateOnTabOneClick: res });
   }
 
   validateFormTwoResults(res) {
+    if (res === false) {
+      this.setState({ enableThirdTab: false });
+    }
+    if (res === true) {
+      this.setState({ enableThirdTab: true });
+    }
+    this.thirdPage();
     this.setState({ validateOnTabTwoClick: res });
   }
 
   validateFormThreeResults(res) {
+    if (res === false) {
+      this.setState({ enableFourthTab: false });
+    }
+    if (res === true) {
+      this.setState({ enableFourthTab: true });
+    }
+    this.fourthPage();
     this.setState({ validateOnTabThreeClick: res });
   }
 
@@ -282,7 +276,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.validateFormOnePress}
+                      onClick={this.validateFormOneResults}
                       className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Schedule</p>
@@ -291,7 +285,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.validateFormTwoPress}
+                      onClick={this.validateFormTwoResults}
                       className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Driver</p>
@@ -300,7 +294,7 @@ class AddTruckForm extends PureComponent {
                       role="link"
                       tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.fourthPage}
+                      onClick={this.validateFormThreeResults}
                       className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}
                     >
                       <p>Summary</p>

@@ -60,6 +60,7 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerChecks: { touched: false, error: '' },
       reqHandlerMaxCapacity: { touched: false, error: '' }
     };
+
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
@@ -76,7 +77,7 @@ class AddTruckFormOne extends PureComponent {
     if (nextProps.validateOnTabOneClick) {
       if (this.isFormValid()) {
         validateResOne(true);
-        
+
         const {secondPage} = this.props;
         secondPage(this.state);
       } else {
@@ -316,6 +317,7 @@ class AddTruckFormOne extends PureComponent {
       redir
     };
 
+    this.setState({ saveValues });
     // save info in the parent
     onTruckFullInfo(saveValues);
     this.handleSubmit('Truck');
