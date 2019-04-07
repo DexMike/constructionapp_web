@@ -113,14 +113,23 @@ class JobViewForm extends Component {
     if (bid) { // we have a bid record
       // if (bid.length) { // we have a bid record
       if (customerAccepted === 1) { // we accept the job
+        console.log(job);
         // console.log('accepting');
+        const newJob = CloneDeep(job);
         const newBid = CloneDeep(bid);
+
+        newJob.status = 'Booked';
+        newJob.startAddress = newJob.startAddress.id;
+        newJob.endAddress = newJob.endAddress.id;
+        delete newJob.materials;
+
         newBid.hasSchedulerAccepted = 1;
         newBid.status = 'Accepted';
         newBid.modifiedBy = profile.userId;
         newBid.modifiedOn = moment()
           .unix() * 1000;
-        await BidService.updateBid(newBid);
+        await JobService.updateJob(newJob);
+        // await BidService.updateBid(newBid);
         // Let's make a call to Twilio to send an SMS
         // We need to change later get the body from the lookups table
         // We need to get the phone number from the carrier co
