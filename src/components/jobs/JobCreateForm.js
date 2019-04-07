@@ -37,18 +37,54 @@ class JobCreateForm extends Component {
       bookingEquipment: BookingEquipmentService.getDefaultBookingEquipment(),
       materials: [],
       availableMaterials: [],
-      reqHandlerName: { touched: false, error: '' },
-      reqHandlerDate: { touched: false, error: '' },
-      reqHandlerEstHours: { touched: false, error: '' },
-      reqHandlerEstTons: { touched: false, error: '' },
-      reqHandlerStartAddress: { touched: false, error: '' },
-      reqHandlerSCity: { touched: false, error: '' },
-      reqHandlerSState: { touched: false, error: '' },
-      reqHandlerSZip: { touched: false, error: '' },
-      reqHandlerEAddress: { touched: false, error: '' },
-      reqHandlerECity: { touched: false, error: '' },
-      reqHandlerEState: { touched: false, error: '' },
-      reqHandlerEZip: { touched: false, error: '' }
+      reqHandlerName: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerDate: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstHours: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerStartAddress: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerSCity: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerSState: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerSZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEAddress: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerECity: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEState: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEZip: {
+        touched: false,
+        error: ''
+      }
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
@@ -125,9 +161,10 @@ class JobCreateForm extends Component {
   async fetchForeignValues() {
     const lookups = await LookupsService.getLookups();
     let states = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'States') states.push(itm);
-    });
+    Object.values(lookups)
+      .forEach((itm) => {
+        if (itm.key === 'States') states.push(itm);
+      });
     states = states.map(state => ({
       value: String(state.val1),
       label: state.val1
@@ -517,19 +554,20 @@ class JobCreateForm extends Component {
     if (availableMaterials.length > 0) {
       for (const mat in availableMaterials) {
         if (availableMaterials[mat].value === 'Any') {
-          availableMaterials = getAllMaterials().map(rateType => ({
-            name: 'rateType',
-            value: rateType,
-            label: rateType
-          }));
+          availableMaterials = getAllMaterials()
+            .map(rateType => ({
+              name: 'rateType',
+              value: rateType,
+              label: rateType
+            }));
         }
       }
     }
 
     return (
       <React.Fragment>
-        <h4>{selectedEquipment.name}</h4>
-        <div style={{ paddingTop: '10px' }} className="row">
+        <h3 className="subhead">{selectedEquipment.name}</h3>
+        <div className="row">
           <div className="col-sm-3">
             <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
                  style={{ width: '100px' }}
@@ -648,22 +686,16 @@ class JobCreateForm extends Component {
     const { selectedEquipment } = this.props;
     return (
       <React.Fragment>
-        <div style={{
-          borderBottom: '2px solid #ccc',
-          marginTop: '10px'
-        }}
-        />
-        <div style={{ paddingTop: '10px' }} className="row">
-          <div className="col-sm-12 form">
+        <div className="row">
+          <div className="col-md-4">
             <div className="form__form-group">
-              <h4 className="form__form-group-label">Job Name</h4>
-              <div className="form__form-group-field">
+              <div className="">
                 { /* <input name="name"
                       style={{ width: '100%' }}
                       type="text"
                       placeholder="Job # 242423"
                       onChange={this.handleJobInputChange}
-                /> */ }
+                /> */}
                 <span className="form__form-group-label">Job Name</span>
                 <TField
                   input={
@@ -680,21 +712,10 @@ class JobCreateForm extends Component {
               </div>
             </div>
           </div>
-        </div>
-        {selectedEquipment.rateType === 'Both' && (
-          <div className="row">
-            <div className="col-sm-4">
-              <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
-                            buttonTwo="Ton" onChange={this.toggleJobRateType}
-              />
-            </div>
-          </div>
-        )}
-        <div className="row">
-          <div className="col-sm-7 form form--horizontal">
+          <div className="col-md-4 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
-              <div className="form__form-group-field">
+              <div className="">
                 <TDateTimePicker
                   input={
                     {
@@ -711,15 +732,15 @@ class JobCreateForm extends Component {
               </div>
             </div>
           </div>
-          <div className="col-sm-5 form form--horizontal">
+          <div className="col-md-4 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
-              <div className="form__form-group-field">
+              <div className="">
                 { /* <input name="rateEstimate"
                       type="text"
                       value={job.rateEstimate}
                       onChange={this.handleJobInputChange}
-                /> */ }
+                /> */}
                 <TField
                   input={
                     {
@@ -736,6 +757,13 @@ class JobCreateForm extends Component {
             </div>
           </div>
         </div>
+        {selectedEquipment.rateType === 'Both' && (
+          <div className="col-sm-4">
+            <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
+                           buttonTwo="Ton" onChange={this.toggleJobRateType}
+            />
+          </div>
+        )}
       </React.Fragment>
     );
   }
@@ -751,94 +779,85 @@ class JobCreateForm extends Component {
     } = this.state;
     return (
       <React.Fragment>
-        <div className="row">
-          <div className="col-sm-12">
-            <h4>Start Location</h4>
-          </div>
-        </div>
-        <div style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '15px'
-        }}
-        />
-        <div className="row form">
-          <div className="col-sm-12">
-            <div className="form__form-group">
-              <TField
-                input={
-                  {
-                    onChange: this.handleStartAddressInputChange,
-                    name: 'address1',
-                    value: startAddress.address1
-                  }
-                }
-                placeholder="Address #1"
-                type="text"
-                meta={reqHandlerStartAddress}
-              />
+        <div className="col-md-6">
+          <div className="row">
+            <div className="col-sm-12">
+              <h3 className="subhead">Start Location</h3>
             </div>
-          </div>
-        </div>
-        <div className="row form">
-          <div className="col-sm-12">
-            <div className="form__form-group">
-              <input name="address2"
-                     type="text"
-                     placeholder="Address #2"
-                     value={startAddress.address2}
-                     onChange={this.handleStartAddressInputChange}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="row form">
-          <div className="col-sm-7">
-            <div className="form__form-group">
-              <TField
-                input={
-                  {
-                    onChange: this.handleStartAddressInputChange,
-                    name: 'city',
-                    value: startAddress.city
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <TField
+                  input={
+                    {
+                      onChange: this.handleStartAddressInputChange,
+                      name: 'address1',
+                      value: startAddress.address1
+                    }
                   }
-                }
-                placeholder="City"
-                type="text"
-                meta={reqHandlerSCity}
-              />
+                  placeholder="Address #1"
+                  type="text"
+                  meta={reqHandlerStartAddress}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-sm-2">
-            <div className="form__form-group">
-              <SelectField
-                input={
-                  {
-                    onChange: this.handleStartStateChange,
-                    name: 'state',
-                    value: startAddress.state
-                  }
-                }
-                meta={reqHandlerSState}
-                value={startAddress.state}
-                options={states}
-                placeholder="State"
-              />
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <input name="address2"
+                       type="text"
+                       placeholder="Address #2"
+                       value={startAddress.address2}
+                       onChange={this.handleStartAddressInputChange}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-sm-3">
-            <div className="form__form-group">
-              <TField
-                input={
-                  {
-                    onChange: this.handleStartAddressInputChange,
-                    name: 'zipCode',
-                    value: startAddress.zipCode
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <TField
+                  input={
+                    {
+                      onChange: this.handleStartAddressInputChange,
+                      name: 'city',
+                      value: startAddress.city
+                    }
                   }
-                }
-                placeholder="Zip Code"
-                type="number"
-                meta={reqHandlerSZip}
-              />
+                  placeholder="City"
+                  type="text"
+                  meta={reqHandlerSCity}
+                />
+              </div>
+            </div>
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <SelectField
+                  input={
+                    {
+                      onChange: this.handleStartStateChange,
+                      name: 'state',
+                      value: startAddress.state
+                    }
+                  }
+                  meta={reqHandlerSState}
+                  value={startAddress.state}
+                  options={states}
+                  placeholder="State"
+                />
+              </div>
+            </div>
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <TField
+                  input={
+                    {
+                      onChange: this.handleStartAddressInputChange,
+                      name: 'zipCode',
+                      value: startAddress.zipCode
+                    }
+                  }
+                  placeholder="Zip Code"
+                  type="number"
+                  meta={reqHandlerSZip}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -857,94 +876,85 @@ class JobCreateForm extends Component {
     } = this.state;
     return (
       <React.Fragment>
-        <div className="row">
-          <div className="col-sm-12">
-            <h4>End Location</h4>
-          </div>
-        </div>
-        <div style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '15px'
-        }}
-        />
-        <div className="row form">
-          <div className="col-sm-12">
-            <div className="form__form-group">
-              <TField
-                input={
-                  {
-                    onChange: this.handleEndAddressInputChange,
-                    name: 'address1',
-                    value: endAddress.address1
-                  }
-                }
-                placeholder="Address #1"
-                type="text"
-                meta={reqHandlerEAddress}
-              />
+        <div className="col-md-6">
+          <div className="row">
+            <div className="col-sm-12">
+              <h3 className="subhead">End Location</h3>
             </div>
-          </div>
-        </div>
-        <div className="row form">
-          <div className="col-sm-12">
-            <div className="form__form-group">
-              <input name="address2"
-                    type="text"
-                    placeholder="Address #2"
-                    value={endAddress.address2}
-                    onChange={this.handleEndAddressInputChange}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="row form">
-          <div className="col-sm-7">
-            <div className="form__form-group">
-              <TField
-                input={
-                  {
-                    onChange: this.handleEndAddressInputChange,
-                    name: 'city',
-                    value: endAddress.city
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <TField
+                  input={
+                    {
+                      onChange: this.handleEndAddressInputChange,
+                      name: 'address1',
+                      value: endAddress.address1
+                    }
                   }
-                }
-                placeholder="City"
-                type="text"
-                meta={reqHandlerECity}
-              />
+                  placeholder="Address #1"
+                  type="text"
+                  meta={reqHandlerEAddress}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-sm-2">
-            <div className="form__form-group">
-              <SelectField
-                input={
-                  {
-                    onChange: this.handleEndStateChange,
-                    name: 'state',
-                    value: endAddress.state
-                  }
-                }
-                meta={reqHandlerEState}
-                value={endAddress.state}
-                options={states}
-                placeholder="State"
-              />
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <input name="address2"
+                       type="text"
+                       placeholder="Address #2"
+                       value={endAddress.address2}
+                       onChange={this.handleEndAddressInputChange}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-sm-3">
-            <div className="form__form-group">
-              <TField
-                input={
-                  {
-                    onChange: this.handleEndAddressInputChange,
-                    name: 'zipCode',
-                    value: endAddress.zipCode
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <TField
+                  input={
+                    {
+                      onChange: this.handleEndAddressInputChange,
+                      name: 'city',
+                      value: endAddress.city
+                    }
                   }
-                }
-                placeholder="Zip Code"
-                type="number"
-                meta={reqHandlerEZip}
-              />
+                  placeholder="City"
+                  type="text"
+                  meta={reqHandlerECity}
+                />
+              </div>
+            </div>
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <SelectField
+                  input={
+                    {
+                      onChange: this.handleEndStateChange,
+                      name: 'state',
+                      value: endAddress.state
+                    }
+                  }
+                  meta={reqHandlerEState}
+                  value={endAddress.state}
+                  options={states}
+                  placeholder="State"
+                />
+              </div>
+            </div>
+            <div className="col-sm-12">
+              <div className="form__form-group">
+                <TField
+                  input={
+                    {
+                      onChange: this.handleEndAddressInputChange,
+                      name: 'zipCode',
+                      value: endAddress.zipCode
+                    }
+                  }
+                  placeholder="Zip Code"
+                  type="number"
+                  meta={reqHandlerEZip}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -955,10 +965,10 @@ class JobCreateForm extends Component {
   renderJobBottom() {
     const { job } = this.state;
     return (
-      <div className="form">
+      <div className="">
         <div className="form__form-group">
-          <h4 className="form__form-group-label">Comments</h4>
-          <div className="form__form-group-field">
+          <h3 className="subhead">Comments</h3>
+          <div className="">
             <textarea name="notes" value={job.notes} onChange={this.handleJobInputChange}/>
           </div>
         </div>
@@ -970,20 +980,17 @@ class JobCreateForm extends Component {
     const { closeModal } = this.props;
 
     return (
-      <div className="row">
-        <div className="col-sm-5"/>
-        <div className="col-sm-7">
-          <div className="row">
-            <div className="col-sm-4">
-              <button type="button" className="btn btn-secondary" onClick={() => closeModal()}>
-                Cancel
-              </button>
-            </div>
-            <div className="col-sm-8">
-              <button type="submit" className="btn btn-primary">
-                Accept Request
-              </button>
-            </div>
+      <div className="row float-right">
+        <div className="row">
+          <div className="col-sm-4">
+            <button type="button" className="btn btn-secondary" onClick={() => closeModal()}>
+              Cancel
+            </button>
+          </div>
+          <div className="col-sm-8">
+            <button type="submit" className="btn btn-primary">
+              Accept Request
+            </button>
           </div>
         </div>
       </div>
@@ -996,10 +1003,18 @@ class JobCreateForm extends Component {
       return (
         <form id="job-request" onSubmit={e => this.createJob(e)}>
           {this.renderSelectedEquipment()}
+          <div className="cl-md-12">
+            <hr></hr>
+          </div>
           {this.renderJobTop()}
-          {this.renderJobStartLocation()}
-          {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
+          <div className="row">
+            {this.renderJobStartLocation()}
+            {this.isRateTypeTon(job.rateType) && this.renderJobEndLocation()}
+          </div>
           {this.renderJobBottom()}
+          <div className="cl-md-12">
+            <hr></hr>
+          </div>
           {this.renderJobFormButtons()}
         </form>
       );

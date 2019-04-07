@@ -151,7 +151,7 @@ class TrucksCustomerPage extends Component {
     for (const [key, value] of Object.entries(equipments)) {
       try {
         let truckMaterials = await
-        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
+          EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
@@ -162,7 +162,8 @@ class TrucksCustomerPage extends Component {
           allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
           newEquipments[key].materials = allMaterials.join('\n');
         } else {
-          newEquipments[key].materials = truckMaterials.map(e => e.material).join('\n');
+          newEquipments[key].materials = truckMaterials.map(e => e.material)
+            .join('\n');
         }
       } catch (error) {
         newEquipments[key].materials = '';
@@ -441,13 +442,13 @@ class TrucksCustomerPage extends Component {
       <Modal
         isOpen={modal}
         toggle={this.toggleAddJobModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="modal-dialog--primary modal-dialog--header form"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"
                   onClick={this.toggleAddJobModal}
           />
-          <h4 className="bold-text modal__title">Job Request</h4>
+          <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobCreateForm
@@ -487,148 +488,148 @@ class TrucksCustomerPage extends Component {
 
     return (
 
-        <div>
+      <div>
 
 
-              <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
+        <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
 
-                <Col lg={12}>
-                  <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col className="filter-item-title">
-                      Availability
-                    </Col>
-                    <Col className="filter-item-title">
-                      Truck Type
-                    </Col>
-                    <Col className="filter-item-title">
-                      Rate Type
-                    </Col>
-                    <Col className="filter-item-title">
-                      Min Capacity
-                    </Col>
-                    <Col className="filter-item-title">
-                      Materials
-                    </Col>
-                    <Col className="filter-item-title">
-                      Zip Code
-                    </Col>
-                  </Row>
-                  <Row lg={12} id="filter-input-row">
-                    <Col>
-                      <TIntervalDatePicker
-                        startDate={startDate}
-                        endDate={endDate}
-                        name="dateInterval"
-                        onChange={this.handleIntervalInputChange}
-                        dateFormat="MM/dd/yy"
-                      />
-                    </Col>
-                    <Col>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'truckType',
-                            value: filters.truckType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.truckType}
-                        options={
-                          equipmentTypeList.map(equipmentType => ({
-                            name: 'truckType',
-                            value: equipmentType,
-                            label: equipmentType
-                          }))
-                        }
-                        placeholder={equipmentTypeList[0]}
-                      />
-                    </Col>
-                    <Col>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'rateType',
-                            value: filters.rateType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.rateType}
-                        options={
-                          rateTypeList.map(rateType => ({
-                            name: 'rateType',
-                            value: rateType,
-                            label: rateType
-                          }))
-                        }
-                        placeholder="Select materials"
-                      />
-                    </Col>
-                    <Col>
-                      <input name="minCapacity"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Min # of tons"
-                             value={filters.minCapacity}
-                             onChange={this.handleFilterChange}
-                      />
-                    </Col>
-                    <Col>
-                      <MultiSelect
-                        input={
-                          {
-                            onChange: this.handleMultiChange,
-                            // onChange: this.handleSelectFilterChange,
-                            name: 'materialType',
-                            value: filters.materialType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        options={
-                          materialTypeList.map(materialType => ({
-                            name: 'materialType',
-                            value: materialType.trim(),
-                            label: materialType.trim()
-                          }))
-                        }
-                        // placeholder="Materials"
-                        placeholder={materialTypeList[0]}
-                      />
-                    </Col>
-                    <Col>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
-                      />
-                    </Col>
-                  </Row>
-                </Col>
+          <Col lg={12}>
+            <Row lg={12} style={{ background: '#eef4f8' }}>
+              <Col className="filter-item-title">
+                Availability
+              </Col>
+              <Col className="filter-item-title">
+                Truck Type
+              </Col>
+              <Col className="filter-item-title">
+                Rate Type
+              </Col>
+              <Col className="filter-item-title">
+                Min Capacity
+              </Col>
+              <Col className="filter-item-title">
+                Materials
+              </Col>
+              <Col className="filter-item-title">
+                Zip Code
+              </Col>
+            </Row>
+            <Row lg={12} id="filter-input-row">
+              <Col>
+                <TIntervalDatePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  name="dateInterval"
+                  onChange={this.handleIntervalInputChange}
+                  dateFormat="MM/dd/yy"
+                />
+              </Col>
+              <Col>
+                <TSelect
+                  input={
+                    {
+                      onChange: this.handleSelectFilterChange,
+                      name: 'truckType',
+                      value: filters.truckType
+                    }
+                  }
+                  meta={
+                    {
+                      touched: false,
+                      error: 'Unable to select'
+                    }
+                  }
+                  value={filters.truckType}
+                  options={
+                    equipmentTypeList.map(equipmentType => ({
+                      name: 'truckType',
+                      value: equipmentType,
+                      label: equipmentType
+                    }))
+                  }
+                  placeholder={equipmentTypeList[0]}
+                />
+              </Col>
+              <Col>
+                <TSelect
+                  input={
+                    {
+                      onChange: this.handleSelectFilterChange,
+                      name: 'rateType',
+                      value: filters.rateType
+                    }
+                  }
+                  meta={
+                    {
+                      touched: false,
+                      error: 'Unable to select'
+                    }
+                  }
+                  value={filters.rateType}
+                  options={
+                    rateTypeList.map(rateType => ({
+                      name: 'rateType',
+                      value: rateType,
+                      label: rateType
+                    }))
+                  }
+                  placeholder="Select materials"
+                />
+              </Col>
+              <Col>
+                <input name="minCapacity"
+                       className="filter-text"
+                       type="text"
+                       placeholder="Min # of tons"
+                       value={filters.minCapacity}
+                       onChange={this.handleFilterChange}
+                />
+              </Col>
+              <Col>
+                <MultiSelect
+                  input={
+                    {
+                      onChange: this.handleMultiChange,
+                      // onChange: this.handleSelectFilterChange,
+                      name: 'materialType',
+                      value: filters.materialType
+                    }
+                  }
+                  meta={
+                    {
+                      touched: false,
+                      error: 'Unable to select'
+                    }
+                  }
+                  options={
+                    materialTypeList.map(materialType => ({
+                      name: 'materialType',
+                      value: materialType.trim(),
+                      label: materialType.trim()
+                    }))
+                  }
+                  // placeholder="Materials"
+                  placeholder={materialTypeList[0]}
+                />
+              </Col>
+              <Col>
+                <input name="zipCode"
+                       className="filter-text"
+                       type="text"
+                       placeholder="Zip Code"
+                       value={filters.zipCode}
+                       onChange={this.handleFilterChange}
+                />
+              </Col>
+            </Row>
+          </Col>
 
-                <br/>
+          <br/>
 
-              </form>
+        </form>
 
 
-        </div>
+      </div>
 
     );
   }
@@ -638,12 +639,12 @@ class TrucksCustomerPage extends Component {
       <React.Fragment>
         <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
-          <div className="truck-image">
+          <div className="col-md-2">
             <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
                  style={{ width: '118px' }}
             />
           </div>
-          
+
           <Col md={5}>
             {/* this was: c7dde8*/}
             <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
@@ -789,64 +790,62 @@ class TrucksCustomerPage extends Component {
     } = this.state;
 
     return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-              <Row>
-                <Col md={6} id="equipment-display-count">
-                  Displaying&nbsp;
-                  {equipments.length}
-                  &nbsp;of&nbsp;
-                  {equipments.length}
-                </Col>
-                <Col md={6}>
-                  <Row>
-                    <Col md={6} id="sortby">Sort By</Col>
-                    <Col md={6}>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'sortBy',
-                            value: filters.sortBy
-                          }
+      <Col md={12}>
+        <Card>
+          <CardBody>
+            <Row>
+              <Col md={6} id="equipment-display-count">
+                Displaying&nbsp;
+                {equipments.length}
+                &nbsp;of&nbsp;
+                {equipments.length}
+              </Col>
+              <Col md={6}>
+                <Row>
+                  <Col md={6} id="sortby">Sort By</Col>
+                  <Col md={6}>
+                    <TSelect
+                      input={
+                        {
+                          onChange: this.handleSelectFilterChange,
+                          name: 'sortBy',
+                          value: filters.sortBy
                         }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
                         }
-                        value={filters.sortBy}
-                        options={
-                          sortByList.map(sortBy => ({
-                            name: 'sortBy',
-                            value: sortBy,
-                            label: sortBy
-                          }))
-                        }
-                        placeholder={sortByList[0]}
-                      />
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
+                      }
+                      value={filters.sortBy}
+                      options={
+                        sortByList.map(sortBy => ({
+                          name: 'sortBy',
+                          value: sortBy,
+                          label: sortBy
+                        }))
+                      }
+                      placeholder={sortByList[0]}
+                    />
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
 
-              <div style={{ marginTop: '30px' }}>
-                {
-                  equipments.map(equipment => (
-                    <React.Fragment key={equipment.id}>
-                      {this.renderEquipmentRow(equipment)}
-                    </React.Fragment>
-                  ))
-                }
-              </div>
+            <div style={{ marginTop: '30px' }}>
+              {
+                equipments.map(equipment => (
+                  <React.Fragment key={equipment.id}>
+                    {this.renderEquipmentRow(equipment)}
+                  </React.Fragment>
+                ))
+              }
+            </div>
 
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 

@@ -3,15 +3,26 @@ import * as PropTypes from 'prop-types';
 import { Container, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
+import NumberFormat from 'react-number-format';
 import JobService from '../../api/JobService';
+import truckImage from '../../img/default_truck.png';
+import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
+import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
+import BookingService from '../../api/BookingService';
+import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import TDateTimePicker from '../common/TDateTimePicker';
+import TField from '../common/TField';
 import TFormat from '../common/TFormat';
 import TMap from '../common/TMapOriginDestination';
 import TwilioService from '../../api/TwilioService';
+import MultiSelect from '../common/TMultiSelect';
+import SelectField from '../common/TSelect';
 import CompanyService from '../../api/CompanyService';
+import Table from 'reactstrap/es/Table';
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -321,12 +332,15 @@ class JobViewForm extends Component {
 
   renderAddress(address, type) {
     return (
-      <Row style={{ marginTop: '20px' }}>
+      <Row>
         <Col sm={12}>
-          {type === 'start' ? 'Start Location' : 'End Location'}
-        </Col>
-        <Col sm={12}>
-          {address.address1}
+          <div className="form__form-group">
+            <span
+              className="form__form-group-label">{type === 'start' ? 'Start Location' : 'End Location'}</span>
+            <div className="form__form-group-field">
+              <span>{address.address1}</span>
+            </div>
+          </div>
         </Col>
         {address.address2 && (
           <Col sm={12}>
@@ -403,13 +417,9 @@ class JobViewForm extends Component {
   renderJobBottom(job) {
     return (
       <React.Fragment>
-        <h4 style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
+        <h3 className="subhead">
           Instructions
-        </h4>
+        </h3>
         <Row>
           <Col md={12}>
             <div className="form__form-group">
