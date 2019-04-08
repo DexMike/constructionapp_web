@@ -238,54 +238,38 @@ class JobViewForm extends Component {
     } = this.state;
     return (
       <React.Fragment>
-        <Row style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
+        <Row>
           <Col md={8}>
-            <h4>
+            <h3 className="subhead">
               {companyName}
               &nbsp;/&nbsp;
               {job.name}
-            </h4>
+              <br/>
+              {moment(job.startTime)
+                .format('dddd, MMMM Do')}
+            </h3>
+            <p>
+              Estimated Income: {TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}
+              <br/>
+              Rate: ${job.rate} / {job.rateType}
+              <br/>
+              Estimated - {job.rateEstimate} {job.rateType}(s)
+            </p>
           </Col>
           <Col md={4}>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn btn-primary float-right"
               onClick={this.saveJob}
             >
               {bidExists && customerAccepted === 1 ? 'Accept Job' : 'Request Job'}
             </button>
           </Col>
         </Row>
-        <Row style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
-          <Col md={6}>
-            <Row>
-              {TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}
-            </Row>
-            <Row>
-              Estimated Income
-            </Row>
-          </Col>
-          <Col md={6}>
-            <Row>Rate ${job.rate} / {job.rateType}</Row>
-            <Row>Estimated - {job.rateEstimate} {job.rateType}(s)</Row>
-          </Col>
-        </Row>
-        <Row style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
-          <h4>
-            Date of Job: {moment(job.startTime).format('dddd, MMMM Do')}
-          </h4>
+        <Row>
+          <div className="col-md-12">
+            <hr></hr>
+          </div>
         </Row>
       </React.Fragment>
     );
@@ -307,8 +291,16 @@ class JobViewForm extends Component {
       destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
     }
     return (
-      <Row>
-        <Col className="col-md-6">
+      <Container>
+        <Row>
+          <span className="col-md-6">
+            {this.renderAddress(job.startAddress, 'start')}
+          </span>
+          <span className="col-md-6">
+            {this.renderAddress(job.endAddress, 'end')}
+          </span>
+        </Row>
+        <span className="col-md-12">
           <TMap
             input={
               {
@@ -317,99 +309,68 @@ class JobViewForm extends Component {
               }
             }
           />
-        </Col>
-        <Col className="col-md-6">
-          <Row>
-            {this.renderAddress(job.startAddress, 'start')}
-          </Row>
-          <Row>
-            {this.renderAddress(job.endAddress, 'end')}
-          </Row>
-        </Col>
-      </Row>
+        </span>
+      </Container>
     );
   }
 
   renderAddress(address, type) {
     return (
-      <Row>
-        <Col sm={12}>
-          <div className="form__form-group">
-            <span
-              className="form__form-group-label">{type === 'start' ? 'Start Location' : 'End Location'}</span>
-            <div className="form__form-group-field">
-              <span>{address.address1}</span>
-            </div>
+      <Container>
+        <Row>
+          <div className="col-md-12">
+            <h3 className="subhead">{type === 'start' ? 'Start Location' : 'End Location'}</h3>
           </div>
-        </Col>
-        {address.address2 && (
-          <Col sm={12}>
-            {address.address2}
-          </Col>
-        )}
-        {address.address3 && (
-          <Col sm={12}>
-            {address.address3}
-          </Col>
-        )}
-        {address.address4 && (
-          <Col sm={12}>
-            {address.address4}
-          </Col>
-        )}
-        <Col md={12}>
-          {`${address.city}, `}
-          {`${address.state}, `}
-          {`${address.zipCode}`}
-        </Col>
-      </Row>
+          <div className="col-md-12">{address.address1}</div>
+          {address.address2 && (
+            <div className="col-md-12">
+              {address.address2}
+            </div>
+          )}
+          {address.address3 && (
+            <div className="col-md-12">
+              {address.address3}
+            </div>
+          )}
+          {address.address4 && (
+            <div className="col-md-12">
+              {address.address4}
+            </div>
+          )}
+          <div className="col-md-12">
+            {`${address.city}, `}
+            {`${address.state}, `}
+            {`${address.zipCode}`}
+          </div>
+        </Row>
+      </Container>
     );
   }
 
   renderJobDetails(job) {
     return (
       <React.Fragment>
-        <Row>
-          <Col md={6}>
-            <Row>
-              <h4 style={{
-                borderBottom: '3px solid #ccc',
-                marginBottom: '20px'
-              }}
-              >
+        <Container>
+          <Row>
+            <div className="col-md-4">
+              <h3 className="subhead">
                 Job Details
-              </h4>
-            </Row>
-          </Col>
-          <Col md={6}>
-            <Row>
-              <h4 style={{
-                borderBottom: '3px solid #ccc',
-                marginBottom: '20px'
-              }}
-              >
+              </h3>
+            </div>
+            <div className="col-md-4">
+              <h3 className="subhead">
                 Truck Details
-              </h4>
-            </Row>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={6}>
-            <Row>
-              <Col md={12}>
-                Materials
-              </Col>
-              <Col md={12}>
-                {this.equipmentMaterialsAsString(job.materials)}
-              </Col>
-            </Row>
-          </Col>
-          <Col md={6}>
-            <Row>
+              </h3>
               {job.equipmentType}
-            </Row>
-          </Col>
-        </Row>
+            </div>
+            <div className="col-md-4">
+              <h3 className="subhead">
+                Materials
+              </h3>
+              {this.equipmentMaterialsAsString(job.materials)}
+            </div>
+          </Row>
+        </Container>
       </React.Fragment>
     );
   }
@@ -551,7 +512,7 @@ class JobViewForm extends Component {
                 {this.renderJobAddresses(job)}
                 {this.renderJobDetails(job)}
                 {this.renderJobBottom(job)}
-                {this.renderJobFormButtons()}
+                {/*{this.renderJobFormButtons()}*/}
               </CardBody>
             </Card>
           </Col>
