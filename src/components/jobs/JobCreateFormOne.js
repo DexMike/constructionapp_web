@@ -151,7 +151,7 @@ class CreateJobFormOne extends PureComponent {
         tonnage: p.tonnage, // estimated amount of tonnage
         hourEstimatedHours: p.hourEstimatedHours,
         hourTrucksNumber: p.hourTrucksNumber,
-        rateTab: 1,
+        rateTab: r.rateTab,
         // location
         endLocationAddress1: p.endLocationAddress1,
         endLocationAddress2: p.endLocationAddress2,
