@@ -109,7 +109,9 @@ class JobCreateFormTwo extends PureComponent {
     const startAddress = await AddressService.createAddress(address1);
 
     // end location
-    let endAddress = null;
+    let endAddress = {
+      id: null
+    };
     if (d.rateTab === 2) {
       const address2 = {
         type: 'Delivery',
