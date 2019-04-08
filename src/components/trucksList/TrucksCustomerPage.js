@@ -65,7 +65,7 @@ class TrucksCustomerPage extends Component {
       filters: {
         startAvailability: null,
         endAvailability: null,
-        truckType: '',
+        equipmentType: '',
         minCapacity: '',
         // materialType: '',
         materialType: [],
@@ -134,7 +134,7 @@ class TrucksCustomerPage extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.truckType] = equipmentTypeList;
+    [filters.equipmentType] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -544,8 +544,8 @@ class TrucksCustomerPage extends Component {
                   input={
                     {
                       onChange: this.handleSelectFilterChange,
-                      name: 'truckType',
-                      value: filters.truckType
+                      name: 'equipmentType',
+                      value: filters.equipmentType
                     }
                   }
                   meta={
@@ -554,10 +554,10 @@ class TrucksCustomerPage extends Component {
                       error: 'Unable to select'
                     }
                   }
-                  value={filters.truckType}
+                  value={filters.equipmentType}
                   options={
                     equipmentTypeList.map(equipmentType => ({
-                      name: 'truckType',
+                      name: 'equipmentType',
                       value: equipmentType,
                       label: equipmentType
                     }))
