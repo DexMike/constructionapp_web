@@ -577,6 +577,7 @@ class CreateJobFormOne extends PureComponent {
   tabFirstPage() {
     // clear all data from tab 2
     this.setState({
+      tonnage: 0,
       endLocationAddress1: '',
       endLocationAddress2: '',
       endLocationCity: '',
@@ -602,7 +603,7 @@ class CreateJobFormOne extends PureComponent {
       // validateRes(false);
       // // TODO display error message
       // // console.error('didnt put all the required fields.');
-      // return;
+      return;
     }
     validateRes(true);
     const { gotoSecond } = this.props;
@@ -866,14 +867,14 @@ class CreateJobFormOne extends PureComponent {
                             <SelectField
                               input={
                                 {
-                                  onChange: this.handleEndLocationChange,
-                                  name: 'endLocationState',
-                                  value: endLocationState
+                                  onChange: this.handleStartLocationChange,
+                                  name: 'startLocationState',
+                                  value: startLocationState
                                 }
                               }
                               placeholder="State"
-                              meta={reqHandlerEndState}
-                              value={endLocationState}
+                              meta={reqHandlerStartState}
+                              value={startLocationState}
                               options={allUSstates}
                             />
                           </div>
@@ -961,14 +962,14 @@ class CreateJobFormOne extends PureComponent {
                               <SelectField
                                 input={
                                   {
-                                    onChange: this.handleEndLocationChange,
-                                    name: 'endLocationState',
-                                    value: endLocationState
+                                    onChange: this.handleStartLocationChange,
+                                    name: 'startLocationState',
+                                    value: startLocationState
                                   }
                                 }
                                 placeholder="State"
                                 meta={reqHandlerEndState}
-                                value={endLocationState}
+                                value={startLocationState}
                                 options={allUSstates}
                               />
                             </div>
@@ -1036,14 +1037,14 @@ class CreateJobFormOne extends PureComponent {
                               <SelectField
                                 input={
                                   {
-                                    onChange: this.handleStartLocationChange,
-                                    name: 'startLocationState',
-                                    value: startLocationState
+                                    onChange: this.handleEndLocationChange,
+                                    name: 'endLocationState',
+                                    value: endLocationState
                                   }
                                 }
                                 placeholder="State"
-                                meta={reqHandlerStartState}
-                                value={startLocationState}
+                                meta={reqHandlerEndState}
+                                value={endLocationState}
                                 options={allUSstates}
                               />
                             </div>

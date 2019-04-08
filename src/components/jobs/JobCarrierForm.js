@@ -337,6 +337,389 @@ class JobCarrierForm extends Component {
     );
   }
 
+  renderJobLoads(job) {
+    return (
+      <React.Fragment>
+        <h4 style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          Load Information
+        </h4>
+
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Number of Runs</span>
+              <div className="form__form-group-field">
+                <span>42</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Tons Completed</span>
+              <div className="form__form-group-field">
+                <span>12,255</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Hours Completed</span>
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Run Time</span>
+              <div className="form__form-group-field">
+                <span>42 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Drive Time</span>
+              <div className="form__form-group-field">
+                <span>12 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Idle Time</span>
+              <div className="form__form-group-field">
+                <span>20 mins</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+      </React.Fragment>
+    );
+  }
+
+  renderJobRunss(job) {
+    return (
+      <React.Fragment>
+        <h4 style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          Run Information
+        </h4>
+
+        <Row>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Activity</span>
+              <div className="form__form-group-field">
+                <span>Waiting to Load</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Start Time</span>
+              <div className="form__form-group-field">
+                <span>8:00 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">End Time</span>
+              <div className="form__form-group-field">
+                <span>8:30 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Time</span>
+              <div className="form__form-group-field">
+                <span>30 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Distance</span>
+              <div className="form__form-group-field">
+                <span>0</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">[map]</span>
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>Loading</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8:30 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8:50 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>20 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>Driving</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8:50 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>9:20 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>30 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>Unloading</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>9:20 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>9:40 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>20 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>Driving</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>9:40 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>10:15 AM</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>35 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={2} lg={2} md={2} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                <span>8.5</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+      </React.Fragment>
+    );
+  }
+
+  renderRunSummary(job) {
+    return (
+      <React.Fragment>
+        <h4 style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          Run Summary
+        </h4>
+
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Run Time</span>
+              <div className="form__form-group-field">
+                <span>42 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Drive Time</span>
+              <div className="form__form-group-field">
+                <span>22 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Idle Time</span>
+              <div className="form__form-group-field">
+                <span>20 mins</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Drive Time</span>
+              <div className="form__form-group-field">
+                <span>42 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Load Time</span>
+              <div className="form__form-group-field">
+                <span>22 mins</span>
+              </div>
+            </div>
+          </Col>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <span className="form__form-group-label">Avg Unload Time</span>
+              <div className="form__form-group-field">
+                <span>20 mins</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+      </React.Fragment>
+    );
+  }
+
   render() {
     const { job } = this.props;
     let origin = '';
@@ -384,6 +767,9 @@ class JobCarrierForm extends Component {
                     </React.Fragment>
                   )}
                   {this.renderJobBottom(job)}
+                  {this.renderJobLoads(job)}
+                  {this.renderJobRunss(job)}
+                  {this.renderRunSummary(job)}
                 </Col>
                 <Col className="col-md-5 backo_red">
                   <TMap

@@ -50,6 +50,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getJobByMaterialByFilters(filters) {
+    const response = await super.post(`${PATH}/materialfilters`, filters);
+    return (response);
+  }
+
   static async createJob(job) {
     console.log(job);
     const response = await super.post(PATH, job);
