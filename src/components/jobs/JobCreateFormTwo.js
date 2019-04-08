@@ -109,7 +109,9 @@ class JobCreateFormTwo extends PureComponent {
     const startAddress = await AddressService.createAddress(address1);
 
     // end location
-    let endAddress = null;
+    let endAddress = {
+      id: null
+    };
     if (d.rateTab === 2) {
       const address2 = {
         type: 'Delivery',
@@ -219,12 +221,13 @@ class JobCreateFormTwo extends PureComponent {
                   </div>
                   <div className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'hidden'}>
                     <h4 className="talign">
-                      Send to Favorites
+                      Send to Favorites<br />
                     </h4>
                   </div>
                   <div className={showSendtoFavorites ? 'hidden' : 'col-md-12 form__form-group'}>
-                    <p>You have not set any favorite carriers to work with.</p>
+                    <p>You have not set any favorite carriers to work with.</p><br /><br />
                   </div>
+                  <br/>
                 </Row>
 
                 <Row className="col-md-12">
@@ -236,13 +239,13 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className="col-md-11 form__form-group">
-                    <h4 className="talign">
-                      Yes! Send to Trelar Marketplace
-                    </h4>
-                    * Note - This job will be sent to all Trelar Partners for review
+                    <h5>
+                      Yes! Send to Trelar Marketplace<br /><br />
+                    </h5>
+                    * Note - This job will be sent to all Trelar Partners for review<br />
                   </div>
                   <div className="col-md-3 form__form-group">
-                    Send Job in
+                    Send Job in<br />
                   </div>
                   <div className="col-md-3 form__form-group">
                     <input
