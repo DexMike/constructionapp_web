@@ -34,6 +34,12 @@ class GroupService extends AgentService {
     return (response);
   }
 
+  static async getGroupListByUserNameFiltered(userId, filters) {
+    const url = `/user/${userId}/filtered${PATH}`;
+    const response = await this.post(url, filters);
+    return (response);
+  }
+
   static async createGroup(group) {
     const response = await super.post(PATH, group);
     return (response);
