@@ -234,7 +234,7 @@ class AddTruckFormFour extends PureComponent {
               <hr />
               <div className="profile__stats">
                 <div className="profile__stat">
-                  <p className="profile__stat-number">Avilable from:</p>
+                  <p className="profile__stat-number">Available from:</p>
                   <h4>{printedStartDate}</h4>
                 </div>
                 <div className="profile__stat">

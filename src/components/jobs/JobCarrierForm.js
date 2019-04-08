@@ -630,7 +630,7 @@ class JobCarrierForm extends Component {
     return (
       <Container>
         <Card>
-          <CardBody>
+          <CardBody className="card-full-height">
             <Row>
               {this.renderJobTop(job)}
               <div className="col-md-3">
