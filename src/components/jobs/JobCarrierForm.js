@@ -240,6 +240,7 @@ class JobCarrierForm extends Component {
                 {job.notes}
               </div>
             </div>
+            <br/>
           </Col>
         </Row>
       </React.Fragment>
@@ -249,64 +250,28 @@ class JobCarrierForm extends Component {
   renderJobLoads(job) {
     return (
       <React.Fragment>
-        <h3 className="subhead">
-          Load Information
-        </h3>
-
         <Row>
           <Col>
+            <h3 className="subhead">
+              Load Information
+            </h3>
             <div>
-              <span>Number of Runs</span>
-              <div>
-                <span>42</span>
-              </div>
+              <span>Number of Runs:  <span>42</span></span>
+              <br/>
+              <span>Tons Completed: <span>12,255</span></span>
+              <br/>
+              <span>Hours Completed: <span>8.5</span></span>
+              <br/>
+              <span>Avg Run Time: <span>42 mins</span></span>
+              <br/>
+              <span>Avg Drive Time: <span>12 mins</span></span>
+              <br/>
+              <span>Avg Idle Time: <span>20 mins</span></span>
+              <br/>
             </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Tons Completed</span>
-              <div>
-                <span>12,255</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Hours Completed</span>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
+            <br/>
           </Col>
         </Row>
-
-        <Row>
-          <Col>
-            <div>
-              <span>Avg Run Time</span>
-              <div>
-                <span>42 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Avg Drive Time</span>
-              <div>
-                <span>12 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Avg Idle Time</span>
-              <div>
-                <span>20 mins</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
       </React.Fragment>
     );
   }
@@ -555,64 +520,27 @@ class JobCarrierForm extends Component {
   renderRunSummary(job) {
     return (
       <React.Fragment>
-        <h3 className="subhead">
-          Run Summary
-        </h3>
-
         <Row>
           <Col>
+            <h3 className="subhead">
+              Run Summary
+            </h3>
             <div>
-              <span>Avg Run Time</span>
-              <div>
-                <span>42 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Avg Drive Time</span>
-              <div>
-                <span>22 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Avg Idle Time</span>
-              <div>
-                <span>20 mins</span>
-              </div>
+              <span>Avg Run Time: <span>42 mins</span></span>
+              <br/>
+              <span>Avg Drive Time: <span>22 mins</span></span>
+              <br/>
+              <span>Avg Idle Time: <span>20 mins</span></span>
+              <br/>
+              <span>Avg Load Time: <span>22 mins</span></span>
+              <br/>
+              <span>Avg Drive Time: <span>42 mins</span></span>
+              <br/>
+              <span>Avg Unload Time: <span>20 mins</span></span>
+              <br/>
             </div>
           </Col>
         </Row>
-
-        <Row>
-          <Col>
-            <div>
-              <span>Avg Drive Time</span>
-              <div>
-                <span>42 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Avg Load Time</span>
-              <div>
-                <span>22 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col>
-            <div>
-              <span>Avg Unload Time</span>
-              <div>
-                <span>20 mins</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
       </React.Fragment>
     );
   }
@@ -637,14 +565,14 @@ class JobCarrierForm extends Component {
 
     return (
       <React.Fragment>
-          <h3 className="subhead">Start Location
-            {/*<img*/}
-            {/*  src={`${window.location.origin}/${pinAImage}`}*/}
-            {/*  alt="avatar"*/}
-            {/*  className="pinSize"*/}
-            {/*/> */}
-          </h3>
-          {this.renderAddress(job.startAddress)}
+        <h3 className="subhead">Start Location
+          {/*<img*/}
+          {/*  src={`${window.location.origin}/${pinAImage}`}*/}
+          {/*  alt="avatar"*/}
+          {/*  className="pinSize"*/}
+          {/*/> */}
+        </h3>
+        {this.renderAddress(job.startAddress)}
       </React.Fragment>
     );
   }
@@ -669,14 +597,14 @@ class JobCarrierForm extends Component {
 
     return (
       <React.Fragment>
-          <h3 className="subhead">End Location
-            {/*<img*/}
-            {/*  src={`${window.location.origin}/${pinBImage}`}*/}
-            {/*  alt="avatar"*/}
-            {/*  className="pinSize"*/}
-            {/*/> */}
-          </h3>
-          {this.renderAddress(job.endAddress)}
+        <h3 className="subhead">End Location
+          {/*<img*/}
+          {/*  src={`${window.location.origin}/${pinBImage}`}*/}
+          {/*  alt="avatar"*/}
+          {/*  className="pinSize"*/}
+          {/*/> */}
+        </h3>
+        {this.renderAddress(job.endAddress)}
       </React.Fragment>
     );
   }
@@ -718,7 +646,7 @@ class JobCarrierForm extends Component {
               </div>
             </Row>
             <Row>
-              <div className="col-md-12 backo_red">
+              <div className="col-md-5 backo_red">
                 <TMap
                   input={
                     {
@@ -728,11 +656,19 @@ class JobCarrierForm extends Component {
                   }
                 />
               </div>
+              <div className="col-md-7">
+                {this.renderJobBottom(job)}
+                <div className="row">
+                  <div className="col-md-6">
+                    {this.renderRunSummary(job)}
+                  </div>
+                  <div className="col-md-6">
+                    {this.renderJobLoads(job)}
+                  </div>
+                </div>
+                {this.renderJobRunss(job)}
+              </div>
             </Row>
-            {this.renderJobBottom(job)}
-            {this.renderJobLoads(job)}
-            {this.renderJobRunss(job)}
-            {this.renderRunSummary(job)}
           </CardBody>
         </Card>
       </Container>
