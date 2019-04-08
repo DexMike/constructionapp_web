@@ -16,6 +16,7 @@ import JobService from '../../api/JobService';
 import BidService from '../../api/BidService';
 import GroupService from '../../api/GroupService';
 import TCheckBox from '../common/TCheckBox';
+import TwilioService from '../../api/TwilioService';
 import './jobs.css';
 
 class JobCreateFormTwo extends PureComponent {
@@ -26,6 +27,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites: true,
       showSendtoFavorites: false,
       favoriteCompanies: [],
+      favoriteAdminTels: [],
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -37,11 +39,16 @@ class JobCreateFormTwo extends PureComponent {
     const profile = await ProfileService.getProfile();
     const favorites = await GroupService.getGroupListByUserName(profile.userId);
 
+    // now that we have the companies, let's figure out the admins
+    const favoriteAdminTels = await GroupService.getGroupAdminsTels(favorites);
+    // console.log(favoriteAdminTels);
+
     // are there any favorite companies?
     if (favorites.length > 0) {
       this.setState({
         showSendtoFavorites: true,
-        favoriteCompanies: favorites
+        favoriteCompanies: favorites,
+        favoriteAdminTels
       });
     }
     this.setState({ loaded: true });
@@ -69,6 +76,7 @@ class JobCreateFormTwo extends PureComponent {
     const { firstTabData } = this.props;
     const {
       favoriteCompanies,
+      favoriteAdminTels,
       showSendtoFavorites,
       sendToFavorites
     } = this.state;
@@ -143,23 +151,22 @@ class JobCreateFormTwo extends PureComponent {
         results.push(BidService.createBid(bid));
       }
       await Promise.all(results);
-    }
 
-    /*
-    // bid
-    const bid = {
-      jobId: newJob.id,
-      hasCustomerAccepted: 1,
-      hasSchedulerAccepted: 0,
-      status: 'New',
-      userId: profile.userId,
-      rateType: 'Ton',
-      rate: 0,
-      rateEstimate: 0,
-      notes: d.instructions
-    };
-    await BidService.createBid(bid);
-    */
+      // now  let's send them an SMS
+      const allSms = [];
+      for (const adminIdTel of favoriteAdminTels) {
+        // send only to Jake
+        if (adminIdTel === '6129990787') {
+          console.log('>>Sending SMS to jakje...');
+          const notification = {
+            to: adminIdTel,
+            body: '🚚 You have a new job offer!, please log in to https://www.mytrelar.com'
+          };
+          allSms.push(TwilioService.createSms(notification));
+        }
+      }
+      await Promise.all(allSms);
+    }
 
     // return false;
     const { onClose } = this.props;

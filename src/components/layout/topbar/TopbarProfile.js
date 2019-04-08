@@ -57,9 +57,6 @@ class TopbarProfile extends PureComponent {
     return (
       <div className="topbar__profile">
         <button type="button" className="topbar__avatar" onClick={this.toggle}>
-          <img className="topbar__avatar-img" src={`${window.location.origin}/${Ava}`}
-               alt="avatar"
-          />
           <p className="topbar__avatar-name">{email}</p>
           <DownIcon className="topbar__icon"/>
         </button>

@@ -74,8 +74,8 @@ class DashboardCarrierPage extends Component {
 
         startAvailability: null,
         endAvailability: null,
-        rate: 'Any',
-        minTons: 'Any',
+        rate: '',
+        minTons: '',
         minHours: '',
         minCapacity: '',
 
@@ -121,10 +121,9 @@ class DashboardCarrierPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
+    this.fetchFilterLists();
 
     if (jobs) {
-      await this.fetchFilterLists();
-
       jobs.map(async (job) => {
         const newJob = job;
 
@@ -138,7 +137,7 @@ class DashboardCarrierPage extends Component {
         const address = await AddressService.getAddressById(newJob.startAddress);
         newJob.zip = address.zipCode;
 
-        // this.setState({ loaded: true });
+        this.setState({ loaded: true });
 
         return newJob;
       });
@@ -221,13 +220,6 @@ class DashboardCarrierPage extends Component {
     });
   }
 
-  handleJobEdit(id) {
-    this.setState({
-      goToUpdateJob: true,
-      jobId: id
-    });
-  }
-
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
@@ -266,7 +258,6 @@ class DashboardCarrierPage extends Component {
     this.setState({ jobs });
     return jobs;
   }
-
 
   handleFilterChangeDelayed(e) {
     const self = this;
@@ -324,19 +315,26 @@ class DashboardCarrierPage extends Component {
   }
 
   handleJobEdit(id) {
-    const { jobs } = this.state;
-    const [selectedJob] = jobs.filter((job) => {
-      if (id === job.id) {
-        return job;
-      }
-      return false;
-    }, id);
-    selectedJob.materials = ['Any'];
     this.setState({
-      selectedJob,
-      modal: true
+      goToUpdateJob: true,
+      jobId: id
     });
   }
+
+  // handleJobEdit(id) {
+  //   const { jobs } = this.state;
+  //   const [selectedJob] = jobs.filter((job) => {
+  //     if (id === job.id) {
+  //       return job;
+  //     }
+  //     return false;
+  //   }, id);
+  //   selectedJob.materials = ['Any'];
+  //   this.setState({
+  //     selectedJob,
+  //     modal: true
+  //   });
+  // }
 
   async handleStartDateChange(e) {
     const { filters } = this.state;
@@ -820,7 +818,7 @@ class DashboardCarrierPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying 80 of {newJobCount}
+                  Displaying {newJobCount} of {newJobCount}
                   <TTable
                     columns={
                       [

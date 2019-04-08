@@ -91,7 +91,7 @@
     }
 
     .form__form-group-input-wrap--error-above {
-      margin-bottom: 15px;
+      //margin-bottom: 15px;
 
       .form__form-group-error {
         top: -28px;
@@ -164,6 +164,9 @@
       border-radius: 0;
       transition: all 0.3s;
       background: transparent;
+      display: block;
+      height: 32px !important;
+
 
       @include themify($themes) {
         border: 1px solid #cccccc;
@@ -180,7 +183,7 @@
 
     input {
       width: 100% !important;
-      border: none;
+      border: none !important;
       padding: 0;
     }
 
@@ -285,7 +288,7 @@
 }
 
 .form__form-group {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   width: 100%;
   position: relative;
 }
@@ -305,7 +308,7 @@
 }
 
 .form__form-group-label {
-  margin-bottom: 4px;
+  //margin-bottom: 4px;
   display: inline-block;
 
   @include themify($themes) {

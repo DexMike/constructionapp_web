@@ -571,11 +571,11 @@ class AddTruckFormOne extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            <div className="card__title">
-              <h5 className="bold-text">
-                Welcome to Trelar, Lets add a truck so customers can find you
-              </h5>
-            </div>
+            {/*<div className="card__title">*/}
+            {/*  <h5 className="bold-text">*/}
+            {/*    Welcome to Trelar, Lets add a truck so customers can find you*/}
+            {/*  </h5>*/}
+            {/*</div>*/}
 
             {/* this.handleSubmit  */}
             <form
@@ -588,7 +588,7 @@ class AddTruckFormOne extends PureComponent {
                     Tell us about your truck
                   </h3>
                 </div>
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6 ">
                   <span className="form__form-group-label">Truck description</span>
                   <input
                     name="description"
@@ -601,7 +601,7 @@ class AddTruckFormOne extends PureComponent {
                   <input type="hidden" val={defaultDriverId}/>
                   <input type="hidden" val={driversId}/>
                 </div>
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6">
                   <span className="form__form-group-label">Truck Type</span>
                   <SelectField
                     input={
@@ -661,7 +661,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <hr className="bighr"/>
+                <hr />
               </Row>
 
               <Row className="col-md-12">
@@ -672,8 +672,7 @@ class AddTruckFormOne extends PureComponent {
                 </div>
 
                 {/* FIRST ROW */}
-                <div className="col-md-4 form__form-group">
-                  <div className="form__form-group">
+                <div className="col-md-12 form__form-group">
                     <TCheckBox
                       onChange={this.handleInputChange}
                       name="ratesByBoth"
@@ -681,16 +680,8 @@ class AddTruckFormOne extends PureComponent {
                       label="By Both"
                       meta={reqHandlerChecks}
                     />
-                  </div>
                 </div>
-                <div className="col-md-8 form__form-group">
-                  <i className="material-icons iconSet">local_shipping</i>
-                  &nbsp;
-                  <i className="material-icons iconSet">schedule</i>
-                </div>
-
-                {/* SECOND ROW */}
-                <div className="col-md-4 form__form-group">
+                <div className="col-md-3 form__form-group">
                   <TCheckBox
                     onChange={this.handleInputChange}
                     name="ratesByHour"
@@ -698,19 +689,14 @@ class AddTruckFormOne extends PureComponent {
                     label="By Hour"
                   />
                 </div>
-                <div className="col-md-1 ">
-                  <i className="material-icons iconSet">schedule</i>
-                </div>
                 <div className="col-md-3 form__form-group">
-                  Cost per Hour $
-                </div>
-                <div className="col-md-2 form__form-group">
+                  <span className="label">$ Cost / Hour</span>
                   <TField
                     input={
                       {
                         onChange: this.handleInputChange,
                         name: 'ratesCostPerHour',
-                        value: ratesCostPerHour
+                        value: ratesCostPerHour,
                       }
                     }
                     placeholder="0"
@@ -718,28 +704,8 @@ class AddTruckFormOne extends PureComponent {
                     meta={reqHandlerMinRate}
                   />
                 </div>
-                <div className="col-md-2 form__form-group moveleft">
-                  / Hours
-                </div>
-              </Row>
-
-              <Row className="col-md-12">
-                <hr/>
-              </Row>
-
-              <Row className="col-md-12">
-
-                <div className="col-md-12 form__form-group">
-                  <h4 className="subhead">
-                    Do you have a Minimum:
-                  </h4>
-                </div>
-
-                {/* THIRD ROW */}
-                <div className="col-md-4 form__form-group">
-                  Minimum Booking Time
-                </div>
-                <div className="col-md-2 form__form-group">
+                <div className="col-md-3 form__form-group">
+                  <span className="label">Minimum hours</span>
                   <TField
                     input={
                       {
@@ -753,23 +719,16 @@ class AddTruckFormOne extends PureComponent {
                     meta={reqHandlerMinTime}
                   />
                 </div>
-                <div className="col-md-6 form__form-group">
-                  Hours / Job
-                </div>
+              </Row>
 
-                {/* FOURTH ROW */}
-                <div className="col-md-4 form__form-group">
+              <Row className="col-md-12">
+                <div className="col-md-3 form__form-group">
                   <TCheckBox onChange={this.handleInputChange} name="ratesByTon"
                              value={!!ratesByTon} label="By Ton"
                   />
                 </div>
-                <div className="col-md-1 ">
-                  <i className="material-icons iconSet">local_shipping</i>
-                </div>
                 <div className="col-md-3 form__form-group">
-                  Cost per Ton $
-                </div>
-                <div className="col-md-2 form__form-group">
+                  <span className="label">Cost per Ton $</span>
                   <TField
                     input={
                       {
@@ -783,9 +742,6 @@ class AddTruckFormOne extends PureComponent {
                     meta={reqHandlerCostTon}
                   />
                 </div>
-                <div className="col-md-2 form__form-group">
-                  / Ton
-                </div>
               </Row>
 
               <Row className="col-md-12">
@@ -793,7 +749,7 @@ class AddTruckFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6">
                   <span className="form__form-group-label">
                     Maximum Capacity (Tons)
                   </span>
@@ -809,9 +765,7 @@ class AddTruckFormOne extends PureComponent {
                     type="number"
                     meta={reqHandlerMaxCapacity}
                   />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">
+                   <span className="form__form-group-label">
                     Max Distance to Pickup (Miles)
                   </span>
                   <input
@@ -822,36 +776,13 @@ class AddTruckFormOne extends PureComponent {
                     placeholder="How far will you travel per job"
                   />
                 </div>
-
-              </Row>
-
-              <Row className="col-md-12">
-                <hr/>
-              </Row>
-
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
+                <div className="col-md-6 form__form-group">
                   <h4 className="subhead">
                     Upload a picture of your Truck (Optional)
                   </h4>
+                  <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
+                    {imageUploading && <span>Uploading Image...</span>}
                 </div>
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    We&apos;ll show a picture of it when a customer searches for Trucks
-                  </h3>
-                </div>
-                {/* <div className="col-md-12 form__form-group"> */}
-                {/* <p>picture goes here</p> */}
-                {/* </div> */}
-              </Row>
-
-              <Row className="col-md-12">
-                <hr className="bighr"/>
-              </Row>
-
-              <Row className="col-md-12">
-                <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
-                {imageUploading && <span>Uploading Image...</span>}
               </Row>
               {/*
               <Row>
@@ -866,6 +797,9 @@ class AddTruckFormOne extends PureComponent {
                 />
               </Row>
               */}
+              <Row className="col-md-12">
+                <hr />
+              </Row>
 
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
