@@ -100,8 +100,8 @@ class DashboardCustomerPage extends Component {
 
         startAvailability: null,
         endAvailability: null,
-        rate: 'Any',
-        minTons: 'Any',
+        rate: '',
+        minTons: '',
         minHours: '',
         minCapacity: '',
 
