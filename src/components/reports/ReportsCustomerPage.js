@@ -28,7 +28,7 @@ class ReportsCustomerPage extends Component {
       { name: 'Last Week', value: 7 },
       { name: 'Last 30 days', value: 30 },
       { name: 'Last 60 days', value: 60 },
-      { name: 'Last 90 days', value: 90 },
+      { name: 'Last 90 days', value: 90 }
       // { name: 'Next Week', value: -7 },
       // { name: 'Next 30 days', value: -30 },
       // { name: 'Next 60 days', value: -60 },
@@ -38,6 +38,7 @@ class ReportsCustomerPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
+      jobsComp: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
@@ -61,7 +62,7 @@ class ReportsCustomerPage extends Component {
 
         startAvailability: null,
         endAvailability: null,
-        startAvailDateComp: null,    // Comparison
+        startAvailDateComp: null,    // Comparison NOTE: I don't know if this  
         endAvailDateComp: null,      // Comparison
 
         rate: 'Any',
@@ -76,6 +77,25 @@ class ReportsCustomerPage extends Component {
 
         sortBy: sortByList[0]
 
+      },
+      filtersComp: {
+        companiesId: 0,
+        rateType: '',
+
+        startAvailability: null,
+        endAvailability: null,
+
+        rate: 'Any',
+        minTons: 'Any',
+        minHours: '',
+        minCapacity: '',
+
+        equipmentType: '',
+        numEquipments: '',
+        zipCode: '',
+        materialType: [],
+
+        sortBy: sortByList[0]
       }
       // profile: null
     };
@@ -91,7 +111,7 @@ class ReportsCustomerPage extends Component {
   }
 
   async componentDidMount() {
-    const { filters } = this.state;
+    const { filters, filtersComp, selectIndex, selectIndexComp } = this.state;
     let {
       startDate,
       endDate,
@@ -104,9 +124,10 @@ class ReportsCustomerPage extends Component {
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
+      filtersComp.companiesId = profile.companyId;
     }
 
-    selectedRange = 30;
+    selectedRange = this.timeRanges[selectIndex].value;
     const currentDate = new Date();
     startDate = new Date();
     endDate = currentDate;
@@ -114,16 +135,7 @@ class ReportsCustomerPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    selectedRangeComp = 30;
-    const currentDate2 = new Date();
-    startDateComp = new Date();
-    endDateComp = currentDate2;
-    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
-    filters.startAvailDateComp = startDateComp;
-    filters.endAvailDateComp = endDateComp;
-
     const jobs = await this.fetchJobs(filters);
-
     if (jobs) {
       jobs.map(async (job) => {
         const newJob = job;
@@ -142,10 +154,41 @@ class ReportsCustomerPage extends Component {
       });
     }
 
+    console.log('First Filter Jobs', jobs);
+    selectedRangeComp = this.timeRanges[selectIndexComp].value;
+    const currentDate2 = new Date();
+    startDateComp = new Date();
+    endDateComp = currentDate2;
+    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
+    filtersComp.startAvailability = startDateComp;
+    filtersComp.endAvailability = endDateComp;
+
+    const jobsComp = await this.fetchJobs(filtersComp);
+    if (jobsComp) {
+      jobsComp.map(async (job) => {
+        const newJob = job;
+
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
+        return newJob;
+      });
+    }
+
+    console.log('Second Filter Jobs', jobsComp);
     this.setState({
       loaded: true,
       jobs,
+      jobsComp,
       filters,
+      filtersComp,
       startDate,
       endDate,
       startDateComp,
@@ -229,6 +272,7 @@ class ReportsCustomerPage extends Component {
     const { value, name } = option;
     const { filters } = this.state;
     let {
+      jobsComp,
       startDate,
       endDate,
       selectedRange,
@@ -247,7 +291,8 @@ class ReportsCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs(filters);
-
+    console.log('First Filter Jobs', jobs);
+    console.log('Second Filter Jobs', jobsComp);
     this.setState({
       jobs,
       loaded: true,
@@ -261,8 +306,9 @@ class ReportsCustomerPage extends Component {
 
   async handleSelectFilterChangeComp(option) {
     const { value, name } = option;
-    const { filters } = this.state;
+    const { filtersComp } = this.state;
     let {
+      jobs, 
       startDateComp,
       endDateComp,
       selectedRangeComp,
@@ -277,21 +323,24 @@ class ReportsCustomerPage extends Component {
     startDateComp = new Date();
     endDateComp = currentDate;
     startDateComp.setDate(currentDate.getDate() - selectedRangeComp);
-    filters.startAvailDateComp = startDateComp;
-    filters.endAvailDateComp = endDateComp;
+    filtersComp.startAvailability = startDateComp;
+    filtersComp.endAvailability = endDateComp;
 
-    const jobs = await this.fetchJobs(filters);
+    const jobsComp = await this.fetchJobs(filtersComp);
+    console.log('First Filter Jobs', jobs);
+    console.log('Second Filter Jobs', jobsComp);
 
     this.setState({
-      jobs,
+      jobsComp,
       loaded: true,
-      filters,
+      filtersComp,
       startDateComp,
       endDateComp,
       selectedRangeComp,
       selectIndexComp
     });
   }
+
   async startDateChange(data) {
     const { filters, endDate } = this.state;
     let { startDate } = this.state;
