@@ -505,9 +505,9 @@ class DashboardCarrierPage extends Component {
           {/*{this.renderGoTo()}*/}
 
           <div className="row">
-            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
             <DashboardObject title="New Offers" val = {newJobCount}/>
             <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
+            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
             <DashboardObject title="Completed Jobs" val={completedJobCount}/>
             <DashboardObject title="Potential Earnings" val={potentialIncome}/>
             <DashboardObject title="% Completed" val = {completedOffersPercent}/>
