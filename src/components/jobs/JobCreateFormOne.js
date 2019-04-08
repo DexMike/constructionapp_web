@@ -603,7 +603,7 @@ class CreateJobFormOne extends PureComponent {
       // validateRes(false);
       // // TODO display error message
       // // console.error('didnt put all the required fields.');
-      // return;
+      return;
     }
     validateRes(true);
     const { gotoSecond } = this.props;
