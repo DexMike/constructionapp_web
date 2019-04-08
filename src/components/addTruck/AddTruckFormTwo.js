@@ -55,16 +55,15 @@ class AddTruckFormTwo extends PureComponent {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  componentWillReceiveProps(nextProps) {
     const {validateResTwo} = this.props;
     if (nextProps.validateOnTabTwoClick) {
       if (this.isFormValid()) {
-        console.log(62);
         validateResTwo(true);
         const {thirdPage} = this.props;
         thirdPage(this.state);
+        this.saveAvailabilityInfo(true);
       } else {
-        console.log(67);
         validateResTwo(false);
       }
     }
@@ -138,7 +137,6 @@ class AddTruckFormTwo extends PureComponent {
       reqHandlerEndDate
     } = this.state;
     let isValid = true;
-    console.log(138);
     if (truck.startDate === null || truck.startDate.length === 0) {
       this.setState({
         reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
@@ -146,7 +144,6 @@ class AddTruckFormTwo extends PureComponent {
         })
       });
       isValid = false;
-      console.log(146);
     }
 
     if (truck.endDate === null || truck.endDate.length === 0) {
@@ -156,7 +153,6 @@ class AddTruckFormTwo extends PureComponent {
         })
       });
       isValid = false;
-      console.log(156);
     }
 
     if (isValid) {

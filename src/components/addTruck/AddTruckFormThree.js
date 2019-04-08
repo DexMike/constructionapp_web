@@ -70,11 +70,12 @@ class AddTruckFormThree extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.validateOnTabThreeClick);
+    // console.log(nextProps.validateOnTabThreeClick);
     const {validateResThree} = this.props;
     if (nextProps.validateOnTabThreeClick) {
       if (this.isFormValid()) {
         validateResThree(true);
+        this.saveUserInfo(true);
       } else {
         validateResThree(false);
       }
@@ -156,7 +157,6 @@ class AddTruckFormThree extends PureComponent {
   isFormValid() {
     const truck = this.state;
     let isValid = true;
-    console.log(161, 'Entro a validacion general');
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
         reqHandlerFName: {
@@ -165,7 +165,6 @@ class AddTruckFormThree extends PureComponent {
         }
       });
       isValid = false;
-      console.log(161, 'Entro a validacion1');
     }
 
     if (truck.lastName === null || truck.lastName.length === 0) {
@@ -176,7 +175,6 @@ class AddTruckFormThree extends PureComponent {
         }
       });
       isValid = false;
-      console.log(161, 'Entro a validacion2');
     }
 
     if (truck.email === null || truck.email.length === 0) {
@@ -187,7 +185,6 @@ class AddTruckFormThree extends PureComponent {
         }
       });
       isValid = false;
-      console.log(161, 'Entro a validacion3');
     }
 
     if (truck.mobilePhone === null || truck.mobilePhone.length === 0) {
@@ -198,7 +195,6 @@ class AddTruckFormThree extends PureComponent {
         }
       });
       isValid = false;
-      console.log(161, 'Entro a validacion4');
     }
 
     if (isValid) {

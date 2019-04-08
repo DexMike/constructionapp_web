@@ -163,25 +163,26 @@ class AddTruckForm extends PureComponent {
   }
 
   thirdPage() {
-    const { enableThirdTab } = this.state;
+    const { enableThirdTab, page } = this.state;
     const { editDriverId } = this.props;
     if (!editDriverId && enableThirdTab) {
       this.setState({ page: 3 });
+    }
+    if (!enableThirdTab) {
+      this.validateFormOnePress();
     }
   }
 
   fourthPage() {
     const { enableFourthTab } = this.state;
-    const { validateOnTabOneClick, validateOnTabTwoClick, validateOnTabThreeClick } = this.state;
+    // const { validateOnTabOneClick, validateOnTabTwoClick, validateOnTabThreeClick } = this.state;
     const { editDriverId } = this.props;
-
-    console.log(178, validateOnTabOneClick);
-    console.log(179, validateOnTabTwoClick);
-    console.log(180, validateOnTabThreeClick);
-
-    /*if (!editDriverId && enableFourthTab) {
+    if (!editDriverId && enableFourthTab) {
       this.setState({ page: 4 });
-    }*/
+    }
+    if (!enableFourthTab) {
+      this.validateFormOnePress();
+    }
   }
 
   validateFormOnePress() {
