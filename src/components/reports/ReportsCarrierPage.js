@@ -113,7 +113,7 @@ class ReportsCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    selectedRangeComp = 30;
+    selectedRangeComp = 60;
     const currentDate2 = new Date();
     startDateComp = new Date();
     endDateComp = currentDate2;

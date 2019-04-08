@@ -10,12 +10,13 @@ class TDateTimePickerField extends PureComponent {
     };
     this.handleChange = this.handleChange.bind(this);
   }
-  // ComponentWillReceiveProps was added in order to change the
-  // datePicker date from a given props value.
 
+  // componentDidMount was added in order to prepopulate
+  // datePicker date from a fixed date passed from other component.
   componentDidMount() {
     const { input } = this.props;
     let dueDate = 0;
+    // startDate and EndDate were added for common datepicker values
     if (input.value.startDate) {
       dueDate = input.value.startDate.getTime();
       const parsedDate = new Date(dueDate);
@@ -26,8 +27,21 @@ class TDateTimePickerField extends PureComponent {
       const parsedDate = new Date(dueDate);
       this.setState({ startDate: parsedDate });
     }
+    // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
+    if (input.value.startDateComp) {
+      dueDate = input.value.startDateComp.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+    if (input.value.endDateComp) {
+      dueDate = input.value.endDateComp.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
   }
 
+  // ComponentWillReceiveProps was added in order to change the
+  // datePicker date from a given props value.
   componentWillReceiveProps(props) {
     let dueDate = 0;
     if (props.input.value.startDate) {
@@ -37,6 +51,16 @@ class TDateTimePickerField extends PureComponent {
     }
     if (props.input.value.endDate) {
       dueDate = props.input.value.endDate.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+    if (props.input.value.startDateComp) {
+      dueDate = props.input.value.startDateComp.getTime();
+      const parsedDate = new Date(dueDate);
+      this.setState({ startDate: parsedDate });
+    }
+    if (props.input.value.endDateComp) {
+      dueDate = props.input.value.endDateComp.getTime();
       const parsedDate = new Date(dueDate);
       this.setState({ startDate: parsedDate });
     }
