@@ -170,7 +170,7 @@ class JobCreateFormTwo extends PureComponent {
       for (const adminIdTel of favoriteAdminTels) {
         // send only to Jake
         if (adminIdTel === '6129990787') {
-          console.log('>>Sending SMS to Jake...');
+          // console.log('>>Sending SMS to Jake...');
           const notification = {
             to: adminIdTel,
             body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
