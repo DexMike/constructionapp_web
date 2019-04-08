@@ -42,7 +42,7 @@ class JobCreateFormTwo extends PureComponent {
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
 
-    // get only those who match criteria
+    // get only those that match criteria
     const filters = {
       tonnage: d.tonnage,
       rateTab: d.rateTab,
@@ -129,7 +129,7 @@ class JobCreateFormTwo extends PureComponent {
     const job = {
       companiesId: profile.companyId,
       name: d.name,
-      status: 'New', // check if this one is alright
+      status: 'Published',
       isFavorited: showSendtoFavorites,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
