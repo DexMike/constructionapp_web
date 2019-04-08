@@ -18,6 +18,7 @@ import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
+import CompanyService from '../../api/CompanyService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -140,8 +141,6 @@ class JobCreateForm extends Component {
     booking.createdBy = selectedEquipment.driversId;
     booking.modifiedBy = selectedEquipment.driversId;
     booking.rateType = job.rateType;
-    booking.startAddress = job.startAddress;
-    booking.endAddress = job.endAddress;
     booking.startTime = job.startTime;
     booking.endTime = job.endTime;
 
@@ -326,8 +325,8 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     newJob.createdOn = moment()
       .unix() * 1000;
-    console.log('selectedEquipment type: ', selectedEquipment.type);
-    console.log('newJob: ', newJob);
+    // console.log('selectedEquipment type: ', selectedEquipment.type);
+    // console.log('newJob: ', newJob);
 
     newJob.equipmentType = selectedEquipment.type;
     // In this scenario we are not letting a customer create a job with
@@ -335,12 +334,16 @@ class JobCreateForm extends Component {
     // in the new job creation method we need to set it to the actual
     // number they set in the field
     newJob.numEquipments = 1;
-    console.log('selectedEquipment: ', selectedEquipment);
-
+    // console.log('selectedEquipment: ');
+    // console.log(selectedEquipment);
+    //
     // console.log('selectedEquipment.equipmentType: ', selectedEquipment.equipmentType);
     // console.log('equipmentType: ', newJob.equipmentType);
     const createdJob = await JobService.createJob(newJob);
     bid.jobId = createdJob.id;
+    // bid.startAddress = createdJob.startAddress;
+    // bid.endAddress = createdJob.endAddress;
+    bid.companyCarrierId = selectedEquipment.companyId;
     bid.rate = createdJob.rate;
     bid.rateEstimate = createdJob.rateEstimate;
     bid.modifiedOn = moment()
@@ -355,40 +358,57 @@ class JobCreateForm extends Component {
     // Now we need to create a Booking
     booking.bidId = createdBid.id;
     booking.schedulersCompanyId = selectedEquipment.companyId;
-    booking.sourceAddressId = newJob.startAddress;
-    console.log('createdBid ', createdBid);
-    console.log('booking bidId is ', booking.bidId);
-    console.log('booking ', booking);
-    await BookingService.createBooking(booking);
+    booking.sourceAddressId = createdJob.startAddress;
+    booking.startAddress = createdJob.startAddress;
+    booking.endAddress = createdJob.endAddress;
+    // console.log('createdBid ');
+    // console.log(createdBid);
+    // console.log('booking bidId is ', booking.bidId);
+    // console.log('booking ');
+    // console.log(booking);
+    // console.log('createdBid.companyCarrierId is ', createdBid.companyCarrierId);
+
+    const createdBooking = await BookingService.createBooking(booking);
 
     // now we need to create a BookingEquipment record
     // Since in this scenario we are only allowing 1 truck for one booking
     // we are going to create one BookingEquipment.  NOTE: the idea going forward is
     // to allow multiple trucks per booking
-    bookingEquipment.bookingId = booking.id;
-    bookingEquipment.schedulerId = bid.userId;
+    bookingEquipment.bookingId = createdBooking.id;
+    // console.log('bookingId ', createdBooking.id);
+    // console.log('bookingEquipment');
+    // console.log(bookingEquipment);
+
+    const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+    // console.log('carrierCompany ');
+    // console.log(carrierCompany);
+    // const carrierAdmin = await
+
+    // this needs to be createdBid.carrierCompanyId.adminId
+    bookingEquipment.schedulerId = createdBid.userId;
     bookingEquipment.driverId = selectedEquipment.driversId;
     bookingEquipment.equipmentId = selectedEquipment.id;
-    bookingEquipment.rateType = bid.rateType;
+    bookingEquipment.rateType = createdBid.rateType;
     // At this point we do not know what rateActual is, this will get set upon completion
     // of the job
     bookingEquipment.rateActual = 0;
     // Lets copy the bid info
-    bookingEquipment.startTime = bid.startTime;
-    bookingEquipment.endTime = bid.endTime;
-    bookingEquipment.startAddress = bid.startAddress;
-    bookingEquipment.endAddress = bid.endAddress;
+    bookingEquipment.startTime = createdBooking.startTime;
+    bookingEquipment.endTime = createdBooking.endTime;
+    bookingEquipment.startAddress = createdBooking.startAddress;
+    bookingEquipment.endAddress = createdBooking.endAddress;
     // Since this is booking method 1, we do not have any notes as this is getting created
     // automatically and not by a user
     bookingEquipment.notes = '';
 
+    // this needs to be createdBid.carrierCompanyId.adminId
     bookingEquipment.createdBy = selectedEquipment.driversId;
     bookingEquipment.modifiedBy = selectedEquipment.driversId;
     bookingEquipment.modifiedOn = moment()
       .unix() * 1000;
     bookingEquipment.createdOn = moment()
       .unix() * 1000;
-
+    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
 
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
