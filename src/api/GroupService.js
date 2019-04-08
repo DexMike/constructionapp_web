@@ -23,8 +23,20 @@ class GroupService extends AgentService {
     return (response);
   }
 
+  static async getGroupAdminsTels(companiesIds) {
+    const newPath = `/companies/adminstels${PATH}`;
+    const response = await super.post(newPath, companiesIds);
+    return (response);
+  }
+
   static async getGroupListByUserName(userId) {
     const response = await this.get(`/user/${userId}/favorite${PATH}`);
+    return (response);
+  }
+
+  static async getGroupListByUserNameFiltered(userId, filters) {
+    const url = `/user/${userId}/filtered${PATH}`;
+    const response = await this.post(url, filters);
     return (response);
   }
 

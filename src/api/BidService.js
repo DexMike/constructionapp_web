@@ -29,6 +29,11 @@ class BidService extends AgentService {
     return (response);
   }
 
+  static async getBidsByJobId(jobId) {
+    const response = await this.get(`/jobs/${jobId}${PATH}`);
+    return (response);
+  }
+
   static getDefaultBid() {
     return {
       jobId: 0,
@@ -36,6 +41,7 @@ class BidService extends AgentService {
       hasSchedulerAccepted: 0,
       status: 'New',
       userId: 0,
+      companyCarrierId: 0,
       rateType: 'Hour',
       rate: '',
       rateEstimate: '',

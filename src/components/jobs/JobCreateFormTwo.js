@@ -16,6 +16,7 @@ import JobService from '../../api/JobService';
 import BidService from '../../api/BidService';
 import GroupService from '../../api/GroupService';
 import TCheckBox from '../common/TCheckBox';
+import TwilioService from '../../api/TwilioService';
 import './jobs.css';
 
 class JobCreateFormTwo extends PureComponent {
@@ -26,6 +27,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites: true,
       showSendtoFavorites: false,
       favoriteCompanies: [],
+      favoriteAdminTels: [],
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -33,15 +35,33 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   async componentDidMount() {
+    const { firstTabData } = this.props;
+    const d = firstTabData();
+    let favoriteAdminTels = [];
+    let favoriteCompanies = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
-    const favorites = await GroupService.getGroupListByUserName(profile.userId);
+
+    // get only those that match criteria
+    const filters = {
+      tonnage: d.tonnage,
+      rateTab: d.rateTab,
+      hourEstimatedHours: d.hourEstimatedHours,
+      hourTrucksNumber: d.hourTrucksNumber
+    };
+    favoriteCompanies = await GroupService.getGroupListByUserNameFiltered(
+      profile.userId,
+      filters
+    );
 
     // are there any favorite companies?
-    if (favorites.length > 0) {
+    if (favoriteCompanies.length > 0) {
+      // get the phone numbers from the admins
+      favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
       this.setState({
         showSendtoFavorites: true,
-        favoriteCompanies: favorites
+        favoriteCompanies,
+        favoriteAdminTels
       });
     }
     this.setState({ loaded: true });
@@ -69,6 +89,7 @@ class JobCreateFormTwo extends PureComponent {
     const { firstTabData } = this.props;
     const {
       favoriteCompanies,
+      favoriteAdminTels,
       showSendtoFavorites,
       sendToFavorites
     } = this.state;
@@ -108,7 +129,7 @@ class JobCreateFormTwo extends PureComponent {
     const job = {
       companiesId: profile.companyId,
       name: d.name,
-      status: 'New', // check if this one is alright
+      status: 'Published',
       isFavorited: showSendtoFavorites,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
@@ -143,23 +164,22 @@ class JobCreateFormTwo extends PureComponent {
         results.push(BidService.createBid(bid));
       }
       await Promise.all(results);
-    }
 
-    /*
-    // bid
-    const bid = {
-      jobId: newJob.id,
-      hasCustomerAccepted: 1,
-      hasSchedulerAccepted: 0,
-      status: 'New',
-      userId: profile.userId,
-      rateType: 'Ton',
-      rate: 0,
-      rateEstimate: 0,
-      notes: d.instructions
-    };
-    await BidService.createBid(bid);
-    */
+      // now let's send them an SMS 1
+      const allSms = [];
+      for (const adminIdTel of favoriteAdminTels) {
+        // send only to Jake
+        if (adminIdTel === '6129990787') {
+          // console.log('>>Sending SMS to Jake...');
+          const notification = {
+            to: adminIdTel,
+            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
+          };
+          allSms.push(TwilioService.createSms(notification));
+        }
+      }
+      await Promise.all(allSms);
+    }
 
     // return false;
     const { onClose } = this.props;
@@ -197,10 +217,13 @@ class JobCreateFormTwo extends PureComponent {
                       value={!!sendToFavorites}
                     />
                   </div>
-                  <div className="col-md-11 form__form-group">
+                  <div className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'hidden'}>
                     <h4 className="talign">
                       Send to Favorites
                     </h4>
+                  </div>
+                  <div className={showSendtoFavorites ? 'hidden' : 'col-md-12 form__form-group'}>
+                    <p>You have not set any favorite carriers to work with.</p>
                   </div>
                 </Row>
 

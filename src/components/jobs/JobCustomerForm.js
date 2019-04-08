@@ -336,6 +336,29 @@ class JobForm extends Component {
     );
   }
 
+  renderJobLoads(job) {
+    return (
+      <React.Fragment>
+        <h4 style={{
+          borderBottom: '3px solid #ccc',
+          marginBottom: '20px'
+        }}
+        >
+          Load Information
+        </h4>
+        <Row>
+          <Col xl={3} lg={4} md={6} sm={12}>
+            <div className="form__form-group">
+              <div className="form__form-group-field">
+                {job.notes}
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   render() {
     const { job } = this.props;
     let origin = '';
@@ -386,6 +409,7 @@ class JobForm extends Component {
                     </React.Fragment>
                   )}
                   {this.renderJobBottom(job)}
+                  {this.renderJobLoads(job)}
                 </Col>
                 <Col className="col-md-5 backo_red">
                   <TMap

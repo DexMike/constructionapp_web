@@ -25,6 +25,7 @@ hr {
 .form input, .form textarea {
     border: 1px solid #cccccc !important;
     color: #666666 !important;
+    /*font-size: 14px !important;*/
 }
 .checkbox-btn:hover .checkbox-btn__checkbox-custom {
     border-color: #4ce1b6 !important;
@@ -85,7 +86,7 @@ p, h1, h2, h3, h4, h5, h6 {
     padding: 12px;
 }
 .wizard__form-wrapper {
-    margin-top: 20px !important;
+    margin-top: 8px !important;
 }
 .card {
     padding-bottom: 16px !important;
@@ -108,7 +109,7 @@ p, h1, h2, h3, h4, h5, h6 {
     filter: alpha(opacity=30);
 }
 .form.form--horizontal .form__form-group-label {
-    width: 180px !important;
+    width: 100% !important;
 }
 /*
 .Select--multi .Select-multi-value-wrapper{

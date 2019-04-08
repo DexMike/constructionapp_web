@@ -55,7 +55,7 @@
 // ---- TUI Topbar
 
 // ---- TUI Sidebar
-.sidebar__link-active .sidebar__link {
+.sidebar__link-active  {
   box-shadow: 0px 1px 3px #eff1f5, 0px -1px 3px #eff1f5;
 }
 .sidebar__link, .topbar__link {
@@ -122,15 +122,16 @@
 
 #filter-input-row {
   background: #F9F9F7;
+  padding-bottom: 15px;
   input {
     background-color: white;
   }
   input.filter-text {
     padding: 5px;
-    margin: 4px 0 8px 0;
+    //margin: 4px 0 8px 0;
   }
   .Select-control, .date-picker {
-    margin-top: 4px;
+    //margin-top: 4px;
     background-color: white;
   }
 
