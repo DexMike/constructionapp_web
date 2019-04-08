@@ -56,15 +56,15 @@ class ReportsCustomerPage extends Component {
       selectIndexComp: 3, // Parameter for setting the dropdown default option.
       selectedRangeComp: 0, // Parameter for setting startDate.
 
-      filters: {
+      filters: { // Filter object for the first Jobs response
         companiesId: 0,
         rateType: '',
 
         startAvailability: null,
         endAvailability: null,
-        startAvailDateComp: null,    // Comparison NOTE: I don't know if this  
+        startAvailDateComp: null,    // Comparison
         endAvailDateComp: null,      // Comparison
-
+                                     // NOTE: I don't know if these fields works or exists on the backend for filters
         rate: 'Any',
         minTons: 'Any',
         minHours: '',
@@ -78,6 +78,7 @@ class ReportsCustomerPage extends Component {
         sortBy: sortByList[0]
 
       },
+      // ↓ Based on the previous NOTE, added a second filter object for the second Jobs response
       filtersComp: {
         companiesId: 0,
         rateType: '',
@@ -153,8 +154,9 @@ class ReportsCustomerPage extends Component {
         return newJob;
       });
     }
+    // console.log('First Filter Jobs', jobs);
 
-    console.log('First Filter Jobs', jobs);
+    // Added a copy of the previous code but using it for the second filter mainly for testing
     selectedRangeComp = this.timeRanges[selectIndexComp].value;
     const currentDate2 = new Date();
     startDateComp = new Date();
@@ -181,8 +183,8 @@ class ReportsCustomerPage extends Component {
         return newJob;
       });
     }
+    // console.log('Second Filter Jobs', jobsComp);
 
-    console.log('Second Filter Jobs', jobsComp);
     this.setState({
       loaded: true,
       jobs,
@@ -291,8 +293,8 @@ class ReportsCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs(filters);
-    console.log('First Filter Jobs', jobs);
-    console.log('Second Filter Jobs', jobsComp);
+    // console.log('First Filter Jobs', jobs);
+    // console.log('Second Filter Jobs', jobsComp);
     this.setState({
       jobs,
       loaded: true,
@@ -327,8 +329,8 @@ class ReportsCustomerPage extends Component {
     filtersComp.endAvailability = endDateComp;
 
     const jobsComp = await this.fetchJobs(filtersComp);
-    console.log('First Filter Jobs', jobs);
-    console.log('Second Filter Jobs', jobsComp);
+    // console.log('First Filter Jobs', jobs);
+    // console.log('Second Filter Jobs', jobsComp);
 
     this.setState({
       jobsComp,
@@ -724,7 +726,6 @@ class ReportsCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -875,7 +876,6 @@ class ReportsCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1025,7 +1025,6 @@ class ReportsCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1089,7 +1088,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1225,7 +1223,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1359,7 +1356,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1493,7 +1489,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
