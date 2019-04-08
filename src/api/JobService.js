@@ -51,7 +51,6 @@ class JobService extends AgentService {
   }
 
   static async createJob(job) {
-    console.log(job);
     const response = await super.post(PATH, job);
     return (response);
   }
