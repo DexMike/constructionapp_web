@@ -60,8 +60,8 @@ class AddTruckFormTwo extends PureComponent {
     if (nextProps.validateOnTabTwoClick) {
       if (this.isFormValid()) {
         validateResTwo(true);
-        const {thirdPage} = this.props;
-        thirdPage(this.state);
+        // const {thirdPage} = this.props;
+        // thirdPage(this.state);
         this.saveAvailabilityInfo(true);
       } else {
         validateResTwo(false);

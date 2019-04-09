@@ -36,9 +36,11 @@ class AddTruckForm extends PureComponent {
     this.getAvailiabilityInfo = this.getAvailiabilityInfo.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
     this.closeNow = this.closeNow.bind(this);
+    /*
     this.validateFormOnePress = this.validateFormOnePress.bind(this);
     this.validateFormTwoPress = this.validateFormTwoPress.bind(this);
     this.validateFormThreePress = this.validateFormThreePress.bind(this);
+    */
     this.validateFormOneResults = this.validateFormOneResults.bind(this);
     this.validateFormTwoResults = this.validateFormTwoResults.bind(this);
     this.validateFormThreeResults = this.validateFormThreeResults.bind(this);
@@ -150,7 +152,7 @@ class AddTruckForm extends PureComponent {
   firstPage() {
     const { editDriverId } = this.props;
     if (!editDriverId) { // we're coming from Drivers List, disable tabs other than 3
-      this.setState({ page: 1 });
+      this.setState({ page: 1, validateOnTabOneClick: null });
     }
   }
 
@@ -163,13 +165,10 @@ class AddTruckForm extends PureComponent {
   }
 
   thirdPage() {
-    const { enableThirdTab, page } = this.state;
+    const { enableThirdTab } = this.state;
     const { editDriverId } = this.props;
     if (!editDriverId && enableThirdTab) {
       this.setState({ page: 3 });
-    }
-    if (!enableThirdTab) {
-      this.validateFormOnePress();
     }
   }
 
@@ -180,26 +179,27 @@ class AddTruckForm extends PureComponent {
     if (!editDriverId && enableFourthTab) {
       this.setState({ page: 4 });
     }
-    if (!enableFourthTab) {
-      this.validateFormOnePress();
-    }
   }
 
+  /*
   validateFormOnePress() {
-    const { validateOnTabOneClick } = this.state;
+    /*const { validateOnTabOneClick } = this.state;
     this.setState({ validateOnTabOneClick: !validateOnTabOneClick });
+    console.log(185, validateOnTabOneClick);
   }
 
   validateFormTwoPress() {
     const { validateOnTabTwoClick } = this.state;
     this.setState({ validateOnTabTwoClick: !validateOnTabTwoClick });
+    console.log(191, validateOnTabTwoClick);
   }
 
   validateFormThreePress() {
     const { validateOnTabThreeClick } = this.state;
     this.setState({ validateOnTabThreeClick: !validateOnTabThreeClick });
+    console.log(197, validateOnTabThreeClick);
   }
-
+  */
   validateFormOneResults(res) {
     if (res === false) {
       this.setState({ enableSecondTab: false });
@@ -207,7 +207,6 @@ class AddTruckForm extends PureComponent {
     if (res === true) {
       this.setState({ enableSecondTab: true });
     }
-    this.secondPage();
     this.setState({ validateOnTabOneClick: res });
   }
 
@@ -218,7 +217,6 @@ class AddTruckForm extends PureComponent {
     if (res === true) {
       this.setState({ enableThirdTab: true });
     }
-    this.thirdPage();
     this.setState({ validateOnTabTwoClick: res });
   }
 
@@ -229,7 +227,6 @@ class AddTruckForm extends PureComponent {
     if (res === true) {
       this.setState({ enableFourthTab: true });
     }
-    this.fourthPage();
     this.setState({ validateOnTabThreeClick: res });
   }
 
@@ -320,7 +317,7 @@ class AddTruckForm extends PureComponent {
                         getTruckFullInfo={this.getTruckInfo}
                         passedTruckFullInfo={truckPassedInfo}
                         getAvailiabilityFullInfo={this.getAvailiabilityInfo}
-                        secondPage={this.secondPage}
+                        // secondPage={this.secondPage}
                         validateResOne={this.validateFormOneResults}
                         validateOnTabOneClick={validateOnTabOneClick}
                       />
@@ -335,7 +332,7 @@ class AddTruckForm extends PureComponent {
                         handleSubmit={this.nextPage}
                         onClose={this.closeNow}
                         getAvailiabilityFullInfo={this.getAvailiabilityInfo}
-                        thirdPage={this.thirdPage}
+                        // thirdPage={this.thirdPage}
                         validateResTwo={this.validateFormTwoResults}
                         validateOnTabTwoClick={validateOnTabTwoClick}
                       />
@@ -353,7 +350,7 @@ class AddTruckForm extends PureComponent {
                           // this is to track if we are editing
                           passedTruckFullInfoId={truckPassedInfo.driversId}
                           editDriverId={editDriverId}
-                          fourthPage={this.fourthPage}
+                          // fourthPage={this.fourthPage}
                           validateResThree={this.validateFormThreeResults}
                           validateOnTabThreeClick={validateOnTabThreeClick}
                         />

@@ -70,7 +70,6 @@ class AddTruckFormThree extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    // console.log(nextProps.validateOnTabThreeClick);
     const {validateResThree} = this.props;
     if (nextProps.validateOnTabThreeClick) {
       if (this.isFormValid()) {
