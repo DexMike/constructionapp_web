@@ -148,7 +148,6 @@ class DashboardCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
-    console.log(jobs);
 
     if (jobs) {
       await this.fetchFilterLists();

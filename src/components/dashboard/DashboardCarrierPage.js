@@ -227,11 +227,10 @@ class DashboardCarrierPage extends Component {
   }
 
   async fetchJobs() {
-    console.log(230);
     const { filters } = this.state;
 
     const jobs = await JobService.getJobByFilters(filters);
-    console.log(jobs);
+    // console.log(jobs);
 
     this.setState({ jobs });
     return jobs;
@@ -404,7 +403,7 @@ class DashboardCarrierPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Job Dashboard 429</h3>
+          <h3 className="page-title">Job Dashboard</h3>
         </Col>
       </Row>
     );
