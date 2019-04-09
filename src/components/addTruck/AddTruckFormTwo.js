@@ -212,12 +212,6 @@ class AddTruckFormTwo extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            <div className="card__title">
-              <h5 className="bold-text">
-                Configure your schedule
-              </h5>
-            </div>
-
             {/*  onSubmit={handleSubmit} */}
             <form
               className="form form--horizontal addtruck__form"
@@ -226,10 +220,10 @@ class AddTruckFormTwo extends PureComponent {
 
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
-                  <h4 className="subhead">
-                    <br />
+                  <h3 className="subhead">
                     Set availability by date range
-                  </h4>
+                  </h3>
+                  <br/>
                 </div>
 
                 <div className="col-md-6 form__form-group">
@@ -266,10 +260,9 @@ class AddTruckFormTwo extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
-                <div className="col-md-3 form__form-group">
-                  <h4 className="subhead">Availability</h4>
-                </div>
-                <div className="col-md-9 form__form-group">
+                <h3 className="subhead">Availability</h3>
+                <br/>
+                <div className="">
                   {/* color={availableButtonColor(true)} */}
                   <Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
                     Available
