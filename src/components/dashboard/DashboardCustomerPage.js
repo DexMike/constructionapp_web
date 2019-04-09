@@ -32,7 +32,8 @@ import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
 
 import {useTranslation} from "react-i18next";
-import {DashboardObject} from "./DashboardObject";
+import {DashboardObject, DashboardObjectClickable} from "./DashboardObjectClickable";
+import {DashboardObjectStatic} from "./DashboardObjectStatic";
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -97,7 +98,7 @@ class DashboardCustomerPage extends Component {
       // Filter values
       filters: {
         rateType: '',
-
+        status: '',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -129,7 +130,7 @@ class DashboardCustomerPage extends Component {
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
-
+    this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
   }
 
   async componentDidMount() {
@@ -287,6 +288,20 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  async handleFilterStatusChange({value, name}) {
+    const { filters } = this.state;
+    if (filters[name] === value) {
+      filters[name] = "";
+    } else {
+      filters[name] = value;
+    }
+    this.setState({ filters });
+    console.log(filters);
+    //await this.fetchJobs();
+
+    // implement backend query for status before fetching to avoid bugs
+  }
+
   async handleFilterChange(e) {
     const { value } = e.target;
     const { filters } = this.state;
@@ -427,7 +442,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderCards() {
-    const {loaded} = this.state;
+    const {loaded, filters} = this.state;
     let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
@@ -494,11 +509,11 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObject title="Offered Jobs" val = {newJobCount}/>
-            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
-            <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
-            <DashboardObject title="Completed Jobs" val={completedJobCount}/>
-            <DashboardObject title="% Completed" val = {completedOffersPercent}/>
+            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"Pending"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent} value={"% Completed"}/>
           </div>
         </Container>
       );
