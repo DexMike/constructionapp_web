@@ -50,6 +50,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getJobDashboardByFilters(filters) {
+    const response = await super.post(`${PATH}/dashboard/filters`, filters);
+    return (response);
+  }
+
   static async getJobByMaterialByFilters(filters) {
     const response = await super.post(`${PATH}/materialfilters`, filters);
     return (response);

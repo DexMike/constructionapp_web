@@ -227,34 +227,12 @@ class DashboardCarrierPage extends Component {
   }
 
   async fetchJobs() {
+    console.log(230);
     const { filters } = this.state;
 
     const jobs = await JobService.getJobByFilters(filters);
+    console.log(jobs);
 
-    // if (jobs) {
-    //   if (jobs != null) {
-    //     jobs.map((job) => {
-    //       const newJob = job;
-    //       //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-    //       //     newEquipment.companyName = company.legalName;
-    //       // console.log(companyName);
-    //       // console.log(job.companyName)
-    //       // const materialsList = await EquipmentMaterialsService
-    //       // .getEquipmentMaterialsByJobId(job.id);
-    //       // const materials = materialsList.map(materialItem => materialItem.value);
-    //       // newJob.material = this.equipmentMaterialsAsString(materials);
-    //       // console.log(companyName);
-    //       // console.log(job.material);
-    //       // newJob.modifiedOn = moment(job.modifiedOn)
-    //       //   .format();
-    //       // newJob.createdOn = moment(job.createdOn)
-    //       //   .format();
-    //       return job;
-    //     });
-    //   }
-    //
-    //   this.setState({ jobs });
-    // }
     this.setState({ jobs });
     return jobs;
   }
