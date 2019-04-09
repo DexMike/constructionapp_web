@@ -523,65 +523,12 @@ class DashboardCarrierPage extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-
                 <Col lg={12}>
-                  <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col className="filter-item-title">
-                      Date Range
-                    </Col>
-                    <Col className="filter-item-title">
-                      Rate Type
-                    </Col>
-                    <Col className="filter-item-title">
-                      Min Rate
-                    </Col>
-                    <Col className="filter-item-title">
-                      Minimum
-                    </Col>
-                    <Col className="filter-item-title">
-                      Truck Type
-                    </Col>
-                    <Col className="filter-item-title">
-                      # of Trucks
-                    </Col>
-                    <Col className="filter-item-title">
-                      Zip Code
-                    </Col>
-                    <Col className="filter-item-title">
-                      Materials
-                    </Col>
-                  </Row>
                   <Row lg={12} id="filter-input-row">
-                    {/*
                     <Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              onChange: this.handleStartDateChange,
-                              name: 'startAvailability',
-                              value: { startDate },
-                              givenDate: new Date(startDate).getTime()
-                            }
-                          }
-                          onChange={this.handleStartDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    </Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              className: 'filter-text',
-                              onChange: this.handleEndDateChange,
-                              name: 'endAvailability',
-                              value: { endDate },
-                              givenDate: new Date(endDate).getTime()
-                            }
-                          }
-                          onChange={this.handleEndDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    */}
-                    <Col>
+                      <div className="filter-item-title">
+                        Date Range
+                      </div>
                       <TIntervalDatePicker
                         startDate={filters.startAvailability}
                         endDate={filters.endAvailability}
@@ -589,9 +536,11 @@ class DashboardCarrierPage extends Component {
                         onChange={this.handleIntervalInputChange}
                         dateFormat="MM/dd/yy"
                       />
-
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Rate Type
+                      </div>
                       <TSelect
                         input={
                           {
@@ -618,6 +567,9 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Min Rate
+                      </div>
                       <TField
                         input={
                           {
@@ -632,6 +584,9 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Minimum
+                      </div>
                       <TField
                         input={
                           {
@@ -646,6 +601,9 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Truck Type
+                      </div>
                       <TSelect
                         input={
                           {
@@ -672,6 +630,9 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        # of Trucks
+                      </div>
                       <TField
                         input={
                           {
@@ -686,6 +647,9 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Zip Code
+                      </div>
                       <input name="zipCode"
                              className="filter-text"
                              type="text"
@@ -695,6 +659,9 @@ class DashboardCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Materials
+                      </div>
                       <MultiSelect
                         input={
                           {
@@ -721,18 +688,13 @@ class DashboardCarrierPage extends Component {
                         placeholder={materialTypeList[0]}
                       />
                     </Col>
-
                   </Row>
                 </Col>
-
                 <br/>
-
               </form>
-
             </CardBody>
           </Card>
         </Col>
-
       </Row>
     );
   }

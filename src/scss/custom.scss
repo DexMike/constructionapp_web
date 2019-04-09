@@ -107,7 +107,7 @@
 .filter-item-title {
   background-color:#F9F9F7;
   //font-weight: bold;
-  padding-left: 15px;
+  //padding-left: 15px;
   padding-top: 8px;
   color: #666666;
   text-align: left;
@@ -202,8 +202,22 @@ span.form__form-group-error {
 // ---- sidebar icons
 
 
-// ------  Helper Classes for layout
+// ------  Helper Classes for Reporting
 .card-full-height {
   height: 75VH;
   padding: 30px !important;
 }
+
+.card-filter {
+  &:hover, &:active {
+    border: 1px solid #4ce1b6;
+    background-color: #006F4F;
+    h4, h5 {
+      color:  #FFFFFF;
+    }
+  }
+}
+
+// ------  Helper Classes for Reporting
+
+

@@ -502,150 +502,145 @@ class TrucksCustomerPage extends Component {
     } = this.state;
 
     return (
-
-      <div>
-
-
-        <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-
-          <Col lg={12}>
-            <Row lg={12} style={{ background: '#eef4f8' }}>
-              <Col className="filter-item-title">
-                Availability
-              </Col>
-              <Col className="filter-item-title">
-                Truck Type
-              </Col>
-              <Col className="filter-item-title">
-                Rate Type
-              </Col>
-              <Col className="filter-item-title">
-                Min Capacity
-              </Col>
-              <Col className="filter-item-title">
-                Materials
-              </Col>
-              <Col className="filter-item-title">
-                Zip Code
-              </Col>
-            </Row>
-            <Row lg={12} id="filter-input-row">
-              <Col>
-                <TIntervalDatePicker
-                  startDate={startDate}
-                  endDate={endDate}
-                  name="dateInterval"
-                  onChange={this.handleIntervalInputChange}
-                  dateFormat="MM/dd/yy"
-                />
-              </Col>
-              <Col>
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handleSelectFilterChange,
-                      name: 'equipmentType',
-                      value: filters.equipmentType
-                    }
-                  }
-                  meta={
-                    {
-                      touched: false,
-                      error: 'Unable to select'
-                    }
-                  }
-                  value={filters.equipmentType}
-                  options={
-                    equipmentTypeList.map(equipmentType => ({
-                      name: 'equipmentType',
-                      value: equipmentType,
-                      label: equipmentType
-                    }))
-                  }
-                  placeholder={equipmentTypeList[0]}
-                />
-              </Col>
-              <Col>
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handleSelectFilterChange,
-                      name: 'rateType',
-                      value: filters.rateType
-                    }
-                  }
-                  meta={
-                    {
-                      touched: false,
-                      error: 'Unable to select'
-                    }
-                  }
-                  value={filters.rateType}
-                  options={
-                    rateTypeList.map(rateType => ({
-                      name: 'rateType',
-                      value: rateType,
-                      label: rateType
-                    }))
-                  }
-                  placeholder="Select materials"
-                />
-              </Col>
-              <Col>
-                <input name="minCapacity"
-                       className="filter-text"
-                       type="text"
-                       placeholder="Min # of tons"
-                       value={filters.minCapacity}
-                       onChange={this.handleFilterChange}
-                />
-              </Col>
-              <Col>
-                <MultiSelect
-                  input={
-                    {
-                      onChange: this.handleMultiChange,
-                      // onChange: this.handleSelectFilterChange,
-                      name: 'materialType',
-                      value: filters.materialType
-                    }
-                  }
-                  meta={
-                    {
-                      touched: false,
-                      error: 'Unable to select'
-                    }
-                  }
-                  options={
-                    materialTypeList.map(materialType => ({
-                      name: 'materialType',
-                      value: materialType.trim(),
-                      label: materialType.trim()
-                    }))
-                  }
-                  // placeholder="Materials"
-                  placeholder={materialTypeList[0]}
-                />
-              </Col>
-              <Col>
-                <input name="zipCode"
-                       className="filter-text"
-                       type="text"
-                       placeholder="Zip Code"
-                       value={filters.zipCode}
-                       onChange={this.handleFilterChange}
-                />
-              </Col>
-            </Row>
-          </Col>
-
-          <br/>
-
-        </form>
-
-
-      </div>
-
+      <Row>
+        <Col md={12}>
+          <Card>
+            <CardBody>
+              <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
+                <Col lg={12}>
+                  <Row lg={12} id="filter-input-row">
+                    <Col>
+                      <div className="filter-item-title">
+                        Availability
+                      </div>
+                      <TIntervalDatePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        name="dateInterval"
+                        onChange={this.handleIntervalInputChange}
+                        dateFormat="MM/dd/yy"
+                      />
+                    </Col>
+                    <Col>
+                      <div className="filter-item-title">
+                        Truck Type
+                      </div>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'truckType',
+                            value: filters.truckType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.truckType}
+                        options={
+                          equipmentTypeList.map(equipmentType => ({
+                            name: 'truckType',
+                            value: equipmentType,
+                            label: equipmentType
+                          }))
+                        }
+                        placeholder={equipmentTypeList[0]}
+                      />
+                    </Col>
+                    <Col>
+                      <div className="filter-item-title">
+                        Rate Type
+                      </div>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder="Select materials"
+                      />
+                    </Col>
+                    <Col>
+                      <div className="filter-item-title">
+                        Min Capacity
+                      </div>
+                      <input name="minCapacity"
+                             className="filter-text"
+                             type="text"
+                             placeholder="Min # of tons"
+                             value={filters.minCapacity}
+                             onChange={this.handleFilterChange}
+                      />
+                    </Col>
+                    <Col>
+                      <div className="filter-item-title">
+                        Materials
+                      </div>
+                      <MultiSelect
+                        input={
+                          {
+                            onChange: this.handleMultiChange,
+                            // onChange: this.handleSelectFilterChange,
+                            name: 'materialType',
+                            value: filters.materialType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        options={
+                          materialTypeList.map(materialType => ({
+                            name: 'materialType',
+                            value: materialType.trim(),
+                            label: materialType.trim()
+                          }))
+                        }
+                        // placeholder="Materials"
+                        placeholder={materialTypeList[0]}
+                      />
+                    </Col>
+                    <Col>
+                      <div className="filter-item-title">
+                        Zip Code
+                      </div>
+                      <input name="zipCode"
+                             className="filter-text"
+                             type="text"
+                             placeholder="Zip Code"
+                             value={filters.zipCode}
+                             onChange={this.handleFilterChange}
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <br/>
+              </form>
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
     );
   }
 

@@ -113,9 +113,15 @@
   }
 
   &.btn-secondary {
-    background-color: #e7e2e2;
-    border-color: #e7e2e2;
-    color: #646777;
+    background: #FFFFFF;
+    color: #666666;
+    border: 2px solid #808080;
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
 
     &:before {
       background-color: darken(#e7e2e2, 10%);
@@ -133,7 +139,15 @@
   }
 
   &.btn-outline-secondary {
-    border-color: #e7e2e2;
+    background: #FFFFFF;
+    color: #666666;
+    border: 2px solid #808080;
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
 
     &, p {
 
@@ -169,8 +183,15 @@
   }
 
   &.btn-primary {
-    background-color: $primary-green;
-    border-color: $primary-green;
+    background: #006f53;
+    color: #FFFFFF;
+    border: 2px solid #FFFFFF;
+    border-radius: 4px;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
 
     &:before {
       border-color: $color-darkgreen;
@@ -370,7 +391,7 @@
       }
     }
   }
-  
+
   &.primaryButton { // TUI
     background: $primary-green;
     color: #FFFFFF;
