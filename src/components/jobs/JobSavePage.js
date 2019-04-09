@@ -112,19 +112,11 @@ class JobSavePage extends Component {
         }
         return (
           <div className="container">
-            {this.renderGoTo()}
-
-            {job.company.legalName}
-            &nbsp;&#62;&nbsp;
-            {job.name}
-
-            <div className="row">
               <div className="col-md-12">
                 <h3 className="page-title">
                   Job Details
                 </h3>
               </div>
-            </div>
             {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
             {/* this.carrierOrCustomerForm(job) */}
             {type}

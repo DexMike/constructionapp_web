@@ -239,7 +239,7 @@ class MarketplaceCarrierPage extends Component {
     for (const [key, value] of Object.entries(jobs)) {
       try {
         let truckMaterials = await
-        JobMaterialsService.getJobMaterialsByJobId(value.id);
+          JobMaterialsService.getJobMaterialsByJobId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
@@ -250,7 +250,8 @@ class MarketplaceCarrierPage extends Component {
           allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
           newJobs[key].materials = allMaterials.join(', \n');
         } else {
-          newJobs[key].materials = truckMaterials.map(e => e.material).join('\n');
+          newJobs[key].materials = truckMaterials.map(e => e.material)
+            .join('\n');
         }
       } catch (error) {
         newJobs[key].materials = '';
@@ -418,9 +419,16 @@ class MarketplaceCarrierPage extends Component {
         toggle={this.toggleViewJobModal}
         className="modal-dialog--primary modal-dialog--header"
       >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleViewJobModal}
+          />
+          <div className="bold-text modal__title">Marketplace Detail</div>
+        </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobViewForm
             jobId={jobId}
+            closeModal={this.toggleViewJobModal}
             toggle={this.toggleViewJobModal}
           />
         </div>
@@ -466,12 +474,17 @@ class MarketplaceCarrierPage extends Component {
         if (newJob.rateType === 'Hour') {
           newJob.newSize = TFormat.asHours(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          newJob.estimatedIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate) * 0.95
+          );
         }
         if (newJob.rateType === 'Ton') {
           newJob.newSize = TFormat.asTons(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          // Job's Potencial Earnings
+          newJob.estimatedIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate) * 0.95
+          );
         }
 
         newJob.newStartDate = TFormat.asDate(job.startTime);
@@ -503,7 +516,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'estimatedIncome',
-                        displayName: 'Est. Income'
+                        displayName: 'Potencial Earnings'
                       },
                       {
                         name: 'newRate',

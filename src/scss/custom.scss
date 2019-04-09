@@ -200,3 +200,10 @@ span.form__form-group-error {
   filter: contrast(30%);
 }
 // ---- sidebar icons
+
+
+// ------  Helper Classes for layout
+.card-full-height {
+  height: 75VH;
+  padding: 30px !important;
+}

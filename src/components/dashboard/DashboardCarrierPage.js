@@ -447,17 +447,21 @@ class DashboardCarrierPage extends Component {
         if (newJob.rateType === 'Hour') {
           newJob.newSize = TFormat.asHours(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          newJob.estimatedIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate) * 0.95
+          );
         }
         if (newJob.rateType === 'Ton') {
           newJob.newSize = TFormat.asTons(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          newJob.estimatedIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate) * 0.95
+          );
         }
 
         newJob.newStartDate = TFormat.asDate(job.startTime);
 
-        potentialIncome += tempRate * newJob.rateEstimate;
+        potentialIncome += (tempRate * newJob.rateEstimate) * 0.95;
 
         return newJob;
       });
@@ -769,17 +773,22 @@ class DashboardCarrierPage extends Component {
       if (newJob.rateType === 'Hour') {
         newJob.newSize = TFormat.asHours(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.estimatedIncome = TFormat.asMoney(
+          (tempRate * newJob.rateEstimate) * 0.95
+        );
       }
       if (newJob.rateType === 'Ton') {
         newJob.newSize = TFormat.asTons(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        // Job's Potencial Earnings
+        newJob.estimatedIncome = TFormat.asMoney(
+          (tempRate * newJob.rateEstimate) * 0.95
+        );
       }
 
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
-      potentialIncome += tempRate * newJob.rateEstimate;
+      potentialIncome += (tempRate * newJob.rateEstimate) * 0.95;
 
       return newJob;
     });
@@ -818,7 +827,7 @@ class DashboardCarrierPage extends Component {
                         },
                         {
                           name: 'estimatedIncome',
-                          displayName: 'Est. Income'
+                          displayName: 'Potencial Earnings'
                         },
                         {
                           name: 'newRate',
