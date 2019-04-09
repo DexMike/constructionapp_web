@@ -317,10 +317,12 @@ class AddTruckFormOne extends PureComponent {
       redir
     };
 
-    this.setState({ saveValues });
     // save info in the parent
-    onTruckFullInfo(saveValues);
-    this.handleSubmit('Truck');
+    this.setState({ saveValues },
+      function wait() {
+        onTruckFullInfo(saveValues);
+        this.handleSubmit('Truck');
+      });
   }
 
   async saveTruck(e) {
