@@ -208,16 +208,27 @@ span.form__form-group-error {
   padding: 30px !important;
 }
 
+.card-filter.active {
+  cursor: default;
+  border: 1px solid #4ce1b6;
+  background-color: #006F4F;
+
+  h4, h5 {
+    color: #FFFFFF;
+  }
+}
+
 .card-filter {
-  &:hover, &:active {
+  &:hover {
+    cursor: default;
     border: 1px solid #4ce1b6;
     background-color: #006F4F;
     h4, h5 {
       color:  #FFFFFF;
     }
   }
-}
 
+}
 // ------  Helper Classes for Reporting
 
 
