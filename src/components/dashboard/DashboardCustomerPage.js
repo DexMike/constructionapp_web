@@ -261,32 +261,8 @@ class DashboardCustomerPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
 
-    const jobs = await JobService.getJobByFilters(filters);
-
-    // if (jobs) {
-    //   if (jobs != null) {
-    //     jobs.map((job) => {
-    //       const newJob = job;
-    //       //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-    //       //     newEquipment.companyName = company.legalName;
-    //       // console.log(companyName);
-    //       // console.log(job.companyName)
-    //       // const materialsList = await EquipmentMaterialsService
-    //       // .getEquipmentMaterialsByJobId(job.id);
-    //       // const materials = materialsList.map(materialItem => materialItem.value);
-    //       // newJob.material = this.equipmentMaterialsAsString(materials);
-    //       // console.log(companyName);
-    //       // console.log(job.material);
-    //       // newJob.modifiedOn = moment(job.modifiedOn)
-    //       //   .format();
-    //       // newJob.createdOn = moment(job.createdOn)
-    //       //   .format();
-    //       return job;
-    //     });
-    //   }
-    //
-    //   this.setState({ jobs });
-    // }
+    const jobs = await JobService.getJobDashboardByFilters(filters);
+    // console.log(jobs);
     this.setState({ jobs });
     return jobs;
   }
@@ -856,7 +832,7 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Job Status'
                         },
                         {
-                          name: 'companyName',
+                          name: 'legalName',
                           displayName: 'Customer'
                         },
                         {
@@ -868,7 +844,7 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Start Date'
                         },
                         {
-                          name: 'zip',
+                          name: 'zipCode',
                           displayName: 'Start Zip'
                         },
                         {
@@ -881,7 +857,7 @@ class DashboardCustomerPage extends Component {
                         // },
                         {
                           // the materials needs to come from the the JobMaterials Table
-                          name: 'material',
+                          name: 'materials',
                           displayName: 'Materials'
                         }
                       ]
