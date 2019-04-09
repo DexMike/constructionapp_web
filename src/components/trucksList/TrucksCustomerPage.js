@@ -529,8 +529,8 @@ class TrucksCustomerPage extends Component {
                         input={
                           {
                             onChange: this.handleSelectFilterChange,
-                            name: 'truckType',
-                            value: filters.truckType
+                            name: 'equipmentType',
+                            value: filters.equipmentType
                           }
                         }
                         meta={
@@ -539,10 +539,10 @@ class TrucksCustomerPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.truckType}
+                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
-                            name: 'truckType',
+                            name: 'equipmentType',
                             value: equipmentType,
                             label: equipmentType
                           }))
