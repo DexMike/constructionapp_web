@@ -18,6 +18,7 @@ import GroupService from '../../api/GroupService';
 import TCheckBox from '../common/TCheckBox';
 import TwilioService from '../../api/TwilioService';
 import './jobs.css';
+import GroupListService from '../../api/GroupListService';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -49,7 +50,7 @@ class JobCreateFormTwo extends PureComponent {
       hourEstimatedHours: d.hourEstimatedHours,
       hourTrucksNumber: d.hourTrucksNumber
     };
-    favoriteCompanies = await GroupService.getGroupListByUserNameFiltered(
+    favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
       profile.userId,
       filters
     );

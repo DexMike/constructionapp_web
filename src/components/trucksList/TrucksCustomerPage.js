@@ -275,9 +275,9 @@ class TrucksCustomerPage extends Component {
       // if we got a group with companyId
       if (group.length > 0) { // delete
         // first we delete the Group List
-        await GroupListService.deleteGroupListById(group[0].id);
+        await GroupListService.deleteGroupListById(group[0].groupId);
         // then the Group
-        await GroupService.deleteGroupById(group[0].groupId);
+        await GroupService.deleteGroupById(group[0].id);
       } else { // create "Favorite" Group record
         const groupData = {
           createdBy: profile.userId,
