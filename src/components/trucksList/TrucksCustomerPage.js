@@ -65,7 +65,7 @@ class TrucksCustomerPage extends Component {
       filters: {
         startAvailability: null,
         endAvailability: null,
-        truckType: '',
+        equipmentType: '',
         minCapacity: '',
         // materialType: '',
         materialType: [],
@@ -134,7 +134,7 @@ class TrucksCustomerPage extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.truckType] = equipmentTypeList;
+    [filters.equipmentType] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -151,7 +151,7 @@ class TrucksCustomerPage extends Component {
     for (const [key, value] of Object.entries(equipments)) {
       try {
         let truckMaterials = await
-          EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
+        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
