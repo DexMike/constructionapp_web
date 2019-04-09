@@ -28,6 +28,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites: true,
       showSendtoFavorites: false,
       favoriteCompanies: [],
+      allBidders: [],
       favoriteAdminTels: [],
       loaded: false
     };
@@ -40,12 +41,13 @@ class JobCreateFormTwo extends PureComponent {
     const d = firstTabData();
     let favoriteAdminTels = [];
     let favoriteCompanies = [];
+    let allBidders = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
-
+    // console.log(profile);
     // get only those that match criteria
     const filters = {
-      tonnage: d.tonnage,
+      tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
       hourEstimatedHours: d.hourEstimatedHours,
       hourTrucksNumber: d.hourTrucksNumber
@@ -54,6 +56,13 @@ class JobCreateFormTwo extends PureComponent {
       profile.userId,
       filters
     );
+
+    // now let's get the bidders that match criteria
+    allBidders = await GroupListService.getBiddersFiltered(
+      filters
+    );
+    //AQUI ME QUEDO HAY QUE DESCONTAR LS DE favoriteCompanies y luego enviar los SMS
+    console.log(allBidders);
 
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
@@ -92,7 +101,8 @@ class JobCreateFormTwo extends PureComponent {
       favoriteCompanies,
       favoriteAdminTels,
       showSendtoFavorites,
-      sendToFavorites
+      sendToFavorites,
+      sendToMkt
     } = this.state;
     const d = firstTabData();
 
@@ -184,6 +194,11 @@ class JobCreateFormTwo extends PureComponent {
       await Promise.all(allSms);
     }
 
+    // if sending to mktplace, let's send SMS to everybody
+    if (sendToMkt) {
+      console.log('>>SE');
+    }
+
     // return false;
     const { onClose } = this.props;
     onClose();
@@ -243,6 +258,7 @@ class JobCreateFormTwo extends PureComponent {
                     <h5>
                       Yes! Send to Trelar Marketplace<br /><br />
                     </h5>
+                    <br />
                     * Note - This job will be sent to all Trelar Partners for review<br />
                   </div>
                   <div className="col-md-3 form__form-group">
