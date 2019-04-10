@@ -771,7 +771,7 @@ class DashboardCarrierPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying {newJobCount} of {newJobCount}
+                  Displaying {jobs.length} of {jobs.length}
                   <TTable
                     columns={
                       [
