@@ -545,8 +545,7 @@ class JobForm extends Component {
     );
   }
 
-  renderStartAddress() {
-    const { job } = this.props;
+  renderStartAddress(job) {
     let origin = '';
     let destination = '';
 
@@ -577,10 +576,11 @@ class JobForm extends Component {
     );
   }
 
-  renderEndAddress() {
-    const { job } = this.props;
+  renderEndAddress(job) {
     let origin = '';
     let destination = '';
+
+    console.log(job.endAddress);
 
     if (!job.startAddress && job.endAddress) {
       origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
@@ -613,6 +613,7 @@ class JobForm extends Component {
     const { job } = this.props;
     let origin = '';
     let destination = '';
+    let endAddress;
 
     if (!job.startAddress && job.endAddress) {
       origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
@@ -627,6 +628,10 @@ class JobForm extends Component {
       destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
     }
 
+    if (job.endAddress) { // if there's endAddress, render it
+      endAddress = this.renderEndAddress(job);
+    }
+
     return (
       <Container>
         <Card>
@@ -637,7 +642,7 @@ class JobForm extends Component {
                 {this.renderStartAddress(job)}
               </div>
               <div className="col-md-3">
-                {this.renderEndAddress(job)}
+                {endAddress}
               </div>
             </Row>
             <Row>
