@@ -290,11 +290,8 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
+    await this.fetchJobs();
     this.setState({ filters });
-    console.log(filters);
-    //await this.fetchJobs();
-
-    // implement backend query for status before fetching to avoid bugs
   }
 
   async handleFilterChange(e) {
@@ -327,7 +324,6 @@ class DashboardCustomerPage extends Component {
   }
 
   handleJobEdit(id) {
-    console.log(id);
     this.setState({
       goToUpdateJob: true,
       jobId: id
@@ -499,7 +495,7 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"Pending"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"New"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
