@@ -146,7 +146,7 @@ class DashboardCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
-
+    this.fetchFilterLists();
     this.setState(
       {
         jobs,
@@ -233,7 +233,6 @@ class DashboardCustomerPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-    await this.fetchFilterLists();
 
     // if (jobs) {
     //   await this.fetchFilterLists();

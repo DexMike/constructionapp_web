@@ -225,7 +225,6 @@ class DashboardCarrierPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-    await this.fetchFilterLists();
     this.setState({ jobs });
     return jobs;
   }
