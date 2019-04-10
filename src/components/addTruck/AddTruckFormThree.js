@@ -389,7 +389,8 @@ AddTruckFormThree.propTypes = {
   previousPage: PropTypes.func.isRequired,
   passedTruckFullInfoId: PropTypes.number,
   editDriverId: PropTypes.number,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  validateResThree: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {

@@ -904,7 +904,8 @@ AddTruckFormOne.propTypes = {
   passedTruckFullInfo: PropTypes.shape({
     info: PropTypes.object
   }),
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  validateResOne: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {

@@ -36,11 +36,6 @@ class AddTruckForm extends PureComponent {
     this.getAvailiabilityInfo = this.getAvailiabilityInfo.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
     this.closeNow = this.closeNow.bind(this);
-    /*
-    this.validateFormOnePress = this.validateFormOnePress.bind(this);
-    this.validateFormTwoPress = this.validateFormTwoPress.bind(this);
-    this.validateFormThreePress = this.validateFormThreePress.bind(this);
-    */
     this.validateFormOneResults = this.validateFormOneResults.bind(this);
     this.validateFormTwoResults = this.validateFormTwoResults.bind(this);
     this.validateFormThreeResults = this.validateFormThreeResults.bind(this);
@@ -174,58 +169,45 @@ class AddTruckForm extends PureComponent {
 
   fourthPage() {
     const { enableFourthTab } = this.state;
-    // const { validateOnTabOneClick, validateOnTabTwoClick, validateOnTabThreeClick } = this.state;
     const { editDriverId } = this.props;
     if (!editDriverId && enableFourthTab) {
       this.setState({ page: 4 });
     }
   }
 
-  /*
-  validateFormOnePress() {
-    /*const { validateOnTabOneClick } = this.state;
-    this.setState({ validateOnTabOneClick: !validateOnTabOneClick });
-    console.log(185, validateOnTabOneClick);
-  }
-
-  validateFormTwoPress() {
-    const { validateOnTabTwoClick } = this.state;
-    this.setState({ validateOnTabTwoClick: !validateOnTabTwoClick });
-    console.log(191, validateOnTabTwoClick);
-  }
-
-  validateFormThreePress() {
-    const { validateOnTabThreeClick } = this.state;
-    this.setState({ validateOnTabThreeClick: !validateOnTabThreeClick });
-    console.log(197, validateOnTabThreeClick);
-  }
-  */
   validateFormOneResults(res) {
+    const {enableSecondTab} = this.state;
     if (res === false) {
       this.setState({ enableSecondTab: false });
-    }
-    if (res === true) {
+    } else if (res === true) {
       this.setState({ enableSecondTab: true });
+    } else if (enableSecondTab === true) {
+      this.setState({ page: 2 });
     }
     this.setState({ validateOnTabOneClick: res });
   }
 
   validateFormTwoResults(res) {
+    const {enableThirdTab} = this.state;
     if (res === false) {
       this.setState({ enableThirdTab: false });
-    }
-    if (res === true) {
+    } else if (res === true) {
       this.setState({ enableThirdTab: true });
+    } else if (enableThirdTab === true) {
+      this.setState({ page: 3 });
     }
     this.setState({ validateOnTabTwoClick: res });
   }
 
   validateFormThreeResults(res) {
+    const {enableFourthTab} = this.state;
     if (res === false) {
       this.setState({ enableFourthTab: false });
     }
     if (res === true) {
       this.setState({ enableFourthTab: true });
+    } else if (enableFourthTab === true) {
+      this.setState({ page: 4 });
     }
     this.setState({ validateOnTabThreeClick: res });
   }
@@ -248,9 +230,6 @@ class AddTruckForm extends PureComponent {
       validateOnTabTwoClick,
       validateOnTabThreeClick
     } = this.state;
-    // console.log(231, equipmentId);
-    // console.log(232, companyId);
-    // console.log(233, editDriverId);
     if (loaded) {
       return (
         <Container className="dashboard">

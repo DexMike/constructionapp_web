@@ -323,7 +323,8 @@ AddTruckFormTwo.propTypes = {
   previousPage: PropTypes.func.isRequired,
   getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onAvailabilityFullInfo: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  validateResTwo: PropTypes.func.isRequired
 };
 
 AddTruckFormTwo.defaultProps = {
