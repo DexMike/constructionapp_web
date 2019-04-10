@@ -79,9 +79,6 @@ class DashboardCustomerPage extends Component {
       startDate: null,          // values for date control
       endDate: null,            // values for date control
 
-      // Rate Type Button toggle
-      isAvailable: true,
-
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
@@ -149,39 +146,13 @@ class DashboardCustomerPage extends Component {
 
     const jobs = await this.fetchJobs();
 
-    if (jobs) {
-      await this.fetchFilterLists();
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        // Todo do a real distance calculation from profile.company.zip
-        newJob.distance = (address.zipCode + 1) / 3000;
-
-        this.setState({loaded: true});
-
-        return newJob;
-      });
-    }
-
     this.setState(
       {
         jobs,
         filters,
         loaded: true,
         startDate,
-        endDate,
-        isAvailable: true
+        endDate
       }
     );
   }
@@ -260,9 +231,33 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-
     const jobs = await JobService.getJobDashboardByFilters(filters);
-    // console.log(jobs);
+
+    if (jobs) {
+      await this.fetchFilterLists();
+
+      jobs.map(async (job) => {
+        const newJob = job;
+
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.materials = this.equipmentMaterialsAsString(materials);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
+        // Todo do a real distance calculation from profile.company.zip
+        newJob.distance = (address.zipCode + 1) / 3000;
+
+        this.setState({loaded: true});
+
+        return newJob;
+      });
+    }
+
     this.setState({ jobs });
     return jobs;
   }
@@ -316,13 +311,8 @@ class DashboardCustomerPage extends Component {
     /**/
   }
 
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
-    }
-  }
-
   handleJobEdit(id) {
+    console.log(id);
     this.setState({
       goToUpdateJob: true,
       jobId: id
