@@ -3,11 +3,13 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
 .app-link-underline {
   color: #70bbfd;
   cursor: pointer;
   text-decoration: underline;
 }
+
 #root {
   .theme-dark {
     color: #ddd;
@@ -22,26 +24,31 @@
 .MuiTypography-caption-62 { //overrides Material UI pagination font
   font-family: "Interstate-Regular", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
 }
+
 // ---- TUI Misc
 
 // ---- TUI Topbar
 .topbar__wrapper {
   background-color: $primary-green;
 }
+
 .topbar__button {
   i.material-icons {
     color: white;
   }
+
   &:hover, &:focus, &:active {
     i.material-icons {
       color: $color-gray
     }
   }
 }
+
 .topbar__avatar {
   .topbar__avatar-name {
     color: white;
   }
+
   &:hover, &:focus, &:active {
     .topbar__avatar-name {
       color: $color-gray
@@ -52,43 +59,52 @@
 .topbar__button-icon {
   width: 60px;
 }
+
 // ---- TUI Topbar
 
 // ---- TUI Sidebar
-.sidebar__link-active  {
+.sidebar__link-active {
   box-shadow: 0px 1px 3px #eff1f5, 0px -1px 3px #eff1f5;
 }
+
 .sidebar__link, .topbar__link {
   &:before {
     background: $primary-green;
   }
 }
+
 .sidebar__block {
   padding: 10px 0;
   border-bottom: none !important;
 }
+
 // ---- TUI Sidebar
 
 // ---- TUI Trucks List
-.customer-truck-results-title .favoriteIcon{
+.customer-truck-results-title .favoriteIcon {
   position: absolute;
   margin: 0;
   padding: 0;
   font-size: 22px;
 }
+
 .btn-link.favoriteIcon {
   color: $primary-green;
+
   &:hover, &:active {
     color: white;
     background-color: $primary-green;
   }
+
   &:before, &:focus {
     background-color: unset;
   }
 }
+
 .trucksListMaterialsHauled {
   white-space: pre-wrap;
 }
+
 // ---- TUI Trucks List
 
 
@@ -105,7 +121,7 @@
 //}
 
 .filter-item-title {
-  background-color:#F9F9F7;
+  background-color: #F9F9F7;
   //font-weight: bold;
   //padding-left: 15px;
   padding-top: 8px;
@@ -123,20 +139,23 @@
 #filter-input-row {
   background: #F9F9F7;
   padding-bottom: 15px;
+
   input {
     background-color: white;
   }
+
   input.filter-text {
     padding: 5px;
     //margin: 4px 0 8px 0;
   }
+
   .Select-control, .date-picker {
     //margin-top: 4px;
     background-color: white;
   }
 
   .Select-input input {
-   border:none !important;
+    border: none !important;
   }
 
   .col {
@@ -166,6 +185,7 @@
   font-size: 16px;
   padding-top: 5px;
 }
+
 // ---- customer dashboard page
 .customer-truck-results-title {
   color: $color-dark-turquoise;
@@ -176,9 +196,11 @@
   //border-left: 1px solid #ccc;
   font-size: 16px;
 }
+
 #filter-input-row .col-sm-3 {
   padding: 15px;
 }
+
 // ---- customer dashboard page
 
 // ---- form validation error
@@ -188,17 +210,20 @@ span.form__form-group-error {
   width: 28em;
   margin-top: -3em !important;
 }
+
 // ---- form validation error
 
 // ---- sidebar icons
 .sidebar__content i.material-icons {
-    font-size: 13px;
+  font-size: 13px;
 }
+
 .sidebar__content img.customIcon {
   height: 13px;
   width: 13px;
   filter: contrast(30%);
 }
+
 // ---- sidebar icons
 
 
@@ -223,12 +248,20 @@ span.form__form-group-error {
     cursor: default;
     border: 1px solid #4ce1b6;
     background-color: #006F4F;
+
     h4, h5 {
-      color:  #FFFFFF;
+      color: #FFFFFF;
     }
   }
 
 }
+
+.date-filter .calendarIcon {
+  font-size: 16px !important;
+  margin-top: 0px;
+}
+
+
 // ------  Helper Classes for Reporting
 
 
