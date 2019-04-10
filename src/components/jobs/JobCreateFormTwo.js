@@ -260,7 +260,6 @@ class JobCreateFormTwo extends PureComponent {
     // if sending to mktplace, let's send SMS to everybody
     if (sendToMkt) {
       const allBiddersSms = [];
-      console.log(nonFavoriteAdminTels);
       for (const bidderTel of nonFavoriteAdminTels) {
         if (this.checkPhoneFormat(bidderTel)) {
           const notification = {
