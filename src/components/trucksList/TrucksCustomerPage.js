@@ -20,7 +20,7 @@ import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
-import truckImage from '../../img/default_truck.png';
+import truckImage from '../../img/belly-dump.jpg';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
@@ -648,36 +648,52 @@ class TrucksCustomerPage extends Component {
     return (
       <React.Fragment>
         <Row className="truck-card truck-details">
-          <div className="row col-md-12">
-            <div className="col-md-3">
-              <img width="100%" height="100%" src={`${window.location.origin}/${truckImage}`} alt=""
-                   style={{""}}
-              />
-            </div>
-            <div className="col-md-2">
-
-              <h1>
-                {equipment.name}
-              </h1>
-              {equipment.type}
-              <br/>
-              <NumberFormat
-                value={equipment.maxCapacity}
-                displayType="text"
-                decimalSeparator="."
-                decimalScale={0}
-                fixedDecimalScale
-                thousandSeparator
-                prefix=" "
-                suffix=" Tons"
-              />
-            </div>
-            <div className="col-md-2">
-              <h1>Rates</h1>
-              {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
-                <React.Fragment>
-                  Rate:
-                  <span>
+          <div className="col-md-12">
+            <div className="row">
+              <div className="col-md-3">
+                <img width="100%" src={`${window.location.origin}/${truckImage}`} alt="" styles="background-size:contain;"
+                />
+              </div>
+              <div className="col-md-9">
+                <div className="row truck-card">
+                  <div className="col-md-9">
+                  <h1>
+                    {equipment.name} |  {equipment.type} | <NumberFormat
+                    value={equipment.maxCapacity}
+                    displayType="text"
+                    decimalSeparator="."
+                    decimalScale={0}
+                    fixedDecimalScale
+                    thousandSeparator
+                    prefix=" "
+                    suffix=" Tons"
+                  />
+                  </h1>
+                  </div>
+                  <div className="col-md-3 button-card">
+                    <Button
+                      onClick={() => this.handleEquipmentEdit(equipment.id)}
+                      className="btn btn-primary"
+                      styles="margin:0px !important"
+                    >
+                      Request
+                    </Button>
+                    <Button
+                      color="link"
+                      onClick={() => this.handleSetFavorite(equipment.companyId)}
+                      className="material-icons favoriteIcon"
+                    >
+                      {equipment.favorite ? 'favorite' : 'favorite_border'}
+                    </Button>
+                  </div>
+                </div>
+                <div className="row truck-card">
+                  <div className="col-md-6">
+                    <h1>Rates</h1>
+                    {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
+                      <React.Fragment>
+                        Rate:
+                        <span>
                     <NumberFormat
                       value={equipment.hourRate}
                       displayType="text"
@@ -689,22 +705,22 @@ class TrucksCustomerPage extends Component {
                       suffix=" / Hour"
                     />
                   </span>
-                  <br/>
-                  Minimum:
-                  <NumberFormat
-                    value={equipment.minHours}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator
-                    suffix=" hours min"
-                  />
-                  <br/>
-                </React.Fragment>
-              )}
-              {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
-                <React.Fragment>
+                        <br/>
+                        Minimum:
+                        <NumberFormat
+                          value={equipment.minHours}
+                          displayType="text"
+                          decimalSeparator="."
+                          decimalScale={2}
+                          fixedDecimalScale
+                          thousandSeparator
+                          suffix=" hours min"
+                        />
+                        <br/>
+                      </React.Fragment>
+                    )}
+                    {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
+                      <React.Fragment>
                   <span>
                     <NumberFormat
                       value={equipment.tonRate}
@@ -717,38 +733,25 @@ class TrucksCustomerPage extends Component {
                       suffix=" / Ton"
                     />
                   </span>
-                  <br/>
-                  <NumberFormat
-                    value={equipment.minCapacity}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator
-                    suffix=" tons min"
-                  />
-                </React.Fragment>
-              )}
-            </div>
-            <div className="col-md-2">
-              <h1>Materials</h1>
-                {equipment.materials}
-            </div>
-            <div className="col-md-3 button-card">
-              <Button
-                onClick={() => this.handleEquipmentEdit(equipment.id)}
-                className="btn btn-primary float-right"
-                styles="margin:0px !important"
-              >
-                Request
-              </Button>
-              <Button
-                color="link"
-                onClick={() => this.handleSetFavorite(equipment.companyId)}
-                className="material-icons favoriteIcon float-right"
-              >
-                {equipment.favorite ? 'favorite' : 'favorite_border'}
-              </Button>
+                        <br/>
+                        <NumberFormat
+                          value={equipment.minCapacity}
+                          displayType="text"
+                          decimalSeparator="."
+                          decimalScale={2}
+                          fixedDecimalScale
+                          thousandSeparator
+                          suffix=" tons min"
+                        />
+                      </React.Fragment>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <h1>Materials</h1>
+                    {equipment.materials}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </Row>

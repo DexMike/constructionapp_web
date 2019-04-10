@@ -94,10 +94,10 @@
 }
 
 .truck-card {
-  padding: 30px;
+  padding: 5px;
   .button-card {
-    padding: 40px 0px;
-    //display: grid;
+    position: relative;
+    bottom: -8px;
   }
 }
 
@@ -107,7 +107,7 @@
   font-weight: 400;
   text-transform: capitalize;
   h1 {
-    font-size: 16px;
+    font-size: 26px;
   }
   h2 {
     font-size: 14px;
