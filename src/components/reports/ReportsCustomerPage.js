@@ -534,131 +534,128 @@ class ReportsCustomerPage extends Component {
               <div className="card">
                 <div className="card-body">
                   <div className="row">
-                    <div className="col-md-2 form__form-group">
-                      <span className="form__form-group-label">BASELINE&nbsp;</span>
-                      <span className="form__form-group-label">Time Range</span>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: this.timeRanges[selectIndex].name,
-                            value: this.timeRanges[selectIndex].value
-                          }
-                        }
-                        value={this.timeRanges[selectIndex].value.toString()}
-                        options={
-                          this.timeRanges.map(timeRange => ({
-                            name: timeRange.name,
-                            value: timeRange.value.toString(),
-                            label: timeRange.name
-                          }))
-                        }
-                        placeholder={this.timeRanges[selectIndex].name}
-                      />
-                    </div>
-                    <div className="col-md-2 form__form-group">
-                      <span className="form__form-group-label">From</span>
+                    <div className="col-md-6">
                       <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
+                        <div className="col-md-3 form__form-group">
+                          <span className="form__form-group-label">BASELINE&nbsp;</span>
+                          <span className="form__form-group-label">Time Range</span>
+                          <TSelect
                             input={
                               {
-                                onChange: this.startDateChange,
-                                name: 'startAvailability',
-                                value: { startDate },
-                                givenDate: new Date(startDate).getTime()
+                                onChange: this.handleSelectFilterChange,
+                                name: this.timeRanges[selectIndex].name,
+                                value: this.timeRanges[selectIndex].value
                               }
                             }
-                            onChange={this.startDateChange}
-                            dateFormat="MM-dd-yy"
+                            value={this.timeRanges[selectIndex].value.toString()}
+                            options={
+                              this.timeRanges.map(timeRange => ({
+                                name: timeRange.name,
+                                value: timeRange.value.toString(),
+                                label: timeRange.name
+                              }))
+                            }
+                            placeholder={this.timeRanges[selectIndex].name}
                           />
-
                         </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">From</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.startDateChange,
+                                    name: 'startAvailability',
+                                    value: { startDate },
+                                    givenDate: new Date(startDate).getTime()
+                                  }
+                                }
+                                onChange={this.startDateChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">To</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.endDateChange,
+                                    name: 'endAvailability',
+                                    value: { endDate },
+                                    givenDate: new Date(endDate).getTime()
+                                  }
+                                }
+                                onChange={this.endDateChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="col-md-2 form__form-group">
-                      <span className="form__form-group-label">To</span>
+                    <div className="col-md-6">
                       <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
+                        <div className="col-md-3 form__form-group">
+                          <span className="form__form-group-label">COMPARISON&nbsp;</span>
+                          <span className="form__form-group-label">Time Range</span>
+                          <TSelect
                             input={
                               {
-                                onChange: this.endDateChange,
-                                name: 'endAvailability',
-                                value: { endDate },
-                                givenDate: new Date(endDate).getTime()
+                                onChange: this.handleSelectFilterChangeComp,
+                                name: this.timeRanges[selectIndexComp].name,
+                                value: this.timeRanges[selectIndexComp].value
                               }
                             }
-                            onChange={this.endDateChange}
-                            dateFormat="MM-dd-yy"
-                          />
-                        </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                      </div>
-                    </div>
-
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">COMPARISON&nbsp;</span>
-                      <span className="form__form-group-label">Time Range</span>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChangeComp,
-                            name: this.timeRanges[selectIndexComp].name,
-                            value: this.timeRanges[selectIndexComp].value
-                          }
-                        }
-                        value={this.timeRanges[selectIndexComp].value.toString()}
-                        options={
-                          this.timeRanges.map(timeRange => ({
-                            name: timeRange.name,
-                            value: timeRange.value.toString(),
-                            label: timeRange.name
-                          }))
-                        }
-                        placeholder={this.timeRanges[selectIndexComp].name}
-                      />
-                    </div>
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">From</span>
-                      <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
-                            input={
-                              {
-                                onChange: this.startDateCompChange,
-                                name: 'startAvailDateComp',
-                                value: { startDateComp },
-                                givenDate: new Date(startDateComp).getTime()
-                              }
+                            value={this.timeRanges[selectIndexComp].value.toString()}
+                            options={
+                              this.timeRanges.map(timeRange => ({
+                                name: timeRange.name,
+                                value: timeRange.value.toString(),
+                                label: timeRange.name
+                              }))
                             }
-                            onChange={this.startDateCompChange}
-                            dateFormat="MM-dd-yy"
-                          />
-
-                        </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                      </div>
-                    </div>
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">To</span>
-                      <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
-                            input={
-                              {
-                                onChange: this.endDateCompChange,
-                                name: 'endAvailDateComp',
-                                value: { endDateComp },
-                                givenDate: new Date(endDateComp).getTime()
-                              }
-                            }
-                            onChange={this.endDateCompChange}
-                            dateFormat="MM-dd-yy"
+                            placeholder={this.timeRanges[selectIndexComp].name}
                           />
                         </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">From</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.startDateCompChange,
+                                    name: 'startAvailDateComp',
+                                    value: { startDateComp },
+                                    givenDate: new Date(startDateComp).getTime()
+                                  }
+                                }
+                                onChange={this.startDateCompChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">To</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.endDateCompChange,
+                                    name: 'endAvailDateComp',
+                                    value: { endDateComp },
+                                    givenDate: new Date(endDateComp).getTime()
+                                  }
+                                }
+                                onChange={this.endDateCompChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -666,7 +663,6 @@ class ReportsCustomerPage extends Component {
               </div>
             </div>
           </div>
-
         </Container>
       );
     }
