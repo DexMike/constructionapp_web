@@ -146,7 +146,7 @@ class DashboardCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
-
+    this.fetchFilterLists();
     this.setState(
       {
         jobs,
@@ -234,30 +234,30 @@ class DashboardCustomerPage extends Component {
     const { filters } = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
 
-    if (jobs) {
-      await this.fetchFilterLists();
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.materials = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        // Todo do a real distance calculation from profile.company.zip
-        newJob.distance = (address.zipCode + 1) / 3000;
-
-        this.setState({loaded: true});
-
-        return newJob;
-      });
-    }
+    // if (jobs) {
+    //   await this.fetchFilterLists();
+    //
+    //   jobs.map(async (job) => {
+    //     const newJob = job;
+    //
+    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
+    //     newJob.companyName = company.legalName;
+    //
+    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    //     const materials = materialsList.map(materialItem => materialItem.value);
+    //     newJob.materials = this.equipmentMaterialsAsString(materials);
+    //
+    //     const address = await AddressService.getAddressById(newJob.startAddress);
+    //     newJob.zip = address.zipCode;
+    //
+    //     // Todo do a real distance calculation from profile.company.zip
+    //     newJob.distance = (address.zipCode + 1) / 3000;
+    //
+    //     this.setState({loaded: true});
+    //
+    //     return newJob;
+    //   });
+    // }
 
     this.setState({ jobs });
     return jobs;
@@ -290,11 +290,8 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
+    await this.fetchJobs();
     this.setState({ filters });
-    console.log(filters);
-    //await this.fetchJobs();
-
-    // implement backend query for status before fetching to avoid bugs
   }
 
   async handleFilterChange(e) {
@@ -327,7 +324,6 @@ class DashboardCustomerPage extends Component {
   }
 
   handleJobEdit(id) {
-    console.log(id);
     this.setState({
       goToUpdateJob: true,
       jobId: id
@@ -499,7 +495,7 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"Pending"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"New"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
@@ -782,7 +778,7 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying {newJobCount} of {newJobCount}
+                  Displaying {jobs.length} of {jobs.length}
                   <TTable
                     columns={
                       [
