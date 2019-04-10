@@ -242,14 +242,13 @@ class JobCreateFormTwo extends PureComponent {
       }
       await Promise.all(results);
 
-      // now let's send them an SMS 1
+      // now let's send them an SMS to all favorites
       const allSms = [];
       for (const adminIdTel of favoriteAdminTels) {
-        // send only to Jake
-        if (adminIdTel === '6129990787') {
+        if (this.checkPhoneFormat(adminIdTel)) {
           // console.log('>>Sending SMS to Jake...');
           const notification = {
-            to: adminIdTel,
+            to: this.phoneToNumberFormat(adminIdTel),
             body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
           };
           allSms.push(TwilioService.createSms(notification));
@@ -261,22 +260,34 @@ class JobCreateFormTwo extends PureComponent {
     // if sending to mktplace, let's send SMS to everybody
     if (sendToMkt) {
       const allBiddersSms = [];
+      console.log(nonFavoriteAdminTels);
       for (const bidderTel of nonFavoriteAdminTels) {
-        // send only to Jake
-        // if (bidderTel === '6129990787') {
-        // console.log('>>Sending SMS to Jake...');
-        const notification = {
-          to: bidderTel,
-          body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'
-        };
-        allBiddersSms.push(TwilioService.createSms(notification));
-        // }
+        if (this.checkPhoneFormat(bidderTel)) {
+          const notification = {
+            to: this.phoneToNumberFormat(bidderTel),
+            body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'
+          };
+          allBiddersSms.push(TwilioService.createSms(notification));
+        }
       }
     }
 
-    // return false;
     const { onClose } = this.props;
     onClose();
+  }
+
+  // remove non numeric
+  phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
+  }
+
+  // check format ok
+  checkPhoneFormat(phone) {
+    if (phone.includes('555')) {
+      return false;
+    }
+    return true;
   }
 
   handleInputChange(e) {
