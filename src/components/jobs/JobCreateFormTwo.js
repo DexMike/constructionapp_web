@@ -48,7 +48,6 @@ class JobCreateFormTwo extends PureComponent {
     let nonFavoriteAdminTels = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
-    // console.log(profile);
     // get only those that match criteria
     const filters = {
       tonnage: Number(d.tonnage),
@@ -66,9 +65,7 @@ class JobCreateFormTwo extends PureComponent {
       filters
     );
 
-    // AQUI ME QUEDO HAY QUE DESCONTAR LS DE favoriteCompanies y luego enviar los SMS
     const biddersIdsNotFavorites = allBidders.filter(x => !favoriteCompanies.includes(x));
-    console.log(biddersIdsNotFavorites);
 
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
