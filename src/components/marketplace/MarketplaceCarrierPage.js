@@ -262,8 +262,12 @@ class MarketplaceCarrierPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-    const jobs = await JobService.getJobByFilters(filters);
-
+    // const jobs = await JobService.getJobByFilters(filters);
+    const jobs = await JobService.getJobDashboardByFilters(filters);
+    console.log(jobs);
+    this.setState({ jobs });
+    return jobs;
+    /*
     if (jobs) {
       this.fetchJobMaterials(jobs);
 
@@ -281,6 +285,7 @@ class MarketplaceCarrierPage extends Component {
       });
       this.setState({ jobs });
     }
+    */
   }
 
   handleFilterChangeDelayed(e) {
@@ -527,7 +532,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Min Hours'
                       },
                       {
-                        name: 'zip',
+                        name: 'zipCode',
                         displayName: 'Zip Code'
                       },
                       {
