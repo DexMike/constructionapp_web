@@ -29,6 +29,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
+import {DashboardObjectClickable} from "./DashboardObjectClickable";
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -65,27 +66,22 @@ class DashboardCarrierPage extends Component {
 
       equipments: [],
       selectedEquipment: {},
-
-
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
         rateType: '',
-
+        status: '',
         startAvailability: null,
         endAvailability: null,
         rate: '',
         minTons: '',
         minHours: '',
         minCapacity: '',
-
         equipmentType: '',
         numEquipments: '',
         zipCode: '',
         materialType: [],
-
         sortBy: sortByList[0]
-
       },
 
     };
@@ -102,7 +98,7 @@ class DashboardCarrierPage extends Component {
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
-
+    this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
   }
 
   async componentDidMount() {
@@ -229,10 +225,12 @@ class DashboardCarrierPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
 
-    const jobs = await JobService.getJobByFilters(filters);
+    const jobs = await JobService.getJobDashboardByFilters(filters);
+    await this.fetchFilterLists();
     // console.log(jobs);
 
     this.setState({ jobs });
+    console.log(jobs);
     return jobs;
   }
 
@@ -260,16 +258,28 @@ class DashboardCarrierPage extends Component {
     const { value } = e.target;
     const { filters } = this.state;
     filters[e.target.name] = value;
-    await this.fetchJobs();
     this.setState({ filters });
+    await this.fetchJobs();
+  }
+
+  async handleFilterStatusChange({value, name}) {
+    const { filters } = this.state;
+    if (filters[name] === value) {
+      filters[name] = "";
+    } else {
+      filters[name] = value;
+    }
+    this.setState({ filters });
+    //console.log(filters);
+    await this.fetchJobs();
   }
 
   async handleSelectFilterChange(option) {
     const { value, name } = option;
     const { filters } = this.state;
     filters[name] = value;
-    await this.fetchJobs();
     this.setState({ filters });
+    await this.fetchJobs();
   }
 
   handleMultiChange(data) {
@@ -316,23 +326,23 @@ class DashboardCarrierPage extends Component {
   async handleStartDateChange(e) {
     const { filters } = this.state;
     filters.startAvailability = e;
-    await this.fetchJobs();
     this.setState({ filters });
+    await this.fetchJobs();
   }
 
   async handleEndDateChange(e) {
     const { filters } = this.state;
     filters.endAvailability = e;
-    await this.fetchJobs();
     this.setState({ filters });
+    await this.fetchJobs();
   }
 
   async handleIntervalInputChange(e) {
     const { filters } = this.state;
     filters.startAvailability = e.start;
     filters.endAvailability = e.end;
-    await this.fetchJobs();
     this.setState({ filters });
+    await this.fetchJobs();
   }
 
   toggleAddJobModal() {
@@ -410,7 +420,7 @@ class DashboardCarrierPage extends Component {
   }
 
   renderCards() {
-    const { loaded } = this.state;
+    const { loaded, filters } = this.state;
     let { jobs } = this.state;
 
     let newJobCount = 0;
@@ -486,12 +496,12 @@ class DashboardCarrierPage extends Component {
           {/*{this.renderGoTo()}*/}
 
           <div className="row">
-            <DashboardObjectStatic title="New Offers" val = {newJobCount}/>
-            <DashboardObjectStatic title="Booked Jobs" val = {acceptedJobCount}/>
-            <DashboardObjectStatic title="Jobs in Progress" val = {inProgressJobCount}/>
-            <DashboardObjectStatic title="Completed Jobs" val={completedJobCount}/>
-            <DashboardObjectStatic title="Potential Earnings" val={potentialIncome}/>
-            <DashboardObjectStatic title="% Completed" val = {completedOffersPercent}/>
+            <DashboardObjectClickable title="New Offers" displayVal = {newJobCount} value={"New"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Completed Jobs" displayVal = {completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectStatic title="Potential Earnings" displayVal={potentialIncome}/>
+            <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent}/>
           </div>
         </Container>
       );
@@ -779,11 +789,11 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Start Date'
                         },
                         {
-                          name: 'companyName',
+                          name: 'legalName',
                           displayName: 'Customer'
                         },
                         {
-                          name: 'zip',
+                          name: 'zipCode',
                           displayName: 'Start Zip'
                         },
                         {
