@@ -63,7 +63,7 @@ class MarketplaceList extends Component {
     return (
       <React.Fragment>
         { companyType === 'Carrier' && <MarketplaceCarrierPage/>}
-        { companyType === 'Customer' && <MarketplaceCustomerPage/>}
+        {/* { companyType === 'Customer' && <MarketplaceCustomerPage/>} */}
       </React.Fragment>
     );
   }

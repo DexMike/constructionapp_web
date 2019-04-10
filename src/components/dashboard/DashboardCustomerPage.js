@@ -233,31 +233,32 @@ class DashboardCustomerPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
+    await this.fetchFilterLists();
 
-    if (jobs) {
-      await this.fetchFilterLists();
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.materials = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        // Todo do a real distance calculation from profile.company.zip
-        newJob.distance = (address.zipCode + 1) / 3000;
-
-        this.setState({loaded: true});
-
-        return newJob;
-      });
-    }
+    // if (jobs) {
+    //   await this.fetchFilterLists();
+    //
+    //   jobs.map(async (job) => {
+    //     const newJob = job;
+    //
+    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
+    //     newJob.companyName = company.legalName;
+    //
+    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    //     const materials = materialsList.map(materialItem => materialItem.value);
+    //     newJob.materials = this.equipmentMaterialsAsString(materials);
+    //
+    //     const address = await AddressService.getAddressById(newJob.startAddress);
+    //     newJob.zip = address.zipCode;
+    //
+    //     // Todo do a real distance calculation from profile.company.zip
+    //     newJob.distance = (address.zipCode + 1) / 3000;
+    //
+    //     this.setState({loaded: true});
+    //
+    //     return newJob;
+    //   });
+    // }
 
     this.setState({ jobs });
     return jobs;
