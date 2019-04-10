@@ -19,6 +19,7 @@ import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import CompanyService from '../../api/CompanyService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -303,10 +304,40 @@ class JobCreateForm extends Component {
     return rateType !== 'Hour';
   }
 
+  async saveJobMaterials(jobId, materials) {
+    if (materials) {
+      const profile = await ProfileService.getProfile();
+      if (profile) {
+        for (const material of materials) {
+          const newMaterial = {
+            jobsId: jobId,
+            value: material.label,
+            createdBy: profile.userId,
+            createdOn: moment()
+              .unix() * 1000,
+            modifiedBy: profile.userId,
+            modifiedOn: moment()
+              .unix() * 1000
+          };
+          /* eslint-disable no-await-in-loop */
+          await JobMaterialsService.createJobMaterials(newMaterial);
+        }
+      }
+    }
+  }
+
   async createJob(e) {
     e.preventDefault();
     const { closeModal, selectedEquipment } = this.props;
-    const { startAddress, job, endAddress, bid, booking, bookingEquipment } = this.state;
+    const {
+      startAddress,
+      job,
+      endAddress,
+      bid,
+      booking,
+      bookingEquipment,
+      materials
+    } = this.state;
     const newJob = CloneDeep(job);
     startAddress.name = `Job: ${newJob.name}`;
     endAddress.name = `Job: ${newJob.name}`;
@@ -352,6 +383,14 @@ class JobCreateForm extends Component {
     // console.log('selectedEquipment.equipmentType: ', selectedEquipment.equipmentType);
     // console.log('equipmentType: ', newJob.equipmentType);
     const createdJob = await JobService.createJob(newJob);
+
+    // add materials to new job
+    if (createdJob) {
+      if (materials) { // check if there's materials to add
+        this.saveJobMaterials(createdJob.id, materials);
+      }
+    }
+
     bid.jobId = createdJob.id;
     // bid.startAddress = createdJob.startAddress;
     // bid.endAddress = createdJob.endAddress;
