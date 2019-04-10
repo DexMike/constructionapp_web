@@ -36,7 +36,7 @@ class JobCreateForm extends Component {
       bid: BidService.getDefaultBid(),
       booking: BookingService.getDefaultBooking(),
       bookingEquipment: BookingEquipmentService.getDefaultBookingEquipment(),
-      materials: [],
+      materials: '',
       availableMaterials: [],
       reqHandlerName: {
         touched: false,
@@ -97,6 +97,7 @@ class JobCreateForm extends Component {
     this.createJob = this.createJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.selectChange = this.selectChange.bind(this);
   }
 
   async componentDidMount() {
@@ -110,9 +111,10 @@ class JobCreateForm extends Component {
     // job.numberOfTrucks = 1;
     job.modifiedBy = profile.userId;
     job.createdBy = profile.userId;
-    if (selectedEquipment.rateType !== 'All') {
+    /* if (selectedEquipment.rateType !== 'All') {
       job.rateType = selectedEquipment.rateType;
-    }
+    } */
+    job.rateType = 'Hour';
 
     // why are we setting these fields to profile.??
 
@@ -275,6 +277,16 @@ class JobCreateForm extends Component {
     this.setState({
       materials: data
     });
+  }
+
+  selectChange(data) {
+    // const { reqHandlerTruckType } = this.state;
+    /* this.setState({
+      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
+        touched: false
+      })
+    }); */
+    this.setState({ materials: data.value });
   }
 
   toggleJobRateType() {
@@ -567,6 +579,7 @@ class JobCreateForm extends Component {
 
   renderSelectedEquipment() {
     const { job, materials } = this.state;
+    console.log(materials);
     let { availableMaterials } = this.state;
     const { selectedEquipment, getAllMaterials } = this.props;
 
@@ -624,12 +637,10 @@ class JobCreateForm extends Component {
             <div className="form__form-group">
               <span className="form__form-group-label">Materials</span>
               <div className="form__form-group-field">
-                {/* this.renderEquipmentMaterials() */}
-                <MultiSelect
+                <SelectField
                   input={
                     {
-                      onChange: this.handleMultiChange,
-                      // onChange: this.handleSelectFilterChange,
+                      onChange: this.selectChange,
                       name: 'materialType',
                       value: materials
                     }
@@ -640,9 +651,9 @@ class JobCreateForm extends Component {
                       error: 'Unable to select'
                     }
                   }
+                  value={materials}
                   options={availableMaterials}
-                  // placeholder="Materials"
-                  placeholder="Select materials"
+                  placeholder="Select material"
                 />
               </div>
             </div>
@@ -678,21 +689,6 @@ class JobCreateForm extends Component {
         )}
       </React.Fragment>
     );
-  }
-
-  renderEquipmentMaterials() {
-    const { selectedEquipment } = this.props;
-    return selectedEquipment.materials.map((material, index, materials) => {
-      if (index !== materials.length - 1) {
-        return (
-          <span key={material}>
-            {material}
-            ,&nbsp;
-          </span>
-        );
-      }
-      return <span key={material}>{material}</span>;
-    });
   }
 
   renderJobTop() {
