@@ -237,10 +237,12 @@ class EquipmentListPage extends Component {
                                 name: 'newHourRate',
                                 displayName: 'Rate per Hour'
                               },
+                              /*
                               {
                                 name: 'newTonRate',
                                 displayName: 'Rate per Ton'
                               },
+                              */
                               {
                                 name: 'materials',
                                 displayName: 'Materials'

@@ -211,8 +211,10 @@ class AddTruckFormFour extends PureComponent {
                     <br /><br />
                     <strong>Rate per hour: </strong><br />{truckFullInfo.info.hourRate}
                     <br /><br />
+                    {/*
                     <strong>Rate per ton: </strong><br />{truckFullInfo.info.tonRate}
                     <br /><br />
+                    */}
                     <strong>Maximum distance to pickup: </strong>
                     <br />{truckFullInfo.info.maxDistance} Miles
                   </p>

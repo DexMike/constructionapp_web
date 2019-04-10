@@ -109,7 +109,7 @@ class AddTruckFormOne extends PureComponent {
     const truck = this.state;
     const {
       ratesByBoth,
-      ratesByTon,
+      // ratesByTon,
       ratesByHour
     } = this.state;
     let isValid = true;
@@ -119,7 +119,7 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMaterials: { touched: false },
       reqHandlerMinRate: { touched: false },
       reqHandlerMinTime: { touched: false },
-      reqHandlerCostTon: { touched: false },
+      // reqHandlerCostTon: { touched: false },
       reqHandlerChecks: { touched: false },
       reqHandlerMaxCapacity: { touched: false }
     });
@@ -154,7 +154,7 @@ class AddTruckFormOne extends PureComponent {
       isValid = false;
     }
 
-    if ((!ratesByHour && !ratesByBoth && !ratesByTon)) { // Checkboxes
+    /*if ((!ratesByHour && !ratesByBoth /* && !ratesByTon )) { // Checkboxes
       this.setState({
         reqHandlerChecks: {
           touched: true,
@@ -162,10 +162,10 @@ class AddTruckFormOne extends PureComponent {
         }
       });
       isValid = false;
-    }
+    }*/
 
     if (!truck.ratesCostPerHour
-      && (ratesByHour === 'on' || ratesByBoth === 1)) { // 'By Hour' check
+      && (ratesByHour === 'on' /* || ratesByBoth === 1 */)) { // 'By Hour' check
       this.setState({
         reqHandlerMinRate: {
           touched: true,
@@ -186,6 +186,7 @@ class AddTruckFormOne extends PureComponent {
       isValid = false;
     }
 
+    /*
     if (!truck.ratesCostPerTon
       && (ratesByTon === 'on' || ratesByBoth === 1)) { // 'By Ton' check
       this.setState({
@@ -196,6 +197,7 @@ class AddTruckFormOne extends PureComponent {
       });
       isValid = false;
     }
+    */
 
     if (isValid) {
       return true;
@@ -492,7 +494,7 @@ class AddTruckFormOne extends PureComponent {
         ratesByTon: preloaded.info.ratesByTon,
         minOperatingTime: preloaded.info.minHours,
         maxDistanceToPickup: preloaded.info.maxDistance,
-        ratesCostPerTon: preloaded.info.tonRate,
+        // ratesCostPerTon: preloaded.info.tonRate,
         ratesCostPerHour: preloaded.info.hourRate,
         truckType: preloaded.info.type,
         selectedMaterials: preloaded.info.selectedMaterials,
@@ -553,7 +555,7 @@ class AddTruckFormOne extends PureComponent {
       ratesByHour,
       ratesCostPerHour,
       ratesByTon,
-      ratesCostPerTon,
+      // ratesCostPerTon,
       minOperatingTime,
       maxDistanceToPickup,
       truckTypes,
@@ -561,7 +563,7 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMaterials,
       reqHandlerMinRate,
       reqHandlerMinTime,
-      reqHandlerCostTon,
+      // reqHandlerCostTon,
       imageUploading,
       reqHandlerChecks,
       reqHandlerMaxCapacity
@@ -588,7 +590,7 @@ class AddTruckFormOne extends PureComponent {
                     Tell us about your truck
                   </h3>
                 </div>
-                <div className="col-md-6 ">
+                <div className="col-md-6">
                   <span className="form__form-group-label">Truck description</span>
                   <input
                     name="description"
@@ -672,31 +674,35 @@ class AddTruckFormOne extends PureComponent {
                 </div>
 
                 {/* FIRST ROW */}
+                {/*
                 <div className="col-md-12 form__form-group">
-                    <TCheckBox
-                      onChange={this.handleInputChange}
-                      name="ratesByBoth"
-                      value={!!ratesByBoth}
-                      label="By Both"
-                      meta={reqHandlerChecks}
-                    />
-                </div>
-                <div className="col-md-3 form__form-group">
                   <TCheckBox
                     onChange={this.handleInputChange}
+                    name="ratesByBoth"
+                    value={!!ratesByBoth}
+                    label="By Both"
+                    meta={reqHandlerChecks}
+                  />
+                </div>
+                */}
+                <div className="col-md-4 form__form-group">
+                  <TCheckBox
+                    type="hidden"
+                    onChange={this.handleInputChange}
                     name="ratesByHour"
-                    value={!!ratesByHour}
+                    // value={!!ratesByHour}
+                    value="on"
                     label="By Hour"
                   />
                 </div>
-                <div className="col-md-3 form__form-group">
+                <div className="col-md-4 form__form-group">
                   <span className="label">$ Cost / Hour</span>
                   <TField
                     input={
                       {
                         onChange: this.handleInputChange,
                         name: 'ratesCostPerHour',
-                        value: ratesCostPerHour,
+                        value: ratesCostPerHour
                       }
                     }
                     placeholder="0"
@@ -704,7 +710,7 @@ class AddTruckFormOne extends PureComponent {
                     meta={reqHandlerMinRate}
                   />
                 </div>
-                <div className="col-md-3 form__form-group">
+                <div className="col-md-4 form__form-group">
                   <span className="label">Minimum hours</span>
                   <TField
                     input={
@@ -721,12 +727,14 @@ class AddTruckFormOne extends PureComponent {
                 </div>
               </Row>
 
+              {/*
               <Row className="col-md-12">
                 <div className="col-md-3 form__form-group">
                   <TCheckBox onChange={this.handleInputChange} name="ratesByTon"
                              value={!!ratesByTon} label="By Ton"
                   />
                 </div>
+
                 <div className="col-md-3 form__form-group">
                   <span className="label">Cost per Ton $</span>
                   <TField
@@ -742,8 +750,9 @@ class AddTruckFormOne extends PureComponent {
                     meta={reqHandlerCostTon}
                   />
                 </div>
-              </Row>
 
+              </Row>
+              */}
               <Row className="col-md-12">
                 <hr/>
               </Row>
@@ -765,7 +774,7 @@ class AddTruckFormOne extends PureComponent {
                     type="number"
                     meta={reqHandlerMaxCapacity}
                   />
-                   <span className="form__form-group-label">
+                  <span className="form__form-group-label">
                     Max Distance to Pickup (Miles)
                   </span>
                   <input
@@ -781,7 +790,7 @@ class AddTruckFormOne extends PureComponent {
                     Upload a picture of your Truck (Optional)
                   </h4>
                   <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
-                    {imageUploading && <span>Uploading Image...</span>}
+                  {imageUploading && <span>Uploading Image...</span>}
                 </div>
               </Row>
               {/*
