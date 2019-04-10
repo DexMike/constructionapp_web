@@ -30,8 +30,8 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites: true,
       showSendtoFavorites: false,
       favoriteCompanies: [],
-      allBidders: [],
       favoriteAdminTels: [],
+      nonFavoriteAdminTels: [],
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -45,6 +45,7 @@ class JobCreateFormTwo extends PureComponent {
     let favoriteAdminTels = [];
     let favoriteCompanies = [];
     let allBidders = [];
+    let nonFavoriteAdminTels = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
     // console.log(profile);
@@ -64,17 +65,21 @@ class JobCreateFormTwo extends PureComponent {
     allBidders = await GroupListService.getBiddersFiltered(
       filters
     );
-    //AQUI ME QUEDO HAY QUE DESCONTAR LS DE favoriteCompanies y luego enviar los SMS
-    console.log(allBidders);
+
+    // AQUI ME QUEDO HAY QUE DESCONTAR LS DE favoriteCompanies y luego enviar los SMS
+    const biddersIdsNotFavorites = allBidders.filter(x => !favoriteCompanies.includes(x));
+    console.log(biddersIdsNotFavorites);
 
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
       favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
+      nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
       this.setState({
         showSendtoFavorites: true,
         favoriteCompanies,
-        favoriteAdminTels
+        favoriteAdminTels,
+        nonFavoriteAdminTels
       });
     }
     this.setState({ loaded: true });
@@ -124,10 +129,11 @@ class JobCreateFormTwo extends PureComponent {
     const { firstTabData } = this.props;
     const {
       favoriteCompanies,
-      favoriteAdminTels,
       showSendtoFavorites,
       sendToFavorites,
-      sendToMkt
+      sendToMkt,
+      favoriteAdminTels,
+      nonFavoriteAdminTels
     } = this.state;
     const d = firstTabData();
     const profile = await ProfileService.getProfile();
@@ -257,7 +263,18 @@ class JobCreateFormTwo extends PureComponent {
 
     // if sending to mktplace, let's send SMS to everybody
     if (sendToMkt) {
-      console.log('>>SE');
+      const allBiddersSms = [];
+      for (const bidderTel of nonFavoriteAdminTels) {
+        // send only to Jake
+        // if (bidderTel === '6129990787') {
+        // console.log('>>Sending SMS to Jake...');
+        const notification = {
+          to: bidderTel,
+          body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'
+        };
+        allBiddersSms.push(TwilioService.createSms(notification));
+        // }
+      }
     }
 
     // return false;
