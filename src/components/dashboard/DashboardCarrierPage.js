@@ -230,7 +230,7 @@ class DashboardCarrierPage extends Component {
     // console.log(jobs);
 
     this.setState({ jobs });
-    console.log(jobs);
+    //console.log(jobs);
     return jobs;
   }
 
@@ -500,8 +500,8 @@ class DashboardCarrierPage extends Component {
             <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal = {completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectStatic title="Potential Earnings" displayVal={potentialIncome}/>
             <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent}/>
+            <DashboardObjectStatic title="Potential Earnings" displayVal={potentialIncome}/>
           </div>
         </Container>
       );
@@ -787,6 +787,10 @@ class DashboardCarrierPage extends Component {
                         {
                           name: 'newStartDate',
                           displayName: 'Start Date'
+                        },
+                        {
+                          name: 'status',
+                          displayName: 'Job Status'
                         },
                         {
                           name: 'legalName',
