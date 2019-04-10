@@ -577,6 +577,9 @@ class CreateJobFormOne extends PureComponent {
   tabFirstPage() {
     // clear all data from tab 2
     this.setState({
+      ratebyBoth: false,
+      rateByHour: true,
+      rateByTon: false,
       tonnage: 0,
       endLocationAddress1: '',
       endLocationAddress2: '',
@@ -590,6 +593,9 @@ class CreateJobFormOne extends PureComponent {
   tabSecondPage() {
     // clear all from tab 1
     this.setState({
+      ratebyBoth: false,
+      rateByHour: false,
+      rateByTon: true,
       hourEstimatedHours: 0,
       hourTrucksNumber: 0
     });

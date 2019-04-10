@@ -19,7 +19,7 @@ import TDateTimePicker from '../common/TDateTimePicker';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
 
-import DashboardTitle, {DashboardObject} from './DashboardObject';
+import DashboardTitle, {DashboardObjectStatic} from './DashboardObjectStatic';
 
 import AddressService from '../../api/AddressService';
 import AgentService from '../../api/AgentService';
@@ -486,12 +486,12 @@ class DashboardCarrierPage extends Component {
           {/*{this.renderGoTo()}*/}
 
           <div className="row">
-            <DashboardObject title="New Offers" val = {newJobCount}/>
-            <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
-            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
-            <DashboardObject title="Completed Jobs" val={completedJobCount}/>
-            <DashboardObject title="Potential Earnings" val={potentialIncome}/>
-            <DashboardObject title="% Completed" val = {completedOffersPercent}/>
+            <DashboardObjectStatic title="New Offers" val = {newJobCount}/>
+            <DashboardObjectStatic title="Booked Jobs" val = {acceptedJobCount}/>
+            <DashboardObjectStatic title="Jobs in Progress" val = {inProgressJobCount}/>
+            <DashboardObjectStatic title="Completed Jobs" val={completedJobCount}/>
+            <DashboardObjectStatic title="Potential Earnings" val={potentialIncome}/>
+            <DashboardObjectStatic title="% Completed" val = {completedOffersPercent}/>
           </div>
         </Container>
       );

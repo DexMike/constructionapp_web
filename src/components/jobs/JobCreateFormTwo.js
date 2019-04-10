@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import moment from 'moment';
 import {
   Card,
   CardBody,
@@ -19,6 +20,7 @@ import TCheckBox from '../common/TCheckBox';
 import TwilioService from '../../api/TwilioService';
 import './jobs.css';
 import GroupListService from '../../api/GroupListService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -33,6 +35,7 @@ class JobCreateFormTwo extends PureComponent {
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.saveJobMaterials = this.saveJobMaterials.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -93,6 +96,28 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
+  async saveJobMaterials(jobId, materials) {
+    if (materials) {
+      const profile = await ProfileService.getProfile();
+      if (profile) {
+        for (const material of materials) {
+          const newMaterial = {
+            jobsId: jobId,
+            value: material.label,
+            createdBy: profile.userId,
+            createdOn: moment()
+              .unix() * 1000,
+            modifiedBy: profile.userId,
+            modifiedOn: moment()
+              .unix() * 1000
+          };
+          /* eslint-disable no-await-in-loop */
+          await JobMaterialsService.createJobMaterials(newMaterial);
+        }
+      }
+    }
+  }
+
   async saveJob(e) {
     e.preventDefault();
     e.persist();
@@ -105,6 +130,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToMkt
     } = this.state;
     const d = firstTabData();
+    const profile = await ProfileService.getProfile();
 
     // start location
     const address1 = {
@@ -115,7 +141,13 @@ class JobCreateFormTwo extends PureComponent {
       address2: d.startLocationAddress2,
       city: d.startLocationCity,
       state: d.startLocationState,
-      zipCode: d.startLocationZip
+      zipCode: d.startLocationZip,
+      createdBy: profile.userId,
+      createdOn: moment()
+        .unix() * 1000,
+      modifiedBy: profile.userId,
+      modifiedOn: moment()
+        .unix() * 1000
     };
     const startAddress = await AddressService.createAddress(address1);
 
@@ -138,27 +170,50 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     // job p
-    const profile = await ProfileService.getProfile();
+    let isFavorited = 0;
+    if (showSendtoFavorites) {
+      isFavorited = 1;
+    }
+
+    let rateType = 'Hour';
+    if (d.rateByTon) {
+      rateType = 'Ton';
+    }
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
       status: 'Published',
-      isFavorited: showSendtoFavorites,
+      isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
+      startTime: new Date(d.jobDate),
       equipmentType: d.truckType.value,
-      rateType: 'Ton',
-      rate: d.tonnage,
-      notes: d.instructions,
-      rateEstimate: 0,
+      numEquipments: d.hourTrucksNumber,
+      rateType,
+      rate: 0,
+      rateEstimate: d.hourEstimatedHours,
       rateTotal: 0,
-      numberOfTrucks: d.capacity // check if this one is alright
+      notes: d.instructions,
+      createdBy: profile.userId,
+      createdOn: moment()
+        .unix() * 1000,
+      modifiedBy: profile.userId,
+      modifiedOn: moment()
+        .unix() * 1000
     };
     const newJob = await JobService.createJob(job);
     // return false;
 
+    // add materials
+    if (newJob) {
+      if (d.selectedMaterials) { // check if there's materials to add
+        this.saveJobMaterials(newJob.id, d.selectedMaterials);
+      }
+    }
+
     // create bids if this user has favorites:
-    if (showSendtoFavorites && sendToFavorites) {
+    if (showSendtoFavorites && sendToFavorites && newJob) {
       const results = [];
       for (const companyId of favoriteCompanies) {
         // bid
@@ -169,10 +224,16 @@ class JobCreateFormTwo extends PureComponent {
           hasCustomerAccepted: 1,
           hasSchedulerAccepted: 0,
           status: 'New',
-          rateType: 'Ton',
+          rateType,
           rate: 0,
-          rateEstimate: 0,
-          notes: d.instructions
+          rateEstimate: d.hourEstimatedHours,
+          notes: d.instructions,
+          createdBy: profile.userId,
+          createdOn: moment()
+            .unix() * 1000,
+          modifiedBy: profile.userId,
+          modifiedOn: moment()
+            .unix() * 1000
         };
         results.push(BidService.createBid(bid));
       }

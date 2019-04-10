@@ -32,7 +32,8 @@ import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
 
 import {useTranslation} from "react-i18next";
-import {DashboardObject} from "./DashboardObject";
+import {DashboardObject, DashboardObjectClickable} from "./DashboardObjectClickable";
+import {DashboardObjectStatic} from "./DashboardObjectStatic";
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -79,9 +80,6 @@ class DashboardCustomerPage extends Component {
       startDate: null,          // values for date control
       endDate: null,            // values for date control
 
-      // Rate Type Button toggle
-      isAvailable: true,
-
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
@@ -97,7 +95,7 @@ class DashboardCustomerPage extends Component {
       // Filter values
       filters: {
         rateType: '',
-
+        status: '',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -129,7 +127,7 @@ class DashboardCustomerPage extends Component {
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
-
+    this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
   }
 
   async componentDidMount() {
@@ -149,39 +147,13 @@ class DashboardCustomerPage extends Component {
 
     const jobs = await this.fetchJobs();
 
-    if (jobs) {
-      await this.fetchFilterLists();
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        // Todo do a real distance calculation from profile.company.zip
-        newJob.distance = (address.zipCode + 1) / 3000;
-
-        this.setState({loaded: true});
-
-        return newJob;
-      });
-    }
-
     this.setState(
       {
         jobs,
         filters,
         loaded: true,
         startDate,
-        endDate,
-        isAvailable: true
+        endDate
       }
     );
   }
@@ -260,9 +232,33 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-
     const jobs = await JobService.getJobDashboardByFilters(filters);
-    // console.log(jobs);
+
+    if (jobs) {
+      await this.fetchFilterLists();
+
+      jobs.map(async (job) => {
+        const newJob = job;
+
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.materials = this.equipmentMaterialsAsString(materials);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
+        // Todo do a real distance calculation from profile.company.zip
+        newJob.distance = (address.zipCode + 1) / 3000;
+
+        this.setState({loaded: true});
+
+        return newJob;
+      });
+    }
+
     this.setState({ jobs });
     return jobs;
   }
@@ -285,6 +281,20 @@ class DashboardCustomerPage extends Component {
       }, 1000),
       filters
     });
+  }
+
+  async handleFilterStatusChange({value, name}) {
+    const { filters } = this.state;
+    if (filters[name] === value) {
+      filters[name] = "";
+    } else {
+      filters[name] = value;
+    }
+    this.setState({ filters });
+    console.log(filters);
+    //await this.fetchJobs();
+
+    // implement backend query for status before fetching to avoid bugs
   }
 
   async handleFilterChange(e) {
@@ -316,13 +326,8 @@ class DashboardCustomerPage extends Component {
     /**/
   }
 
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
-    }
-  }
-
   handleJobEdit(id) {
+    console.log(id);
     this.setState({
       goToUpdateJob: true,
       jobId: id
@@ -427,7 +432,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderCards() {
-    const {loaded} = this.state;
+    const {loaded, filters} = this.state;
     let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
@@ -494,11 +499,11 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObject title="Offered Jobs" val = {newJobCount}/>
-            <DashboardObject title="Jobs in Progress" val = {inProgressJobCount}/>
-            <DashboardObject title="Booked Jobs" val = {acceptedJobCount}/>
-            <DashboardObject title="Completed Jobs" val={completedJobCount}/>
-            <DashboardObject title="% Completed" val = {completedOffersPercent}/>
+            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"Pending"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent} value={"% Completed"}/>
           </div>
         </Container>
       );
