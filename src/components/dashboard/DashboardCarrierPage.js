@@ -123,25 +123,25 @@ class DashboardCarrierPage extends Component {
     const jobs = await this.fetchJobs();
     this.fetchFilterLists();
 
-    if (jobs) {
-      jobs.map(async (job) => {
-        const newJob = job;
+    // if (jobs) {
+    //   jobs.map(async (job) => {
+    //     const newJob = job;
+    //
+    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
+    //     newJob.companyName = company.legalName;
+    //
+    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    //     const materials = materialsList.map(materialItem => materialItem.value);
+    //     newJob.material = this.equipmentMaterialsAsString(materials);
+    //
+    //     const address = await AddressService.getAddressById(newJob.startAddress);
+    //     newJob.zip = address.zipCode;
 
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        this.setState({ loaded: true });
-
-        return newJob;
-      });
-    }
+    // this.setState({ loaded: true });
+    //
+    //     return newJob;
+    //   });
+    // }
 
     this.setState(
       {
@@ -229,9 +229,8 @@ class DashboardCarrierPage extends Component {
   async fetchJobs() {
     const { filters } = this.state;
 
-    const jobs = await JobService.getJobByFilters(filters);
+    const jobs = await JobService.getJobDashboardByFilters(filters);
     // console.log(jobs);
-
     this.setState({ jobs });
     return jobs;
   }
@@ -758,7 +757,6 @@ class DashboardCarrierPage extends Component {
     potentialIncome = TFormat.asMoney(potentialIncome);
 
     // console.log(jobs);
-
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -779,11 +777,11 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Start Date'
                         },
                         {
-                          name: 'companyName',
+                          name: 'legalName',
                           displayName: 'Customer'
                         },
                         {
-                          name: 'zip',
+                          name: 'zipCode',
                           displayName: 'Start Zip'
                         },
                         {
@@ -810,7 +808,7 @@ class DashboardCarrierPage extends Component {
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table
-                          name: 'material',
+                          name: 'materials',
                           displayName: 'Materials'
                         }
                       ]
