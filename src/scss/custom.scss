@@ -78,6 +78,9 @@
 }
 .btn-link.favoriteIcon {
   color: $primary-green;
+  margin-right: 15px;
+  padding: 0px;
+  border-radius: 3px;
   &:hover, &:active {
     color: white;
     background-color: $primary-green;
@@ -88,6 +91,27 @@
 }
 .trucksListMaterialsHauled {
   white-space: pre-wrap;
+}
+
+.truck-card {
+  padding: 30px;
+  .button-card {
+    padding: 40px 0px;
+    //display: grid;
+  }
+}
+
+
+.truck-details  {
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: capitalize;
+  h1 {
+    font-size: 16px;
+  }
+  h2 {
+    font-size: 14px;
+  }
 }
 // ---- TUI Trucks List
 
