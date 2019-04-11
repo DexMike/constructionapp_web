@@ -645,12 +645,21 @@ class TrucksCustomerPage extends Component {
   }
 
   renderEquipmentRow(equipment) {
+    let imageTruck = '';
+
+    // checking if there's an image for the truck
+    if ((equipment.image).trim()) { // use of trim removes whitespace from img url
+      imageTruck = equipment.image;
+    } else {
+      imageTruck = `${window.location.origin}/${truckImage}`;
+    }
+
     return (
       <React.Fragment>
         <Row md={12} style={{ width: '100%' }}>
           {/* 100 85 */}
           <div className="col-md-2">
-            <img width="118" height="100" src={`${window.location.origin}/${truckImage}`} alt=""
+            <img width="118" height="100" src={imageTruck} alt=""
                  style={{ width: '118px' }}
             />
           </div>

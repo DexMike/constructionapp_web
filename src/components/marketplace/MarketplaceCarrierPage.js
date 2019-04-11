@@ -119,25 +119,25 @@ class MarketplaceCarrierPage extends Component {
     const jobs = await this.fetchJobs();
     this.fetchFilterLists();
 
-    if (jobs) {
-      this.fetchJobMaterials(jobs);
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        return newJob;
-      });
-    }
+    // if (jobs) {
+    //   this.fetchJobMaterials(jobs);
+    //
+    //   jobs.map(async (job) => {
+    //     const newJob = job;
+    //
+    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
+    //     newJob.companyName = company.legalName;
+    //
+    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    //     const materials = materialsList.map(materialItem => materialItem.value);
+    //     newJob.material = this.equipmentMaterialsAsString(materials);
+    //
+    //     const address = await AddressService.getAddressById(newJob.startAddress);
+    //     newJob.zip = address.zipCode;
+    //
+    //     return newJob;
+    //   });
+    // }
 
     this.setState(
       {
@@ -262,25 +262,9 @@ class MarketplaceCarrierPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-    const jobs = await JobService.getJobByFilters(filters);
-
-    if (jobs) {
-      this.fetchJobMaterials(jobs);
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-        newJob.modifiedOn = moment(job.modifiedOn)
-          .format();
-        newJob.createdOn = moment(job.createdOn)
-          .format();
-
-        return newJob;
-      });
-      this.setState({ jobs });
-    }
+    const jobs = await JobService.getJobDashboardByFilters(filters);
+    this.setState({ jobs });
+    return jobs;
   }
 
   handleFilterChangeDelayed(e) {
@@ -527,7 +511,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Min Hours'
                       },
                       {
-                        name: 'zip',
+                        name: 'zipCode',
                         displayName: 'Zip Code'
                       },
                       {

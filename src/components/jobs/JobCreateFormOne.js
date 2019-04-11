@@ -27,16 +27,17 @@ class CreateJobFormOne extends PureComponent {
       allTruckTypes: [],
       capacity: 0,
       allMaterials: [],
-      selectedMaterials: [],
+      selectedMaterials: '',
       allUSstates: [],
       // rates
+      rate: 0,
       ratebyBoth: false,
-      rateByTon: true,
-      rateByHour: false,
+      rateByTon: false,
+      rateByHour: true,
       tonnage: 0, // estimated amount of tonnage
       hourEstimatedHours: 0,
       hourTrucksNumber: 0,
-      rateTab: 2,
+      rateTab: 1,
       // location
       endLocationAddress1: '',
       endLocationAddress2: '',
@@ -145,6 +146,7 @@ class CreateJobFormOne extends PureComponent {
         allMaterials: p.allMaterials,
         selectedMaterials: p.selectedMaterials,
         // rates
+        rate: p.rate,
         ratebyBoth: p.ratebyBoth,
         rateByTon: p.rateByTon,
         rateByHour: p.rateByHour,
@@ -176,7 +178,7 @@ class CreateJobFormOne extends PureComponent {
       const allTruckTypes = [];
 
       allMaterials = allMaterials.map(material => ({
-        value: String(material.id),
+        value: material.val1,
         label: material.val1
       }));
       Object.values(truckTypes)
@@ -459,76 +461,76 @@ class CreateJobFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (job.rateTab === 2) {
-      if (job.endLocationAddress1.length === 0) {
-        this.setState({
-          reqHandlerEndAddress: {
-            ...reqHandlerEndAddress,
-            touched: true,
-            error: 'Missing ending address field'
-          }
-        });
-        isValid = false;
-      }
-
-      if (job.endLocationCity.length === 0) {
-        this.setState({
-          reqHandlerEndCity: {
-            ...reqHandlerEndCity,
-            touched: true,
-            error: 'Missing ending city field'
-          }
-        });
-        isValid = false;
-      }
-
-      if (job.endLocationState.length === 0) {
-        this.setState({
-          reqHandlerEndState: {
-            ...reqHandlerEndState,
-            touched: true,
-            error: 'Missing ending state field'
-          }
-        });
-        isValid = false;
-      }
-
-      if (job.endLocationZip.length === 0) {
-        this.setState({
-          reqHandlerEndZip: {
-            ...reqHandlerEndZip,
-            touched: true,
-            error: 'Missing ending zip field'
-          }
-        });
-        isValid = false;
-      }
+    // if (job.rateTab === 2) {
+    if (job.endLocationAddress1.length === 0) {
+      this.setState({
+        reqHandlerEndAddress: {
+          ...reqHandlerEndAddress,
+          touched: true,
+          error: 'Missing ending address field'
+        }
+      });
+      isValid = false;
     }
 
-    if (job.rateTab === 1) {
-      // work if rateTab is 1
-      if (job.hourEstimatedHours <= 0 && rateTab === 1) {
-        this.setState({
-          reqHandlerHoursEstimate: {
-            ...reqHandlerHoursEstimate,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
-      // work if rateTab is 1
-      if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-        this.setState({
-          reqHandlerTrucksEstimate: {
-            ...reqHandlerTrucksEstimate,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
+    if (job.endLocationCity.length === 0) {
+      this.setState({
+        reqHandlerEndCity: {
+          ...reqHandlerEndCity,
+          touched: true,
+          error: 'Missing ending city field'
+        }
+      });
+      isValid = false;
     }
+
+    if (job.endLocationState.length === 0) {
+      this.setState({
+        reqHandlerEndState: {
+          ...reqHandlerEndState,
+          touched: true,
+          error: 'Missing ending state field'
+        }
+      });
+      isValid = false;
+    }
+
+    if (job.endLocationZip.length === 0) {
+      this.setState({
+        reqHandlerEndZip: {
+          ...reqHandlerEndZip,
+          touched: true,
+          error: 'Missing ending zip field'
+        }
+      });
+      isValid = false;
+    }
+    // }
+
+    // if (job.rateTab === 1) {
+
+    if (job.hourEstimatedHours <= 0 && rateTab === 1) {
+      this.setState({
+        reqHandlerHoursEstimate: {
+          ...reqHandlerHoursEstimate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    if (job.hourTrucksNumber <= 0 && rateTab === 1) {
+      this.setState({
+        reqHandlerTrucksEstimate: {
+          ...reqHandlerTrucksEstimate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    // }
 
     return isValid;
   }
@@ -577,6 +579,9 @@ class CreateJobFormOne extends PureComponent {
   tabFirstPage() {
     // clear all data from tab 2
     this.setState({
+      ratebyBoth: false,
+      rateByHour: true,
+      rateByTon: false,
       tonnage: 0,
       endLocationAddress1: '',
       endLocationAddress2: '',
@@ -590,6 +595,9 @@ class CreateJobFormOne extends PureComponent {
   tabSecondPage() {
     // clear all from tab 1
     this.setState({
+      ratebyBoth: false,
+      rateByHour: false,
+      rateByTon: true,
       hourEstimatedHours: 0,
       hourTrucksNumber: 0
     });
@@ -615,6 +623,7 @@ class CreateJobFormOne extends PureComponent {
       truckType,
       allTruckTypes,
       capacity,
+      rate,
       allMaterials,
       selectedMaterials,
       allUSstates,
@@ -701,30 +710,30 @@ class CreateJobFormOne extends PureComponent {
                     placeholder="Truck Type"
                   />
                 </div>
-                <div className="col-md-2">
-                  <span className="form__form-group-label">Capacity</span>
+                <div className="col-md-3">
+                  <span className="form__form-group-label">Rate per hour</span>
                   <input
-                    name="capacity"
+                    name="rate"
                     type="number"
-                    value={capacity}
+                    value={rate}
                     onChange={this.handleInputChange}
-                    placeholder="# of tons"
+                    placeholder="$"
                   />
                 </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Materials</span>
-                  <MultiSelect
+                <div className="col-md-5 form__form-group">
+                  <span className="form__form-group-label">Material</span>
+                  <SelectField
                     input={
                       {
                         onChange: this.handleMaterialsChange,
-                        name: 'selectedMaterials',
+                        name: 'materialType',
                         value: selectedMaterials
                       }
                     }
-                    // meta={reqHandlerMaterials}
-                    options={allMaterials}
-                    placeholder="Materials"
                     meta={reqHandlerMaterials}
+                    value={selectedMaterials}
+                    options={allMaterials}
+                    placeholder="Select material"
                   />
                 </div>
               </Row>
@@ -761,7 +770,7 @@ class CreateJobFormOne extends PureComponent {
 
               <Row className="col-md-12 rateTab">
                 <div className="col-md-12 wizard">
-                  <div className="wizard__steps">
+                  {/* <div className="wizard__steps">
                     <div
                       role="link"
                       tabIndex="0"
@@ -780,7 +789,7 @@ class CreateJobFormOne extends PureComponent {
                     >
                       <p>By Tonnage</p>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="wizard__form-wrapper">
                     {rateTab === 1
@@ -893,6 +902,80 @@ class CreateJobFormOne extends PureComponent {
                             />
                           </div>
                         </div>
+
+                        {/* END LOCATION */}
+                        <div className="col-md-6">
+                            <h3 className="subhead">
+                              End Location
+                            </h3>
+                            <div className="form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationAddress1',
+                                    value: endLocationAddress1
+                                  }
+                                }
+                                placeholder="Address 1"
+                                type="text"
+                                meta={reqHandlerEndAddress}
+                              />
+                            </div>
+                            <div className="form__form-group">
+                              <input
+                                name="endLocationAddress2"
+                                type="text"
+                                value={endLocationAddress2}
+                                onChange={this.handleEndAddressChange}
+                                placeholder="Address 2"
+                                autoComplete="new-password"
+                              />
+                            </div>
+                            <div className="form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationCity',
+                                    value: endLocationCity
+                                  }
+                                }
+                                placeholder="City"
+                                type="text"
+                                meta={reqHandlerEndCity}
+                              />
+                            </div>
+                            <div className="form__form-group">
+                              <SelectField
+                                input={
+                                  {
+                                    onChange: this.handleEndLocationChange,
+                                    name: 'endLocationState',
+                                    value: endLocationState
+                                  }
+                                }
+                                placeholder="State"
+                                meta={reqHandlerEndState}
+                                value={endLocationState}
+                                options={allUSstates}
+                              />
+                            </div>
+                            <div className="form__form-group">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleEndAddressChange,
+                                    name: 'endLocationZip',
+                                    value: endLocationZip
+                                  }
+                                }
+                                placeholder="Zip"
+                                type="text"
+                                meta={reqHandlerEndZip}
+                              />
+                            </div>
+                          </div>
                       </Row>
                     )}
                     {/* onSubmit={this.nextPage} */}
