@@ -348,7 +348,7 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     const newStartAddress = await AddressService.createAddress(startAddress);
     newJob.startAddress = newStartAddress.id;
-    newJob.status = 'Booked';
+    newJob.status = 'On Offer';
     /* if (newJob.rateType === 'Ton') {
       endAddress.modifiedOn = moment()
         .unix() * 1000;
