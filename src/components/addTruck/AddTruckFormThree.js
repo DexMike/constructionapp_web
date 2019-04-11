@@ -389,8 +389,8 @@ AddTruckFormThree.propTypes = {
   passedTruckFullInfoId: PropTypes.number,
   editDriverId: PropTypes.number,
   onClose: PropTypes.func.isRequired,
-  validateResThree: PropTypes.object, // eslint-disable-line react/forbid-prop-types
-  validateOnTabThreeClick: PropTypes.object // eslint-disable-line react/forbid-prop-types
+  validateResThree: PropTypes.any, // eslint-disable-line react/forbid-prop-types
+  validateOnTabThreeClick: PropTypes.any // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormThree.defaultProps = {

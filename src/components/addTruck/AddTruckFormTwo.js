@@ -318,8 +318,8 @@ AddTruckFormTwo.propTypes = {
   getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onAvailabilityFullInfo: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-  validateResTwo: PropTypes.object, // eslint-disable-line react/forbid-prop-types
-  validateOnTabTwoClick: PropTypes.object // eslint-disable-line react/forbid-prop-types
+  validateResTwo: PropTypes.any, // eslint-disable-line react/forbid-prop-types
+  validateOnTabTwoClick: PropTypes.any // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormTwo.defaultProps = {

@@ -852,8 +852,8 @@ AddTruckFormOne.propTypes = {
     info: PropTypes.object
   }),
   onClose: PropTypes.func.isRequired,
-  validateResOne: PropTypes.object, // eslint-disable-line react/forbid-prop-types
-  validateOnTabOneClick: PropTypes.object // eslint-disable-line react/forbid-prop-types
+  validateResOne: PropTypes.any, // eslint-disable-line react/forbid-prop-types
+  validateOnTabOneClick: PropTypes.any // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormOne.defaultProps = {
