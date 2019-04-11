@@ -651,24 +651,25 @@ class TrucksCustomerPage extends Component {
           <div className="col-md-12">
             <div className="row">
               <div className="col-md-3">
-                <img width="100%" src={`${window.location.origin}/${truckImage}`} alt="" styles="background-size:contain;"
+                <img width="100%" src={`${window.location.origin}/${truckImage}`} alt=""
+                     styles="background-size:contain;"
                 />
               </div>
               <div className="col-md-9">
                 <div className="row truck-card">
                   <div className="col-md-9">
-                  <h1>
-                    {equipment.name} |  {equipment.type} | <NumberFormat
-                    value={equipment.maxCapacity}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={0}
-                    fixedDecimalScale
-                    thousandSeparator
-                    prefix=" "
-                    suffix=" Tons"
-                  />
-                  </h1>
+                    <h3 className="subhead">
+                      {equipment.name} | {equipment.type} | <NumberFormat
+                      value={equipment.maxCapacity}
+                      displayType="text"
+                      decimalSeparator="."
+                      decimalScale={0}
+                      fixedDecimalScale
+                      thousandSeparator
+                      prefix=" "
+                      suffix=" Tons"
+                    />
+                    </h3>
                   </div>
                   <div className="col-md-3 button-card">
                     <Button
@@ -689,24 +690,33 @@ class TrucksCustomerPage extends Component {
                 </div>
                 <div className="row truck-card">
                   <div className="col-md-6">
-                    <h1>Rates</h1>
-                    {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
-                      <React.Fragment>
-                        Rate:
-                        <span>
-                    <NumberFormat
-                      value={equipment.hourRate}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix="$ "
-                      suffix=" / Hour"
-                    />
-                  </span>
-                        <br/>
-                        Minimum:
+                    <h3 className="subhead">Rates</h3>
+                    <Row>
+                      {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
+                        <React.Fragment>
+                          <div className="col-md-6">
+                            Hourly Rate:
+                          </div>
+                          <div className="col-md-6">
+                            <NumberFormat
+                              value={equipment.hourRate}
+                              displayType="text"
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator
+                              prefix="$ "
+                              suffix=" / Hour"
+                            />
+                          </div>
+                        </React.Fragment>
+                      )}
+                    </Row>
+                    <Row>
+                      <div className="col-md-6">
+                        Hourly Minimum:
+                      </div>
+                      <div className="col-md-6">
                         <NumberFormat
                           value={equipment.minHours}
                           displayType="text"
@@ -716,38 +726,50 @@ class TrucksCustomerPage extends Component {
                           thousandSeparator
                           suffix=" hours min"
                         />
-                        <br/>
-                      </React.Fragment>
-                    )}
+                      </div>
+                    </Row>
                     {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
                       <React.Fragment>
-                  <span>
-                    <NumberFormat
-                      value={equipment.tonRate}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix="$ "
-                      suffix=" / Ton"
-                    />
-                  </span>
-                        <br/>
-                        <NumberFormat
-                          value={equipment.minCapacity}
-                          displayType="text"
-                          decimalSeparator="."
-                          decimalScale={2}
-                          fixedDecimalScale
-                          thousandSeparator
-                          suffix=" tons min"
-                        />
+                        <div className="row">
+                          <div className="col-md-6">
+                            Rate per Ton:
+                          </div>
+                          <div className="col-md-6">
+                            <NumberFormat
+                              value={equipment.tonRate}
+                              displayType="text"
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator
+                              prefix="$ "
+                              suffix=" / Ton"
+                            />
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-md-6">
+                            Minimum Tonnage Capacity:
+                          </div>
+                          <div className="col-md-6">
+                            <NumberFormat
+                              value={equipment.minCapacity}
+                              displayType="text"
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator
+                              suffix=" tons min"
+                            />
+                          </div>
+                        </div>
                       </React.Fragment>
                     )}
                   </div>
                   <div className="col-md-6">
-                    <h1>Materials</h1>
+                    <h3 className="subhead">
+                      Materials
+                    </h3>
                     {equipment.materials}
                   </div>
                 </div>
@@ -810,6 +832,7 @@ class TrucksCustomerPage extends Component {
                   </Col>
                 </Row>
               </Col>
+              <hr/>
             </Row>
             {
               equipments.map(equipment => (
