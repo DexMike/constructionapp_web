@@ -26,6 +26,9 @@ class JobSavePage extends Component {
         company: {
           legalName: ''
         },
+        company: {
+          phone: ''
+        },
         startAddress: {
           address1: ''
         },

@@ -170,29 +170,42 @@ class JobForm extends Component {
   renderJobTop(job) {
     return (
       <React.Fragment>
-        <div className="col-md-3">
+        <div className="col-md-4">
           <h3 className="subhead">
-            Carrier Status: {job.status}
+            Job: {job.name}
           </h3>
-          Job: {job.name}
-          <br/>
+
+          {/*<br/>*/}
           {job.company.legalName}
           <br/>
+          Carrier Contact Name
+          <br/>
+          Phone #: <a href="tel:{job.company.phone}">{job.company.phone}</a>
+          <br/>
+          # of trucks
+          <br/>
+        </div>
+        <div className="col-md-4">
+          <h3 className="subhead">
+            Dates:
+          </h3>
           Start Date: {TFormat.asDateTime(job.startTime)}
           <br/>
           Created On: {TFormat.asDateTime(job.createdOn)}
         </div>
-        <div className="col-md-3">
+        <div className="col-md-4">
           <h3 className="subhead">
-            Potential Earnings: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+            Carrier Status: {job.status}
           </h3>
+          Potential Earnings: {
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
+          <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
           Rate: ${job.rate} / {job.rateType}
           <br/>
-          Materials: {this.materialsAsString(job.materials)}
+          Product: {this.materialsAsString(job.materials)}
         </div>
       </React.Fragment>
     );
@@ -247,6 +260,32 @@ class JobForm extends Component {
     );
   }
 
+  renderJobTons(job) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col>
+            <h3 className="subhead">
+              Delivery Metrics
+            </h3>
+            <div>
+              <span>Total Tons:  <span>42</span></span>
+              <br/>
+              <span>Tons Delivered: <span>125</span></span>
+              <br/>
+              <span>Tons Remaining: <span>8.5</span></span>
+              <br/>
+              <span>% Completed: <span>80%</span></span>
+              <br/>
+            </div>
+            <br/>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
+
   renderJobLoads(job) {
     return (
       <React.Fragment>
@@ -256,17 +295,13 @@ class JobForm extends Component {
               Load Information
             </h3>
             <div>
-              <span>Number of Runs:  <span>42</span></span>
+              <span>Est # of Loads:  <span>42</span></span>
               <br/>
-              <span>Tons Completed: <span>12,255</span></span>
+              <span>Loads Completed: <span>35</span></span>
               <br/>
-              <span>Hours Completed: <span>8.5</span></span>
+              <span>Loads Remaining: <span>8.5</span></span>
               <br/>
-              <span>Avg Run Time: <span>42 mins</span></span>
-              <br/>
-              <span>Avg Drive Time: <span>12 mins</span></span>
-              <br/>
-              <span>Avg Idle Time: <span>20 mins</span></span>
+              <span>Avg Tons / Load: <span>10 Tons</span></span>
               <br/>
             </div>
             <br/>
@@ -286,7 +321,7 @@ class JobForm extends Component {
         <Row>
           <Col xl={2} lg={2} md={2} sm={12}>
             <div>
-              <span>Activity</span>
+              <span><b>Activity</b></span>
               <div>
                 <span>Waiting to Load</span>
               </div>
@@ -294,7 +329,7 @@ class JobForm extends Component {
           </Col>
           <Col xl={2} lg={2} md={2} sm={12}>
             <div>
-              <span>Start Time</span>
+              <span><b>Start Time</b></span>
               <div>
                 <span>8:00 AM</span>
               </div>
@@ -302,7 +337,7 @@ class JobForm extends Component {
           </Col>
           <Col xl={2} lg={2} md={2} sm={12}>
             <div>
-              <span>End Time</span>
+              <span><b>End Time</b></span>
               <div>
                 <span>8:30 AM</span>
               </div>
@@ -310,7 +345,7 @@ class JobForm extends Component {
           </Col>
           <Col xl={2} lg={2} md={2} sm={12}>
             <div>
-              <span>Time</span>
+              <span><b>Duration</b></span>
               <div>
                 <span>30 mins</span>
               </div>
@@ -318,7 +353,7 @@ class JobForm extends Component {
           </Col>
           <Col xl={2} lg={2} md={2} sm={12}>
             <div>
-              <span>Distance</span>
+              <span><b>Distance</b></span>
               <div>
                 <span>0</span>
               </div>
@@ -326,7 +361,7 @@ class JobForm extends Component {
           </Col>
           <Col xl={2} lg={2} md={2} sm={12}>
             <div>
-              <span>[map]</span>
+              <span><b>Load Amount</b></span>
               <div>
                 <span>8.5</span>
               </div>
@@ -526,17 +561,13 @@ class JobForm extends Component {
               Run Summary
             </h3>
             <div>
-              <span>Avg Run Time: <span>42 mins</span></span>
-              <br/>
-              <span>Avg Drive Time: <span>22 mins</span></span>
-              <br/>
-              <span>Avg Idle Time: <span>20 mins</span></span>
-              <br/>
               <span>Avg Load Time: <span>22 mins</span></span>
               <br/>
-              <span>Avg Drive Time: <span>42 mins</span></span>
+              <span>Avg UnLoad Time: <span>22 mins</span></span>
               <br/>
-              <span>Avg Unload Time: <span>20 mins</span></span>
+              <span>Avg Transit Time: <span>22 mins</span></span>
+              <br/>
+              <span>Avg Idle Time: <span>20 mins</span></span>
               <br/>
             </div>
           </Col>
@@ -636,18 +667,8 @@ class JobForm extends Component {
           <CardBody className="card-full-height">
             <Row>
               {this.renderJobTop(job)}
-              <div className="col-md-3">
-                {this.renderStartAddress(job)}
-              </div>
-              <div className="col-md-3">
-                {endAddress}
-              </div>
             </Row>
-            <Row>
-              <div>
-                <hr></hr>
-              </div>
-            </Row>
+            <hr/>
             <Row>
               <div className="col-md-5 backo_red">
                 <TMap
@@ -660,18 +681,35 @@ class JobForm extends Component {
                 />
               </div>
               <div className="col-md-7">
-                {this.renderJobBottom(job)}
                 <div className="row">
-                  <div className="col-md-6">
-                    {this.renderRunSummary(job)}
+                  <div className="col-md-4">
+                    {this.renderStartAddress(job)}
                   </div>
-                  <div className="col-md-6">
-                    {this.renderJobLoads(job)}
+                  <div className="col-md-8">
+                    {this.renderJobBottom(job)}
                   </div>
                 </div>
-                {this.renderJobRunss(job)}
+                <div className="row">
+                  <div className="col-md-3">
+                    {endAddress}
+                  </div>
+                </div>
               </div>
             </Row>
+            <hr/>
+            <div className="row">
+              <div className="col-md-4">
+                {this.renderJobTons(job)}
+              </div>
+              <div className="col-md-4">
+                {this.renderJobLoads(job)}
+              </div>
+              <div className="col-md-4">
+                {this.renderRunSummary(job)}
+              </div>
+            </div>
+            <hr/>
+            {this.renderJobRunss(job)}
           </CardBody>
         </Card>
       </Container>
@@ -689,9 +727,9 @@ class JobForm extends Component {
   }
 
   // return (
-  //   <Container className="dashboard">
-  //     Loading...
-  //   </Container>
+  // <Container className="dashboard">
+  // Loading...
+  // </Container>
   // );
 }
 
