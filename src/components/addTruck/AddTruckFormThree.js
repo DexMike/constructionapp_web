@@ -277,11 +277,11 @@ class AddTruckFormThree extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-             <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Add a Driver
-                  </h3>
-             </div>
+            <div className="col-md-12 form__form-group">
+              <h3 className="subhead">
+                Add a Driver
+              </h3>
+            </div>
 
             <form
               className="form form--horizontal addtruck__form"
@@ -389,16 +389,16 @@ AddTruckFormThree.propTypes = {
   passedTruckFullInfoId: PropTypes.number,
   editDriverId: PropTypes.number,
   onClose: PropTypes.func.isRequired,
-  validateResThree: PropTypes.func,
-  validateOnTabThreeClick: PropTypes.func
+  validateResThree: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  validateOnTabThreeClick: PropTypes.object // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormThree.defaultProps = {
   equipmentId: null,
   passedTruckFullInfoId: null,
   editDriverId: 0,
-  validateResThree: PropTypes.func,
-  validateOnTabThreeClick: PropTypes.func
+  validateResThree: null,
+  validateOnTabThreeClick: null
 };
 
 export default AddTruckFormThree;

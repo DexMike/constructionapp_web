@@ -238,6 +238,7 @@ class AddTruckFormOne extends PureComponent {
       minOperatingTime,
       maxDistanceToPickup
     } = this.state;
+    let {saveValues} = this.state;
     const { onTruckFullInfo } = this.props;
 
     // set states for checkboxes
@@ -283,7 +284,7 @@ class AddTruckFormOne extends PureComponent {
     }
 
     // TODO-> Ask which params are required
-    const saveValues = {
+    saveValues = {
       id,
       selectedMaterials,
       name: shortDesc, // unasigned
@@ -585,11 +586,13 @@ class AddTruckFormOne extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            {/*<div className="card__title">*/}
-            {/*  <h5 className="bold-text">*/}
-            {/*    Welcome to Trelar, Lets add a truck so customers can find you*/}
-            {/*  </h5>*/}
-            {/*</div>*/}
+            {/*
+            <div className="card__title">
+              <h5 className="bold-text">
+                Welcome to Trelar, Lets add a truck so customers can find you
+              </h5>
+            </div>
+            */}
 
             {/* this.handleSubmit  */}
             <form
@@ -687,13 +690,13 @@ class AddTruckFormOne extends PureComponent {
 
                 {/* FIRST ROW */}
                 <div className="col-md-12 form__form-group">
-                    <TCheckBox
-                      onChange={this.handleInputChange}
-                      name="ratesByBoth"
-                      value={!!ratesByBoth}
-                      label="By Both"
-                      meta={reqHandlerChecks}
-                    />
+                  <TCheckBox
+                    onChange={this.handleInputChange}
+                    name="ratesByBoth"
+                    value={!!ratesByBoth}
+                    label="By Both"
+                    meta={reqHandlerChecks}
+                  />
                 </div>
                 <div className="col-md-3 form__form-group">
                   <TCheckBox
@@ -710,7 +713,7 @@ class AddTruckFormOne extends PureComponent {
                       {
                         onChange: this.handleInputChange,
                         name: 'ratesCostPerHour',
-                        value: ratesCostPerHour,
+                        value: ratesCostPerHour
                       }
                     }
                     placeholder="0"
@@ -779,7 +782,7 @@ class AddTruckFormOne extends PureComponent {
                     type="number"
                     meta={reqHandlerMaxCapacity}
                   />
-                   <span className="form__form-group-label">
+                  <span className="form__form-group-label">
                     Max Distance to Pickup (Miles)
                   </span>
                   <input
@@ -795,7 +798,7 @@ class AddTruckFormOne extends PureComponent {
                     Upload a picture of your Truck (Optional)
                   </h4>
                   <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
-                    {imageUploading && <span>Uploading Image...</span>}
+                  {imageUploading && <span>Uploading Image...</span>}
                 </div>
               </Row>
               {/*
@@ -849,15 +852,17 @@ AddTruckFormOne.propTypes = {
     info: PropTypes.object
   }),
   onClose: PropTypes.func.isRequired,
-  validateResOne: PropTypes.any,
-  validateOnTabOneClick: PropTypes.any
+  validateResOne: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  validateOnTabOneClick: PropTypes.object // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormOne.defaultProps = {
   p: null,
   equipmentId: null,
   // companyId: null,
-  passedTruckFullInfo: null
+  passedTruckFullInfo: null,
+  validateResOne: null,
+  validateOnTabOneClick: null
 };
 
 export default AddTruckFormOne;

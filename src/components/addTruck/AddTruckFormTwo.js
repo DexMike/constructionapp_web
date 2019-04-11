@@ -8,7 +8,7 @@ import {
   Row
 } from 'reactstrap';
 // import EyeIcon from 'mdi-react/EyeIcon';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import TDateTimePicker from '../common/TDateTimePicker';
 // import { start } from 'repl';
 
@@ -318,15 +318,15 @@ AddTruckFormTwo.propTypes = {
   getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onAvailabilityFullInfo: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-  validateResTwo: PropTypes.func,
-  validateOnTabTwoClick: PropTypes.func
+  validateResTwo: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  validateOnTabTwoClick: PropTypes.object // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormTwo.defaultProps = {
   p: PropTypes.number,
   // previousPage: PropTypes.func.isAvailable,
-  validateResTwo: PropTypes.func,
-  validateOnTabTwoClick: PropTypes.func
+  validateResTwo: null,
+  validateOnTabTwoClick: null
 };
 
 export default AddTruckFormTwo;
