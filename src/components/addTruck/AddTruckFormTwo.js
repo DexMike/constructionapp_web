@@ -8,7 +8,7 @@ import {
   Row
 } from 'reactstrap';
 // import EyeIcon from 'mdi-react/EyeIcon';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import TDateTimePicker from '../common/TDateTimePicker';
 // import { start } from 'repl';
 
@@ -55,6 +55,18 @@ class AddTruckFormTwo extends PureComponent {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    const {validateResTwo} = this.props;
+    if (nextProps.validateOnTabTwoClick) {
+      if (this.isFormValid()) {
+        validateResTwo(true);
+        this.saveAvailabilityInfo(true);
+      } else {
+        validateResTwo(false);
+      }
+    }
+  }
+
   // on the login I can find something like this
   showPassword(e) {
     e.preventDefault();
@@ -83,7 +95,11 @@ class AddTruckFormTwo extends PureComponent {
   makeAvailable() {
     const { isAvailable } = this.state;
     const newValue = !isAvailable;
-    this.setState({ isAvailable: newValue });
+
+    this.setState({ isAvailable: newValue },
+      function wait() {
+        this.saveAvailabilityInfo(false);
+      });
   }
 
   startDateChange(data) {
@@ -123,7 +139,6 @@ class AddTruckFormTwo extends PureComponent {
       reqHandlerEndDate
     } = this.state;
     let isValid = true;
-
     if (truck.startDate === null || truck.startDate.length === 0) {
       this.setState({
         reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
@@ -145,7 +160,6 @@ class AddTruckFormTwo extends PureComponent {
     if (isValid) {
       return true;
     }
-
     return false;
   }
 
@@ -303,12 +317,16 @@ AddTruckFormTwo.propTypes = {
   previousPage: PropTypes.func.isRequired,
   getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onAvailabilityFullInfo: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  validateResTwo: PropTypes.any, // eslint-disable-line react/forbid-prop-types
+  validateOnTabTwoClick: PropTypes.any // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormTwo.defaultProps = {
-  p: PropTypes.number
+  p: PropTypes.number,
   // previousPage: PropTypes.func.isAvailable,
+  validateResTwo: null,
+  validateOnTabTwoClick: null
 };
 
 export default AddTruckFormTwo;

@@ -8,6 +8,7 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import PropTypes, { object } from 'prop-types';
+import TFormat from '../common/TFormat';
 import DriverService from '../../api/DriverService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
@@ -169,7 +170,6 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
-
     // show selected materials
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
@@ -209,10 +209,12 @@ class AddTruckFormFour extends PureComponent {
                     <br /><br />
                     <strong>License plate: </strong><br />{truckFullInfo.info.licensePlate}
                     <br /><br />
-                    <strong>Rate per hour: </strong><br />{truckFullInfo.info.hourRate}
+                    <strong>Rate per hour: </strong><br />{TFormat.asMoneyByHour(truckFullInfo.info.hourRate)}
                     <br /><br />
+                    {/*
                     <strong>Rate per ton: </strong><br />{truckFullInfo.info.tonRate}
                     <br /><br />
+                    */}
                     <strong>Maximum distance to pickup: </strong>
                     <br />{truckFullInfo.info.maxDistance} Miles
                   </p>

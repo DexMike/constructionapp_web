@@ -69,6 +69,18 @@ class AddTruckFormThree extends PureComponent {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    const {validateResThree} = this.props;
+    if (nextProps.validateOnTabThreeClick) {
+      if (this.isFormValid()) {
+        validateResThree(true);
+        this.saveUserInfo(true);
+      } else {
+        validateResThree(false);
+      }
+    }
+  }
+
   async onSubmitDriver() {
     // const user = this.state;
     const { onClose } = this.props;
@@ -138,13 +150,15 @@ class AddTruckFormThree extends PureComponent {
         touched: false
       })
     });
-    this.setState({ [e.target.name]: value });
+    this.setState({ [e.target.name]: value },
+      function wait() {
+        this.saveUserInfo(false);
+      });
   }
 
   isFormValid() {
     const truck = this.state;
     let isValid = true;
-
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
         reqHandlerFName: {
@@ -263,11 +277,11 @@ class AddTruckFormThree extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-             <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Add a Driver
-                  </h3>
-             </div>
+            <div className="col-md-12 form__form-group">
+              <h3 className="subhead">
+                Add a Driver
+              </h3>
+            </div>
 
             <form
               className="form form--horizontal addtruck__form"
@@ -374,13 +388,17 @@ AddTruckFormThree.propTypes = {
   previousPage: PropTypes.func.isRequired,
   passedTruckFullInfoId: PropTypes.number,
   editDriverId: PropTypes.number,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  validateResThree: PropTypes.any, // eslint-disable-line react/forbid-prop-types
+  validateOnTabThreeClick: PropTypes.any // eslint-disable-line react/forbid-prop-types
 };
 
 AddTruckFormThree.defaultProps = {
   equipmentId: null,
   passedTruckFullInfoId: null,
-  editDriverId: 0
+  editDriverId: 0,
+  validateResThree: null,
+  validateOnTabThreeClick: null
 };
 
 export default AddTruckFormThree;
