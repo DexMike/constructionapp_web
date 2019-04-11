@@ -580,8 +580,6 @@ class JobForm extends Component {
     let origin = '';
     let destination = '';
 
-    console.log(job.endAddress);
-
     if (!job.startAddress && job.endAddress) {
       origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
       destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;

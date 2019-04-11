@@ -87,25 +87,21 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
-  async saveJobMaterials(jobId, materials) {
-    if (materials) {
-      const profile = await ProfileService.getProfile();
-      if (profile) {
-        for (const material of materials) {
-          const newMaterial = {
-            jobsId: jobId,
-            value: material.label,
-            createdBy: profile.userId,
-            createdOn: moment()
-              .unix() * 1000,
-            modifiedBy: profile.userId,
-            modifiedOn: moment()
-              .unix() * 1000
-          };
-          /* eslint-disable no-await-in-loop */
-          await JobMaterialsService.createJobMaterials(newMaterial);
-        }
-      }
+  async saveJobMaterials(jobId, material) {
+    const profile = await ProfileService.getProfile();
+    if (profile && material) {
+      const newMaterial = {
+        jobsId: jobId,
+        value: material,
+        createdBy: profile.userId,
+        createdOn: moment()
+          .unix() * 1000,
+        modifiedBy: profile.userId,
+        modifiedOn: moment()
+          .unix() * 1000
+      };
+      /* eslint-disable no-await-in-loop */
+      await JobMaterialsService.createJobMaterials(newMaterial);
     }
   }
 
@@ -145,19 +141,19 @@ class JobCreateFormTwo extends PureComponent {
     let endAddress = {
       id: null
     };
-    if (d.rateTab === 2) {
-      const address2 = {
-        type: 'Delivery',
-        name: 'Delivery End Location',
-        companyId: 19, // 'this should change',
-        address1: d.endLocationAddress1,
-        address2: d.endLocationAddress2,
-        city: d.endLocationCity,
-        state: d.endLocationState,
-        zipCode: d.endLocationZip
-      };
-      endAddress = await AddressService.createAddress(address2);
-    }
+    // if (d.rateTab === 2) {
+    const address2 = {
+      type: 'Delivery',
+      name: 'Delivery End Location',
+      companyId: 19, // 'this should change',
+      address1: d.endLocationAddress1,
+      address2: d.endLocationAddress2,
+      city: d.endLocationCity,
+      state: d.endLocationState,
+      zipCode: d.endLocationZip
+    };
+    endAddress = await AddressService.createAddress(address2);
+    // }
 
     // job p
     let isFavorited = 0;
@@ -181,7 +177,7 @@ class JobCreateFormTwo extends PureComponent {
       equipmentType: d.truckType.value,
       numEquipments: d.hourTrucksNumber,
       rateType,
-      rate: 0,
+      rate: d.rate,
       rateEstimate: d.hourEstimatedHours,
       rateTotal: 0,
       notes: d.instructions,
@@ -198,7 +194,7 @@ class JobCreateFormTwo extends PureComponent {
     // add materials
     if (newJob) {
       if (d.selectedMaterials) { // check if there's materials to add
-        this.saveJobMaterials(newJob.id, d.selectedMaterials);
+        this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
       }
     }
 

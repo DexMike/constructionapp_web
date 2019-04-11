@@ -687,7 +687,7 @@ class JobCreateForm extends Component {
           </div>
           <div className="col-sm-3">
             <div className="form__form-group">
-              <span className="form__form-group-label">Materials</span>
+              <span className="form__form-group-label">Material</span>
               <div className="form__form-group-field">
                 <SelectField
                   input={
@@ -862,7 +862,7 @@ class JobCreateForm extends Component {
                       value: startAddress.address1
                     }
                   }
-                  placeholder="Address #1"
+                  placeholder="Address 1"
                   type="text"
                   meta={reqHandlerStartAddress}
                 />
@@ -872,7 +872,7 @@ class JobCreateForm extends Component {
               <div className="form__form-group">
                 <input name="address2"
                        type="text"
-                       placeholder="Address #2"
+                       placeholder="Address 2"
                        value={startAddress.address2}
                        onChange={this.handleStartAddressInputChange}
                 />
