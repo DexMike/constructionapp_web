@@ -348,6 +348,7 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     const newStartAddress = await AddressService.createAddress(startAddress);
     newJob.startAddress = newStartAddress.id;
+    newJob.status = 'Booked';
     /* if (newJob.rateType === 'Ton') {
       endAddress.modifiedOn = moment()
         .unix() * 1000;
@@ -626,6 +627,14 @@ class JobCreateForm extends Component {
     let { availableMaterials } = this.state;
     const { selectedEquipment, getAllMaterials } = this.props;
 
+    let imageTruck = '';
+    // checking if there's an image for the truck
+    if ((selectedEquipment.image).trim()) { // use of trim removes whitespace from img url
+      imageTruck = selectedEquipment.image;
+    } else {
+      imageTruck = `${window.location.origin}/${truckImage}`;
+    }
+
     // if ANY is selected, let's show all material
     if (availableMaterials.length > 0) {
       for (const mat in availableMaterials) {
@@ -645,7 +654,7 @@ class JobCreateForm extends Component {
         <h3 className="subhead">{selectedEquipment.name}</h3>
         <div className="row">
           <div className="col-sm-3">
-            <img width="100" height="85" src={`${window.location.origin}/${truckImage}`} alt=""
+            <img width="100" height="85" src={imageTruck} alt=""
                  style={{ width: '100px' }}
             />
           </div>
