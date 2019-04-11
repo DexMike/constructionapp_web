@@ -212,13 +212,13 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleMaterialsChange(data) {
-    /* const { reqHandlerMaterials } = this.state;
+    const { reqHandlerMaterials } = this.state;
     this.setState({
       reqHandlerMaterials: {
         ...reqHandlerMaterials,
         touched: false
       }
-    }); */
+    });
     this.setState({ selectedMaterials: data });
   }
 
@@ -730,6 +730,7 @@ class CreateJobFormOne extends PureComponent {
                         value: selectedMaterials
                       }
                     }
+                    meta={reqHandlerMaterials}
                     value={selectedMaterials}
                     options={allMaterials}
                     placeholder="Select material"
