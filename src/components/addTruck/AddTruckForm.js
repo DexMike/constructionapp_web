@@ -109,7 +109,6 @@ class AddTruckForm extends PureComponent {
   }
 
   handleAvailabilitySave(e) {
-    console.log(112, e);
     // let's keep the info from the truck in memory
     const { availabilityCachedInfo, page } = this.state;
     availabilityCachedInfo.info = e;
