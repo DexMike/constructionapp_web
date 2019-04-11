@@ -60,8 +60,6 @@ class AddTruckFormTwo extends PureComponent {
     if (nextProps.validateOnTabTwoClick) {
       if (this.isFormValid()) {
         validateResTwo(true);
-        // const {thirdPage} = this.props;
-        // thirdPage(this.state);
         this.saveAvailabilityInfo(true);
       } else {
         validateResTwo(false);
@@ -97,6 +95,7 @@ class AddTruckFormTwo extends PureComponent {
   makeAvailable() {
     const { isAvailable } = this.state;
     const newValue = !isAvailable;
+
     this.setState({ isAvailable: newValue },
       function wait() {
         this.saveAvailabilityInfo(false);
@@ -326,7 +325,8 @@ AddTruckFormTwo.propTypes = {
   getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onAvailabilityFullInfo: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-  validateResTwo: PropTypes.func.isRequired
+  validateResTwo: PropTypes.func.isRequired,
+  validateOnTabTwoClick: PropTypes.func.isRequired
 };
 
 AddTruckFormTwo.defaultProps = {

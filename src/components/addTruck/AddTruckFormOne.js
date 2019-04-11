@@ -77,8 +77,6 @@ class AddTruckFormOne extends PureComponent {
     if (nextProps.validateOnTabOneClick) {
       if (this.isFormValid()) {
         validateResOne(true);
-        // const {secondPage} = this.props;
-        // secondPage(this.state);
         this.saveTruckInfo(true);
       } else {
         validateResOne(false);
@@ -91,6 +89,9 @@ class AddTruckFormOne extends PureComponent {
     this.setState({
       reqHandlerMaterials: Object.assign({}, reqHandlerMaterials, {
         touched: false
+      },
+      function wait() {
+        this.saveTruckInfo(false);
       })
     });
     this.setState({ selectedMaterials: data },
@@ -393,7 +394,10 @@ class AddTruckFormOne extends PureComponent {
       })
     });
 
-    this.setState({ [e.target.name]: value });
+    this.setState({ [e.target.name]: value },
+      function wait() {
+        this.saveTruckInfo(false);
+      });
   }
 
   // Pull materials
@@ -911,7 +915,8 @@ AddTruckFormOne.propTypes = {
     info: PropTypes.object
   }),
   onClose: PropTypes.func.isRequired,
-  validateResOne: PropTypes.func.isRequired
+  validateResOne: PropTypes.func.isRequired,
+  validateOnTabOneClick: PropTypes.func.isRequired
 };
 
 AddTruckFormOne.defaultProps = {

@@ -150,7 +150,10 @@ class AddTruckFormThree extends PureComponent {
         touched: false
       })
     });
-    this.setState({ [e.target.name]: value });
+    this.setState({ [e.target.name]: value },
+      function wait() {
+        this.saveUserInfo(false);
+      });
   }
 
   isFormValid() {
@@ -390,7 +393,8 @@ AddTruckFormThree.propTypes = {
   passedTruckFullInfoId: PropTypes.number,
   editDriverId: PropTypes.number,
   onClose: PropTypes.func.isRequired,
-  validateResThree: PropTypes.func.isRequired
+  validateResThree: PropTypes.func.isRequired,
+  validateOnTabThreeClick: PropTypes.func.isRequired
 };
 
 AddTruckFormThree.defaultProps = {
