@@ -169,7 +169,6 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
-
     // show selected materials
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
