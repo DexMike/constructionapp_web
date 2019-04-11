@@ -9,6 +9,7 @@ import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
+import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
@@ -40,13 +41,7 @@ class JobCarrierForm extends Component {
 
     this.state = {
       ...job,
-      images: [
-        { id: 1, name: 'Truck Image 1', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'},
-        { id: 2, name: 'Truck Image 2', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'},
-        { id: 3, name: 'Truck Image 3', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'},
-        { id: 4, name: 'Truck Image 4', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'},
-        { id: 5, name: 'Truck Image 5', image: 'http://www.overdriveonline.com/wp-content/uploads/sites/8/2016/08/KW-T880-super-dump-2016-08-01-15-51.jpg'}
-      ]
+      images: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -78,11 +73,11 @@ class JobCarrierForm extends Component {
   async componentDidMount() {
     const { job } = this.props;
     const bookings = await BookingService.getBookingsByJobId(job.id);
-    console.log(558, bookings);
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
-      const bookingInvoices = await BookingService.getBookingInvoicesByBookingId(booking.id);
-      console.log(563, bookingInvoices);
+      const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
+      const images = bookingInvoices.map(item => item.image);
+      this.setState({images});
     }
   }
 
@@ -157,10 +152,6 @@ class JobCarrierForm extends Component {
 
   handleInputChange(e) {
     this.setState({ [e.target.name]: e.target.value });
-  }
-
-  handleImg(id) {
-    // console.log(145, id);
   }
 
   materialsAsString(materials) {
@@ -573,13 +564,12 @@ class JobCarrierForm extends Component {
       <React.Fragment>
         <Row>
           {images.map(item => (
-              <Col className="col-md-4 pt-4" key={`img-${item.id}`}>
-                <img key={item.id} src={`${item.image}`} alt={`${item.name}`}/>
-              </Col>
+            <Col className="col-md-4 pt-4" key={`img-${item}`}>
+              <img key={item} src={`${item}`} alt={`${item}`}/>
+            </Col>
           ))
           }
         </Row>
-        
       </React.Fragment>
     );
   }
@@ -605,11 +595,11 @@ class JobCarrierForm extends Component {
     return (
       <React.Fragment>
         <h3 className="subhead">Start Location
-          {/*<img*/}
-          {/*  src={`${window.location.origin}/${pinAImage}`}*/}
-          {/*  alt="avatar"*/}
-          {/*  className="pinSize"*/}
-          {/*/> */}
+          {/*<img */}
+          {/*  src={`${window.location.origin}/${pinAImage}`} */}
+          {/*  alt="avatar" */}
+          {/*  className="pinSize" */}
+          {/* /> */}
         </h3>
         {this.renderAddress(job.startAddress)}
       </React.Fragment>
@@ -637,11 +627,11 @@ class JobCarrierForm extends Component {
     return (
       <React.Fragment>
         <h3 className="subhead">End Location
-          {/*<img*/}
-          {/*  src={`${window.location.origin}/${pinBImage}`}*/}
-          {/*  alt="avatar"*/}
-          {/*  className="pinSize"*/}
-          {/*/> */}
+          {/* <img*/}
+          {/*  src={`${window.location.origin}/${pinBImage}`} */}
+          {/*  alt="avatar" */}
+          {/*  className="pinSize" */}
+          {/* /> */}
         </h3>
         {this.renderAddress(job.endAddress)}
       </React.Fragment>
@@ -682,7 +672,7 @@ class JobCarrierForm extends Component {
             </Row>
             <Row>
               <div>
-                <hr></hr>
+                <hr />
               </div>
             </Row>
             <Row>
@@ -709,10 +699,9 @@ class JobCarrierForm extends Component {
                 {this.renderJobRunss(job)}
               </div>
               <div className="col-md-12">
-                {this.renderImages(images)}   
+                {this.renderImages(images)}
               </div>
             </Row>
-            
           </CardBody>
         </Card>
       </Container>
