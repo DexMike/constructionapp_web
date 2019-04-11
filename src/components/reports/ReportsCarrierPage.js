@@ -1065,7 +1065,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Material</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Cost</div>
@@ -1083,7 +1083,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Material</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Cost</div>
@@ -1201,7 +1201,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Carrier</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Earnings</div>
@@ -1219,7 +1219,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Carrier</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Earnings</div>
@@ -1335,7 +1335,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Customer</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Earnings</div>
@@ -1353,7 +1353,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Customer</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Earnings</div>
@@ -1469,7 +1469,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Site</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Earnings</div>
@@ -1487,7 +1487,7 @@ class ReportsCarrierPage extends Component {
                 <div className="card__title bold-text">Site</div>
               </Col>
               <Col md={1}>
-                <div className="card__title bold-text"># of Jobs</div>
+                <div className="card__title bold-text"># of Loads</div>
               </Col>
               <Col md={1}>
                 <div className="card__title bold-text">Earnings</div>

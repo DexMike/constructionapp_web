@@ -645,6 +645,15 @@ class TrucksCustomerPage extends Component {
   }
 
   renderEquipmentRow(equipment) {
+    let imageTruck = '';
+
+    // checking if there's an image for the truck
+    if ((equipment.image).trim()) { // use of trim removes whitespace from img url
+      imageTruck = equipment.image;
+    } else {
+      imageTruck = `${window.location.origin}/${truckImage}`;
+    }
+
     return (
       <React.Fragment>
         <Row className="truck-card truck-details">

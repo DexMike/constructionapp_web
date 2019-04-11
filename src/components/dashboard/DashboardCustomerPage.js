@@ -80,9 +80,6 @@ class DashboardCustomerPage extends Component {
       startDate: null,          // values for date control
       endDate: null,            // values for date control
 
-      // Rate Type Button toggle
-      isAvailable: true,
-
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
@@ -149,40 +146,14 @@ class DashboardCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs();
-
-    if (jobs) {
-      await this.fetchFilterLists();
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        // Todo do a real distance calculation from profile.company.zip
-        newJob.distance = (address.zipCode + 1) / 3000;
-
-        this.setState({loaded: true});
-
-        return newJob;
-      });
-    }
-
+    this.fetchFilterLists();
     this.setState(
       {
         jobs,
         filters,
         loaded: true,
         startDate,
-        endDate,
-        isAvailable: true
+        endDate
       }
     );
   }
@@ -261,9 +232,33 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-
     const jobs = await JobService.getJobDashboardByFilters(filters);
-    // console.log(jobs);
+
+    // if (jobs) {
+    //   await this.fetchFilterLists();
+    //
+    //   jobs.map(async (job) => {
+    //     const newJob = job;
+    //
+    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
+    //     newJob.companyName = company.legalName;
+    //
+    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    //     const materials = materialsList.map(materialItem => materialItem.value);
+    //     newJob.materials = this.equipmentMaterialsAsString(materials);
+    //
+    //     const address = await AddressService.getAddressById(newJob.startAddress);
+    //     newJob.zip = address.zipCode;
+    //
+    //     // Todo do a real distance calculation from profile.company.zip
+    //     newJob.distance = (address.zipCode + 1) / 3000;
+    //
+    //     this.setState({loaded: true});
+    //
+    //     return newJob;
+    //   });
+    // }
+
     this.setState({ jobs });
     return jobs;
   }
@@ -295,11 +290,8 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
+    await this.fetchJobs();
     this.setState({ filters });
-    console.log(filters);
-    //await this.fetchJobs();
-
-    // implement backend query for status before fetching to avoid bugs
   }
 
   async handleFilterChange(e) {
@@ -329,12 +321,6 @@ class DashboardCustomerPage extends Component {
       // console.log(this.state);
     });
     /**/
-  }
-
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
-    }
   }
 
   handleJobEdit(id) {
@@ -509,7 +495,7 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"Pending"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"New"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
@@ -792,7 +778,7 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying {newJobCount} of {newJobCount}
+                  Displaying {jobs.length} of {jobs.length}
                   <TTable
                     columns={
                       [

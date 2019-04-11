@@ -55,7 +55,7 @@
 // ---- TUI Topbar
 
 // ---- TUI Sidebar
-.sidebar__link-active  {
+.sidebar__link-active {
   box-shadow: 0px 1px 3px #eff1f5, 0px -1px 3px #eff1f5;
 }
 .sidebar__link, .topbar__link {
@@ -70,7 +70,7 @@
 // ---- TUI Sidebar
 
 // ---- TUI Trucks List
-.customer-truck-results-title .favoriteIcon{
+.customer-truck-results-title .favoriteIcon {
   position: absolute;
   margin: 0;
   padding: 0;
@@ -78,6 +78,7 @@
 }
 .btn-link.favoriteIcon {
   color: $primary-green;
+
   margin-right: 15px;
   padding: 0px;
   border-radius: 3px;
@@ -147,20 +148,23 @@
 #filter-input-row {
   background: #F9F9F7;
   padding-bottom: 15px;
+
   input {
     background-color: white;
   }
+
   input.filter-text {
     padding: 5px;
     //margin: 4px 0 8px 0;
   }
+
   .Select-control, .date-picker {
     //margin-top: 4px;
     background-color: white;
   }
 
   .Select-input input {
-   border:none !important;
+    border: none !important;
   }
 
   .col {
@@ -248,12 +252,20 @@ span.form__form-group-error {
     cursor: default;
     border: 1px solid #4ce1b6;
     background-color: #006F4F;
+
     h4, h5 {
       color:  #FFFFFF;
     }
   }
 
 }
+
+.date-filter .calendarIcon {
+  font-size: 16px !important;
+  margin-top: 0px;
+}
+
+
 // ------  Helper Classes for Reporting
 
 
