@@ -283,7 +283,10 @@ class JobCreateFormTwo extends PureComponent {
 
   // check format ok
   checkPhoneFormat(phone) {
-    if (phone.includes('555')) {
+    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
       return false;
     }
     return true;
@@ -321,9 +324,9 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'hidden'}>
-                    <h4 className="talign">
+                    <h5>
                       Send to Favorites<br />
-                    </h4>
+                    </h5>
                   </div>
                   <div className={showSendtoFavorites ? 'hidden' : 'col-md-12 form__form-group'}>
                     <p>You have not set any favorite carriers to work with.</p><br /><br />
@@ -343,8 +346,7 @@ class JobCreateFormTwo extends PureComponent {
                     <h5>
                       Yes! Send to Trelar Marketplace<br /><br />
                     </h5>
-                    <br />
-                    * Note - This job will be sent to all Trelar Partners for review<br />
+                    <small>* Note - This job will be sent to all Trelar Partners for review</small>
                   </div>
                   <div className="col-md-3 form__form-group">
                     Send Job in<br />

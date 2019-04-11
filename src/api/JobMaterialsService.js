@@ -15,7 +15,6 @@ class JobMaterialsService extends AgentService {
 
   static async getJobMaterialsByJobId(jobId) {
     const response = await this.get(`/jobs/${jobId}${PATH}`);
-    // /jobs/jobId/jobmaterials/
     return (response);
   }
 
