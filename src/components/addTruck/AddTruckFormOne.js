@@ -93,7 +93,10 @@ class AddTruckFormOne extends PureComponent {
         touched: false
       })
     });
-    this.setState({ selectedMaterials: data });
+    this.setState({ selectedMaterials: data },
+      function wait() {
+        this.saveTruckInfo(false);
+      });
   }
 
   selectChange(data) {
@@ -103,7 +106,10 @@ class AddTruckFormOne extends PureComponent {
         touched: false
       })
     });
-    this.setState({ truckType: data.value });
+    this.setState({ truckType: data.value },
+      function wait() {
+        this.saveTruckInfo(false);
+      });
   }
 
   isFormValid() {

@@ -97,7 +97,10 @@ class AddTruckFormTwo extends PureComponent {
   makeAvailable() {
     const { isAvailable } = this.state;
     const newValue = !isAvailable;
-    this.setState({ isAvailable: newValue });
+    this.setState({ isAvailable: newValue },
+      function wait() {
+        this.saveAvailabilityInfo(false);
+      });
   }
 
   startDateChange(data) {
@@ -158,7 +161,6 @@ class AddTruckFormTwo extends PureComponent {
     if (isValid) {
       return true;
     }
-
     return false;
   }
 

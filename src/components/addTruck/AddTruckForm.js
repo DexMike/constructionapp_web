@@ -188,28 +188,38 @@ class AddTruckForm extends PureComponent {
   }
 
   validateFormTwoResults(res) {
-    const {enableThirdTab} = this.state;
-    if (res === false) {
-      this.setState({ enableThirdTab: false });
-    } else if (res === true) {
-      this.setState({ enableThirdTab: true });
-    } else if (enableThirdTab === true) {
-      this.setState({ page: 3 });
+    const {enableSecondTab, enableThirdTab} = this.state;
+    if (enableSecondTab === true) {
+      if (res === false) {
+        this.setState({ enableThirdTab: false });
+      } else if (res === true) {
+        this.setState({ enableThirdTab: true });
+      } else if (enableThirdTab === true) {
+        this.setState({ page: 3 });
+      }
+      this.setState({ validateOnTabTwoClick: res });
+    } else {
+      this.validateFormOneResults(res);
     }
-    this.setState({ validateOnTabTwoClick: res });
   }
 
   validateFormThreeResults(res) {
-    const {enableFourthTab} = this.state;
-    if (res === false) {
-      this.setState({ enableFourthTab: false });
+    const {enableSecondTab, enableThirdTab, enableFourthTab} = this.state;
+    if (enableSecondTab === true && enableThirdTab === true) {
+      if (res === false) {
+        this.setState({ enableFourthTab: false });
+      }
+      if (res === true) {
+        this.setState({ enableFourthTab: true });
+      } else if (enableFourthTab === true) {
+        this.setState({ page: 4 });
+      }
+      this.setState({ validateOnTabThreeClick: res });
+    } else if (enableSecondTab === false) {
+      this.validateFormOneResults(res);
+    } else if (enableSecondTab === true && enableThirdTab === false) {
+      this.validateFormTwoResults(res);
     }
-    if (res === true) {
-      this.setState({ enableFourthTab: true });
-    } else if (enableFourthTab === true) {
-      this.setState({ page: 4 });
-    }
-    this.setState({ validateOnTabThreeClick: res });
   }
 
   closeNow() {
