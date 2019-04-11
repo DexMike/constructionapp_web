@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
 import {
   Button,
   Card,
@@ -93,16 +93,16 @@ class TrucksCustomerPage extends Component {
     // await this.fetchJobs();
     await this.fetchEquipments();
     await this.fetchFilterLists();
-    this.setState({ loaded: true });
+    this.setState({loaded: true});
   }
 
   retrieveAllMaterials() {
-    const { materialTypeList } = this.state;
+    const {materialTypeList} = this.state;
     return materialTypeList;
   }
 
   async fetchFilterLists() {
-    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+    const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
@@ -169,7 +169,7 @@ class TrucksCustomerPage extends Component {
         newEquipments[key].materials = '';
       }
     }
-    this.setState({ equipments: newEquipments });
+    this.setState({equipments: newEquipments});
   }
 
   async fetchFavoriteEquipments(equipments) {
@@ -188,12 +188,12 @@ class TrucksCustomerPage extends Component {
         }
         return newEquipment;
       });
-      this.setState({ equipments });
+      this.setState({equipments});
     }
   }
 
   async fetchEquipments() {
-    const { filters } = this.state;
+    const {filters} = this.state;
     const equipments = await EquipmentService.getEquipmentByFilters(filters);
 
     if (equipments) {
@@ -221,28 +221,28 @@ class TrucksCustomerPage extends Component {
           .format();
         return newEquipment;
       });
-      this.setState({ equipments });
+      this.setState({equipments});
     }
   }
 
   async handleFilterChange(e) {
-    const { value } = e.target;
-    const { filters } = this.state;
+    const {value} = e.target;
+    const {filters} = this.state;
     filters[e.target.name] = value;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   async handleSelectFilterChange(option) {
-    const { value, name } = option;
-    const { filters } = this.state;
+    const {value, name} = option;
+    const {filters} = this.state;
     filters[name] = value;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   handleMultiChange(data) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.materialType = data;
     this.setState({
       filters
@@ -253,12 +253,12 @@ class TrucksCustomerPage extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
   async handleSetFavorite(companyId) {
-    const { equipments } = this.state;
+    const {equipments} = this.state;
 
     try {
       const group = await GroupListService.getGroupListsByCompanyId(companyId);
@@ -287,12 +287,12 @@ class TrucksCustomerPage extends Component {
       }
       this.fetchFavoriteEquipments(equipments);
     } catch (error) {
-      this.setState({ equipments });
+      this.setState({equipments});
     }
   }
 
   handleEquipmentEdit(id) {
-    const { equipments, filters } = this.state;
+    const {equipments, filters} = this.state;
 
     const [selectedEquipment] = equipments.filter((equipment) => {
       if (id === equipment.id) {
@@ -324,29 +324,29 @@ class TrucksCustomerPage extends Component {
   }
 
   async handleStartDateChange(e) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.startAvailability = e;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   async handleEndDateChange(e) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.endAvailability = e;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   async handleIntervalInputChange(e) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.startAvailability = e.start;
     filters.endAvailability = e.end;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   toggleAddJobModal() {
-    const { modal, filters } = this.state;
+    const {modal, filters} = this.state;
     if (modal) {
       filters.materialType = [];
       this.setState({
@@ -359,19 +359,19 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleSelectMaterialsModal() {
-    const { modalSelectMaterials } = this.state;
+    const {modalSelectMaterials} = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
     });
   }
 
   returnSelectedMaterials() {
-    const { filters } = this.state;
+    const {filters} = this.state;
     return filters.materialType;
   }
 
   preventModal() {
-    this.setState({ modal: false });
+    this.setState({modal: false});
   }
 
   renderGoTo() {
@@ -410,7 +410,7 @@ class TrucksCustomerPage extends Component {
             Select material
           </h4>
         </div>
-        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           Please select a material type for this job
         </div>
 
@@ -465,7 +465,7 @@ class TrucksCustomerPage extends Component {
           />
           <div className="bold-text modal__title">Job Request</div>
         </div>
-        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           <JobCreateForm
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
@@ -770,7 +770,7 @@ class TrucksCustomerPage extends Component {
                     <h3 className="subhead">
                       Materials
                     </h3>
-                    {equipment.materials}
+                    {equipment.materials ? equipment.materials.replace(/\n/g, ", ") : "Undefined"}
                   </div>
                 </div>
               </div>
@@ -848,7 +848,7 @@ class TrucksCustomerPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
