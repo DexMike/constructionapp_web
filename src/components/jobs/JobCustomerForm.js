@@ -184,7 +184,7 @@ class JobForm extends Component {
         </div>
         <div className="col-md-3">
           <h3 className="subhead">
-            Potential Earnings: {
+            Estimated Cost: {
             TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
           }
           </h3>
