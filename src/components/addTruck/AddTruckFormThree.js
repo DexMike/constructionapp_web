@@ -393,14 +393,16 @@ AddTruckFormThree.propTypes = {
   passedTruckFullInfoId: PropTypes.number,
   editDriverId: PropTypes.number,
   onClose: PropTypes.func.isRequired,
-  validateResThree: PropTypes.func.isRequired,
-  validateOnTabThreeClick: PropTypes.func.isRequired
+  validateResThree: PropTypes.func,
+  validateOnTabThreeClick: PropTypes.func
 };
 
 AddTruckFormThree.defaultProps = {
   equipmentId: null,
   passedTruckFullInfoId: null,
-  editDriverId: 0
+  editDriverId: 0,
+  validateResThree: PropTypes.func,
+  validateOnTabThreeClick: PropTypes.func
 };
 
 export default AddTruckFormThree;
