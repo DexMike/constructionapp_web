@@ -277,11 +277,11 @@ class AddTruckFormThree extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            <div className="card__title">
-              <h5 className="bold-text">
-                Add a Driver
-              </h5>
-            </div>
+             <div className="col-md-12 form__form-group">
+                  <h3 className="subhead">
+                    Add a Driver
+                  </h3>
+             </div>
 
             <form
               className="form form--horizontal addtruck__form"
@@ -292,10 +292,6 @@ class AddTruckFormThree extends PureComponent {
               <input type="hidden" value={isBanned} />
               <input type="hidden" value={preferredLanguage} />
               <input type="hidden" value={userStatus} />
-
-              <Row className="col-md-12">
-                <hr className="bighr" />
-              </Row>
 
               <Row className="col-md-12">
 
@@ -334,7 +330,7 @@ class AddTruckFormThree extends PureComponent {
 
               <Row className="col-md-12">
 
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-6">
                   <span className="form__form-group-label">Mobile Phone</span>
                   <NumberFormat
                     name="mobilePhone"

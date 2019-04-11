@@ -31,7 +31,6 @@ class BookingService extends AgentService {
 
   static getDefaultBooking() {
     return {
-      id: 0,
       bidId: 0,
       schedulersCompanyId: 0,
       sourceAddressId: 0,
