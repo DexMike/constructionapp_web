@@ -14,6 +14,7 @@ import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
 import './Reports.css';
+
 // NOTE: this is a copy of DashboardCustomerPage
 
 class ReportsCustomerPage extends Component {
@@ -24,11 +25,26 @@ class ReportsCustomerPage extends Component {
     // Fixed options for Time Range filtering
 
     this.timeRanges = [
-      { name: 'Custom', value: 0 },
-      { name: 'Last Week', value: 7 },
-      { name: 'Last 30 days', value: 30 },
-      { name: 'Last 60 days', value: 60 },
-      { name: 'Last 90 days', value: 90 },
+      {
+        name: 'Custom',
+        value: 0
+      },
+      {
+        name: 'Last Week',
+        value: 7
+      },
+      {
+        name: 'Last 30 days',
+        value: 30
+      },
+      {
+        name: 'Last 60 days',
+        value: 60
+      },
+      {
+        name: 'Last 90 days',
+        value: 90
+      }
       // { name: 'Next Week', value: -7 },
       // { name: 'Next 30 days', value: -30 },
       // { name: 'Next 60 days', value: -60 },
@@ -38,6 +54,7 @@ class ReportsCustomerPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
+      jobsComp: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
@@ -55,7 +72,7 @@ class ReportsCustomerPage extends Component {
       selectIndexComp: 3, // Parameter for setting the dropdown default option.
       selectedRangeComp: 0, // Parameter for setting startDate.
 
-      filters: {
+      filters: { // Filter object for the first Jobs response
         companiesId: 0,
         rateType: '',
 
@@ -63,7 +80,7 @@ class ReportsCustomerPage extends Component {
         endAvailability: null,
         startAvailDateComp: null,    // Comparison
         endAvailDateComp: null,      // Comparison
-
+                                     // NOTE: I don't know if these fields works or exists on the backend for filters
         rate: 'Any',
         minTons: 'Any',
         minHours: '',
@@ -76,6 +93,26 @@ class ReportsCustomerPage extends Component {
 
         sortBy: sortByList[0]
 
+      },
+      // ↓ Based on the previous NOTE, added a second filter object for the second Jobs response
+      filtersComp: {
+        companiesId: 0,
+        rateType: '',
+
+        startAvailability: null,
+        endAvailability: null,
+
+        rate: 'Any',
+        minTons: 'Any',
+        minHours: '',
+        minCapacity: '',
+
+        equipmentType: '',
+        numEquipments: '',
+        zipCode: '',
+        materialType: [],
+
+        sortBy: sortByList[0]
       }
       // profile: null
     };
@@ -91,7 +128,7 @@ class ReportsCustomerPage extends Component {
   }
 
   async componentDidMount() {
-    const { filters } = this.state;
+    const { filters, filtersComp, selectIndex, selectIndexComp } = this.state;
     let {
       startDate,
       endDate,
@@ -104,9 +141,10 @@ class ReportsCustomerPage extends Component {
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
+      filtersComp.companiesId = profile.companyId;
     }
 
-    selectedRange = 30;
+    selectedRange = this.timeRanges[selectIndex].value;
     const currentDate = new Date();
     startDate = new Date();
     endDate = currentDate;
@@ -114,16 +152,7 @@ class ReportsCustomerPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    selectedRangeComp = 30;
-    const currentDate2 = new Date();
-    startDateComp = new Date();
-    endDateComp = currentDate2;
-    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
-    filters.startAvailDateComp = startDateComp;
-    filters.endAvailDateComp = endDateComp;
-
     const jobs = await this.fetchJobs(filters);
-
     if (jobs) {
       jobs.map(async (job) => {
         const newJob = job;
@@ -141,11 +170,43 @@ class ReportsCustomerPage extends Component {
         return newJob;
       });
     }
+    // console.log('First Filter Jobs', jobs);
+
+    // Added a copy of the previous code but using it for the second filter mainly for testing
+    selectedRangeComp = this.timeRanges[selectIndexComp].value;
+    const currentDate2 = new Date();
+    startDateComp = new Date();
+    endDateComp = currentDate2;
+    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
+    filtersComp.startAvailability = startDateComp;
+    filtersComp.endAvailability = endDateComp;
+
+    const jobsComp = await this.fetchJobs(filtersComp);
+    if (jobsComp) {
+      jobsComp.map(async (job) => {
+        const newJob = job;
+
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
+        return newJob;
+      });
+    }
+    // console.log('Second Filter Jobs', jobsComp);
 
     this.setState({
       loaded: true,
       jobs,
+      jobsComp,
       filters,
+      filtersComp,
       startDate,
       endDate,
       startDateComp,
@@ -229,6 +290,7 @@ class ReportsCustomerPage extends Component {
     const { value, name } = option;
     const { filters } = this.state;
     let {
+      jobsComp,
       startDate,
       endDate,
       selectedRange,
@@ -247,7 +309,8 @@ class ReportsCustomerPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs(filters);
-
+    // console.log('First Filter Jobs', jobs);
+    // console.log('Second Filter Jobs', jobsComp);
     this.setState({
       jobs,
       loaded: true,
@@ -261,8 +324,9 @@ class ReportsCustomerPage extends Component {
 
   async handleSelectFilterChangeComp(option) {
     const { value, name } = option;
-    const { filters } = this.state;
+    const { filtersComp } = this.state;
     let {
+      jobs,
       startDateComp,
       endDateComp,
       selectedRangeComp,
@@ -277,21 +341,24 @@ class ReportsCustomerPage extends Component {
     startDateComp = new Date();
     endDateComp = currentDate;
     startDateComp.setDate(currentDate.getDate() - selectedRangeComp);
-    filters.startAvailDateComp = startDateComp;
-    filters.endAvailDateComp = endDateComp;
+    filtersComp.startAvailability = startDateComp;
+    filtersComp.endAvailability = endDateComp;
 
-    const jobs = await this.fetchJobs(filters);
+    const jobsComp = await this.fetchJobs(filtersComp);
+    // console.log('First Filter Jobs', jobs);
+    // console.log('Second Filter Jobs', jobsComp);
 
     this.setState({
-      jobs,
+      jobsComp,
       loaded: true,
-      filters,
+      filtersComp,
       startDateComp,
       endDateComp,
       selectedRangeComp,
       selectIndexComp
     });
   }
+
   async startDateChange(data) {
     const { filters, endDate } = this.state;
     let { startDate } = this.state;
@@ -357,7 +424,12 @@ class ReportsCustomerPage extends Component {
   }
 
   formatDate(date) {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
     return (date.toLocaleDateString('en-US', options));
   }
 
@@ -458,135 +530,132 @@ class ReportsCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row date-filter">
-            <div className="col-12 col-md-12 col-lg-12">
+            <div className="col-md-12">
               <div className="card">
                 <div className="card-body">
                   <div className="row">
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">BASELINE&nbsp;</span>
-                      <span className="form__form-group-label">Time Range</span>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: this.timeRanges[selectIndex].name,
-                            value: this.timeRanges[selectIndex].value
-                          }
-                        }
-                        value={this.timeRanges[selectIndex].value.toString()}
-                        options={
-                          this.timeRanges.map(timeRange => ({
-                            name: timeRange.name,
-                            value: timeRange.value.toString(),
-                            label: timeRange.name
-                          }))
-                        }
-                        placeholder={this.timeRanges[selectIndex].name}
-                      />
-                    </div>
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">From</span>
+                    <div className="col-md-6">
                       <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
+                        <div className="col-md-3 form__form-group">
+                          <span className="form__form-group-label">BASELINE&nbsp;</span>
+                          <span className="form__form-group-label">Time Range</span>
+                          <TSelect
                             input={
                               {
-                                onChange: this.startDateChange,
-                                name: 'startAvailability',
-                                value: { startDate },
-                                givenDate: new Date(startDate).getTime()
+                                onChange: this.handleSelectFilterChange,
+                                name: this.timeRanges[selectIndex].name,
+                                value: this.timeRanges[selectIndex].value
                               }
                             }
-                            onChange={this.startDateChange}
-                            dateFormat="MM-dd-yy"
+                            value={this.timeRanges[selectIndex].value.toString()}
+                            options={
+                              this.timeRanges.map(timeRange => ({
+                                name: timeRange.name,
+                                value: timeRange.value.toString(),
+                                label: timeRange.name
+                              }))
+                            }
+                            placeholder={this.timeRanges[selectIndex].name}
                           />
-
                         </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">From</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.startDateChange,
+                                    name: 'startAvailability',
+                                    value: { startDate },
+                                    givenDate: new Date(startDate).getTime()
+                                  }
+                                }
+                                onChange={this.startDateChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">To</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.endDateChange,
+                                    name: 'endAvailability',
+                                    value: { endDate },
+                                    givenDate: new Date(endDate).getTime()
+                                  }
+                                }
+                                onChange={this.endDateChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">To</span>
+                    <div className="col-md-6">
                       <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
+                        <div className="col-md-3 form__form-group">
+                          <span className="form__form-group-label">COMPARISON&nbsp;</span>
+                          <span className="form__form-group-label">Time Range</span>
+                          <TSelect
                             input={
                               {
-                                onChange: this.endDateChange,
-                                name: 'endAvailability',
-                                value: { endDate },
-                                givenDate: new Date(endDate).getTime()
+                                onChange: this.handleSelectFilterChangeComp,
+                                name: this.timeRanges[selectIndexComp].name,
+                                value: this.timeRanges[selectIndexComp].value
                               }
                             }
-                            onChange={this.endDateChange}
-                            dateFormat="MM-dd-yy"
-                          />
-                        </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                      </div>
-                    </div>
-
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">COMPARISON&nbsp;</span>
-                      <span className="form__form-group-label">Time Range</span>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChangeComp,
-                            name: this.timeRanges[selectIndexComp].name,
-                            value: this.timeRanges[selectIndexComp].value
-                          }
-                        }
-                        value={this.timeRanges[selectIndexComp].value.toString()}
-                        options={
-                          this.timeRanges.map(timeRange => ({
-                            name: timeRange.name,
-                            value: timeRange.value.toString(),
-                            label: timeRange.name
-                          }))
-                        }
-                        placeholder={this.timeRanges[selectIndexComp].name}
-                      />
-                    </div>
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">From</span>
-                      <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
-                            input={
-                              {
-                                onChange: this.startDateCompChange,
-                                name: 'startAvailDateComp',
-                                value: { startDateComp },
-                                givenDate: new Date(startDateComp).getTime()
-                              }
+                            value={this.timeRanges[selectIndexComp].value.toString()}
+                            options={
+                              this.timeRanges.map(timeRange => ({
+                                name: timeRange.name,
+                                value: timeRange.value.toString(),
+                                label: timeRange.name
+                              }))
                             }
-                            onChange={this.startDateCompChange}
-                            dateFormat="MM-dd-yy"
-                          />
-
-                        </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                      </div>
-                    </div>
-                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
-                      <span className="form__form-group-label">To</span>
-                      <div className="row">
-                        <div className="col-12">
-                          <TDateTimePicker
-                            input={
-                              {
-                                onChange: this.endDateCompChange,
-                                name: 'endAvailDateComp',
-                                value: { endDateComp },
-                                givenDate: new Date(endDateComp).getTime()
-                              }
-                            }
-                            onChange={this.endDateCompChange}
-                            dateFormat="MM-dd-yy"
+                            placeholder={this.timeRanges[selectIndexComp].name}
                           />
                         </div>
-                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">From</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.startDateCompChange,
+                                    name: 'startAvailDateComp',
+                                    value: { startDateComp },
+                                    givenDate: new Date(startDateComp).getTime()
+                                  }
+                                }
+                                onChange={this.startDateCompChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          <span className="form__form-group-label">To</span>
+                          <div className="row">
+                              <TDateTimePicker
+                                input={
+                                  {
+                                    onChange: this.endDateCompChange,
+                                    name: 'endAvailDateComp',
+                                    value: { endDateComp },
+                                    givenDate: new Date(endDateComp).getTime()
+                                  }
+                                }
+                                onChange={this.endDateCompChange}
+                                dateFormat="MM-dd-yy"
+                              />
+                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -594,7 +663,6 @@ class ReportsCustomerPage extends Component {
               </div>
             </div>
           </div>
-
         </Container>
       );
     }
@@ -675,77 +743,76 @@ class ReportsCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
-          <div className="card-body">
-            <div className="row">
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Jobs In Progress</center></h5>
-                    <span><center><h4>{inProgressJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
+          {/*<div className="card-body">*/}
+          {/*  <div className="row">*/}
+          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
+          {/*      <div className="card">*/}
+          {/*        <div className="dashboard__card-widget card-body">*/}
+          {/*          <h5 className="card__title bold-text">Jobs In Progress</h5>*/}
+          {/*          <span><h4>{inProgressJobCount}</h4></span>*/}
+          {/*        </div>*/}
+          {/*      </div>*/}
+          {/*    </div>*/}
 
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
-                    <span><center><h4>{acceptedJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
+          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
+          {/*      <div className="card">*/}
+          {/*        <div className="dashboard__card-widget card-body">*/}
+          {/*          <h5 className="card__title bold-text">Booked Jobs</h5>*/}
+          {/*          <span><h4>{acceptedJobCount}</h4></span>*/}
+          {/*        </div>*/}
+          {/*      </div>*/}
+          {/*    </div>*/}
 
-              {/*<div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
-                {/*<div className="card">*/}
-                  {/*<div className="dashboard__card-widget card-body">*/}
-                    {/*<h5 className="card__title bold-text"><center>New Offers</center></h5>*/}
-                    {/*<span><center><h4>{newJobCount}</h4></center></span>*/}
-                  {/*</div>*/}
-                {/*</div>*/}
-              {/*</div>*/}
+          {/*    /!*<div className="col-12 col-sm-12 col-md-4 col-lg-3">*!/*/}
+          {/*      /!*<div className="card">*!/*/}
+          {/*        /!*<div className="dashboard__card-widget card-body">*!/*/}
+          {/*          /!*<h5 className="card__title bold-text">New Offers</h5>*!/*/}
+          {/*          /!*<span><h4>{newJobCount}</h4></span>*!/*/}
+          {/*        /!*</div>*!/*/}
+          {/*      /!*</div>*!/*/}
+          {/*    /!*</div>*!/*/}
 
-              {/*<div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
-                {/*<div className="card">*/}
-                  {/*<div className="dashboard__card-widget card-body">*/}
-                    {/*<h5 className="card__title bold-text"><center>Potential Earnings</center></h5>*/}
-                    {/*<div className="my-auto">*/}
-                      {/*<span><center><h4>{potentialIncome}</h4></center></span>*/}
-                    {/*</div>*/}
-                  {/*</div>*/}
-                {/*</div>*/}
-              {/*</div>*/}
+          {/*    /!*<div className="col-12 col-sm-12 col-md-4 col-lg-3">*!/*/}
+          {/*      /!*<div className="card">*!/*/}
+          {/*        /!*<div className="dashboard__card-widget card-body">*!/*/}
+          {/*          /!*<h5 className="card__title bold-text">Potential Earnings</h5>*!/*/}
+          {/*          /!*<div className="my-auto">*!/*/}
+          {/*            /!*<span><h4>{potentialIncome}</h4></span>*!/*/}
+          {/*          /!*</div>*!/*/}
+          {/*        /!*</div>*!/*/}
+          {/*      /!*</div>*!/*/}
+          {/*    /!*</div>*!/*/}
 
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <div className="my-auto">
-                      <h5 className="card__title bold-text"><center>Job Completion Rate</center></h5>
-                      <span><center><h4>{completedOffersPercent}</h4></center></span>
-                      <div className="text-center pt-3">
-                        <span className="form__form-group-label">completed:</span>&nbsp;<span>{completedJobCount}</span>
-                        &nbsp;&nbsp;
-                        <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
+          {/*      <div className="card">*/}
+          {/*        <div className="dashboard__card-widget card-body">*/}
+          {/*          <div className="my-auto">*/}
+          {/*            <h5 className="card__title bold-text">Job Completion Rate</h5>*/}
+          {/*            <span><h4>{completedOffersPercent}</h4></span>*/}
+          {/*            <div className="text-center pt-3">*/}
+          {/*              <span className="form__form-group-label">completed:</span>&nbsp;<span>{completedJobCount}</span>*/}
+          {/*              &nbsp;&nbsp;*/}
+          {/*              <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>*/}
+          {/*            </div>*/}
+          {/*          </div>*/}
+          {/*        </div>*/}
+          {/*      </div>*/}
+          {/*    </div>*/}
 
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
-                    <span><center><h4>{completedJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
+          {/*      <div className="card">*/}
+          {/*        <div className="dashboard__card-widget card-body">*/}
+          {/*          <h5 className="card__title bold-text">Completed Jobs</h5>*/}
+          {/*          <span><h4>{completedJobCount}</h4></span>*/}
+          {/*        </div>*/}
+          {/*      </div>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
 
-          </div>
+          {/*</div>*/}
         </Container>
       );
     }
@@ -826,76 +893,80 @@ class ReportsCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
-
-          <div className="card-body">
-
-            <Row>
-              <Col md={12}>
-                <h3 className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>
-                <h3 className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>
-              </Col>
-            </Row>
-
+          <div className="text-center">
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3*/}
+            {/*      className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>*/}
+            {/*    <h3*/}
+            {/*      className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
             <div className="row">
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
-                    <span><center><h4>{jobsCompleted}</h4></center></span>
+                    <h5 className="card__title bold-text">
+                      Jobs Completed
+                    </h5>
+                    <span><h4>{jobsCompleted}</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
-                    <span><center><h4>{totalEarnings}</h4></center></span>
+                    <h5 className="card__title bold-text">
+                      Total Earnings
+                    </h5>
+                    <span><h4>{totalEarnings}</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
-                    <span><center><h4>{earningsPerJob}</h4></center></span>
+                    <h5 className="card__title bold-text">
+                      Average Earnings / Job
+                    </h5>
+                    <span><h4>{earningsPerJob}</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
-                    <span><center><h4>{cancelledJobs}</h4></center></span>
+                    <h5 className="card__title bold-text">
+                      Tons Delivered
+                    </h5>
+                    <span><h4>34,567</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
-                    <span><center><h4>{jobsPerTruck}</h4></center></span>
+                    <h5 className="card__title bold-text">
+                      Average Rate / hr
+                    </h5>
+                    <span><h4>$50.00</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-2 col-lg-2">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
-                    <span><center><h4>{idleTrucks}</h4></center></span>
+                    <h5 className="card__title bold-text">
+                      Average Rate / ton
+                    </h5>
+                    <span><h4>$50.00</h4></span>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </Container>
       );
@@ -976,7 +1047,6 @@ class ReportsCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1040,7 +1110,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1054,10 +1123,14 @@ class ReportsCustomerPage extends Component {
 
             <Row>
               <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+                <div
+                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
+                </div>
               </Col>
               <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+                <div
+                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
+                </div>
               </Col>
             </Row>
 
@@ -1176,7 +1249,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1190,10 +1262,14 @@ class ReportsCustomerPage extends Component {
 
             <Row>
               <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+                <div
+                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
+                </div>
               </Col>
               <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+                <div
+                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
+                </div>
               </Col>
             </Row>
 
@@ -1310,7 +1386,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1324,10 +1399,14 @@ class ReportsCustomerPage extends Component {
 
             <Row>
               <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+                <div
+                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
+                </div>
               </Col>
               <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+                <div
+                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
+                </div>
               </Col>
             </Row>
 
@@ -1444,7 +1523,6 @@ class ReportsCustomerPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1458,10 +1536,14 @@ class ReportsCustomerPage extends Component {
 
             <Row>
               <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
+                <div
+                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
+                </div>
               </Col>
               <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
+                <div
+                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
+                </div>
               </Col>
             </Row>
 

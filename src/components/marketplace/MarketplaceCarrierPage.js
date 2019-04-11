@@ -119,25 +119,25 @@ class MarketplaceCarrierPage extends Component {
     const jobs = await this.fetchJobs();
     this.fetchFilterLists();
 
-    if (jobs) {
-      this.fetchJobMaterials(jobs);
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const company = await CompanyService.getCompanyById(newJob.companiesId);
-        newJob.companyName = company.legalName;
-
-        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        const materials = materialsList.map(materialItem => materialItem.value);
-        newJob.material = this.equipmentMaterialsAsString(materials);
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-
-        return newJob;
-      });
-    }
+    // if (jobs) {
+    //   this.fetchJobMaterials(jobs);
+    //
+    //   jobs.map(async (job) => {
+    //     const newJob = job;
+    //
+    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
+    //     newJob.companyName = company.legalName;
+    //
+    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    //     const materials = materialsList.map(materialItem => materialItem.value);
+    //     newJob.material = this.equipmentMaterialsAsString(materials);
+    //
+    //     const address = await AddressService.getAddressById(newJob.startAddress);
+    //     newJob.zip = address.zipCode;
+    //
+    //     return newJob;
+    //   });
+    // }
 
     this.setState(
       {
@@ -239,7 +239,7 @@ class MarketplaceCarrierPage extends Component {
     for (const [key, value] of Object.entries(jobs)) {
       try {
         let truckMaterials = await
-        JobMaterialsService.getJobMaterialsByJobId(value.id);
+          JobMaterialsService.getJobMaterialsByJobId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
@@ -250,7 +250,8 @@ class MarketplaceCarrierPage extends Component {
           allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
           newJobs[key].materials = allMaterials.join(', \n');
         } else {
-          newJobs[key].materials = truckMaterials.map(e => e.material).join('\n');
+          newJobs[key].materials = truckMaterials.map(e => e.material)
+            .join('\n');
         }
       } catch (error) {
         newJobs[key].materials = '';
@@ -261,25 +262,9 @@ class MarketplaceCarrierPage extends Component {
 
   async fetchJobs() {
     const { filters } = this.state;
-    const jobs = await JobService.getJobByFilters(filters);
-
-    if (jobs) {
-      this.fetchJobMaterials(jobs);
-
-      jobs.map(async (job) => {
-        const newJob = job;
-
-        const address = await AddressService.getAddressById(newJob.startAddress);
-        newJob.zip = address.zipCode;
-        newJob.modifiedOn = moment(job.modifiedOn)
-          .format();
-        newJob.createdOn = moment(job.createdOn)
-          .format();
-
-        return newJob;
-      });
-      this.setState({ jobs });
-    }
+    const jobs = await JobService.getJobDashboardByFilters(filters);
+    this.setState({ jobs });
+    return jobs;
   }
 
   handleFilterChangeDelayed(e) {
@@ -418,9 +403,16 @@ class MarketplaceCarrierPage extends Component {
         toggle={this.toggleViewJobModal}
         className="modal-dialog--primary modal-dialog--header"
       >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleViewJobModal}
+          />
+          <div className="bold-text modal__title">Marketplace Detail</div>
+        </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobViewForm
             jobId={jobId}
+            closeModal={this.toggleViewJobModal}
             toggle={this.toggleViewJobModal}
           />
         </div>
@@ -466,12 +458,17 @@ class MarketplaceCarrierPage extends Component {
         if (newJob.rateType === 'Hour') {
           newJob.newSize = TFormat.asHours(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          newJob.estimatedIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate) * 0.95
+          );
         }
         if (newJob.rateType === 'Ton') {
           newJob.newSize = TFormat.asTons(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+          // Job's Potencial Earnings
+          newJob.estimatedIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate) * 0.95
+          );
         }
 
         newJob.newStartDate = TFormat.asDate(job.startTime);
@@ -503,7 +500,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'estimatedIncome',
-                        displayName: 'Est. Income'
+                        displayName: 'Potencial Earnings'
                       },
                       {
                         name: 'newRate',
@@ -514,7 +511,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Min Hours'
                       },
                       {
-                        name: 'zip',
+                        name: 'zipCode',
                         displayName: 'Zip Code'
                       },
                       {
@@ -562,65 +559,12 @@ class MarketplaceCarrierPage extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-
                 <Col lg={12}>
-                  <Row lg={12} style={{ background: '#eef4f8' }}>
-                    <Col className="filter-item-title">
-                      Date Range
-                    </Col>
-                    <Col className="filter-item-title">
-                      Rate Type
-                    </Col>
-                    <Col className="filter-item-title">
-                      Min Rate
-                    </Col>
-                    <Col className="filter-item-title">
-                      Minimum
-                    </Col>
-                    <Col className="filter-item-title">
-                      Truck Type
-                    </Col>
-                    <Col className="filter-item-title">
-                      # of Trucks
-                    </Col>
-                    <Col className="filter-item-title">
-                      Zip Code
-                    </Col>
-                    <Col className="filter-item-title">
-                      Materials
-                    </Col>
-                  </Row>
                   <Row lg={12} id="filter-input-row">
-                    {/*
                     <Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              onChange: this.handleStartDateChange,
-                              name: 'startAvailability',
-                              value: { startDate },
-                              givenDate: new Date(startDate).getTime()
-                            }
-                          }
-                          onChange={this.handleStartDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    </Col>
-                      <TDateTimePicker
-                          input={
-                            {
-                              className: 'filter-text',
-                              onChange: this.handleEndDateChange,
-                              name: 'endAvailability',
-                              value: { endDate },
-                              givenDate: new Date(endDate).getTime()
-                            }
-                          }
-                          onChange={this.handleEndDateChange}
-                          dateFormat="MM-dd-yy"
-                      />
-                    */}
-                    <Col>
+                      <div className="filter-item-title">
+                        Date Range
+                      </div>
                       <TIntervalDatePicker
                         startDate={filters.startAvailability}
                         endDate={filters.endAvailability}
@@ -628,9 +572,11 @@ class MarketplaceCarrierPage extends Component {
                         onChange={this.handleIntervalInputChange}
                         dateFormat="MM/dd/yy"
                       />
-
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Rate Type
+                      </div>
                       <TSelect
                         input={
                           {
@@ -657,6 +603,9 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Min Rate
+                      </div>
                       <TField
                         input={
                           {
@@ -671,6 +620,9 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Minimum
+                      </div>
                       <TField
                         input={
                           {
@@ -685,6 +637,9 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Truck Type
+                      </div>
                       <TSelect
                         input={
                           {
@@ -711,6 +666,9 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        # of Trucks
+                      </div>
                       <TField
                         input={
                           {
@@ -725,6 +683,9 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Zip Code
+                      </div>
                       <input name="zipCode"
                              className="filter-text"
                              type="text"
@@ -734,6 +695,9 @@ class MarketplaceCarrierPage extends Component {
                       />
                     </Col>
                     <Col>
+                      <div className="filter-item-title">
+                        Materials
+                      </div>
                       <MultiSelect
                         input={
                           {
@@ -760,18 +724,13 @@ class MarketplaceCarrierPage extends Component {
                         placeholder={materialTypeList[0]}
                       />
                     </Col>
-
                   </Row>
                 </Col>
-
                 <br/>
-
               </form>
-
             </CardBody>
           </Card>
         </Col>
-
       </Row>
     );
   }
