@@ -849,8 +849,8 @@ AddTruckFormOne.propTypes = {
     info: PropTypes.object
   }),
   onClose: PropTypes.func.isRequired,
-  validateResOne: PropTypes.func,
-  validateOnTabOneClick: PropTypes.func
+  validateResOne: PropTypes.any,
+  validateOnTabOneClick: PropTypes.any
 };
 
 AddTruckFormOne.defaultProps = {
