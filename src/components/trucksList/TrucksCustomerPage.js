@@ -16,7 +16,6 @@ import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
 
 import EquipmentService from '../../api/EquipmentService';
-import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
@@ -145,33 +144,6 @@ class TrucksCustomerPage extends Component {
     });
   }
 
-  async fetchEquipmentMaterials(equipments) {
-    const newEquipments = equipments;
-    /* eslint-disable no-await-in-loop */
-    for (const [key, value] of Object.entries(equipments)) {
-      try {
-        let truckMaterials = await
-        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
-        truckMaterials = truckMaterials.map(material => ({
-          material: material.value
-        }));
-
-        if ((truckMaterials[0].material).includes('Any')) { // If we have 'Any', show all materials
-          let allMaterials = await LookupsService.getLookupsByType('MaterialType'); // Get all materials from Lookups
-          allMaterials = allMaterials.map(item => item.val1); // Get only val1 values
-          allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
-          newEquipments[key].materials = allMaterials.join('\n');
-        } else {
-          newEquipments[key].materials = truckMaterials.map(e => e.material)
-            .join('\n');
-        }
-      } catch (error) {
-        newEquipments[key].materials = '';
-      }
-    }
-    this.setState({ equipments: newEquipments });
-  }
-
   async fetchFavoriteEquipments(equipments) {
     // we get all groups.companyId that have name 'Favorite'
     const groupsFavorites = await GroupListService.getGroupListsFavorites();
@@ -201,7 +173,6 @@ class TrucksCustomerPage extends Component {
       // Promise.all(
 
       this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
-      this.fetchEquipmentMaterials(equipments);
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
