@@ -8,6 +8,8 @@ import { Card, CardBody, Col, Row, Container } from 'reactstrap';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
+import BookingService from '../../api/BookingService';
+import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
@@ -38,7 +40,8 @@ class JobForm extends Component {
     };
 
     this.state = {
-      ...job
+      ...job,
+      images: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -66,6 +69,17 @@ class JobForm extends Component {
   //   this.setState({ jobs });
   //   // console.log(jobs);
   // }
+
+  async componentDidMount() {
+    const { job } = this.props;
+    const bookings = await BookingService.getBookingsByJobId(job.id);
+    if (bookings && bookings.length > 0) {
+      const booking = bookings[0];
+      const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
+      const images = bookingInvoices.map(item => item.image);
+      this.setState({images});
+    }
+  }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
@@ -545,6 +559,21 @@ class JobForm extends Component {
     );
   }
 
+  renderImages(images) {
+    return (
+      <React.Fragment>
+        <Row>
+          {images.map(item => (
+            <Col className="col-md-4 pt-4" key={`img-${item}`}>
+              <img key={item} src={`${item}`} alt={`${item}`}/>
+            </Col>
+          ))
+          }
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   renderStartAddress(job) {
     let origin = '';
     let destination = '';
@@ -608,6 +637,7 @@ class JobForm extends Component {
   }
 
   renderEverything() {
+    const { images } = this.state;
     const { job } = this.props;
     let origin = '';
     let destination = '';
@@ -670,6 +700,9 @@ class JobForm extends Component {
                   </div>
                 </div>
                 {this.renderJobRunss(job)}
+              </div>
+              <div className="col-md-12">
+                {this.renderImages(images)}
               </div>
             </Row>
           </CardBody>

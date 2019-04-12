@@ -29,6 +29,11 @@ class BookingService extends AgentService {
     return (response);
   }
 
+  static async getBookingsByJobId(id) {
+    const response = await this.get(`/jobs/${id}/bookings`);
+    return response;
+  }
+
   static getDefaultBooking() {
     return {
       bidId: 0,
