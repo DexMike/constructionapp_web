@@ -71,9 +71,7 @@ class EquipmentListPage extends Component {
     const { modal } = this.state;
     // load only if the modal is not present
     if (!modal) {
-      let equipments = await this.fetchEquipments();
-      // we get and map materials based on equipment ID
-      equipments = await this.fetchEquipmentMaterials(equipments);
+      const equipments = await this.fetchEquipments();
       this.setState({ equipments });
     }
   }
