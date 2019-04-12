@@ -44,6 +44,12 @@ class GroupListService extends AgentService {
     return (response);
   }
 
+  static async getBiddersFiltered(filters) {
+    const url = `/bidders/filtered${PATH}`;
+    const response = await this.post(url, filters);
+    return (response);
+  }
+
   static async updateGroupList(group) {
     const response = await this.put(PATH, group);
     return (response);
