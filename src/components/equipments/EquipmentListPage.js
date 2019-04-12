@@ -49,24 +49,6 @@ class EquipmentListPage extends Component {
     this.setState({ loaded: true });
   }
 
-  async fetchEquipmentMaterials(equipments) {
-    const newEquipments = equipments;
-    /* eslint-disable no-await-in-loop */
-    for (const [key, value] of Object.entries(equipments)) {
-      try {
-        let truckMaterials = await
-        EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
-        truckMaterials = truckMaterials.map(material => ({
-          material: material.value
-        }));
-        newEquipments[key].materials = truckMaterials.map(e => e.material).join(', ');
-      } catch (error) {
-        newEquipments[key].materials = '';
-      }
-    }
-    return newEquipments;
-  }
-
   async loadEquipments() {
     const { modal } = this.state;
     // load only if the modal is not present
