@@ -31,6 +31,7 @@ class JobCreateFormTwo extends PureComponent {
       showSendtoFavorites: false,
       favoriteCompanies: [],
       favoriteAdminTels: [],
+      nonFavoriteAdminTels: [],
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -43,12 +44,13 @@ class JobCreateFormTwo extends PureComponent {
     const d = firstTabData();
     let favoriteAdminTels = [];
     let favoriteCompanies = [];
+    let allBidders = [];
+    let nonFavoriteAdminTels = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
-
     // get only those that match criteria
     const filters = {
-      tonnage: d.tonnage,
+      tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
       hourEstimatedHours: d.hourEstimatedHours,
       hourTrucksNumber: d.hourTrucksNumber
@@ -58,14 +60,23 @@ class JobCreateFormTwo extends PureComponent {
       filters
     );
 
+    // now let's get the bidders that match criteria
+    allBidders = await GroupListService.getBiddersFiltered(
+      filters
+    );
+
+    const biddersIdsNotFavorites = allBidders.filter(x => !favoriteCompanies.includes(x));
+
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
       favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
+      nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
       this.setState({
         showSendtoFavorites: true,
         favoriteCompanies,
-        favoriteAdminTels
+        favoriteAdminTels,
+        nonFavoriteAdminTels
       });
     }
     this.setState({ loaded: true });
@@ -111,9 +122,11 @@ class JobCreateFormTwo extends PureComponent {
     const { firstTabData } = this.props;
     const {
       favoriteCompanies,
-      favoriteAdminTels,
       showSendtoFavorites,
-      sendToFavorites
+      sendToFavorites,
+      sendToMkt,
+      favoriteAdminTels,
+      nonFavoriteAdminTels
     } = this.state;
     const d = firstTabData();
     const profile = await ProfileService.getProfile();
@@ -225,14 +238,13 @@ class JobCreateFormTwo extends PureComponent {
       }
       await Promise.all(results);
 
-      // now let's send them an SMS 1
+      // now let's send them an SMS to all favorites
       const allSms = [];
       for (const adminIdTel of favoriteAdminTels) {
-        // send only to Jake
-        if (adminIdTel === '6129990787') {
+        if (this.checkPhoneFormat(adminIdTel)) {
           // console.log('>>Sending SMS to Jake...');
           const notification = {
-            to: adminIdTel,
+            to: this.phoneToNumberFormat(adminIdTel),
             body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
           };
           allSms.push(TwilioService.createSms(notification));
@@ -241,9 +253,39 @@ class JobCreateFormTwo extends PureComponent {
       await Promise.all(allSms);
     }
 
-    // return false;
+    // if sending to mktplace, let's send SMS to everybody
+    if (sendToMkt) {
+      const allBiddersSms = [];
+      for (const bidderTel of nonFavoriteAdminTels) {
+        if (this.checkPhoneFormat(bidderTel)) {
+          const notification = {
+            to: this.phoneToNumberFormat(bidderTel),
+            body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'
+          };
+          allBiddersSms.push(TwilioService.createSms(notification));
+        }
+      }
+    }
+
     const { onClose } = this.props;
     onClose();
+  }
+
+  // remove non numeric
+  phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
+  }
+
+  // check format ok
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
+      return false;
+    }
+    return true;
   }
 
   handleInputChange(e) {
@@ -278,9 +320,9 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'hidden'}>
-                    <h4 className="talign">
+                    <h5>
                       Send to Favorites<br />
-                    </h4>
+                    </h5>
                   </div>
                   <div className={showSendtoFavorites ? 'hidden' : 'col-md-12 form__form-group'}>
                     <p>You have not set any favorite carriers to work with.</p><br /><br />
@@ -300,7 +342,7 @@ class JobCreateFormTwo extends PureComponent {
                     <h5>
                       Yes! Send to Trelar Marketplace<br /><br />
                     </h5>
-                    * Note - This job will be sent to all Trelar Partners for review<br />
+                    <small>* Note - This job will be sent to all Trelar Partners for review</small>
                   </div>
                   <div className="col-md-3 form__form-group">
                     Send Job in<br />

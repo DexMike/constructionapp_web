@@ -4,10 +4,12 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row, Container } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
-
+import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
+import BookingService from '../../api/BookingService';
+import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
@@ -38,7 +40,8 @@ class JobCarrierForm extends Component {
     };
 
     this.state = {
-      ...job
+      ...job,
+      images: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -66,6 +69,17 @@ class JobCarrierForm extends Component {
   //   this.setState({ jobs });
   //   // console.log(jobs);
   // }
+
+  async componentDidMount() {
+    const { job } = this.props;
+    const bookings = await BookingService.getBookingsByJobId(job.id);
+    if (bookings && bookings.length > 0) {
+      const booking = bookings[0];
+      const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
+      const images = bookingInvoices.map(item => item.image);
+      this.setState({images});
+    }
+  }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
@@ -545,6 +559,21 @@ class JobCarrierForm extends Component {
     );
   }
 
+  renderImages(images) {
+    return (
+      <React.Fragment>
+        <Row>
+          {images.map(item => (
+            <Col className="col-md-4 pt-4" key={`img-${item}`}>
+              <img key={item} src={`${item}`} alt={`${item}`}/>
+            </Col>
+          ))
+          }
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   renderStartAddress() {
     const { job } = this.props;
     let origin = '';
@@ -566,11 +595,11 @@ class JobCarrierForm extends Component {
     return (
       <React.Fragment>
         <h3 className="subhead">Start Location
-          {/*<img*/}
-          {/*  src={`${window.location.origin}/${pinAImage}`}*/}
-          {/*  alt="avatar"*/}
-          {/*  className="pinSize"*/}
-          {/*/> */}
+          {/*<img */}
+          {/*  src={`${window.location.origin}/${pinAImage}`} */}
+          {/*  alt="avatar" */}
+          {/*  className="pinSize" */}
+          {/* /> */}
         </h3>
         {this.renderAddress(job.startAddress)}
       </React.Fragment>
@@ -598,11 +627,11 @@ class JobCarrierForm extends Component {
     return (
       <React.Fragment>
         <h3 className="subhead">End Location
-          {/*<img*/}
-          {/*  src={`${window.location.origin}/${pinBImage}`}*/}
-          {/*  alt="avatar"*/}
-          {/*  className="pinSize"*/}
-          {/*/> */}
+          {/* <img*/}
+          {/*  src={`${window.location.origin}/${pinBImage}`} */}
+          {/*  alt="avatar" */}
+          {/*  className="pinSize" */}
+          {/* /> */}
         </h3>
         {this.renderAddress(job.endAddress)}
       </React.Fragment>
@@ -610,6 +639,7 @@ class JobCarrierForm extends Component {
   }
 
   renderEverything() {
+    const { images } = this.state;
     const { job } = this.props;
     let origin = '';
     let destination = '';
@@ -642,7 +672,7 @@ class JobCarrierForm extends Component {
             </Row>
             <Row>
               <div>
-                <hr></hr>
+                <hr />
               </div>
             </Row>
             <Row>
@@ -667,6 +697,9 @@ class JobCarrierForm extends Component {
                   </div>
                 </div>
                 {this.renderJobRunss(job)}
+              </div>
+              <div className="col-md-12">
+                {this.renderImages(images)}
               </div>
             </Row>
           </CardBody>
