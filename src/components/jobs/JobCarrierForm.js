@@ -18,7 +18,9 @@ import './jobs.css';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
 
-class JobCarrierForm extends Component {
+import JobForm from './JobCustomerForm';
+
+class JobCarrierForm extends JobForm {
   constructor(props) {
     super(props);
 
@@ -154,22 +156,6 @@ class JobCarrierForm extends Component {
     this.setState({ [e.target.name]: e.target.value });
   }
 
-  materialsAsString(materials) {
-    let materialsString = '';
-    if (materials) {
-      let index = 0;
-      for (const material of materials) {
-        if (index !== materials.length - 1) {
-          materialsString += `${material}, `;
-        } else {
-          materialsString += material;
-        }
-        index += 1;
-      }
-    }
-    return materialsString;
-  }
-
   renderGoTo() {
     const { goToDashboard, goToJob } = this.state;
     if (goToDashboard) {
@@ -224,34 +210,6 @@ class JobCarrierForm extends Component {
           Rate: ${job.rate} / {job.rateType}
           <br/>
           Product: {this.materialsAsString(job.materials)}
-        </div>
-      </React.Fragment>
-    );
-  }
-
-  renderAddress(address) {
-    return (
-      <React.Fragment>
-        <div>
-          <span>{address.address1}</span>
-        </div>
-        {address.address2 && (
-          <div>
-            <span>{address.address2}</span>
-          </div>
-        )}
-        {address.address3 && (
-          <div>
-            <span>{address.address3}</span>
-          </div>
-        )}
-        {address.address4 && (
-          <div>
-            <span>{address.address4}</span>
-          </div>
-        )}
-        <div>
-          <span>{address.city}, {address.state} {address.zipCode}</span>
         </div>
       </React.Fragment>
     );
@@ -607,70 +565,6 @@ class JobCarrierForm extends Component {
     );
   }
 
-  renderStartAddress() {
-    const { job } = this.props;
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-
-    return (
-      <React.Fragment>
-        <h3 className="subhead">Start Location
-          {/*<img */}
-          {/*  src={`${window.location.origin}/${pinAImage}`} */}
-          {/*  alt="avatar" */}
-          {/*  className="pinSize" */}
-          {/* /> */}
-        </h3>
-        {this.renderAddress(job.startAddress)}
-      </React.Fragment>
-    );
-  }
-
-  renderEndAddress() {
-    const { job } = this.props;
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-
-    return (
-      <React.Fragment>
-        <h3 className="subhead">End Location
-          {/* <img*/}
-          {/*  src={`${window.location.origin}/${pinBImage}`} */}
-          {/*  alt="avatar" */}
-          {/*  className="pinSize" */}
-          {/* /> */}
-        </h3>
-        {this.renderAddress(job.endAddress)}
-      </React.Fragment>
-    );
-  }
-
   renderEverything() {
     const { images } = this.state;
     const { job } = this.props;
@@ -692,7 +586,7 @@ class JobCarrierForm extends Component {
     }
 
     if (job.endAddress) { // if there's endAddress, render it
-      endAddress = this.renderEndAddress(job);
+      endAddress = this.renderEndAddress(job.endAddress);
     }
 
     return (
@@ -705,19 +599,12 @@ class JobCarrierForm extends Component {
             <hr/>
             <Row>
               <div className="col-md-5 backo_red">
-                <TMap
-                  input={
-                    {
-                      origin,
-                      destination
-                    }
-                  }
-                />
+                {this.renderGoogleMap(origin, destination)}
               </div>
               <div className="col-md-7">
                 <div className="row">
                   <div className="col-md-4">
-                    {this.renderStartAddress(job)}
+                    {this.renderStartAddress(job.startAddress)}
                   </div>
                   <div className="col-md-3">
                     {endAddress}
@@ -754,8 +641,6 @@ class JobCarrierForm extends Component {
   }
 
   render() {
-    // const { loaded } = this.state;
-    // if (loaded) {
     return (
       <Container className="dashboard">
         {this.renderEverything()}
@@ -763,11 +648,6 @@ class JobCarrierForm extends Component {
     );
   }
 
-  // return (
-  //   <Container className="dashboard">
-  //     Loading...
-  //   </Container>
-  // );
 }
 
 JobCarrierForm.propTypes = {

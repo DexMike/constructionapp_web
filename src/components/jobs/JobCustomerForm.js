@@ -302,7 +302,6 @@ class JobForm extends Component {
     );
   }
 
-
   renderJobLoads(job) {
     return (
       <React.Fragment>
@@ -608,22 +607,22 @@ class JobForm extends Component {
     );
   }
 
-  renderStartAddress(job) {
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
+  renderStartAddress(address) {
+    // let origin = '';
+    // let destination = '';
+    //
+    // if (!job.startAddress && job.endAddress) {
+    //   origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
+    // if (job.startAddress && !job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    // }
+    // if (job.startAddress && job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
 
     return (
       <React.Fragment>
@@ -634,27 +633,27 @@ class JobForm extends Component {
           {/*  className="pinSize"*/}
           {/*/> */}
         </h3>
-        {this.renderAddress(job.startAddress)}
+        {this.renderAddress(address)}
       </React.Fragment>
     );
   }
 
-  renderEndAddress(job) {
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
+  renderEndAddress(address) {
+    // let origin = '';
+    // let destination = '';
+    //
+    // if (!job.startAddress && job.endAddress) {
+    //   origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
+    // if (job.startAddress && !job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    // }
+    // if (job.startAddress && job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
 
     return (
       <React.Fragment>
@@ -665,7 +664,22 @@ class JobForm extends Component {
           {/*  className="pinSize"*/}
           {/*/> */}
         </h3>
-        {this.renderAddress(job.endAddress)}
+        {this.renderAddress(address)}
+      </React.Fragment>
+    );
+  }
+
+  renderGoogleMap(origin, destination) {
+    return (
+      <React.Fragment>
+        <TMap
+          input={
+            {
+              origin,
+              destination
+            }
+          }
+        />
       </React.Fragment>
     );
   }
@@ -691,7 +705,7 @@ class JobForm extends Component {
     }
 
     if (job.endAddress) { // if there's endAddress, render it
-      endAddress = this.renderEndAddress(job);
+      endAddress = this.renderEndAddress(job.endAddress);
     }
 
     return (
@@ -704,19 +718,12 @@ class JobForm extends Component {
             <hr/>
             <Row>
               <div className="col-md-5 backo_red">
-                <TMap
-                  input={
-                    {
-                      origin,
-                      destination
-                    }
-                  }
-                />
+                {this.renderGoogleMap(origin, destination)}
               </div>
               <div className="col-md-7">
                 <div className="row">
                   <div className="col-md-4">
-                    {this.renderStartAddress(job)}
+                    {this.renderStartAddress(job.startAddress)}
                   </div>
                   <div className="col-md-3">
                     {endAddress}
