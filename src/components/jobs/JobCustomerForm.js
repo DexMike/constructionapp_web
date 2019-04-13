@@ -210,13 +210,14 @@ class JobForm extends Component {
         <div className="col-md-4">
           <h3 className="subhead">
             Carrier Status: {job.status}
-            Estimated Cost: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }å
           </h3>
+          Estimated Cost: {
+            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+          }
+          <br/>
           Potential Earnings: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
+            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+          }
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
@@ -227,7 +228,6 @@ class JobForm extends Component {
       </React.Fragment>
     );
   }
-
 
   renderAddress(address) {
     return (
@@ -328,7 +328,7 @@ class JobForm extends Component {
     );
   }
 
-  renderJobRunss(job) {
+  renderJobRuns(job) {
     return (
       <React.Fragment>
         <h3 className="subhead">
@@ -718,13 +718,13 @@ class JobForm extends Component {
                   <div className="col-md-4">
                     {this.renderStartAddress(job)}
                   </div>
-                  <div className="col-md-8">
-                    {this.renderJobBottom(job)}
+                  <div className="col-md-3">
+                    {endAddress}
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-md-3">
-                    {endAddress}
+                  <div className="col-md-8">
+                    {this.renderJobBottom(job)}
                   </div>
                 </div>
               </div>
@@ -745,7 +745,7 @@ class JobForm extends Component {
               </div>
             </div>
             <hr/>
-            {this.renderJobRunss(job)}
+            {this.renderJobRuns(job)}
           </CardBody>
         </Card>
       </Container>
