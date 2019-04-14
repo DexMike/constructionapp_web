@@ -21,16 +21,29 @@ class TMapBox extends PureComponent {
 
   constructor(props: Props) {
     super(props);
+    console.log("TMapBox.constructor");
+    console.log(props);
+    console.log("TMapBox.constructor .props.state");
+    console.log(props.state);
+
 
     this.state = {
       lat: props.state.lat,
       long: props.state.long,
       zoom: props.state.zoom
     };
+    console.log("TMapBox.constructor.state");
+    console.log(this.state);
+
   }
 
   componentDidMount() {
     const { long, lat, zoom } = this.state;
+
+    console.log("TMapBox.componentDidMount");
+    console.log(lat);
+    console.log(long);
+    console.log(zoom);
 
     const map = new mapboxgl.Map({
       container: this.mapContainer,
@@ -39,7 +52,7 @@ class TMapBox extends PureComponent {
       zoom
     });
 
-    // console.log(map);
+    console.log(map);
 
     map.on('move', () => {
       const { long, lat } = map.getCenter();
@@ -57,9 +70,9 @@ class TMapBox extends PureComponent {
 
     return (
       <div>
-        {/*<div className="inline-block absolute top left mt12 ml12 bg-darken75 color-white z1 py6 px12 round-full txt-s txt-bold">*/}
+        <div className="inline-block absolute top left mt12 ml12 bg-darken75 color-white z1 py6 px12 round-full txt-s txt-bold">
           <div>{`Longitude: ${long} Latitude: ${lat} Zoom: ${zoom}`}</div>
-        {/*</div>*/}
+        </div>
         <div ref={el => this.mapContainer = el} className="absolute top right left bottom" />
       </div>
     );
