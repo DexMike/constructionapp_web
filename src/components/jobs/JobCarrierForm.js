@@ -6,6 +6,8 @@ import { Card, CardBody, Col, Row, Container } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
+import TMap from '../common/TMapOriginDestination';
+import TMapBox from '../common/TMapBox';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -13,12 +15,12 @@ import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
-import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
 
 import JobForm from './JobCustomerForm';
+
 
 class JobCarrierForm extends JobForm {
   constructor(props) {
@@ -48,29 +50,6 @@ class JobCarrierForm extends JobForm {
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
-
-  // async componentDidMount() {
-  //   const jobs = await this.fetchJobs();
-  //
-  //   Promise.all(
-  //     jobs.map(async (job) => {
-  //       const newJob = job;
-  //       const company = await CompanyService.getCompanyById(newJob.companiesId);
-  //       newJob.companyName = company.legalName;
-  //
-  //       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-  //       const materials = materialsList.map(materialItem => materialItem.value);
-  //       newJob.material = this.equipmentMaterialsAsString(materials);
-  //
-  //       const address = await AddressService.getAddressById(newJob.startAddress);
-  //       newJob.zip = address.zipCode;
-  //
-  //       return newJob;
-  //     })
-  //   );
-  //   this.setState({ jobs });
-  //   // console.log(jobs);
-  // }
 
   async componentDidMount() {
     const { job } = this.props;
@@ -565,6 +544,35 @@ class JobCarrierForm extends JobForm {
     );
   }
 
+  renderMapBox(origin, destination) {
+
+    // Need to first convert addresses to long, lat.
+    //
+    // see
+    //
+    //
+    // see https://github.com/mapbox/mapbox-sdk-js/blob/master/docs/services.md#forwardgeocode
+    //
+
+    let lat = 41.8507300;
+    let long = -87.6512600;
+    let zoom = 1.5;
+
+    return (
+      <React.Fragment>
+        <TMapBox
+          state={
+            {
+              lat,
+              long,
+              zoom
+            }
+          }
+        />
+      </React.Fragment>
+    );
+  }
+
   renderEverything() {
     const { images } = this.state;
     const { job } = this.props;
@@ -599,7 +607,7 @@ class JobCarrierForm extends JobForm {
             <hr/>
             <Row>
               <div className="col-md-5 backo_red">
-                {this.renderGoogleMap(origin, destination)}
+                {this.renderMapBox(origin, destination)}
               </div>
               <div className="col-md-7">
                 <div className="row">
