@@ -29,7 +29,7 @@ class TMapBox extends PureComponent {
 
     this.state = {
       lat: props.state.lat,
-      long: props.state.long,
+      lng: props.state.lng,
       zoom: props.state.zoom
     };
     console.log("TMapBox.constructor.state");
@@ -38,27 +38,27 @@ class TMapBox extends PureComponent {
   }
 
   componentDidMount() {
-    const { long, lat, zoom } = this.state;
+    const { lng, lat, zoom } = this.state;
 
     console.log("TMapBox.componentDidMount");
     console.log(lat);
-    console.log(long);
+    console.log(lng);
     console.log(zoom);
 
     const map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/mapbox/streets-v9',
-      center: [long, lat],
+      center: [lng, lat],
       zoom
     });
 
     console.log(map);
 
     map.on('move', () => {
-      const { long, lat } = map.getCenter();
+      const { lng, lat } = map.getCenter();
 
       this.setState({
-        long: long.toFixed(4),
+        lng: lng.toFixed(4),
         lat: lat.toFixed(4),
         zoom: map.getZoom().toFixed(2)
       });
@@ -66,12 +66,12 @@ class TMapBox extends PureComponent {
   }
 
   render() {
-    const { long, lat, zoom } = this.state;
+    const { lng, lat, zoom } = this.state;
 
     return (
       <div>
         <div className="inline-block absolute top left mt12 ml12 bg-darken75 color-white z1 py6 px12 round-full txt-s txt-bold">
-          <div>{`Longitude: ${long} Latitude: ${lat} Zoom: ${zoom}`}</div>
+          <div>{`Longitude: ${lng} Latitude: ${lat} Zoom: ${zoom}`}</div>
         </div>
         <div ref={el => this.mapContainer = el} className="absolute top right left bottom" />
       </div>

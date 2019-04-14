@@ -555,8 +555,8 @@ class JobCarrierForm extends JobForm {
     //
 
     let lat = 41.8507300;
-    let long = -87.6512600;
-    let zoom = 1.5;
+    let lng = -87.6512600;
+    let zoom = 12;
 
     return (
       <React.Fragment>
@@ -564,7 +564,7 @@ class JobCarrierForm extends JobForm {
           state={
             {
               lat,
-              long,
+              lng,
               zoom
             }
           }
