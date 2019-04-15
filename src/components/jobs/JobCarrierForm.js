@@ -19,10 +19,10 @@ import './jobs.css';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
 
-import JobForm from './JobCustomerForm';
+import JobCustomerForm from './JobCustomerForm';
 
 
-class JobCarrierForm extends JobForm {
+class JobCarrierForm extends JobCustomerForm {
   constructor(props) {
     super(props);
 

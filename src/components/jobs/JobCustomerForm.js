@@ -18,7 +18,7 @@ import './jobs.css';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
 
-class JobForm extends Component {
+class JobCustomerForm extends Component {
   constructor(props) {
     super(props);
 
@@ -776,15 +776,15 @@ class JobForm extends Component {
   // );
 }
 
-JobForm.propTypes = {
+JobCustomerForm.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
   }),
   handlePageClick: PropTypes.func.isRequired
 };
 
-JobForm.defaultProps = {
+JobCustomerForm.defaultProps = {
   job: null
 };
 
-export default JobForm;
+export default JobCustomerForm;
