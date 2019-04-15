@@ -85,6 +85,8 @@ class ReportsCustomerPage extends Component {
         minTons: 'Any',
         minHours: '',
         minCapacity: '',
+        searchType: 'Customer Job',
+        userId: '',
 
         equipmentType: '',
         numEquipments: '',
@@ -143,6 +145,7 @@ class ReportsCustomerPage extends Component {
       filters.companiesId = profile.companyId;
       filtersComp.companiesId = profile.companyId;
     }
+    filters.userId = profile.userId;
 
     selectedRange = this.timeRanges[selectIndex].value;
     const currentDate = new Date();

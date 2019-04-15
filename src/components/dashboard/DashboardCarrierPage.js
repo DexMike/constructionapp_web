@@ -71,6 +71,8 @@ class DashboardCarrierPage extends Component {
       filters: {
         rateType: '',
         status: '',
+        userId: '',
+        searchType: 'Carrier Job',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -107,7 +109,8 @@ class DashboardCarrierPage extends Component {
       endDate,
       filters
     } = this.state;
-
+    const profile = await ProfileService.getProfile();
+    filters.userId = profile.userId;
     startDate = new Date();
     startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();

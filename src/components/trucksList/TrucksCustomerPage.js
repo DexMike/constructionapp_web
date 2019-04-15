@@ -64,6 +64,8 @@ class TrucksCustomerPage extends Component {
       filters: {
         startAvailability: null,
         endAvailability: null,
+        searchType: 'Customer Truck',
+        userId: '',
         equipmentType: '',
         minCapacity: '',
         // materialType: '',
@@ -89,7 +91,10 @@ class TrucksCustomerPage extends Component {
   }
 
   async componentDidMount() {
+    const { filters } = this.state;
     // await this.fetchJobs();
+    const profile = await ProfileService.getProfile();
+    filters.userId = profile.userId;
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({ loaded: true });
