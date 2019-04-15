@@ -197,7 +197,7 @@ class JobCarrierForm extends JobCustomerForm {
             </Row>
             <hr/>
             <Row>
-              <div className="col-md-5 backo_red">
+              <div className="col-md-8 backo_red">
 
                 {/*swap to mapbox from Google*/}
                 {/*{this.renderMapBox(origin, destination)}*/}
@@ -206,17 +206,20 @@ class JobCarrierForm extends JobCustomerForm {
                 {this.renderGoogleMap(origin, destination)}
 
               </div>
-              <div className="col-md-7">
+              <div className="col-md-4">
                 <div className="row">
-                  <div className="col-md-4">
+                  <div className="col-md-12">
                     {this.renderStartAddress(job.startAddress)}
                   </div>
-                  <div className="col-md-3">
-                    {endAddress}
+                </div>
+                <div className="row mt-1">
+                  <div className="col-md-12">
+                      {endAddress}
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-md-8">
+                <hr/>
+                <div className="row  mt-1">
+                  <div className="col-md-12">
                     {this.renderJobBottom(job)}
                   </div>
                 </div>
