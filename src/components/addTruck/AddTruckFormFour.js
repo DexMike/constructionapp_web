@@ -188,67 +188,131 @@ class AddTruckFormFour extends PureComponent {
         <Col md={12} lg={12}>
           <Card>
             <CardBody className="profile__card">
-              <div className="profile__information">
-                <div className="profile__avatar">
-                  <img src={`${window.location.origin}/${truckImage}`} alt="avatar"/>
-                </div>
-                <div className="profile__data">
-                  <p className="profile__name">Summary of Truck and Driver Information</p>
-                  <h4>Information about your Truck:</h4>
-                  <br />
-                  <p className="profile__contact">
-                    <strong>Description: </strong><br />{truckFullInfo.info.description}
-                    <br /><br />
-                    <strong>Type: </strong><br />{truckFullInfo.info.type}
-                    <br /><br />
-                    <strong>Materials hauled: </strong><br />{allMaterials}
-                    <br /><br />
-                    <strong>Maximum capacity: </strong><br />{truckFullInfo.info.maxCapacity} Tons
-                    <br /><br />
-                    <strong>VIN: </strong><br />{truckFullInfo.info.vin}
-                    <br /><br />
-                    <strong>License plate: </strong><br />{truckFullInfo.info.licensePlate}
-                    <br /><br />
-                    <strong>Rate per hour: </strong><br />{TFormat.asMoneyByHour(truckFullInfo.info.hourRate)}
-                    <br /><br />
-                    {/*
-                    <strong>Rate per ton: </strong><br />{truckFullInfo.info.tonRate}
-                    <br /><br />
-                    */}
-                    <strong>Maximum distance to pickup: </strong>
-                    <br />{truckFullInfo.info.maxDistance} Miles
-                  </p>
-                  <hr />
-                  <h4>Information about the Driver:</h4>
-                  <br />
-                  <p className="profile__contact">
-                    <strong>Name: </strong>
-                    <br />{userFullInfo.info.firstName} {userFullInfo.info.lastName}
-                    <br /><br />
-                    <strong>Email: </strong>
-                    <br />{userFullInfo.info.email}
-                    <br /><br />
-                    <strong>Mobile phone: </strong>
-                    {userFullInfo.info.mobilePhone}
-                  </p>
+              <div className="">
+                <div className="">
+                  <div className="row">
+                    <div className="col-md-4 truck-profile">
+                      <img src={truckFullInfo.info.image} alt="avatar"/>
+                    </div>
+                    <div className="col-md-8">
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Truck Name: </strong>
+                        </div>
+                        <div className="col-md-6">
+                          {truckFullInfo.info.description}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Type: </strong>
+                        </div>
+                        <div className="col-md-6">
+                          {truckFullInfo.info.type}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Name: </strong>
+                        </div>
+                        <div className="col-md-6">
+                          {userFullInfo.info.firstName} {userFullInfo.info.lastName}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Email: </strong>
+                        </div>
+                        <div className="col-md-6">
+                          <a href={"mailto:" + userFullInfo.info.email}> {userFullInfo.info.email}</a>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Mobile phone: </strong>
+                        </div>
+                        <div className="col-md-6">
+                          <a href={"tel:" + userFullInfo.info.mobilePhone}> {userFullInfo.info.mobilePhone}</a>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Available from:</strong>
+                        </div>
+                        <div className="col-md-6">
+                          {printedStartDate}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Available until:</strong>
+                        </div>
+                        <div className="col-md-6">
+                          {printedEndDate}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Availability:</strong>
+                        </div>
+                        <div className="col-md-6">
+                          {availableText}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <hr/>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Materials hauled: </strong>
+                    </div>
+                    <div className="col-md-8">
+                      {allMaterials}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Maximum capacity: </strong>
+                    </div>
+                    <div className="col-md-8">
+                      {truckFullInfo.info.maxCapacity} Tons
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>VIN: </strong>
+                    </div>
+                    <div className="col-md-8">
+                      {truckFullInfo.info.vin}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>License plate: </strong>
+                    </div>
+                    <div className="col-md-8">
+                      {truckFullInfo.info.licensePlate}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Rate per hour: </strong>
+                    </div>
+                    <div className="col-md-8">
+                      {TFormat.asMoneyByHour(truckFullInfo.info.hourRate)}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4">
+                      <strong>Maximum distance pickup: </strong>
+                    </div>
+                    <div className="col-md-8">
+                      {truckFullInfo.info.maxDistance} Miles
+                    </div>
+                  </div>
                 </div>
               </div>
               <hr />
-              <div className="profile__stats">
-                <div className="profile__stat">
-                  <p className="profile__stat-number">Available from:</p>
-                  <h4>{printedStartDate}</h4>
-                </div>
-                <div className="profile__stat">
-                  <p className="profile__stat-number">Available until:</p>
-                  <h4>{printedEndDate}</h4>
-                </div>
-                <div className="profile__stat">
-                  <p className="profile__stat-number">Availability:</p>
-                  <h4>{availableText}</h4>
-                </div>
-              </div>
-              <hr className="bighr" />
               <div className="profile__stats">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
                   <Button type="button" className="tertiaryButton" onClick={onClose}>
