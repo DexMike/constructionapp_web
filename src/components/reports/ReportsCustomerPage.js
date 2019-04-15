@@ -13,6 +13,9 @@ import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import customerProductMetrics from '../../img/Customer_ProductMetrics.png';
+import customerCarrierMetrics from '../../img/Customer_CarrierMetrics.png';
+import customerProjectMetrics from '../../img/Customer_ProjectMetrics.png';
 import './Reports.css';
 
 // NOTE: this is a copy of DashboardCustomerPage
@@ -561,36 +564,36 @@ class ReportsCustomerPage extends Component {
                         <div className="col-md-2 form__form-group">
                           <span className="form__form-group-label">From</span>
                           <div className="row">
-                              <TDateTimePicker
-                                input={
-                                  {
-                                    onChange: this.startDateChange,
-                                    name: 'startAvailability',
-                                    value: { startDate },
-                                    givenDate: new Date(startDate).getTime()
-                                  }
+                            <TDateTimePicker
+                              input={
+                                {
+                                  onChange: this.startDateChange,
+                                  name: 'startAvailability',
+                                  value: { startDate },
+                                  givenDate: new Date(startDate).getTime()
                                 }
-                                onChange={this.startDateChange}
-                                dateFormat="MM-dd-yy"
-                              />
+                              }
+                              onChange={this.startDateChange}
+                              dateFormat="MM-dd-yy"
+                            />
                             <i className="material-icons iconSet calendarIcon">calendar_today</i>
                           </div>
                         </div>
                         <div className="col-md-2 form__form-group">
                           <span className="form__form-group-label">To</span>
                           <div className="row">
-                              <TDateTimePicker
-                                input={
-                                  {
-                                    onChange: this.endDateChange,
-                                    name: 'endAvailability',
-                                    value: { endDate },
-                                    givenDate: new Date(endDate).getTime()
-                                  }
+                            <TDateTimePicker
+                              input={
+                                {
+                                  onChange: this.endDateChange,
+                                  name: 'endAvailability',
+                                  value: { endDate },
+                                  givenDate: new Date(endDate).getTime()
                                 }
-                                onChange={this.endDateChange}
-                                dateFormat="MM-dd-yy"
-                              />
+                              }
+                              onChange={this.endDateChange}
+                              dateFormat="MM-dd-yy"
+                            />
                             <i className="material-icons iconSet calendarIcon">calendar_today</i>
                           </div>
                         </div>
@@ -623,36 +626,36 @@ class ReportsCustomerPage extends Component {
                         <div className="col-md-2 form__form-group">
                           <span className="form__form-group-label">From</span>
                           <div className="row">
-                              <TDateTimePicker
-                                input={
-                                  {
-                                    onChange: this.startDateCompChange,
-                                    name: 'startAvailDateComp',
-                                    value: { startDateComp },
-                                    givenDate: new Date(startDateComp).getTime()
-                                  }
+                            <TDateTimePicker
+                              input={
+                                {
+                                  onChange: this.startDateCompChange,
+                                  name: 'startAvailDateComp',
+                                  value: { startDateComp },
+                                  givenDate: new Date(startDateComp).getTime()
                                 }
-                                onChange={this.startDateCompChange}
-                                dateFormat="MM-dd-yy"
-                              />
+                              }
+                              onChange={this.startDateCompChange}
+                              dateFormat="MM-dd-yy"
+                            />
                             <i className="material-icons iconSet calendarIcon">calendar_today</i>
                           </div>
                         </div>
                         <div className="col-md-2 form__form-group">
                           <span className="form__form-group-label">To</span>
                           <div className="row">
-                              <TDateTimePicker
-                                input={
-                                  {
-                                    onChange: this.endDateCompChange,
-                                    name: 'endAvailDateComp',
-                                    value: { endDateComp },
-                                    givenDate: new Date(endDateComp).getTime()
-                                  }
+                            <TDateTimePicker
+                              input={
+                                {
+                                  onChange: this.endDateCompChange,
+                                  name: 'endAvailDateComp',
+                                  value: { endDateComp },
+                                  givenDate: new Date(endDateComp).getTime()
                                 }
-                                onChange={this.endDateCompChange}
-                                dateFormat="MM-dd-yy"
-                              />
+                              }
+                              onChange={this.endDateCompChange}
+                              dateFormat="MM-dd-yy"
+                            />
                             <i className="material-icons iconSet calendarIcon">calendar_today</i>
                           </div>
                         </div>
@@ -1115,73 +1118,80 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            <Row>
-              <Col md={12}>
-                <h3 className="page-title">Material Metrics</h3>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Product Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
             <Row>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
-                </div>
-              </Col>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
-                </div>
-              </Col>
+              <div className="col-md-12 mt-1">
+                <img width="100%" height="100%" src={customerProductMetrics} alt=""
+                />
+              </div>
             </Row>
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Material</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Cost</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Material</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Cost</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderMaterialMetricsRow('RMA')}
-              {this.renderMaterialMetricsRow('Stone')}
-              {this.renderMaterialMetricsRow('Sand')}
-              {this.renderMaterialMetricsRow('Gravel')}
-              {this.renderMaterialMetricsRow('Recycling')}
-              {this.renderMaterialMetricsRow('Other')}
-              {this.renderMaterialMetricsRow('TOTALS')}
-            </div>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Material</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Cost</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Material</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Cost</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
+
+            {/*<div>*/}
+            {/*  {this.renderMaterialMetricsRow('RMA')}*/}
+            {/*  {this.renderMaterialMetricsRow('Stone')}*/}
+            {/*  {this.renderMaterialMetricsRow('Sand')}*/}
+            {/*  {this.renderMaterialMetricsRow('Gravel')}*/}
+            {/*  {this.renderMaterialMetricsRow('Recycling')}*/}
+            {/*  {this.renderMaterialMetricsRow('Other')}*/}
+            {/*  {this.renderMaterialMetricsRow('TOTALS')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1254,71 +1264,77 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Carrier Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
             <Row>
-              <Col md={12}>
-                <h3 className="page-title">Carrier Metrics</h3>
-              </Col>
+              <div className="col-md-12 mt-1">
+                <img width="100%" height="100%" src={customerCarrierMetrics} alt=""
+                />
+              </div>
             </Row>
 
-            <Row>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
-                </div>
-              </Col>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
-                </div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Carrier</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Carrier</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Carrier</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Carrier</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderCarrierMetricsRow('Irging Construction')}
-              {this.renderCarrierMetricsRow('Midlo Quarry')}
-              {this.renderCarrierMetricsRow('TexasTexas Dirt')}
-              {this.renderCarrierMetricsRow('Grovel R Us')}
-              {this.renderCarrierMetricsRow('Dump Buddies')}
-            </div>
+            {/*<div>*/}
+            {/*  {this.renderCarrierMetricsRow('Irging Construction')}*/}
+            {/*  {this.renderCarrierMetricsRow('Midlo Quarry')}*/}
+            {/*  {this.renderCarrierMetricsRow('TexasTexas Dirt')}*/}
+            {/*  {this.renderCarrierMetricsRow('Grovel R Us')}*/}
+            {/*  {this.renderCarrierMetricsRow('Dump Buddies')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1391,71 +1407,78 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            <Row>
-              <Col md={12}>
-                <h3 className="page-title">Customer Metrics</h3>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Project Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
             <Row>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
-                </div>
-              </Col>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
-                </div>
-              </Col>
+              <div className="col-md-12 mt-1">
+                <img width="100%" height="100%" src={customerProjectMetrics} alt=""
+                />
+              </div>
             </Row>
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Customer</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Customer</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderCustomerMetricsRow('DFW Airport')}
-              {this.renderCustomerMetricsRow('Midland Quarry')}
-              {this.renderCustomerMetricsRow('Dirt USA')}
-              {this.renderCustomerMetricsRow('Us')}
-              {this.renderCustomerMetricsRow('Buddy Dump 3')}
-            </div>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Customer</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Customer</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
+
+            {/*<div>*/}
+            {/*  {this.renderCustomerMetricsRow('DFW Airport')}*/}
+            {/*  {this.renderCustomerMetricsRow('Midland Quarry')}*/}
+            {/*  {this.renderCustomerMetricsRow('Dirt USA')}*/}
+            {/*  {this.renderCustomerMetricsRow('Us')}*/}
+            {/*  {this.renderCustomerMetricsRow('Buddy Dump 3')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1528,71 +1551,71 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            <Row>
-              <Col md={12}>
-                <h3 className="page-title">Site Metrics</h3>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Site Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})
-                </div>
-              </Col>
-              <Col md={6}>
-                <div
-                  className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})
-                </div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div*/}
+            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
+            {/*    </div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Site</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Time Spent</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Idle Time</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Site</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Time Spent</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Idle Time</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Site</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Site</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderSiteMetricsRow('Mega Site')}
-              {this.renderSiteMetricsRow('New Tower Riverside')}
-              {this.renderSiteMetricsRow('SMU Campus')}
-              {this.renderSiteMetricsRow('DFW Airport Facilities')}
-              {this.renderSiteMetricsRow('Amazon HQ3')}
-            </div>
+            {/*<div>*/}
+            {/*  {this.renderSiteMetricsRow('Mega Site')}*/}
+            {/*  {this.renderSiteMetricsRow('New Tower Riverside')}*/}
+            {/*  {this.renderSiteMetricsRow('SMU Campus')}*/}
+            {/*  {this.renderSiteMetricsRow('DFW Airport Facilities')}*/}
+            {/*  {this.renderSiteMetricsRow('Amazon HQ3')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1667,7 +1690,7 @@ class ReportsCustomerPage extends Component {
           {this.renderCustomerMetrics()}
           {this.renderSiteMetrics()}
 
-          {this.renderAdditionalReports()}
+          {/*{this.renderAdditionalReports()}*/}
           {/*{this.renderEverything()}*/}
         </Container>
       );

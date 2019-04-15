@@ -2,8 +2,8 @@
     height: 28px !important;
     width: 100% !important;
     border-radius: 3px !important;
-    padding-left: 8px !important;  
-   
+    padding-left: 8px !important;
+
     border: 1px solid #CACACA !important;
     box-shadow: none !important;
     outline :none !important;
@@ -30,5 +30,5 @@
 
 .date-filter .calendarIcon {
     padding-top: 6px;
-    padding-left: 26px;    
+    padding-left: 26px;
 }
