@@ -257,7 +257,6 @@ span.form__form-group-error {
       color:  #FFFFFF;
     }
   }
-
 }
 
 .date-filter .calendarIcon {
@@ -265,14 +264,16 @@ span.form__form-group-error {
   margin-top: 0px;
 }
 
-
 // ------  Helper Classes for Reporting
 
 
 // ------  Helper Classes for Bootstrap
-
 $spacer: 30px;
 
+hr {
+  margin: 20px 0px !important;
+  border: .5px solid #cccccc !important;
+}
 
 .mt-0 {
   margin-top: 0 !important;
@@ -284,4 +285,12 @@ $spacer: 30px;
 
 .mt-2 {
   margin-top: ($spacer * 2) !important;
+}
+
+.pt-1 {
+  padding-top: $spacer !important;
+}
+
+.pt-1 {
+  padding-top: ($spacer * 2) !important;
 }
