@@ -6,6 +6,8 @@ import { Card, CardBody, Col, Row, Container } from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
+import TMap from '../common/TMapOriginDestination';
+import TMapBox from '../common/TMapBox';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -13,12 +15,14 @@ import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
-import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
 
-class JobCarrierForm extends Component {
+import JobCustomerForm from './JobCustomerForm';
+
+
+class JobCarrierForm extends JobCustomerForm {
   constructor(props) {
     super(props);
 
@@ -46,29 +50,6 @@ class JobCarrierForm extends Component {
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
-
-  // async componentDidMount() {
-  //   const jobs = await this.fetchJobs();
-  //
-  //   Promise.all(
-  //     jobs.map(async (job) => {
-  //       const newJob = job;
-  //       const company = await CompanyService.getCompanyById(newJob.companiesId);
-  //       newJob.companyName = company.legalName;
-  //
-  //       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-  //       const materials = materialsList.map(materialItem => materialItem.value);
-  //       newJob.material = this.equipmentMaterialsAsString(materials);
-  //
-  //       const address = await AddressService.getAddressById(newJob.startAddress);
-  //       newJob.zip = address.zipCode;
-  //
-  //       return newJob;
-  //     })
-  //   );
-  //   this.setState({ jobs });
-  //   // console.log(jobs);
-  // }
 
   async componentDidMount() {
     const { job } = this.props;
@@ -150,490 +131,35 @@ class JobCarrierForm extends Component {
     this.handlePageClick('Job');
   }
 
-  handleInputChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
-  }
+  renderMapBox(origin, destination) {
 
-  materialsAsString(materials) {
-    let materialsString = '';
-    if (materials) {
-      let index = 0;
-      for (const material of materials) {
-        if (index !== materials.length - 1) {
-          materialsString += `${material}, `;
-        } else {
-          materialsString += material;
-        }
-        index += 1;
-      }
-    }
-    return materialsString;
-  }
+    // Need to first convert addresses to long, lat.
+    //
+    // see
+    //
+    //
+    // see https://github.com/mapbox/mapbox-sdk-js/blob/master/docs/services.md#forwardgeocode
+    //
 
-  renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
-    if (goToDashboard) {
-      return <Redirect push to="/"/>;
-    }
-    if (goToJob) {
-      return <Redirect push to="/jobs"/>;
-    }
-    return true;
-  }
+    //
+    // Hard coded location due to long, lat changes to point in Address objects
+    // NOTE: mapbox requires 'lng' not 'long'
+    //
+    let lat = 41.8507300;
+    let lng = -87.6512600;
+    let zoom = 12;
 
-  renderJobTop(job) {
     return (
       <React.Fragment>
-        <div className="col-md-3">
-          <h3 className="subhead">
-            Carrier Status: {job.status}
-          </h3>
-          Job: {job.name}
-          <br/>
-          {job.company.legalName}
-          <br/>
-          Start Date: {TFormat.asDateTime(job.startTime)}
-          <br/>
-          Created On: {TFormat.asDateTime(job.createdOn)}
-        </div>
-        <div className="col-md-3">
-          <h3 className="subhead">
-            Estimated Revenue: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        <TMapBox
+          state={
+            {
+              lat,
+              lng,
+              zoom
+            }
           }
-          </h3>
-          Estimated Amount: {job.rateEstimate} {job.rateType}(s)
-          <br/>
-          Rate: ${job.rate} / {job.rateType}
-          <br/>
-          Materials: {this.materialsAsString(job.materials)}
-        </div>
-      </React.Fragment>
-    );
-  }
-
-
-  renderAddress(address) {
-    return (
-      <React.Fragment>
-        <div>
-          <span>{address.address1}</span>
-        </div>
-        {address.address2 && (
-          <div>
-            <span>{address.address2}</span>
-          </div>
-        )}
-        {address.address3 && (
-          <div>
-            <span>{address.address3}</span>
-          </div>
-        )}
-        {address.address4 && (
-          <div>
-            <span>{address.address4}</span>
-          </div>
-        )}
-        <div>
-          <span>{address.city}, {address.state} {address.zipCode}</span>
-        </div>
-      </React.Fragment>
-    );
-  }
-
-  renderJobBottom(job) {
-    return (
-      <React.Fragment>
-        <h3 className="subhead">
-          Comments
-        </h3>
-        <Row>
-          <Col>
-            <div>
-              <div>
-                {job.notes}
-              </div>
-            </div>
-            <br/>
-          </Col>
-        </Row>
-      </React.Fragment>
-    );
-  }
-
-  renderJobLoads(job) {
-    return (
-      <React.Fragment>
-        <Row>
-          <Col>
-            <h3 className="subhead">
-              Load Information
-            </h3>
-            <div>
-              <span>Number of Runs:  <span>42</span></span>
-              <br/>
-              <span>Tons Completed: <span>12,255</span></span>
-              <br/>
-              <span>Hours Completed: <span>8.5</span></span>
-              <br/>
-              <span>Avg Run Time: <span>42 mins</span></span>
-              <br/>
-              <span>Avg Drive Time: <span>12 mins</span></span>
-              <br/>
-              <span>Avg Idle Time: <span>20 mins</span></span>
-              <br/>
-            </div>
-            <br/>
-          </Col>
-        </Row>
-      </React.Fragment>
-    );
-  }
-
-  renderJobRunss(job) {
-    return (
-      <React.Fragment>
-        <h3 className="subhead">
-          Run Information
-        </h3>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span>Activity</span>
-              <div>
-                <span>Waiting to Load</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span>Start Time</span>
-              <div>
-                <span>8:00 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span>End Time</span>
-              <div>
-                <span>8:30 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span>Time</span>
-              <div>
-                <span>30 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span>Distance</span>
-              <div>
-                <span>0</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span>[map]</span>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Loading</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8:30 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8:50 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>20 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Driving</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8:50 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:20 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>30 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Unloading</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:20 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:40 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>20 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Driving</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:40 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>10:15 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>35 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-      </React.Fragment>
-    );
-  }
-
-  renderRunSummary(job) {
-    return (
-      <React.Fragment>
-        <Row>
-          <Col>
-            <h3 className="subhead">
-              Run Summary
-            </h3>
-            <div>
-              <span>Avg Run Time: <span>42 mins</span></span>
-              <br/>
-              <span>Avg Drive Time: <span>22 mins</span></span>
-              <br/>
-              <span>Avg Idle Time: <span>20 mins</span></span>
-              <br/>
-              <span>Avg Load Time: <span>22 mins</span></span>
-              <br/>
-              <span>Avg Drive Time: <span>42 mins</span></span>
-              <br/>
-              <span>Avg Unload Time: <span>20 mins</span></span>
-              <br/>
-            </div>
-          </Col>
-        </Row>
-      </React.Fragment>
-    );
-  }
-
-  renderImages(images) {
-    return (
-      <React.Fragment>
-        <Row>
-          {images.map(item => (
-            <Col className="col-md-4 pt-4" key={`img-${item}`}>
-              <img key={item} src={`${item}`} alt={`${item}`}/>
-            </Col>
-          ))
-          }
-        </Row>
-      </React.Fragment>
-    );
-  }
-
-  renderStartAddress() {
-    const { job } = this.props;
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-
-    return (
-      <React.Fragment>
-        <h3 className="subhead">Start Location
-          {/*<img */}
-          {/*  src={`${window.location.origin}/${pinAImage}`} */}
-          {/*  alt="avatar" */}
-          {/*  className="pinSize" */}
-          {/* /> */}
-        </h3>
-        {this.renderAddress(job.startAddress)}
-      </React.Fragment>
-    );
-  }
-
-  renderEndAddress() {
-    const { job } = this.props;
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-
-    return (
-      <React.Fragment>
-        <h3 className="subhead">End Location
-          {/* <img*/}
-          {/*  src={`${window.location.origin}/${pinBImage}`} */}
-          {/*  alt="avatar" */}
-          {/*  className="pinSize" */}
-          {/* /> */}
-        </h3>
-        {this.renderAddress(job.endAddress)}
+        />
       </React.Fragment>
     );
   }
@@ -643,6 +169,7 @@ class JobCarrierForm extends Component {
     const { job } = this.props;
     let origin = '';
     let destination = '';
+    let endAddress;
 
     if (!job.startAddress && job.endAddress) {
       origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
@@ -657,51 +184,61 @@ class JobCarrierForm extends Component {
       destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
     }
 
+    if (job.endAddress) { // if there's endAddress, render it
+      endAddress = this.renderEndAddress(job.endAddress);
+    }
+
     return (
       <Container>
         <Card>
           <CardBody className="card-full-height">
             <Row>
               {this.renderJobTop(job)}
-              <div className="col-md-3">
-                {this.renderStartAddress(job)}
-              </div>
-              <div className="col-md-3">
-                {this.renderEndAddress(job)}
-              </div>
             </Row>
-            <Row>
-              <div>
-                <hr />
-              </div>
-            </Row>
+            <hr/>
             <Row>
               <div className="col-md-5 backo_red">
-                <TMap
-                  input={
-                    {
-                      origin,
-                      destination
-                    }
-                  }
-                />
+
+                {/*swap to mapbox from Google*/}
+                {/*{this.renderMapBox(origin, destination)}*/}
+
+                {/*Call from parent object*/}
+                {this.renderGoogleMap(origin, destination)}
+
               </div>
               <div className="col-md-7">
-                {this.renderJobBottom(job)}
                 <div className="row">
-                  <div className="col-md-6">
-                    {this.renderRunSummary(job)}
+                  <div className="col-md-4">
+                    {this.renderStartAddress(job.startAddress)}
                   </div>
-                  <div className="col-md-6">
-                    {this.renderJobLoads(job)}
+                  <div className="col-md-3">
+                    {endAddress}
                   </div>
                 </div>
-                {this.renderJobRunss(job)}
+                <div className="row">
+                  <div className="col-md-8">
+                    {this.renderJobBottom(job)}
+                  </div>
+                </div>
               </div>
               <div className="col-md-12">
                 {this.renderImages(images)}
               </div>
             </Row>
+            <hr/>
+            <div className="row">
+              <div className="col-md-4">
+                {this.renderJobTons(job)}
+              </div>
+              <div className="col-md-4">
+                {this.renderJobLoads(job)}
+              </div>
+              <div className="col-md-4">
+                {this.renderRunSummary(job)}
+              </div>
+            </div>
+            <hr/>
+            {this.renderJobRuns(job)}
           </CardBody>
         </Card>
       </Container>
@@ -709,8 +246,6 @@ class JobCarrierForm extends Component {
   }
 
   render() {
-    // const { loaded } = this.state;
-    // if (loaded) {
     return (
       <Container className="dashboard">
         {this.renderEverything()}
@@ -718,11 +253,6 @@ class JobCarrierForm extends Component {
     );
   }
 
-  // return (
-  //   <Container className="dashboard">
-  //     Loading...
-  //   </Container>
-  // );
 }
 
 JobCarrierForm.propTypes = {

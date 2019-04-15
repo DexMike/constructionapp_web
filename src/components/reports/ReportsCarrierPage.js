@@ -12,8 +12,12 @@ import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import carrierCustomerMetrics from '../../img/Carrier_CustomerMetrics.png';
+import carrierProductMetrics from '../../img/Carrier_ProductMetrics.png';
+import carrierProjectMetrics from '../../img/Carrier_ProjectMetrics.png';
 
 import './Reports.css';
+import customerProductMetrics from '../../img/Customer_ProductMetrics.png';
 
 class ReportsCarrierPage extends Component {
   constructor(props) {
@@ -1049,68 +1053,75 @@ class ReportsCarrierPage extends Component {
           <div className="card-body">
 
             <Row>
-              <Col md={12}>
-                <h3 className="page-title">Material Metrics</h3>
-              </Col>
+              <div className="col-md-12 mt-1">
+                <img width="100%" height="100%" src={carrierCustomerMetrics} alt=""
+                />
+              </div>
             </Row>
 
-            <Row>
-              <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
-              </Col>
-              <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Material Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Material</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Cost</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Material</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Cost</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-                    {this.renderMaterialMetricsRow('RMA')}
-                    {this.renderMaterialMetricsRow('Stone')}
-                    {this.renderMaterialMetricsRow('Sand')}
-                    {this.renderMaterialMetricsRow('Gravel')}
-                    {this.renderMaterialMetricsRow('Recycling')}
-                    {this.renderMaterialMetricsRow('Other')}
-                    {this.renderMaterialMetricsRow('TOTALS')}
-            </div>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Material</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Cost</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Material</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Cost</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
+
+            {/*<div>*/}
+            {/*        {this.renderMaterialMetricsRow('RMA')}*/}
+            {/*        {this.renderMaterialMetricsRow('Stone')}*/}
+            {/*        {this.renderMaterialMetricsRow('Sand')}*/}
+            {/*        {this.renderMaterialMetricsRow('Gravel')}*/}
+            {/*        {this.renderMaterialMetricsRow('Recycling')}*/}
+            {/*        {this.renderMaterialMetricsRow('Other')}*/}
+            {/*        {this.renderMaterialMetricsRow('TOTALS')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1185,66 +1196,73 @@ class ReportsCarrierPage extends Component {
           <div className="card-body">
 
             <Row>
-              <Col md={12}>
-                <h3 className="page-title">Carrier Metrics</h3>
-              </Col>
+              <div className="col-md-12 mt-1">
+                <img width="100%" height="100%" src={carrierProductMetrics} alt=""
+                />
+              </div>
             </Row>
 
-            <Row>
-              <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
-              </Col>
-              <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Carrier Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Carrier</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Carrier</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderCarrierMetricsRow('Irging Construction')}
-              {this.renderCarrierMetricsRow('Midlo Quarry')}
-              {this.renderCarrierMetricsRow('TexasTexas Dirt')}
-              {this.renderCarrierMetricsRow('Grovel R Us')}
-              {this.renderCarrierMetricsRow('Dump Buddies')}
-            </div>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Carrier</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Carrier</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
+
+            {/*<div>*/}
+            {/*  {this.renderCarrierMetricsRow('Irging Construction')}*/}
+            {/*  {this.renderCarrierMetricsRow('Midlo Quarry')}*/}
+            {/*  {this.renderCarrierMetricsRow('TexasTexas Dirt')}*/}
+            {/*  {this.renderCarrierMetricsRow('Grovel R Us')}*/}
+            {/*  {this.renderCarrierMetricsRow('Dump Buddies')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1319,66 +1337,67 @@ class ReportsCarrierPage extends Component {
           <div className="card-body">
 
             <Row>
-              <Col md={12}>
-                <h3 className="page-title">Customer Metrics</h3>
-              </Col>
+              <div className="col-md-12 mt-1">
+                <img width="100%" height="100%" src={carrierProjectMetrics} alt=""
+                />
+              </div>
             </Row>
 
-            <Row>
-              <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
-              </Col>
-              <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Customer</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Customer</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Ton</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg $/Hr</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Customer</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Customer</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderCustomerMetricsRow('DFW Airport')}
-              {this.renderCustomerMetricsRow('Midland Quarry')}
-              {this.renderCustomerMetricsRow('Dirt USA')}
-              {this.renderCustomerMetricsRow('Us')}
-              {this.renderCustomerMetricsRow('Buddy Dump 3')}
-            </div>
+            {/*<div>*/}
+            {/*  {this.renderCustomerMetricsRow('DFW Airport')}*/}
+            {/*  {this.renderCustomerMetricsRow('Midland Quarry')}*/}
+            {/*  {this.renderCustomerMetricsRow('Dirt USA')}*/}
+            {/*  {this.renderCustomerMetricsRow('Us')}*/}
+            {/*  {this.renderCustomerMetricsRow('Buddy Dump 3')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1452,67 +1471,67 @@ class ReportsCarrierPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            <Row>
-              <Col md={12}>
-                <h3 className="page-title">Site Metrics</h3>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3 className="page-title">Site Metrics</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={6}>
-                <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>
-              </Col>
-              <Col md={6}>
-                <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={6}>*/}
+            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <Row>
-              <Col md={1}>
-                <div className="card__title bold-text">Site</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Time Spent</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Idle Time</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Site</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text"># of Loads</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Earnings</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Tons</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Time Spent</div>
-              </Col>
-              <Col md={1}>
-                <div className="card__title bold-text">Avg Idle Time</div>
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Site</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Site</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text"># of Loads</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Earnings</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Tons</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
+            {/*  </Col>*/}
+            {/*  <Col md={1}>*/}
+            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
-            <div>
-              {this.renderSiteMetricsRow('Mega Site')}
-              {this.renderSiteMetricsRow('New Tower Riverside')}
-              {this.renderSiteMetricsRow('SMU Campus')}
-              {this.renderSiteMetricsRow('DFW Airport Facilities')}
-              {this.renderSiteMetricsRow('Amazon HQ3')}
-            </div>
+            {/*<div>*/}
+            {/*  {this.renderSiteMetricsRow('Mega Site')}*/}
+            {/*  {this.renderSiteMetricsRow('New Tower Riverside')}*/}
+            {/*  {this.renderSiteMetricsRow('SMU Campus')}*/}
+            {/*  {this.renderSiteMetricsRow('DFW Airport Facilities')}*/}
+            {/*  {this.renderSiteMetricsRow('Amazon HQ3')}*/}
+            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1580,14 +1599,14 @@ class ReportsCarrierPage extends Component {
           {this.renderFilter()}
           {this.renderTopCards()}
 
-          {this.renderComparisonCardReports()}
+          {/*{this.renderComparisonCardReports()}*/}
 
           {this.renderMaterialMetrics()}
           {this.renderCarrierMetrics()}
           {this.renderCustomerMetrics()}
           {this.renderSiteMetrics()}
 
-          {this.renderAdditionalReports()}
+          {/*{this.renderAdditionalReports()}*/}
           {/*{this.renderEverything()}*/}
         </Container>
       );

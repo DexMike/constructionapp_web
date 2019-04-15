@@ -18,7 +18,7 @@ import './jobs.css';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
 
-class JobForm extends Component {
+class JobCustomerForm extends Component {
   constructor(props) {
     super(props);
 
@@ -210,13 +210,14 @@ class JobForm extends Component {
         <div className="col-md-4">
           <h3 className="subhead">
             Carrier Status: {job.status}
-            Estimated Cost: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }å
           </h3>
+          Estimated Cost: {
+            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+          }
+          <br/>
           Potential Earnings: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
+            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+          }
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
@@ -227,7 +228,6 @@ class JobForm extends Component {
       </React.Fragment>
     );
   }
-
 
   renderAddress(address) {
     return (
@@ -302,7 +302,6 @@ class JobForm extends Component {
     );
   }
 
-
   renderJobLoads(job) {
     return (
       <React.Fragment>
@@ -328,7 +327,7 @@ class JobForm extends Component {
     );
   }
 
-  renderJobRunss(job) {
+  renderJobRuns(job) {
     return (
       <React.Fragment>
         <h3 className="subhead">
@@ -608,22 +607,22 @@ class JobForm extends Component {
     );
   }
 
-  renderStartAddress(job) {
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
+  renderStartAddress(address) {
+    // let origin = '';
+    // let destination = '';
+    //
+    // if (!job.startAddress && job.endAddress) {
+    //   origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
+    // if (job.startAddress && !job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    // }
+    // if (job.startAddress && job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
 
     return (
       <React.Fragment>
@@ -634,27 +633,27 @@ class JobForm extends Component {
           {/*  className="pinSize"*/}
           {/*/> */}
         </h3>
-        {this.renderAddress(job.startAddress)}
+        {this.renderAddress(address)}
       </React.Fragment>
     );
   }
 
-  renderEndAddress(job) {
-    let origin = '';
-    let destination = '';
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
+  renderEndAddress(address) {
+    // let origin = '';
+    // let destination = '';
+    //
+    // if (!job.startAddress && job.endAddress) {
+    //   origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
+    // if (job.startAddress && !job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    // }
+    // if (job.startAddress && job.endAddress) {
+    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    // }
 
     return (
       <React.Fragment>
@@ -665,7 +664,22 @@ class JobForm extends Component {
           {/*  className="pinSize"*/}
           {/*/> */}
         </h3>
-        {this.renderAddress(job.endAddress)}
+        {this.renderAddress(address)}
+      </React.Fragment>
+    );
+  }
+
+  renderGoogleMap(origin, destination) {
+    return (
+      <React.Fragment>
+        <TMap
+          input={
+            {
+              origin,
+              destination
+            }
+          }
+        />
       </React.Fragment>
     );
   }
@@ -691,7 +705,7 @@ class JobForm extends Component {
     }
 
     if (job.endAddress) { // if there's endAddress, render it
-      endAddress = this.renderEndAddress(job);
+      endAddress = this.renderEndAddress(job.endAddress);
     }
 
     return (
@@ -704,27 +718,20 @@ class JobForm extends Component {
             <hr/>
             <Row>
               <div className="col-md-5 backo_red">
-                <TMap
-                  input={
-                    {
-                      origin,
-                      destination
-                    }
-                  }
-                />
+                {this.renderGoogleMap(origin, destination)}
               </div>
               <div className="col-md-7">
                 <div className="row">
                   <div className="col-md-4">
-                    {this.renderStartAddress(job)}
+                    {this.renderStartAddress(job.startAddress)}
                   </div>
-                  <div className="col-md-8">
-                    {this.renderJobBottom(job)}
+                  <div className="col-md-3">
+                    {endAddress}
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-md-3">
-                    {endAddress}
+                  <div className="col-md-8">
+                    {this.renderJobBottom(job)}
                   </div>
                 </div>
               </div>
@@ -745,7 +752,7 @@ class JobForm extends Component {
               </div>
             </div>
             <hr/>
-            {this.renderJobRunss(job)}
+            {this.renderJobRuns(job)}
           </CardBody>
         </Card>
       </Container>
@@ -769,15 +776,15 @@ class JobForm extends Component {
   // );
 }
 
-JobForm.propTypes = {
+JobCustomerForm.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
   }),
   handlePageClick: PropTypes.func.isRequired
 };
 
-JobForm.defaultProps = {
+JobCustomerForm.defaultProps = {
   job: null
 };
 
-export default JobForm;
+export default JobCustomerForm;
