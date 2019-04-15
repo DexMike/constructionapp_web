@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
 import {
   Button,
   Card,
@@ -18,8 +18,8 @@ import TSelect from '../common/TSelect';
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
-
-import truckImage from '../../img/default_truck.png';
+// import truckImage from '../../img/default_truck.png';
+import truckImage from '../../img/belly-dump.jpg';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
@@ -92,16 +92,16 @@ class TrucksCustomerPage extends Component {
     // await this.fetchJobs();
     await this.fetchEquipments();
     await this.fetchFilterLists();
-    this.setState({ loaded: true });
+    this.setState({loaded: true});
   }
 
   retrieveAllMaterials() {
-    const { materialTypeList } = this.state;
+    const {materialTypeList} = this.state;
     return materialTypeList;
   }
 
   async fetchFilterLists() {
-    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
+    const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
     const profile = await ProfileService.getProfile();
 
     if (profile.companyId) {
@@ -144,6 +144,33 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  async fetchEquipmentMaterials(equipments) {
+    const newEquipments = equipments;
+    /* eslint-disable no-await-in-loop */
+    for (const [key, value] of Object.entries(equipments)) {
+      try {
+        let truckMaterials = await
+          EquipmentMaterialsService.getEquipmentMaterialsByEquipmentId(value.id);
+        truckMaterials = truckMaterials.map(material => ({
+          material: material.value
+        }));
+
+        if ((truckMaterials[0].material).includes('Any')) { // If we have 'Any', show all materials
+          let allMaterials = await LookupsService.getLookupsByType('MaterialType'); // Get all materials from Lookups
+          allMaterials = allMaterials.map(item => item.val1); // Get only val1 values
+          allMaterials = allMaterials.filter(e => e !== 'Any'); // All materials, but 'Any'
+          newEquipments[key].materials = allMaterials.join('\n');
+        } else {
+          newEquipments[key].materials = truckMaterials.map(e => e.material)
+            .join('\n');
+        }
+      } catch (error) {
+        newEquipments[key].materials = '';
+      }
+    }
+    this.setState({equipments: newEquipments});
+  }
+
   async fetchFavoriteEquipments(equipments) {
     // we get all groups.companyId that have name 'Favorite'
     const groupsFavorites = await GroupListService.getGroupListsFavorites();
@@ -160,12 +187,12 @@ class TrucksCustomerPage extends Component {
         }
         return newEquipment;
       });
-      this.setState({ equipments });
+      this.setState({equipments});
     }
   }
 
   async fetchEquipments() {
-    const { filters } = this.state;
+    const {filters} = this.state;
     const equipments = await EquipmentService.getEquipmentByFilters(filters);
 
     if (equipments) {
@@ -173,6 +200,7 @@ class TrucksCustomerPage extends Component {
       // Promise.all(
 
       this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
+      this.fetchEquipmentMaterials(equipments);
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
@@ -192,28 +220,28 @@ class TrucksCustomerPage extends Component {
           .format();
         return newEquipment;
       });
-      this.setState({ equipments });
+      this.setState({equipments});
     }
   }
 
   async handleFilterChange(e) {
-    const { value } = e.target;
-    const { filters } = this.state;
+    const {value} = e.target;
+    const {filters} = this.state;
     filters[e.target.name] = value;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   async handleSelectFilterChange(option) {
-    const { value, name } = option;
-    const { filters } = this.state;
+    const {value, name} = option;
+    const {filters} = this.state;
     filters[name] = value;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   handleMultiChange(data) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.materialType = data;
     this.setState({
       filters
@@ -224,12 +252,12 @@ class TrucksCustomerPage extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
   async handleSetFavorite(companyId) {
-    const { equipments } = this.state;
+    const {equipments} = this.state;
 
     try {
       const group = await GroupListService.getGroupListsByCompanyId(companyId);
@@ -258,12 +286,12 @@ class TrucksCustomerPage extends Component {
       }
       this.fetchFavoriteEquipments(equipments);
     } catch (error) {
-      this.setState({ equipments });
+      this.setState({equipments});
     }
   }
 
   handleEquipmentEdit(id) {
-    const { equipments, filters } = this.state;
+    const {equipments, filters} = this.state;
 
     const [selectedEquipment] = equipments.filter((equipment) => {
       if (id === equipment.id) {
@@ -295,29 +323,29 @@ class TrucksCustomerPage extends Component {
   }
 
   async handleStartDateChange(e) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.startAvailability = e;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   async handleEndDateChange(e) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.endAvailability = e;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   async handleIntervalInputChange(e) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     filters.startAvailability = e.start;
     filters.endAvailability = e.end;
     await this.fetchEquipments();
-    this.setState({ filters });
+    this.setState({filters});
   }
 
   toggleAddJobModal() {
-    const { modal, filters } = this.state;
+    const {modal, filters} = this.state;
     if (modal) {
       filters.materialType = [];
       this.setState({
@@ -330,19 +358,19 @@ class TrucksCustomerPage extends Component {
   }
 
   toggleSelectMaterialsModal() {
-    const { modalSelectMaterials } = this.state;
+    const {modalSelectMaterials} = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
     });
   }
 
   returnSelectedMaterials() {
-    const { filters } = this.state;
+    const {filters} = this.state;
     return filters.materialType;
   }
 
   preventModal() {
-    this.setState({ modal: false });
+    this.setState({modal: false});
   }
 
   renderGoTo() {
@@ -381,7 +409,7 @@ class TrucksCustomerPage extends Component {
             Select material
           </h4>
         </div>
-        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           Please select a material type for this job
         </div>
 
@@ -436,7 +464,7 @@ class TrucksCustomerPage extends Component {
           />
           <div className="bold-text modal__title">Job Request</div>
         </div>
-        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           <JobCreateForm
             selectedEquipment={selectedEquipment}
             closeModal={this.toggleAddJobModal}
@@ -627,148 +655,139 @@ class TrucksCustomerPage extends Component {
 
     return (
       <React.Fragment>
-        <Row md={12} style={{ width: '100%' }}>
-          {/* 100 85 */}
-          <div className="col-md-2">
-            <img width="118" height="100" src={imageTruck} alt=""
-                 style={{ width: '118px' }}
-            />
-          </div>
-
-          <Col md={5}>
-            {/* this was: c7dde8 */}
-            <Row lg={4} sm={8} style={{ background: '#c7dde8' }}>
-              <Col lg={4} className="customer-truck-results-title">
-                Type: {equipment.type}
-              </Col>
-              <Col className="customer-truck-results-title">
-                Capacity:
-                <NumberFormat
-                  value={equipment.maxCapacity}
-                  displayType="text"
-                  decimalSeparator="."
-                  decimalScale={0}
-                  fixedDecimalScale
-                  thousandSeparator
-                  prefix=" "
-                  suffix=" Tons"
+        <Row className="truck-card truck-details">
+          <div className="col-md-12">
+            <div className="row">
+              <div className="col-md-3">
+                <img width="100%" src={`${window.location.origin}/${truckImage}`} alt=""
+                     styles="background-size:contain;"
                 />
-              </Col>
-            </Row>
-            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
-              <Col>
-                Rate
-              </Col>
-              <Col>
-                Minimum
-              </Col>
-            </Row>
-            {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
-              <Row>
-                <Col>
-
-                  <span>
-                    <NumberFormat
-                      value={equipment.hourRate}
+              </div>
+              <div className="col-md-9">
+                <div className="row truck-card">
+                  <div className="col-md-9">
+                    <h3 className="subhead">
+                      {equipment.name} | {equipment.type} | <NumberFormat
+                      value={equipment.maxCapacity}
                       displayType="text"
                       decimalSeparator="."
-                      decimalScale={2}
+                      decimalScale={0}
                       fixedDecimalScale
                       thousandSeparator
-                      prefix="$ "
-                      suffix=" / Hour"
+                      prefix=" "
+                      suffix=" Tons"
                     />
-                  </span>
-
-                </Col>
-                <Col>
-                  <NumberFormat
-                    value={equipment.minHours}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator
-                    suffix=" hours min"
-                  />
-                </Col>
-              </Row>
-            )}
-            {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
-              <Row>
-                <Col>
-
-                  <span>
-                    <NumberFormat
-                      value={equipment.tonRate}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix="$ "
-                      suffix=" / Ton"
-                    />
-                  </span>
-
-                </Col>
-                <Col>
-                  <NumberFormat
-                    value={equipment.minCapacity}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator
-                    suffix=" tons min"
-                  />
-                </Col>
-              </Row>
-            )}
-          </Col>
-
-          <Col md={5}>
-            {/* this was: c7dde8 */}
-            <Row style={{ background: '#c7dde8' }}>
-              <Col md={11} className="customer-truck-results-title">
-                Name: {equipment.name}
-              </Col>
-              <Col md={1} className="customer-truck-results-title">
-                <Button
-                  color="link"
-                  onClick={() => this.handleSetFavorite(equipment.companyId)}
-                  className="material-icons favoriteIcon"
-                >
-                  {equipment.favorite ? 'favorite' : 'favorite_border'}
-                </Button>
-              </Col>
-              {/* <Col md={6} className="customer-truck-results-title> */}
-              {/* Company: {equipment.companyName} */}
-              {/* </Col> */}
-            </Row>
-            <Row style={{ borderBottom: '3px solid rgb(199, 221, 232)' }}>
-              <Col>
-                Materials Hauled
-              </Col>
-            </Row>
-            <Row>
-              <Col className="trucksListMaterialsHauled">
-                {equipment.materials}
-              </Col>
-              <Col>
-                <Button
-                  onClick={() => this.handleEquipmentEdit(equipment.id)}
-                  className="primaryButton"
-                  style={{ marginTop: '10px' }}
-                >
-                  Request
-                </Button>
-              </Col>
-            </Row>
-          </Col>
+                    </h3>
+                  </div>
+                  <div className="col-md-3 button-card">
+                    <Button
+                      onClick={() => this.handleEquipmentEdit(equipment.id)}
+                      className="btn btn-primary"
+                      styles="margin:0px !important"
+                    >
+                      Request
+                    </Button>
+                    <Button
+                      color="link"
+                      onClick={() => this.handleSetFavorite(equipment.companyId)}
+                      className="material-icons favoriteIcon"
+                    >
+                      {equipment.favorite ? 'favorite' : 'favorite_border'}
+                    </Button>
+                  </div>
+                </div>
+                <div className="row truck-card">
+                  <div className="col-md-6">
+                    <h3 className="subhead">Rates</h3>
+                    <Row>
+                      {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
+                        <React.Fragment>
+                          <div className="col-md-6">
+                            Hourly Rate:
+                          </div>
+                          <div className="col-md-6">
+                            <NumberFormat
+                              value={equipment.hourRate}
+                              displayType="text"
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator
+                              prefix="$ "
+                              suffix=" / Hour"
+                            />
+                          </div>
+                        </React.Fragment>
+                      )}
+                    </Row>
+                    <Row>
+                      <div className="col-md-6">
+                        Hourly Minimum:
+                      </div>
+                      <div className="col-md-6">
+                        <NumberFormat
+                          value={equipment.minHours}
+                          displayType="text"
+                          decimalSeparator="."
+                          decimalScale={2}
+                          fixedDecimalScale
+                          thousandSeparator
+                          suffix=" hours min"
+                        />
+                      </div>
+                    </Row>
+                    {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
+                      <React.Fragment>
+                        <div className="row">
+                          <div className="col-md-6">
+                            Rate per Ton:
+                          </div>
+                          <div className="col-md-6">
+                            <NumberFormat
+                              value={equipment.tonRate}
+                              displayType="text"
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator
+                              prefix="$ "
+                              suffix=" / Ton"
+                            />
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-md-6">
+                            Minimum Tonnage Capacity:
+                          </div>
+                          <div className="col-md-6">
+                            <NumberFormat
+                              value={equipment.minCapacity}
+                              displayType="text"
+                              decimalSeparator="."
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator
+                              suffix=" tons min"
+                            />
+                          </div>
+                        </div>
+                      </React.Fragment>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <h3 className="subhead">
+                      Materials
+                    </h3>
+                    {equipment.materials ? equipment.materials.replace(/\n/g, ", ") : "Undefined"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </Row>
         <hr/>
       </React.Fragment>
+
     );
   }
 
@@ -780,10 +799,10 @@ class TrucksCustomerPage extends Component {
     } = this.state;
 
     return (
-      <Col md={12}>
+      <Container>
         <Card>
           <CardBody>
-            <Row>
+            <Row className="truck-card">
               <Col md={6} id="equipment-display-count">
                 Displaying&nbsp;
                 {equipments.length}
@@ -821,26 +840,23 @@ class TrucksCustomerPage extends Component {
                   </Col>
                 </Row>
               </Col>
+              <hr/>
             </Row>
-
-            <div style={{ marginTop: '30px' }}>
-              {
-                equipments.map(equipment => (
-                  <React.Fragment key={equipment.id}>
-                    {this.renderEquipmentRow(equipment)}
-                  </React.Fragment>
-                ))
-              }
-            </div>
-
+            {
+              equipments.map(equipment => (
+                <React.Fragment key={equipment.id}>
+                  {this.renderEquipmentRow(equipment)}
+                </React.Fragment>
+              ))
+            }
           </CardBody>
         </Card>
-      </Col>
+      </Container>
     );
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
