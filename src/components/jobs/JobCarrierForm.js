@@ -554,6 +554,10 @@ class JobCarrierForm extends JobForm {
     // see https://github.com/mapbox/mapbox-sdk-js/blob/master/docs/services.md#forwardgeocode
     //
 
+    //
+    // Hard coded location due to long, lat changes to point in Address objects
+    // NOTE: mapbox requires 'lng' not 'long'
+    //
     let lat = 41.8507300;
     let lng = -87.6512600;
     let zoom = 12;
@@ -607,7 +611,13 @@ class JobCarrierForm extends JobForm {
             <hr/>
             <Row>
               <div className="col-md-5 backo_red">
-                {this.renderMapBox(origin, destination)}
+
+                {/*swap to mapbox from Google*/}
+                {/*{this.renderMapBox(origin, destination)}*/}
+
+                {/*Call from parent object*/}
+                {this.renderGoogleMap(origin, destination)}
+
               </div>
               <div className="col-md-7">
                 <div className="row">
