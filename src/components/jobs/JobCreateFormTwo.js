@@ -71,7 +71,11 @@ class JobCreateFormTwo extends PureComponent {
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
       favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
-      nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
+
+      if (biddersIdsNotFavorites.length > 0) {
+        nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
+      }
+
       this.setState({
         showSendtoFavorites: true,
         favoriteCompanies,
