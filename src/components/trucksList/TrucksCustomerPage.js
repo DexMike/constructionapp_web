@@ -206,16 +206,16 @@ class TrucksCustomerPage extends Component {
     const {value} = e.target;
     const {filters} = this.state;
     filters[e.target.name] = value;
-    await this.fetchEquipments();
     this.setState({filters});
+    await this.fetchEquipments();
   }
 
   async handleSelectFilterChange(option) {
     const {value, name} = option;
     const {filters} = this.state;
     filters[name] = value;
-    await this.fetchEquipments();
     this.setState({filters});
+    await this.fetchEquipments();
   }
 
   handleMultiChange(data) {
@@ -562,7 +562,7 @@ class TrucksCustomerPage extends Component {
                       </div>
                       <input name="minCapacity"
                              className="filter-text"
-                             type="text"
+                             type="number"
                              placeholder="Min # of tons"
                              value={filters.minCapacity}
                              onChange={this.handleFilterChange}
