@@ -502,7 +502,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'estimatedIncome',
-                        displayName: 'Potencial Earnings'
+                        displayName: 'Potential Earnings'
                       },
                       {
                         name: 'newRate',
