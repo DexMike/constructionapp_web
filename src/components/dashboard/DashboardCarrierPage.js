@@ -796,6 +796,10 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Start Date'
                         },
                         {
+                          name: 'name',
+                          displayName: 'Job Name'
+                        },
+                        {
                           name: 'status',
                           displayName: 'Job Status'
                         },
