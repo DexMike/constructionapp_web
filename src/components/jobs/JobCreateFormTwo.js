@@ -359,12 +359,7 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className="col-md-6 form__form-group">
-                    <Button color="minimal" className="btn btn-outline-secondary" type="button">
-                      Hours
-                    </Button>
-                    <Button color="secondary" className="btn btn-outline-secondary" type="button">
-                      Days
-                    </Button>
+                    Hours
                   </div>
                 </Row>
 
