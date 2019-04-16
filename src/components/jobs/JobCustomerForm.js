@@ -15,8 +15,8 @@ import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
-import pinAImage from '../../img/PinA.png';
-import pinBImage from '../../img/PinB.png';
+// import pinAImage from '../../img/PinA.png';
+// import pinBImage from '../../img/PinB.png';
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -41,7 +41,8 @@ class JobCustomerForm extends Component {
 
     this.state = {
       ...job,
-      images: []
+      images: [],
+      loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -77,7 +78,7 @@ class JobCustomerForm extends Component {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       const images = bookingInvoices.map(item => item.image);
-      this.setState({images});
+      this.setState({images, loaded: true});
     }
   }
 
@@ -91,16 +92,7 @@ class JobCustomerForm extends Component {
           }
           return true;
         });
-      this.setState({ ...job });
-    }
-  }
-
-  toggle(tab) {
-    const { activeTab } = this.state;
-    if (activeTab !== tab) {
-      this.setState({
-        activeTab: tab
-      });
+      this.setState({ ...job, loaded: true });
     }
   }
 
@@ -144,11 +136,11 @@ class JobCustomerForm extends Component {
     );
   }
 
-  async handleDelete() {
+  /* async handleDelete() {
     const job = this.state;
     await JobCarrierForm.deleteJobById(job.id);
     this.handlePageClick('Job');
-  }
+  } */
 
   handleInputChange(e) {
     this.setState({ [e.target.name]: e.target.value });
@@ -189,7 +181,7 @@ class JobCustomerForm extends Component {
             Job: {job.name}
           </h3>
 
-          {/*<br/>*/}
+          {/* <br/> */}
           {job.company.legalName}
           <br/>
           Carrier Contact Name
@@ -277,7 +269,7 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderJobTons(job) {
+  renderJobTons() {
     return (
       <React.Fragment>
         <Row>
@@ -302,7 +294,7 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderJobLoads(job) {
+  renderJobLoads() {
     return (
       <React.Fragment>
         <Row>
@@ -327,7 +319,7 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderJobRuns(job) {
+  renderJobRuns() {
     return (
       <React.Fragment>
         <h3 className="subhead">
@@ -568,7 +560,7 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderRunSummary(job) {
+  renderRunSummary() {
     return (
       <React.Fragment>
         <Row>
@@ -608,30 +600,14 @@ class JobCustomerForm extends Component {
   }
 
   renderStartAddress(address) {
-    // let origin = '';
-    // let destination = '';
-    //
-    // if (!job.startAddress && job.endAddress) {
-    //   origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    // }
-    // if (job.startAddress && !job.endAddress) {
-    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    //   destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    // }
-    // if (job.startAddress && job.endAddress) {
-    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    // }
-
     return (
       <React.Fragment>
         <h3 className="subhead">Start Location
-          {/*<img*/}
-          {/*  src={`${window.location.origin}/${pinAImage}`}*/}
-          {/*  alt="avatar"*/}
-          {/*  className="pinSize"*/}
-          {/*/> */}
+          {/* <img */}
+          {/*  src={`${window.location.origin}/${pinAImage}`} */}
+          {/*  alt="avatar" */}
+          {/*  className="pinSize" */}
+          {/* /> */}
         </h3>
         {this.renderAddress(address)}
       </React.Fragment>
@@ -639,30 +615,14 @@ class JobCustomerForm extends Component {
   }
 
   renderEndAddress(address) {
-    // let origin = '';
-    // let destination = '';
-    //
-    // if (!job.startAddress && job.endAddress) {
-    //   origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    // }
-    // if (job.startAddress && !job.endAddress) {
-    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    //   destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    // }
-    // if (job.startAddress && job.endAddress) {
-    //   origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    //   destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    // }
-
     return (
       <React.Fragment>
         <h3 className="subhead">End Location
-          {/*<img*/}
-          {/*  src={`${window.location.origin}/${pinBImage}`}*/}
-          {/*  alt="avatar"*/}
-          {/*  className="pinSize"*/}
-          {/*/> */}
+          {/* <img */}
+          {/*  src={`${window.location.origin}/${pinBImage}`} */}
+          {/*  alt="avatar" */}
+          {/*  className="pinSize" */}
+          {/* /> */}
         </h3>
         {this.renderAddress(address)}
       </React.Fragment>
@@ -763,11 +723,17 @@ class JobCustomerForm extends Component {
   }
 
   render() {
-    // const { loaded } = this.state;
-    // if (loaded) {
+    const { loaded } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderEverything()}
+        </Container>
+      );
+    }
     return (
       <Container className="dashboard">
-        {this.renderEverything()}
+      Loading...
       </Container>
     );
   }
