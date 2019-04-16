@@ -486,7 +486,7 @@ class TrucksCustomerPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Availability
                       </div>
@@ -498,7 +498,7 @@ class TrucksCustomerPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -527,7 +527,7 @@ class TrucksCustomerPage extends Component {
                         placeholder={equipmentTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -556,7 +556,7 @@ class TrucksCustomerPage extends Component {
                         placeholder="Select materials"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
@@ -568,9 +568,9 @@ class TrucksCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col>
+                    <Col md="4">
                       <div className="filter-item-title">
-                        Materials
+                        Materials 
                       </div>
                       <MultiSelect
                         input={
@@ -598,7 +598,7 @@ class TrucksCustomerPage extends Component {
                         placeholder={materialTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Zip Code
                       </div>
