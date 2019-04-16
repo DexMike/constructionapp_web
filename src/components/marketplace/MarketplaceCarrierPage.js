@@ -698,7 +698,7 @@ class MarketplaceCarrierPage extends Component {
                     </Col>
                     <Col md="3">
                       <div className="filter-item-title">
-                        Materials
+                        Materials ({this.returnSelectedMaterials().length})
                       </div>
                       <MultiSelect
                         input={

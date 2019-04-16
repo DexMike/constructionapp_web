@@ -570,7 +570,7 @@ class TrucksCustomerPage extends Component {
                     </Col>
                     <Col md="4">
                       <div className="filter-item-title">
-                        Materials
+                        Materials ({this.returnSelectedMaterials().length})
                       </div>
                       <MultiSelect
                         input={
