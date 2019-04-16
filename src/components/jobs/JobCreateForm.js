@@ -6,7 +6,6 @@ import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
 import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
-import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
@@ -16,9 +15,7 @@ import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
-import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
-import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCreateForm extends Component {
@@ -105,6 +102,7 @@ class JobCreateForm extends Component {
     // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
+    let { availableMaterials } = this.state;
     const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     // I commented the line below as I am not sure what it is used for
@@ -147,6 +145,14 @@ class JobCreateForm extends Component {
     booking.startTime = job.startTime;
     booking.endTime = job.endTime;
 
+    // We arrange selected equipment materials
+    if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
+      availableMaterials = selectedMaterials()[0].value;
+      availableMaterials = availableMaterials.split(',');
+    } else { // User selected 'Any'
+      availableMaterials = selectedMaterials();
+    }
+
     await this.fetchForeignValues();
     this.setState({
       job,
@@ -155,7 +161,7 @@ class JobCreateForm extends Component {
       bid,
       booking,
       bookingEquipment,
-      availableMaterials: selectedMaterials()
+      availableMaterials
     });
     this.setState({ loaded: true });
   }
@@ -436,7 +442,7 @@ class JobCreateForm extends Component {
     // console.log('bookingEquipment');
     // console.log(bookingEquipment);
 
-    const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+    // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
     // console.log('carrierCompany ');
     // console.log(carrierCompany);
     // const carrierAdmin = await
@@ -622,10 +628,9 @@ class JobCreateForm extends Component {
   }
 
   renderSelectedEquipment() {
-    const { job, material } = this.state;
-    console.log(material);
-    let { availableMaterials } = this.state;
+    const { job, material, availableMaterials } = this.state;
     const { selectedEquipment, getAllMaterials } = this.props;
+    let availableMaterialsOptions = [];
 
     let imageTruck = '';
     // checking if there's an image for the truck
@@ -639,7 +644,14 @@ class JobCreateForm extends Component {
     if (availableMaterials.length > 0) {
       for (const mat in availableMaterials) {
         if (availableMaterials[mat].value === 'Any') {
-          availableMaterials = getAllMaterials()
+          availableMaterialsOptions = getAllMaterials()
+            .map(rateType => ({
+              name: 'rateType',
+              value: rateType,
+              label: rateType
+            }));
+        } else {
+          availableMaterialsOptions = availableMaterials
             .map(rateType => ({
               name: 'rateType',
               value: rateType,
@@ -704,7 +716,7 @@ class JobCreateForm extends Component {
                     }
                   }
                   value={material}
-                  options={availableMaterials}
+                  options={availableMaterialsOptions}
                   placeholder="Select material"
                 />
               </div>
@@ -751,7 +763,7 @@ class JobCreateForm extends Component {
       reqHandlerEstHours/* ,
       reqHandlerEstTons */
     } = this.state;
-    const { selectedEquipment } = this.props;
+    // const { selectedEquipment } = this.props;
     return (
       <React.Fragment>
         <div className="row">
@@ -1066,13 +1078,13 @@ class JobCreateForm extends Component {
   }
 
   render() {
-    const { job, loaded } = this.state;
+    const { loaded } = this.state;
     if (loaded) {
       return (
         <form id="job-request" onSubmit={e => this.createJob(e)}>
           {this.renderSelectedEquipment()}
           <div className="cl-md-12">
-            <hr></hr>
+            <hr />
           </div>
           {this.renderJobTop()}
           <div className="row">
@@ -1082,7 +1094,7 @@ class JobCreateForm extends Component {
           </div>
           {this.renderJobBottom()}
           <div className="cl-md-12">
-            <hr></hr>
+            <hr />
           </div>
           {this.renderJobFormButtons()}
         </form>
