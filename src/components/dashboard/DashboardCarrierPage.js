@@ -765,7 +765,7 @@ class DashboardCarrierPage extends Component {
     // jobsCompleted = newJobCount * 20;
     potentialIncome = TFormat.asMoney(potentialIncome);
 
-    // console.log(jobs);
+    console.log(768, jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -784,6 +784,10 @@ class DashboardCarrierPage extends Component {
                         {
                           name: 'newStartDate',
                           displayName: 'Start Date'
+                        },
+                        {
+                          name: 'name',
+                          displayName: 'Job Name'
                         },
                         {
                           name: 'status',
