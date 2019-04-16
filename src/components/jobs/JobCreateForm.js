@@ -6,7 +6,6 @@ import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
 import JobService from '../../api/JobService';
 import truckImage from '../../img/default_truck.png';
-import TButtonToggle from '../common/TButtonToggle';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
 import BidService from '../../api/BidService';
@@ -16,11 +15,8 @@ import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
-import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
-import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
-import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -107,7 +103,7 @@ class JobCreateForm extends Component {
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
     let { availableMaterials } = this.state;
-    const { selectedEquipment, selectedMaterials, getAllMaterials } = this.props;
+    const { selectedEquipment, selectedMaterials } = this.props;
     job.companiesId = profile.companyId;
     // I commented the line below as I am not sure what it is used for
     // in the DB we have numEquipments
@@ -446,7 +442,7 @@ class JobCreateForm extends Component {
     // console.log('bookingEquipment');
     // console.log(bookingEquipment);
 
-    const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+    // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
     // console.log('carrierCompany ');
     // console.log(carrierCompany);
     // const carrierAdmin = await
@@ -767,7 +763,7 @@ class JobCreateForm extends Component {
       reqHandlerEstHours/* ,
       reqHandlerEstTons */
     } = this.state;
-    const { selectedEquipment } = this.props;
+    // const { selectedEquipment } = this.props;
     return (
       <React.Fragment>
         <div className="row">
@@ -1082,13 +1078,13 @@ class JobCreateForm extends Component {
   }
 
   render() {
-    const { job, loaded } = this.state;
+    const { loaded } = this.state;
     if (loaded) {
       return (
         <form id="job-request" onSubmit={e => this.createJob(e)}>
           {this.renderSelectedEquipment()}
           <div className="cl-md-12">
-            <hr></hr>
+            <hr />
           </div>
           {this.renderJobTop()}
           <div className="row">
@@ -1098,7 +1094,7 @@ class JobCreateForm extends Component {
           </div>
           {this.renderJobBottom()}
           <div className="cl-md-12">
-            <hr></hr>
+            <hr />
           </div>
           {this.renderJobFormButtons()}
         </form>
