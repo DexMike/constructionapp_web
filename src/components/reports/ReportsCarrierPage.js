@@ -61,7 +61,8 @@ class ReportsCarrierPage extends Component {
       filters: {
         companiesId: 0,
         rateType: '',
-
+        searchType: 'Carrier Job',
+        userId: '',
         startAvailability: null,
         endAvailability: null,
         startAvailDateComp: null,    // Comparison
@@ -101,14 +102,15 @@ class ReportsCarrierPage extends Component {
       startDateComp,
       endDateComp,
       selectedRange,
-      selectedRangeComp
+      selectedRangeComp,
+
     } = this.state;
 
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
     }
-
+    filters.userId = profile.userId;
     selectedRange = 30;
     const currentDate = new Date();
     startDate = new Date();
@@ -193,6 +195,7 @@ class ReportsCarrierPage extends Component {
     const { companyId } = profile;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     */
+
     const jobs = await JobService.getJobByFilters(filters);
 
     if (jobs) {
