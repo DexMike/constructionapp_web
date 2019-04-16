@@ -96,6 +96,8 @@ class DashboardCustomerPage extends Component {
       filters: {
         rateType: '',
         status: '',
+        userId: '',
+        searchType: 'Customer Job',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -136,7 +138,8 @@ class DashboardCustomerPage extends Component {
       endDate,
       filters
     } = this.state;
-
+    const profile = await ProfileService.getProfile();
+    filters.userId = profile.userId;
     startDate = new Date();
     startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();

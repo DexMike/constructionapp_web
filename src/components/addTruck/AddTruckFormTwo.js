@@ -95,10 +95,15 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   makeAvailable() {
-    const { isAvailable } = this.state;
-    const newValue = !isAvailable;
+    let { isAvailable } = this.state;
 
-    this.setState({ isAvailable: newValue },
+    if (isAvailable === 1 || isAvailable === true) {
+      isAvailable = false;
+    } else if (isAvailable === 0 || isAvailable === false) {
+      isAvailable = true;
+    }
+
+    this.setState({ isAvailable },
       function wait() {
         this.saveAvailabilityInfo(false);
       });
