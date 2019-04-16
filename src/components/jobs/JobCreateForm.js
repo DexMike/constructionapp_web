@@ -20,6 +20,7 @@ import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -105,7 +106,8 @@ class JobCreateForm extends Component {
     // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
-    const { selectedEquipment, selectedMaterials } = this.props;
+    let { availableMaterials } = this.state;
+    const { selectedEquipment, selectedMaterials, getAllMaterials } = this.props;
     job.companiesId = profile.companyId;
     // I commented the line below as I am not sure what it is used for
     // in the DB we have numEquipments
@@ -147,6 +149,14 @@ class JobCreateForm extends Component {
     booking.startTime = job.startTime;
     booking.endTime = job.endTime;
 
+    // We arrange selected equipment materials
+    if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
+      availableMaterials = selectedMaterials()[0].value;
+      availableMaterials = availableMaterials.split(',');
+    } else { // User selected 'Any'
+      availableMaterials = selectedMaterials();
+    }
+
     await this.fetchForeignValues();
     this.setState({
       job,
@@ -155,7 +165,7 @@ class JobCreateForm extends Component {
       bid,
       booking,
       bookingEquipment,
-      availableMaterials: selectedMaterials()
+      availableMaterials
     });
     this.setState({ loaded: true });
   }
@@ -622,10 +632,9 @@ class JobCreateForm extends Component {
   }
 
   renderSelectedEquipment() {
-    const { job, material } = this.state;
-    console.log(material);
-    let { availableMaterials } = this.state;
+    const { job, material, availableMaterials } = this.state;
     const { selectedEquipment, getAllMaterials } = this.props;
+    let availableMaterialsOptions = [];
 
     let imageTruck = '';
     // checking if there's an image for the truck
@@ -639,7 +648,14 @@ class JobCreateForm extends Component {
     if (availableMaterials.length > 0) {
       for (const mat in availableMaterials) {
         if (availableMaterials[mat].value === 'Any') {
-          availableMaterials = getAllMaterials()
+          availableMaterialsOptions = getAllMaterials()
+            .map(rateType => ({
+              name: 'rateType',
+              value: rateType,
+              label: rateType
+            }));
+        } else {
+          availableMaterialsOptions = availableMaterials
             .map(rateType => ({
               name: 'rateType',
               value: rateType,
@@ -704,7 +720,7 @@ class JobCreateForm extends Component {
                     }
                   }
                   value={material}
-                  options={availableMaterials}
+                  options={availableMaterialsOptions}
                   placeholder="Select material"
                 />
               </div>

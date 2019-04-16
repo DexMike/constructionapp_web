@@ -200,7 +200,7 @@ class TrucksCustomerPage extends Component {
       // Promise.all(
 
       this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
-      this.fetchEquipmentMaterials(equipments);
+      // this.fetchEquipmentMaterials(equipments);
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
@@ -274,9 +274,9 @@ class TrucksCustomerPage extends Component {
       // if we got a group with companyId
       if (group.length > 0) { // delete
         // first we delete the Group List
-        await GroupListService.deleteGroupListById(group[0].groupId);
+        await GroupListService.deleteGroupListById(group[0].id);
         // then the Group
-        await GroupService.deleteGroupById(group[0].id);
+        await GroupService.deleteGroupById(group[0].groupId);
       } else { // create "Favorite" Group record
         const groupData = {
           createdBy: profile.userId,
@@ -778,7 +778,7 @@ class TrucksCustomerPage extends Component {
                     <h3 className="subhead">
                       Materials
                     </h3>
-                    {equipment.materials ? equipment.materials.replace(/\n/g, ", ") : "Undefined"}
+                    {equipment.materials}
                   </div>
                 </div>
               </div>
