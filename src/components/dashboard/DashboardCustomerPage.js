@@ -502,10 +502,10 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObjectClickable title="Job Offers" displayVal = {onOfferJobCount} value={"On Offer"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="New Offers" displayVal = {onOfferJobCount} value={"On Offer"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Published Jobs" displayVal = {publishedJobCount} value={"Published"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Booked Jobs" displayVal = {bookedJobCount} value={"Booked"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent} value={"% Completed"}/>
           </div>
