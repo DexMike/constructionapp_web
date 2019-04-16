@@ -15,6 +15,7 @@ import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
+import CompanyService from '../../api/CompanyService';
 // import pinAImage from '../../img/PinA.png';
 // import pinBImage from '../../img/PinB.png';
 
@@ -72,13 +73,16 @@ class JobCustomerForm extends Component {
   // }
 
   async componentDidMount() {
-    const { job } = this.props;
+    let { job } = this.props;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       const images = bookingInvoices.map(item => item.image);
-      this.setState({images, loaded: true});
+      this.setState({
+        images,
+        loaded: true
+      });
     }
   }
 
@@ -92,7 +96,10 @@ class JobCustomerForm extends Component {
           }
           return true;
         });
-      this.setState({ ...job, loaded: true });
+      this.setState({
+        ...job,
+        loaded: true
+      });
     }
   }
 
@@ -180,36 +187,34 @@ class JobCustomerForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-
-          {/* <br/> */}
           {job.company.legalName}
           <br/>
-          Carrier Contact Name
+          {/* Find the company admin name */}
+          Phone #: <a
+          href={'tel:' + TFormat.asPhoneText(job.company.phone)}>{TFormat.asPhoneText(job.company.phone)}</a>
           <br/>
-          Phone #: <a href="tel:{job.company.phone}">{job.company.phone}</a>
-          <br/>
-          # of trucks
+          Number of Trucks: {job.numEquipments}
           <br/>
         </div>
         <div className="col-md-4">
           <h3 className="subhead">
             Dates:
           </h3>
-          Start Date: {TFormat.asDateTime(job.startTime)}
+          Start Date: {TFormat.asDayWeek(job.startTime)}
           <br/>
-          Created On: {TFormat.asDateTime(job.createdOn)}
+          Created On: {TFormat.asDayWeek(job.createdOn)}
         </div>
         <div className="col-md-4">
           <h3 className="subhead">
-            Carrier Status: {job.status}
+            Status: {job.status}
           </h3>
           Estimated Cost: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
           <br/>
           Potential Earnings: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
@@ -733,7 +738,7 @@ class JobCustomerForm extends Component {
     }
     return (
       <Container className="dashboard">
-      Loading...
+        Loading...
       </Container>
     );
   }
