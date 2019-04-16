@@ -96,6 +96,8 @@ class DashboardCustomerPage extends Component {
       filters: {
         rateType: '',
         status: '',
+        userId: '',
+        searchType: 'Customer Job',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -136,7 +138,8 @@ class DashboardCustomerPage extends Component {
       endDate,
       filters
     } = this.state;
-
+    const profile = await ProfileService.getProfile();
+    filters.userId = profile.userId;
     startDate = new Date();
     startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();
@@ -430,8 +433,9 @@ class DashboardCustomerPage extends Component {
   renderCards() {
     const {loaded, filters} = this.state;
     let {jobs} = this.state;
-    let newJobCount = 0;
-    let acceptedJobCount = 0;
+    let onOfferJobCount = 0;
+    let publishedJobCount = 0;
+    let bookedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let potentialIncome = 0;
@@ -447,11 +451,14 @@ class DashboardCustomerPage extends Component {
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
-      if (newJob.status === 'New') {
-        newJobCount += 1;
+      if (newJob.status === 'On Offer') {
+        onOfferJobCount += 1;
       }
-      if (newJob.status === 'Accepted') {
-        acceptedJobCount += 1;
+      if (newJob.status === 'Published') {
+        publishedJobCount += 1;
+      }
+      if (newJob.status === 'Booked') {
+        bookedJobCount += 1;
       }
       if (newJob.status === 'In Progress') {
         inProgressJobCount += 1;
@@ -479,11 +486,11 @@ class DashboardCustomerPage extends Component {
       return newJob;
     });
 
-    jobsCompleted = newJobCount * 20;
+    jobsCompleted = onOfferJobCount * 20;
     totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
     earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
     cancelledJobs = 1;
-    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    jobsPerTruck = TFormat.asNumber(onOfferJobCount / 0.7);
     idleTrucks = 1;
 
     // Jobs completed / Job offers responded to
@@ -495,9 +502,10 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObjectClickable title="Offered Jobs" displayVal = {newJobCount} value={"New"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="New Offers" displayVal = {onOfferJobCount} value={"On Offer"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Published Jobs" displayVal = {publishedJobCount} value={"Published"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
+            <DashboardObjectClickable title="Booked Jobs" displayVal = {bookedJobCount} value={"Booked"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Accepted"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent} value={"% Completed"}/>
           </div>
@@ -710,8 +718,9 @@ class DashboardCustomerPage extends Component {
   renderJobList() {
     const {loaded} = this.state;
     let {jobs} = this.state;
-    let newJobCount = 0;
-    let acceptedJobCount = 0;
+    let onOfferJobCount = 0;
+    let publishedJobCount = 0;
+    let bookedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let potentialIncome = 0;
@@ -727,11 +736,14 @@ class DashboardCustomerPage extends Component {
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
-      if (newJob.status === 'New') {
-        newJobCount += 1;
+      if (newJob.status === 'On Offer') {
+        onOfferJobCount += 1;
       }
-      if (newJob.status === 'Accepted') {
-        acceptedJobCount += 1;
+      if (newJob.status === 'Published') {
+        publishedJobCount += 1;
+      }
+      if (newJob.status === 'Booked') {
+        bookedJobCount += 1;
       }
       if (newJob.status === 'In Progress') {
         inProgressJobCount += 1;
@@ -759,11 +771,11 @@ class DashboardCustomerPage extends Component {
       return newJob;
     });
 
-    jobsCompleted = newJobCount * 20;
+    jobsCompleted = onOfferJobCount * 20;
     totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
     earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
     cancelledJobs = 1;
-    jobsPerTruck = TFormat.asNumber(newJobCount / 0.7);
+    jobsPerTruck = TFormat.asNumber(onOfferJobCount / 0.7);
     idleTrucks = 1;
 
     // Jobs completed / Job offers responded to

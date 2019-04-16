@@ -59,14 +59,14 @@ class MarketplaceCarrierPage extends Component {
       // Filter values
       filters: {
         rateType: '',
-
+        searchType: "Carrier Job",
         startAvailability: null,
         endAvailability: null,
         rate: '',
         minTons: '',
         minHours: '',
         minCapacity: '',
-
+        userId: '',
         equipmentType: '',
         numEquipments: '',
         zipCode: '',
@@ -106,7 +106,8 @@ class MarketplaceCarrierPage extends Component {
       endDate
     } = this.state;
     const { filters } = this.state;
-
+    const profile = await ProfileService.getProfile();
+    filters.userId = profile.userId;
     startDate = new Date();
     startDate.setHours(0, 0, 0); // 00:00:00
     endDate = new Date();
@@ -114,6 +115,7 @@ class MarketplaceCarrierPage extends Component {
     endDate.setHours(23, 59, 59); // 23:59:59
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
+
 
     // await this.fetchJobs();
     const jobs = await this.fetchJobs();
