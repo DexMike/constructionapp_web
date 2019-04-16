@@ -129,7 +129,7 @@ class JobSavePage extends Component {
                 </div>
                 <div className="col-md-2">
                   <Button className="btn btn-primary">
-                    Accept Job
+                    Confirm Job Request
                   </Button>
                 </div>
               </div>
