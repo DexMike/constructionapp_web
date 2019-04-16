@@ -673,7 +673,7 @@ class DashboardCarrierPage extends Component {
                     </Col>
                     <Col md="3">
                       <div className="filter-item-title">
-                        Materials ({this.returnSelectedMaterials().length})
+                        Materials
                       </div>
                       <MultiSelect
                         input={
