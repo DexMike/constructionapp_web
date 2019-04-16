@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
+import {Card, CardBody, Col, Container, Row} from 'reactstrap';
 import moment from 'moment';
 
 // import TTable from '../common/TTable';
@@ -27,11 +27,11 @@ class ReportsCarrierPage extends Component {
     // Fixed options for Time Range filtering
 
     this.timeRanges = [
-      { name: 'Custom', value: 0 },
-      { name: 'Last Week', value: 7 },
-      { name: 'Last 30 days', value: 30 },
-      { name: 'Last 60 days', value: 60 },
-      { name: 'Last 90 days', value: 90 },
+      {name: 'Custom', value: 0},
+      {name: 'Last Week', value: 7},
+      {name: 'Last 30 days', value: 30},
+      {name: 'Last 60 days', value: 60},
+      {name: 'Last 90 days', value: 90},
       // { name: 'Next Week', value: -7 },
       // { name: 'Next 30 days', value: -30 },
       // { name: 'Next 60 days', value: -60 },
@@ -95,7 +95,7 @@ class ReportsCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    const { filters } = this.state;
+    const {filters} = this.state;
     let {
       startDate,
       endDate,
@@ -185,7 +185,7 @@ class ReportsCarrierPage extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -209,7 +209,7 @@ class ReportsCarrierPage extends Component {
       //     return job;
       //   });
       // }
-      this.setState({ jobs });
+      this.setState({jobs});
     }
     return jobs;
   }
@@ -232,8 +232,8 @@ class ReportsCarrierPage extends Component {
   }
 
   async handleSelectFilterChange(option) {
-    const { value, name } = option;
-    const { filters } = this.state;
+    const {value, name} = option;
+    const {filters} = this.state;
     let {
       startDate,
       endDate,
@@ -266,8 +266,8 @@ class ReportsCarrierPage extends Component {
   }
 
   async handleSelectFilterChangeComp(option) {
-    const { value, name } = option;
-    const { filters } = this.state;
+    const {value, name} = option;
+    const {filters} = this.state;
     let {
       startDateComp,
       endDateComp,
@@ -298,9 +298,10 @@ class ReportsCarrierPage extends Component {
       selectIndexComp
     });
   }
+
   async startDateChange(data) {
-    const { filters, endDate } = this.state;
-    let { startDate } = this.state;
+    const {filters, endDate} = this.state;
+    let {startDate} = this.state;
 
     startDate = data;
     filters.startAvailability = startDate;
@@ -315,8 +316,8 @@ class ReportsCarrierPage extends Component {
   }
 
   async startDateCompChange(data) {
-    const { filters, endDateComp } = this.state;
-    let { startDateComp } = this.state;
+    const {filters, endDateComp} = this.state;
+    let {startDateComp} = this.state;
 
     startDateComp = data;
     filters.startAvailDateComp = startDateComp;
@@ -331,8 +332,8 @@ class ReportsCarrierPage extends Component {
   }
 
   async endDateChange(data) {
-    const { filters, startDate } = this.state;
-    let { endDate } = this.state;
+    const {filters, startDate} = this.state;
+    let {endDate} = this.state;
 
     endDate = data;
     filters.endAvailability = endDate;
@@ -347,8 +348,8 @@ class ReportsCarrierPage extends Component {
   }
 
   async endDateCompChange(data) {
-    const { filters, startDateComp } = this.state;
-    let { endDateComp } = this.state;
+    const {filters, startDateComp} = this.state;
+    let {endDateComp} = this.state;
 
     endDateComp = data;
     filters.endAvailDateComp = endDateComp;
@@ -363,12 +364,12 @@ class ReportsCarrierPage extends Component {
   }
 
   formatDate(date) {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const options = {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
     return (date.toLocaleDateString('en-US', options));
   }
 
   async isCustomRange(startDate, endDate) {
-    let { selectIndex } = this.state;
+    let {selectIndex} = this.state;
     const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
     const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
 
@@ -397,7 +398,7 @@ class ReportsCarrierPage extends Component {
   }
 
   async isCustomRangeComp(startDate, endDate) {
-    let { selectIndexComp } = this.state;
+    let {selectIndexComp} = this.state;
     const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
     const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
 
@@ -499,7 +500,7 @@ class ReportsCarrierPage extends Component {
                               {
                                 onChange: this.startDateChange,
                                 name: 'startAvailability',
-                                value: { startDate },
+                                value: {startDate},
                                 givenDate: new Date(startDate).getTime()
                               }
                             }
@@ -520,7 +521,7 @@ class ReportsCarrierPage extends Component {
                               {
                                 onChange: this.endDateChange,
                                 name: 'endAvailability',
-                                value: { endDate },
+                                value: {endDate},
                                 givenDate: new Date(endDate).getTime()
                               }
                             }
@@ -563,7 +564,7 @@ class ReportsCarrierPage extends Component {
                               {
                                 onChange: this.startDateCompChange,
                                 name: 'startAvailDateComp',
-                                value: { startDateComp },
+                                value: {startDateComp},
                                 givenDate: new Date(startDateComp).getTime()
                               }
                             }
@@ -584,7 +585,7 @@ class ReportsCarrierPage extends Component {
                               {
                                 onChange: this.endDateCompChange,
                                 name: 'endAvailDateComp',
-                                value: { endDateComp },
+                                value: {endDateComp},
                                 givenDate: new Date(endDateComp).getTime()
                               }
                             }
@@ -600,7 +601,6 @@ class ReportsCarrierPage extends Component {
               </div>
             </div>
           </div>
-
         </Container>
       );
     }
@@ -621,7 +621,7 @@ class ReportsCarrierPage extends Component {
       selectIndex,
       selectIndexComp
     } = this.state;
-    let { jobs } = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     const totalJobs = jobs.length;
@@ -690,7 +690,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Jobs In Progress</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Jobs In Progress</center>
+                    </h5>
                     <span><center><h4>{inProgressJobCount}</h4></center></span>
                   </div>
                 </div>
@@ -699,7 +701,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Booked Jobs</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Booked Jobs</center>
+                    </h5>
                     <span><center><h4>{acceptedJobCount}</h4></center></span>
                   </div>
                 </div>
@@ -708,7 +712,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>New Offers</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>New Offers</center>
+                    </h5>
                     <span><center><h4>{newJobCount}</h4></center></span>
                   </div>
                 </div>
@@ -717,7 +723,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Potential Earnings</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Potential Earnings</center>
+                    </h5>
                     <div className="my-auto">
                       <span><center><h4>{potentialIncome}</h4></center></span>
                     </div>
@@ -729,7 +737,9 @@ class ReportsCarrierPage extends Component {
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <div className="my-auto">
-                      <h5 className="card__title bold-text"><center>Job Completion Rate</center></h5>
+                      <h5 className="card__title bold-text">
+                        <center>Job Completion Rate</center>
+                      </h5>
                       <span><center><h4>{completedOffersPercent}</h4></center></span>
                       <div className="text-center pt-3">
                         <span className="form__form-group-label">completed:</span>&nbsp;<span>{completedJobCount}</span>
@@ -744,7 +754,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-sm-12 col-md-4 col-lg-3">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Completed Jobs</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Completed Jobs</center>
+                    </h5>
                     <span><center><h4>{completedJobCount}</h4></center></span>
                   </div>
                 </div>
@@ -772,7 +784,7 @@ class ReportsCarrierPage extends Component {
       selectIndex,
       selectIndexComp
     } = this.state;
-    let { jobs } = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     const totalJobs = jobs.length;
@@ -841,8 +853,10 @@ class ReportsCarrierPage extends Component {
 
             <Row>
               <Col md={12}>
-                <h3 className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>
-                <h3 className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>
+                <h3
+                  className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>
+                <h3
+                  className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>
               </Col>
             </Row>
 
@@ -850,7 +864,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-md-2 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Jobs Completed</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Jobs Completed</center>
+                    </h5>
                     <span><center><h4>{jobsCompleted}</h4></center></span>
                   </div>
                 </div>
@@ -859,7 +875,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Total Earnings</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Total Earnings</center>
+                    </h5>
                     <span><center><h4>{totalEarnings}</h4></center></span>
                   </div>
                 </div>
@@ -868,7 +886,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Earnings / Job</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Earnings / Job</center>
+                    </h5>
                     <span><center><h4>{earningsPerJob}</h4></center></span>
                   </div>
                 </div>
@@ -877,7 +897,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Cancelled Jobs</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Cancelled Jobs</center>
+                    </h5>
                     <span><center><h4>{cancelledJobs}</h4></center></span>
                   </div>
                 </div>
@@ -886,7 +908,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Jobs / Truck</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Jobs / Truck</center>
+                    </h5>
                     <span><center><h4>{jobsPerTruck}</h4></center></span>
                   </div>
                 </div>
@@ -895,7 +919,9 @@ class ReportsCarrierPage extends Component {
               <div className="col-12 col-md-4 col-lg-4">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text"><center>Idle Trucks</center></h5>
+                    <h5 className="card__title bold-text">
+                      <center>Idle Trucks</center>
+                    </h5>
                     <span><center><h4>{idleTrucks}</h4></center></span>
                   </div>
                 </div>
@@ -922,7 +948,7 @@ class ReportsCarrierPage extends Component {
       endDateComp,
       selectIndex
     } = this.state;
-    let { jobs } = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     const totalJobs = jobs.length;
@@ -1589,7 +1615,7 @@ class ReportsCarrierPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">

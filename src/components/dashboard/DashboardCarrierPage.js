@@ -538,7 +538,7 @@ class DashboardCarrierPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Date Range
                       </div>
@@ -550,7 +550,7 @@ class DashboardCarrierPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -579,7 +579,7 @@ class DashboardCarrierPage extends Component {
                         placeholder={rateTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Min Rate
                       </div>
@@ -596,7 +596,7 @@ class DashboardCarrierPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Minimum
                       </div>
@@ -613,7 +613,7 @@ class DashboardCarrierPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -642,7 +642,7 @@ class DashboardCarrierPage extends Component {
                         placeholder={equipmentTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
@@ -659,7 +659,7 @@ class DashboardCarrierPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Zip Code
                       </div>
@@ -671,7 +671,7 @@ class DashboardCarrierPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col>
+                    <Col md="3">
                       <div className="filter-item-title">
                         Materials
                       </div>
