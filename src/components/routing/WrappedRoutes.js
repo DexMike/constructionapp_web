@@ -14,6 +14,7 @@ import EquipmentListPage from '../equipments/EquipmentListPage';
 import EquipmentSavePage from '../equipments/EquipmentSavePage';
 import UserPage from '../users/UserPage';
 import DriverListPage from '../drivers/DriverListPage';
+import DriverForm from '../drivers/DriverForm';
 // import UserListPage from '../users/UserListPage';
 import UserSavePage from '../users/UserSavePage';
 import TrucksList from '../trucksList/TrucksList';
@@ -124,6 +125,12 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/drivers"
             component={DriverListPage}
+          />
+
+          <Route
+            exact
+            path="/drivers/save/:id"
+            component={DriverForm}
           />
 
           <Route
