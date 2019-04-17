@@ -72,14 +72,15 @@ class JobCustomerForm extends Component {
   // }
 
   async componentDidMount() {
-    const { job } = this.props;
-    let { images } = this.state;
+    let { job, images } = this.props;
     const bookings = await BookingService.getBookingsByJobId(job.id);
+
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       images = bookingInvoices.map(item => item.image);
     }
+
     this.setState({
       images,
       loaded: true
@@ -191,30 +192,26 @@ class JobCustomerForm extends Component {
           {/* <br/> */}
           {job.company.legalName}
           <br/>
-          Carrier Contact Name
+          {/* Find the company admin name */}
+          Phone #: <a
+          href={'tel:' + TFormat.asPhoneText(job.company.phone)}>{TFormat.asPhoneText(job.company.phone)}</a>
           <br/>
-          Phone #: <a href="tel:{job.company.phone}">{job.company.phone}</a>
-          <br/>
-          # of trucks
+          Number of Trucks: {job.numEquipments}
           <br/>
         </div>
         <div className="col-md-4">
           <h3 className="subhead">
             Dates:
           </h3>
-          Start Date: {TFormat.asDateTime(job.startTime)}
+          Start Date: {TFormat.asDayWeek(job.startTime)}
           <br/>
-          Created On: {TFormat.asDateTime(job.createdOn)}
+          Created On: {TFormat.asDayWeek(job.createdOn)}
         </div>
         <div className="col-md-4">
           <h3 className="subhead">
-            Carrier Status: {job.status}
+            Status: {job.status}
           </h3>
           Estimated Cost: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
-          <br/>
-          Potential Earnings: {
           TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
         }
           <br/>
@@ -682,6 +679,58 @@ class JobCustomerForm extends Component {
       endAddress = this.renderEndAddress(job.endAddress);
     }
 
+    if (job.status === 'Job Completed') {
+      return (
+        <Container>
+          <Card>
+            <CardBody className="card-full-height">
+              <Row>
+                {this.renderJobTop(job)}
+              </Row>
+              <hr/>
+              <Row>
+                <div className="col-md-8 backo_red">
+                  {this.renderGoogleMap(origin, destination)}
+                </div>
+                <div className="col-md-4">
+                  <div className="row">
+                    <div className="col-md-12">
+                      {this.renderStartAddress(job.startAddress)}
+                    </div>
+                  </div>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {endAddress}
+                    </div>
+                  </div>
+                  <hr/>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {this.renderJobBottom(job)}
+                    </div>
+                  </div>
+                </div>
+              </Row>
+              <hr/>
+              <div className="row">
+                <div className="col-md-4">
+                  {this.renderJobTons(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderJobLoads(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderRunSummary(job)}
+                </div>
+              </div>
+              <hr/>
+              {this.renderJobRuns(job)}
+              {this.renderUploadedPhotos(images)}
+            </CardBody>
+          </Card>
+        </Container>
+      );
+    }
     return (
       <Container>
         <Card>
@@ -712,22 +761,24 @@ class JobCustomerForm extends Component {
                   </div>
                 </div>
               </div>
+              {/*<div className="col-md-12">*/}
+              {/*  {this.renderImages(images)}*/}
+              {/*</div>*/}
             </Row>
             <hr/>
-            <div className="row">
-              <div className="col-md-4">
-                {this.renderJobTons(job)}
-              </div>
-              <div className="col-md-4">
-                {this.renderJobLoads(job)}
-              </div>
-              <div className="col-md-4">
-                {this.renderRunSummary(job)}
-              </div>
-            </div>
-            <hr/>
-            {this.renderJobRuns(job)}
-            {this.renderUploadedPhotos(images)}
+            {/*<div className="row">*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderJobTons(job)}*/}
+            {/*  </div>*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderJobLoads(job)}*/}
+            {/*  </div>*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderRunSummary(job)}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<hr/>*/}
+            {/*{this.renderJobRuns(job)}*/}
           </CardBody>
         </Card>
       </Container>
