@@ -18,8 +18,8 @@ import TSelect from '../common/TSelect';
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
-// import truckImage from '../../img/default_truck.png';
-import truckImage from '../../img/belly-dump.jpg';
+import truckImage from '../../img/default_truck.png';
+// import truckImage from '../../img/belly-dump.jpg';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
@@ -570,7 +570,7 @@ class TrucksCustomerPage extends Component {
                     </Col>
                     <Col md="4">
                       <div className="filter-item-title">
-                        Materials 
+                        Materials
                       </div>
                       <MultiSelect
                         input={
@@ -622,14 +622,14 @@ class TrucksCustomerPage extends Component {
   }
 
   renderEquipmentRow(equipment) {
-    /* let imageTruck = '';
+    let imageTruck = '';
 
     // checking if there's an image for the truck
     if ((equipment.image).trim()) { // use of trim removes whitespace from img url
       imageTruck = equipment.image;
     } else {
       imageTruck = `${window.location.origin}/${truckImage}`;
-    } */
+    }
 
     return (
       <React.Fragment>
@@ -637,7 +637,7 @@ class TrucksCustomerPage extends Component {
           <div className="col-md-12">
             <div className="row">
               <div className="col-md-3">
-                <img width="100%" src={`${window.location.origin}/${truckImage}`} alt=""
+                <img width="100%" src={imageTruck} alt=""
                      styles="background-size:contain;"
                 />
               </div>
