@@ -59,7 +59,7 @@ class MarketplaceCarrierPage extends Component {
       // Filter values
       filters: {
         rateType: '',
-        searchType: "Carrier Job",
+        searchType: 'Carrier Job',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -241,7 +241,7 @@ class MarketplaceCarrierPage extends Component {
     for (const [key, value] of Object.entries(jobs)) {
       try {
         let truckMaterials = await
-          JobMaterialsService.getJobMaterialsByJobId(value.id);
+        JobMaterialsService.getJobMaterialsByJobId(value.id);
         truckMaterials = truckMaterials.map(material => ({
           material: material.value
         }));
@@ -623,7 +623,7 @@ class MarketplaceCarrierPage extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
-                        Minimum
+                        Min Capacity
                       </div>
                       <TField
                         input={
@@ -634,7 +634,7 @@ class MarketplaceCarrierPage extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder="# of tons"
                         type="number"
                       />
                     </Col>
