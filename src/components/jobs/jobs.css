@@ -16,6 +16,16 @@
 .hidden {
   display:none;
 }
+.shown {
+  display: block;
+  opacity: 1;
+  background: transparent;
+}
+.fifty {
+  /*pointer-events: none;*/
+  opacity: 0.5;
+  background: #ededed;
+}
 /*
 .wizard__step__rate{
   height: 36px !important;
