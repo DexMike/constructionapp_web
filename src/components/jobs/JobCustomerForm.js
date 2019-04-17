@@ -73,17 +73,16 @@ class JobCustomerForm extends Component {
 
   async componentDidMount() {
     const { job } = this.props;
-    let { images, loaded } = this.state;
+    let { images } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       images = bookingInvoices.map(item => item.image);
     }
-    loaded = true;
     this.setState({
       images,
-      loaded
+      loaded: true
     });
   }
 
@@ -592,19 +591,26 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderImages(images) {
-    return (
-      <React.Fragment>
-        <Row>
-          {images.map(item => (
-            <Col className="col-md-4 pt-4" key={`img-${item}`}>
-              <img key={item} src={`${item}`} alt={`${item}`}/>
-            </Col>
-          ))
-          }
-        </Row>
-      </React.Fragment>
-    );
+  renderUploadedPhotos(images) {
+    if (images && images.length > 0) {
+      return (
+        <React.Fragment>
+          <hr/>
+          <h3 className="subhead">
+            Uploaded Photos
+          </h3>
+          <Row>
+            {images.map(item => (
+              <Col className="col-md-3 pt-3" key={`img-${item}`}>
+                <img key={item} src={`${item}`} alt={`${item}`}/>
+              </Col>
+            ))
+            }
+          </Row>
+        </React.Fragment>
+      );
+    }
+    return false;
   }
 
   renderStartAddress(address) {
@@ -706,9 +712,6 @@ class JobCustomerForm extends Component {
                   </div>
                 </div>
               </div>
-              <div className="col-md-12">
-                {this.renderImages(images)}
-              </div>
             </Row>
             <hr/>
             <div className="row">
@@ -724,6 +727,7 @@ class JobCustomerForm extends Component {
             </div>
             <hr/>
             {this.renderJobRuns(job)}
+            {this.renderUploadedPhotos(images)}
           </CardBody>
         </Card>
       </Container>
