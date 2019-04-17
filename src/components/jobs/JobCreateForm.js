@@ -1069,7 +1069,7 @@ class JobCreateForm extends Component {
           </div>
           <div className="col-sm-8">
             <button type="submit" className="btn btn-primary">
-              Accept Request
+              Request Truck
             </button>
           </div>
         </div>

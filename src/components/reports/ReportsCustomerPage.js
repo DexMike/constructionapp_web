@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
+import {Card, CardBody, Col, Container, Row} from 'reactstrap';
 import moment from 'moment';
 // Button,
 // import PropTypes from 'prop-types';
@@ -133,7 +133,7 @@ class ReportsCustomerPage extends Component {
   }
 
   async componentDidMount() {
-    const { filters, filtersComp, selectIndex, selectIndexComp } = this.state;
+    const {filters, filtersComp, selectIndex, selectIndexComp} = this.state;
     let {
       startDate,
       endDate,
@@ -247,7 +247,7 @@ class ReportsCustomerPage extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -270,7 +270,7 @@ class ReportsCustomerPage extends Component {
       //     return job;
       //   });
       // }
-      this.setState({ jobs });
+      this.setState({jobs});
     }
     return jobs;
   }
@@ -293,8 +293,8 @@ class ReportsCustomerPage extends Component {
   }
 
   async handleSelectFilterChange(option) {
-    const { value, name } = option;
-    const { filters } = this.state;
+    const {value, name} = option;
+    const {filters} = this.state;
     let {
       jobsComp,
       startDate,
@@ -329,8 +329,8 @@ class ReportsCustomerPage extends Component {
   }
 
   async handleSelectFilterChangeComp(option) {
-    const { value, name } = option;
-    const { filtersComp } = this.state;
+    const {value, name} = option;
+    const {filtersComp} = this.state;
     let {
       jobs,
       startDateComp,
@@ -366,8 +366,8 @@ class ReportsCustomerPage extends Component {
   }
 
   async startDateChange(data) {
-    const { filters, endDate } = this.state;
-    let { startDate } = this.state;
+    const {filters, endDate} = this.state;
+    let {startDate} = this.state;
 
     startDate = data;
     filters.startAvailability = startDate;
@@ -382,8 +382,8 @@ class ReportsCustomerPage extends Component {
   }
 
   async startDateCompChange(data) {
-    const { filters, endDateComp } = this.state;
-    let { startDateComp } = this.state;
+    const {filters, endDateComp} = this.state;
+    let {startDateComp} = this.state;
 
     startDateComp = data;
     filters.startAvailDateComp = startDateComp;
@@ -398,8 +398,8 @@ class ReportsCustomerPage extends Component {
   }
 
   async endDateChange(data) {
-    const { filters, startDate } = this.state;
-    let { endDate } = this.state;
+    const {filters, startDate} = this.state;
+    let {endDate} = this.state;
 
     endDate = data;
     filters.endAvailability = endDate;
@@ -414,8 +414,8 @@ class ReportsCustomerPage extends Component {
   }
 
   async endDateCompChange(data) {
-    const { filters, startDateComp } = this.state;
-    let { endDateComp } = this.state;
+    const {filters, startDateComp} = this.state;
+    let {endDateComp} = this.state;
 
     endDateComp = data;
     filters.endAvailDateComp = endDateComp;
@@ -440,7 +440,7 @@ class ReportsCustomerPage extends Component {
   }
 
   async isCustomRange(startDate, endDate) {
-    let { selectIndex } = this.state;
+    let {selectIndex} = this.state;
     const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
     const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
 
@@ -469,7 +469,7 @@ class ReportsCustomerPage extends Component {
   }
 
   async isCustomRangeComp(startDate, endDate) {
-    let { selectIndexComp } = this.state;
+    let {selectIndexComp} = this.state;
     const startDateId = `${startDate.getDate()}${startDate.getMonth()}${startDate.getFullYear()}`;
     const endDateId = `${endDate.getDate()}${endDate.getMonth()}${endDate.getFullYear()}`;
 
@@ -536,132 +536,135 @@ class ReportsCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row date-filter">
-            <div className="col-md-12">
+            <div className="col-12 col-md-12 col-lg-12">
               <div className="card">
                 <div className="card-body">
                   <div className="row">
-                    <div className="col-md-6">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
+                      <span className="form__form-group-label">BASELINE&nbsp;</span>
+                      <span className="form__form-group-label">Time Range</span>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: this.timeRanges[selectIndex].name,
+                            value: this.timeRanges[selectIndex].value
+                          }
+                        }
+                        value={this.timeRanges[selectIndex].value.toString()}
+                        options={
+                          this.timeRanges.map(timeRange => ({
+                            name: timeRange.name,
+                            value: timeRange.value.toString(),
+                            label: timeRange.name
+                          }))
+                        }
+                        placeholder={this.timeRanges[selectIndex].name}
+                      />
+                    </div>
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
+                      <span className="form__form-group-label">From</span>
                       <div className="row">
-                        <div className="col-md-3 form__form-group">
-                          <span className="form__form-group-label">BASELINE&nbsp;</span>
-                          <span className="form__form-group-label">Time Range</span>
-                          <TSelect
+                        <div className="col-12">
+                          <TDateTimePicker
                             input={
                               {
-                                onChange: this.handleSelectFilterChange,
-                                name: this.timeRanges[selectIndex].name,
-                                value: this.timeRanges[selectIndex].value
+                                onChange: this.startDateChange,
+                                name: 'startAvailability',
+                                value: {startDate},
+                                givenDate: new Date(startDate).getTime()
                               }
                             }
-                            value={this.timeRanges[selectIndex].value.toString()}
-                            options={
-                              this.timeRanges.map(timeRange => ({
-                                name: timeRange.name,
-                                value: timeRange.value.toString(),
-                                label: timeRange.name
-                              }))
-                            }
-                            placeholder={this.timeRanges[selectIndex].name}
+                            onChange={this.startDateChange}
+                            dateFormat="MM-dd-yy"
                           />
+
                         </div>
-                        <div className="col-md-2 form__form-group">
-                          <span className="form__form-group-label">From</span>
-                          <div className="row">
-                            <TDateTimePicker
-                              input={
-                                {
-                                  onChange: this.startDateChange,
-                                  name: 'startAvailability',
-                                  value: { startDate },
-                                  givenDate: new Date(startDate).getTime()
-                                }
-                              }
-                              onChange={this.startDateChange}
-                              dateFormat="MM-dd-yy"
-                            />
-                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                          </div>
-                        </div>
-                        <div className="col-md-2 form__form-group">
-                          <span className="form__form-group-label">To</span>
-                          <div className="row">
-                            <TDateTimePicker
-                              input={
-                                {
-                                  onChange: this.endDateChange,
-                                  name: 'endAvailability',
-                                  value: { endDate },
-                                  givenDate: new Date(endDate).getTime()
-                                }
-                              }
-                              onChange={this.endDateChange}
-                              dateFormat="MM-dd-yy"
-                            />
-                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                          </div>
-                        </div>
+                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
                       </div>
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
+                      <span className="form__form-group-label">To</span>
                       <div className="row">
-                        <div className="col-md-3 form__form-group">
-                          <span className="form__form-group-label">COMPARISON&nbsp;</span>
-                          <span className="form__form-group-label">Time Range</span>
-                          <TSelect
+                        <div className="col-12">
+                          <TDateTimePicker
                             input={
                               {
-                                onChange: this.handleSelectFilterChangeComp,
-                                name: this.timeRanges[selectIndexComp].name,
-                                value: this.timeRanges[selectIndexComp].value
+                                onChange: this.endDateChange,
+                                name: 'endAvailability',
+                                value: {endDate},
+                                givenDate: new Date(endDate).getTime()
                               }
                             }
-                            value={this.timeRanges[selectIndexComp].value.toString()}
-                            options={
-                              this.timeRanges.map(timeRange => ({
-                                name: timeRange.name,
-                                value: timeRange.value.toString(),
-                                label: timeRange.name
-                              }))
-                            }
-                            placeholder={this.timeRanges[selectIndexComp].name}
+                            onChange={this.endDateChange}
+                            dateFormat="MM-dd-yy"
                           />
                         </div>
-                        <div className="col-md-2 form__form-group">
-                          <span className="form__form-group-label">From</span>
-                          <div className="row">
-                            <TDateTimePicker
-                              input={
-                                {
-                                  onChange: this.startDateCompChange,
-                                  name: 'startAvailDateComp',
-                                  value: { startDateComp },
-                                  givenDate: new Date(startDateComp).getTime()
-                                }
+                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                      </div>
+                    </div>
+
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
+                      <span className="form__form-group-label">COMPARISON&nbsp;</span>
+                      <span className="form__form-group-label">Time Range</span>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChangeComp,
+                            name: this.timeRanges[selectIndexComp].name,
+                            value: this.timeRanges[selectIndexComp].value
+                          }
+                        }
+                        value={this.timeRanges[selectIndexComp].value.toString()}
+                        options={
+                          this.timeRanges.map(timeRange => ({
+                            name: timeRange.name,
+                            value: timeRange.value.toString(),
+                            label: timeRange.name
+                          }))
+                        }
+                        placeholder={this.timeRanges[selectIndexComp].name}
+                      />
+                    </div>
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
+                      <span className="form__form-group-label">From</span>
+                      <div className="row">
+                        <div className="col-12">
+                          <TDateTimePicker
+                            input={
+                              {
+                                onChange: this.startDateCompChange,
+                                name: 'startAvailDateComp',
+                                value: {startDateComp},
+                                givenDate: new Date(startDateComp).getTime()
                               }
-                              onChange={this.startDateCompChange}
-                              dateFormat="MM-dd-yy"
-                            />
-                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                          </div>
+                            }
+                            onChange={this.startDateCompChange}
+                            dateFormat="MM-dd-yy"
+                          />
+
                         </div>
-                        <div className="col-md-2 form__form-group">
-                          <span className="form__form-group-label">To</span>
-                          <div className="row">
-                            <TDateTimePicker
-                              input={
-                                {
-                                  onChange: this.endDateCompChange,
-                                  name: 'endAvailDateComp',
-                                  value: { endDateComp },
-                                  givenDate: new Date(endDateComp).getTime()
-                                }
+                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
+                      </div>
+                    </div>
+                    <div className="col-sm-4 col-md-3 col-lg-2 form__form-group">
+                      <span className="form__form-group-label">To</span>
+                      <div className="row">
+                        <div className="col-12">
+                          <TDateTimePicker
+                            input={
+                              {
+                                onChange: this.endDateCompChange,
+                                name: 'endAvailDateComp',
+                                value: {endDateComp},
+                                givenDate: new Date(endDateComp).getTime()
                               }
-                              onChange={this.endDateCompChange}
-                              dateFormat="MM-dd-yy"
-                            />
-                            <i className="material-icons iconSet calendarIcon">calendar_today</i>
-                          </div>
+                            }
+                            onChange={this.endDateCompChange}
+                            dateFormat="MM-dd-yy"
+                          />
                         </div>
+                        <i className="material-icons iconSet calendarIcon">calendar_today</i>
                       </div>
                     </div>
                   </div>
@@ -689,7 +692,7 @@ class ReportsCustomerPage extends Component {
       selectIndex,
       selectIndexComp
     } = this.state;
-    let { jobs } = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     const totalJobs = jobs.length;
@@ -839,7 +842,7 @@ class ReportsCustomerPage extends Component {
       selectIndex,
       selectIndexComp
     } = this.state;
-    let { jobs } = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     const totalJobs = jobs.length;
@@ -993,7 +996,7 @@ class ReportsCustomerPage extends Component {
       endDateComp,
       selectIndex
     } = this.state;
-    let { jobs } = this.state;
+    let {jobs} = this.state;
     let newJobCount = 0;
     let acceptedJobCount = 0;
     const totalJobs = jobs.length;
@@ -1676,7 +1679,7 @@ class ReportsCustomerPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">

@@ -10,6 +10,8 @@ import {
 // import EyeIcon from 'mdi-react/EyeIcon';
 import * as PropTypes from 'prop-types';
 import TDateTimePicker from '../common/TDateTimePicker';
+import CheckBox from '@material-ui/core/es/internal/svg-icons/CheckBox';
+// import CheckBox from '@material-ui/core/es/internal/svg-icons/CheckBox';
 // import { start } from 'repl';
 
 class AddTruckFormTwo extends PureComponent {
@@ -43,20 +45,20 @@ class AddTruckFormTwo extends PureComponent {
     const preloaded = getAvailiabilityFullInfo();
     if (Object.keys(preloaded).length > 0) {
       this.setState({
-        isAvailable: preloaded.info.isAvailable,
-        startDate: preloaded.info.startDate,
-        endDate: preloaded.info.endDate
-      },
-      function wait() { // wait until it loads
-        this.saveAvailabilityInfo(false);
-      });
+          isAvailable: preloaded.info.isAvailable,
+          startDate: preloaded.info.startDate,
+          endDate: preloaded.info.endDate
+        },
+        function wait() { // wait until it loads
+          this.saveAvailabilityInfo(false);
+        });
     } else {
       // console.log(47);
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const {validateResTwo} = this.props;
+    const { validateResTwo } = this.props;
     if (nextProps.validateOnTabTwoClick) {
       if (this.isFormValid()) {
         validateResTwo(true);
@@ -259,7 +261,7 @@ class AddTruckFormTwo extends PureComponent {
                     onChange={this.startDateChange}
                     meta={reqHandlerStartDate}
                   />
-                  <input type="hidden" value={p} />
+                  <input type="hidden" value={p}/>
                 </div>
                 <div className="col-md-6 form__form-group">
                   <span className="form__form-group-label">End</span>
@@ -278,22 +280,26 @@ class AddTruckFormTwo extends PureComponent {
                 </div>
               </Row>
 
-              <Row className="col-md-12">
-                <h3 className="subhead">Availability</h3>
-                <br/>
-                <div className="">
-                  {/* color={availableButtonColor(true)} */}
-                  <Button color={this.availableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
-                    Available
-                  </Button>
-                  <Button color={this.unavailableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">
-                    Un-available
-                  </Button>
+              {/*<h3 className="subhead">Availability</h3>*/}
+              <br/>
+              <div className="col-md-12 mt-1">
+                {/* color={availableButtonColor(true)} */}
+                {/*<Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">*/}
+                {/*  Available*/}
+                {/*</Button>*/}
+                {/*<Button color={this.unavailableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">*/}
+                {/*  Un-available*/}
+                {/*</Button>*/}
+
+                <div className="form-check checkbox-slider--b checkbox-slider-md">
+                  <label>
+                    <input type="checkbox" onClick={this.makeAvailable}/><span>Available to make deliveries</span>
+                  </label>
                 </div>
-              </Row>
+              </div>
 
               <Row className="col-md-12">
-                <hr className="bighr" />
+                <hr/>
               </Row>
 
               <Row className="col-md-12">
@@ -303,7 +309,8 @@ class AddTruckFormTwo extends PureComponent {
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button type="button" className="secondaryButton" onClick={this.saveAndGoBack} >Back</Button>
+                  <Button type="button" className="secondaryButton"
+                          onClick={this.saveAndGoBack}>Back</Button>
                   <Button type="submit" className="primaryButton">Next</Button>
                 </ButtonToolbar>
               </Row>
