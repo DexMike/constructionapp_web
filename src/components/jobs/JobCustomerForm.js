@@ -214,6 +214,10 @@ class JobCustomerForm extends Component {
           <h3 className="subhead">
             Status: {job.status}
           </h3>
+          Estimated Cost: {
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
+          <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
           Rate: ${job.rate} / {job.rateType}

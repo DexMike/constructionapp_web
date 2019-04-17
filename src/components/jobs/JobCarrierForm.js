@@ -159,6 +159,10 @@ class JobCarrierForm extends JobCustomerForm {
           <h3 className="subhead">
             Status: {job.status}
           </h3>
+          Potential Earnings: {
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
+          <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
           Rate: ${job.rate} / {job.rateType}
