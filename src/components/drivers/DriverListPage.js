@@ -121,6 +121,7 @@ class DriverListPage extends Component {
     }
     if (goToUpdateDriver) {
       return <Redirect push to={`/drivers/save/${userId}`}/>;
+      // return <Redirect push to={`/drivers/save/${userId}`}/>;
     }
     return true;
   }
@@ -199,7 +200,8 @@ class DriverListPage extends Component {
                       }
                     ]}
                     data={drivers}
-                    handleIdClick={this.toggleAddTruckModalClear}
+                    // handleIdClick={this.toggleAddTruckModalClear}
+                    handleIdClick={this.handleDriverEdit}
                   />
                 </CardBody>
               </Card>
