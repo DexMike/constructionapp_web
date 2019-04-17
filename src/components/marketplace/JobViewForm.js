@@ -133,14 +133,14 @@ class JobViewForm extends Component {
         newJob.startAddress = newJob.startAddress.id;
         newJob.endAddress = newJob.endAddress.id;
         delete newJob.materials;
+        await JobService.updateJob(newJob);
 
         newBid.hasSchedulerAccepted = 1;
         newBid.status = 'Accepted';
         newBid.modifiedBy = profile.userId;
         newBid.modifiedOn = moment()
           .unix() * 1000;
-        await JobService.updateJob(newJob);
-        // await BidService.updateBid(newBid);
+        await BidService.updateBid(newBid);
         // Let's make a call to Twilio to send an SMS
         // We need to change later get the body from the lookups table
         // We need to get the phone number from the carrier co
