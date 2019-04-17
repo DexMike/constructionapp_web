@@ -262,6 +262,7 @@ class AddTruckFormOne extends PureComponent {
     const shortDesc = description.substring(0, 45);
     let start = new Date();
     let end = new Date();
+    let available = false;
 
     // dates if preloaded
     const {
@@ -277,6 +278,7 @@ class AddTruckFormOne extends PureComponent {
       if (Object.keys(preloaded.info).length > 0) {
         start = preloaded.info.startAvailability;
         end = preloaded.info.endAvailability;
+        available = preloadedAvailability.info.isAvailable;
       }
     }
     // however, if there is already saved dates, we'll use that one
@@ -284,6 +286,7 @@ class AddTruckFormOne extends PureComponent {
       if (Object.keys(preloadedAvailability.info).length > 0) {
         start = preloadedAvailability.info.startDate;
         end = preloadedAvailability.info.endDate;
+        available = preloadedAvailability.info.isAvailable;
       }
     }
 
@@ -302,7 +305,7 @@ class AddTruckFormOne extends PureComponent {
       licensePlate,
       vin,
       image,
-      currentAvailability: 1, // unasigned
+      currentAvailability: available, // unasigned
       startAvailability: start, // careful here, it's date unless it exists
       endAvailability: end,
       ratesByBoth, // keeping here in order to track it
@@ -445,7 +448,7 @@ class AddTruckFormOne extends PureComponent {
         value: String(material.id),
         label: material.value
       }));
-      // console.log(truckMaterials);
+
       let { files } = this.state;
       if (passedTruckFullInfo.image
         && passedTruckFullInfo.image.trim().length > 0) {
@@ -540,14 +543,6 @@ class AddTruckFormOne extends PureComponent {
       const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
       this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
       this.setState({ imageUploading: false });
-      // console.log(result);
-      // } catch (err) {
-      //   console.log(err);
-      // }
-      // .then(result => console.log(result))
-      // .catch(err =>);
-      // {key: "2019/52/rb3zYH.png"}
-      // this.showResults(this.state.files)
     }
   }
 
