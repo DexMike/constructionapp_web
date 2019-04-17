@@ -218,9 +218,12 @@
 // ---- form validation error
 .form.form--horizontal .form__form-group-input-wrap--error-above .form__form-group-error,
 span.form__form-group-error {
-  top: 0;
+  /* top: 0;
   width: 28em;
-  margin-top: -3em !important;
+  margin-top: -3em !important; */
+  top: -8px !important;
+  line-height: 10px;
+
 }
 // ---- form validation error
 

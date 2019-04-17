@@ -71,7 +71,11 @@ class JobCreateFormTwo extends PureComponent {
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
       favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
-      nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
+
+      if (biddersIdsNotFavorites.length > 0) {
+        nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
+      }
+
       this.setState({
         showSendtoFavorites: true,
         favoriteCompanies,
@@ -132,41 +136,50 @@ class JobCreateFormTwo extends PureComponent {
     const profile = await ProfileService.getProfile();
 
     // start location
-    const address1 = {
-      type: 'Delivery',
-      name: 'Delivery Start Location',
-      companyId: 19, // 'this should change',
-      address1: d.startLocationAddress1,
-      address2: d.startLocationAddress2,
-      city: d.startLocationCity,
-      state: d.startLocationState,
-      zipCode: d.startLocationZip,
-      createdBy: profile.userId,
-      createdOn: moment()
-        .unix() * 1000,
-      modifiedBy: profile.userId,
-      modifiedOn: moment()
-        .unix() * 1000
+    let startAddress = {
+      id: null
     };
-    const startAddress = await AddressService.createAddress(address1);
+    if (d.selectedStartAddressId === 0) {
+      const address1 = {
+        type: 'Delivery',
+        name: 'Delivery Start Location',
+        companyId: 19, // 'this should change',
+        address1: d.startLocationAddress1,
+        address2: d.startLocationAddress2,
+        city: d.startLocationCity,
+        state: d.startLocationState,
+        zipCode: d.startLocationZip,
+        createdBy: profile.userId,
+        createdOn: moment()
+          .unix() * 1000,
+        modifiedBy: profile.userId,
+        modifiedOn: moment()
+          .unix() * 1000
+      };
+      startAddress = await AddressService.createAddress(address1);
+    } else {
+      startAddress.id = d.selectedStartAddressId;
+    }
 
     // end location
     let endAddress = {
       id: null
     };
-    // if (d.rateTab === 2) {
-    const address2 = {
-      type: 'Delivery',
-      name: 'Delivery End Location',
-      companyId: 19, // 'this should change',
-      address1: d.endLocationAddress1,
-      address2: d.endLocationAddress2,
-      city: d.endLocationCity,
-      state: d.endLocationState,
-      zipCode: d.endLocationZip
-    };
-    endAddress = await AddressService.createAddress(address2);
-    // }
+    if (d.selectedEndAddressId === 0) {
+      const address2 = {
+        type: 'Delivery',
+        name: 'Delivery End Location',
+        companyId: 19, // 'this should change',
+        address1: d.endLocationAddress1,
+        address2: d.endLocationAddress2,
+        city: d.endLocationCity,
+        state: d.endLocationState,
+        zipCode: d.endLocationZip
+      };
+      endAddress = await AddressService.createAddress(address2);
+    } else {
+      endAddress.id = d.selectedEndAddressId;
+    }
 
     // job p
     let isFavorited = 0;
@@ -355,12 +368,7 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className="col-md-6 form__form-group">
-                    <Button color="minimal" className="btn btn-outline-secondary" type="button">
-                      Hours
-                    </Button>
-                    <Button color="secondary" className="btn btn-outline-secondary" type="button">
-                      Days
-                    </Button>
+                    Hours
                   </div>
                 </Row>
 

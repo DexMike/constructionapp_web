@@ -504,7 +504,7 @@ class DashboardCarrierPage extends Component {
             <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             <DashboardObjectClickable title="Completed Jobs" displayVal = {completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
             {/*<DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent}/>*/}
-            <DashboardObjectStatic title="Potential Earnings" displayVal={potentialIncome}/>
+            <DashboardObjectStatic title={filters["status"] === "Job Completed"  ? "Earnings" : "Potential Earnings"} displayVal={potentialIncome}/>
           </div>
         </Container>
       );
@@ -538,7 +538,7 @@ class DashboardCarrierPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Date Range
                       </div>
@@ -550,7 +550,7 @@ class DashboardCarrierPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -579,7 +579,7 @@ class DashboardCarrierPage extends Component {
                         placeholder={rateTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Min Rate
                       </div>
@@ -596,7 +596,7 @@ class DashboardCarrierPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Minimum
                       </div>
@@ -613,7 +613,7 @@ class DashboardCarrierPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -642,7 +642,7 @@ class DashboardCarrierPage extends Component {
                         placeholder={equipmentTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
@@ -659,7 +659,7 @@ class DashboardCarrierPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Zip Code
                       </div>
@@ -671,7 +671,7 @@ class DashboardCarrierPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col>
+                    <Col md="3">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -776,6 +776,7 @@ class DashboardCarrierPage extends Component {
 
     // console.log(jobs);
     if (loaded) {
+      const {filters} = this.state;
       return (
         <Container className="dashboard">
           <Row>
@@ -795,6 +796,10 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Start Date'
                         },
                         {
+                          name: 'name',
+                          displayName: 'Job Name'
+                        },
+                        {
                           name: 'status',
                           displayName: 'Job Status'
                         },
@@ -808,7 +813,7 @@ class DashboardCarrierPage extends Component {
                         },
                         {
                           name: 'estimatedIncome',
-                          displayName: 'Potencial Earnings'
+                          displayName: filters.status === "Job Completed" ? "Earnings" : "Potential Earnings"
                         },
                         {
                           name: 'newRate',

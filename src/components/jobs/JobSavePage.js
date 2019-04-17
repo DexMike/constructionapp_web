@@ -1,7 +1,7 @@
-
 import React, { Component } from 'react';
 import {
-  Container
+  Container,
+  Button
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
@@ -68,7 +68,10 @@ class JobSavePage extends Component {
 
     // moved the loader to the mount function
     const profile = await ProfileService.getProfile();
-    this.setState({ companyType: profile.companyType, loaded: true },
+    this.setState({
+        companyType: profile.companyType,
+        loaded: true
+      },
       () => {
         // console.log('setState completed', this.state);
       });
@@ -90,13 +93,14 @@ class JobSavePage extends Component {
   renderGoTo() {
     const { goToDashboard, goToJob } = this.state;
     if (goToDashboard) {
-      return <Redirect push to="/" />;
+      return <Redirect push to="/"/>;
     }
     if (goToJob) {
-      return <Redirect push to="/jobs" />;
+      return <Redirect push to="/jobs"/>;
     }
     return false;
   }
+
 
   render() {
     const { job, companyType, loaded } = this.state;
@@ -104,25 +108,50 @@ class JobSavePage extends Component {
       // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
         let type = '';
+        const acceptJob = job;
         // console.log(companyType);
         // get the <JobCarrierForm> inside parentheses so that jsx doesn't complain
         if (companyType === 'Carrier') {
-          type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick} />);
+          type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick}/>);
         } else {
-          type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick} />);
+          type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
         }
-        return (
-          <div className="container">
-            <div className="col-md-12">
-              <h3 className="page-title">
-                Job Details
-              </h3>
+        if (acceptJob.status === 'On Offer') {
+          return (
+            <div className="container">
+              <div className="row">
+                <div className="col-md-10">
+                  <h3 className="page-title">
+                    Job Details
+                  </h3>
+                </div>
+                <div className="col-md-2">
+                  <Button className="btn btn-primary">
+                    Confirm Job Request
+                  </Button>
+                </div>
+              </div>
+              {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
+              {/* this.carrierOrCustomerForm(job) */}
+              {type}
             </div>
-            {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
-            {/* this.carrierOrCustomerForm(job) */}
-            {type}
-          </div>
-        );
+          );
+        } else {
+          return (
+            <div className="container">
+              <div className="row">
+                <div className="col-md-10">
+                  <h3 className="page-title">
+                    Job Details
+                  </h3>
+                </div>
+              </div>
+              {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
+              {/* this.carrierOrCustomerForm(job) */}
+              {type}
+            </div>
+          );
+        }
       }
     }
     return (

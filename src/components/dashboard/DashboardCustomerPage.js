@@ -234,33 +234,9 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchJobs() {
+    // console.log(237);
     const { filters } = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-
-    // if (jobs) {
-    //   await this.fetchFilterLists();
-    //
-    //   jobs.map(async (job) => {
-    //     const newJob = job;
-    //
-    //     const company = await CompanyService.getCompanyById(newJob.companiesId);
-    //     newJob.companyName = company.legalName;
-    //
-    //     const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-    //     const materials = materialsList.map(materialItem => materialItem.value);
-    //     newJob.materials = this.equipmentMaterialsAsString(materials);
-    //
-    //     const address = await AddressService.getAddressById(newJob.startAddress);
-    //     newJob.zip = address.zipCode;
-    //
-    //     // Todo do a real distance calculation from profile.company.zip
-    //     newJob.distance = (address.zipCode + 1) / 3000;
-    //
-    //     this.setState({loaded: true});
-    //
-    //     return newJob;
-    //   });
-    // }
 
     this.setState({ jobs });
     return jobs;
@@ -541,7 +517,7 @@ class DashboardCustomerPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Date Range
                       </div>
@@ -553,7 +529,7 @@ class DashboardCustomerPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -582,7 +558,7 @@ class DashboardCustomerPage extends Component {
                         placeholder={rateTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Min Rate
                       </div>
@@ -599,7 +575,7 @@ class DashboardCustomerPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Minimum
                       </div>
@@ -616,7 +592,7 @@ class DashboardCustomerPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -645,7 +621,7 @@ class DashboardCustomerPage extends Component {
                         placeholder={equipmentTypeList[0]}
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
@@ -662,7 +638,7 @@ class DashboardCustomerPage extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col>
+                    <Col md="1">
                       <div className="filter-item-title">
                         Zip Code
                       </div>
@@ -674,7 +650,7 @@ class DashboardCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col>
+                    <Col md="3">
                       <div className="filter-item-title">
                         Materials
                       </div>
