@@ -58,7 +58,7 @@ class JobCarrierForm extends JobCustomerForm {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       const images = bookingInvoices.map(item => item.image);
-      this.setState({images});
+      this.setState({ images });
     }
   }
 
@@ -131,6 +131,44 @@ class JobCarrierForm extends JobCustomerForm {
     this.handlePageClick('Job');
   }
 
+  renderJobTop(job) {
+    return (
+      <React.Fragment>
+        <div className="col-md-4">
+          <h3 className="subhead">
+            Job: {job.name}
+          </h3>
+          {job.company.legalName}
+          <br/>
+          {/* Find the company admin name */}
+          Phone #: <a
+          href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
+          <br/>
+          Number of Trucks: {job.numEquipments}
+          <br/>
+        </div>
+        <div className="col-md-4">
+          <h3 className="subhead">
+            Dates:
+          </h3>
+          Start Date: {TFormat.asDayWeek(job.startTime)}
+          <br/>
+          Created On: {TFormat.asDayWeek(job.createdOn)}
+        </div>
+        <div className="col-md-4">
+          <h3 className="subhead">
+            Status: {job.status}
+          </h3>
+          Estimated Amount: {job.rateEstimate} {job.rateType}(s)
+          <br/>
+          Rate: ${job.rate} / {job.rateType}
+          <br/>
+          Product: {this.materialsAsString(job.materials)}
+        </div>
+      </React.Fragment>
+    );
+  }
+
   renderMapBox(origin, destination) {
 
     // Need to first convert addresses to long, lat.
@@ -188,6 +226,66 @@ class JobCarrierForm extends JobCustomerForm {
       endAddress = this.renderEndAddress(job.endAddress);
     }
 
+    if (job.status === 'Job Completed') {
+      return (
+        <Container>
+          <Card>
+            <CardBody className="card-full-height">
+              <Row>
+                {this.renderJobTop(job)}
+              </Row>
+              <hr/>
+              <Row>
+                <div className="col-md-8 backo_red">
+
+                  {/*swap to mapbox from Google*/}
+                  {/*{this.renderMapBox(origin, destination)}*/}
+
+                  {/*Call from parent object*/}
+                  {this.renderGoogleMap(origin, destination)}
+
+                </div>
+                <div className="col-md-4">
+                  <div className="row">
+                    <div className="col-md-12">
+                      {this.renderStartAddress(job.startAddress)}
+                    </div>
+                  </div>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {endAddress}
+                    </div>
+                  </div>
+                  <hr/>
+                  <div className="row  mt-1">
+                    <div className="col-md-12">
+                      {this.renderJobBottom(job)}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-12">
+                  {this.renderImages(images)}
+                </div>
+              </Row>
+              <hr/>
+              <div className="row">
+                <div className="col-md-4">
+                  {this.renderJobTons(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderJobLoads(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderRunSummary(job)}
+                </div>
+              </div>
+              <hr/>
+              {this.renderJobRuns(job)}
+            </CardBody>
+          </Card>
+        </Container>
+      );
+    }
     return (
       <Container>
         <Card>
@@ -214,7 +312,7 @@ class JobCarrierForm extends JobCustomerForm {
                 </div>
                 <div className="row mt-1">
                   <div className="col-md-12">
-                      {endAddress}
+                    {endAddress}
                   </div>
                 </div>
                 <hr/>
@@ -224,24 +322,24 @@ class JobCarrierForm extends JobCustomerForm {
                   </div>
                 </div>
               </div>
-              <div className="col-md-12">
-                {this.renderImages(images)}
-              </div>
+              {/*<div className="col-md-12">*/}
+              {/*  {this.renderImages(images)}*/}
+              {/*</div>*/}
             </Row>
             <hr/>
-            <div className="row">
-              <div className="col-md-4">
-                {this.renderJobTons(job)}
-              </div>
-              <div className="col-md-4">
-                {this.renderJobLoads(job)}
-              </div>
-              <div className="col-md-4">
-                {this.renderRunSummary(job)}
-              </div>
-            </div>
-            <hr/>
-            {this.renderJobRuns(job)}
+            {/*<div className="row">*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderJobTons(job)}*/}
+            {/*  </div>*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderJobLoads(job)}*/}
+            {/*  </div>*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderRunSummary(job)}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<hr/>*/}
+            {/*{this.renderJobRuns(job)}*/}
           </CardBody>
         </Card>
       </Container>

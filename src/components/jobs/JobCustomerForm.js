@@ -15,7 +15,6 @@ import BookingInvoiceService from '../../api/BookingInvoiceService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
-import CompanyService from '../../api/CompanyService';
 // import pinAImage from '../../img/PinA.png';
 // import pinBImage from '../../img/PinB.png';
 
@@ -39,6 +38,10 @@ class JobCustomerForm extends Component {
         .unix() * 1000,
       isArchived: 0
     };
+
+    // const company = {
+    //   type: 'Carrier'
+    // };
 
     this.state = {
       ...job,
@@ -73,17 +76,19 @@ class JobCustomerForm extends Component {
   // }
 
   async componentDidMount() {
-    let { job } = this.props;
+    let { job, images } = this.props;
     const bookings = await BookingService.getBookingsByJobId(job.id);
+
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
-      const images = bookingInvoices.map(item => item.image);
-      this.setState({
-        images,
-        loaded: true
-      });
+      images = bookingInvoices.map(item => item.image);
     }
+
+    this.setState({
+      images,
+      loaded: true
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -180,6 +185,7 @@ class JobCustomerForm extends Component {
     return true;
   }
 
+
   renderJobTop(job) {
     return (
       <React.Fragment>
@@ -208,14 +214,6 @@ class JobCustomerForm extends Component {
           <h3 className="subhead">
             Status: {job.status}
           </h3>
-          Estimated Cost: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
-          <br/>
-          Potential Earnings: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
-          <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
           Rate: ${job.rate} / {job.rateType}
@@ -673,6 +671,60 @@ class JobCustomerForm extends Component {
       endAddress = this.renderEndAddress(job.endAddress);
     }
 
+    if (job.status === 'Job Completed') {
+      return (
+        <Container>
+          <Card>
+            <CardBody className="card-full-height">
+              <Row>
+                {this.renderJobTop(job)}
+              </Row>
+              <hr/>
+              <Row>
+                <div className="col-md-8 backo_red">
+                  {this.renderGoogleMap(origin, destination)}
+                </div>
+                <div className="col-md-4">
+                  <div className="row">
+                    <div className="col-md-12">
+                      {this.renderStartAddress(job.startAddress)}
+                    </div>
+                  </div>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {endAddress}
+                    </div>
+                  </div>
+                  <hr/>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {this.renderJobBottom(job)}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-12">
+                  {this.renderImages(images)}
+                </div>
+              </Row>
+              <hr/>
+              <div className="row">
+                <div className="col-md-4">
+                  {this.renderJobTons(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderJobLoads(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderRunSummary(job)}
+                </div>
+              </div>
+              <hr/>
+              {this.renderJobRuns(job)}
+            </CardBody>
+          </Card>
+        </Container>
+      );
+    }
     return (
       <Container>
         <Card>
@@ -703,24 +755,24 @@ class JobCustomerForm extends Component {
                   </div>
                 </div>
               </div>
-              <div className="col-md-12">
-                {this.renderImages(images)}
-              </div>
+              {/*<div className="col-md-12">*/}
+              {/*  {this.renderImages(images)}*/}
+              {/*</div>*/}
             </Row>
             <hr/>
-            <div className="row">
-              <div className="col-md-4">
-                {this.renderJobTons(job)}
-              </div>
-              <div className="col-md-4">
-                {this.renderJobLoads(job)}
-              </div>
-              <div className="col-md-4">
-                {this.renderRunSummary(job)}
-              </div>
-            </div>
-            <hr/>
-            {this.renderJobRuns(job)}
+            {/*<div className="row">*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderJobTons(job)}*/}
+            {/*  </div>*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderJobLoads(job)}*/}
+            {/*  </div>*/}
+            {/*  <div className="col-md-4">*/}
+            {/*    {this.renderRunSummary(job)}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<hr/>*/}
+            {/*{this.renderJobRuns(job)}*/}
           </CardBody>
         </Card>
       </Container>
