@@ -78,7 +78,10 @@ class JobCustomerForm extends Component {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       const images = bookingInvoices.map(item => item.image);
-      this.setState({images, loaded: true});
+      this.setState({
+        images,
+        loaded: true
+      });
     }
   }
 
@@ -92,7 +95,10 @@ class JobCustomerForm extends Component {
           }
           return true;
         });
-      this.setState({ ...job, loaded: true });
+      this.setState({
+        ...job,
+        loaded: true
+      });
     }
   }
 
@@ -201,15 +207,15 @@ class JobCustomerForm extends Component {
         </div>
         <div className="col-md-4">
           <h3 className="subhead">
-            Carrier Status: {job.status}
+            Job Status: {job.status}
           </h3>
           Estimated Cost: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
           <br/>
           Potential Earnings: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
@@ -733,7 +739,7 @@ class JobCustomerForm extends Component {
     }
     return (
       <Container className="dashboard">
-      Loading...
+        Loading...
       </Container>
     );
   }

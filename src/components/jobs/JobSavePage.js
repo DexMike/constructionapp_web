@@ -24,9 +24,7 @@ class JobSavePage extends Component {
       goToJob: false,
       job: {
         company: {
-          legalName: ''
-        },
-        company: {
+          legalName: '',
           phone: ''
         },
         startAddress: {
@@ -71,12 +69,12 @@ class JobSavePage extends Component {
     // moved the loader to the mount function
     const profile = await ProfileService.getProfile();
     this.setState({
-        companyType: profile.companyType,
-        loaded: true
-      },
-      () => {
-        // console.log('setState completed', this.state);
-      });
+      companyType: profile.companyType,
+      loaded: true
+    },
+    () => {
+      // console.log('setState completed', this.state);
+    });
   }
 
   handlePageClick(menuItem) {
