@@ -73,13 +73,18 @@ class JobCustomerForm extends Component {
 
   async componentDidMount() {
     const { job } = this.props;
+    let { images, loaded } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
-      const images = bookingInvoices.map(item => item.image);
-      this.setState({images, loaded: true});
+      images = bookingInvoices.map(item => item.image);
     }
+    loaded = true;
+    this.setState({
+      images,
+      loaded
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -92,7 +97,10 @@ class JobCustomerForm extends Component {
           }
           return true;
         });
-      this.setState({ ...job, loaded: true });
+      this.setState({
+        ...job,
+        loaded: true
+      });
     }
   }
 
@@ -204,12 +212,12 @@ class JobCustomerForm extends Component {
             Carrier Status: {job.status}
           </h3>
           Estimated Cost: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
           <br/>
           Potential Earnings: {
-            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-          }
+          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+        }
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
@@ -733,7 +741,7 @@ class JobCustomerForm extends Component {
     }
     return (
       <Container className="dashboard">
-      Loading...
+        Loading...
       </Container>
     );
   }
