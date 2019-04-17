@@ -71,7 +71,11 @@ class JobCreateFormTwo extends PureComponent {
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
       favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
-      nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
+
+      if (biddersIdsNotFavorites.length > 0) {
+        nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
+      }
+
       this.setState({
         showSendtoFavorites: true,
         favoriteCompanies,
@@ -355,12 +359,7 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className="col-md-6 form__form-group">
-                    <Button color="minimal" className="btn btn-outline-secondary" type="button">
-                      Hours
-                    </Button>
-                    <Button color="secondary" className="btn btn-outline-secondary" type="button">
-                      Days
-                    </Button>
+                    Hours
                   </div>
                 </Row>
 

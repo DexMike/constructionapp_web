@@ -8,7 +8,6 @@ import {
   Row
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
@@ -153,7 +152,7 @@ class CreateJobFormOne extends PureComponent {
         tonnage: p.tonnage, // estimated amount of tonnage
         hourEstimatedHours: p.hourEstimatedHours,
         hourTrucksNumber: p.hourTrucksNumber,
-        rateTab: r.rateTab,
+        // rateTab: r.rateTab,
         // location
         endLocationAddress1: p.endLocationAddress1,
         endLocationAddress2: p.endLocationAddress2,
@@ -205,7 +204,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  componentWillReceiveProps(nextProps) {
     if (nextProps.validateOnTabClick) {
       this.goToSecondFromFirst();
     }
@@ -439,7 +438,7 @@ class CreateJobFormOne extends PureComponent {
     }
 
     // only work if tab is 1
-    if (job.startLocationState.length === 0 && rateTab === 2) {
+    if (job.startLocationState.length === 0) {
       this.setState({
         reqHandlerStartState: {
           ...reqHandlerStartState,
@@ -622,7 +621,7 @@ class CreateJobFormOne extends PureComponent {
     const {
       truckType,
       allTruckTypes,
-      capacity,
+      // capacity,
       rate,
       allMaterials,
       selectedMaterials,
@@ -814,9 +813,9 @@ class CreateJobFormOne extends PureComponent {
                         </div>
                         {/* SECOND ROW */}
                         <div className="col-md-6 form__form-group">
-                           <span className="form__form-group-label">
-                           Number of trucks
-                           </span>
+                          <span className="form__form-group-label">
+                            Number of trucks
+                          </span>
                           <TField
                             input={
                               {
@@ -905,77 +904,77 @@ class CreateJobFormOne extends PureComponent {
 
                         {/* END LOCATION */}
                         <div className="col-md-6">
-                            <h3 className="subhead">
-                              End Location
-                            </h3>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationAddress1',
-                                    value: endLocationAddress1
-                                  }
+                          <h3 className="subhead">
+                            End Location
+                          </h3>
+                          <div className="form__form-group">
+                            <TField
+                              input={
+                                {
+                                  onChange: this.handleEndAddressChange,
+                                  name: 'endLocationAddress1',
+                                  value: endLocationAddress1
                                 }
-                                placeholder="Address 1"
-                                type="text"
-                                meta={reqHandlerEndAddress}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <input
-                                name="endLocationAddress2"
-                                type="text"
-                                value={endLocationAddress2}
-                                onChange={this.handleEndAddressChange}
-                                placeholder="Address 2"
-                                autoComplete="new-password"
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationCity',
-                                    value: endLocationCity
-                                  }
-                                }
-                                placeholder="City"
-                                type="text"
-                                meta={reqHandlerEndCity}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <SelectField
-                                input={
-                                  {
-                                    onChange: this.handleEndLocationChange,
-                                    name: 'endLocationState',
-                                    value: endLocationState
-                                  }
-                                }
-                                placeholder="State"
-                                meta={reqHandlerEndState}
-                                value={endLocationState}
-                                options={allUSstates}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationZip',
-                                    value: endLocationZip
-                                  }
-                                }
-                                placeholder="Zip"
-                                type="text"
-                                meta={reqHandlerEndZip}
-                              />
-                            </div>
+                              }
+                              placeholder="Address 1"
+                              type="text"
+                              meta={reqHandlerEndAddress}
+                            />
                           </div>
+                          <div className="form__form-group">
+                            <input
+                              name="endLocationAddress2"
+                              type="text"
+                              value={endLocationAddress2}
+                              onChange={this.handleEndAddressChange}
+                              placeholder="Address 2"
+                              autoComplete="new-password"
+                            />
+                          </div>
+                          <div className="form__form-group">
+                            <TField
+                              input={
+                                {
+                                  onChange: this.handleEndAddressChange,
+                                  name: 'endLocationCity',
+                                  value: endLocationCity
+                                }
+                              }
+                              placeholder="City"
+                              type="text"
+                              meta={reqHandlerEndCity}
+                            />
+                          </div>
+                          <div className="form__form-group">
+                            <SelectField
+                              input={
+                                {
+                                  onChange: this.handleEndLocationChange,
+                                  name: 'endLocationState',
+                                  value: endLocationState
+                                }
+                              }
+                              placeholder="State"
+                              meta={reqHandlerEndState}
+                              value={endLocationState}
+                              options={allUSstates}
+                            />
+                          </div>
+                          <div className="form__form-group">
+                            <TField
+                              input={
+                                {
+                                  onChange: this.handleEndAddressChange,
+                                  name: 'endLocationZip',
+                                  value: endLocationZip
+                                }
+                              }
+                              placeholder="Zip"
+                              type="text"
+                              meta={reqHandlerEndZip}
+                            />
+                          </div>
+                        </div>
                       </Row>
                     )}
                     {/* onSubmit={this.nextPage} */}
@@ -1160,21 +1159,22 @@ class CreateJobFormOne extends PureComponent {
                   </h3>
                 </div>
                 <div className="col-md-12 form__form-group">
-                      <textarea
-                        name="instructions"
-                        type="text"
-                        value={instructions}
-                        onChange={this.handleInputChange}
-                        placeholder="instructions"
-                        maxLength="255"
-                      />
+                  <textarea
+                    name="instructions"
+                    type="text"
+                    value={instructions}
+                    onChange={this.handleInputChange}
+                    placeholder="instructions"
+                    maxLength="255"
+                  />
                 </div>
               </Row>
-              <Row className='col-md-12'>
-                <ButtonToolbar className='col-md-6 wizard__toolbar'>
-                  <Button color='minimal' className='btn btn-outline-secondary'
-                          type='button'
-                          onClick={onClose}>
+              <Row className="col-md-12">
+                <ButtonToolbar className="col-md-6 wizard__toolbar">
+                  <Button color="minimal" className="btn btn-outline-secondary"
+                    type="button"
+                    onClick={onClose}
+                  >
                     Cancel
                   </Button>
                 </ButtonToolbar>
@@ -1199,19 +1199,20 @@ class CreateJobFormOne extends PureComponent {
           </CardBody>
         </Card>
       </Col>
-  );
+    );
   }
-  }
+}
 
-  CreateJobFormOne.propTypes = {
-    // getJobFullInfo: PropTypes.func.isRequired,
-    onClose: PropTypes.func.isRequired,
-    gotoSecond: PropTypes.func.isRequired,
-    firstTabData: PropTypes.func.isRequired
-  };
+CreateJobFormOne.propTypes = {
+  // getJobFullInfo: PropTypes.func.isRequired,
+  firstTabData: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  gotoSecond: PropTypes.func.isRequired,
+  validateOnTabClick: PropTypes.bool.isRequired,
+  validateRes: PropTypes.func.isRequired
+};
 
-  CreateJobFormOne.defaultProps = {
-    //
-  };
+CreateJobFormOne.defaultProps = {
+};
 
-  export default CreateJobFormOne;
+export default CreateJobFormOne;
