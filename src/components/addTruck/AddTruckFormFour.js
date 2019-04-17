@@ -44,6 +44,7 @@ class AddTruckFormFour extends PureComponent {
 
   // save after the user has checked the info
   async saveInfo() {
+
     // save new or update?
     const {
       truckFullInfo, // saved info
@@ -69,8 +70,14 @@ class AddTruckFormFour extends PureComponent {
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
 
-      // now let's save the user
+      // now let's save the user ..
       if (userFullInfo.info.id === 0) {
+
+        // ID SHOULD NOT BE 0, SINCE THERE'S ALWAYS
+        // SOMEONE ALREADY SELECTED
+
+        // let's not save a new driver for now
+        /*
         // setup info for user
         delete userFullInfo.info.redir;
         delete userFullInfo.info.id;
@@ -89,6 +96,7 @@ class AddTruckFormFour extends PureComponent {
         };
         await DriverService.updateDriver(driver);
         // return false;
+        */
       } else {
         userFullInfo.info.companyId = companyId;
         userFullInfo.info.isBanned = 0; // TODO read from current profile
@@ -108,17 +116,19 @@ class AddTruckFormFour extends PureComponent {
     } else {
       // setup info for user
       delete userFullInfo.info.redir;
-      delete userFullInfo.info.id;
+      // delete userFullInfo.info.id;
       userFullInfo.info.companyId = companyId;
       // userFullInfo.info.equipmentId = 1; // setting as 1 since I don't have the ID yet
       userFullInfo.info.preferredLanguage = 'English';
       userFullInfo.info.isBanned = 0;
       userFullInfo.info.userStatus = 'New';
-      const newUser = await UserService.createUser(userFullInfo.info);
+      // do not create a new user for now
+      // const newUser = await UserService.createUser(userFullInfo.info);
       // return false;
 
       const driver = {
-        usersId: newUser.id,
+        // usersId: newUser.id,
+        usersId: userFullInfo.info.id,
         driverLicenseId: 1 // THIS IS A FK
       };
       const newDriver = await DriverService.createDriver(driver);
@@ -126,7 +136,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.driversId = newDriver.id;
       truckFullInfo.info.companyId = companyId;
       truckFullInfo.info.defaultDriverId = newDriver.id; // set as default as well
-      truckFullInfo.info.defaultDriverId = newUser.id; // careful here, don't know if it's default
+      truckFullInfo.info.defaultDriverId = userFullInfo.info.id; // newUser.id;
       const selectedTruckMaterials = truckFullInfo.info.selectedMaterials;
 
       // remove unnecesary info

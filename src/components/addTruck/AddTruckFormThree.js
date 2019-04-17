@@ -5,15 +5,18 @@ import {
   Col,
   Row,
   Button,
-  ButtonToolbar
+  ButtonToolbar,
+  Container
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
-import NumberFormat from 'react-number-format';
-import TField from '../common/TField';
+// import NumberFormat from 'react-number-format';
+// import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
+import ProfileService from '../../api/ProfileService';
+import SelectField from '../common/TSelect';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
@@ -35,25 +38,46 @@ class AddTruckFormThree extends PureComponent {
       reqHandlerFName: { touched: false, error: '' },
       reqHandlerLName: { touched: false, error: '' },
       reqHandlerEmail: { touched: false, error: '' },
-      reqHandlerPhone: { touched: false, error: '' }
+      reqHandlerPhone: { touched: false, error: '' },
+      allDrivers: [],
+      selectedDriverId: 0,
+      loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onSubmitDriver = this.onSubmitDriver.bind(this);
     this.getAndSetExistingUser = this.getAndSetExistingUser.bind(this);
+    this.selectChange = this.selectChange.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     // check fo cached info
     const { getUserFullInfo, passedTruckFullInfoId, editDriverId } = this.props;
     const preloaded = getUserFullInfo();
-    // console.log('>>USER PRELOADED INFO:');
+
+    const profile = await ProfileService.getProfile();
+
+    // get all drivers for this company:
+    let allDrivers = await DriverService.getDriverByCompanyId(profile.companyId);
+
+    allDrivers = allDrivers.map(driver => ({
+      value: String(driver.id),
+      label: `${driver.firstName} ${driver.lastName}`
+    }));
+
     // console.log(preloaded);
     if (Object.keys(preloaded).length > 0) {
       this.setState({
         firstName: preloaded.info.firstName,
         lastName: preloaded.info.lastName,
         mobilePhone: preloaded.info.mobilePhone,
-        email: preloaded.info.email
+        email: preloaded.info.email,
+        allDrivers,
+        loaded: true
+      });
+    } else {
+      this.setState({
+        allDrivers,
+        loaded: true
       });
     }
 
@@ -159,6 +183,8 @@ class AddTruckFormThree extends PureComponent {
   isFormValid() {
     const truck = this.state;
     let isValid = true;
+
+    /*
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
         reqHandlerFName: {
@@ -198,7 +224,7 @@ class AddTruckFormThree extends PureComponent {
       });
       isValid = false;
     }
-
+    */
     if (isValid) {
       return true;
     }
@@ -209,14 +235,14 @@ class AddTruckFormThree extends PureComponent {
   saveUserInfo(redir) {
     const { onUserFullInfo } = this.props;
     const {
-      id, // only to track if this is an edit
       firstName,
       lastName,
       mobilePhone,
-      email
+      email,
+      selectedDriverId
     } = this.state;
     const userInfo = {
-      id, // only to track if this is an edit
+      id: selectedDriverId, // only to track if this is an edit
       firstName,
       lastName,
       mobilePhone,
@@ -227,6 +253,13 @@ class AddTruckFormThree extends PureComponent {
     onUserFullInfo(userInfo);
     this.handleSubmit('User');
     // this.saveUserInfo(true);
+  }
+
+  selectChange(data) {
+    // const { selectedDriverId } = this.state;
+    this.setState({
+      selectedDriverId: data.value
+    });
   }
 
   async saveUser(e) {
@@ -261,8 +294,10 @@ class AddTruckFormThree extends PureComponent {
       userStatus,
       reqHandlerFName,
       reqHandlerLName,
-      reqHandlerEmail/* ,
-      // reqHandlerPhone */
+      reqHandlerEmail,
+      allDrivers,
+      selectedDriverId,
+      loaded
     } = this.state;
     const buttons = [];
 
@@ -273,110 +308,135 @@ class AddTruckFormThree extends PureComponent {
       buttons.push(<Button key="2" type="submit" className="primaryButton">Next</Button>);
     }
 
-    return (
-      <Col md={12} lg={12}>
-        <Card>
-          <CardBody>
-            <div className="col-md-12 form__form-group">
+    if (loaded) {
+      return (
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
+
               <h3 className="subhead">
-                Add a Driver
+                Search for a Driver
               </h3>
-            </div>
 
-            <form
-              className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveUser(e)}
-            >
-              <input type="hidden" value={id} />
-              <input type="hidden" value={parentId} />
-              <input type="hidden" value={isBanned} />
-              <input type="hidden" value={preferredLanguage} />
-              <input type="hidden" value={userStatus} />
+              <form
+                className="form form--horizontal addtruck__form"
+                onSubmit={e => this.saveUser(e)}
+              >
+                <input type="hidden" value={id} />
+                <input type="hidden" value={parentId} />
+                <input type="hidden" value={isBanned} />
+                <input type="hidden" value={preferredLanguage} />
+                <input type="hidden" value={userStatus} />
 
-              <Row className="col-md-12">
+                <Row className="col-md-12">
 
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">First Name</span>
-                  <TField
+                  {/*
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">First Name</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'firstName',
+                          value: firstName
+                        }
+                      }
+                      placeholder=""
+                      type="text"
+                      meta={reqHandlerFName}
+                    />
+                    <input type="hidden" value={equipmentId} />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">Last Name</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'lastName',
+                          value: lastName
+                        }
+                      }
+                      placeholder=""
+                      type="text"
+                      meta={reqHandlerLName}
+                    />
+                  </div>
+                  */}
+
+                  <SelectField
                     input={
                       {
-                        onChange: this.handleInputChange,
-                        name: 'firstName',
-                        value: firstName
+                        onChange: this.selectChange,
+                        name: 'All Drivers',
+                        value: selectedDriverId
                       }
                     }
-                    placeholder=""
-                    type="text"
-                    meta={reqHandlerFName}
+                    // meta={this.handleInputChange}
+                    value={selectedDriverId}
+                    options={allDrivers}
+                    placeholder="All Drivers"
                   />
-                  <input type="hidden" value={equipmentId} />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Last Name</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'lastName',
-                        value: lastName
+
+                </Row>
+
+                <Row className="col-md-12">
+
+                  {/*
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">Mobile Phone</span>
+                    <NumberFormat
+                      name="mobilePhone"
+                      type="text"
+                      format="(###) ###-####"
+                      mask="_"
+                      value={mobilePhone}
+                      onChange={this.handleInputChange}
+                    />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">Email</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'email',
+                          value: email
+                        }
                       }
-                    }
-                    placeholder=""
-                    type="text"
-                    meta={reqHandlerLName}
-                  />
-                </div>
-              </Row>
+                      placeholder=""
+                      type="text"
+                      meta={reqHandlerEmail}
+                    />
+                  </div>
+                  */}
+                </Row>
 
-              <Row className="col-md-12">
+                <Row className="col-md-12">
+                  <hr />
+                </Row>
 
-                <div className="col-md-6">
-                  <span className="form__form-group-label">Mobile Phone</span>
-                  <NumberFormat
-                    name="mobilePhone"
-                    type="text"
-                    format="(###) ###-####"
-                    mask="_"
-                    value={mobilePhone}
-                    onChange={this.handleInputChange}
-                  />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Email</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'email',
-                        value: email
-                      }
-                    }
-                    placeholder=""
-                    type="text"
-                    meta={reqHandlerEmail}
-                  />
-                </div>
-              </Row>
+                <Row className="col-md-12">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button type="button" className="tertiaryButton" onClick={onClose}>
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    {buttons}
+                  </ButtonToolbar>
+                </Row>
 
-              <Row className="col-md-12">
-                <hr />
-              </Row>
-
-              <Row className="col-md-12">
-                <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button type="button" className="tertiaryButton" onClick={onClose}>
-                    Cancel
-                  </Button>
-                </ButtonToolbar>
-                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  {buttons}
-                </ButtonToolbar>
-              </Row>
-
-            </form>
-          </CardBody>
-        </Card>
-      </Col>
+              </form>
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
+    return (
+      <Container className="dashboard">
+        Loading...
+      </Container>
     );
   }
 }
