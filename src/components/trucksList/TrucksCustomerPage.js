@@ -563,7 +563,7 @@ class TrucksCustomerPage extends Component {
                       <input name="minCapacity"
                              className="filter-text"
                              type="number"
-                             placeholder="Min # of tons"
+                             placeholder="# of tons"
                              value={filters.minCapacity}
                              onChange={this.handleFilterChange}
                       />
