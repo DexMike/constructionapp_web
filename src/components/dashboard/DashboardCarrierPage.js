@@ -598,7 +598,7 @@ class DashboardCarrierPage extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
-                        Minimum
+                        Min Capacity
                       </div>
                       <TField
                         input={
@@ -609,7 +609,7 @@ class DashboardCarrierPage extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder="# of tons"
                         type="number"
                       />
                     </Col>

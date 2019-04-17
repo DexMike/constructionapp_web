@@ -39,10 +39,6 @@ class JobCustomerForm extends Component {
       isArchived: 0
     };
 
-    // const company = {
-    //   type: 'Carrier'
-    // };
-
     this.state = {
       ...job,
       images: [],
@@ -185,7 +181,6 @@ class JobCustomerForm extends Component {
     return true;
   }
 
-
   renderJobTop(job) {
     return (
       <React.Fragment>
@@ -193,6 +188,8 @@ class JobCustomerForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
+
+          {/* <br/> */}
           {job.company.legalName}
           <br/>
           {/* Find the company admin name */}
@@ -591,19 +588,26 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderImages(images) {
-    return (
-      <React.Fragment>
-        <Row>
-          {images.map(item => (
-            <Col className="col-md-4 pt-4" key={`img-${item}`}>
-              <img key={item} src={`${item}`} alt={`${item}`}/>
-            </Col>
-          ))
-          }
-        </Row>
-      </React.Fragment>
-    );
+  renderUploadedPhotos(images) {
+    if (images && images.length > 0) {
+      return (
+        <React.Fragment>
+          <hr/>
+          <h3 className="subhead">
+            Uploaded Photos
+          </h3>
+          <Row>
+            {images.map(item => (
+              <Col className="col-md-3 pt-3" key={`img-${item}`}>
+                <img key={item} src={`${item}`} alt={`${item}`}/>
+              </Col>
+            ))
+            }
+          </Row>
+        </React.Fragment>
+      );
+    }
+    return false;
   }
 
   renderStartAddress(address) {
@@ -706,9 +710,6 @@ class JobCustomerForm extends Component {
                     </div>
                   </div>
                 </div>
-                <div className="col-md-12">
-                  {this.renderImages(images)}
-                </div>
               </Row>
               <hr/>
               <div className="row">
@@ -724,6 +725,7 @@ class JobCustomerForm extends Component {
               </div>
               <hr/>
               {this.renderJobRuns(job)}
+              {this.renderUploadedPhotos(images)}
             </CardBody>
           </Card>
         </Container>

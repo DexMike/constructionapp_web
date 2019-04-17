@@ -267,9 +267,6 @@ class JobCarrierForm extends JobCustomerForm {
                     </div>
                   </div>
                 </div>
-                <div className="col-md-12">
-                  {this.renderImages(images)}
-                </div>
               </Row>
               <hr/>
               <div className="row">
@@ -285,6 +282,7 @@ class JobCarrierForm extends JobCustomerForm {
               </div>
               <hr/>
               {this.renderJobRuns(job)}
+              {this.renderUploadedPhotos(images)}
             </CardBody>
           </Card>
         </Container>
