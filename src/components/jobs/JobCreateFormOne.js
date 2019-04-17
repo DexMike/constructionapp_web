@@ -814,9 +814,9 @@ class CreateJobFormOne extends PureComponent {
                         </div>
                         {/* SECOND ROW */}
                         <div className="col-md-6 form__form-group">
-                           <span className="form__form-group-label">
-                           Number of trucks
-                           </span>
+                          <span className="form__form-group-label">
+                          Number of trucks
+                          </span>
                           <TField
                             input={
                               {
