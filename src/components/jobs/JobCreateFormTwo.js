@@ -9,8 +9,6 @@ import {
   Row,
   Container
 } from 'reactstrap';
-import { css } from '@emotion/core';
-import { ClipLoader } from 'react-spinners';
 import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
 import AddressService from '../../api/AddressService';
@@ -23,11 +21,6 @@ import './jobs.css';
 import GroupListService from '../../api/GroupListService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 
-const override = css`
-    display: block;
-    margin: 0 auto;
-    border-color: red;
-`;
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -398,18 +391,8 @@ class JobCreateFormTwo extends PureComponent {
                     >
                       Send Job
                     </Button>
-                    <div className='sweet-loading'>
-                      <ClipLoader
-                        css={override}
-                        sizeUnit={"px"}
-                        size={150}
-                        color={'#123abc'}
-                        loading={this.state.loading}
-                      />
-                    </div>
                   </ButtonToolbar>
                 </Row>
-
               </form>
             </CardBody>
           </Card>

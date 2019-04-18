@@ -134,12 +134,29 @@ class TFormat {
     );
   }
 
+  static asPhoneText(textValue) {
+    // <NumberFormat format="+1 (###) ###-####" mask="_" />
+    return (
+      <NumberFormat
+        value={textValue}
+        displayType={"text"}
+        format="(###) ###-####"
+        mask=""
+      />
+    );
+  }
+
+
   static asDate(inputValue) {
     return moment(inputValue).format('MM/DD/YYYY');
   }
 
   static asDateTime(inputValue) {
     return moment(inputValue).format('MM/DD/YYYY hh:mm');
+  }
+
+  static asDayWeek(inputValue) {
+    return moment(inputValue).format('LLLL');
   }
 
   static asZip5(inputValue) {

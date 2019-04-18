@@ -623,7 +623,7 @@ class MarketplaceCarrierPage extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
-                        Minimum
+                        Min Capacity
                       </div>
                       <TField
                         input={
@@ -634,7 +634,7 @@ class MarketplaceCarrierPage extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder="# of tons"
                         type="number"
                       />
                     </Col>
