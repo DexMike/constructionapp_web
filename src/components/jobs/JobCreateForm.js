@@ -926,7 +926,7 @@ class JobCreateForm extends Component {
             Starting Location
           </h3>
           <small>
-            Select a starting address 920:
+            Select a starting address
           </small>
           <div
             id="starting_id"
@@ -942,7 +942,7 @@ class JobCreateForm extends Component {
               // meta={reqHandlerMaterials}
               // value={selectedStartAddressId}
               options={allAddresses}
-              placeholder="Select material"
+              placeholder="Select a location"
             />
           </div>
           <div>
@@ -1079,7 +1079,7 @@ class JobCreateForm extends Component {
               // meta={reqHandlerMaterials}
               // value={selectedEndAddressId}
               options={allAddresses}
-              placeholder="Select material"
+              placeholder="Select a location"
             />
           </div>
           <div>

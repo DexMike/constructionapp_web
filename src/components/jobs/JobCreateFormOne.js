@@ -761,9 +761,10 @@ class CreateJobFormOne extends PureComponent {
                             meta={reqHandlerTrucksEstimate}
                           />
                         </div>
+                        <hr/>
                         <div className="col-md-6">
                           <h3 className="subhead">
-                            Starting Location
+                            Start Location
                           </h3>
                           <small>
                             Select a starting address:
@@ -782,7 +783,7 @@ class CreateJobFormOne extends PureComponent {
                               // meta={reqHandlerMaterials}
                               value={selectedStartAddressId}
                               options={allAddresses}
-                              placeholder="Select material"
+                              placeholder="Select a location"
                             />
                           </div>
                           <div>
@@ -890,7 +891,7 @@ class CreateJobFormOne extends PureComponent {
                               // meta={reqHandlerMaterials}
                               value={selectedEndAddressId}
                               options={allAddresses}
-                              placeholder="Select material"
+                              placeholder="Select a location"
                             />
                           </div>
                           <div>
@@ -921,6 +922,7 @@ class CreateJobFormOne extends PureComponent {
                                 meta={reqHandlerEndAddress}
                               />
                             </div>
+
                             <div className="form__form-group">
                               <input
                                 name="endLocationAddress2"
@@ -1170,6 +1172,7 @@ class CreateJobFormOne extends PureComponent {
                   />
                 </div>
               </Row>
+              <hr/>
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
                   <Button color="minimal" className="btn btn-outline-secondary"

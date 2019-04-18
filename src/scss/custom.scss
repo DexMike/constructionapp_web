@@ -302,3 +302,33 @@ hr {
 .pt-1 {
   padding-top: ($spacer * 2) !important;
 }
+// ------  Helper Classes for Bootstrap
+
+
+// ------  Helper Classes for Job Create Modal
+
+.slickinput {
+  border-bottom: 1px solid #cccccc !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  text-align: center;
+  font-size: 18px !important;
+  margin-top: -7px;
+}
+
+.favoritenotice {
+  font-size: 14px;
+  font-style: italic;
+}
+
+.sendjob {
+  font-size: 12px ;
+}
+
+// fix the autofilling background blue color
+input:-webkit-autofill {
+  background-color: #FFFFFF !important;
+}
+
+// ------  Helper Classes for Job Create Modal
