@@ -112,7 +112,6 @@ class AddTruckForm extends PureComponent {
     // let's keep the info from the truck in memory
     const { availabilityCachedInfo, page } = this.state;
     availabilityCachedInfo.info = e;
-    // console.log(e);
     // not receiving the redir
     if (e.redir) {
       this.setState({ page: page + 1 });
@@ -120,7 +119,6 @@ class AddTruckForm extends PureComponent {
   }
 
   handleUserSave(e) {
-    // console.log('>USER SAVE', e);
     // let's keep the info from the truck in memory
     const { userCachedInfo, page } = this.state;
     userCachedInfo.info = e;
