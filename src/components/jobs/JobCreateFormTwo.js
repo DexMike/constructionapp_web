@@ -326,27 +326,31 @@ class JobCreateFormTwo extends PureComponent {
                 onSubmit={e => this.saveJob(e)}
               >
                 <Row className="col-md-12">
-
-                  <div className={showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}>
-                    <TCheckBox
-                      onChange={this.handleInputChange}
-                      name="sendToMkt"
-                      value={!!sendToFavorites}
-                    />
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      <h3 className="subhead">
+                        Thanks for creating a new job! How do you want to send this?
+                      </h3>
+                    </div>
+                    <div
+                      className={showSendtoFavorites ? 'col-md-1 form__form-group mt-1' : 'hidden'}>
+                      <TCheckBox
+                        onChange={this.handleInputChange}
+                        name="sendToMkt"
+                        value={!!sendToFavorites}
+                      />
+                    </div>
+                    <div
+                      className={showSendtoFavorites ? 'col-md-11 form__form-group mt-1' : 'hidden'}>
+                      <h3 className="subhead">
+                        Send to Favorites<br/>
+                      </h3>
+                    </div>
                   </div>
-                  <div className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'hidden'}>
-                    <h4>
-                      Send to Favorites<br/>
-                    </h4>
-                  </div>
-                  <div className={showSendtoFavorites ? 'hidden' : ''}>
-                    <p className="favoritenotice">You have not set any favorite carriers to work
-                      with.</p><br/><br/>
-                  </div>
-                  <br/>
+                  <hr/>
                 </Row>
 
-                <Row className="col-md-12">
+                <Row className="col-md-12 mt-1">
                   <div className="row">
                     <div className="col-md-1 form__form-group">
                       <TCheckBox
@@ -362,7 +366,7 @@ class JobCreateFormTwo extends PureComponent {
                     </div>
                     <div className="col-md-1 form__form-group">
                       <h3 className="subhead">
-                      In
+                        In
                       </h3>
                     </div>
                     <div className="col-md-2 form__form-group">
@@ -375,18 +379,18 @@ class JobCreateFormTwo extends PureComponent {
                     </div>
                     <div className="col-md-1 form__form-group">
                       <h3 className="subhead">
-                      Hours
+                        Hours
                       </h3>
                     </div>
                   </div>
                   <br/>
-                  <div className="row mt-1">
-                    <div className="col-md-12 form__form-group">
-                      <div className="sendjob">* Note - This job will be sent to all Trelar Partners
-                        for review
-                      </div>
-                    </div>
-                  </div>
+                  {/*<div className="row mt-1">*/}
+                  {/*  <div className="col-md-12 form__form-group">*/}
+                  {/*    <div className="sendjob">* Note - This job will be sent to all Trelar Partners*/}
+                  {/*      for review*/}
+                  {/*    </div>*/}
+                  {/*  </div>*/}
+                  {/*</div>*/}
                 </Row>
                 <Row className="col-md-12">
                   <hr/>
