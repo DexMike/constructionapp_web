@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/core';
 import { ClipLoader } from 'react-spinners';
-import TMap from './TMapOriginDestination';
+import * as PropTypes from 'prop-types';
 
 const override = css`
     display: block;
@@ -11,14 +10,8 @@ const override = css`
 `;
 
 class TSpinner extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: true
-    };
-  }
-
   render() {
+    const { loading } = this.props;
     return (
       <div className="sweet-loading">
         <ClipLoader
@@ -26,7 +19,7 @@ class TSpinner extends PureComponent {
           sizeUnit="px"
           size={20}
           color="#006f53"
-          loading={this.state.loading}
+          loading={loading}
         />
       </div>
     );
@@ -34,11 +27,11 @@ class TSpinner extends PureComponent {
 }
 
 TSpinner.propTypes = {
-  input: PropTypes.shape({
-    origin: PropTypes.string,
-    destination: PropTypes.string
-  }).isRequired
+  loading: PropTypes.bool
 };
 
+TSpinner.defaultProps = {
+  loading: true
+};
 
 export default TSpinner;

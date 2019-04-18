@@ -20,6 +20,7 @@ import TwilioService from '../../api/TwilioService';
 import './jobs.css';
 import GroupListService from '../../api/GroupListService';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import TSpinner from '../common/TSpinner';
 
 
 class JobCreateFormTwo extends PureComponent {
@@ -334,52 +335,68 @@ class JobCreateFormTwo extends PureComponent {
                     />
                   </div>
                   <div className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'hidden'}>
-                    <h5>
-                      Send to Favorites<br />
-                    </h5>
+                    <h4>
+                      Send to Favorites<br/>
+                    </h4>
                   </div>
-                  <div className={showSendtoFavorites ? 'hidden' : 'col-md-12 form__form-group'}>
-                    <p>You have not set any favorite carriers to work with.</p><br /><br />
+                  <div className={showSendtoFavorites ? 'hidden' : ''}>
+                    <p className="favoritenotice">You have not set any favorite carriers to work
+                      with.</p><br/><br/>
                   </div>
                   <br/>
                 </Row>
 
                 <Row className="col-md-12">
-                  <div className="col-md-1 form__form-group">
-                    <TCheckBox
-                      onChange={this.handleInputChange}
-                      name="sendToMkt"
-                      value={!!sendToMkt}
-                    />
+                  <div className="row">
+                    <div className="col-md-1 form__form-group">
+                      <TCheckBox
+                        onChange={this.handleInputChange}
+                        name="sendToMkt"
+                        value={!!sendToMkt}
+                      />
+                    </div>
+                    <div className="col-md-6 form__form-group">
+                      <h3 className="subhead">
+                        Send this job to the Trelar Marketplace
+                      </h3>
+                    </div>
+                    <div className="col-md-1 form__form-group">
+                      <h3 className="subhead">
+                      In
+                      </h3>
+                    </div>
+                    <div className="col-md-2 form__form-group">
+                      <input
+                        name="delay"
+                        type="number"
+                        placeholder="0"
+                        className="slickinput"
+                      />
+                    </div>
+                    <div className="col-md-1 form__form-group">
+                      <h3 className="subhead">
+                      Hours
+                      </h3>
+                    </div>
                   </div>
-                  <div className="col-md-11 form__form-group">
-                    <h5>
-                      Yes! Send to Trelar Marketplace<br /><br />
-                    </h5>
-                    <small>* Note - This job will be sent to all Trelar Partners for review</small>
-                  </div>
-                  <div className="col-md-3 form__form-group">
-                    Send Job in<br />
-                  </div>
-                  <div className="col-md-3 form__form-group">
-                    <input
-                      name="delay"
-                      type="number"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="col-md-6 form__form-group">
-                    Hours
+                  <br/>
+                  <div className="row mt-1">
+                    <div className="col-md-12 form__form-group">
+                      <div className="sendjob">* Note - This job will be sent to all Trelar Partners
+                        for review
+                      </div>
+                    </div>
                   </div>
                 </Row>
-
                 <Row className="col-md-12">
-                  <hr />
+                  <hr/>
                 </Row>
 
-                <Row className="col-md-12">
+
+                <Row className="col-md-12 ">
                   <ButtonToolbar className="col-md-6 wizard__toolbar">
-                    <Button color="minimal" className="btn btn-outline-secondary" type="button" onClick={onClose}>
+                    <Button color="minimal" className="btn btn-outline-secondary" type="button"
+                            onClick={onClose}>
                       Cancel
                     </Button>
                   </ButtonToolbar>
@@ -392,6 +409,7 @@ class JobCreateFormTwo extends PureComponent {
                       Send Job
                     </Button>
                   </ButtonToolbar>
+                  <TSpinner loading={false}/>
                 </Row>
               </form>
             </CardBody>
@@ -401,7 +419,7 @@ class JobCreateFormTwo extends PureComponent {
     }
     return (
       <Container>
-        Loading...
+        <TSpinner loading/>
       </Container>
     );
   }

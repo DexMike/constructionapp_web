@@ -2,14 +2,14 @@ $themes: (
   light: (
     colorBackground: white,
     colorBackgroundBody: #f2f4f7,
-    colorText: #646777,
+    colorText: #666666,
     colorTextAdditional: #646777,
     logoImg: url(../img/logo/logo_dark_t_v2.png),
     colorHover: #fafbfe,
     colorBorder: #eff1f5,
     colorIcon: #dddddd,
     imgInvert: invert(0%),
-    colorFieldsBorder: #f2f4f7,
+    colorFieldsBorder: #cccccc,
     colorBubble: rgba(242, 244, 247, 0.65),
     colorBubbleActive: rgba(234, 238, 255, 0.6),
     colorScrollbar: #B4BFD0,
@@ -51,9 +51,9 @@ $themes: (
   @return map-get($theme-map, $key);
 }
 
-$color-accent: #4ce1b6;
+$color-accent: #006f53;
 $color-accent-hover: darken($color-accent, 10%);
-$color-additional: #999999;
+$color-additional: #666666;
 $color-additional-hover: darken($color-additional, 10%);
 
 $color-yellow: #f6da6e;
