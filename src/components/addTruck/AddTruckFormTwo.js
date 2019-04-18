@@ -28,7 +28,7 @@ class AddTruckFormTwo extends PureComponent {
         touched: false,
         error: 'Please select an end date for when your truck is available'
       },
-      isAvailable: true,
+      isAvailable: false,
       redir: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -45,13 +45,13 @@ class AddTruckFormTwo extends PureComponent {
     const preloaded = getAvailiabilityFullInfo();
     if (Object.keys(preloaded).length > 0) {
       this.setState({
-          isAvailable: preloaded.info.isAvailable,
-          startDate: preloaded.info.startDate,
-          endDate: preloaded.info.endDate
-        },
-        function wait() { // wait until it loads
-          this.saveAvailabilityInfo(false);
-        });
+        isAvailable: preloaded.info.isAvailable,
+        startDate: preloaded.info.startDate,
+        endDate: preloaded.info.endDate
+      },
+      function wait() { // wait until it loads
+        this.saveAvailabilityInfo(false);
+      });
     } else {
       // console.log(47);
     }
@@ -96,13 +96,11 @@ class AddTruckFormTwo extends PureComponent {
 
   makeAvailable() {
     let { isAvailable } = this.state;
-
     if (isAvailable === 1 || isAvailable === true) {
       isAvailable = false;
     } else if (isAvailable === 0 || isAvailable === false) {
       isAvailable = true;
     }
-
     this.setState({ isAvailable },
       function wait() {
         this.saveAvailabilityInfo(false);
@@ -197,7 +195,6 @@ class AddTruckFormTwo extends PureComponent {
   }
 
   handleSubmit(menuItem) {
-    // // console.log(menuItem);
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
@@ -279,21 +276,17 @@ class AddTruckFormTwo extends PureComponent {
                   />
                 </div>
               </Row>
-
-              {/*<h3 className="subhead">Availability</h3>*/}
               <br/>
+              ES: {isAvailable.toString()}
               <div className="col-md-12 mt-1">
-                {/* color={availableButtonColor(true)} */}
-                {/*<Button color={this.availableButtonColor(isAvailable)} type="button" onClick={this.makeAvailable} className="previous">*/}
-                {/*  Available*/}
-                {/*</Button>*/}
-                {/*<Button color={this.unavailableButtonColor(!isAvailable)} type="button" onClick={this.makeAvailable} className="previous">*/}
-                {/*  Un-available*/}
-                {/*</Button>*/}
-
                 <div className="form-check checkbox-slider--b checkbox-slider-md">
                   <label>
-                    <input type="checkbox" onClick={this.makeAvailable}/><span>Available to make deliveries</span>
+                    <input
+                      type="checkbox"
+                      onChange={this.makeAvailable}
+                      checked={isAvailable}
+                    />
+                    <span>Available to make deliveries</span>
                   </label>
                 </div>
               </div>
@@ -310,7 +303,10 @@ class AddTruckFormTwo extends PureComponent {
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
                   <Button type="button" className="secondaryButton"
-                          onClick={this.saveAndGoBack}>Back</Button>
+                          onClick={this.saveAndGoBack}
+                  >
+                    Back
+                  </Button>
                   <Button type="submit" className="primaryButton">Next</Button>
                 </ButtonToolbar>
               </Row>
