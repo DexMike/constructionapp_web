@@ -441,9 +441,21 @@ class JobCreateForm extends Component {
     // Now we need to create a Booking
     booking.bidId = createdBid.id;
     booking.schedulersCompanyId = selectedEquipment.companyId;
-    booking.sourceAddressId = createdJob.startAddress;
-    booking.startAddress = createdJob.startAddress;
-    booking.endAddress = createdJob.endAddress;
+
+    // if the startaddress is the actual ID
+    if (Number.isInteger(createdJob.startAddress)) {
+      booking.sourceAddressId = createdJob.startAddress;
+      booking.startAddressId = createdJob.startAddress;
+    } else {
+      booking.sourceAddressId = createdJob.startAddress.id;
+      booking.startAddressId = createdJob.startAddress.id;
+    }
+
+    if (Number.isInteger(createdJob.endAddress)) {
+      booking.endAddressId = createdJob.endAddress;
+    } else {
+      booking.endAddressId = createdJob.endAddress.id;
+    }
 
     const createdBooking = await BookingService.createBooking(booking);
 
@@ -466,8 +478,21 @@ class JobCreateForm extends Component {
     // Lets copy the bid info
     bookingEquipment.startTime = createdBooking.startTime;
     bookingEquipment.endTime = createdBooking.endTime;
-    bookingEquipment.startAddress = createdBooking.startAddress;
-    bookingEquipment.endAddress = createdBooking.endAddress;
+
+    // TEST
+    // if the startaddress is the actual ID
+    if (Number.isInteger(createdJob.startAddress)) {
+      bookingEquipment.startAddressId = createdBooking.startAddress;
+    } else {
+      bookingEquipment.startAddressId = createdBooking.startAddress.id;
+    }
+
+    if (Number.isInteger(createdJob.endAddress)) {
+      bookingEquipment.endAddressId = createdBooking.endAddress;
+    } else {
+      bookingEquipment.endAddressId = createdBooking.endAddress.id;
+    }
+
     // Since this is booking method 1, we do not have any notes as this is getting created
     // automatically and not by a user
     bookingEquipment.notes = '';
