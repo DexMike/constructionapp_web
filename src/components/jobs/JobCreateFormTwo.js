@@ -328,7 +328,7 @@ class JobCreateFormTwo extends PureComponent {
                   <div className={showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}>
                     <TCheckBox
                       onChange={this.handleInputChange}
-                      name="sendToMkt"
+                      name="sendToFavorites"
                       value={!!sendToFavorites}
                     />
                   </div>
