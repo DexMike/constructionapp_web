@@ -13,6 +13,8 @@
     height: 32px;
     transition: border 0.3s;
     background: transparent;
+    border: 1px solid #cccccc;
+    color: #666666;
 
     &::-webkit-input-placeholder {
       color: $color-additional;
@@ -175,6 +177,7 @@
 
     .Select-placeholder, .Select-input {
       height: 30px;
+      color: #666666;
     }
 
     .Select-input {

@@ -22,11 +22,7 @@ hr {
     width: 100% !important;
     max-width: 100% !important;
 }
-.form input, .form textarea {
-    border: 1px solid #cccccc !important;
-    color: #666666 !important;
-    /*font-size: 14px !important;*/
-}
+
 .checkbox-btn:hover .checkbox-btn__checkbox-custom {
     border-color: #4ce1b6 !important;
 }

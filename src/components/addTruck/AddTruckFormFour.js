@@ -44,7 +44,6 @@ class AddTruckFormFour extends PureComponent {
 
   // save after the user has checked the info
   async saveInfo() {
-
     // save new or update?
     const {
       truckFullInfo, // saved info
@@ -71,6 +70,7 @@ class AddTruckFormFour extends PureComponent {
       // return;
 
       // now let's save the user ..
+      /*
       if (userFullInfo.info.id === 0) {
 
         // ID SHOULD NOT BE 0, SINCE THERE'S ALWAYS
@@ -96,7 +96,6 @@ class AddTruckFormFour extends PureComponent {
         };
         await DriverService.updateDriver(driver);
         // return false;
-        */
       } else {
         userFullInfo.info.companyId = companyId;
         userFullInfo.info.isBanned = 0; // TODO read from current profile
@@ -104,7 +103,7 @@ class AddTruckFormFour extends PureComponent {
         userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
         await UserService.updateUser(userFullInfo.info);
       }
-
+      */
 
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(

@@ -452,7 +452,7 @@ class DashboardCustomerPage extends Component {
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-      newJob.newRate = `$${newJob.rate}`;
+      // newJob.newRate = `$${newJob.rate}`;
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
@@ -737,7 +737,7 @@ class DashboardCustomerPage extends Component {
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-      newJob.newRate = `$${newJob.rate}`;
+      // newJob.newRate = `$${newJob.rate}`;
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);

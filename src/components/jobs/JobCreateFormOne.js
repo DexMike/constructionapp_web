@@ -367,6 +367,7 @@ class CreateJobFormOne extends PureComponent {
     const { rateTab } = this.state;
     const {
       reqHandlerTonnage,
+      /*
       reqHandlerEndAddress,
       reqHandlerEndState,
       reqHandlerEndCity,
@@ -375,6 +376,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerStartCity,
       reqHandlerStartState,
       reqHandlerStartZip,
+      */
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerHoursEstimate,
@@ -423,49 +425,6 @@ class CreateJobFormOne extends PureComponent {
       isValid = false;
     }
 
-    /*
-    if (job.startLocationAddress1.length === 0) {
-      this.setState({
-        reqHandlerStartAddress: {
-          ...reqHandlerStartAddress,
-          touched: true,
-          error: 'Missing starting address field'
-        }
-      });
-      isValid = false;
-    }
-    if (job.startLocationCity.length === 0) {
-      this.setState({
-        reqHandlerStartCity: {
-          ...reqHandlerStartCity,
-          touched: true,
-          error: 'Missing starting city field'
-        }
-      });
-      isValid = false;
-    }
-    if (job.startLocationZip.length === 0) {
-      this.setState({
-        reqHandlerStartZip: {
-          ...reqHandlerStartZip,
-          touched: true,
-          error: 'Missing starting zip code field'
-        }
-      });
-      isValid = false;
-    }
-    if (job.startLocationState.length === 0) {
-      this.setState({
-        reqHandlerStartState: {
-          ...reqHandlerStartState,
-          touched: true,
-          error: 'Missing starting state field'
-        }
-      });
-      isValid = false;
-    }
-    */
-
     if (job.tonnage <= 0 && rateTab === 2) {
       this.setState({
         reqHandlerTonnage: {
@@ -476,49 +435,6 @@ class CreateJobFormOne extends PureComponent {
       });
       isValid = false;
     }
-
-    /*
-    if (job.endLocationAddress1.length === 0) {
-      this.setState({
-        reqHandlerEndAddress: {
-          ...reqHandlerEndAddress,
-          touched: true,
-          error: 'Missing ending address field'
-        }
-      });
-      isValid = false;
-    }
-    if (job.endLocationCity.length === 0) {
-      this.setState({
-        reqHandlerEndCity: {
-          ...reqHandlerEndCity,
-          touched: true,
-          error: 'Missing ending city field'
-        }
-      });
-      isValid = false;
-    }
-    if (job.endLocationState.length === 0) {
-      this.setState({
-        reqHandlerEndState: {
-          ...reqHandlerEndState,
-          touched: true,
-          error: 'Missing ending state field'
-        }
-      });
-      isValid = false;
-    }
-    if (job.endLocationZip.length === 0) {
-      this.setState({
-        reqHandlerEndZip: {
-          ...reqHandlerEndZip,
-          touched: true,
-          error: 'Missing ending zip field'
-        }
-      });
-      isValid = false;
-    }
-    */
 
     if (job.hourEstimatedHours <= 0 && rateTab === 1) {
       this.setState({
@@ -731,12 +647,6 @@ class CreateJobFormOne extends PureComponent {
                     onChange={this.handleInputChange}
                     placeholder="Job Name"
                   />
-                  {/*
-                  <input type="hidden" val={p} />
-                  <input type="hidden" val={id} />
-                  <input type="hidden" val={defaultDriverId} />
-                  <input type="hidden" val={driversId} />
-                  */}
                 </div>
                 <div className="col-md-4">
                   <span className="form__form-group-label">Truck Type</span>
@@ -811,30 +721,8 @@ class CreateJobFormOne extends PureComponent {
                 </div>
               </Row>
 
-
               <Row className="col-md-12 rateTab">
                 <div className="col-md-12 wizard">
-                  {/* <div className="wizard__steps">
-                    <div
-                      role="link"
-                      tabIndex="0"
-                      onKeyPress={this.handleKeyPress}
-                      onClick={this.tabFirstPage}
-                      className={`wizard__step${rateTab === 1 ? ' wizard__step--active' : ''}`}
-                    >
-                      <p>By the Hour</p>
-                    </div>
-                    <div
-                      role="link"
-                      tabIndex="0"
-                      onKeyPress={this.handleKeyPress}
-                      onClick={this.tabSecondPage}
-                      className={`wizard__step${rateTab === 2 ? ' wizard__step--active' : ''}`}
-                    >
-                      <p>By Tonnage</p>
-                    </div>
-                  </div> */}
-
                   <div className="wizard__form-wrapper">
                     {rateTab === 1
                     && (
@@ -873,9 +761,10 @@ class CreateJobFormOne extends PureComponent {
                             meta={reqHandlerTrucksEstimate}
                           />
                         </div>
+                        <hr/>
                         <div className="col-md-6">
                           <h3 className="subhead">
-                            Starting Location
+                            Start Location
                           </h3>
                           <small>
                             Select a starting address:
@@ -894,7 +783,7 @@ class CreateJobFormOne extends PureComponent {
                               // meta={reqHandlerMaterials}
                               value={selectedStartAddressId}
                               options={allAddresses}
-                              placeholder="Select material"
+                              placeholder="Select a location"
                             />
                           </div>
                           <div>
@@ -1002,7 +891,7 @@ class CreateJobFormOne extends PureComponent {
                               // meta={reqHandlerMaterials}
                               value={selectedEndAddressId}
                               options={allAddresses}
-                              placeholder="Select material"
+                              placeholder="Select a location"
                             />
                           </div>
                           <div>
@@ -1033,7 +922,7 @@ class CreateJobFormOne extends PureComponent {
                                 meta={reqHandlerEndAddress}
                               />
                             </div>
-                              
+
                             <div className="form__form-group">
                               <input
                                 name="endLocationAddress2"
@@ -1088,8 +977,6 @@ class CreateJobFormOne extends PureComponent {
                               />
                             </div>
                           </div>
-                          
-                          
                         </div>
                       </Row>
                     )}
@@ -1285,6 +1172,7 @@ class CreateJobFormOne extends PureComponent {
                   />
                 </div>
               </Row>
+              <hr/>
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
                   <Button color="minimal" className="btn btn-outline-secondary"
