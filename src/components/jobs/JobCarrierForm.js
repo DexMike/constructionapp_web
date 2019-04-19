@@ -283,6 +283,7 @@ class JobCarrierForm extends JobCustomerForm {
               <hr/>
               {this.renderJobRuns(job)}
               {this.renderUploadedPhotos(images)}
+              {this.renderGPSPoints(job)}
             </CardBody>
           </Card>
         </Container>

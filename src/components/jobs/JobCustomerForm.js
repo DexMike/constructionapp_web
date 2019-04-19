@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Row, Container } from 'reactstrap';
+import {Redirect} from 'react-router-dom';
+import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
 
 import TFormat from '../common/TFormat';
@@ -10,11 +10,14 @@ import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
+import GPSPointService from '../../api/GPSPointService';
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
 import TMap from '../common/TMapOriginDestination';
 import './jobs.css';
+import TTable from "../common/TTable";
+import EquipmentService from "../../api/EquipmentService";
 // import pinAImage from '../../img/PinA.png';
 // import pinBImage from '../../img/PinB.png';
 
@@ -39,9 +42,11 @@ class JobCustomerForm extends Component {
       isArchived: 0
     };
 
+
     this.state = {
       ...job,
       images: [],
+      gpsTrackings: null,
       loaded: false
     };
 
@@ -73,23 +78,28 @@ class JobCustomerForm extends Component {
 
   async componentDidMount() {
     let { job, images } = this.props;
+    let { gpsTrackings } = this.state;
+
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
+      console.log(booking);
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       images = bookingInvoices.map(item => item.image);
+      gpsTrackings = await this.fetchGPSPoints(booking.id);
     }
 
     this.setState({
       images,
-      loaded: true
+      loaded: true,
+      gpsTrackings
     });
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
-      const { job } = nextProps;
+      const {job} = nextProps;
       Object.keys(job)
         .map((key) => {
           if (job[key] === null) {
@@ -106,13 +116,13 @@ class JobCustomerForm extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
   async saveJob(e) {
     e.preventDefault();
-    const { job, handlePageClick } = this.props;
+    const {job, handlePageClick} = this.props;
     if (!this.isFormValid()) {
       // TODO display error message
       // console.error('didnt put all the required fields.');
@@ -151,7 +161,7 @@ class JobCustomerForm extends Component {
   } */
 
   handleInputChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   }
 
   materialsAsString(materials) {
@@ -170,8 +180,12 @@ class JobCustomerForm extends Component {
     return materialsString;
   }
 
+  async fetchGPSPoints(bookingId) {
+    return GPSPointService.getGPSTrackingsByBookingId(bookingId);
+  }
+
   renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
+    const {goToDashboard, goToJob} = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
@@ -610,6 +624,57 @@ class JobCustomerForm extends Component {
     return false;
   }
 
+  renderGPSPoints(gpsTrackings) {
+    return (
+      <React.Fragment>
+        <hr/>
+        <h3 className="subhead">
+          GPS Tracking Data
+        </h3>
+        <Row>
+          <Col md={12} lg={12}>
+            <Card>
+              <CardBody className="products-list">
+                <div className="tabs tabs--bordered-bottom">
+                  <div className="tabs__wrap">
+                    <TTable
+                      columns={
+                        [
+                          {
+                            name: 'recordedAt',
+                            displayName: 'Time'
+                          },
+                          {
+                            name: 'latitude',
+                            displayName: 'Latitude'
+                          },
+                          {
+                            name: 'longitude',
+                            displayName: 'Longitude'
+                          },
+                          {
+                            name: 'latitude',
+                            displayName: 'Accuracy'
+                          },
+                          {
+                            name: 'longitude',
+                            displayName: 'Battery level'
+                          }
+                        ]
+                      }
+                      data={gpsTrackings}
+                      handleIdClick={this.handleInputChange}
+                    />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   renderStartAddress(address) {
     return (
       <React.Fragment>
@@ -656,8 +721,8 @@ class JobCustomerForm extends Component {
   }
 
   renderEverything() {
-    const { images } = this.state;
-    const { job } = this.props;
+    const {images, gpsTrackings} = this.state;
+    const {job} = this.props;
     let origin = '';
     let destination = '';
     let endAddress;
@@ -726,6 +791,7 @@ class JobCustomerForm extends Component {
               <hr/>
               {this.renderJobRuns(job)}
               {this.renderUploadedPhotos(images)}
+              {this.renderGPSPoints(gpsTrackings)}
             </CardBody>
           </Card>
         </Container>
@@ -786,7 +852,7 @@ class JobCustomerForm extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -811,8 +877,7 @@ class JobCustomerForm extends Component {
 JobCustomerForm.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
-  }),
-  handlePageClick: PropTypes.func.isRequired
+  })
 };
 
 JobCustomerForm.defaultProps = {
