@@ -77,14 +77,13 @@ class JobCustomerForm extends Component {
   // }
 
   async componentDidMount() {
-    let { job, images } = this.props;
-    let { gpsTrackings } = this.state;
+    let {job, images} = this.props;
+    let {gpsTrackings} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
-      console.log(booking);
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       images = bookingInvoices.map(item => item.image);
       gpsTrackings = await this.fetchGPSPoints(booking.id);
@@ -181,6 +180,7 @@ class JobCustomerForm extends Component {
   }
 
   async fetchGPSPoints(bookingId) {
+
     return GPSPointService.getGPSTrackingsByBookingId(bookingId);
   }
 
@@ -625,54 +625,57 @@ class JobCustomerForm extends Component {
   }
 
   renderGPSPoints(gpsTrackings) {
-    return (
-      <React.Fragment>
-        <hr/>
-        <h3 className="subhead">
-          GPS Tracking Data
-        </h3>
-        <Row>
-          <Col md={12} lg={12}>
-            <Card>
-              <CardBody className="products-list">
-                <div className="tabs tabs--bordered-bottom">
-                  <div className="tabs__wrap">
-                    <TTable
-                      columns={
-                        [
-                          {
-                            name: 'recordedAt',
-                            displayName: 'Time'
-                          },
-                          {
-                            name: 'latitude',
-                            displayName: 'Latitude'
-                          },
-                          {
-                            name: 'longitude',
-                            displayName: 'Longitude'
-                          },
-                          {
-                            name: 'latitude',
-                            displayName: 'Accuracy'
-                          },
-                          {
-                            name: 'longitude',
-                            displayName: 'Battery level'
-                          }
-                        ]
-                      }
-                      data={gpsTrackings}
-                      handleIdClick={this.handleInputChange}
-                    />
+    if (gpsTrackings) {
+      return (
+        <React.Fragment>
+          <hr/>
+          <h3 className="subhead">
+            GPS Tracking Data
+          </h3>
+          <Row>
+            <Col md={12} lg={12}>
+              <Card>
+                <CardBody className="products-list">
+                  <div className="tabs tabs--bordered-bottom">
+                    <div className="tabs__wrap">
+                      <TTable
+                        columns={
+                          [
+                            {
+                              name: 'recordedAt',
+                              displayName: 'Time'
+                            },
+                            {
+                              name: 'latitude',
+                              displayName: 'Latitude'
+                            },
+                            {
+                              name: 'longitude',
+                              displayName: 'Longitude'
+                            }
+                            // ,
+                            // {
+                            //   name: 'latitude',
+                            //   displayName: 'Accuracy'
+                            // },
+                            // {
+                            //   name: 'longitude',
+                            //   displayName: 'Battery level'
+                            // }
+                          ]
+                        }
+                        data={gpsTrackings}
+                        handleIdClick={this.handleInputChange}
+                      />
+                    </div>
                   </div>
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-      </React.Fragment>
-    );
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </React.Fragment>
+      );
+    }
   }
 
   renderStartAddress(address) {
