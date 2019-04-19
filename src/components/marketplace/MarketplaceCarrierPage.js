@@ -494,7 +494,7 @@ class MarketplaceCarrierPage extends Component {
                     [
                       {
                         name: 'id',
-                        displayName: 'Job Id'
+                        displayName: 'Job Name'
                       },
                       {
                         name: 'newStartDate',
