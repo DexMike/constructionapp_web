@@ -17,11 +17,8 @@ import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
-<<<<<<< HEAD
 import CompanyService from '../../api/CompanyService';
-=======
 import './jobs.css';
->>>>>>> dev
 
 class JobCreateForm extends Component {
   constructor(props) {
