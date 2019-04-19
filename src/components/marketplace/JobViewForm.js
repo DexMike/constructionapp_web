@@ -22,6 +22,7 @@ import TwilioService from '../../api/TwilioService';
 import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import CompanyService from '../../api/CompanyService';
+import EquipmentService from '../../api/EquipmentService';
 import Table from 'reactstrap/es/Table';
 
 class JobViewForm extends Component {
@@ -30,10 +31,13 @@ class JobViewForm extends Component {
     const job = JobService.getDefaultJob();
 
     this.state = {
+      company: [],
       companyName: '',
       customerAccepted: 0,
       bidId: 0,
       bidExists: false,
+      booking: null,
+      bookingEquipment: null,
       ...job,
       loaded: false,
       profile: []
@@ -45,9 +49,12 @@ class JobViewForm extends Component {
   async componentDidMount() {
     let {
       job,
+      company,
       companyName,
       bidId,
       bidExists,
+      booking,
+      bookingEquipment,
       customerAccepted,
       profile
     } = this.state;
@@ -57,7 +64,7 @@ class JobViewForm extends Component {
     job = await JobService.getJobById(jobId);
 
     if (job) {
-      const company = await CompanyService.getCompanyById(job.companiesId);
+      company = await CompanyService.getCompanyById(job.companiesId);
       const startAddress = await AddressService.getAddressById(job.startAddress);
       let endAddress = null;
       if (job.endAddress) {
@@ -86,14 +93,26 @@ class JobViewForm extends Component {
         bidExists = true;
         bidId = bids[0].id;
         customerAccepted = bids[0].hasCustomerAccepted; // has customer accepted?
+      }    
+
+      const bookings = await BookingService.getBookingsByJobId(job.id);
+      if (bookings && bookings.length > 0) {
+        booking = bookings[0];
+        const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+        bookingEquipment = bookingEquipments.find(bookingEquipment => {
+          return bookingEquipment.bookingId === booking.id;
+        }, booking);
       }
     }
 
     this.setState({
       job,
+      company,
       companyName,
       bidId,
       bidExists,
+      booking,
+      bookingEquipment,
       customerAccepted,
       profile,
       loaded: true
@@ -110,9 +129,11 @@ class JobViewForm extends Component {
     const {
       job,
       bidId,
-      customerAccepted,
+      company,
       profile
     } = this.state;
+    let { booking, bookingEquipment } = this.state;
+    let notification;
 
     let bid;
     try {
@@ -121,60 +142,98 @@ class JobViewForm extends Component {
       // console.log('there is no Bid record');
     }
 
-    if (bid) { // we have a bid record
-      // if (bid.length) { // we have a bid record
-      if (customerAccepted === 1) { // we accept the job
-        console.log(job);
-        // console.log('accepting');
-        const newJob = CloneDeep(job);
-        const newBid = CloneDeep(bid);
+    if (bid) { // we have a bid record, we are accepting the job
+      // console.log('accepting');
+      const newJob = CloneDeep(job);
+      const newBid = CloneDeep(bid);
 
-        newJob.status = 'Booked';
-        newJob.startAddress = newJob.startAddress.id;
-        newJob.endAddress = newJob.endAddress.id;
-        delete newJob.materials;
-        await JobService.updateJob(newJob);
+      // UPDATING JOB
+      newJob.status = 'Booked';
+      newJob.startAddress = newJob.startAddress.id;
+      newJob.endAddress = newJob.endAddress.id;
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment()
+        .unix() * 1000;
+      delete newJob.materials;
+      await JobService.updateJob(newJob);
 
-        newBid.hasSchedulerAccepted = 1;
-        newBid.status = 'Accepted';
-        newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment()
-          .unix() * 1000;
-        await BidService.updateBid(newBid);
-        // Let's make a call to Twilio to send an SMS
-        // We need to change later get the body from the lookups table
-        // We need to get the phone number from the carrier co
-        const notification = {
-          to: '16129990787',
-          body: 'You have won this job! Congratulations.'
-        };
-        await TwilioService.createSms(notification);
-        // eslint-disable-next-line no-alert
-        alert('You have won this job! Congratulations.');
-        this.closeNow();
-      } else { // we request a job
-        // console.log('requesting');
-        const newBid = CloneDeep(bid);
-        newBid.hasSchedulerAccepted = 1;
-        newBid.status = 'New';
-        newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment()
-          .unix() * 1000;
-        newBid.createdOn = moment()
-          .unix() * 1000;
-        await BidService.updateBid(newBid);
-        // Let's make a call to Twilio to send an SMS
-        // We need to change later get the body from the lookups table
-        // We need to get the phone number from the carrier co
-        const notification = {
-          to: '16129990787',
-          body: 'Your Request has been sent.'
-        };
-        await TwilioService.createSms(notification);
-        // eslint-disable-next-line no-alert
-        alert('Your Request has been sent.');
-        this.closeNow();
+      // UPDATING BID
+      newBid.hasSchedulerAccepted = 1;
+      newBid.status = 'Accepted';
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+      await BidService.updateBid(newBid);
+
+      // CREATING BOOKING
+      // see if we have a booking first
+      const bookings = await BookingService.getBookingsByJobId(job.id);
+      if (!bookings || bookings.length <= 0) {
+        // TODO create a booking
+        booking = {};
+        booking.bidId = bid.id;
+        booking.rateType = bid.rateType;
+        booking.startTime = job.startTime;
+        booking.schedulersCompanyId = bid.companyCarrierId;
+        booking.sourceAddressId = job.startAddress.id;
+        booking.startAddressId = job.startAddress.id;
+        booking.endAddressId = job.endAddress.id;
+        booking.bookingStatus = 'New';
+        booking.createdBy = profile.userId;
+        booking.createdOn = moment().unix() * 1000;
+        booking.modifiedOn = moment().unix() * 1000;
+        booking.modifiedBy = profile.userId;
+        booking = await BookingService.createBooking(booking);
       }
+
+      // CREATING BOOKING EQUIPMENT
+      // see if we have a booking equipment first
+      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+      bookingEquipments = bookingEquipments.filter(bookingEq => {
+        if(bookingEq.bookingId === booking.id) {
+          return bookingEq;
+        }
+      });
+      if (!bookingEquipments || bookingEquipments.length <= 0) {
+        const equipments = await EquipmentService.getEquipments();
+        if (equipments && equipments.length > 0) {
+          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          bookingEquipment = {};
+          bookingEquipment.bookingId = booking.id;
+          bookingEquipment.schedulerId = bid.userId;
+          bookingEquipment.driverId = equipment.driversId;
+          bookingEquipment.equipmentId = equipment.id;
+          bookingEquipment.rateType = bid.rateType;
+          bookingEquipment.rateActual = 0;
+          bookingEquipment.startTime = booking.startTime;
+          bookingEquipment.endTime = booking.endTime;
+          bookingEquipment.startAddressId = booking.startAddressId;
+          bookingEquipment.endAddressId = booking.endAddressId;
+          bookingEquipment.notes = '';
+          bookingEquipment.createdBy = equipment.driversId;
+          bookingEquipment.modifiedBy = equipment.driversId;
+          bookingEquipment.modifiedOn = moment().unix() * 1000;
+          bookingEquipment.createdOn = moment().unix() * 1000;
+          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+            bookingEquipment
+          );
+        }
+      }
+
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // We tell the customer that the job has been accepted
+      const customerCompany = await CompanyService.getCompanyById(job.companiesId);
+      if (customerCompany.phone && this.checkPhoneFormat(customerCompany.phone)) {
+        notification = {
+          to: this.phoneToNumberFormat(customerCompany.phone),
+          body: 'Your job request has been accepted.'
+        };
+        await TwilioService.createSms(notification);
+      }
+      // eslint-disable-next-line no-alert
+      alert('You have won this job! Congratulations.');
+      this.closeNow();
     } else { // no bid record, request a job
       // console.log('requesting');
       bid = {};
@@ -195,18 +254,48 @@ class JobViewForm extends Component {
       bid.createdOn = moment()
         .unix() * 1000;
       await BidService.createBid(bid);
+
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
-      // We need to get the phone number from the carrier co
-      const notification = {
-        to: '16129990787',
-        body: 'Your Request has been sent.'
-      };
-      await TwilioService.createSms(notification);
+      // Sending SMS to carrier
+      /* if (company.phone && this.checkPhoneFormat(company.phone)) {
+        notification = {
+          to: this.phoneToNumberFormat(company.phone),
+          body: 'Your request has been sent.'
+        };
+        await TwilioService.createSms(notification);
+      } */
+
+      // Sending SMS to customer who created Job
+      if (job.company.phone && this.checkPhoneFormat(job.company.phone)) {
+        notification = {
+          to: this.phoneToNumberFormat(job.company.phone),
+          body: 'You have a new job request.'
+        };
+        await TwilioService.createSms(notification);
+      }
+
       // eslint-disable-next-line no-alert
-      alert('Your Request has been sent.');
+      alert('Your request has been sent.');
       this.closeNow();
     }
+  }
+
+  // remove non numeric
+  phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
+  }
+
+  // check format ok
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
+      return false;
+    }
+    return true;
   }
 
   equipmentMaterialsAsString(materials) {
@@ -268,7 +357,7 @@ class JobViewForm extends Component {
         </Row>
         <Row>
           <div className="col-md-12">
-            <hr></hr>
+            <hr/>
           </div>
         </Row>
       </React.Fragment>

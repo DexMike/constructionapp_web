@@ -17,6 +17,7 @@ import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import CompanyService from '../../api/CompanyService';
 import './jobs.css';
 
 class JobCreateForm extends Component {
@@ -363,6 +364,7 @@ class JobCreateForm extends Component {
     } = this.state;
 
     const newJob = CloneDeep(job);
+
     startAddress.name = `Job: ${newJob.name}`;
     endAddress.name = `Job: ${newJob.name}`;
     if (!this.isFormValid()) {
@@ -429,6 +431,7 @@ class JobCreateForm extends Component {
     bid.companyCarrierId = selectedEquipment.companyId;
     bid.rate = createdJob.rate;
     bid.rateEstimate = createdJob.rateEstimate;
+    bid.hasCustomerAccepted = 1;
     bid.modifiedOn = moment()
       .unix() * 1000;
     bid.createdOn = moment()
@@ -509,12 +512,33 @@ class JobCreateForm extends Component {
     // Let's make a call to Twilio to send an SMS
     // We need to change later get the body from the lookups table
     // We need to get the phone number from the carrier co
-    const notification = {
-      to: '16129990787',
-      body: 'You have a new job offer, please log in to https://www.mytrelar.com'
-    };
-    await TwilioService.createSms(notification);
+    // Sending SMS to Truck's company
+    const carrierCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
+    if (carrierCompany.phone && this.checkPhoneFormat(carrierCompany.phone)) {
+      const notification = {
+        to: this.phoneToNumberFormat(carrierCompany.phone),
+        body: 'You have a new job offer, please log in to https://www.mytrelar.com'
+      };
+      await TwilioService.createSms(notification);
+    }
     closeModal();
+  }
+
+  // remove non numeric
+  phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
+  }
+
+  // check format ok
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
+      return false;
+    }
+    return true;
   }
 
   handleStartAddressIdChange(data) {

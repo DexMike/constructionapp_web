@@ -55,7 +55,7 @@ class JobSavePage extends Component {
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleConfirmRequest = this.handleConfirmRequest.bind(this);
-    // this.carrierOrCustomerForm = this.carrierOrCustomerForm.bind(this);
+    this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
   }
 
   async componentDidMount() {
@@ -218,10 +218,11 @@ class JobSavePage extends Component {
 
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
-      // We need to get the phone number from the carrier co
-      if (job.company.phone && this.checkPhoneFormat(job.company.phone)) {
+      // Sending SMS to Truck's company
+      const carrierCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
+      if (carrierCompany.phone && this.checkPhoneFormat(carrierCompany.phone)) {
         const notification = {
-          to: this.phoneToNumberFormat(job.company.phone),
+          to: this.phoneToNumberFormat(carrierCompany.phone),
           body: 'Your request for the job has been accepted!'
         };
         await TwilioService.createSms(notification);
@@ -231,6 +232,144 @@ class JobSavePage extends Component {
 
       job.status = 'Booked';
       this.setState({ job });
+    }
+  }
+
+  async handleConfirmRequestCarrier() {
+    const {
+      job,
+      profile
+    } = this.state;
+    let { bid } = this.state;
+    let { booking, bookingEquipment } = this.state;
+    let notification;
+
+    if (bid) { // we have a bid record, accepting a job
+      const newJob = CloneDeep(job);
+      const newBid = CloneDeep(bid);
+
+      // UPDATING JOB
+      newJob.status = 'Booked';
+      newJob.startAddress = newJob.startAddress.id;
+      newJob.endAddress = newJob.endAddress.id;
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment()
+        .unix() * 1000;
+      delete newJob.materials;
+      await JobService.updateJob(newJob);
+
+      // UPDATING BID
+      newBid.hasCustomerAccepted = 1;
+      newBid.status = 'Accepted';
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+      await BidService.updateBid(newBid);
+
+      // CREATING BOOKING
+      // see if we have a booking first
+      const bookings = await BookingService.getBookingsByJobId(job.id);
+      if (!bookings || bookings.length <= 0) {
+        // TODO create a booking
+        booking = {};
+        booking.bidId = bid.id;
+        booking.rateType = bid.rateType;
+        booking.startTime = job.startTime;
+        booking.schedulersCompanyId = bid.companyCarrierId;
+        booking.sourceAddressId = job.startAddress.id;
+        booking.startAddressId = job.startAddress.id;
+        booking.endAddressId = job.endAddress.id;
+        booking.bookingStatus = 'New';
+        booking.createdBy = profile.userId;
+        booking.createdOn = moment().unix() * 1000;
+        booking.modifiedOn = moment().unix() * 1000;
+        booking.modifiedBy = profile.userId;
+        booking = await BookingService.createBooking(booking);
+      }
+
+      // CREATING BOOKING EQUIPMENT
+      // see if we have a booking equipment first
+      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+      bookingEquipments = bookingEquipments.filter(bookingEq => {
+        if(bookingEq.bookingId === booking.id) {
+          return bookingEq;
+        }
+      });
+      if (!bookingEquipments || bookingEquipments.length <= 0) {
+        const equipments = await EquipmentService.getEquipments();
+        if (equipments && equipments.length > 0) {
+          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          bookingEquipment = {};
+          bookingEquipment.bookingId = booking.id;
+          bookingEquipment.schedulerId = bid.userId;
+          bookingEquipment.driverId = equipment.driversId;
+          bookingEquipment.equipmentId = equipment.id;
+          bookingEquipment.rateType = bid.rateType;
+          bookingEquipment.rateActual = 0;
+          bookingEquipment.startTime = booking.startTime;
+          bookingEquipment.endTime = booking.endTime;
+          bookingEquipment.startAddressId = booking.startAddressId;
+          bookingEquipment.endAddressId = booking.endAddressId;
+          bookingEquipment.notes = '';
+          bookingEquipment.createdBy = equipment.driversId;
+          bookingEquipment.modifiedBy = equipment.driversId;
+          bookingEquipment.modifiedOn = moment().unix() * 1000;
+          bookingEquipment.createdOn = moment().unix() * 1000;
+          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+            bookingEquipment
+          );
+        }
+      }
+
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // Sending SMS to Truck's company
+      const carrierCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
+      if (carrierCompany.phone && this.checkPhoneFormat(carrierCompany.phone)) {
+        notification = {
+          to: this.phoneToNumberFormat(carrierCompany.phone),
+          body: 'Your request for the job has been accepted.'
+        };
+        await TwilioService.createSms(notification);
+      }
+      // eslint-disable-next-line no-alert
+      alert('You have accepted this job request! Congratulations.');
+
+      job.status = 'Booked';
+      this.setState({ job });
+    } else { // no bid record, requesting a job
+      // console.log('requesting');
+      bid = {};
+      bid.jobId = job.id;
+      bid.userId = profile.userId;
+      bid.companyCarrierId = job.companiesId;
+      bid.hasCustomerAccepted = 0;
+      bid.hasSchedulerAccepted = 1;
+      bid.status = 'New';
+      bid.rateType = job.rateType;
+      bid.rate = job.rate;
+      bid.rateEstimate = job.rateEstimate;
+      bid.notes = job.notes;
+      bid.createdBy = profile.userId;
+      bid.modifiedBy = profile.userId;
+      bid.modifiedOn = moment()
+        .unix() * 1000;
+      bid.createdOn = moment()
+        .unix() * 1000;
+      await BidService.createBid(bid);
+
+      // Sending SMS to customer who created Job
+      if (job.company.phone && this.checkPhoneFormat(job.company.phone)) {
+        notification = {
+          to: this.phoneToNumberFormat(job.company.phone),
+          body: 'You have a new job request.'
+        };
+        await TwilioService.createSms(notification);
+      }
+
+      // eslint-disable-next-line no-alert
+      alert('Your request has been sent.');
+      this.closeNow();
     }
   }
 
@@ -262,14 +401,13 @@ class JobSavePage extends Component {
     return false;
   }
 
-
   render() {
-    const { job, companyType, loaded } = this.state;
+    const { job, bid, companyType, loaded } = this.state;
+    let buttonText;
     if (loaded) {
       // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
         let type = '';
-        const acceptJob = job;
         // console.log(companyType);
         // get the <JobCarrierForm> inside parentheses so that jsx doesn't complain
         if (companyType === 'Carrier') {
@@ -277,45 +415,58 @@ class JobSavePage extends Component {
         } else {
           type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
         }
-        if (acceptJob.status === 'On Offer' && companyType === 'Customer') {
-          return (
-            <div className="container">
-              <div className="row">
-                <div className="col-md-10">
-                  <h3 className="page-title">
-                    Job Details
-                  </h3>
-                </div>
-                <div className="col-md-2">
-                  <Button
-                    onClick={() => this.handleConfirmRequest()}
-                    className="btn btn-primary"
-                  >
-                    Confirm Job Request
-                  </Button>
-                </div>
-              </div>
-              {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
-              {/* this.carrierOrCustomerForm(job) */}
-              {type}
-            </div>
-          );
-        } else {
-          return (
-            <div className="container">
-              <div className="row">
-                <div className="col-md-10">
-                  <h3 className="page-title">
-                    Job Details
-                  </h3>
-                </div>
-              </div>
-              {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
-              {/* this.carrierOrCustomerForm(job) */}
-              {type}
-            </div>
+
+        
+        if (job.status === 'On Offer' && companyType === 'Carrier') {
+          if (bid) { // we have a bid record, we are accepting the job
+            buttonText = (
+              <Button
+                onClick={() => this.handleConfirmRequestCarrier()}
+                className="btn btn-primary"
+              >
+                Accept Job
+              </Button>
+            );
+          } else {
+            buttonText = (
+              <Button
+                onClick={() => this.handleConfirmRequestCarrier()}
+                className="btn btn-primary"
+              >
+                Request Job
+              </Button>
+            );
+          }
+        }
+
+        if (job.status === 'On Offer' && companyType === 'Customer') {
+          buttonText = (
+            <Button
+              onClick={() => this.handleConfirmRequest()}
+              className="btn btn-primary"
+            >
+              Accept Job Request
+            </Button>
           );
         }
+
+        return (
+          <div className="container">
+            <div className="row">
+              <div className="col-md-10">
+                <h3 className="page-title">
+                  Job Details
+                </h3>
+              </div>
+              <div className="col-md-2">
+                {buttonText}
+              </div>
+            </div>
+            {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
+            {/* this.carrierOrCustomerForm(job) */}
+            {type}
+          </div>
+        );
       }
     }
     return (
