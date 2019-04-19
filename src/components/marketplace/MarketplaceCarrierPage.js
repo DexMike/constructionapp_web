@@ -436,7 +436,6 @@ class MarketplaceCarrierPage extends Component {
     let {
       jobs
     } = this.state;
-
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
@@ -493,7 +492,7 @@ class MarketplaceCarrierPage extends Component {
                   columns={
                     [
                       {
-                        name: 'id',
+                        name: 'name',
                         displayName: 'Job Name'
                       },
                       {
