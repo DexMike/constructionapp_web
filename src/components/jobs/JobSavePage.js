@@ -27,7 +27,6 @@ class JobSavePage extends Component {
 
     this.state = {
       loaded: false,
-      companyType: null,
       goToDashboard: false,
       goToJob: false,
       job: {
@@ -44,6 +43,7 @@ class JobSavePage extends Component {
         status: null
       },
       bid: null,
+      marketPlaceBid: null,
       booking: null,
       bookingEquipment: null,
       profile: [],
@@ -60,7 +60,7 @@ class JobSavePage extends Component {
 
   async componentDidMount() {
     const { match } = this.props;
-    let {bid, booking, bookingEquipment, profile} = this.state;
+    let {bid, marketPlaceBid, booking, bookingEquipment, profile} = this.state;
 
     profile = await ProfileService.getProfile();
 
@@ -85,6 +85,9 @@ class JobSavePage extends Component {
       const bids = await BidService.getBidsByJobId(job.id);
       if (bids && bids.length > 0) {
         bid = bids[0];
+        if (bids[1]) {
+          marketPlaceBid = bids[1];
+        }
       }
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
@@ -99,9 +102,11 @@ class JobSavePage extends Component {
       this.setState({
         job,
         bid,
+        marketPlaceBid,
         booking,
         bookingEquipment,
         profile,
+        profileCompanyId: profile.companyId,
         companyType: profile.companyType
       });
       this.setState({ job });
@@ -109,6 +114,7 @@ class JobSavePage extends Component {
 
     // moved the loader to the mount function
     this.setState({
+      profileCompanyId: profile.companyId,
       companyType: profile.companyType,
       loaded: true
     },
@@ -186,14 +192,15 @@ class JobSavePage extends Component {
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter(bookingEq => {
-        if(bookingEq.bookingId === booking.id) {
+        if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
         if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          const equipment = equipments[0]; // temporary for now.
+          // Ideally this should be the carrier/driver's truck
           bookingEquipment = {};
           bookingEquipment.bookingId = booking.id;
           bookingEquipment.schedulerId = bid.userId;
@@ -228,7 +235,7 @@ class JobSavePage extends Component {
         await TwilioService.createSms(notification);
       }
       // eslint-disable-next-line no-alert
-      alert('You have accepted this job request! Congratulations.');
+      // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
       this.setState({ job });
@@ -291,14 +298,15 @@ class JobSavePage extends Component {
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter(bookingEq => {
-        if(bookingEq.bookingId === booking.id) {
+        if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
         if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          const equipment = equipments[0]; // temporary for now.
+          // Ideally this should be the carrier/driver's truck
           bookingEquipment = {};
           bookingEquipment.bookingId = booking.id;
           bookingEquipment.schedulerId = bid.userId;
@@ -333,7 +341,7 @@ class JobSavePage extends Component {
         await TwilioService.createSms(notification);
       }
       // eslint-disable-next-line no-alert
-      alert('You have accepted this job request! Congratulations.');
+      // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
       this.setState({ job });
@@ -368,7 +376,7 @@ class JobSavePage extends Component {
       }
 
       // eslint-disable-next-line no-alert
-      alert('Your request has been sent.');
+      // alert('Your request has been sent.');
       this.closeNow();
     }
   }
@@ -402,7 +410,7 @@ class JobSavePage extends Component {
   }
 
   render() {
-    const { job, bid, companyType, loaded } = this.state;
+    const { job, bid, marketPlaceBid, companyType, profileCompanyId, loaded } = this.state;
     let buttonText;
     if (loaded) {
       // waiting for jobs and type to be available
@@ -416,13 +424,21 @@ class JobSavePage extends Component {
           type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
         }
 
-        
+        // console.log('profileCompanyId ');
+        // console.log(profileCompanyId);
+        // console.log('bid ');
+        // console.log(bid);
+
         if (job.status === 'On Offer' && companyType === 'Carrier') {
-          if (bid) { // we have a bid record, we are accepting the job
+          if (bid && profileCompanyId === bid.companyCarrierId) {
+            // we have a bid record, we need to verify that the bid record
+            // belongs to this carrier then we are accepting the job
+            // console.log('We are a carrier and we are a favorite');
+
             buttonText = (
               <Button
                 onClick={() => this.handleConfirmRequestCarrier()}
-                className="btn btn-primary"
+                className="btn btn-prsaveJobimary"
               >
                 Accept Job
               </Button>
@@ -438,8 +454,11 @@ class JobSavePage extends Component {
             );
           }
         }
-
-        if (job.status === 'On Offer' && companyType === 'Customer') {
+        // console.log('bid ');
+        // console.log(bid);
+        if (job.status === 'On Offer' && companyType === 'Customer'
+          && marketPlaceBid.hasSchedulerAccepted && !marketPlaceBid.hasCustomerAccepted) {
+          // console.log('We are a customer and we have a job request');
           buttonText = (
             <Button
               onClick={() => this.handleConfirmRequest()}
