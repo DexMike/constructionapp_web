@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import { Container, Card, CardBody, Col, Row } from 'reactstrap';
+import { Container, Card, CardBody, Col, Row, Button } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
@@ -36,6 +36,7 @@ class JobViewForm extends Component {
       customerAccepted: 0,
       bidId: 0,
       bidExists: false,
+      currentBidCarrier: 0,
       booking: null,
       bookingEquipment: null,
       ...job,
@@ -53,6 +54,7 @@ class JobViewForm extends Component {
       companyName,
       bidId,
       bidExists,
+      currentBidCarrier,
       booking,
       bookingEquipment,
       customerAccepted,
@@ -93,7 +95,8 @@ class JobViewForm extends Component {
         bidExists = true;
         bidId = bids[0].id;
         customerAccepted = bids[0].hasCustomerAccepted; // has customer accepted?
-      }    
+        currentBidCarrier = bids[0].companyCarrierId;
+      }
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
       if (bookings && bookings.length > 0) {
@@ -111,6 +114,7 @@ class JobViewForm extends Component {
       companyName,
       bidId,
       bidExists,
+      currentBidCarrier,
       booking,
       bookingEquipment,
       customerAccepted,
@@ -125,6 +129,7 @@ class JobViewForm extends Component {
 
   // save after the user has checked the info
   async saveJob() {
+    console.log('saveJob ');
     // save new or update?
     const {
       job,
@@ -135,28 +140,47 @@ class JobViewForm extends Component {
     let { booking, bookingEquipment } = this.state;
     let notification;
 
+    // {bidExists && customerAccepted === 1
+    // && currentBidCarrier === profile.companyId ? 'Accept Job' : 'Request Job'}
+
     let bid;
     try {
+      console.log('bidId ');
+      console.log(bidId);
       bid = await BidService.getBidById(bidId);
+      console.log('bid ');
+      console.log(bid);
     } catch (e) {
       // console.log('there is no Bid record');
     }
 
     if (bid) { // we have a bid record, we are accepting the job
       // console.log('accepting');
+      console.log('job status ');
+      console.log(job.status);
       const newJob = CloneDeep(job);
+      console.log('job ');
+      console.log(job);
+      console.log('newJob ');
+      console.log(newJob);
       const newBid = CloneDeep(bid);
 
       // UPDATING JOB
       newJob.status = 'Booked';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
+      newJob.startAddressId = newJob.startAddress.id;
+      newJob.endAddressId = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
       newJob.modifiedOn = moment()
         .unix() * 1000;
       delete newJob.materials;
-      await JobService.updateJob(newJob);
+      console.log('about to update job');
+      console.log(newJob);
 
+      await JobService.updateJob(newJob);
+      console.log('job ');
+      console.log(job);
+      console.log('newJob ');
+      console.log(newJob);
       // UPDATING BID
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
@@ -167,18 +191,25 @@ class JobViewForm extends Component {
 
       // CREATING BOOKING
       // see if we have a booking first
-      const bookings = await BookingService.getBookingsByJobId(job.id);
+      console.log('newJobId : ', newJob.id);
+      const bookings = await BookingService.getBookingsByJobId(newJob.id);
       if (!bookings || bookings.length <= 0) {
         // TODO create a booking
         booking = {};
-        booking.bidId = bid.id;
         booking.rateType = bid.rateType;
         booking.startTime = job.startTime;
-        booking.schedulersCompanyId = bid.companyCarrierId;
-        booking.sourceAddressId = job.startAddress.id;
+        booking.endTime = job.endTime;
         booking.startAddressId = job.startAddress.id;
         booking.endAddressId = job.endAddress.id;
+        booking.fee = 0.0;
         booking.bookingStatus = 'New';
+        booking.invoiceNumber = '';
+        booking.orderNumber = '';
+        booking.ticketNumber = '';
+        booking.bidId = bid.id;
+        booking.schedulersCompanyId = bid.companyCarrierId;
+        booking.sourceAddressId = job.startAddress.id;
+        booking.notes = '';
         booking.createdBy = profile.userId;
         booking.createdOn = moment().unix() * 1000;
         booking.modifiedOn = moment().unix() * 1000;
@@ -190,14 +221,15 @@ class JobViewForm extends Component {
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter(bookingEq => {
-        if(bookingEq.bookingId === booking.id) {
+        if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
         if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          const equipment = equipments[0]; // temporary for now.
+          // Ideally this should be the carrier/driver's truck
           bookingEquipment = {};
           bookingEquipment.bookingId = booking.id;
           bookingEquipment.schedulerId = bid.userId;
@@ -232,7 +264,7 @@ class JobViewForm extends Component {
         await TwilioService.createSms(notification);
       }
       // eslint-disable-next-line no-alert
-      alert('You have won this job! Congratulations.');
+      // alert('You have won this job! Congratulations.');
       this.closeNow();
     } else { // no bid record, request a job
       // console.log('requesting');
@@ -276,7 +308,7 @@ class JobViewForm extends Component {
       }
 
       // eslint-disable-next-line no-alert
-      alert('Your request has been sent.');
+      // alert('Your request has been sent.');
       this.closeNow();
     }
   }
@@ -323,6 +355,8 @@ class JobViewForm extends Component {
     const {
       companyName,
       bidExists,
+      profile,
+      currentBidCarrier,
       customerAccepted
     } = this.state;
     return (
@@ -349,9 +383,12 @@ class JobViewForm extends Component {
             <button
               type="submit"
               className="btn btn-primary float-right"
-              onClick={this.saveJob}
+              // onClick={this.saveJob}
+              onClick={() => this.saveJob()}
+
             >
-              {bidExists && customerAccepted === 1 ? 'Accept Job' : 'Request Job'}
+              {bidExists && customerAccepted === 1
+                && currentBidCarrier === profile.companyId ? 'Accept Job' : 'Request Job'}
             </button>
           </Col>
         </Row>

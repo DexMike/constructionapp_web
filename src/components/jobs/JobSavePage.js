@@ -102,6 +102,7 @@ class JobSavePage extends Component {
         booking,
         bookingEquipment,
         profile,
+        profileCompanyId: profile.companyId,
         companyType: profile.companyType
       });
       this.setState({ job });
@@ -109,6 +110,7 @@ class JobSavePage extends Component {
 
     // moved the loader to the mount function
     this.setState({
+      profileCompanyId: profile.companyId,
       companyType: profile.companyType,
       loaded: true
     },
@@ -228,7 +230,7 @@ class JobSavePage extends Component {
         await TwilioService.createSms(notification);
       }
       // eslint-disable-next-line no-alert
-      alert('You have accepted this job request! Congratulations.');
+      // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
       this.setState({ job });
@@ -333,7 +335,7 @@ class JobSavePage extends Component {
         await TwilioService.createSms(notification);
       }
       // eslint-disable-next-line no-alert
-      alert('You have accepted this job request! Congratulations.');
+      // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
       this.setState({ job });
@@ -368,7 +370,7 @@ class JobSavePage extends Component {
       }
 
       // eslint-disable-next-line no-alert
-      alert('Your request has been sent.');
+      // alert('Your request has been sent.');
       this.closeNow();
     }
   }
@@ -402,7 +404,7 @@ class JobSavePage extends Component {
   }
 
   render() {
-    const { job, bid, companyType, loaded } = this.state;
+    const { job, bid, companyType, profileCompanyId, loaded } = this.state;
     let buttonText;
     if (loaded) {
       // waiting for jobs and type to be available
@@ -416,13 +418,21 @@ class JobSavePage extends Component {
           type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
         }
 
-        
+        console.log('profileCompanyId ');
+        console.log(profileCompanyId);
+        console.log('bid ');
+        console.log(bid);
+
         if (job.status === 'On Offer' && companyType === 'Carrier') {
-          if (bid) { // we have a bid record, we are accepting the job
+          if (bid && profileCompanyId === bid.companyCarrierId) {
+            // we have a bid record, we need to verify that the bid record
+            // belongs to this carrier then we are accepting the job
+            console.log('We are a carrier and we are a favorite');
+
             buttonText = (
               <Button
                 onClick={() => this.handleConfirmRequestCarrier()}
-                className="btn btn-primary"
+                className="btn btn-prsaveJobimary"
               >
                 Accept Job
               </Button>
@@ -439,7 +449,9 @@ class JobSavePage extends Component {
           }
         }
 
-        if (job.status === 'On Offer' && companyType === 'Customer') {
+        if (job.status === 'On Offer' && companyType === 'Customer' &&
+          bid.hasSchedulerAccepted && !bid.hasCustomerAccepted) {
+          console.log('We are a customer and we have a job request');
           buttonText = (
             <Button
               onClick={() => this.handleConfirmRequest()}
