@@ -624,7 +624,17 @@ class JobCustomerForm extends Component {
   }
 
   renderGPSPoints(gpsTrackings) {
+
     if (gpsTrackings && gpsTrackings != null && gpsTrackings.length > 0) {
+      gpsTrackings = gpsTrackings.map((gps) => {
+        const newGPS = gps;
+        // newGPS.newRecordedAt = moment(gps.recordedAt)
+        newGPS.newRecordedAt = TFormat.asDayWeek(gps.recordedAt);
+        newGPS.accuracy = '90%';
+        newGPS.battery = '87%';
+        return newGPS;
+      });
+
       return (
         <React.Fragment>
           <hr/>
@@ -641,7 +651,7 @@ class JobCustomerForm extends Component {
                         columns={
                           [
                             {
-                              name: 'recordedAt',
+                              name: 'newRecordedAt',
                               displayName: 'Time'
                             },
                             {
@@ -651,16 +661,15 @@ class JobCustomerForm extends Component {
                             {
                               name: 'longitude',
                               displayName: 'Longitude'
+                            },
+                            {
+                              name: 'accuracy',
+                              displayName: 'Accuracy'
+                            },
+                            {
+                              name: 'battery',
+                              displayName: 'Battery level'
                             }
-                            // ,
-                            // {
-                            //   name: 'latitude',
-                            //   displayName: 'Accuracy'
-                            // },
-                            // {
-                            //   name: 'longitude',
-                            //   displayName: 'Battery level'
-                            // }
                           ]
                         }
                         data={gpsTrackings}
