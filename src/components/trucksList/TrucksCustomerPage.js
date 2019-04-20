@@ -277,20 +277,27 @@ class TrucksCustomerPage extends Component {
       }
       return false;
     }, id);
+
     // prevent dialog if no selected materials
     if (filters.materialType.length === 0) {
       const hauledMaterials = selectedEquipment.materials.match(/[^\r\n]+/g);
       const options = [];
-      hauledMaterials.forEach((material) => {
-        const m = {
-          label: material,
-          name: 'materialType',
-          value: material
-        };
-        options.push(m);
-      });
+
+      if (hauledMaterials && hauledMaterials.length > 0) {
+        hauledMaterials.forEach((material) => {
+          const m = {
+            label: material,
+            name: 'materialType',
+            value: material
+          };
+          options.push(m);
+        });
+      }
+
       filters.materialType = options;
-      // alert('Please select a some materials');
+
+      // TODO:UI replace with a better error message dialog
+      // alert('I\'m sorry but this Truck does not have any allowable materials.  Please select a truck with Materials');
       // return false;
     }
     this.setState({
