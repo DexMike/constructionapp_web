@@ -27,7 +27,6 @@ class JobSavePage extends Component {
 
     this.state = {
       loaded: false,
-      companyType: null,
       goToDashboard: false,
       goToJob: false,
       job: {
@@ -188,14 +187,15 @@ class JobSavePage extends Component {
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter(bookingEq => {
-        if(bookingEq.bookingId === booking.id) {
+        if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
         if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          const equipment = equipments[0]; // temporary for now.
+          // Ideally this should be the carrier/driver's truck
           bookingEquipment = {};
           bookingEquipment.bookingId = booking.id;
           bookingEquipment.schedulerId = bid.userId;
@@ -293,14 +293,15 @@ class JobSavePage extends Component {
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter(bookingEq => {
-        if(bookingEq.bookingId === booking.id) {
+        if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
         if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now. Ideally this should be the carrier/driver's truck
+          const equipment = equipments[0]; // temporary for now.
+          // Ideally this should be the carrier/driver's truck
           bookingEquipment = {};
           bookingEquipment.bookingId = booking.id;
           bookingEquipment.schedulerId = bid.userId;
@@ -448,9 +449,10 @@ class JobSavePage extends Component {
             );
           }
         }
-
-        if (job.status === 'On Offer' && companyType === 'Customer' &&
-          bid.hasSchedulerAccepted && !bid.hasCustomerAccepted) {
+        console.log('bid ');
+        console.log(bid);
+        if (job.status === 'On Offer' && companyType === 'Customer'
+          && bid.hasSchedulerAccepted && !bid.hasCustomerAccepted) {
           console.log('We are a customer and we have a job request');
           buttonText = (
             <Button
