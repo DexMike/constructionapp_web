@@ -1,25 +1,26 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import {Redirect} from 'react-router-dom';
 import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
 
+import './jobs.css';
+import TMap from '../common/TMapOriginDestination';
+import TTable from "../common/TTable";
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
 import GPSPointService from '../../api/GPSPointService';
+import EquipmentService from "../../api/EquipmentService";
+
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
-import TMap from '../common/TMapOriginDestination';
-import './jobs.css';
-import TTable from "../common/TTable";
-import EquipmentService from "../../api/EquipmentService";
-// import pinAImage from '../../img/PinA.png';
-// import pinBImage from '../../img/PinB.png';
+import pinAImage from '../../img/PinA.png';
+import pinBImage from '../../img/PinB.png';
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -41,7 +42,6 @@ class JobCustomerForm extends Component {
         .unix() * 1000,
       isArchived: 0
     };
-
 
     this.state = {
       ...job,
@@ -180,7 +180,6 @@ class JobCustomerForm extends Component {
   }
 
   async fetchGPSPoints(bookingId) {
-
     return GPSPointService.getGPSTrackingsByBookingId(bookingId);
   }
 
@@ -608,7 +607,7 @@ class JobCustomerForm extends Component {
         <React.Fragment>
           <hr/>
           <h3 className="subhead">
-            Uploaded Photos
+            Uploaded Images
           </h3>
           <Row>
             {images.map(item => (
@@ -625,7 +624,7 @@ class JobCustomerForm extends Component {
   }
 
   renderGPSPoints(gpsTrackings) {
-    if (gpsTrackings) {
+    if (gpsTrackings && gpsTrackings != null && gpsTrackings.length > 0) {
       return (
         <React.Fragment>
           <hr/>
