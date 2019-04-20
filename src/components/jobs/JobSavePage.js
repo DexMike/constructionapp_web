@@ -43,6 +43,7 @@ class JobSavePage extends Component {
         status: null
       },
       bid: null,
+      marketPlaceBid: null,
       booking: null,
       bookingEquipment: null,
       profile: [],
@@ -59,7 +60,7 @@ class JobSavePage extends Component {
 
   async componentDidMount() {
     const { match } = this.props;
-    let {bid, booking, bookingEquipment, profile} = this.state;
+    let {bid, marketPlaceBid, booking, bookingEquipment, profile} = this.state;
 
     profile = await ProfileService.getProfile();
 
@@ -84,6 +85,9 @@ class JobSavePage extends Component {
       const bids = await BidService.getBidsByJobId(job.id);
       if (bids && bids.length > 0) {
         bid = bids[0];
+        if (bids[1]) {
+          marketPlaceBid = bids[1];
+        }
       }
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
@@ -98,6 +102,7 @@ class JobSavePage extends Component {
       this.setState({
         job,
         bid,
+        marketPlaceBid,
         booking,
         bookingEquipment,
         profile,
@@ -405,7 +410,7 @@ class JobSavePage extends Component {
   }
 
   render() {
-    const { job, bid, companyType, profileCompanyId, loaded } = this.state;
+    const { job, bid, marketPlaceBid, companyType, profileCompanyId, loaded } = this.state;
     let buttonText;
     if (loaded) {
       // waiting for jobs and type to be available
@@ -419,16 +424,16 @@ class JobSavePage extends Component {
           type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
         }
 
-        console.log('profileCompanyId ');
-        console.log(profileCompanyId);
-        console.log('bid ');
-        console.log(bid);
+        // console.log('profileCompanyId ');
+        // console.log(profileCompanyId);
+        // console.log('bid ');
+        // console.log(bid);
 
         if (job.status === 'On Offer' && companyType === 'Carrier') {
           if (bid && profileCompanyId === bid.companyCarrierId) {
             // we have a bid record, we need to verify that the bid record
             // belongs to this carrier then we are accepting the job
-            console.log('We are a carrier and we are a favorite');
+            // console.log('We are a carrier and we are a favorite');
 
             buttonText = (
               <Button
@@ -449,11 +454,11 @@ class JobSavePage extends Component {
             );
           }
         }
-        console.log('bid ');
-        console.log(bid);
+        // console.log('bid ');
+        // console.log(bid);
         if (job.status === 'On Offer' && companyType === 'Customer'
-          && bid.hasSchedulerAccepted && !bid.hasCustomerAccepted) {
-          console.log('We are a customer and we have a job request');
+          && marketPlaceBid.hasSchedulerAccepted && !marketPlaceBid.hasCustomerAccepted) {
+          // console.log('We are a customer and we have a job request');
           buttonText = (
             <Button
               onClick={() => this.handleConfirmRequest()}

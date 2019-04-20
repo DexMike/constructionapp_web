@@ -127,12 +127,15 @@ class JobViewForm extends Component {
 
   // save after the user has checked the info
   async saveJob() {
-    console.log('saveJob ');
+    // console.log('saveJob ');
     // save new or update?
     const {
       job,
       bidId,
       company,
+      bidExists,
+      customerAccepted,
+      currentBidCarrier,
       profile
     } = this.state;
     let { booking, bookingEquipment } = this.state;
@@ -143,24 +146,29 @@ class JobViewForm extends Component {
 
     let bid;
     try {
-      console.log('bidId ');
-      console.log(bidId);
+      // console.log('bidId ');
+      // console.log(bidId);
       bid = await BidService.getBidById(bidId);
-      console.log('bid ');
-      console.log(bid);
+      // console.log('bid ');
+      // console.log(bid);
     } catch (e) {
       // console.log('there is no Bid record');
     }
+    // console.log('bid line 154 ');
+    // console.log(bid);
+    // if (bid && bid.length > 0) { // we have a bid record, we are accepting the job
+    if (bidExists && customerAccepted === 1
+      && currentBidCarrier === profile.companyId) {
 
-    if (bid && bid.length > 0) { // we have a bid record, we are accepting the job
-      // console.log('accepting');
-      console.log('job status ');
-      console.log(job.status);
+      // if (bid) { // we have a bid record, we are accepting the job
+      // console.log('accepting, we have a bid');
+      // console.log('job status ');
+      // console.log(job.status);
       const newJob = CloneDeep(job);
-      console.log('job ');
-      console.log(job);
-      console.log('newJob ');
-      console.log(newJob);
+      // console.log('job ');
+      // console.log(job);
+      // console.log('newJob ');
+      // console.log(newJob);
       const newBid = CloneDeep(bid);
 
       // UPDATING JOB
@@ -171,14 +179,14 @@ class JobViewForm extends Component {
       newJob.modifiedOn = moment()
         .unix() * 1000;
       delete newJob.materials;
-      console.log('about to update job');
-      console.log(newJob);
+      // console.log('about to update job');
+      // console.log(newJob);
 
       await JobService.updateJob(newJob);
-      console.log('job ');
-      console.log(job);
-      console.log('newJob ');
-      console.log(newJob);
+      // console.log('job ');
+      // console.log(job);
+      // console.log('newJob ');
+      // console.log(newJob);
       // UPDATING BID
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
@@ -189,7 +197,7 @@ class JobViewForm extends Component {
 
       // CREATING BOOKING
       // see if we have a booking first
-      console.log('newJobId : ', newJob.id);
+      // console.log('newJobId : ', newJob.id);
       const bookings = await BookingService.getBookingsByJobId(newJob.id);
       if (!bookings || bookings.length <= 0) {
         // TODO create a booking
@@ -266,13 +274,13 @@ class JobViewForm extends Component {
       this.closeNow();
     } else { // no bid record, request a job
       // console.log('requesting');
-      console.log('job status ');
-      console.log(job.status);
+      // console.log('job status ');
+      // console.log(job.status);
       const newJob = CloneDeep(job);
-      console.log('job ');
-      console.log(job);
-      console.log('newJob ');
-      console.log(newJob);
+      // console.log('job ');
+      // console.log(job);
+      // console.log('newJob ');
+      // console.log(newJob);
 
       // UPDATING JOB
       newJob.status = 'On Offer';
@@ -282,14 +290,14 @@ class JobViewForm extends Component {
       newJob.modifiedOn = moment()
         .unix() * 1000;
       delete newJob.materials;
-      console.log('about to update job');
-      console.log(newJob);
+      // console.log('about to update job');
+      // console.log(newJob);
 
       await JobService.updateJob(newJob);
-      console.log('job ');
-      console.log(job);
-      console.log('newJob ');
-      console.log(newJob);
+      // console.log('job ');
+      // console.log(job);
+      // console.log('newJob ');
+      // console.log(newJob);
 
       bid = {};
       bid.jobId = newJob.id;
@@ -308,8 +316,8 @@ class JobViewForm extends Component {
         .unix() * 1000;
       bid.createdOn = moment()
         .unix() * 1000;
-      console.log('bid ');
-      console.log(bid);
+      // console.log('bid ');
+      // console.log(bid);
       await BidService.createBid(bid);
 
       // Let's make a call to Twilio to send an SMS
