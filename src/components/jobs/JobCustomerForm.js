@@ -1,22 +1,26 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Row, Container } from 'reactstrap';
+import {Redirect} from 'react-router-dom';
+import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
 
+import './jobs.css';
+import TMap from '../common/TMapOriginDestination';
+import TTable from "../common/TTable";
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
+import GPSPointService from '../../api/GPSPointService';
+import EquipmentService from "../../api/EquipmentService";
+
 // import CompanyService from '../../api/CompanyService';
 // import JobMaterialsService from '../../api/JobMaterialsService';
 // import AddressService from '../../api/AddressService';
-import TMap from '../common/TMapOriginDestination';
-import './jobs.css';
-// import pinAImage from '../../img/PinA.png';
-// import pinBImage from '../../img/PinB.png';
+import pinAImage from '../../img/PinA.png';
+import pinBImage from '../../img/PinB.png';
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -42,6 +46,7 @@ class JobCustomerForm extends Component {
     this.state = {
       ...job,
       images: [],
+      gpsTrackings: null,
       loaded: false
     };
 
@@ -72,24 +77,28 @@ class JobCustomerForm extends Component {
   // }
 
   async componentDidMount() {
-    let { job, images } = this.props;
+    let {job, images} = this.props;
+    let {gpsTrackings} = this.state;
+
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       images = bookingInvoices.map(item => item.image);
+      gpsTrackings = await this.fetchGPSPoints(booking.id);
     }
 
     this.setState({
       images,
-      loaded: true
+      loaded: true,
+      gpsTrackings
     });
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
-      const { job } = nextProps;
+      const {job} = nextProps;
       Object.keys(job)
         .map((key) => {
           if (job[key] === null) {
@@ -106,13 +115,13 @@ class JobCustomerForm extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
   async saveJob(e) {
     e.preventDefault();
-    const { job, handlePageClick } = this.props;
+    const {job, handlePageClick} = this.props;
     if (!this.isFormValid()) {
       // TODO display error message
       // console.error('didnt put all the required fields.');
@@ -151,7 +160,7 @@ class JobCustomerForm extends Component {
   } */
 
   handleInputChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   }
 
   materialsAsString(materials) {
@@ -170,8 +179,12 @@ class JobCustomerForm extends Component {
     return materialsString;
   }
 
+  async fetchGPSPoints(bookingId) {
+    return GPSPointService.getGPSTrackingsByBookingId(bookingId);
+  }
+
   renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
+    const {goToDashboard, goToJob} = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
@@ -594,7 +607,7 @@ class JobCustomerForm extends Component {
         <React.Fragment>
           <hr/>
           <h3 className="subhead">
-            Uploaded Photos
+            Uploaded Images
           </h3>
           <Row>
             {images.map(item => (
@@ -608,6 +621,69 @@ class JobCustomerForm extends Component {
       );
     }
     return false;
+  }
+
+  renderGPSPoints(gpsTrackings) {
+
+    if (gpsTrackings && gpsTrackings != null && gpsTrackings.length > 0) {
+      gpsTrackings = gpsTrackings.map((gps) => {
+        const newGPS = gps;
+        // newGPS.newRecordedAt = moment(gps.recordedAt)
+        newGPS.newRecordedAt = TFormat.asDayWeek(gps.recordedAt);
+        newGPS.accuracy = '90%';
+        newGPS.battery = '87%';
+        return newGPS;
+      });
+
+      return (
+        <React.Fragment>
+          <hr/>
+          <h3 className="subhead">
+            GPS Tracking Data
+          </h3>
+          <Row>
+            <Col md={12} lg={12}>
+              <Card>
+                <CardBody className="products-list">
+                  <div className="tabs tabs--bordered-bottom">
+                    <div className="tabs__wrap">
+                      <TTable
+                        columns={
+                          [
+                            {
+                              name: 'newRecordedAt',
+                              displayName: 'Time'
+                            },
+                            {
+                              name: 'latitude',
+                              displayName: 'Latitude'
+                            },
+                            {
+                              name: 'longitude',
+                              displayName: 'Longitude'
+                            },
+                            {
+                              name: 'accuracy',
+                              displayName: 'Accuracy'
+                            },
+                            {
+                              name: 'battery',
+                              displayName: 'Battery level'
+                            }
+                          ]
+                        }
+                        data={gpsTrackings}
+                        handleIdClick={this.handleInputChange}
+                      />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </React.Fragment>
+      );
+    }
   }
 
   renderStartAddress(address) {
@@ -656,8 +732,8 @@ class JobCustomerForm extends Component {
   }
 
   renderEverything() {
-    const { images } = this.state;
-    const { job } = this.props;
+    const {images, gpsTrackings} = this.state;
+    const {job} = this.props;
     let origin = '';
     let destination = '';
     let endAddress;
@@ -726,6 +802,7 @@ class JobCustomerForm extends Component {
               <hr/>
               {this.renderJobRuns(job)}
               {this.renderUploadedPhotos(images)}
+              {this.renderGPSPoints(gpsTrackings)}
             </CardBody>
           </Card>
         </Container>
@@ -786,7 +863,7 @@ class JobCustomerForm extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -811,8 +888,7 @@ class JobCustomerForm extends Component {
 JobCustomerForm.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
-  }),
-  handlePageClick: PropTypes.func.isRequired
+  })
 };
 
 JobCustomerForm.defaultProps = {

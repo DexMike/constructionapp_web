@@ -846,7 +846,8 @@ class JobCreateForm extends Component {
       reqHandlerEstHours/* ,
       reqHandlerEstTons */
     } = this.state;
-    // const { selectedEquipment } = this.props;
+    const today = new Date();
+    const currentDate = today.getTime();
     return (
       <React.Fragment>
         <div className="row">
@@ -885,11 +886,11 @@ class JobCreateForm extends Component {
                       onChange: this.handleStartTimeChange,
                       name: 'startTime',
                       value: job.startTime,
-                      givenDate: new Date(job.startTime).getTime(),
-                      dateFormat: 'MM-dd-yy'
+                      givenDate: currentDate
                     }
                   }
                   onChange={this.handleStartTimeChange}
+                  dateFormat="MMMM-dd-yyyy"
                   meta={reqHandlerDate}
                 />
               </div>
