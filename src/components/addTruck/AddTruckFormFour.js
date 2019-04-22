@@ -20,9 +20,21 @@ class AddTruckFormFour extends PureComponent {
     super(props);
     this.state = {
       // showPassword: false
+      userInfo: {}
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.saveInfo = this.saveInfo.bind(this);
+  }
+
+  async componentDidMount() {
+    const {
+      userFullInfo
+    } = this.props;
+    const userInfoLoaded = await UserService.getUserById(userFullInfo.info.id);
+    this.setState({
+      userInfo: userInfoLoaded
+    });
+    await this.fetchMaterials();
   }
 
   // on the login I can find something like this
@@ -138,6 +150,10 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.defaultDriverId = userFullInfo.info.id; // newUser.id;
       const selectedTruckMaterials = truckFullInfo.info.selectedMaterials;
 
+      // convert false to 0
+      const available = availabilityFullInfo.info.isAvailable;
+      truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
+
       // remove unnecesary info
       delete truckFullInfo.info.id;
       delete truckFullInfo.info.redir;
@@ -179,6 +195,7 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
+    const { userInfo } = this.state;
     // show selected materials
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
@@ -190,7 +207,7 @@ class AddTruckFormFour extends PureComponent {
     if (Object.keys(getAvailiabilityFullInfo().info).length > 0
       && Object.keys(getTruckFullInfo().info).length > 0
       && Object.keys(getUserFullInfo().info).length > 0) {
-      const availableText = availabilityFullInfo.info.isAvailable ? 'Unavailable' : 'Available';
+      const availableText = availabilityFullInfo.info.isAvailable === true ? 'Available' : 'Unavailable';
       const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
       const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
       return (
@@ -225,7 +242,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Name: </strong>
                         </div>
                         <div className="col-md-6">
-                          {userFullInfo.info.firstName} {userFullInfo.info.lastName}
+                          {userInfo.firstName} {userInfo.lastName}
                         </div>
                       </div>
                       <div className="row">
@@ -233,7 +250,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Email: </strong>
                         </div>
                         <div className="col-md-6">
-                          <a href={"mailto:" + userFullInfo.info.email}> {userFullInfo.info.email}</a>
+                          <a href="mailto: {userInfo.email}"> {userInfo.email}</a>
                         </div>
                       </div>
                       <div className="row">
@@ -241,7 +258,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Mobile phone: </strong>
                         </div>
                         <div className="col-md-6">
-                          <a href={"tel:" + userFullInfo.info.mobilePhone}> {userFullInfo.info.mobilePhone}</a>
+                          <a href="tel: {userInfo.mobilePhone}"> {userInfo.mobilePhone}</a>
                         </div>
                       </div>
                       <div className="row">
