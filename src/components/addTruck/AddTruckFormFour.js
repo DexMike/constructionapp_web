@@ -34,7 +34,6 @@ class AddTruckFormFour extends PureComponent {
     this.setState({
       userInfo: userInfoLoaded
     });
-    await this.fetchMaterials();
   }
 
   // on the login I can find something like this
