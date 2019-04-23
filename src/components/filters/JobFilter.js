@@ -205,7 +205,6 @@ class JobFilter extends Component {
   async filterWithStatus(filters) {
     this.state = {filters}
     await this.fetchJobs();
-    console.log(this.state);
   }
 
   render() {
