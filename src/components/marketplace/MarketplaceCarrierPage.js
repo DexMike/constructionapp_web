@@ -55,7 +55,6 @@ class MarketplaceCarrierPage extends Component {
 
   returnJobs(jobs) {
     this.setState({ jobs });
-    return jobs;
   }
 
   handlePageClick(menuItem) {

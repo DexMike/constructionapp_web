@@ -29,8 +29,6 @@ class JobFilter extends Component {
     // Comment
     this.state = {
       jobs: [],
-      jobId: 0,
-
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
@@ -146,7 +144,7 @@ class JobFilter extends Component {
     const jobs = await JobService.getJobDashboardByFilters(filters);
     this.setState({jobs});
     const {returnJobs} = this.props;
-    returnJobs(jobs);
+    returnJobs(jobs, filters);
     return jobs;
   }
 
@@ -182,8 +180,8 @@ class JobFilter extends Component {
     const {value, name} = option;
     const {filters} = this.state;
     filters[name] = value;
-    await this.fetchJobs();
     this.setState({filters});
+    await this.fetchJobs();
   }
 
   handleMultiChange(data) {
@@ -200,8 +198,14 @@ class JobFilter extends Component {
     const {filters} = this.state;
     filters.startAvailability = e.start;
     filters.endAvailability = e.end;
-    await this.fetchJobs();
     this.setState({filters});
+    await this.fetchJobs();
+  }
+
+  async filterWithStatus(filters) {
+    this.state = {filters}
+    await this.fetchJobs();
+    console.log(this.state);
   }
 
   render() {
