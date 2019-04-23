@@ -7,30 +7,11 @@ import {
   Container,
   Row
 } from 'reactstrap';
-
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-import moment from 'moment';
-// import { Select } from '@material-ui/core';
-import NumberFormat from 'react-number-format';
-import TField from '../common/TField';
-import TSelect from '../common/TSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
-import TIntervalDatePicker from '../common/TIntervalDatePicker';
-import MultiSelect from '../common/TMultiSelect';
-
-import DashboardTitle, {DashboardObjectStatic} from './DashboardObjectStatic';
-
-import AddressService from '../../api/AddressService';
-import AgentService from '../../api/AgentService';
-import CompanyService from '../../api/CompanyService';
-import JobCreateForm from '../jobs/JobCreateForm';
-import JobMaterialsService from '../../api/JobMaterialsService';
-import JobService from '../../api/JobService';
-import LookupsService from '../../api/LookupsService';
-import ProfileService from '../../api/ProfileService';
-import {DashboardObjectClickable} from "./DashboardObjectClickable";
-import JobFilter from "../filters/JobFilter";
+import {DashboardObjectStatic} from './DashboardObjectStatic';
+import {DashboardObjectClickable} from './DashboardObjectClickable';
+import JobFilter from '../filters/JobFilter';
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -38,15 +19,13 @@ class DashboardCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
-      modal: false,
       goToDashboard: false,
       goToUpdateJob: false,
       jobId: 0,
       // profile: null
       // Rate Type Button toggle
-      isAvailable: true,
       filters: {
-        status: '',
+        status: ''
       },
     };
 
@@ -60,8 +39,7 @@ class DashboardCarrierPage extends Component {
   async componentDidMount() {
     this.setState(
       {
-        loaded: true,
-        isAvailable: true
+        loaded: true
       }
     );
   }
@@ -97,18 +75,11 @@ class DashboardCarrierPage extends Component {
   async handleFilterStatusChange({value, name}) {
     const { filters } = this.state;
     if (filters[name] === value) {
-      filters[name] = "";
+      filters[name] = '';
     } else {
       filters[name] = value;
     }
     this.refs.filterChild.filterWithStatus(filters);
-  }
-
-
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
-    }
   }
 
   handleJobEdit(id) {

@@ -9,42 +9,25 @@ import {
   Modal,
   Row
 } from 'reactstrap';
-import moment from 'moment';
-
-// import PropTypes from 'prop-types';
+import {useTranslation} from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-import TField from '../common/TField';
-import TSelect from '../common/TSelect';
-import TDateTimePicker from '../common/TDateTimePicker';
-import TIntervalDatePicker from '../common/TIntervalDatePicker';
-import MultiSelect from '../common/TMultiSelect';
-
-import AddressService from '../../api/AddressService';
-import AgentService from '../../api/AgentService';
-import CompanyService from '../../api/CompanyService';
-import JobCreateForm from '../jobs/JobCreateForm';
-import JobMaterialsService from '../../api/JobMaterialsService';
 import JobService from '../../api/JobService';
-import LookupsService from '../../api/LookupsService';
-import ProfileService from '../../api/ProfileService';
-
 import JobCreatePopup from '../jobs/JobCreatePopup';
 
-import {useTranslation} from "react-i18next";
-import {DashboardObject, DashboardObjectClickable} from "./DashboardObjectClickable";
-import {DashboardObjectStatic} from "./DashboardObjectStatic";
-import JobFilter from "../filters/JobFilter";
+import {DashboardObjectClickable} from './DashboardObjectClickable';
+import {DashboardObjectStatic} from './DashboardObjectStatic';
+import JobFilter from '../filters/JobFilter';
 
 function PageTitle() {
   const {t} = useTranslation();
   return (
     <Row>
       <Col md={12}>
-        <h3 className="page-title">{t("Jobs")}</h3>
+        <h3 className="page-title">{t('Jobs')}</h3>
       </Col>
     </Row>
-  )
+  );
 }
 
 function AddJobButton({handle}) {
@@ -55,9 +38,9 @@ function AddJobButton({handle}) {
       type="button"
       className="primaryButton"
     >
-      {t("ADD A JOB")}
+      {t('ADD A JOB')}
     </Button>
-  )
+  );
 }
 
 class DashboardCustomerPage extends Component {
@@ -77,26 +60,11 @@ class DashboardCustomerPage extends Component {
       goToUpdateJob: false,
       jobId: 0,
       modalAddJob: false,
-
-      startDate: null,          // values for date control
-      endDate: null,            // values for date control
-
-      // Look up lists
-      equipmentTypeList: [],
-      materialTypeList: [],
-      rateTypeList: [],
-      sortByList, // array from above
-      // sortBy: 1,
-
-      equipments: [],
-      selectedEquipment: {},
-
-
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
-        status: '',
-      },
+        status: ''
+      }
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -109,21 +77,20 @@ class DashboardCustomerPage extends Component {
   async componentDidMount() {
     this.setState(
       {
-        loaded: true,
-        isAvailable: true
+        loaded: true
       }
     );
   }
 
   returnJobs(jobs, filters) {
-    this.setState({ jobs });
-    this.setState({ filters });
+    this.setState({jobs});
+    this.setState({filters});
   }
 
   async handleFilterStatusChange({value, name}) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     if (filters[name] === value) {
-      filters[name] = "";
+      filters[name] = '';
     } else {
       filters[name] = value;
     }
@@ -154,10 +121,10 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobs() {
     // console.log(237);
-    const { filters } = this.state;
+    const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
 
-    this.setState({ jobs });
+    this.setState({jobs});
     return jobs;
   }
 
@@ -310,12 +277,27 @@ class DashboardCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="row">
-            <DashboardObjectClickable title="New Offers" displayVal = {onOfferJobCount} value={"On Offer"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Published Jobs" displayVal = {publishedJobCount} value={"Published"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Booked Jobs" displayVal = {bookedJobCount} value={"Booked"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent} value={"% Completed"}/>
+            <DashboardObjectClickable title="New Offers" displayVal={onOfferJobCount} value="On Offer"
+                                      handle={this.handleFilterStatusChange} name="status"
+                                      status={filters.status}
+            />
+            <DashboardObjectClickable title="Published Jobs" displayVal={publishedJobCount} value="Published"
+                                      handle={this.handleFilterStatusChange} name="status"
+                                      status={filters.status}
+            />
+            <DashboardObjectClickable title="Booked Jobs" displayVal={bookedJobCount} value="Booked"
+                                      handle={this.handleFilterStatusChange} name="status"
+                                      status={filters.status}
+            />
+            <DashboardObjectClickable title="Jobs in Progress" displayVal={inProgressJobCount} value="In Progress"
+                                      handle={this.handleFilterStatusChange} name="status"
+                                      status={filters.status}
+            />
+            <DashboardObjectClickable title="Completed Jobs" displayVal={completedJobCount} value="Job Completed"
+                                      handle={this.handleFilterStatusChange} name="status"
+                                      status={filters.status}
+            />
+            <DashboardObjectStatic title="% Completed" displayVal={completedOffersPercent} value="% Completed"/>
           </div>
         </Container>
       );
@@ -467,17 +449,17 @@ class DashboardCustomerPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
-          {/*{this.renderModal()}*/}
+          {/* {this.renderModal()} */}
           {this.renderNewJobModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}
           <JobFilter returnJobs={this.returnJobs} ref="filterChild"/>
-          {/*{this.renderFilter()}*/}
+          {/* {this.renderFilter()} */}
           {this.renderJobList()}
         </Container>
       );
