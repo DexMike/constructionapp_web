@@ -40,14 +40,11 @@ class DashboardCarrierPage extends Component {
       jobs: [],
       modal: false,
       goToDashboard: false,
-      goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
       // profile: null
       // Rate Type Button toggle
       isAvailable: true,
-      // TODO: Refactor to a single filter object
-      // Filter values
       filters: {
         status: '',
       },
@@ -55,7 +52,6 @@ class DashboardCarrierPage extends Component {
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
-    this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
@@ -137,13 +133,6 @@ class DashboardCarrierPage extends Component {
   //   });
   // }
 
-  toggleAddJobModal() {
-    const { modal } = this.state;
-    this.setState({
-      modal: !modal
-    });
-  }
-
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
@@ -191,9 +180,6 @@ class DashboardCarrierPage extends Component {
     const status = this.state;
     if (status.goToDashboard) {
       return <Redirect push to="/"/>;
-    }
-    if (status.goToAddJob) {
-      return <Redirect push to="/jobs/save"/>;
     }
     if (status.goToUpdateJob) {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
