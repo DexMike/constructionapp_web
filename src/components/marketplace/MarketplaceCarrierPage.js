@@ -8,24 +8,10 @@ import {
   Modal,
   Row
 } from 'reactstrap';
-
-import moment from 'moment';
-// import { Select } from '@material-ui/core';
-import TField from '../common/TField';
-import TSelect from '../common/TSelect';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
-import TIntervalDatePicker from '../common/TIntervalDatePicker';
-import MultiSelect from '../common/TMultiSelect';
-
-import AddressService from '../../api/AddressService';
-import CompanyService from '../../api/CompanyService';
-import JobService from '../../api/JobService';
-import LookupsService from '../../api/LookupsService';
 import JobViewForm from './JobViewForm';
-import JobMaterialsService from '../../api/JobMaterialsService';
-import ProfileService from '../../api/ProfileService';
-import JobFilter from "../filters/JobFilter";
+import JobFilter from '../filters/JobFilter';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
