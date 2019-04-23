@@ -401,10 +401,10 @@ class JobFilter extends Component {
   }
 }
 
-CreateJobFormOne.propTypes = {
+JobFilter.propTypes = {
   returnJobs: PropTypes.func.isRequired
 };
 
-CreateJobFormOne.defaultProps = {};
+JobFilter.defaultProps = {};
 
 export default JobFilter;
