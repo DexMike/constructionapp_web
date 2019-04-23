@@ -46,10 +46,6 @@ class TruckFilter extends Component {
       equipmentTypeList: [],
       materialTypeList: [],
       rateTypeList: [],
-      sortByList,
-
-      equipments: [],
-      selectedEquipment: {},
 
       // TODO: Refactor to a single filter object
       // Filter values
@@ -143,7 +139,6 @@ class TruckFilter extends Component {
         }
         return newEquipment;
       });
-      this.setState({equipments});
     }
   }
 
@@ -176,7 +171,6 @@ class TruckFilter extends Component {
           .format();
         return newEquipment;
       });
-      this.setState({equipments});
       const {returnEquipments} = this.props;
       returnEquipments(equipments);
     }
