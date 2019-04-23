@@ -31,6 +31,7 @@ import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
+import TruckFilter from "../filters/TruckFilter";
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -88,16 +89,22 @@ class TrucksCustomerPage extends Component {
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
     this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
+    this.returnEquipments = this.returnEquipments.bind(this);
   }
 
   async componentDidMount() {
-    const { filters } = this.state;
+    const {filters} = this.state;
     // await this.fetchJobs();
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({loaded: true});
+  }
+
+  returnEquipments(equipments) {
+    this.setState({equipments});
+    return equipments;
   }
 
   retrieveAllMaterials() {
@@ -661,7 +668,7 @@ class TrucksCustomerPage extends Component {
                       thousandSeparator
                       prefix=" "
                       suffix=" Tons"
-                      />
+                    />
                     </h3>
                   </div>
                   <div className="col-md-3 button-card">
@@ -849,7 +856,8 @@ class TrucksCustomerPage extends Component {
           {this.renderGoTo()}
           {this.renderTitle()}
           <div className="truck-container">
-            {this.renderFilter()}
+            <TruckFilter returnEquipments={this.returnEquipments} />
+            {/*{this.renderFilter()}*/}
             {/* {this.renderTable()} */}
             {this.renderEquipmentTable()}
           </div>
