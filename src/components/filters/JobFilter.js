@@ -5,6 +5,7 @@ import {
   Col,
   Row
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
@@ -14,8 +15,6 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
-import PropTypes from "prop-types";
-import CreateJobFormOne from "../jobs/JobCreateFormOne";
 
 class JobFilter extends Component {
   constructor(props) {
@@ -28,7 +27,6 @@ class JobFilter extends Component {
 
     // Comment
     this.state = {
-      jobs: [],
       // Look up lists
       equipmentTypeList: [],
       materialTypeList: [],
@@ -43,7 +41,7 @@ class JobFilter extends Component {
       // Filter values
       filters: {
         rateType: '',
-        searchType: "Carrier Job",
+        searchType: 'Carrier Job',
         startAvailability: null,
         endAvailability: null,
         rate: '',
@@ -82,12 +80,11 @@ class JobFilter extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    const jobs = await this.fetchJobs();
+    await this.fetchJobs();
     this.fetchFilterLists();
 
     this.setState(
       {
-        jobs,
         filters,
         startDate,
         endDate
@@ -142,7 +139,6 @@ class JobFilter extends Component {
   async fetchJobs() {
     const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-    this.setState({jobs});
     const {returnJobs} = this.props;
     returnJobs(jobs, filters);
     return jobs;
