@@ -172,7 +172,7 @@ class TruckFilter extends Component {
         return newEquipment;
       });
       const {returnEquipments} = this.props;
-      returnEquipments(equipments);
+      returnEquipments(equipments, filters);
     }
   }
 

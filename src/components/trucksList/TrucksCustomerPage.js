@@ -37,7 +37,21 @@ class TrucksCustomerPage extends Component {
       equipments: [],
       selectedEquipment: {},
       modal: false,
-      goToDashboard: false
+      goToDashboard: false,
+
+      filters: {
+        startAvailability: null,
+        endAvailability: null,
+        searchType: 'Customer Truck',
+        userId: '',
+        equipmentType: '',
+        minCapacity: '',
+        // materialType: '',
+        materialType: [],
+        zipCode: '',
+        rateType: '',
+        sortBy: sortByList[0]
+      }
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -49,17 +63,11 @@ class TrucksCustomerPage extends Component {
   }
 
   async componentDidMount() {
-    const {filters} = this.state;
-    // await this.fetchJobs();
-    const profile = await ProfileService.getProfile();
-    filters.userId = profile.userId;
-    await this.fetchEquipments();
-    await this.fetchFilterLists();
     this.setState({loaded: true});
   }
 
-  returnEquipments(equipments) {
-    this.setState({equipments});
+  returnEquipments(equipments, filters) {
+    this.setState({equipments, filters});
     return equipments;
   }
 
