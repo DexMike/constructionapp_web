@@ -79,15 +79,15 @@ class TrucksCustomerPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
+    this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
-    this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
-    this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
-    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
   }
 
   async componentDidMount() {
