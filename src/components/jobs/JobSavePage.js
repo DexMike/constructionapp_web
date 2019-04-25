@@ -18,6 +18,7 @@ import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
+import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
 
 
@@ -226,14 +227,17 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      const carrierCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
-      if (carrierCompany.phone && this.checkPhoneFormat(carrierCompany.phone)) {
-        const notification = {
-          to: this.phoneToNumberFormat(carrierCompany.phone),
-          body: 'Your request for the job has been accepted!'
-        };
-        await TwilioService.createSms(notification);
+      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: 'Your request for the job has been accepted!'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
+
       // eslint-disable-next-line no-alert
       // alert('You have accepted this job request! Congratulations.');
 
@@ -332,14 +336,17 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      const carrierCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
-      if (carrierCompany.phone && this.checkPhoneFormat(carrierCompany.phone)) {
-        notification = {
-          to: this.phoneToNumberFormat(carrierCompany.phone),
-          body: 'Your request for the job has been accepted.'
-        };
-        await TwilioService.createSms(notification);
+      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: 'Your request for the job has been accepted.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
+
       // eslint-disable-next-line no-alert
       // alert('You have accepted this job request! Congratulations.');
 
@@ -366,13 +373,16 @@ class JobSavePage extends Component {
         .unix() * 1000;
       await BidService.createBid(bid);
 
-      // Sending SMS to customer who created Job
-      if (job.company.phone && this.checkPhoneFormat(job.company.phone)) {
-        notification = {
-          to: this.phoneToNumberFormat(job.company.phone),
-          body: 'You have a new job request.'
-        };
-        await TwilioService.createSms(notification);
+      // Sending SMS to customer's Admin from the company who created the Job
+      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'You have a new job request.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
 
       // eslint-disable-next-line no-alert
