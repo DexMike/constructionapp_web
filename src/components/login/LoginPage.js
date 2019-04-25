@@ -3,6 +3,7 @@ import React from 'react';
 // import FacebookIcon from 'mdi-react/FacebookIcon';
 // import GooglePlusIcon from 'mdi-react/GooglePlusIcon';
 // import { Link, Redirect } from 'react-router-dom';
+import moment from 'moment';
 import { SignIn } from 'aws-amplify-react';
 import { Auth } from 'aws-amplify';
 import AccountOutlineIcon from 'mdi-react/AccountOutlineIcon';
@@ -10,6 +11,7 @@ import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
 import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
+import UserService from '../../api/UserService';
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
 
@@ -49,6 +51,13 @@ class LoginPage extends SignIn {
     window.location = '/'; // go to the equipments listing as the customer needs to create a job.
   }
 
+  async setLogging(username) {
+    const user = await UserService.getUserByUsername(username);
+    user.lastLogin = moment().unix() * 1000;
+    user.loginCount += 1;
+    await UserService.updateUser(user);
+  }
+
   async onSignIn() {
     this.setState({ loading: true });
     try {
@@ -69,6 +78,7 @@ class LoginPage extends SignIn {
           this.props.onStateChange('authenticated', data);
         }
         // window.location = '/';
+        this.setLogging(this.state.username);
         this.loginRouting();
         return;
       }
