@@ -79,12 +79,10 @@ class TrucksCustomerPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
-<<<<<<< HEAD
     this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
     this.returnEquipments = this.returnEquipments.bind(this);
-=======
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
@@ -94,7 +92,6 @@ class TrucksCustomerPage extends Component {
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
     this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
->>>>>>> dev
   }
 
   async componentDidMount() {
