@@ -166,11 +166,15 @@ class JobCreateForm extends Component {
     });
 
     // We arrange selected equipment materials
-    if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
-      availableMaterials = selectedMaterials()[0].value;
-      availableMaterials = availableMaterials.split(',');
-    } else { // User selected 'Any'
-      availableMaterials = selectedMaterials();
+    try {
+      if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
+        availableMaterials = selectedMaterials()[0].value;
+        availableMaterials = availableMaterials.split(',');
+      } else { // User selected 'Any'
+        availableMaterials = selectedMaterials();
+      }
+    } catch (e) {
+      // console.log('No materials');
     }
 
     await this.fetchForeignValues();
