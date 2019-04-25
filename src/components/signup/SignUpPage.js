@@ -7,7 +7,7 @@ import {
   VerifyContact,
   withAuthenticator
 } from 'aws-amplify-react';
-import { Auth } from 'aws-amplify';
+import {Auth} from 'aws-amplify';
 import AccountOutlineIcon from 'mdi-react/AccountOutlineIcon';
 import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
 import CellphoneIcon from 'mdi-react/CellphoneIcon';
@@ -33,15 +33,27 @@ class SignUpPage extends SignUp {
     this.onSignUp = this.onSignUp.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.changeState = this.changeState.bind(this);
   }
 
   handleInputChange(e) {
-    const { value } = e.target;
-    this.setState({ [e.target.name]: value });
+    const {value} = e.target;
+    this.setState({[e.target.name]: value});
   }
 
   onDismiss() {
-    this.setState({ error: null });
+    this.setState({error: null});
+  }
+
+  changeState(state, data) {
+    if (this.props.onStateChange) {
+      this.props.onStateChange(state, data);
+    }
+
+    this.triggerAuthEvent({
+      type: 'stateChange',
+      data: state
+    });
   }
 
   async onSignUp() {
@@ -49,25 +61,19 @@ class SignUpPage extends SignUp {
       const {createUsername, createPassword} = this.state;
       const username = createUsername;
       const password = createPassword;
-      if (createUsername.length <= 0 || createPassword.length <= 0) {
+      if (username.length <= 0 || password.length <= 0) {
         this.setState({
           error: 'Username and password required.',
           loading: false
         });
         return;
       }
-      // const {phone} = this.state
-      // const {phone} = this.state
-      await Auth.signUp({
-        username,
-        password,
-        // attributes: {
-        //   phone // optional - E.164 number convention
-        //   // other custom attributes
-        // },
-        validationData: [] // optional
-      });
-      this.props.onStateChange('confirmSignUp');
+      Auth.signUp(username, password)
+        .then(() => this.changeState('confirmSignUp', username))
+        .catch(err => this.setState({
+          error: err.message,
+          loading: false
+        }));
     } catch (err) {
       console.log('Error: ', err);
       this.setState({
@@ -169,6 +175,7 @@ class SignUpPage extends SignUp {
   }
 
   render() {
+    console.log(this.props);
     if (this.props.authState !== 'signUp') {
       return null;
     }
@@ -180,8 +187,6 @@ class SignUpPage extends SignUp {
   }
 }
 
-SignUpPage.defaultProps = {
-
-};
+SignUpPage.defaultProps = {};
 
 export default SignUpPage;

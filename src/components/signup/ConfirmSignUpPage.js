@@ -1,9 +1,9 @@
 import React from 'react';
 import { ConfirmSignUp } from 'aws-amplify-react';
-import TAlert from "../common/TAlert";
-import AccountOutlineIcon from "mdi-react/AccountOutlineIcon";
-import KeyVariantIcon from "mdi-react/KeyVariantIcon";
-import {Auth} from "aws-amplify";
+import AccountOutlineIcon from 'mdi-react/AccountOutlineIcon';
+import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
+import {Auth} from 'aws-amplify';
+import TAlert from '../common/TAlert';
 
 class ConfirmSignUpPage extends ConfirmSignUp {
   constructor(props) {
@@ -15,12 +15,11 @@ class ConfirmSignUpPage extends ConfirmSignUp {
       modalShowing: false,
       loading: false,
       error: null,
-      createUsername: '',
-      createPassword: '',
+      confirmationCode: '',
       // phone: '',
       user: null
     };
-    this.onSignUp = this.onSignUp.bind(this);
+    this.onConfirm = this.onConfirm.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
   }
@@ -28,36 +27,31 @@ class ConfirmSignUpPage extends ConfirmSignUp {
   handleInputChange(e) {
     const { value } = e.target;
     this.setState({ [e.target.name]: value });
+    console.log(this.state);
   }
 
   onDismiss() {
     this.setState({ error: null });
   }
 
-  async onSignUp() {
+  async onConfirm(e) {
+    const username = e.target.value;
     try {
-      const {createUsername, createPassword} = this.state;
-      const username = createUsername;
-      const password = createPassword;
-      if (createUsername.length <= 0 || createPassword.length <= 0) {
+      const {confirmationCode} = this.state;
+      const code = confirmationCode;
+      if (code.length <= 0) {
         this.setState({
-          error: 'Username and password required.',
+          error: 'Code cannot be empty',
           loading: false
         });
         return;
       }
-      // const {phone} = this.state
-      // const {phone} = this.state
-      await Auth.signUp({
-        username,
-        password,
-        // attributes: {
-        //   phone // optional - E.164 number convention
-        //   // other custom attributes
-        // },
-        validationData: [] // optional
-      });
-      this.props.onStateChange('confirmSignUp');
+      Auth.confirmSignUp(username, code)
+        .then(() => this.changeState('signIn'))
+        .catch(err => this.setState({
+          error: err.message,
+          loading: false
+        }));
     } catch (err) {
       console.log('Error: ', err);
       this.setState({
@@ -68,6 +62,8 @@ class ConfirmSignUpPage extends ConfirmSignUp {
   }
 
   renderConfirmSignUpForm() {
+    const {props} = this;
+    const username = props.authData;
     return (
       <div className="form">
         <TAlert color="danger" visible={!!this.state.error} onDismiss={this.onDismiss}>
@@ -86,12 +82,11 @@ class ConfirmSignUpPage extends ConfirmSignUp {
               <AccountOutlineIcon/>
             </div>
             <input
-              className="lower"
-              name="createUsername"
+              name="confirmUsername"
               type="text"
-              placeholder="Email"
-              value={this.state.createUsername}
-              onChange={this.handleInputChange}
+              placeholder={username}
+              value={username}
+              disabled
             />
           </div>
         </div>
@@ -102,18 +97,18 @@ class ConfirmSignUpPage extends ConfirmSignUp {
               <KeyVariantIcon/>
             </div>
             <input
-              name="createPassword"
-              type="password"
-              placeholder="Password"
-              value={this.state.createPassword}
+              name="confirmationCode"
+              type="text"
+              placeholder="Enter your code"
+              value={this.state.confirmationCode}
               onChange={this.handleInputChange}
             />
           </div>
         </div>
-        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
-                onClick={this.onSignUp}
+        <button type="button" className="btn btn-outline-primary account__btn account__btn--small" value={username}
+                onClick={this.onConfirm}
         >
-          Create Account
+          Confirm
         </button>
       </div>
     );
@@ -146,8 +141,6 @@ class ConfirmSignUpPage extends ConfirmSignUp {
   }
 
   render() {
-    const {props} = this;
-    console.log(props);
     if (this.props.authState !== 'confirmSignUp') {
       return null;
     }
@@ -158,6 +151,7 @@ class ConfirmSignUpPage extends ConfirmSignUp {
     );
   }
 }
+
 
 ConfirmSignUpPage.defaultProps = {
 
