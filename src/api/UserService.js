@@ -23,6 +23,11 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getUserByUsername(username) {
+    const response = await this.post(`/username?email=${username}`);
+    return (response);
+  }
+
   static async createUser(user) {
     const response = await super.post(PATH, user);
     return (response);
