@@ -7,7 +7,6 @@ import {
   ForgotPassword,
   RequireNewPassword,
   VerifyContact,
-  ConfirmSignUp,
   withAuthenticator
 } from 'aws-amplify-react';
 import 'bootstrap/dist/css/bootstrap.css';

@@ -1,19 +1,12 @@
 import React from 'react';
 import {
-  ConfirmSignIn,
-  ConfirmSignUp,
-  ForgotPassword, RequireNewPassword,
   SignUp,
-  VerifyContact,
-  withAuthenticator
 } from 'aws-amplify-react';
 import {Auth} from 'aws-amplify';
 import AccountOutlineIcon from 'mdi-react/AccountOutlineIcon';
 import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
-import CellphoneIcon from 'mdi-react/CellphoneIcon';
 import TAlert from '../common/TAlert';
 import './SignUpPage.css';
-import ConfirmSignUpPage from './ConfirmSignUpPage';
 
 class SignUpPage extends SignUp {
   constructor(props) {
