@@ -37,6 +37,11 @@ class UserService extends AgentService {
     const response = await this.delete(PATH, id);
     return (response);
   }
+
+  static async getAdminByCompanyId(id) {
+    const response = await this.get(`/companies/${id}/admin${PATH}`);
+    return (response);
+  }
 }
 
 export default UserService;

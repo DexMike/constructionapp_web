@@ -24,6 +24,7 @@ import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import CompanyService from '../../api/CompanyService';
 import EquipmentService from '../../api/EquipmentService';
+import UserService from '../../api/UserService';
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -261,13 +262,15 @@ class JobViewForm extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // We tell the customer that the job has been accepted
-      const customerCompany = await CompanyService.getCompanyById(job.companiesId);
-      if (customerCompany.phone && this.checkPhoneFormat(customerCompany.phone)) {
-        notification = {
-          to: this.phoneToNumberFormat(customerCompany.phone),
-          body: 'Your job request has been accepted.'
-        };
-        await TwilioService.createSms(notification);
+      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'Your job request has been accepted.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
       // eslint-disable-next-line no-alert
       // alert('You have won this job! Congratulations.');
@@ -336,13 +339,15 @@ class JobViewForm extends Component {
       // const customerCompany = await GroupService.getGroupAdminsTels(favoriteCompanies);
 
       // Sending SMS to customer who created Job
-      const customerCompany = await CompanyService.getCompanyById(newJob.companiesId);
-      if (customerCompany.phone && this.checkPhoneFormat(customerCompany.phone)) {
-        notification = {
-          to: this.phoneToNumberFormat(customerCompany.phone),
-          body: 'You have a new job request.'
-        };
-        await TwilioService.createSms(notification);
+      const customerAdmin = await UserService.getAdminByCompanyId(newJob.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'You have a new job request.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
 
       // eslint-disable-next-line no-alert
