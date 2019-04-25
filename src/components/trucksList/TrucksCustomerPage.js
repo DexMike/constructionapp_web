@@ -56,9 +56,10 @@ class TrucksCustomerPage extends Component {
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
+    this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
-    this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
     this.returnEquipments = this.returnEquipments.bind(this);
   }
 
@@ -155,6 +156,19 @@ class TrucksCustomerPage extends Component {
       modal: true
     });
     return true;
+  }
+
+  toggleAddJobModal() {
+    const {modal, filters} = this.state;
+    if (modal) {
+      filters.materialType = [];
+      this.setState({
+        filters
+      });
+    }
+    this.setState({
+      modal: !modal
+    });
   }
 
   toggleSelectMaterialsModal() {
