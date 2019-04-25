@@ -4,11 +4,10 @@ import { createBrowserHistory } from 'history';
 import Amplify from 'aws-amplify';
 import {
   ConfirmSignIn,
-  ConfirmSignUp,
   ForgotPassword,
   RequireNewPassword,
-  SignUp,
   VerifyContact,
+  ConfirmSignUp,
   withAuthenticator
 } from 'aws-amplify-react';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -17,6 +16,8 @@ import ScrollToTop from './ScrollToTop';
 import Router from './routing/Router';
 import ThemeContext from './ThemeContext';
 import LoginPage from './login/LoginPage';
+import SignUpPage from './signup/SignUpPage';
+import ConfirmSignUpPage from './signup/ConfirmSignUpPage';
 
 Amplify.configure({
   Auth: {
@@ -104,8 +105,8 @@ export default withAuthenticator(App, false, [
   <LoginPage/>,
   <ConfirmSignIn/>,
   <VerifyContact/>,
-  <SignUp/>,
-  <ConfirmSignUp/>,
+  <SignUpPage/>,
+  <ConfirmSignUpPage/>,
   <ForgotPassword/>,
   <RequireNewPassword/>
 ]);
