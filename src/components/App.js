@@ -5,8 +5,6 @@ import Amplify from 'aws-amplify';
 import {
   ConfirmSignIn,
   ConfirmSignUp,
-  ForgotPassword,
-  RequireNewPassword,
   SignUp,
   VerifyContact,
   withAuthenticator
@@ -17,6 +15,8 @@ import ScrollToTop from './ScrollToTop';
 import Router from './routing/Router';
 import ThemeContext from './ThemeContext';
 import LoginPage from './login/LoginPage';
+import ForgotPasswordPage from './forgotPassword/ForgotPasswordPage';
+import RequireNewPasswordPage from './forgotPassword/RequireNewPasswordPage';
 
 Amplify.configure({
   Auth: {
@@ -106,6 +106,6 @@ export default withAuthenticator(App, false, [
   <VerifyContact/>,
   <SignUp/>,
   <ConfirmSignUp/>,
-  <ForgotPassword/>,
-  <RequireNewPassword/>
+  <ForgotPasswordPage/>,
+  <RequireNewPasswordPage/>
 ]);
