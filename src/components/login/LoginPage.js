@@ -69,7 +69,7 @@ class LoginPage extends SignIn {
   }
 
   handleUserNotConfirmed() {
-    this.setState({ confirmUsername: null, error: null });
+    this.setState({confirmUsername: null, error: null, errorCode: null});
     Auth.resendSignUp(this.state.confirmUsername);
     this.changeState('confirmSignUp', this.state.confirmUsername);
   }
