@@ -138,6 +138,7 @@ class SignUpPage extends SignUp {
                 <div className="account__card">
                   <div className="account__head">
                     <h3 className="account__title">
+                      Welcome to&nbsp;
                       <span className="account__logo">
                         TRE
                         <span className="account__logo-accent">
@@ -154,7 +155,7 @@ class SignUpPage extends SignUp {
                       </span>
                     </h3>
                     <h4 className="account__subhead subhead">
-                      Create a new user
+                      Changing how Construction Moves
                     </h4>
                   </div>
                   {this.renderSignUpForm()}
@@ -168,7 +169,6 @@ class SignUpPage extends SignUp {
   }
 
   render() {
-    console.log(this.props);
     if (this.props.authState !== 'signUp') {
       return null;
     }

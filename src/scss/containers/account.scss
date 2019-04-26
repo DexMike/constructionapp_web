@@ -116,6 +116,21 @@
   line-height: 15px;
 }
 
+.account__confirm {
+  background-color: Transparent;
+  background-repeat:no-repeat;
+  border: none;
+  cursor:pointer;
+  overflow: hidden;
+  outline:none;
+  color: white;
+  font-style: italic;
+}
+
+.account__confirm:hover {
+  color: black;
+}
+
 .account__forgot-password {
   position: absolute;
   font-size: 11px;

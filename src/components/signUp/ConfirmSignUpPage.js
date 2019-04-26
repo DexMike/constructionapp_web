@@ -125,10 +125,25 @@ class ConfirmSignUpPage extends ConfirmSignUp {
                 <div className="account__card">
                   <div className="account__head">
                     <h3 className="account__title">
+                      Welcome to&nbsp;
                       <span className="account__logo">
-                        Confirm Sign Up
+                        TRE
+                        <span className="account__logo-accent">
+                          LAR
+                        </span>
+                      </span>
+                      <span style={{
+                        fontSize: '16px',
+                        position: 'relative',
+                        bottom: '6px'
+                      }}
+                      >
+                        &trade;
                       </span>
                     </h3>
+                    <h4 className="account__subhead subhead">
+                      Changing how Construction Moves
+                    </h4>
                   </div>
                   {this.renderConfirmSignUpForm()}
                 </div>
