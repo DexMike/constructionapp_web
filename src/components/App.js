@@ -6,6 +6,8 @@ import {
   ConfirmSignIn,
   ForgotPassword,
   RequireNewPassword,
+  ConfirmSignUp,
+  SignUp,
   VerifyContact,
   withAuthenticator
 } from 'aws-amplify-react';
@@ -17,6 +19,8 @@ import ThemeContext from './ThemeContext';
 import LoginPage from './login/LoginPage';
 import SignUpPage from './signup/SignUpPage';
 import ConfirmSignUpPage from './signup/ConfirmSignUpPage';
+import ForgotPasswordPage from './forgotPassword/ForgotPasswordPage';
+import RequireNewPasswordPage from './forgotPassword/RequireNewPasswordPage';
 
 Amplify.configure({
   Auth: {
@@ -106,6 +110,6 @@ export default withAuthenticator(App, false, [
   <VerifyContact/>,
   <SignUpPage/>,
   <ConfirmSignUpPage/>,
-  <ForgotPassword/>,
-  <RequireNewPassword/>
+  <ForgotPasswordPage/>,
+  <RequireNewPasswordPage/>
 ]);
