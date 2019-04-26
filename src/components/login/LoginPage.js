@@ -193,12 +193,13 @@ class LoginPage extends SignIn {
         </TAlert>
         <TAlert color="danger" visible={!!this.state.confirmUsername} onDismiss={this.onDismiss}>
           <p>
+            User not confirmed.
             {this.state.errorCode === 'UserNotConfirmedException' &&
             <button type="button"
                     className="account__confirm"
                     onClick={this.handleUserNotConfirmed}
             >
-              User not confirmed. Confirm: {this.state.confirmUsername}
+              Confirm: {this.state.confirmUsername}
             </button>
             }
             &nbsp;
