@@ -6,7 +6,9 @@ import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 // import TCheckBox from '../common/TCheckBox';
 
 import './jobs.css';
-import TMap from '../common/TMapOriginDestination';
+import mapboxgl from 'mapbox-gl';
+// import TMap from '../common/TMapOriginDestination';
+import TMapBoxOriginDestination from '../common/TMapBoxOriginDestination';
 import TTable from "../common/TTable";
 import TFormat from '../common/TFormat';
 
@@ -21,6 +23,8 @@ import EquipmentService from "../../api/EquipmentService";
 // import AddressService from '../../api/AddressService';
 import pinAImage from '../../img/PinA.png';
 import pinBImage from '../../img/PinB.png';
+
+mapboxgl.accessToken = process.env.MAPBOX_API;
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -47,7 +51,8 @@ class JobCustomerForm extends Component {
       ...job,
       images: [],
       gpsTrackings: null,
-      loaded: false
+      loaded: false,
+      mapboxKey: ''
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -92,7 +97,8 @@ class JobCustomerForm extends Component {
     this.setState({
       images,
       loaded: true,
-      gpsTrackings
+      gpsTrackings,
+      mapboxKey: process.env.GOOGLE_MAPS_API
     });
   }
 
@@ -716,10 +722,10 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderGoogleMap(origin, destination) {
+  renderMBMap(origin, destination) {
     return (
       <React.Fragment>
-        <TMap
+        <TMapBoxOriginDestination
           input={
             {
               origin,
@@ -766,7 +772,7 @@ class JobCustomerForm extends Component {
               <hr/>
               <Row>
                 <div className="col-md-8 backo_red">
-                  {this.renderGoogleMap(origin, destination)}
+                  {this.renderMBMap(origin, destination)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -818,7 +824,7 @@ class JobCustomerForm extends Component {
             <hr/>
             <Row>
               <div className="col-md-8 backo_red">
-                {this.renderGoogleMap(origin, destination)}
+                {this.renderMBMap(origin, destination)}
               </div>
               <div className="col-md-4">
                 <div className="row">
