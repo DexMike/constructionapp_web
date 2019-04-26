@@ -34,10 +34,18 @@ class TMapBoxOriginDestination extends PureComponent {
       attributionControl: false
     });
 
-    map.on('load', function mapLoaded() {
-      const directions = new MapboxDirections({
-        accessToken: mapboxgl.accessToken
-      });
+    map.on('load', () => {
+      const directions = new MapboxDirections(
+        {
+          accessToken: mapboxgl.accessToken,
+          container: 'directions', // Specify an element thats not the map container.
+          // UI controls
+          controls: {
+            inputs: false,
+            instructions: false
+          }
+        }
+      );
       map.addControl(directions, 'top-left');
       map.addControl(new mapboxgl.FullscreenControl());
     
@@ -50,6 +58,7 @@ class TMapBoxOriginDestination extends PureComponent {
     return (
       <Container className="dashboard">
         <div id="map" />
+        <div id="extras" />
       </Container>
     );
   }
