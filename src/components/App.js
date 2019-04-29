@@ -17,8 +17,8 @@ import ScrollToTop from './ScrollToTop';
 import Router from './routing/Router';
 import ThemeContext from './ThemeContext';
 import LoginPage from './login/LoginPage';
-import SignUpPage from './signup/SignUpPage';
-import ConfirmSignUpPage from './signup/ConfirmSignUpPage';
+import SignUpPage from './signUp/SignUpPage';
+import ConfirmSignUpPage from './signUp/ConfirmSignUpPage';
 import ForgotPasswordPage from './forgotPassword/ForgotPasswordPage';
 import RequireNewPasswordPage from './forgotPassword/RequireNewPasswordPage';
 
