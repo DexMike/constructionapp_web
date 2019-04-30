@@ -93,13 +93,6 @@ class JobFilter extends Component {
     );
   }
 
-  // temporary fix - look into date-fns and date-fns-timezone
-  getUTC() {
-    const t = new Date();
-    t.setUTCHours(t.getUTCHours() - 5);
-    return t;
-  }
-
   async fetchFilterLists() {
     const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
     const profile = await ProfileService.getProfile();
