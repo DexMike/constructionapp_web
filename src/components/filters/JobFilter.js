@@ -94,13 +94,24 @@ class JobFilter extends Component {
 
   getUTCStartInterval(s) {
     if (s) {
-      const timeZoneOffset = s.getTimezoneOffset() / 60;
+      let timeZoneOffset = s.getTimezoneOffset() / 60;
+      if (timeZoneOffset < 0) {
+        timeZoneOffset = Math.ceil(timeZoneOffset);
+      } else {
+        timeZoneOffset = Math.floor(timeZoneOffset);
+      }
+      const min = Math.abs(s.getTimezoneOffset() % 60);
       // if behind
       if (timeZoneOffset > 0) {
-        s.setHours(24 - timeZoneOffset, 0, 0); // 00:00:00s
+        console.log("here");
+        if (min > 0) {
+          s.setHours(23 - timeZoneOffset, min, 0); // 00:00:00s
+        } else {
+          s.setHours(24 - timeZoneOffset, min, 0); // 00:00:00s
+        }
         s.setDate(s.getDate() - 1);
       } else { // if ahead
-        s.setHours(-1 * timeZoneOffset, 0, 0); // 00:00:00
+        s.setHours(-1 * timeZoneOffset, min, 0); // 00:00:00
       }
     }
     return s;
@@ -108,12 +119,18 @@ class JobFilter extends Component {
 
   getUTCEndInterval(endDate) {
     if (endDate) {
-      const timeZoneOffset = endDate.getTimezoneOffset() / 60;
+      let timeZoneOffset = endDate.getTimezoneOffset() / 60;
+      if (timeZoneOffset < 0) {
+        timeZoneOffset = Math.ceil(timeZoneOffset);
+      } else {
+        timeZoneOffset = Math.floor(timeZoneOffset);
+      }
+      const min = Math.abs(endDate.getTimezoneOffset() % 60);
       if (timeZoneOffset > 0) {
-        endDate.setHours(23 - timeZoneOffset, 59, 59); // 23:59:59
+        endDate.setHours(23 - timeZoneOffset, 59 - min, 59); // 23:59:59
       } else { // if ahead
         endDate.setDate(endDate.getDate() + 1);
-        endDate.setHours(-1 * (timeZoneOffset + 1), 59, 59); // 23:59:59
+        endDate.setHours(-1 * (timeZoneOffset + 1), 59 + min, 59); // 23:59:59
       }
     }
     return endDate;
