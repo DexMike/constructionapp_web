@@ -3,13 +3,16 @@ import React from 'react';
 // import FacebookIcon from 'mdi-react/FacebookIcon';
 // import GooglePlusIcon from 'mdi-react/GooglePlusIcon';
 // import { Link, Redirect } from 'react-router-dom';
-import { SignIn } from 'aws-amplify-react';
-import { Auth } from 'aws-amplify';
+import moment from 'moment';
+import {SignIn} from 'aws-amplify-react';
+import {Auth} from 'aws-amplify';
 import AccountOutlineIcon from 'mdi-react/AccountOutlineIcon';
 import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
 import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
+import UserService from '../../api/UserService';
+
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
 
@@ -25,6 +28,9 @@ class LoginPage extends SignIn {
       modalShowing: false,
       loading: false,
       error: null,
+      errorCode: null,
+      confirmUsername: null,
+      userConfirmError: null,
       username: this.props.authData.username || '',
       password: this.props.authData.password || '',
       user: null
@@ -35,13 +41,26 @@ class LoginPage extends SignIn {
     this.onSignUp = this.onSignUp.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.handleUserNotConfirmed = this.handleUserNotConfirmed.bind(this);
+    this.changeState = this.changeState.bind(this);
   }
 
   showPassword(e) {
     e.preventDefault();
-    const { showPassword } = this.state;
+    const {showPassword} = this.state;
     this.setState({
       showPassword: !showPassword
+    });
+  }
+
+  changeState(state, data) {
+    if (this.props.onStateChange) {
+      this.props.onStateChange(state, data);
+    }
+
+    this.triggerAuthEvent({
+      type: 'stateChange',
+      data: state
     });
   }
 
@@ -49,8 +68,21 @@ class LoginPage extends SignIn {
     window.location = '/'; // go to the equipments listing as the customer needs to create a job.
   }
 
+  handleUserNotConfirmed() {
+    this.setState({confirmUsername: null, error: null, errorCode: null});
+    Auth.resendSignUp(this.state.confirmUsername);
+    this.changeState('confirmSignUp', this.state.confirmUsername);
+  }
+
+  async setLogging(username) {
+    const user = await UserService.getUserByUsername(username);
+    user.lastLogin = moment().unix() * 1000;
+    user.loginCount += 1;
+    await UserService.updateUser(user);
+  }
+
   async onSignIn() {
-    this.setState({ loading: true });
+    this.setState({loading: true});
     try {
       if (!this.state.username || this.state.username.length <= 0
         || !this.state.password || this.state.password.length <= 0) {
@@ -69,6 +101,7 @@ class LoginPage extends SignIn {
           this.props.onStateChange('authenticated', data);
         }
         // window.location = '/';
+        this.setLogging(this.state.username);
         this.loginRouting();
         return;
       }
@@ -87,15 +120,27 @@ class LoginPage extends SignIn {
       throw new Error('Invalid response from server');
     } catch (err) {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
-      this.setState({
-        error: err.message,
-        loading: false
-      });
+      if (err.code === 'UserNotConfirmedException') {
+        const {username} = this.state;
+        this.setState({
+          error: err.message,
+          loading: false,
+          errorCode: err.code,
+          confirmUsername: username
+        });
+      } else {
+        this.setState({
+          error: err.message,
+          loading: false,
+          errorCode: err.code,
+          confirmUsername: null
+        });
+      }
     }
   }
 
   async onConfirmSignin(token) {
-    this.setState({ loading: true });
+    this.setState({loading: true});
     try {
       // console.log(`onConfirmSignIn:: ${this.state.username}, ${token}`);
       // const data = await Auth.confirmSignIn(this.state.user, token);
@@ -122,28 +167,43 @@ class LoginPage extends SignIn {
   }
 
   handleInputChange(e) {
-    let { value } = e.target;
+    let {value} = e.target;
     if (e.target.name === 'rememberMe') {
       value = e.target.checked ? Number(1) : Number(0);
     }
-    this.setState({ [e.target.name]: value });
+    this.setState({[e.target.name]: value});
   }
 
   onDismiss() {
-    this.setState({ error: null });
+    this.setState({error: null});
   }
 
   renderLogInForm() {
-    const { showPassword } = this.state;
+    const {showPassword} = this.state;
     return (
       <div className="form">
-        <TAlert color="danger" visible={!!this.state.error} onDismiss={this.onDismiss}>
+        <TAlert color="danger" visible={!!this.state.error && !this.state.confirmUsername} onDismiss={this.onDismiss}>
           <p>
             <span className="bold-text">
               Error!
             </span>
             &nbsp;
             {this.state.error}
+          </p>
+        </TAlert>
+        <TAlert color="danger" visible={!!this.state.confirmUsername} onDismiss={this.onDismiss}>
+          <p>
+            User not confirmed.
+            {this.state.errorCode === 'UserNotConfirmedException' &&
+            <button type="button"
+                    className="account__confirm"
+                    onClick={this.handleUserNotConfirmed}
+            >
+              Confirm: {this.state.confirmUsername}
+            </button>
+            }
+            &nbsp;
+            {this.state.userConfirmError}
           </p>
         </TAlert>
         <div className="form__form-group">
@@ -264,7 +324,7 @@ class LoginPage extends SignIn {
   }
 
   render() {
-    const { authState } = this.props;
+    const {authState} = this.props;
     return (
       <React.Fragment>
         {authState === 'signIn' && this.renderPage()}

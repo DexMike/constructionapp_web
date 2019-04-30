@@ -19,6 +19,7 @@ import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import CompanyService from '../../api/CompanyService';
 import './jobs.css';
+import UserService from '../../api/UserService';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -166,11 +167,15 @@ class JobCreateForm extends Component {
     });
 
     // We arrange selected equipment materials
-    if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
-      availableMaterials = selectedMaterials()[0].value;
-      availableMaterials = availableMaterials.split(',');
-    } else { // User selected 'Any'
-      availableMaterials = selectedMaterials();
+    try {
+      if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
+        availableMaterials = selectedMaterials()[0].value;
+        availableMaterials = availableMaterials.split(',');
+      } else { // User selected 'Any'
+        availableMaterials = selectedMaterials();
+      }
+    } catch (e) {
+      // console.log('No materials');
     }
 
     await this.fetchForeignValues();
@@ -404,12 +409,10 @@ class JobCreateForm extends Component {
     }
 
     newJob.rate = selectedEquipment.hourRate;
-
     newJob.modifiedOn = moment()
       .unix() * 1000;
     newJob.createdOn = moment()
       .unix() * 1000;
-
     newJob.equipmentType = selectedEquipment.type;
     // In this scenario we are not letting a customer create a job with
     // more than 1 truck so here we set the numEquipments to 1
@@ -441,6 +444,7 @@ class JobCreateForm extends Component {
     booking.createdOn = moment()
       .unix() * 1000;
     const createdBid = await BidService.createBid(bid);
+
     // Now we need to create a Booking
     booking.bidId = createdBid.id;
     booking.schedulersCompanyId = selectedEquipment.companyId;
@@ -510,16 +514,17 @@ class JobCreateForm extends Component {
     await BookingEquipmentService.createBookingEquipments(bookingEquipment);
 
     // Let's make a call to Twilio to send an SMS
-    // We need to change later get the body from the lookups table
     // We need to get the phone number from the carrier co
-    // Sending SMS to Truck's company
-    const carrierCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
-    if (carrierCompany.phone && this.checkPhoneFormat(carrierCompany.phone)) {
-      const notification = {
-        to: this.phoneToNumberFormat(carrierCompany.phone),
-        body: 'You have a new job offer, please log in to https://www.mytrelar.com'
-      };
-      await TwilioService.createSms(notification);
+    // Sending SMS to Truck's company's admin
+    const carrierAdmin = await UserService.getAdminByCompanyId(createdBid.companyCarrierId);
+    if (carrierAdmin.length > 0) { // check if we get a result
+      if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+        const notification = {
+          to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+          body: 'You have a new job offer, please log in to https://www.mytrelar.com'
+        };
+        await TwilioService.createSms(notification);
+      }
     }
     closeModal();
   }
