@@ -62,7 +62,6 @@ class JobFilter extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
-    this.getUTC = this.getUTC.bind(this);
   }
 
   async componentDidMount() {
