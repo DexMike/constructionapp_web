@@ -8,7 +8,8 @@ import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 import './jobs.css';
 import mapboxgl from 'mapbox-gl';
 // import TMap from '../common/TMapOriginDestination';
-import TMapBoxOriginDestination from '../common/TMapBoxOriginDestination';
+import TMapBoxOriginDestinationWithOverlay 
+  from '../common/TMapBoxOriginDestinationWithOverlay';
 import TTable from "../common/TTable";
 import TFormat from '../common/TFormat';
 
@@ -44,7 +45,8 @@ class JobCustomerForm extends Component {
       modifiedBy: 0,
       modifiedOn: moment()
         .unix() * 1000,
-      isArchived: 0
+      isArchived: 0,
+      overlayMapData: {}
     };
 
     this.state = {
@@ -58,34 +60,34 @@ class JobCustomerForm extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  // async componentDidMount() {
-  //   const jobs = await this.fetchJobs();
-  //
-  //   Promise.all(
-  //     jobs.map(async (job) => {
-  //       const newJob = job;
-  //       const company = await CompanyService.getCompanyById(newJob.companiesId);
-  //       newJob.companyName = company.legalName;
-  //
-  //       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-  //       const materials = materialsList.map(materialItem => materialItem.value);
-  //       newJob.material = this.equipmentMaterialsAsString(materials);
-  //
-  //       const address = await AddressService.getAddressById(newJob.startAddress);
-  //       newJob.zip = address.zipCode;
-  //
-  //       return newJob;
-  //     })
-  //   );
-  //   this.setState({ jobs });
-  //   // console.log(jobs);
-  // }
-
   async componentDidMount() {
     let {job, images} = this.props;
     let {gpsTrackings} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
+
+    // get overlay data
+    let gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+      6 // booking.id
+    );
+
+    // extract one out of six
+    const gps = [];
+    for (const datum in gpsData) {
+      if (gpsData[datum][0]) {
+        const loc = {
+          location: {
+            lat: gpsData[datum][0],
+            lng: gpsData[datum][1]
+          }
+        };
+        const fifth = datum / 6;
+        const remainder = (fifth % 1);
+        if (remainder === 0) {
+          gps.push(loc);
+        }
+      }
+    }
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
@@ -98,7 +100,8 @@ class JobCustomerForm extends Component {
       images,
       loaded: true,
       gpsTrackings,
-      mapboxKey: process.env.GOOGLE_MAPS_API
+      mapboxKey: process.env.GOOGLE_MAPS_API,
+      overlayMapData: {gps}
     });
   }
 
@@ -725,7 +728,7 @@ class JobCustomerForm extends Component {
   renderMBMap(origin, destination) {
     return (
       <React.Fragment>
-        <TMapBoxOriginDestination
+        <TMapBoxOriginDestinationWithOverlay
           input={
             {
               origin,

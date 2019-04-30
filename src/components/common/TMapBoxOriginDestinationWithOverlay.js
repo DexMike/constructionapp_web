@@ -20,6 +20,11 @@ class TMapBoxOriginDestination extends PureComponent {
 
   componentDidMount() {
     const { input } = this.props;
+
+    const waypoints = input.gpsData.gps;
+    const origin = waypoints[0];
+    const destination = waypoints[waypoints.length - 1];
+
     this.setMap(input.origin, input.destination);
   }
 
@@ -51,6 +56,32 @@ class TMapBoxOriginDestination extends PureComponent {
       map.addControl(directions, 'top-left');
       map.addControl(new mapboxgl.FullscreenControl());
 
+      // TEST STARTS
+      map.addLayer({
+        id: 'point',
+        type: 'circle',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [{
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'Point',
+                coordinates: origin // start
+              }
+            }
+            ]
+          }
+        },
+        paint: {
+          'circle-radius': 10,
+          'circle-color': '#3887be'
+        }
+      });
+      // TEST ENDS
+
       directions.setOrigin(origin);
       directions.setDestination(destination);
     });
@@ -68,7 +99,8 @@ class TMapBoxOriginDestination extends PureComponent {
 TMapBoxOriginDestination.propTypes = {
   input: PropTypes.shape({
     origin: PropTypes.string,
-    destination: PropTypes.string
+    destination: PropTypes.string,
+    gpsData: PropTypes.object
   }).isRequired
 };
 
