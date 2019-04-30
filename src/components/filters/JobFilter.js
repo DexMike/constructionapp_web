@@ -73,11 +73,27 @@ class JobFilter extends Component {
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
     startDate = new Date();
-    startDate.setDate(startDate.getDate() - 1);
-    startDate.setHours(19, 0, 0); // 00:00:00
     endDate = new Date();
     endDate.setDate(startDate.getDate() + 7);
-    endDate.setHours(18, 59, 59); // 23:59:59
+    const timeZoneOffset = startDate.getTimezoneOffset() / 60;
+    // if behind
+    if (timeZoneOffset > 0) {
+      if (startDate) {
+        startDate.setDate(startDate.getDate() - 1);
+        startDate.setHours(24 - timeZoneOffset, 0, 0); // 00:00:00
+      }
+      if (endDate) {
+        endDate.setHours(23 - timeZoneOffset, 59, 59); // 23:59:59
+      }
+    } else { // if ahead
+      if (startDate) {
+        startDate.setHours(-1 * timeZoneOffset, 0, 0); // 00:00:00
+      }
+      if (endDate) {
+        endDate.setDate(startDate.getDate() + 1);
+        endDate.setHours(-1 * (timeZoneOffset + 1), 59, 59); // 23:59:59
+      }
+    }
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
     await this.fetchJobs();
@@ -193,14 +209,25 @@ class JobFilter extends Component {
   async handleIntervalInputChange(e) {
     const {filters} = this.state;
     const startDate = e.start;
-    if (startDate) {
-      startDate.setDate(startDate.getDate() - 1);
-      startDate.setHours(19, 0, 0); // 00:00:00
-    }
     const endDate = e.end;
-    if (endDate) {
-      endDate.setDate(startDate.getDate() + 7);
-      endDate.setHours(18, 59, 59); // 23:59:59
+    const timeZoneOffset = startDate.getTimezoneOffset() / 60;
+    // if behind
+    if (timeZoneOffset > 0) {
+      if (startDate) {
+        startDate.setDate(startDate.getDate() - 1);
+        startDate.setHours(24 - timeZoneOffset, 0, 0); // 00:00:00
+      }
+      if (endDate) {
+        endDate.setHours(23 - timeZoneOffset, 59, 59); // 23:59:59
+      }
+    } else { // if ahead
+      if (startDate) {
+        startDate.setHours(-1 * timeZoneOffset, 0, 0); // 00:00:00
+        endDate.setDate(startDate.getDate() + 1);
+      }
+      if (endDate) {
+        endDate.setHours(-1 * (timeZoneOffset + 1), 59, 59); // 23:59:59
+      }
     }
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
