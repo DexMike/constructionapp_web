@@ -62,6 +62,7 @@ class JobFilter extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
+    this.getUTC = this.getUTC.bind(this);
   }
 
   async componentDidMount() {
@@ -73,13 +74,13 @@ class JobFilter extends Component {
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
     startDate = new Date();
-    startDate.setHours(0, 0, 0); // 00:00:00
+    startDate.setDate(startDate.getDate() - 1);
+    startDate.setHours(19, 0, 0); // 00:00:00
     endDate = new Date();
     endDate.setDate(startDate.getDate() + 7);
-    endDate.setHours(23, 59, 59); // 23:59:59
+    endDate.setHours(18, 59, 59); // 23:59:59
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
-
     await this.fetchJobs();
     this.fetchFilterLists();
 
@@ -90,6 +91,13 @@ class JobFilter extends Component {
         endDate
       }
     );
+  }
+
+  // temporary fix - look into date-fns and date-fns-timezone
+  getUTC() {
+    const t = new Date();
+    t.setUTCHours(t.getUTCHours() - 5);
+    return t;
   }
 
   async fetchFilterLists() {
@@ -192,8 +200,18 @@ class JobFilter extends Component {
 
   async handleIntervalInputChange(e) {
     const {filters} = this.state;
-    filters.startAvailability = e.start;
-    filters.endAvailability = e.end;
+    const startDate = e.start;
+    if (startDate) {
+      startDate.setDate(startDate.getDate() - 1);
+      startDate.setHours(19, 0, 0); // 00:00:00
+    }
+    const endDate = e.end;
+    if (endDate) {
+      endDate.setDate(startDate.getDate() + 7);
+      endDate.setHours(18, 59, 59); // 23:59:59
+    }
+    filters.startAvailability = startDate;
+    filters.endAvailability = endDate;
     this.setState({filters});
     await this.fetchJobs();
   }
