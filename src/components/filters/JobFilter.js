@@ -79,6 +79,8 @@ class JobFilter extends Component {
     endDate = new Date();
     endDate.setHours(23, 59, 59); // 23:59:59
     endDate.setDate(endDate.getDate() + 7);
+    filters.startAvailability = this.getUTCStartInterval(startDate);
+    filters.endAvailability = this.getUTCEndInterval(endDate);
     this.setState(
       {
         filters,
@@ -162,10 +164,7 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const {filters, startDate, endDate} = this.state;
-    filters.startAvailability = this.getUTCStartInterval(startDate);
-    filters.endAvailability = this.getUTCEndInterval(endDate);
-    console.log(filters);
+    const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
     const {returnJobs} = this.props;
     returnJobs(jobs, filters);
@@ -219,6 +218,7 @@ class JobFilter extends Component {
   }
 
   async handleIntervalInputChange(e) {
+    const {filters} = this.state;
     const {start} = e;
     if (e.start) {
       start.setHours(0, 0, 0);
@@ -227,7 +227,9 @@ class JobFilter extends Component {
     if (e.end) {
       end.setHours(23, 59, 59); // 23:59:59
     }
-    this.setState({startDate: start, endDate: end});
+    filters.startAvailability = this.getUTCStartInterval(start);
+    filters.endAvailability = this.getUTCEndInterval(end);
+    this.setState({filters, startDate: start, endDate: end});
     await this.fetchJobs();
   }
 
@@ -248,6 +250,7 @@ class JobFilter extends Component {
       filters
 
     } = this.state;
+    console.log(this.state);
     return (
       <Row>
         <Col md={12}>
