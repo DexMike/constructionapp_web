@@ -95,9 +95,10 @@ class JobSavePage extends Component {
       if (bookings && bookings.length > 0) {
         booking = bookings[0];
         const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-        bookingEquipment = bookingEquipments.find(bookingEquipment => {
-          return bookingEquipment.bookingId === booking.id;
-        }, booking);
+        bookingEquipment = bookingEquipments.find(
+          bookingEq => bookingEq.bookingId === booking.id,
+          booking
+        );
       }
 
       this.setState({
@@ -137,7 +138,7 @@ class JobSavePage extends Component {
     this.handlePageClick('Job');
   }
 
-  async handleConfirmRequest() {
+  async handleConfirmRequest() { // Customer clicks on 'Accept Job Request'
     const {
       job,
       bid,
@@ -192,10 +193,11 @@ class JobSavePage extends Component {
       // CREATING BOOKING EQUIPMENT
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-      bookingEquipments = bookingEquipments.filter(bookingEq => {
+      bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
+        return null;
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
@@ -246,6 +248,7 @@ class JobSavePage extends Component {
     }
   }
 
+  // Carrier clicks on 'Accept Job' or 'Request Job'
   async handleConfirmRequestCarrier() {
     const {
       job,
@@ -255,6 +258,9 @@ class JobSavePage extends Component {
     let { booking, bookingEquipment } = this.state;
     let notification;
 
+    // TODO: change this to
+    // if (carrier is a favorite) Accept Job
+    // else Request Job
     if (bid) { // we have a bid record, accepting a job
       const newJob = CloneDeep(job);
       const newBid = CloneDeep(bid);
@@ -301,11 +307,13 @@ class JobSavePage extends Component {
       // CREATING BOOKING EQUIPMENT
       // see if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-      bookingEquipments = bookingEquipments.filter(bookingEq => {
+      bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
           return bookingEq;
         }
+        return null;
       });
+
       if (!bookingEquipments || bookingEquipments.length <= 0) {
         const equipments = await EquipmentService.getEquipments();
         if (equipments && equipments.length > 0) {
@@ -354,13 +362,26 @@ class JobSavePage extends Component {
       this.setState({ job });
     } else { // no bid record, requesting a job
       // console.log('requesting');
+      const newJob = CloneDeep(job);
+
+      // UPDATING JOB
+      newJob.status = 'On Offer';
+      newJob.startAddress = newJob.startAddress.id;
+      newJob.endAddress = newJob.endAddress.id;
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment()
+        .unix() * 1000;
+      delete newJob.materials;
+      await JobService.updateJob(newJob);
+
+      // UPDATING BID
       bid = {};
       bid.jobId = job.id;
       bid.userId = profile.userId;
       bid.companyCarrierId = job.companiesId;
       bid.hasCustomerAccepted = 0;
       bid.hasSchedulerAccepted = 1;
-      bid.status = 'New';
+      bid.status = 'Pending';
       bid.rateType = job.rateType;
       bid.rate = job.rate;
       bid.rateEstimate = job.rateEstimate;
