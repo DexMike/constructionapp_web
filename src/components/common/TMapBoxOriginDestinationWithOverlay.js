@@ -20,16 +20,15 @@ class TMapBoxOriginDestination extends PureComponent {
 
   componentDidMount() {
     const { input } = this.props;
-
     const waypoints = input.gpsData.gps;
-    const origin = waypoints[0];
-    const destination = waypoints[waypoints.length - 1];
-
-    this.setMap(input.origin, input.destination);
+    this.setMap(input.origin, input.destination, waypoints);
   }
 
-  setMap(origin, destination) {
-    mapboxgl.accessToken = 'pk.eyJ1IjoicmF1bHRyZWxhciIsImEiOiJjanV1MnVkM2wwZWY1NDNrZjZ5dXJkbTR4In0.rMU0bd9xlsFxupjk7vlWhA';
+  setMap(origin, destination, waypoints) {
+    // const cPointOrigin = waypoints[0];
+    // const cPointDestination = waypoints[waypoints.length - 1];
+
+    mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v11',
@@ -40,13 +39,13 @@ class TMapBoxOriginDestination extends PureComponent {
     });
 
     map.on('load', () => {
+      // FIRST
       const directions = new MapboxDirections(
         {
           accessToken: mapboxgl.accessToken,
           // unit: 'metric',
           // profile: 'driving',
           container: 'directions', // Specify an element thats not the map container.
-          // UI controls
           controls: {
             inputs: false,
             instructions: false
@@ -55,35 +54,66 @@ class TMapBoxOriginDestination extends PureComponent {
       );
       map.addControl(directions, 'top-left');
       map.addControl(new mapboxgl.FullscreenControl());
+      directions.setOrigin(origin);
+      directions.setDestination(destination);
 
-      // TEST STARTS
+      // This is a reference, please do not delete
+      /*
+      const directionsTwo = new MapboxDirections(
+        {
+          accessToken: mapboxgl.accessToken,
+          container: 'directions',
+          controls: {
+            inputs: false,
+            instructions: false
+          }
+        }
+      );
+      map.addControl(directionsTwo, 'top-left');
+      map.addControl(new mapboxgl.FullscreenControl());
+      directionsTwo.setOrigin(cPointOrigin);
+
+      if (waypoints.length > 1) {
+        for (let i = 0; i < waypoints.length; i += 1) {
+          const loc = {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [
+                waypoints[i][1],
+                waypoints[i][0]
+              ]
+            },
+            properties: {
+              title: 'Mapbox DC',
+              icon: 'monument'
+            }
+          };
+          directionsTwo.addWaypoint(i, loc);
+        }
+        directionsTwo.setDestination(cPointDestination);
+      }
+      */
+
+      // Plot the actual route (as recorded by GPS)
       map.addLayer({
-        id: 'point',
-        type: 'circle',
+        id: 'points',
+        type: 'symbol',
         source: {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: [{
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'Point',
-                coordinates: origin // start
-              }
-            }
-            ]
+            features: waypoints
           }
         },
-        paint: {
-          'circle-radius': 10,
-          'circle-color': '#3887be'
+        layout: {
+          'icon-image': '{icon}-15',
+          'text-field': '{title}',
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+          'text-offset': [0, 0.6],
+          'text-anchor': 'top'
         }
       });
-      // TEST ENDS
-
-      directions.setOrigin(origin);
-      directions.setDestination(destination);
     });
   }
 
