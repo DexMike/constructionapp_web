@@ -8,7 +8,8 @@ import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 import './jobs.css';
 import mapboxgl from 'mapbox-gl';
 // import TMap from '../common/TMapOriginDestination';
-import TMapBoxOriginDestination from '../common/TMapBoxOriginDestination';
+import TMapBoxOriginDestinationWithOverlay
+  from '../common/TMapBoxOriginDestinationWithOverlay';
 import TTable from "../common/TTable";
 import TFormat from '../common/TFormat';
 
@@ -16,15 +17,10 @@ import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
 import GPSPointService from '../../api/GPSPointService';
-import EquipmentService from "../../api/EquipmentService";
-
-// import CompanyService from '../../api/CompanyService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
-// import AddressService from '../../api/AddressService';
-import pinAImage from '../../img/PinA.png';
-import pinBImage from '../../img/PinB.png';
+import GPSTrackingService from '../../api/GPSTrackingService';
 
 mapboxgl.accessToken = process.env.MAPBOX_API;
+const MAPBOX_MAX = 23;
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -44,7 +40,8 @@ class JobCustomerForm extends Component {
       modifiedBy: 0,
       modifiedOn: moment()
         .unix() * 1000,
-      isArchived: 0
+      isArchived: 0,
+      overlayMapData: {}
     };
 
     this.state = {
@@ -58,38 +55,54 @@ class JobCustomerForm extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  // async componentDidMount() {
-  //   const jobs = await this.fetchJobs();
-  //
-  //   Promise.all(
-  //     jobs.map(async (job) => {
-  //       const newJob = job;
-  //       const company = await CompanyService.getCompanyById(newJob.companiesId);
-  //       newJob.companyName = company.legalName;
-  //
-  //       const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-  //       const materials = materialsList.map(materialItem => materialItem.value);
-  //       newJob.material = this.equipmentMaterialsAsString(materials);
-  //
-  //       const address = await AddressService.getAddressById(newJob.startAddress);
-  //       newJob.zip = address.zipCode;
-  //
-  //       return newJob;
-  //     })
-  //   );
-  //   this.setState({ jobs });
-  //   // console.log(jobs);
-  // }
-
   async componentDidMount() {
-    let {job, images} = this.props;
+    const { job } = this.props;
+    let { images } = this.props;
     let {gpsTrackings} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
+    // get overlay data
+    const gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+      bookings[0].id // booking.id 6
+    );
+
+    // prepare the waypoints in an appropiate format for MB (GEOJson point)
+    const gps = [];
+    if (gpsData.length > 0) {
+      for (const datum in gpsData) {
+        if (gpsData[datum][0]) {
+          const loc = {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [
+                gpsData[datum][1],
+                gpsData[datum][0]
+              ]
+            },
+            properties: {
+              title: 'Actual route',
+              icon: 'car'
+            }
+          };
+          // reduce the total of results to a maximum of 23
+          // Mapbox's limit is 25 points plus an origin and destination
+          const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
+          const reducer = datum / steps;
+          const remainder = (reducer % 1);
+          if (remainder === 0) {
+            gps.push(loc);
+          }
+        }
+      }
+    }
+
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
-      const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
+      const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(
+        booking.id
+      );
       images = bookingInvoices.map(item => item.image);
       gpsTrackings = await this.fetchGPSPoints(booking.id);
     }
@@ -98,7 +111,7 @@ class JobCustomerForm extends Component {
       images,
       loaded: true,
       gpsTrackings,
-      mapboxKey: process.env.GOOGLE_MAPS_API
+      overlayMapData: {gps}
     });
   }
 
@@ -630,7 +643,6 @@ class JobCustomerForm extends Component {
   }
 
   renderGPSPoints(gpsTrackings) {
-
     if (gpsTrackings && gpsTrackings != null && gpsTrackings.length > 0) {
       gpsTrackings = gpsTrackings.map((gps) => {
         const newGPS = gps;
@@ -722,14 +734,15 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderMBMap(origin, destination) {
+  renderMBMap(origin, destination, gpsData) {
     return (
       <React.Fragment>
-        <TMapBoxOriginDestination
+        <TMapBoxOriginDestinationWithOverlay
           input={
             {
               origin,
-              destination
+              destination,
+              gpsData
             }
           }
         />
@@ -738,7 +751,7 @@ class JobCustomerForm extends Component {
   }
 
   renderEverything() {
-    const {images, gpsTrackings} = this.state;
+    const {images, gpsTrackings, overlayMapData} = this.state;
     const {job} = this.props;
     let origin = '';
     let destination = '';
@@ -772,7 +785,7 @@ class JobCustomerForm extends Component {
               <hr/>
               <Row>
                 <div className="col-md-8 backo_red">
-                  {this.renderMBMap(origin, destination)}
+                  {this.renderMBMap(origin, destination, overlayMapData)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -824,7 +837,7 @@ class JobCustomerForm extends Component {
             <hr/>
             <Row>
               <div className="col-md-8 backo_red">
-                {this.renderMBMap(origin, destination)}
+                {this.renderMBMap(origin, destination, overlayMapData)}
               </div>
               <div className="col-md-4">
                 <div className="row">

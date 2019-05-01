@@ -38,6 +38,8 @@ class TMapBoxOriginDestination extends PureComponent {
       const directions = new MapboxDirections(
         {
           accessToken: mapboxgl.accessToken,
+          // unit: 'metric',
+          // profile: 'driving',
           container: 'directions', // Specify an element thats not the map container.
           // UI controls
           controls: {
@@ -48,7 +50,7 @@ class TMapBoxOriginDestination extends PureComponent {
       );
       map.addControl(directions, 'top-left');
       map.addControl(new mapboxgl.FullscreenControl());
-    
+
       directions.setOrigin(origin);
       directions.setDestination(destination);
     });
@@ -58,7 +60,6 @@ class TMapBoxOriginDestination extends PureComponent {
     return (
       <Container className="dashboard">
         <div id="map" />
-        <div id="extras" />
       </Container>
     );
   }
