@@ -33,7 +33,8 @@ class JobFilter extends Component {
       rateTypeList: [],
       startDate: null, // values for date control
       endDate: null, // values for date control
-
+      startInterval: null,
+      endInterval: null,
       // Rate Type Button toggle
       // isAvailable: true,
 
@@ -235,12 +236,12 @@ class JobFilter extends Component {
   }
 
   async handleIntervalInputChange(e) {
-    const {filters} = this.state;
-    const {start} = e;
+    const {filters, startInterval, endInterval} = {...this.state};
+    const {start} = {...e.start};
+    const {end} = {...e.end};
     if (e.start) {
       start.setHours(0, 0, 0);
     }
-    const {end} = e;
     if (e.end) {
       end.setHours(23, 59, 59); // 23:59:59
     }
@@ -268,6 +269,7 @@ class JobFilter extends Component {
 
     } = this.state;
     console.log(this.state);
+    let start = filters.startAvailability;
     return (
       <Row>
         <Col md={12}>
@@ -281,7 +283,7 @@ class JobFilter extends Component {
                         Date Range
                       </div>
                       <TIntervalDatePicker
-                        startDate={startDate}
+                        startDate={start.setDate(start.getDate() + 1)}
                         endDate={endDate}
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
