@@ -19,7 +19,7 @@ class TCheckBox extends Component {
       disabled
     });
     return (
-      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above input-error-checkbox">
         <label htmlFor={name}
           className={`${CheckboxClass} ${className ? ` checkbox-btn--${className}` : ''}`}
         >

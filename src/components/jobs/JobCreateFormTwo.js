@@ -34,7 +34,10 @@ class JobCreateFormTwo extends PureComponent {
       favoriteAdminTels: [],
       nonFavoriteAdminTels: [],
       loaded: false,
-      loading: true
+      reqCheckABox: {
+        touched: false,
+        error: ''
+      }
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.saveJobMaterials = this.saveJobMaterials.bind(this);
@@ -89,7 +92,27 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   isFormValid() {
-    const isValid = true;
+    let isValid = true;
+    const {
+      showSendtoFavorites,
+      sendToMkt,
+      sendToFavorites,
+      reqCheckABox
+    } = this.state;
+
+    if (showSendtoFavorites) {
+      // We're showing both checkboxes, allow to check at least one of them
+      if (sendToMkt === 0 && sendToFavorites === 0) {
+        this.setState({
+          reqCheckABox: {
+            ...reqCheckABox,
+            touched: true,
+            error: 'You have to select at least one option'
+          }
+        });
+        isValid = false;
+      }
+    }
 
     if (isValid) {
       return true;
@@ -125,6 +148,9 @@ class JobCreateFormTwo extends PureComponent {
   async saveJob(e) {
     e.preventDefault();
     e.persist();
+    if (!this.isFormValid()) {
+      return;
+    }
     const { firstTabData } = this.props;
     const {
       favoriteCompanies,
@@ -304,8 +330,31 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   handleInputChange(e) {
-    const { value } = e.target;
-    this.setState({ [e.target.name]: value });
+    const { reqCheckABox, showSendtoFavorites } = this.state;
+    let { value } = e.target;
+
+    // Allow change only if there're favorites
+    if (e.target.name === 'sendToMkt' && showSendtoFavorites) {
+      value = e.target.checked ? Number(1) : Number(0);
+      this.setState({
+        sendToMkt: value,
+        reqCheckABox: {
+          ...reqCheckABox,
+          touched: false
+        }
+      });
+    } else if (e.target.name === 'sendToFavorites') {
+      value = e.target.checked ? Number(1) : Number(0);
+      this.setState({
+        sendToFavorites: value,
+        reqCheckABox: {
+          ...reqCheckABox,
+          touched: false
+        }
+      });
+    } else {
+      this.setState({ [e.target.name]: value });
+    }
   }
 
   render() {
@@ -313,6 +362,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToMkt,
       sendToFavorites,
       showSendtoFavorites,
+      reqCheckABox,
       loaded
     } = this.state;
     const { onClose } = this.props;
@@ -333,15 +383,18 @@ class JobCreateFormTwo extends PureComponent {
                       </h3>
                     </div>
                     <div
-                      className={showSendtoFavorites ? 'col-md-1 form__form-group mt-1' : 'hidden'}>
+                      className={showSendtoFavorites ? 'col-md-1 form__form-group mt-1' : 'hidden'}
+                    >
                       <TCheckBox
                         onChange={this.handleInputChange}
-                        name="sendToMkt"
+                        name="sendToFavorites"
                         value={!!sendToFavorites}
+                        meta={reqCheckABox}
                       />
                     </div>
                     <div
-                      className={showSendtoFavorites ? 'col-md-11 form__form-group mt-1' : 'hidden'}>
+                      className={showSendtoFavorites ? 'col-md-11 form__form-group mt-1' : 'hidden'}
+                    >
                       <h3 className="subhead">
                         Send to Favorites<br/>
                       </h3>
@@ -359,29 +412,36 @@ class JobCreateFormTwo extends PureComponent {
                         value={!!sendToMkt}
                       />
                     </div>
-                    <div className="col-md-6 form__form-group">
+                    <div
+                      // className="col-md-6 form__form-group"
+                      className={showSendtoFavorites ? 'col-md-6 form__form-group' : 'col-md-11 form__form-group'}
+                    >
                       <h3 className="subhead">
                         Send this job to the Trelar Marketplace
                       </h3>
                     </div>
-                    <div className="col-md-1 form__form-group">
-                      <h3 className="subhead">
-                        In
-                      </h3>
-                    </div>
-                    <div className="col-md-2 form__form-group">
-                      <input
-                        name="delay"
-                        type="number"
-                        placeholder="0"
-                        className="slickinput"
-                      />
-                    </div>
-                    <div className="col-md-1 form__form-group">
-                      <h3 className="subhead">
-                        Hours
-                      </h3>
-                    </div>
+                    {showSendtoFavorites ? ( // If there're no favorites, hide Hours input
+                      <React.Fragment>
+                        <div className="col-md-1 form__form-group">
+                          <h3 className="subhead">
+                            In
+                          </h3>
+                        </div>
+                        <div className="col-md-2 form__form-group">
+                          <input
+                            name="delay"
+                            type="number"
+                            placeholder="0"
+                            className="slickinput"
+                          />
+                        </div>
+                        <div className="col-md-1 form__form-group">
+                          <h3 className="subhead">
+                            Hours
+                          </h3>
+                        </div>
+                      </React.Fragment>
+                    ) : null }
                   </div>
                   <br/>
                   {/*<div className="row mt-1">*/}
@@ -399,8 +459,12 @@ class JobCreateFormTwo extends PureComponent {
 
                 <Row className="col-md-12 ">
                   <ButtonToolbar className="col-md-6 wizard__toolbar">
-                    <Button color="minimal" className="btn btn-outline-secondary" type="button"
-                            onClick={onClose}>
+                    <Button
+                      color="minimal"
+                      className="btn btn-outline-secondary"
+                      type="button"
+                      onClick={onClose}
+                    >
                       Cancel
                     </Button>
                   </ButtonToolbar>
