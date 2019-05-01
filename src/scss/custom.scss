@@ -223,7 +223,11 @@ span.form__form-group-error {
   margin-top: -3em !important; */
   top: -8px !important;
   line-height: 10px;
-
+}
+.form.form--horizontal
+.form__form-group-input-wrap--error-above.input-error-checkbox
+.form__form-group-error {
+  top: -95px !important;
 }
 // ---- form validation error
 
