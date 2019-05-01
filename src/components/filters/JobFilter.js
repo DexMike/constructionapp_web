@@ -106,9 +106,11 @@ class JobFilter extends Component {
       const min = Math.abs(s.getTimezoneOffset() % 60);
       // if behind
       if (timeZoneOffset > 0) {
-        if (min > 30) {
+        if (min > 0) {
+          console.log("here");
           s.setHours(23 - timeZoneOffset, min, 0); // 00:00:00s
         } else {
+          console.log("here2");
           s.setHours(24 - timeZoneOffset, min, 0); // 00:00:00s
         }
         s.setDate(s.getDate() - 1);
