@@ -4,10 +4,6 @@ import mapboxgl from 'mapbox-gl';
 import { Container } from 'reactstrap';
 import './css/mapBox.css';
 
-mapboxgl.accessToken = process.env.MAPBOX_API;
-// console.log(process.env.MAPBOX_API);
-// console.log(process.env.GOOGLE_MAPS_API);
-
 class TMapBoxOriginDestination extends PureComponent {
   constructor(props) {
     super(props);
