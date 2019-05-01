@@ -17,7 +17,6 @@ import TField from '../common/TField';
 import TwilioService from '../../api/TwilioService';
 import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
-import CompanyService from '../../api/CompanyService';
 import './jobs.css';
 import UserService from '../../api/UserService';
 
@@ -435,6 +434,7 @@ class JobCreateForm extends Component {
     bid.rate = createdJob.rate;
     bid.rateEstimate = createdJob.rateEstimate;
     bid.hasCustomerAccepted = 1;
+    bid.status = 'Pending';
     bid.modifiedOn = moment()
       .unix() * 1000;
     bid.createdOn = moment()
