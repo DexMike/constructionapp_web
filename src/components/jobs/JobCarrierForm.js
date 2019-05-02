@@ -5,25 +5,19 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row, Container } from 'reactstrap';
 
 import './jobs.css';
-import TCheckBox from '../common/TCheckBox';
 import TFormat from '../common/TFormat';
-import TMap from '../common/TMapOriginDestination';
-import TMapBox from '../common/TMapBox';
-import TTable from "../common/TTable";
+import TMapBoxOriginDestinationWithOverlay
+  from '../common/TMapBoxOriginDestinationWithOverlay';
+import TTable from '../common/TTable';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
 import GPSPointService from '../../api/GPSPointService';
-import EquipmentService from "../../api/EquipmentService";
-
-// import CompanyService from '../../api/CompanyService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
-// import AddressService from '../../api/AddressService';
-import pinAImage from '../../img/PinA.png';
-import pinBImage from '../../img/PinB.png';
-
+import GPSTrackingService from '../../api/GPSTrackingService';
 import JobCustomerForm from './JobCustomerForm';
+
+const MAPBOX_MAX = 23;
 
 class JobCarrierForm extends JobCustomerForm {
   constructor(props) {
@@ -43,7 +37,8 @@ class JobCarrierForm extends JobCustomerForm {
       modifiedBy: 0,
       modifiedOn: moment()
         .unix() * 1000,
-      isArchived: 0
+      isArchived: 0,
+      overlayMapData: {}
     };
 
     this.state = {
@@ -62,6 +57,45 @@ class JobCarrierForm extends JobCustomerForm {
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
+    // get overlay data
+    let gpsData = [];
+    if (bookings.length > 0) {
+      gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+        bookings[0].id // booking.id 6
+      );
+    }
+
+    // prepare the waypoints in an appropiate format for MB (GEOJson point)
+    const gps = [];
+    if (gpsData.length > 0) {
+      for (const datum in gpsData) {
+        if (gpsData[datum][0]) {
+          const loc = {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [
+                gpsData[datum][1],
+                gpsData[datum][0]
+              ]
+            },
+            properties: {
+              title: 'Actual route',
+              icon: 'car'
+            }
+          };
+          // reduce the total of results to a maximum of 23
+          // Mapbox's limit is 25 points plus an origin and destination
+          const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
+          const reducer = datum / steps;
+          const remainder = (reducer % 1);
+          if (remainder === 0) {
+            gps.push(loc);
+          }
+        }
+      }
+    }
+
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
@@ -72,7 +106,8 @@ class JobCarrierForm extends JobCustomerForm {
     this.setState({
       images,
       loaded: true,
-      gpsTrackings
+      gpsTrackings,
+      overlayMapData: {gps}
     });
   }
 
@@ -266,32 +301,15 @@ class JobCarrierForm extends JobCustomerForm {
     }
   }
 
-  renderMapBox(origin, destination) {
-
-    // Need to first convert addresses to long, lat.
-    //
-    // see
-    //
-    //
-    // see https://github.com/mapbox/mapbox-sdk-js/blob/master/docs/services.md#forwardgeocode
-    //
-
-    //
-    // Hard coded location due to long, lat changes to point in Address objects
-    // NOTE: mapbox requires 'lng' not 'long'
-    //
-    let lat = 41.8507300;
-    let lng = -87.6512600;
-    let zoom = 12;
-
+  renderMBMap(origin, destination, gpsData) {
     return (
       <React.Fragment>
-        <TMapBox
-          state={
+        <TMapBoxOriginDestinationWithOverlay
+          input={
             {
-              lat,
-              lng,
-              zoom
+              origin,
+              destination,
+              gpsData
             }
           }
         />
@@ -300,7 +318,7 @@ class JobCarrierForm extends JobCustomerForm {
   }
 
   renderEverything() {
-    const {images, gpsTrackings} = this.state;
+    const {images, gpsTrackings, overlayMapData} = this.state;
     const { job } = this.props;
     let origin = '';
     let destination = '';
@@ -334,13 +352,7 @@ class JobCarrierForm extends JobCustomerForm {
               <hr/>
               <Row>
                 <div className="col-md-8 backo_red">
-
-                  {/*swap to mapbox from Google*/}
-                  {/*{this.renderMapBox(origin, destination)}*/}
-
-                  {/*Call from parent object*/}
-                  {this.renderGoogleMap(origin, destination)}
-
+                  {this.renderMBMap(origin, destination, overlayMapData)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -392,13 +404,7 @@ class JobCarrierForm extends JobCustomerForm {
             <hr/>
             <Row>
               <div className="col-md-8 backo_red">
-
-                {/*swap to mapbox from Google*/}
-                {/*{this.renderMapBox(origin, destination)}*/}
-
-                {/*Call from parent object*/}
-                {this.renderGoogleMap(origin, destination)}
-
+                {this.renderMBMap(origin, destination, overlayMapData)}
               </div>
               <div className="col-md-4">
                 <div className="row">
