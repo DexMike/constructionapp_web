@@ -52,8 +52,8 @@ class AddTruckForm extends PureComponent {
     }
     const availableInfo = {
       info: {
-        startDate: new Date(),
-        endDate: new Date(),
+        startDate: new Date(passedInfo.startAvailability),
+        endDate: new Date(passedInfo.endAvailability),
         isAvailable: (passedInfo.currentAvailability === 1)
       }
     };
