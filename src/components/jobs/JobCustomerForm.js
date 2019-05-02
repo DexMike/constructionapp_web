@@ -10,7 +10,7 @@ import mapboxgl from 'mapbox-gl';
 // import TMap from '../common/TMapOriginDestination';
 import TMapBoxOriginDestinationWithOverlay
   from '../common/TMapBoxOriginDestinationWithOverlay';
-import TTable from "../common/TTable";
+import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
@@ -48,8 +48,7 @@ class JobCustomerForm extends Component {
       ...job,
       images: [],
       gpsTrackings: null,
-      loaded: false,
-      mapboxKey: ''
+      loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -63,9 +62,12 @@ class JobCustomerForm extends Component {
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
     // get overlay data
-    const gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-      bookings[0].id // booking.id 6
-    );
+    let gpsData = [];
+    if (bookings.length > 0) {
+      gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+        bookings[0].id // booking.id 6
+      );
+    }
 
     // prepare the waypoints in an appropiate format for MB (GEOJson point)
     const gps = [];
