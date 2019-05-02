@@ -31,9 +31,10 @@ class JobFilter extends Component {
       equipmentTypeList: [],
       materialTypeList: [],
       rateTypeList: [],
-      startDate: null, // values for date control
-      endDate: null, // values for date control
-
+      intervals: {
+        startInterval: null,
+        endInterval: null
+      },
       // Rate Type Button toggle
       // isAvailable: true,
 
@@ -62,34 +63,81 @@ class JobFilter extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
+    this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
+    this.getUTCEndInterval = this.getUTCEndInterval.bind(this);
   }
 
   async componentDidMount() {
-    let {
-      startDate,
-      endDate
+    const {
+      intervals,
+      filters
     } = this.state;
-    const {filters} = this.state;
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
-    startDate = new Date();
-    startDate.setHours(0, 0, 0); // 00:00:00
-    endDate = new Date();
-    endDate.setDate(startDate.getDate() + 7);
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0);
+    const endDate = new Date();
     endDate.setHours(23, 59, 59); // 23:59:59
-    filters.startAvailability = startDate;
-    filters.endAvailability = endDate;
-
-    await this.fetchJobs();
-    this.fetchFilterLists();
-
+    endDate.setDate(endDate.getDate() + 7);
+    const startAv = new Date(startDate);
+    const endAv = new Date(endDate);
+    intervals.startInterval = startAv;
+    intervals.endInterval = endAv;
+    filters.startAvailability = this.getUTCStartInterval(startDate);
+    filters.endAvailability = this.getUTCEndInterval(endDate);
     this.setState(
       {
         filters,
-        startDate,
-        endDate
+        intervals
       }
     );
+    await this.fetchJobs();
+    this.fetchFilterLists();
+  }
+
+  getUTCStartInterval(s) {
+    if (s) {
+      let timeZoneOffset = s.getTimezoneOffset() / 60;
+      if (timeZoneOffset < 0) {
+        timeZoneOffset = Math.ceil(timeZoneOffset);
+      } else {
+        timeZoneOffset = Math.floor(timeZoneOffset);
+      }
+      const min = Math.abs(s.getTimezoneOffset() % 60);
+      // if behind
+      if (timeZoneOffset > 0) {
+        if (min > 0) {
+          console.log("here");
+          s.setHours(23 - timeZoneOffset, min, 0); // 00:00:00s
+        } else {
+          console.log("here2");
+          s.setHours(24 - timeZoneOffset, min, 0); // 00:00:00s
+        }
+        s.setDate(s.getDate() - 1);
+      } else { // if ahead
+        s.setHours(-1 * timeZoneOffset, min, 0); // 00:00:00
+      }
+    }
+    return s;
+  }
+
+  getUTCEndInterval(endDate) {
+    if (endDate) {
+      let timeZoneOffset = endDate.getTimezoneOffset() / 60;
+      if (timeZoneOffset < 0) {
+        timeZoneOffset = Math.ceil(timeZoneOffset);
+      } else {
+        timeZoneOffset = Math.floor(timeZoneOffset);
+      }
+      const min = Math.abs(endDate.getTimezoneOffset() % 60);
+      if (timeZoneOffset > 0) {
+        endDate.setHours(23 - timeZoneOffset, 59 - min, 59); // 23:59:59
+      } else { // if ahead
+        endDate.setDate(endDate.getDate() + 1);
+        endDate.setHours(-1 * (timeZoneOffset + 1), 59 + min, 59); // 23:59:59
+      }
+    }
+    return endDate;
   }
 
   async fetchFilterLists() {
@@ -191,10 +239,28 @@ class JobFilter extends Component {
   }
 
   async handleIntervalInputChange(e) {
-    const {filters} = this.state;
-    filters.startAvailability = e.start;
-    filters.endAvailability = e.end;
-    this.setState({filters});
+    const {filters, intervals} = {...this.state};
+    let sAv = null;
+    if (e.start) {
+      sAv = new Date(e.start);
+    }
+    let endAv = null;
+    if (e.end) {
+      endAv = new Date(e.end);
+    }
+    filters.startAvailability = this.getUTCStartInterval(sAv);
+    filters.endAvailability = this.getUTCEndInterval(endAv);
+    const {start} = e;
+    const {end} = e;
+    if (start) {
+      start.setHours(0, 0, 0);
+    }
+    if (end) {
+      end.setHours(23, 59, 59); // 23:59:59
+    }
+    intervals.startInterval = start;
+    intervals.endInterval = end;
+    this.setState({intervals, filters});
     await this.fetchJobs();
   }
 
@@ -209,11 +275,13 @@ class JobFilter extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
-
+      intervals,
       // filters
       filters
 
     } = this.state;
+    console.log(this.state);
+    // let start = filters.startAvailability;
     return (
       <Row>
         <Col md={12}>
@@ -227,8 +295,8 @@ class JobFilter extends Component {
                         Date Range
                       </div>
                       <TIntervalDatePicker
-                        startDate={filters.startAvailability}
-                        endDate={filters.endAvailability}
+                        startDate={intervals.startInterval}
+                        endDate={intervals.endInterval}
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
                         dateFormat="MM/dd/yy"
