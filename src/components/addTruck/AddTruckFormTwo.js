@@ -257,6 +257,7 @@ class AddTruckFormTwo extends PureComponent {
                     }
                     onChange={this.startDateChange}
                     meta={reqHandlerStartDate}
+                    dateFormat="MM/dd/yy"
                   />
                   <input type="hidden" value={p}/>
                 </div>
@@ -273,6 +274,7 @@ class AddTruckFormTwo extends PureComponent {
                     }
                     onChange={this.endDateChange}
                     meta={reqHandlerEndDate}
+                    dateFormat="MM/dd/yy"
                   />
                 </div>
               </Row>
