@@ -205,7 +205,7 @@ class AddTruckFormFour extends PureComponent {
       && Object.keys(getTruckFullInfo().info).length > 0
       && Object.keys(getUserFullInfo().info).length > 0) {
       const available = availabilityFullInfo.info.isAvailable;
-      const availableText = (available === true || available === 1) ? 'Available' : 'Unavailable';
+      const availableText = (available === true) ? 'Available' : 'Unavailable';
       const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
       const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
       return (
