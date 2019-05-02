@@ -20,7 +20,7 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
-
+import GroupListService from '../../api/GroupListService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -47,6 +47,7 @@ class JobSavePage extends Component {
       marketPlaceBid: null,
       booking: null,
       bookingEquipment: null,
+      favoriteCompany: [],
       profile: [],
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
@@ -61,7 +62,14 @@ class JobSavePage extends Component {
 
   async componentDidMount() {
     const { match } = this.props;
-    let {bid, marketPlaceBid, booking, bookingEquipment, profile} = this.state;
+    let {
+      bid,
+      marketPlaceBid,
+      booking,
+      bookingEquipment,
+      profile,
+      favoriteCompany
+    } = this.state;
 
     profile = await ProfileService.getProfile();
 
@@ -101,6 +109,13 @@ class JobSavePage extends Component {
         );
       }
 
+      // If the customer is Carrier, check if it's a favorite
+      if (profile.companyType === 'Carrier') {
+        favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
+          profile.companyId
+        );
+      }
+
       this.setState({
         job,
         bid,
@@ -109,7 +124,8 @@ class JobSavePage extends Component {
         bookingEquipment,
         profile,
         profileCompanyId: profile.companyId,
-        companyType: profile.companyType
+        companyType: profile.companyType,
+        favoriteCompany
       });
       this.setState({ job });
     }
@@ -163,6 +179,7 @@ class JobSavePage extends Component {
 
       // UPDATING BID
       newBid.hasCustomerAccepted = 1;
+      newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
       newBid.modifiedBy = profile.userId;
       newBid.modifiedOn = moment()
@@ -252,18 +269,19 @@ class JobSavePage extends Component {
   async handleConfirmRequestCarrier() {
     const {
       job,
+      favoriteCompany,
       profile
     } = this.state;
     let { bid } = this.state;
     let { booking, bookingEquipment } = this.state;
     let notification;
 
-    // TODO: change this to
-    // if (carrier is a favorite) Accept Job
-    // else Request Job
-    if (bid) { // we have a bid record, accepting a job
+    // if (bid) { // we have a bid record, accepting a job
+    // Is the Carrier this Company's favorite? If so, accepting the job
+    if (favoriteCompany.length > 0) {
+      // console.log('accepting');
       const newJob = CloneDeep(job);
-      const newBid = CloneDeep(bid);
+      // const newBid = CloneDeep(bid);
 
       // UPDATING JOB
       newJob.status = 'Booked';
@@ -276,12 +294,31 @@ class JobSavePage extends Component {
       await JobService.updateJob(newJob);
 
       // UPDATING BID
-      newBid.hasCustomerAccepted = 1;
+      /* newBid.hasCustomerAccepted = 1;
       newBid.status = 'Accepted';
       newBid.modifiedBy = profile.userId;
       newBid.modifiedOn = moment()
         .unix() * 1000;
-      await BidService.updateBid(newBid);
+      await BidService.updateBid(newBid); */
+      // CREATING BID
+      bid = {};
+      bid.jobId = newJob.id;
+      bid.userId = profile.userId;
+      bid.companyCarrierId = profile.companyId;
+      bid.hasCustomerAccepted = 1;
+      bid.hasSchedulerAccepted = 1;
+      bid.status = 'Accepted';
+      bid.rateType = newJob.rateType;
+      bid.rate = newJob.rate;
+      bid.rateEstimate = newJob.rateEstimate;
+      bid.notes = newJob.notes;
+      bid.createdBy = profile.userId;
+      bid.modifiedBy = profile.userId;
+      bid.modifiedOn = moment()
+        .unix() * 1000;
+      bid.createdOn = moment()
+        .unix() * 1000;
+      bid = await BidService.createBid(bid);
 
       // CREATING BOOKING
       // see if we have a booking first
@@ -360,7 +397,7 @@ class JobSavePage extends Component {
 
       job.status = 'Booked';
       this.setState({ job });
-    } else { // no bid record, requesting a job
+    } else { // The Carrier is not this Company's favorite? requesting the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
 
