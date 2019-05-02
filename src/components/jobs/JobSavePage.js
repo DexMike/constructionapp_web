@@ -478,7 +478,15 @@ class JobSavePage extends Component {
   }
 
   render() {
-    const { job, bid, marketPlaceBid, companyType, profileCompanyId, loaded } = this.state;
+    const {
+      job,
+      bid,
+      marketPlaceBid,
+      companyType,
+      profileCompanyId,
+      favoriteCompany,
+      loaded
+    } = this.state;
     let buttonText;
     if (loaded) {
       // waiting for jobs and type to be available
@@ -497,12 +505,10 @@ class JobSavePage extends Component {
         // console.log('bid ');
         // console.log(bid);
 
-        if (job.status === 'On Offer' && companyType === 'Carrier') {
+        // If the carrier is a favorite
+        if (favoriteCompany.length > 0 && job.status === 'On Offer' && companyType === 'Carrier') {
           if (bid && profileCompanyId === bid.companyCarrierId) {
-            // we have a bid record, we need to verify that the bid record
-            // belongs to this carrier then we are accepting the job
             // console.log('We are a carrier and we are a favorite');
-
             buttonText = (
               <Button
                 onClick={() => this.handleConfirmRequestCarrier()}
@@ -511,7 +517,7 @@ class JobSavePage extends Component {
                 Accept Job
               </Button>
             );
-          } else {
+          } else { // the carrier is not a favorite
             buttonText = (
               <Button
                 onClick={() => this.handleConfirmRequestCarrier()}
