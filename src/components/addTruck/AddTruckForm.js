@@ -312,7 +312,7 @@ class AddTruckForm extends PureComponent {
                         onClose={this.closeNow}
                         getTruckFullInfo={this.getTruckInfo}
                         passedTruckFullInfo={truckPassedInfo}
-                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
+                        // getAvailiabilityFullInfo={this.getAvailiabilityInfo}
                         // secondPage={this.secondPage}
                         validateResOne={this.validateFormOneResults}
                         validateOnTabOneClick={validateOnTabOneClick}
