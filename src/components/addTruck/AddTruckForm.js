@@ -1,10 +1,11 @@
-import React, { PureComponent } from 'react';
-import { Col, Card, Row, Container } from 'reactstrap';
+import React, {PureComponent} from 'react';
+import {Col, Card, Row, Container} from 'reactstrap';
 import PropTypes from 'prop-types';
 import AddTruckFormOne from './AddTruckFormOne';
 import AddTruckFormTwo from './AddTruckFormTwo';
 import AddTruckFormThree from './AddTruckFormThree';
 import AddTruckFormFour from './AddTruckFormFour';
+
 // import TButtonToggle from '../common/TButtonToggle';
 
 
@@ -42,13 +43,20 @@ class AddTruckForm extends PureComponent {
   }
 
   async componentDidMount() {
-    const { incomingPage, passedInfo } = this.props;
+    const {incomingPage, passedInfo} = this.props;
     // this is to prevent mounting if we must go to page three
     if (incomingPage === 3) {
-      this.setState({ page: 3 });
+      this.setState({page: 3});
     } else {
-      this.setState({ page: 1 });
+      this.setState({page: 1});
     }
+    const availableInfo = {
+      info: {
+        startDate: new Date(),
+        endDate: new Date(),
+        isAvailable: (passedInfo.currentAvailability === 1)
+      }
+    };
 
     // force load from previous page
     if (Object.keys(passedInfo).length) {
@@ -56,7 +64,8 @@ class AddTruckForm extends PureComponent {
         truckPassedInfo: passedInfo,
         enableSecondTab: true,
         enableThirdTab: true,
-        enableFourthTab: false
+        enableFourthTab: false,
+        availabilityCachedInfo: availableInfo
       });
     }
     this.setState({
@@ -65,17 +74,17 @@ class AddTruckForm extends PureComponent {
   }
 
   getTruckInfo() {
-    const { truckCachedInfo } = this.state;
+    const {truckCachedInfo} = this.state;
     return truckCachedInfo;
   }
 
   getAvailiabilityInfo() {
-    const { availabilityCachedInfo } = this.state;
+    const {availabilityCachedInfo} = this.state;
     return availabilityCachedInfo;
   }
 
   getUserInfo() {
-    const { userCachedInfo } = this.state;
+    const {userCachedInfo} = this.state;
     return userCachedInfo;
   }
 
@@ -87,19 +96,19 @@ class AddTruckForm extends PureComponent {
 
   handleTruckSave(e) {
     // let's keep the info from the truck in memory
-    const { truckCachedInfo, page } = this.state;
+    const {truckCachedInfo, page} = this.state;
     truckCachedInfo.info = e;
 
     // also set availability info
-    const availableInfo = {
-      info: {
-        startDate: e.startAvailability,
-        endDate: e.endAvailability,
-        isAvailable: e.currentAvailability
-      }
-    };
-
-    this.setState({ availabilityCachedInfo: availableInfo });
+    // const availableInfo = {
+    //   info: {
+    //     startDate: e.startAvailability,
+    //     endDate: e.endAvailability,
+    //     isAvailable: e.currentAvailability
+    //   }
+    // };
+    //
+    // this.setState({ availabilityCachedInfo: availableInfo });
 
     if (truckCachedInfo.info.redir) {
       this.setState({
@@ -110,96 +119,96 @@ class AddTruckForm extends PureComponent {
 
   handleAvailabilitySave(e) {
     // let's keep the info from the truck in memory
-    const { availabilityCachedInfo, page } = this.state;
+    const {availabilityCachedInfo, page} = this.state;
     availabilityCachedInfo.info = e;
     // not receiving the redir
     if (e.redir) {
-      this.setState({ page: page + 1 });
+      this.setState({page: page + 1});
     }
   }
 
   handleUserSave(e) {
     // let's keep the info from the truck in memory
-    const { userCachedInfo, page } = this.state;
+    const {userCachedInfo, page} = this.state;
     userCachedInfo.info = e;
     if (e.redir) {
-      this.setState({ page: page + 1 });
+      this.setState({page: page + 1});
     }
   }
 
   gotoPage(pageNumber) {
-    this.setState({ page: pageNumber });
+    this.setState({page: pageNumber});
   }
 
   previousPage() {
-    const { page } = this.state;
+    const {page} = this.state;
     if (page === 2) {
-      this.setState({ page: 1, validateOnTabOneClick: null });
+      this.setState({page: 1, validateOnTabOneClick: null});
     } else {
-      this.setState({ page: page - 1 });
+      this.setState({page: page - 1});
     }
   }
 
   nextPage() {
-    const { page } = this.state;
+    const {page} = this.state;
     // just checking if the state changeo
-    this.setState({ page: page + 1 });
+    this.setState({page: page + 1});
   }
 
   firstPage() {
-    const { editDriverId } = this.props;
+    const {editDriverId} = this.props;
     if (!editDriverId) { // we're coming from Drivers List, disable tabs other than 3
-      this.setState({ page: 1, validateOnTabOneClick: null });
+      this.setState({page: 1, validateOnTabOneClick: null});
     }
   }
 
   secondPage() {
-    const { enableSecondTab } = this.state;
-    const { editDriverId } = this.props;
+    const {enableSecondTab} = this.state;
+    const {editDriverId} = this.props;
     if (!editDriverId && enableSecondTab) {
-      this.setState({ page: 2 });
+      this.setState({page: 2});
     }
   }
 
   thirdPage() {
-    const { enableThirdTab } = this.state;
-    const { editDriverId } = this.props;
+    const {enableThirdTab} = this.state;
+    const {editDriverId} = this.props;
     if (!editDriverId && enableThirdTab) {
-      this.setState({ page: 3 });
+      this.setState({page: 3});
     }
   }
 
   fourthPage() {
-    const { enableFourthTab } = this.state;
-    const { editDriverId } = this.props;
+    const {enableFourthTab} = this.state;
+    const {editDriverId} = this.props;
     if (!editDriverId && enableFourthTab) {
-      this.setState({ page: 4 });
+      this.setState({page: 4});
     }
   }
 
   validateFormOneResults(res) {
     const {enableSecondTab} = this.state;
     if (res === false) {
-      this.setState({ enableSecondTab: false });
+      this.setState({enableSecondTab: false});
     } else if (res === true) {
-      this.setState({ enableSecondTab: true });
+      this.setState({enableSecondTab: true});
     } else if (enableSecondTab === true) {
-      this.setState({ page: 2 });
+      this.setState({page: 2});
     }
-    this.setState({ validateOnTabOneClick: res });
+    this.setState({validateOnTabOneClick: res});
   }
 
   validateFormTwoResults(res) {
     const {enableSecondTab, enableThirdTab} = this.state;
     if (enableSecondTab === true) {
       if (res === false) {
-        this.setState({ enableThirdTab: false });
+        this.setState({enableThirdTab: false});
       } else if (res === true) {
-        this.setState({ enableThirdTab: true });
+        this.setState({enableThirdTab: true});
       } else if (enableThirdTab === true) {
-        this.setState({ page: 3 });
+        this.setState({page: 3});
       }
-      this.setState({ validateOnTabTwoClick: res });
+      this.setState({validateOnTabTwoClick: res});
     } else {
       this.validateFormOneResults(res);
     }
@@ -209,14 +218,14 @@ class AddTruckForm extends PureComponent {
     const {enableSecondTab, enableThirdTab, enableFourthTab} = this.state;
     if (enableSecondTab === true && enableThirdTab === true) {
       if (res === false) {
-        this.setState({ enableFourthTab: false });
+        this.setState({enableFourthTab: false});
       }
       if (res === true) {
-        this.setState({ enableFourthTab: true });
+        this.setState({enableFourthTab: true});
       } else if (enableFourthTab === true) {
-        this.setState({ page: 4 });
+        this.setState({page: 4});
       }
-      this.setState({ validateOnTabThreeClick: res });
+      this.setState({validateOnTabThreeClick: res});
     } else if (enableSecondTab === false) {
       this.validateFormOneResults(res);
     } else if (enableSecondTab === true && enableThirdTab === false) {
@@ -225,12 +234,12 @@ class AddTruckForm extends PureComponent {
   }
 
   closeNow() {
-    const { toggle } = this.props;
+    const {toggle} = this.props;
     toggle();
   }
 
   render() {
-    const { equipmentId, companyId, editDriverId } = this.props;
+    const {equipmentId, companyId, editDriverId} = this.props;
     const {
       page,
       loaded,
@@ -293,7 +302,7 @@ class AddTruckForm extends PureComponent {
                   <div className="wizard__form-wrapper">
                     {/* onSubmit={this.nextPage} */}
                     {page === 1
-                      && (
+                    && (
                       <AddTruckFormOne
                         p={page}
                         equipmentId={equipmentId}
@@ -303,14 +312,14 @@ class AddTruckForm extends PureComponent {
                         onClose={this.closeNow}
                         getTruckFullInfo={this.getTruckInfo}
                         passedTruckFullInfo={truckPassedInfo}
-                        getAvailiabilityFullInfo={this.getAvailiabilityInfo}
+                        // getAvailiabilityFullInfo={this.getAvailiabilityInfo}
                         // secondPage={this.secondPage}
                         validateResOne={this.validateFormOneResults}
                         validateOnTabOneClick={validateOnTabOneClick}
                       />
-                      )}
+                    )}
                     {page === 2
-                      && (
+                    && (
                       <AddTruckFormTwo
                         p={page}
                         equipmentId={equipmentId}
@@ -323,27 +332,27 @@ class AddTruckForm extends PureComponent {
                         validateResTwo={this.validateFormTwoResults}
                         validateOnTabTwoClick={validateOnTabTwoClick}
                       />
-                      )}
+                    )}
                     {page === 3
-                      && (
-                        <AddTruckFormThree
-                          equipmentId={equipmentId}
-                          // companyId={companyId}
-                          previousPage={this.previousPage}
-                          onUserFullInfo={this.handleUserSave}
-                          onClose={this.closeNow}
-                          handleSubmit={this.nextPage}
-                          getUserFullInfo={this.getUserInfo}
-                          // this is to track if we are editing
-                          passedTruckFullInfoId={truckPassedInfo.driversId}
-                          editDriverId={editDriverId}
-                          // fourthPage={this.fourthPage}
-                          validateResThree={this.validateFormThreeResults}
-                          validateOnTabThreeClick={validateOnTabThreeClick}
-                        />
-                      )}
+                    && (
+                      <AddTruckFormThree
+                        equipmentId={equipmentId}
+                        // companyId={companyId}
+                        previousPage={this.previousPage}
+                        onUserFullInfo={this.handleUserSave}
+                        onClose={this.closeNow}
+                        handleSubmit={this.nextPage}
+                        getUserFullInfo={this.getUserInfo}
+                        // this is to track if we are editing
+                        passedTruckFullInfoId={truckPassedInfo.driversId}
+                        editDriverId={editDriverId}
+                        // fourthPage={this.fourthPage}
+                        validateResThree={this.validateFormThreeResults}
+                        validateOnTabThreeClick={validateOnTabThreeClick}
+                      />
+                    )}
                     {page === 4
-                      && (
+                    && (
                       <AddTruckFormFour
                         equipmentId={equipmentId}
                         companyId={companyId}
@@ -356,7 +365,7 @@ class AddTruckForm extends PureComponent {
                         getAvailiabilityFullInfo={this.getAvailiabilityInfo}
                         getUserFullInfo={this.getUserInfo}
                       />
-                      )}
+                    )}
                     {/* onSubmit={onSubmit} */}
                   </div>
                 </div>

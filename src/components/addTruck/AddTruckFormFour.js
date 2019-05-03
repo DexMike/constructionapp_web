@@ -76,7 +76,6 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
-
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
 
@@ -201,12 +200,12 @@ class AddTruckFormFour extends PureComponent {
       allMaterials += `${material.label}, `;
     }
     allMaterials = allMaterials.substring(0, allMaterials.length - 2);
-
     // do we  have info? otherwise don't let the user continue
     if (Object.keys(getAvailiabilityFullInfo().info).length > 0
       && Object.keys(getTruckFullInfo().info).length > 0
       && Object.keys(getUserFullInfo().info).length > 0) {
-      const availableText = availabilityFullInfo.info.isAvailable === true ? 'Available' : 'Unavailable';
+      const available = availabilityFullInfo.info.isAvailable;
+      const availableText = (available === true) ? 'Available' : 'Unavailable';
       const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
       const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
       return (
