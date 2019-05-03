@@ -329,7 +329,6 @@ class DashboardCarrierPage extends Component {
     // jobsCompleted = onOfferJobCount * 20;
     potentialIncome = TFormat.asMoney(potentialIncome);
 
-    // console.log(jobs);
     if (loaded) {
       const {filters} = this.state;
       return (
@@ -342,9 +341,9 @@ class DashboardCarrierPage extends Component {
                   <TTable
                     columns={
                       [
-                        // {
-                        //   name: 'id',
-                        //   displayName: 'Job Id'
+                        //{
+                        //  name: 'id',
+                        //  displayName: 'Job Id'
                         // },
                         {
                           name: 'newStartDate',

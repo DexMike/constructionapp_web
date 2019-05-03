@@ -77,10 +77,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
-<<<<<<< HEAD
       truckFullInfo.info.modifiedBy = profile.userId;
-=======
->>>>>>> dev
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
 
