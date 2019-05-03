@@ -262,33 +262,33 @@ class AddTruckFormOne extends PureComponent {
     const shortDesc = description.substring(0, 45);
     let start = new Date();
     let end = new Date();
-    let available = false;
+    // let available = false;
 
     // dates if preloaded
     const {
       getTruckFullInfo,
-      getAvailiabilityFullInfo,
+      // getAvailiabilityFullInfo,
       equipmentId
     } = this.props;
     const preloaded = getTruckFullInfo();
-    const preloadedAvailability = getAvailiabilityFullInfo();
+    // const preloadedAvailability = getAvailiabilityFullInfo();
 
     // load info from cached (if coming back from next tabs)
-    if (typeof preloaded.info !== 'undefined') {
-      if (Object.keys(preloaded.info).length > 0) {
-        start = preloaded.info.startAvailability;
-        end = preloaded.info.endAvailability;
-        available = preloadedAvailability.info.isAvailable;
-      }
-    }
-    // however, if there is already saved dates, we'll use that one
-    if (typeof preloadedAvailability.info !== 'undefined') {
-      if (Object.keys(preloadedAvailability.info).length > 0) {
-        start = preloadedAvailability.info.startDate;
-        end = preloadedAvailability.info.endDate;
-        available = preloadedAvailability.info.isAvailable;
-      }
-    }
+    // if (typeof preloaded.info !== 'undefined') {
+    //   if (Object.keys(preloaded.info).length > 0) {
+    //     start = preloaded.info.startAvailability;
+    //     end = preloaded.info.endAvailability;
+    //     available = preloadedAvailability.info.isAvailable;
+    //   }
+    // }
+    // // however, if there is already saved dates, we'll use that one
+    // if (typeof preloadedAvailability.info !== 'undefined') {
+    //   if (Object.keys(preloadedAvailability.info).length > 0) {
+    //     start = preloadedAvailability.info.startDate;
+    //     end = preloadedAvailability.info.endDate;
+    //     available = preloadedAvailability.info.isAvailable;
+    //   }
+    // }
 
     // TODO-> Ask which params are required
     saveValues = {
@@ -305,9 +305,9 @@ class AddTruckFormOne extends PureComponent {
       licensePlate,
       vin,
       image,
-      currentAvailability: available, // unasigned
-      startAvailability: start, // careful here, it's date unless it exists
-      endAvailability: end,
+      // currentAvailability: available, // unasigned
+      // startAvailability: start, // careful here, it's date unless it exists
+      // endAvailability: end,
       ratesByBoth, // keeping here in order to track it
       ratesByHour, // keeping here in order to track it
       ratesByTon, // keeping here in order to track it
@@ -741,7 +741,7 @@ class AddTruckFormOne extends PureComponent {
                 </div>
               </Row>
 
-              
+
               <Row className="col-md-12">
                 <div className="col-md-3 form__form-group">
                   <TCheckBox onChange={this.handleInputChange} name="ratesByTon"
@@ -852,7 +852,7 @@ AddTruckFormOne.propTypes = {
   equipmentId: PropTypes.number,
   // companyId: PropTypes.number,
   getTruckFullInfo: PropTypes.func.isRequired,
-  getAvailiabilityFullInfo: PropTypes.func.isRequired,
+  // getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onTruckFullInfo: PropTypes.func.isRequired,
   passedTruckFullInfo: PropTypes.shape({
     info: PropTypes.object

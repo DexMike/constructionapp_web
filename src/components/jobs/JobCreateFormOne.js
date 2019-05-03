@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import {
   Card,
   CardBody,
@@ -59,6 +59,10 @@ class CreateJobFormOne extends PureComponent {
       name: '',
       instructions: '',
       // Request Handlers
+      reqHandlerSameAddresses: {
+        touched: false,
+        error: ''
+      },
       reqHandlerTonnage: {
         touched: false,
         error: ''
@@ -135,10 +139,11 @@ class CreateJobFormOne extends PureComponent {
     this.handleEndAddressIdChange = this.handleEndAddressIdChange.bind(this);
     this.toggleNewStartAddress = this.toggleNewStartAddress.bind(this);
     this.toggleNewEndAddress = this.toggleNewEndAddress.bind(this);
+    this.handleSameAddresses = this.handleSameAddresses.bind(this);
   }
 
   async componentDidMount() {
-    const { firstTabData } = this.props;
+    const {firstTabData} = this.props;
 
     // should load all addresses even if already set
     let allAddresses = await AddressService.getAddresses();
@@ -219,7 +224,7 @@ class CreateJobFormOne extends PureComponent {
       value: String(state.val1),
       label: state.val1
     }));
-    this.setState({ allUSstates: states });
+    this.setState({allUSstates: states});
   }
 
 
@@ -230,42 +235,43 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleMaterialsChange(data) {
-    const { reqHandlerMaterials } = this.state;
+    const {reqHandlerMaterials} = this.state;
     this.setState({
       reqHandlerMaterials: {
         ...reqHandlerMaterials,
         touched: false
       }
     });
-    this.setState({ selectedMaterials: data });
+    this.setState({selectedMaterials: data});
   }
 
   handleTruckTypeChange(data) {
-    const { reqHandlerTruckType } = this.state;
+    const {reqHandlerTruckType} = this.state;
     this.setState({
       reqHandlerTruckType: {
         ...reqHandlerTruckType,
         touched: false
       }
     });
-    this.setState({ truckType: data });
+    this.setState({truckType: data});
   }
 
   handleStartLocationChange(e) {
     this.setState({
-      reqHandlerStartState: { touched: false }
+      reqHandlerStartState: {touched: false}
     });
-    this.setState({ startLocationState: e.value });
+    this.setState({startLocationState: e.value});
   }
 
   handleEndLocationChange(e) {
     this.setState({
-      reqHandlerEndState: { touched: false }
+      reqHandlerEndState: {touched: false}
     });
-    this.setState({ endLocationState: e.value });
+    this.setState({endLocationState: e.value});
   }
 
   handleEndAddressChange(e) {
+    this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
       case 'endLocationAddress1':
@@ -290,18 +296,28 @@ class CreateJobFormOne extends PureComponent {
         touched: false
       }
     });
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   }
 
   handleTonnageDetails(e) {
-    const { reqHandlerTonnage } = this.state;
+    const {reqHandlerTonnage} = this.state;
     this.setState({
       reqHandlerTonnage: {
         ...reqHandlerTonnage,
         touched: false
       }
     });
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
+  }
+
+  handleSameAddresses() {
+    const {reqHandlerSameAddresses} = this.state;
+    this.setState({
+      reqHandlerSameAddresses: {
+        ...reqHandlerSameAddresses,
+        touched: false
+      }
+    });
   }
 
   handleHourDetails(e) {
@@ -321,10 +337,11 @@ class CreateJobFormOne extends PureComponent {
         touched: false
       }
     });
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   }
 
   handleStartAddressChange(e) {
+    this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
       case 'startLocationAddress1':
@@ -347,36 +364,35 @@ class CreateJobFormOne extends PureComponent {
         touched: false
       }
     });
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   }
 
 
   selectChange(data) {
-    const { reqHandlerTruckType } = this.state;
+    const {reqHandlerTruckType} = this.state;
     this.setState({
       reqHandlerTruckType: {
         ...reqHandlerTruckType,
         touched: false
       }
     });
-    this.setState({ truckType: data.value });
+    this.setState({truckType: data.value});
   }
 
   isFormValid() {
     const job = this.state;
-    const { rateTab } = this.state;
+    const {rateTab} = this.state;
     const {
       reqHandlerTonnage,
-      /*
       reqHandlerEndAddress,
       reqHandlerEndState,
       reqHandlerEndCity,
       reqHandlerEndZip,
+      reqHandlerSameAddresses,
       reqHandlerStartAddress,
       reqHandlerStartCity,
       reqHandlerStartState,
       reqHandlerStartZip,
-      */
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerHoursEstimate,
@@ -385,7 +401,7 @@ class CreateJobFormOne extends PureComponent {
     } = this.state;
     let isValid = true;
 
-    if (job.selectedMaterials.length === 0) {
+    if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
       this.setState({
         reqHandlerMaterials: {
           ...reqHandlerMaterials,
@@ -396,7 +412,7 @@ class CreateJobFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (job.truckType.length === 0) {
+    if (!job.truckType || job.truckType.length === 0) {
       this.setState({
         reqHandlerTruckType: {
           ...reqHandlerTruckType,
@@ -425,6 +441,117 @@ class CreateJobFormOne extends PureComponent {
       isValid = false;
     }
 
+    // START ADDRESS VALIDATION
+
+    if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
+      if (job.startLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerStartAddress: {
+            ...reqHandlerStartAddress,
+            touched: true,
+            error: 'Missing starting address field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.startLocationCity.length === 0) {
+        this.setState({
+          reqHandlerStartCity: {
+            ...reqHandlerStartCity,
+            touched: true,
+            error: 'Missing starting city field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.startLocationZip.length === 0) {
+        this.setState({
+          reqHandlerStartZip: {
+            ...reqHandlerStartZip,
+            touched: true,
+            error: 'Missing starting zip code field'
+          }
+        });
+        isValid = false;
+      }
+
+      // only work if tab is 1
+      if (job.startLocationState.length === 0) {
+        this.setState({
+          reqHandlerStartState: {
+            ...reqHandlerStartState,
+            touched: true,
+            error: 'Missing starting state field'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
+      && job.selectedStartAddressId === job.selectedEndAddressId) {
+      this.setState({
+        reqHandlerSameAddresses: {
+          ...reqHandlerSameAddresses,
+          touched: true,
+          error: "Can't have same start and end locations"
+        }
+      });
+      isValid = false;
+    }
+
+    // END ADDRESS VALIDATION
+
+    if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
+      if (job.endLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerEndAddress: {
+            ...reqHandlerEndAddress,
+            touched: true,
+            error: 'Missing ending address field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationCity.length === 0) {
+        this.setState({
+          reqHandlerEndCity: {
+            ...reqHandlerEndCity,
+            touched: true,
+            error: 'Missing ending city field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationState.length === 0) {
+        this.setState({
+          reqHandlerEndState: {
+            ...reqHandlerEndState,
+            touched: true,
+            error: 'Missing ending state field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationZip.length === 0) {
+        this.setState({
+          reqHandlerEndZip: {
+            ...reqHandlerEndZip,
+            touched: true,
+            error: 'Missing ending zip field'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+
+    // only work if tab is 1
     if (job.tonnage <= 0 && rateTab === 2) {
       this.setState({
         reqHandlerTonnage: {
@@ -457,6 +584,17 @@ class CreateJobFormOne extends PureComponent {
       });
       isValid = false;
     }
+
+    if (job.hourTrucksNumber <= 0 && rateTab === 1) {
+      this.setState({
+        reqHandlerTrucksEstimate: {
+          ...reqHandlerTrucksEstimate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
     // }
 
     return isValid;
@@ -464,7 +602,7 @@ class CreateJobFormOne extends PureComponent {
 
   async handleSubmit(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -479,8 +617,8 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    const { value } = e.target;
-    this.setState({ [e.target.name]: value });
+    const {value} = e.target;
+    this.setState({[e.target.name]: value});
   }
 
   // Pull materials
@@ -494,35 +632,73 @@ class CreateJobFormOne extends PureComponent {
   }
 
   jobDateChange(data) {
-    const { reqHandlerDate } = this.state;
+    const {reqHandlerDate} = this.state;
     this.setState({
       reqHandlerDate: Object.assign({}, reqHandlerDate, {
         touched: false
       })
     });
-    this.setState({ jobDate: data });
+    this.setState({jobDate: data});
   }
 
   handleStartAddressIdChange(data) {
-    this.setState({
-      startLocationAddress1: '',
-      startLocationAddress2: '',
-      startLocationCity: '',
-      startLocationState: '',
-      startLocationZip: '',
-      selectedStartAddressId: data.value
-    });
+    this.handleSameAddresses();
+    if (data.value !== 0) {
+      this.setState({
+        startLocationAddress1: '',
+        startLocationAddress2: '',
+        startLocationCity: '',
+        startLocationState: '',
+        startLocationZip: '',
+        selectedStartAddressId: data.value,
+        reqHandlerStartAddress: {
+          touched: false
+        },
+        reqHandlerStartCity: {
+          touched: false
+        },
+        reqHandlerStartState: {
+          touched: false
+        },
+        reqHandlerStartZip: {
+          touched: false
+        }
+      });
+    } else {
+      this.setState({
+        selectedStartAddressId: data.value
+      });
+    }
   }
 
   handleEndAddressIdChange(data) {
-    this.setState({
-      endLocationAddress1: '',
-      endLocationAddress2: '',
-      endLocationCity: '',
-      endLocationState: '',
-      endLocationZip: '',
-      selectedEndAddressId: data.value
-    });
+    this.handleSameAddresses();
+    if (data.value !== 0) {
+      this.setState({
+        endLocationAddress1: '',
+        endLocationAddress2: '',
+        endLocationCity: '',
+        endLocationState: '',
+        endLocationZip: '',
+        selectedEndAddressId: data.value,
+        reqHandlerEndAddress: {
+          touched: false
+        },
+        reqHandlerEndCity: {
+          touched: false
+        },
+        reqHandlerEndState: {
+          touched: false
+        },
+        reqHandlerEndZip: {
+          touched: false
+        }
+      });
+    } else {
+      this.setState({
+        selectedEndAddressId: data.value
+      });
+    }
   }
 
   tabFirstPage() {
@@ -538,7 +714,7 @@ class CreateJobFormOne extends PureComponent {
       endLocationState: '',
       endLocationZip: ''
     });
-    this.setState({ rateTab: 1 });
+    this.setState({rateTab: 1});
   }
 
   tabSecondPage() {
@@ -550,11 +726,11 @@ class CreateJobFormOne extends PureComponent {
       hourEstimatedHours: 0,
       hourTrucksNumber: 0
     });
-    this.setState({ rateTab: 2 });
+    this.setState({rateTab: 2});
   }
 
   goToSecondFromFirst() {
-    const { validateRes } = this.props;
+    const {validateRes} = this.props;
     if (!this.isFormValid()) {
       // Add this back before merging SG-170 back into the design.
       // validateRes(false);
@@ -563,16 +739,16 @@ class CreateJobFormOne extends PureComponent {
       return;
     }
     validateRes(true);
-    const { gotoSecond } = this.props;
+    const {gotoSecond} = this.props;
     gotoSecond(this.state);
   }
 
   toggleNewStartAddress() {
-    this.setState({ selectedStartAddressId: 0 });
+    this.setState({selectedStartAddressId: 0});
   }
 
   toggleNewEndAddress() {
-    this.setState({ selectedEndAddressId: 0 });
+    this.setState({selectedEndAddressId: 0});
   }
 
   render() {
@@ -622,11 +798,12 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndState,
       reqHandlerEndZip,
       reqHandlerEndCity,
+      reqHandlerSameAddresses,
       reqHandlerDate
     } = this.state;
     const today = new Date();
     const currentDate = today.getTime();
-    const { onClose } = this.props;
+    const {onClose} = this.props;
     return (
       <Col md={12} lg={12}>
         <Card>
@@ -710,7 +887,7 @@ class CreateJobFormOne extends PureComponent {
                       {
                         onChange: this.jobDateChange,
                         name: 'jobDate',
-                        value: { jobDate },
+                        value: {jobDate},
                         givenDate: currentDate
                       }
                     }
@@ -784,6 +961,7 @@ class CreateJobFormOne extends PureComponent {
                               value={selectedStartAddressId}
                               options={allAddresses}
                               placeholder="Select a location"
+                              meta={reqHandlerSameAddresses}
                             />
                           </div>
                           <div>
@@ -1176,8 +1354,8 @@ class CreateJobFormOne extends PureComponent {
               <Row className="col-md-12">
                 <ButtonToolbar className="col-md-6 wizard__toolbar">
                   <Button color="minimal" className="btn btn-outline-secondary"
-                    type="button"
-                    onClick={onClose}
+                          type="button"
+                          onClick={onClose}
                   >
                     Cancel
                   </Button>
@@ -1216,7 +1394,6 @@ CreateJobFormOne.propTypes = {
   validateRes: PropTypes.func.isRequired
 };
 
-CreateJobFormOne.defaultProps = {
-};
+CreateJobFormOne.defaultProps = {};
 
 export default CreateJobFormOne;
