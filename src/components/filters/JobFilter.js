@@ -198,6 +198,7 @@ class JobFilter extends Component {
       jobs = await JobService.getJobDashboardByFilters(filters);
     } else if (page === 'Marketplace') {
       filters.status = 'Published';
+      filters.isFavorited = 0;
       jobs = await JobService.getJobDashboardByFilters(filters);
     }
     const {returnJobs} = this.props;
