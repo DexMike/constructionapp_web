@@ -9,12 +9,12 @@ import {
 } from 'reactstrap';
 import PropTypes, { object } from 'prop-types';
 import TFormat from '../common/TFormat';
-import DriverService from '../../api/DriverService';
+// import DriverService from '../../api/DriverService';
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
-import truckImage from '../../img/12.png';
+// import truckImage from '../../img/12.png';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
@@ -77,7 +77,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
-      truckFullInfo.info.createdBy = profile.userId;
+      truckFullInfo.info.modifiedBy = profile.userId;
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
 
