@@ -59,6 +59,10 @@ class CreateJobFormOne extends PureComponent {
       name: '',
       instructions: '',
       // Request Handlers
+      reqHandlerSameAddresses: {
+        touched: false,
+        error: ''
+      },
       reqHandlerTonnage: {
         touched: false,
         error: ''
@@ -135,6 +139,7 @@ class CreateJobFormOne extends PureComponent {
     this.handleEndAddressIdChange = this.handleEndAddressIdChange.bind(this);
     this.toggleNewStartAddress = this.toggleNewStartAddress.bind(this);
     this.toggleNewEndAddress = this.toggleNewEndAddress.bind(this);
+    this.handleSameAddresses = this.handleSameAddresses.bind(this);
   }
 
   async componentDidMount() {
@@ -266,6 +271,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleEndAddressChange(e) {
+    this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
       case 'endLocationAddress1':
@@ -304,6 +310,16 @@ class CreateJobFormOne extends PureComponent {
     this.setState({[e.target.name]: e.target.value});
   }
 
+  handleSameAddresses() {
+    const {reqHandlerSameAddresses} = this.state;
+    this.setState({
+      reqHandlerSameAddresses: {
+        ...reqHandlerSameAddresses,
+        touched: false
+      }
+    });
+  }
+
   handleHourDetails(e) {
     let reqHandler = '';
     switch (e.target.name) {
@@ -325,6 +341,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleStartAddressChange(e) {
+    this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
       case 'startLocationAddress1':
@@ -371,6 +388,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndState,
       reqHandlerEndCity,
       reqHandlerEndZip,
+      reqHandlerSameAddresses,
       reqHandlerStartAddress,
       reqHandlerStartCity,
       reqHandlerStartState,
@@ -470,6 +488,18 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
+    }
+
+    if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
+      && job.selectedStartAddressId === job.selectedEndAddressId) {
+      this.setState({
+        reqHandlerSameAddresses: {
+          ...reqHandlerSameAddresses,
+          touched: true,
+          error: "Can't have same start and end locations"
+        }
+      });
+      isValid = false;
     }
 
     // END ADDRESS VALIDATION
@@ -612,6 +642,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleStartAddressIdChange(data) {
+    this.handleSameAddresses();
     if (data.value !== 0) {
       this.setState({
         startLocationAddress1: '',
@@ -641,6 +672,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleEndAddressIdChange(data) {
+    this.handleSameAddresses();
     if (data.value !== 0) {
       this.setState({
         endLocationAddress1: '',
@@ -766,6 +798,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndState,
       reqHandlerEndZip,
       reqHandlerEndCity,
+      reqHandlerSameAddresses,
       reqHandlerDate
     } = this.state;
     const today = new Date();
@@ -928,6 +961,7 @@ class CreateJobFormOne extends PureComponent {
                               value={selectedStartAddressId}
                               options={allAddresses}
                               placeholder="Select a location"
+                              meta={reqHandlerSameAddresses}
                             />
                           </div>
                           <div>
