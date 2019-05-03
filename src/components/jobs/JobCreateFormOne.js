@@ -383,8 +383,6 @@ class CreateJobFormOne extends PureComponent {
     } = this.state;
     let isValid = true;
 
-    console.log(job);
-
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
       this.setState({
         reqHandlerMaterials: {
