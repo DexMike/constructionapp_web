@@ -72,6 +72,7 @@ class TrucksCustomerPage extends Component {
         materialType: [],
         zipCode: '',
         rateType: '',
+        currentAvailability: 1,
         sortBy: sortByList[0]
       }
     };

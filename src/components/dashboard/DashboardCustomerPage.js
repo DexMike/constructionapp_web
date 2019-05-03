@@ -458,7 +458,11 @@ class DashboardCustomerPage extends Component {
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}
-          <JobFilter returnJobs={this.returnJobs} ref="filterChild"/>
+          <JobFilter
+            returnJobs={this.returnJobs}
+            ref="filterChild"
+            page="Customer"
+          />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}
         </Container>

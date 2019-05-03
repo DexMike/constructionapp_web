@@ -39,6 +39,11 @@ class JobService extends AgentService {
   //   return (response);
   // }
 
+  static async getJobsByCompanyCarrierId(id) {
+    const response = await super.get(`/companies/carrier/${id}${PATH}`);
+    return (response);
+  }
+
   static async getJobMaterialsByJobId(id) {
     const response = await this.get(`${PATH}/${id}/jobmaterials`);
     // /jobs/jobId/jobMaterials/

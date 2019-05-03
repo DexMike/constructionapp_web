@@ -421,7 +421,11 @@ class DashboardCarrierPage extends Component {
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}
-          <JobFilter returnJobs={this.returnJobs} ref="filterChild"/>
+          <JobFilter
+            returnJobs={this.returnJobs} 
+            ref="filterChild"
+            page="Carrier"
+          />
           {/*{this.renderFilter()}*/}
           {this.renderJobList()}
         </Container>

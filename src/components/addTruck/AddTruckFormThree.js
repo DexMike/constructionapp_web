@@ -60,7 +60,7 @@ class AddTruckFormThree extends PureComponent {
     let allDrivers = await DriverService.getDriverByCompanyId(profile.companyId);
 
     allDrivers = allDrivers.map(driver => ({
-      value: String(driver.id),
+      value: String(driver.driverId),
       label: `${driver.firstName} ${driver.lastName}`
     }));
 
