@@ -186,18 +186,17 @@ class JobFilter extends Component {
 
   async fetchJobs() {
     const {filters} = this.state;
-    const {page} = this.props;
-
     const profile = await ProfileService.getProfile();
-    if (page === 'Carrier') {
-      // jobs = await JobService.getJobsByCompanyCarrierId(profile.companyId);
+    const url = '/marketplace';
+    if (profile.companyType === 'Carrier' && window.location.pathname !== url) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
-    } else if (page === 'Customer') {
+    } else if (profile.companyType === 'Customer') { // Customer Job Dashboard
       filters.createdBy = profile.userId;
-    } else if (page === 'Marketplace') {
+    } else if (profile.companyType === 'Carrier' && window.location.pathname === url) { // Marketplace
       filters.status = 'Published';
       filters.isFavorited = 0;
     }
+
     const jobs = await JobService.getJobDashboardByFilters(filters);
     const {returnJobs} = this.props;
     returnJobs(jobs, filters);

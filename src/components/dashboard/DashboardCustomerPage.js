@@ -461,7 +461,6 @@ class DashboardCustomerPage extends Component {
           <JobFilter
             returnJobs={this.returnJobs}
             ref="filterChild"
-            page="Customer"
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}

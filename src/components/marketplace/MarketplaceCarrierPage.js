@@ -252,7 +252,6 @@ class MarketplaceCarrierPage extends Component {
           {this.renderTitle()}
           <JobFilter
             returnJobs={this.returnJobs}
-            page="Marketplace"
           />
           {this.renderJobList()}
         </Container>
