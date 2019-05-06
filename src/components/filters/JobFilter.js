@@ -186,6 +186,18 @@ class JobFilter extends Component {
 
   async fetchJobs() {
     const {filters} = this.state;
+    const {page} = this.props;
+
+    const profile = await ProfileService.getProfile();
+    if (page === 'Carrier') {
+      // jobs = await JobService.getJobsByCompanyCarrierId(profile.companyId);
+      filters.companyCarrierId = profile.companyId;
+    } else if (page === 'Customer') {
+      filters.createdBy = profile.userId;
+    } else if (page === 'Marketplace') {
+      filters.status = 'Published';
+      filters.isFavorited = 0;
+    }
     const jobs = await JobService.getJobDashboardByFilters(filters);
     const {returnJobs} = this.props;
     returnJobs(jobs, filters);
@@ -280,7 +292,7 @@ class JobFilter extends Component {
       filters
 
     } = this.state;
-    console.log(this.state);
+    // console.log(this.state);
     // let start = filters.startAvailability;
     return (
       <Row>

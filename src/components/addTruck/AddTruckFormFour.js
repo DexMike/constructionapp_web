@@ -9,11 +9,12 @@ import {
 } from 'reactstrap';
 import PropTypes, { object } from 'prop-types';
 import TFormat from '../common/TFormat';
-import DriverService from '../../api/DriverService';
+// import DriverService from '../../api/DriverService';
+import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
-import truckImage from '../../img/12.png';
+// import truckImage from '../../img/12.png';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
@@ -64,7 +65,7 @@ class AddTruckFormFour extends PureComponent {
       equipmentId,
       companyId
     } = this.props;
-
+    const profile = await ProfileService.getProfile();
     // not saving, updating instead
     if (truckFullInfo.info.id !== 0) {
       // assign all the info from availiabilty into the equipment
@@ -76,6 +77,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
+      truckFullInfo.info.modifiedBy = profile.userId;
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
 
@@ -135,17 +137,17 @@ class AddTruckFormFour extends PureComponent {
       // const newUser = await UserService.createUser(userFullInfo.info);
       // return false;
 
-      const driver = {
-        // usersId: newUser.id,
-        usersId: userFullInfo.info.id,
-        driverLicenseId: 1 // THIS IS A FK
-      };
-      const newDriver = await DriverService.createDriver(driver);
+      // const driver = {
+      //   // usersId: newUser.id,
+      //   usersId: userFullInfo.info.id,
+      //   driverLicenseId: 1 // THIS IS A FK
+      // };
+      // const newDriver = await DriverService.createDriver(driver);
 
-      truckFullInfo.info.driversId = newDriver.id;
+      truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.companyId = companyId;
-      truckFullInfo.info.defaultDriverId = newDriver.id; // set as default as well
-      truckFullInfo.info.defaultDriverId = userFullInfo.info.id; // newUser.id;
+      truckFullInfo.info.defaultDriverId = userFullInfo.info.id;
+      truckFullInfo.info.createdBy = profile.userId;
       const selectedTruckMaterials = truckFullInfo.info.selectedMaterials;
 
       // convert false to 0
