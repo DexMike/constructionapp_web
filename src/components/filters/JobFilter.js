@@ -186,13 +186,15 @@ class JobFilter extends Component {
 
   async fetchJobs() {
     const {filters} = this.state;
+    const marketplaceUrl = '/marketplace';
+    const url = window.location.pathname;
     const profile = await ProfileService.getProfile();
-    const url = '/marketplace';
-    if (profile.companyType === 'Carrier' && window.location.pathname !== url) { // Carrier Job Dashboard
+
+    if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
     } else if (profile.companyType === 'Customer') { // Customer Job Dashboard
       filters.createdBy = profile.userId;
-    } else if (profile.companyType === 'Carrier' && window.location.pathname === url) { // Marketplace
+    } else if (profile.companyType === 'Carrier' && url === marketplaceUrl) { // Marketplace
       filters.status = 'Published';
       filters.isFavorited = 0;
     }
