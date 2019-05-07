@@ -423,7 +423,6 @@ class DashboardCarrierPage extends Component {
           <JobFilter
             returnJobs={this.returnJobs} 
             ref="filterChild"
-            page="Carrier"
           />
           {/*{this.renderFilter()}*/}
           {this.renderJobList()}
