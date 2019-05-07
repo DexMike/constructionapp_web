@@ -25,6 +25,11 @@ class JobFilter extends Component {
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
 
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0);
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59); // 23:59:59
+    endDate.setDate(endDate.getDate() + 14);
     // Comment
     this.state = {
       // Look up lists
@@ -32,8 +37,8 @@ class JobFilter extends Component {
       materialTypeList: [],
       rateTypeList: [],
       intervals: {
-        startInterval: null,
-        endInterval: null
+        startInterval: startDate,
+        endInterval: endDate
       },
       // Rate Type Button toggle
       // isAvailable: true,
@@ -74,21 +79,13 @@ class JobFilter extends Component {
     } = this.state;
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
-    const startDate = new Date();
-    startDate.setHours(0, 0, 0);
-    const endDate = new Date();
-    endDate.setHours(23, 59, 59); // 23:59:59
-    endDate.setDate(endDate.getDate() + 7);
-    const startAv = new Date(startDate);
-    const endAv = new Date(endDate);
-    intervals.startInterval = startAv;
-    intervals.endInterval = endAv;
-    filters.startAvailability = this.getUTCStartInterval(startDate);
-    filters.endAvailability = this.getUTCEndInterval(endDate);
+    const startAv = new Date(intervals.startInterval);
+    const endAv = new Date(intervals.endInterval);
+    filters.startAvailability = this.getUTCStartInterval(startAv);
+    filters.endAvailability = this.getUTCEndInterval(endAv);
     this.setState(
       {
-        filters,
-        intervals
+        filters
       }
     );
     await this.fetchJobs();
@@ -196,7 +193,6 @@ class JobFilter extends Component {
       filters.status = 'Published';
       filters.isFavorited = 0;
     }
-
     const jobs = await JobService.getJobDashboardByFilters(filters);
     const {returnJobs} = this.props;
     returnJobs(jobs, filters);
@@ -291,7 +287,6 @@ class JobFilter extends Component {
       filters
 
     } = this.state;
-    // console.log(this.state);
     // let start = filters.startAvailability;
     return (
       <Row>
