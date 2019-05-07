@@ -22,6 +22,11 @@ class ForgotPasswordPage extends ForgotPassword {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.changeState = this.changeState.bind(this);
+    this.onBackToSignIn = this.onBackToSignIn.bind(this);
+  }
+
+  onBackToSignIn() {
+    this.changeState('signIn');
   }
 
   handleInputChange(e) {
@@ -88,6 +93,7 @@ class ForgotPasswordPage extends ForgotPassword {
               <AccountOutlineIcon/>
             </div>
             <input
+              className="lower"
               name="username"
               type="text"
               placeholder="Enter your username"
@@ -96,10 +102,16 @@ class ForgotPasswordPage extends ForgotPassword {
             />
           </div>
         </div>
-        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+        <button type="button" className="btn btn-primary account__btn account__btn--small"
                 onClick={this.onSubmit}
         >
           Send Code
+        </button>
+
+        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+                onClick={this.onBackToSignIn}
+        >
+          Back to Sign In
         </button>
       </div>
     );

@@ -213,6 +213,7 @@ class LoginPage extends SignIn {
               <AccountOutlineIcon/>
             </div>
             <input
+              className="lower"
               name="username"
               type="text"
               placeholder="Email"
