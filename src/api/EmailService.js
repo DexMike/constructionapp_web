@@ -8,9 +8,10 @@ const email = {
   subject: 'Test | ' + date.getHours() + ':' + date.getMinutes(),
   isHTML: true,
   body: '<strong>BOLD TEXT!</strong><br><br>Testing...',
-  attachmentImg: 'https://d2x9cff48m5sea.cloudfront.net/public/2019/04/7UAf2p.jpg',
-  attachmentPdf: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-  attachmentTxt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+  attachments: [
+    'https://d2x9cff48m5sea.cloudfront.net/public/2019/04/7UAf2p.jpg',
+    'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+  ]
 };
 await EmailService.sendEmail(email); */
 
