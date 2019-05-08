@@ -21,6 +21,11 @@ class RequireNewPasswordPage extends RequireNewPassword {
     this.onSubmit = this.onSubmit.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.onBackToSignIn = this.onBackToSignIn.bind(this);
+  }
+
+  onBackToSignIn() {
+    this.changeState('signIn');
   }
 
   handleInputChange(e) {
@@ -93,10 +98,16 @@ class RequireNewPasswordPage extends RequireNewPassword {
             />
           </div>
         </div>
-        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+        <button type="button" className="btn btn-primary account__btn account__btn--small"
                 onClick={this.onSubmit}
         >
           SUBMIT
+        </button>
+
+        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+                onClick={this.onBackToSignIn}
+        >
+          Back to Sign In
         </button>
       </div>
     );

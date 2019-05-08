@@ -22,6 +22,7 @@ class ConfirmSignUpPage extends ConfirmSignUp {
     this.onConfirm = this.onConfirm.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.onBackToSignIn = this.onBackToSignIn.bind(this);
   }
 
   handleInputChange(e) {
@@ -32,6 +33,10 @@ class ConfirmSignUpPage extends ConfirmSignUp {
 
   onDismiss() {
     this.setState({ error: null });
+  }
+
+  onBackToSignIn() {
+    this.changeState('signIn');
   }
 
   async onConfirm(e) {
@@ -105,10 +110,15 @@ class ConfirmSignUpPage extends ConfirmSignUp {
             />
           </div>
         </div>
-        <button type="button" className="btn btn-outline-primary account__btn account__btn--small" value={username}
+        <button type="button" className="btn btn-primary account__btn account__btn--small" value={username}
                 onClick={this.onConfirm}
         >
           Confirm
+        </button>
+        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+                onClick={this.onBackToSignIn}
+        >
+          Back to Sign In
         </button>
       </div>
     );
