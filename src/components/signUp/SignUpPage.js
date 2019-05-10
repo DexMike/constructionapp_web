@@ -27,6 +27,7 @@ class SignUpPage extends SignUp {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.changeState = this.changeState.bind(this);
+    this.onBackToSignIn = this.onBackToSignIn.bind(this);
   }
 
   handleInputChange(e) {
@@ -36,6 +37,10 @@ class SignUpPage extends SignUp {
 
   onDismiss() {
     this.setState({error: null});
+  }
+
+  onBackToSignIn() {
+    this.changeState('signIn');
   }
 
   changeState(state, data) {
@@ -119,10 +124,16 @@ class SignUpPage extends SignUp {
             />
           </div>
         </div>
-        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+
+        <button type="button" className="btn btn-primary account__btn account__btn--small"
                 onClick={this.onSignUp}
         >
           Create Account
+        </button>
+        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
+                onClick={this.onBackToSignIn}
+        >
+          Back to Sign In
         </button>
       </div>
     );

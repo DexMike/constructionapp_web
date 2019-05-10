@@ -505,7 +505,7 @@ class JobSavePage extends Component {
         // console.log('bid ');
         // console.log(bid);
 
-        if (job.status === 'On Offer' && companyType === 'Carrier') {
+        if ((job.status === 'On Offer' || job.status === 'Published') && companyType === 'Carrier') {
           // If the carrier is a favorite
           if (favoriteCompany.length > 0) {
             // console.log('We are a carrier and we are a favorite');
