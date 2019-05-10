@@ -8,7 +8,8 @@ const email = {
   isHTML: true,
   body: '<strong>BOLD TEXT!</strong><br><br>Testing...',
   recipients: [
-    {name: 'Trelar Customer', email: 'mike@trelar.net'}
+    {name: 'Trelar Customer #1', email: 'mike@trelar.net'},
+    {name: 'Trelar Customer #2', email: 'mike@trelar.net'}
   ],
   attachments: [
     'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
