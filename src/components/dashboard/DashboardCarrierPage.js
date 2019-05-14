@@ -12,6 +12,8 @@ import TFormat from '../common/TFormat';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import {DashboardObjectClickable} from './DashboardObjectClickable';
 import JobFilter from '../filters/JobFilter';
+import JobService from '../../api/JobService';
+import ProfileService from '../../api/ProfileService';
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -19,6 +21,7 @@ class DashboardCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
+      jobsInfo: [],
       goToDashboard: false,
       goToUpdateJob: false,
       jobId: 0,
@@ -27,21 +30,30 @@ class DashboardCarrierPage extends Component {
       filters: {
         status: ''
       },
+      page: 0,
+      rows: 5,
+      totalCount: 5
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
   }
 
   async componentDidMount() {
-    this.setState(
-      {
-        loaded: true
-      }
-    );
+    await this.fetchJobsInfo();
+    this.setState({ loaded: true });
+  }
+
+  async fetchJobsInfo() {
+    const profile = await ProfileService.getProfile();
+    const jobsInfo = await JobService.getCarrierJobsInfo(profile.companyId);
+    const totalCount = jobsInfo[0].totalJobs;
+    this.setState({ totalCount, jobsInfo });
   }
 
   returnJobs(jobs, filters) {
@@ -87,6 +99,14 @@ class DashboardCarrierPage extends Component {
       goToUpdateJob: true,
       jobId: id
     });
+  }
+
+  handlePageChange(page) {
+    this.setState({ page });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows });
   }
 
   // handleJobEdit(id) {
@@ -169,67 +189,72 @@ class DashboardCarrierPage extends Component {
   }
 
   renderCards() {
-    const { loaded, filters } = this.state;
-    let { jobs } = this.state;
-
+    const { loaded, filters, jobsInfo } = this.state;
+    let jobs = jobsInfo;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
-    let acceptedJobCount = 0;
+    let bookedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let potentialIncome = 0;
 
-    let jobsCompleted = 0;
-    let totalEarnings = 0;
-    let earningsPerJob = 0;
-    let cancelledJobs = 0;
-    let jobsPerTruck = 0;
-    let idleTrucks = 0;
-    let completedOffersPercent = 0;
+    // let jobsCompleted = 0;
+    // let totalEarnings = 0;
+    // let earningsPerJob = 0;
+    // let cancelledJobs = 0;
+    // let jobsPerTruck = 0;
+    // let idleTrucks = 0;
+    // let completedOffersPercent = 0;
 
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
-        const tempRate = newJob.rate;
+        // const tempRate = newJob.rate;
         if (newJob.status === 'On Offer') {
-          onOfferJobCount += 1;
+          // onOfferJobCount += 1;
+          onOfferJobCount = newJob.countJobs;
         }
         if (newJob.status === 'Published') {
-          publishedJobCount += 1;
+          // publishedJobCount += 1;
+          publishedJobCount = newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
-          acceptedJobCount += 1;
+          // publishedJobCount += 1;
+          bookedJobCount = newJob.countJobs;
         }
         if (newJob.status === 'In Progress') {
-          inProgressJobCount += 1;
+          // inProgressJobCount += 1;
+          inProgressJobCount = newJob.countJobs;
         }
         if (newJob.status === 'Job Completed') {
-          completedJobCount += 1;
-        }
-        if (newJob.rateType === 'Hour') {
-          newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-          newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate) * 0.95
-          );
-        }
-        if (newJob.rateType === 'Ton') {
-          newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-          newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate) * 0.95
-          );
+          // completedJobCount += 1;
+          completedJobCount = newJob.countJobs;
         }
 
-        newJob.newStartDate = TFormat.asDate(job.startTime);
-
-        potentialIncome += (tempRate * newJob.rateEstimate) * 0.95;
+        // if (newJob.rateType === 'Hour') {
+        //   newJob.newSize = TFormat.asHours(newJob.rateEstimate);
+        //   newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        //   newJob.estimatedIncome = TFormat.asMoney(
+        //     (tempRate * newJob.rateEstimate) * 0.95
+        //   );
+        // }
+        // if (newJob.rateType === 'Ton') {
+        //   newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        //   newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        //   newJob.estimatedIncome = TFormat.asMoney(
+        //     (tempRate * newJob.rateEstimate) * 0.95
+        //   );
+        // }
+        //
+        // newJob.newStartDate = TFormat.asDate(job.startTime);
+        //
+        potentialIncome += (newJob.estimatedEarnings) * 0.95;
 
         return newJob;
       });
     }
 
-    jobsCompleted = onOfferJobCount * 20;
+    // jobsCompleted = onOfferJobCount * 20;
     // totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
     // earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
     // cancelledJobs = 1;
@@ -237,25 +262,67 @@ class DashboardCarrierPage extends Component {
     // idleTrucks = 1;
 
     // Jobs completed / Job offers responded to
-    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
-
-    potentialIncome = TFormat.asMoney(potentialIncome);
-
-    // console.log(jobs);
+    // completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+    //
+    // potentialIncome = TFormat.asMoney(potentialIncome);
 
     if (loaded) {
       return (
         <Container className="dashboard">
-          {/*{this.renderGoTo()}*/}
-
+          {/* {this.renderGoTo()} */}
           <div className="row">
-            <DashboardObjectClickable title="New Offers" displayVal = {onOfferJobCount} value={"On Offer"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Published Jobs" displayVal = {publishedJobCount} value={"Published"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Booked Jobs" displayVal = {acceptedJobCount} value={"Booked"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Jobs in Progress" displayVal = {inProgressJobCount} value={"In Progress"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            <DashboardObjectClickable title="Completed Jobs" displayVal = {completedJobCount} value={"Job Completed"} handle={this.handleFilterStatusChange} name={"status"} status={filters["status"]}/>
-            {/*<DashboardObjectStatic title="% Completed" displayVal = {completedOffersPercent}/>*/}
-            <DashboardObjectStatic title={filters["status"] === "Job Completed"  ? "Earnings" : "Potential Earnings"} displayVal={potentialIncome}/>
+            <DashboardObjectClickable
+              title="New Offers"
+              displayVal={onOfferJobCount}
+              value="On Offer"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            <DashboardObjectClickable
+              title="Published Jobs"
+              displayVal={publishedJobCount}
+              value="Published"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            <DashboardObjectClickable
+              title="Booked Jobs"
+              displayVal={bookedJobCount}
+              value="Booked"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            <DashboardObjectClickable
+              title="Jobs in Progress"
+              displayVal={inProgressJobCount}
+              value="In Progress"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            <DashboardObjectClickable
+              title="Completed Jobs"
+              displayVal={completedJobCount}
+              value="Job Completed"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            {
+            /*
+            <DashboardObjectStatic
+              title="% Completed"
+              displayVal = {completedOffersPercent}
+            />
+            */
+            }
+            <DashboardObjectStatic
+              title={filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings'}
+              displayVal={TFormat.asMoney(potentialIncome)}
+            />
           </div>
         </Container>
       );
@@ -330,18 +397,18 @@ class DashboardCarrierPage extends Component {
     potentialIncome = TFormat.asMoney(potentialIncome);
 
     if (loaded) {
-      const {filters} = this.state;
+      const {filters, totalCount} = this.state;
       return (
         <Container className="dashboard">
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying {jobs.length} of {jobs.length}
+                  Displaying {jobs.length} of {totalCount}
                   <TTable
                     columns={
                       [
-                        //{
+                        // {
                         //  name: 'id',
                         //  displayName: 'Job Id'
                         // },
@@ -367,22 +434,12 @@ class DashboardCarrierPage extends Component {
                         },
                         {
                           name: 'estimatedIncome',
-                          displayName: filters.status === "Job Completed" ? "Earnings" : "Potential Earnings"
+                          displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings'
                         },
                         {
                           name: 'newRate',
                           displayName: 'Rate'
                         },
-                        // {
-                        //   name: 'name',
-                        //   displayName: 'Job Name'
-                        // },
-                        // {
-                        //   name: 'status',
-                        //   displayName: 'Job Status'
-                        // },
-
-
                         {
                           name: 'newSize',
                           displayName: 'Size'
@@ -396,6 +453,9 @@ class DashboardCarrierPage extends Component {
                     }
                     data={jobs}
                     handleIdClick={this.handleJobEdit}
+                    handleRowsChange={this.handleRowsPerPage}
+                    handlePageChange={this.handlePageChange}
+                    totalCount={totalCount}
                   />
                 </CardBody>
               </Card>
@@ -412,7 +472,7 @@ class DashboardCarrierPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const { loaded, page, rows } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -421,10 +481,12 @@ class DashboardCarrierPage extends Component {
           {this.renderTitle()}
           {this.renderCards()}
           <JobFilter
-            returnJobs={this.returnJobs} 
+            returnJobs={this.returnJobs}
+            page={page}
+            rows={rows}
             ref="filterChild"
           />
-          {/*{this.renderFilter()}*/}
+          {/* {this.renderFilter()} */}
           {this.renderJobList()}
         </Container>
       );
