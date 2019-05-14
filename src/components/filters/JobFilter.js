@@ -40,6 +40,7 @@ class JobFilter extends Component {
         startInterval: startDate,
         endInterval: endDate
       },
+      profile: {},
       // Rate Type Button toggle
       // isAvailable: true,
 
@@ -59,7 +60,9 @@ class JobFilter extends Component {
         numEquipments: '',
         zipCode: '',
         materialType: [],
-        sortBy: sortByList[0]
+        sortBy: sortByList[0],
+        page: 0,
+        rows: 5
       }
     };
 
@@ -90,6 +93,16 @@ class JobFilter extends Component {
     );
     await this.fetchJobs();
     this.fetchFilterLists();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    const { filters } = this.state;
+    if (filters.rows !== nextProps.rows || filters.page !== nextProps.page) {
+      filters.rows = nextProps.rows;
+      filters.page = nextProps.page;
+      this.setState({filters});
+      await this.fetchJobs();
+    }
   }
 
   getUTCStartInterval(s) {
@@ -180,10 +193,10 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const {filters} = this.state;
+    const { filters } = this.state;
+    const profile = await ProfileService.getProfile();
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
-    const profile = await ProfileService.getProfile();
 
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
@@ -272,7 +285,7 @@ class JobFilter extends Component {
   }
 
   async filterWithStatus(filters) {
-    this.state = {filters}
+    this.state = {filters};
     await this.fetchJobs();
   }
 
@@ -472,9 +485,14 @@ class JobFilter extends Component {
 }
 
 JobFilter.propTypes = {
-  returnJobs: PropTypes.func.isRequired
+  returnJobs: PropTypes.func.isRequired,
+  rows: PropTypes.number,
+  page: PropTypes.number
 };
 
-JobFilter.defaultProps = {};
+JobFilter.defaultProps = {
+  rows: 5,
+  page: 0
+};
 
 export default JobFilter;

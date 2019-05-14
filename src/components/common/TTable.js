@@ -21,13 +21,13 @@ class TTable extends Component {
       orderBy,
       selected: [],
       page: 0,
-      rowsPerPage: 500
+      rowsPerPage: 5
     };
     this.handleRequestSort = this.handleRequestSort.bind(this);
     // this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
     // this.handleClick = this.handleClick.bind(this);
-    // this.handleChangePage = this.handleChangePage.bind(this);
-    // this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+    this.handleChangePage = this.handleChangePage.bind(this);
+    this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
     // this.handleDeleteSelected = this.handleDeleteSelected.bind(this);
     // this.isSelected = this.isSelected.bind(this);
   }
@@ -59,14 +59,6 @@ class TTable extends Component {
   //   }
   //
   //   this.setState({selected: newSelected});
-  // };
-
-  // handleChangePage(event, page) {
-  //   this.setState({page});
-  // };
-
-  // handleChangeRowsPerPage(event) {
-  //   this.setState({rowsPerPage: event.target.value});
   // };
 
   // handleDeleteSelected() {
@@ -118,6 +110,19 @@ class TTable extends Component {
     });
   }
 
+  handleChangePage(event, page) {
+    const { handlePageChange } = this.props;
+    this.setState({page});
+    handlePageChange(page);
+  }
+
+  handleChangeRowsPerPage(event) {
+    const { handleRowsChange } = this.props;
+    const rowsPerPage = event.target.value;
+    this.setState({ rowsPerPage });
+    handleRowsChange(rowsPerPage);
+  }
+
   renderItem(item) {
     const shallowItem = {};
     const { columns, handleIdClick } = this.props;
@@ -165,7 +170,7 @@ class TTable extends Component {
 
   render() {
     const { order, orderBy, selected, rowsPerPage, page } = this.state;
-    const { data, columns, handleIdClick } = this.props;
+    const { data, columns, handleIdClick, totalCount } = this.props;
     const emptyRows = 0;
     // const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - (page * rowsPerPage));
     return (
@@ -216,18 +221,14 @@ class TTable extends Component {
             <TablePagination
               component="div"
               className="material-table__pagination"
-              count={data.length}
+              count={totalCount}
               rowsPerPage={rowsPerPage}
               page={page}
               backIconButtonProps={{ 'aria-label': 'Previous Page' }}
               nextIconButtonProps={{ 'aria-label': 'Next Page' }}
-              onChangePage={() => {
-              }}
-              // onChangePage={this.handleChangePage}
-              onChangeRowsPerPage={() => {
-              }}
-              // onChangeRowsPerPage={this.handleChangeRowsPerPage}
-              rowsPerPageOptions={[5, 10, 15]}
+              onChangePage={this.handleChangePage}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 15, 50]}
             />
           </CardBody>
         </Card>
@@ -245,7 +246,10 @@ TTable.propTypes = {
       displayName: PropTypes.string
     })
   ).isRequired,
+  totalCount: PropTypes.number,
   handleIdClick: PropTypes.func.isRequired,
+  handlePageChange: PropTypes.func.isRequired,
+  handleRowsChange: PropTypes.func.isRequired,
   data: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number
@@ -254,6 +258,7 @@ TTable.propTypes = {
 };
 
 TTable.defaultProps = {
+  totalCount: 5,
   order: 'asc',
   orderBy: 'id'
 };

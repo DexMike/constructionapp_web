@@ -50,6 +50,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getCarrierJobsInfo(companyId) {
+    const response = await super.get(`/dashboard/companies/${companyId}/jobs`);
+    return (response);
+  }
+
+  static async getCustomerJobsInfo(userId) {
+    const response = await super.get(`/dashboard/customer/${userId}/jobs`);
+    return (response);
+  }
+
   static async getJobDashboardByFilters(filters) {
     const response = await super.post(`${PATH}/dashboard/filters`, filters);
     return (response);
