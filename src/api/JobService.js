@@ -60,6 +60,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getMarketplaceJobsInfo() {
+    const response = await super.get('/marketplace/jobs');
+    return (response);
+  }
+
   static async getJobDashboardByFilters(filters) {
     const response = await super.post(`${PATH}/dashboard/filters`, filters);
     return (response);

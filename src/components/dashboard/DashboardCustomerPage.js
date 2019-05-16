@@ -66,8 +66,9 @@ class DashboardCustomerPage extends Component {
         status: ''
       },
       page: 0,
-      rows: 5,
-      totalCount: 5
+      rows: 10,
+      totalCount: 10,
+      totalJobs: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -87,13 +88,20 @@ class DashboardCustomerPage extends Component {
   async fetchJobsInfo() {
     const profile = await ProfileService.getProfile();
     const jobsInfo = await JobService.getCustomerJobsInfo(profile.userId);
-    const totalCount = jobsInfo[0].totalJobs;
-    this.setState({ totalCount, jobsInfo });
+    const { totalJobs } = jobsInfo[0];
+    this.setState({ totalJobs, jobsInfo });
   }
 
   returnJobs(jobs, filters) {
-    this.setState({jobs});
-    this.setState({filters});
+    let totalCount = 0;
+    if (jobs.length > 0) {
+      totalCount = jobs[0].totalJobs;
+    }
+    this.setState({
+      jobs,
+      filters,
+      totalCount
+    });
   }
 
   async handleFilterStatusChange({value, name}) {
@@ -103,7 +111,22 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
+    // Deleting filter fields for general jobs based on Status (Top cards)
+    // delete filters.equipmentType;
+    // delete filters.startAvailability;
+    // delete filters.endAvailability;
+    // delete filters.rateType;
+    // delete filters.rate;
+    // delete filters.minTons;
+    // delete filters.minHours;
+    // delete filters.minCapacity;
+    // delete filters.equipmentType;
+    // delete filters.numEquipments;
+    // delete filters.zipCode;
     this.refs.filterChild.filterWithStatus(filters);
+    this.setState({
+      page: 0
+    });
   }
 
   equipmentMaterialsAsString(materials) {
@@ -223,7 +246,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderCards() {
-    const {loaded, filters, jobsInfo, totalCount} = this.state;
+    const {loaded, filters, jobsInfo, totalJobs} = this.state;
     let jobs = jobsInfo;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -293,7 +316,7 @@ class DashboardCustomerPage extends Component {
 
     // Jobs completed / Job offers responded to
     // completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
-    completedOffersPercent = TFormat.asPercent((completedJobCount / totalCount) * 100, 2);
+    completedOffersPercent = TFormat.asPercent((completedJobCount / totalJobs) * 100, 2);
 
     // potentialIncome = TFormat.asMoney(potentialIncome);
 
@@ -358,7 +381,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {loaded} = this.state;
+    const {loaded, totalJobs, totalCount} = this.state;
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -421,19 +444,20 @@ class DashboardCustomerPage extends Component {
     idleTrucks = 1;
 
     // Jobs completed / Job offers responded to
-    completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
+    completedOffersPercent = TFormat.asPercent((completedJobCount / totalJobs) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
 
     if (loaded) {
-      const { totalCount } = this.state;
       return (
         <Container className="dashboard">
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying {jobs.length} of {jobs.length}
+                  <div className="ml-4 mt-4">
+                    Displaying {jobs.length} out of {totalCount} filtered jobs ({totalJobs} total jobs)
+                  </div>
                   <TTable
                     columns={
                       [
