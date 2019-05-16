@@ -56,7 +56,6 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
-
       return (
         <React.Fragment>
           <TableRow key={load.id}>
@@ -67,7 +66,7 @@ class LoadsExpandableRow extends Component {
               </IconButton>
             </TableCell>
             <TableCell align="left">{index + 1}</TableCell>
-            <TableCell align="left">{`${driver.firstName} ${driver.lastName}`}</TableCell>
+            <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
                        style={{fontStyle: !endTime ? 'italic' : 'normal'}}>{(!endTime ? 'In Progress' : endTime)}
