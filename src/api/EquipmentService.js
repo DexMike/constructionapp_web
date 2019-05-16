@@ -13,8 +13,9 @@ class EquipmentService extends AgentService {
     return (response);
   }
 
-  static async getEquipmentByCompanyId(companyId) {
-    const response = await this.get(`/companies/${companyId}${PATH}`);
+  static async getEquipmentByCompanyId(companyId, rows, page) {
+    // response = await this.get(`/companies/${companyId}${PATH}`);
+    const response = await this.get(`/companies/${companyId}${PATH}?rows=${rows}&page=${page}`);
     return (response);
   }
 

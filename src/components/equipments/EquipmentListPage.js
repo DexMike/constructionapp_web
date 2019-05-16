@@ -32,7 +32,10 @@ class EquipmentListPage extends Component {
       equipmentId: 0,
       companyId: 0,
       modal: false,
-      selectedItemData: {}
+      selectedItemData: {},
+      page: 0,
+      rows: 10,
+      totalCount: 10
     };
 
     // this.renderGoTo = this.renderGoTo.bind(this);
@@ -40,6 +43,8 @@ class EquipmentListPage extends Component {
     this.toggle = this.toggle.bind(this);
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
     this.toggleAddTruckModalClear = this.toggleAddTruckModalClear.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
   }
 
   async componentDidMount() {
@@ -54,7 +59,11 @@ class EquipmentListPage extends Component {
     // load only if the modal is not present
     if (!modal) {
       const equipments = await this.fetchEquipments();
-      this.setState({ equipments });
+      const totalCount = equipments[0].totalEquipments;
+      this.setState({
+        equipments,
+        totalCount
+      });
     }
   }
 
@@ -84,8 +93,8 @@ class EquipmentListPage extends Component {
   }
 
   async fetchEquipments() {
-    const { companyId } = this.state;
-    return EquipmentService.getEquipmentByCompanyId(companyId);
+    const { companyId, rows, page } = this.state;
+    return EquipmentService.getEquipmentByCompanyId(companyId, rows, page);
   }
 
   handlePageClick(menuItem) {
@@ -115,6 +124,21 @@ class EquipmentListPage extends Component {
       this.toggleAddTruckModal();
     });
   }
+
+  handlePageChange(page) {
+    this.setState({ page },
+      function wait() {
+        this.loadEquipments();
+      });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows },
+      function wait() {
+        this.loadEquipments();
+      });
+  }
+
 
   renderModal() {
     const {
@@ -150,7 +174,7 @@ class EquipmentListPage extends Component {
 
   render() {
     let { equipments } = this.state;
-    const { loaded } = this.state;
+    const { loaded, totalCount } = this.state;
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
       // const tempHourRate = newEquipment.hourRate;
@@ -188,6 +212,9 @@ class EquipmentListPage extends Component {
               <Col md={12} lg={12}>
                 <Card>
                   <CardBody className="products-list">
+                    <div className="ml-4 mt-4">
+                      Displaying {equipments.length} out of {totalCount} Trucks
+                    </div>
                     <div className="tabs tabs--bordered-bottom">
                       <div className="tabs__wrap">
                         <TTable
@@ -227,8 +254,11 @@ class EquipmentListPage extends Component {
                               }
                             ]
                           }
-                              data={equipments}
-                              handleIdClick={this.handleEquipmentEdit}
+                          data={equipments}
+                          handleIdClick={this.handleEquipmentEdit}
+                          handleRowsChange={this.handleRowsPerPage}
+                          handlePageChange={this.handlePageChange}
+                          totalCount={totalCount}
                         />
                       </div>
                     </div>

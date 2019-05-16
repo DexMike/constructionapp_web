@@ -12,6 +12,7 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import JobViewForm from './JobViewForm';
 import JobFilter from '../filters/JobFilter';
+import JobService from '../../api/JobService';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
@@ -22,31 +23,52 @@ class MarketplaceCarrierPage extends Component {
       jobId: 0,
       modal: false,
       goToDashboard: false,
+      page: 0,
+      rows: 10,
+      totalJobs: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.toggleViewJobModal = this.toggleViewJobModal.bind(this);
     this.toggleViewJobModalClear = this.toggleViewJobModalClear.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
   }
 
   async componentDidMount() {
-    this.setState(
-      {
-        loaded: true,
-      }
-    );
+    await this.fetchJobsInfo();
+    this.setState({ loaded: true });
   }
 
+  async fetchJobsInfo() {
+    const jobsInfo = await JobService.getMarketplaceJobsInfo();
+    const { totalJobs } = jobsInfo[0];
+    this.setState({ totalJobs });
+  }
+
+
   returnJobs(jobs) {
-    this.setState({ jobs });
+    const totalCount = jobs[0].totalJobs;
+    this.setState({
+      totalCount,
+      jobs
+    });
   }
 
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
+  }
+
+  handlePageChange(page) {
+    this.setState({ page });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows });
   }
 
   /* handleJobEdit(id) {
@@ -63,6 +85,7 @@ class MarketplaceCarrierPage extends Component {
       modal: true
     });
   } */
+  
 
   toggleAddJobModal() {
     const { modal } = this.state;
@@ -133,9 +156,7 @@ class MarketplaceCarrierPage extends Component {
   }
 
   renderJobList() {
-    let {
-      jobs
-    } = this.state;
+    let { jobs } = this.state;
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
@@ -180,14 +201,18 @@ class MarketplaceCarrierPage extends Component {
       // console.log("MarketPlaceCarrierPage: no Jobs");
       jobs = [];
     }
-
+    const { totalCount, totalJobs } = this.state;
     return (
       <Container className="dashboard">
         <Row>
           <Col md={12}>
             <Card>
               <CardBody>
-                Carrier Market Place
+                <div className="ml-4 mt-4">
+                  Carrier Market Place<br />
+                  Displaying {jobs.length} out of {totalCount}&nbsp;
+                  filtered jobs ({totalJobs} total jobs)
+                </div>
                 <TTable
                   columns={
                     [
@@ -232,6 +257,9 @@ class MarketplaceCarrierPage extends Component {
                   }
                   data={jobs}
                   handleIdClick={this.toggleViewJobModalClear}
+                  handleRowsChange={this.handleRowsPerPage}
+                  handlePageChange={this.handlePageChange}
+                  totalCount={totalCount}
                 />
 
               </CardBody>
@@ -243,7 +271,7 @@ class MarketplaceCarrierPage extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const { loaded, page, rows } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -252,6 +280,8 @@ class MarketplaceCarrierPage extends Component {
           {this.renderTitle()}
           <JobFilter
             returnJobs={this.returnJobs}
+            page={page}
+            rows={rows}
           />
           {this.renderJobList()}
         </Container>

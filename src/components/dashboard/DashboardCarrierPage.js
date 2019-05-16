@@ -31,8 +31,9 @@ class DashboardCarrierPage extends Component {
         status: ''
       },
       page: 0,
-      rows: 5,
-      totalCount: 5
+      rows: 10,
+      totalCount: 10,
+      totalJobs: 0
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -52,13 +53,20 @@ class DashboardCarrierPage extends Component {
   async fetchJobsInfo() {
     const profile = await ProfileService.getProfile();
     const jobsInfo = await JobService.getCarrierJobsInfo(profile.companyId);
-    const totalCount = jobsInfo[0].totalJobs;
-    this.setState({ totalCount, jobsInfo });
+    const { totalJobs } = jobsInfo[0];
+    this.setState({ jobsInfo, totalJobs });
   }
 
   returnJobs(jobs, filters) {
-    this.setState({ jobs });
-    this.setState({ filters });
+    let totalCount = 0;
+    if (jobs.length > 0) {
+      totalCount = jobs[0].totalJobs;
+    }
+    this.setState({
+      jobs,
+      filters,
+      totalCount
+    });
   }
 
   equipmentMaterialsAsString(materials) {
@@ -91,7 +99,23 @@ class DashboardCarrierPage extends Component {
     } else {
       filters[name] = value;
     }
+    // Deleting filter fields for general jobs based on Status (Top cards)
+    // delete filters.equipmentType;
+    // delete filters.startAvailability;
+    // delete filters.endAvailability;
+    // delete filters.rateType;
+    // delete filters.rate;
+    // delete filters.minTons;
+    // delete filters.minHours;
+    // delete filters.minCapacity;
+    // delete filters.equipmentType;
+    // delete filters.numEquipments;
+    // delete filters.zipCode;
+    // filters.materialType = [];
     this.refs.filterChild.filterWithStatus(filters);
+    this.setState({
+      page: 0
+    });
   }
 
   handleJobEdit(id) {
@@ -337,13 +361,13 @@ class DashboardCarrierPage extends Component {
   renderJobList() {
     const { loaded } = this.state;
     let { jobs } = this.state;
+
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let potentialIncome = 0;
-
     let jobsCompleted = 0;
     let totalEarnings = 0;
     let earningsPerJob = 0;
@@ -397,14 +421,16 @@ class DashboardCarrierPage extends Component {
     potentialIncome = TFormat.asMoney(potentialIncome);
 
     if (loaded) {
-      const {filters, totalCount} = this.state;
+      const { filters, totalCount, totalJobs} = this.state;
       return (
         <Container className="dashboard">
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  Displaying {jobs.length} of {totalCount}
+                  <div className="ml-4 mt-4">
+                    Displaying {jobs.length} out of {totalCount} filtered jobs ({totalJobs} total jobs)
+                  </div>
                   <TTable
                     columns={
                       [

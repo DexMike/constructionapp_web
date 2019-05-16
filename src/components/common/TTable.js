@@ -21,7 +21,7 @@ class TTable extends Component {
       orderBy,
       selected: [],
       page: 0,
-      rowsPerPage: 5
+      rowsPerPage: 10
     };
     this.handleRequestSort = this.handleRequestSort.bind(this);
     // this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
