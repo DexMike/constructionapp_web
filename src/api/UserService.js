@@ -47,6 +47,11 @@ class UserService extends AgentService {
     const response = await this.get(`/companies/${id}/admin${PATH}`);
     return (response);
   }
+
+  static async getDriverByBookingId(bookingId) {
+    const response = await this.get(`/booking_equipments/${bookingId}/drivers/users`);
+    return (response);
+  }
 }
 
 export default UserService;
