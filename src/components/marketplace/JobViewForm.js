@@ -285,7 +285,7 @@ class JobViewForm extends Component {
       const newJob = CloneDeep(job);
 
       // UPDATING JOB
-      newJob.status = 'On Offer';
+      newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
@@ -374,29 +374,22 @@ class JobViewForm extends Component {
   renderJobTop(job) {
     const {
       companyName,
-      // bidExists,
-      // profile,
-      // currentBidCarrier,
-      // customerAccepted,
       favoriteCompany
     } = this.state;
     let showModalButton;
-    // if (job.status === 'On Offer' || job.status === 'Published') {
-    // if (bidExists && customerAccepted === 1
-    if (
-      favoriteCompany.length > 0
-      // && currentBidCarrier === profile.companyId
-      && (job.status === 'On Offer' || job.status === 'Published')
-    ) {
+
+    // Job was 'Published' to the Marketplace, Carrier is a favorite
+    if (job.status === 'Published' && favoriteCompany.length > 0) {
       showModalButton = (
         <Button
             onClick={() => this.saveJob()}
             className="btn btn-primary float-right"
         >
-            Accept Job
+          Accept Job
         </Button>
       );
-    } else if (job.status === 'On Offer' || job.status === 'Published') {
+    // Job was 'Published' to the Marketplace
+    } else if (job.status === 'Published') {
       showModalButton = (
         <Button
           onClick={() => this.saveJob()}
@@ -406,7 +399,6 @@ class JobViewForm extends Component {
         </Button>
       );
     }
-    // }
 
     return (
       <React.Fragment>

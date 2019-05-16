@@ -266,22 +266,19 @@ class JobSavePage extends Component {
   }
 
   // Carrier clicks on 'Accept Job' or 'Request Job'
-  async handleConfirmRequestCarrier() {
+  async handleConfirmRequestCarrier(action) {
     const {
       job,
-      favoriteCompany,
       profile
     } = this.state;
     let { bid } = this.state;
     let { booking, bookingEquipment } = this.state;
     let notification;
 
-    // if (bid) { // we have a bid record, accepting a job
     // Is the Carrier this Company's favorite? If so, accepting the job
-    if (favoriteCompany.length > 0) {
+    if (action === 'Accept') {
       // console.log('accepting');
       const newJob = CloneDeep(job);
-      // const newBid = CloneDeep(bid);
 
       // UPDATING JOB
       newJob.status = 'Booked';
@@ -293,13 +290,6 @@ class JobSavePage extends Component {
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
-      // UPDATING BID
-      /* newBid.hasCustomerAccepted = 1;
-      newBid.status = 'Accepted';
-      newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
-      await BidService.updateBid(newBid); */
       // CREATING BID
       bid = {};
       bid.jobId = newJob.id;
@@ -402,7 +392,7 @@ class JobSavePage extends Component {
       const newJob = CloneDeep(job);
 
       // UPDATING JOB
-      newJob.status = 'On Offer';
+      newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
@@ -445,7 +435,8 @@ class JobSavePage extends Component {
 
       // eslint-disable-next-line no-alert
       // alert('Your request has been sent.');
-      this.closeNow();
+      job.status = newJob.status;
+      this.setState({ job });
     }
   }
 
@@ -483,7 +474,6 @@ class JobSavePage extends Component {
       bid,
       marketPlaceBid,
       companyType,
-      profileCompanyId,
       favoriteCompany,
       loaded
     } = this.state;
@@ -493,25 +483,20 @@ class JobSavePage extends Component {
       if (companyType !== null && job !== null) {
         let type = '';
         // console.log(companyType);
-        // get the <JobCarrierForm> inside parentheses so that jsx doesn't complain
         if (companyType === 'Carrier') {
           type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick}/>);
         } else {
           type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
         }
 
-        // console.log('profileCompanyId ');
-        // console.log(profileCompanyId);
-        // console.log('bid ');
-        // console.log(bid);
-
-        if ((job.status === 'On Offer' || job.status === 'Published') && companyType === 'Carrier') {
+        // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
+        if (job.status === 'Published' && companyType === 'Carrier') {
           // If the carrier is a favorite
           if (favoriteCompany.length > 0) {
             // console.log('We are a carrier and we are a favorite');
             buttonText = (
               <Button
-                onClick={() => this.handleConfirmRequestCarrier()}
+                onClick={() => this.handleConfirmRequestCarrier('Accept')}
                 className="btn btn-prsaveJobimary"
               >
                 Accept Job
@@ -520,7 +505,7 @@ class JobSavePage extends Component {
           } else { // the carrier is not a favorite
             buttonText = (
               <Button
-                onClick={() => this.handleConfirmRequestCarrier()}
+                onClick={() => this.handleConfirmRequestCarrier('Request')}
                 className="btn btn-primary"
               >
                 Request Job
@@ -528,19 +513,36 @@ class JobSavePage extends Component {
             );
           }
         }
-        // console.log('bid ');
-        // console.log(bid);
-        if (job.status === 'On Offer' && companyType === 'Customer'
-          && marketPlaceBid.hasSchedulerAccepted && !marketPlaceBid.hasCustomerAccepted) {
-          // console.log('We are a customer and we have a job request');
+
+        // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
+        if (job.status === 'On Offer' && companyType === 'Carrier') {
+          buttonText = (
+            <Button
+              onClick={() => this.handleConfirmRequestCarrier('Accept')}
+              className="btn btn-prsaveJobimary"
+            >
+              Accept Job
+            </Button>
+          );
+          // TODO: Add a 'Decline Job' button for Carrier
+        }
+
+        // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
+        if (job.status === 'Requested' && companyType === 'Customer'
+        && (
+          (marketPlaceBid.hasSchedulerAccepted && !marketPlaceBid.hasCustomerAccepted)
+          || (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted))
+        ) {
+          // console.log('We are a customer and we have a Carrier's job request');
           buttonText = (
             <Button
               onClick={() => this.handleConfirmRequest()}
               className="btn btn-primary"
             >
-              Accept Job Request
+              Approve Job Request
             </Button>
           );
+          // TODO: Add 'Reject Job Request' button for Customer
         }
 
         return (
