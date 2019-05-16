@@ -67,9 +67,9 @@ class JobCustomerForm extends Component {
     // get overlay data
     let gpsData = [];
     if (bookings.length > 0) {
-      // gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-      //   bookings[0].id // booking.id 6
-      // );
+      gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+        bookings[0].id // booking.id 6
+      );
       loads = await LoadService.getLoadsByBookingId(
         bookings[0].id // booking.id 6
       );
