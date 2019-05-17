@@ -29,12 +29,12 @@ class JobViewForm extends Component {
       company: [],
       companyName: '',
       customerAccepted: 0,
-      bidId: 0,
       bidExists: false,
       currentBidCarrier: 0,
       booking: null,
       bookingEquipment: null,
       ...job,
+      bid: null,
       loaded: false,
       favoriteCompany: [],
       profile: []
@@ -46,9 +46,9 @@ class JobViewForm extends Component {
   async componentDidMount() {
     let {
       job,
+      bid,
       company,
       companyName,
-      bidId,
       bidExists,
       currentBidCarrier,
       booking,
@@ -89,10 +89,16 @@ class JobViewForm extends Component {
       }
 
       if (bids.length) { // we have a bid record
-        bidExists = true;
-        bidId = bids[0].id;
-        customerAccepted = bids[0].hasCustomerAccepted; // has customer accepted?
-        currentBidCarrier = bids[0].companyCarrierId;
+        // we search for a bid that is assigned to the carrier (a favorite)
+        bid = bids.filter((filteredBid) => {
+          if (filteredBid.hasCustomerAccepted === 1
+            // && filteredBid.hasSchedulerAccepted === 1
+            && filteredBid.companyCarrierId === profile.companyId) {
+            return filteredBid;
+          }
+          bid = bids[0];
+          return bid;
+        });
       }
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
@@ -114,7 +120,7 @@ class JobViewForm extends Component {
       job,
       company,
       companyName,
-      bidId,
+      bid,
       bidExists,
       currentBidCarrier,
       booking,
@@ -146,25 +152,12 @@ class JobViewForm extends Component {
     let notification;
     let bid;
 
-    /* try {
-      bid = await BidService.getBidById(bidId);
-    } catch (e) {
-      // console.log('there is no Bid record');
-    } */
-
-    /* if (
-      bidExists
-      && customerAccepted === 1
-      && currentBidCarrier === profile.companyId
-    ) { */
-
     // Is the Carrier this Company's favorite? If so, accepting the job
     if (favoriteCompany.length > 0) {
       // console.log('accepting');
       const newJob = CloneDeep(job);
-      // const newBid = CloneDeep(bid);
 
-      // UPDATING JOB
+      // Updating the Job
       newJob.status = 'Booked';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
@@ -174,38 +167,23 @@ class JobViewForm extends Component {
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
-      // UPDATING BID
-      /* newBid.hasSchedulerAccepted = 1;
+      // Since the Job was sent to all favorites there's a bid, update existing bid
+      const newBid = CloneDeep(bid);
+      newBid.companyCarrierId = profile.companyId;
+      newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
+      newBid.rateEstimate = newJob.rateEstimate;
+      newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
       newBid.modifiedOn = moment()
         .unix() * 1000;
-      await BidService.updateBid(newBid); */
-      // CREATING BID
       bid = {};
-      bid.jobId = newJob.id;
-      bid.userId = profile.userId;
-      bid.companyCarrierId = profile.companyId;
-      bid.hasCustomerAccepted = 1;
-      bid.hasSchedulerAccepted = 1;
-      bid.status = 'Accepted';
-      bid.rateType = newJob.rateType;
-      bid.rate = newJob.rate;
-      bid.rateEstimate = newJob.rateEstimate;
-      bid.notes = newJob.notes;
-      bid.createdBy = profile.userId;
-      bid.modifiedBy = profile.userId;
-      bid.modifiedOn = moment()
-        .unix() * 1000;
-      bid.createdOn = moment()
-        .unix() * 1000;
-      bid = await BidService.createBid(bid);
+      bid = await BidService.updateBid(newBid);
 
-      // CREATING BOOKING
-      // see if we have a booking first
+      // Create a Booking
+      // Check if we have a booking first
       const bookings = await BookingService.getBookingsByJobId(newJob.id);
       if (!bookings || bookings.length <= 0) {
-        // TODO create a booking
         booking = {};
         booking.rateType = bid.rateType;
         booking.startTime = job.startTime;
@@ -228,8 +206,8 @@ class JobViewForm extends Component {
         booking = await BookingService.createBooking(booking);
       }
 
-      // CREATING BOOKING EQUIPMENT
-      // see if we have a booking equipment first
+      // Create Booking Equipment
+      // Check if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
@@ -284,7 +262,7 @@ class JobViewForm extends Component {
       // console.log('carrier is not this company´s favorite, requesting');
       const newJob = CloneDeep(job);
 
-      // UPDATING JOB
+      // Updating the Job
       newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
