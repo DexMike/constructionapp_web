@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import {Redirect} from 'react-router-dom';
@@ -18,6 +18,8 @@ import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
 import GPSPointService from '../../api/GPSPointService';
 import GPSTrackingService from '../../api/GPSTrackingService';
+import LoadService from '../../api/LoadService';
+import LoadsTable from '../loads/LoadsTable';
 
 mapboxgl.accessToken = process.env.MAPBOX_API;
 const MAPBOX_MAX = 23;
@@ -48,6 +50,7 @@ class JobCustomerForm extends Component {
       ...job,
       images: [],
       gpsTrackings: null,
+      loads: null,
       loaded: false
     };
 
@@ -55,9 +58,9 @@ class JobCustomerForm extends Component {
   }
 
   async componentDidMount() {
-    const { job } = this.props;
-    let { images } = this.props;
-    let {gpsTrackings} = this.state;
+    const {job} = this.props;
+    let {images} = this.props;
+    let {gpsTrackings, loads} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
@@ -65,6 +68,9 @@ class JobCustomerForm extends Component {
     let gpsData = [];
     if (bookings.length > 0) {
       gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+        bookings[0].id // booking.id 6
+      );
+      loads = await LoadService.getLoadsByBookingId(
         bookings[0].id // booking.id 6
       );
     }
@@ -113,6 +119,7 @@ class JobCustomerForm extends Component {
       images,
       loaded: true,
       gpsTrackings,
+      loads,
       overlayMapData: {gps}
     });
   }
@@ -305,6 +312,57 @@ class JobCustomerForm extends Component {
         </Row>
       </React.Fragment>
     );
+  }
+
+  renderLoads(loads) {
+    return (
+      <React.Fragment>
+        <h3 className="subhead" style={{
+          paddingTop: 30,
+          color: '#006F53',
+          fontSize: 22
+        }}
+        >
+          Loads
+        </h3>
+        <LoadsTable loads={loads}/>
+      </React.Fragment>
+    );
+    // console.log(loads);
+    // if (loads != null && loads.length > 0) {
+    //   return (
+    //     <React.Fragment>
+    //       <hr/>
+    //       <h3 className="subhead">
+    //         Loads
+    //       </h3>
+    //       <Row>
+    //         <Col md={12} lg={12}>
+    //           <Card>
+    //             <CardBody className="products-list">
+    //               <div className="tabs tabs--bordered-bottom">
+    //                 <div className="tabs__wrap">
+    //                   <TTable
+    //                     columns={
+    //                       [
+    //                         {
+    //                           name: 'id',
+    //                           displayName: 'IDs'
+    //                         }
+    //                       ]
+    //                     }
+    //                     data={loads}
+    //                     handleIdClick={this.handleInputChange}
+    //                   />
+    //                 </div>
+    //               </div>
+    //             </CardBody>
+    //           </Card>
+    //         </Col>
+    //       </Row>
+    //     </React.Fragment>
+    //   );
+    // }
   }
 
   renderJobTons() {
@@ -753,7 +811,7 @@ class JobCustomerForm extends Component {
   }
 
   renderEverything() {
-    const {images, gpsTrackings, overlayMapData} = this.state;
+    const {images, gpsTrackings, overlayMapData, loads} = this.state;
     const {job} = this.props;
     let origin = '';
     let destination = '';
@@ -824,6 +882,7 @@ class JobCustomerForm extends Component {
               {this.renderJobRuns(job)}
               {this.renderUploadedPhotos(images)}
               {this.renderGPSPoints(gpsTrackings)}
+              {this.renderLoads(loads)}
             </CardBody>
           </Card>
         </Container>
