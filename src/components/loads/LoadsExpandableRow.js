@@ -6,12 +6,14 @@ import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button} from 'reactstrap';
 import UserService from '../../api/UserService';
+import LoadService from "../../api/LoadService";
 
 class LoadsExpandableRow extends Component {
   constructor(props) {
     super(props);
     this.state = {
       load: props.load,
+      loadStatus: props.load.loadStatus,
       loaded: false, // if page is loading
       index: props.index,
       expanded: false,
@@ -23,7 +25,10 @@ class LoadsExpandableRow extends Component {
   async componentDidMount() {
     const {props} = this;
     const driver = await UserService.getDriverByBookingId(props.load.bookingId);
+    console.log(driver);
     this.setState({driver, loaded: true});
+    this.handleApproveLoad = this.handleApproveLoad.bind(this);
+    this.handleDisputeLoad = this.handleDisputeLoad.bind(this);
   }
 
   toggle() {
@@ -33,14 +38,28 @@ class LoadsExpandableRow extends Component {
     });
   }
 
+  async handleApproveLoad() {
+    const {load} = {...this.state};
+    load.loadStatus = 'Approved';
+    await LoadService.updateLoad(load);
+    this.setState({loadStatus: 'Approved'});
+  }
+
+  async handleDisputeLoad() {
+    const {load} = {...this.state};
+    load.loadStatus = 'Disputed';
+    await LoadService.updateLoad(load);
+    this.setState({loadStatus: 'Disputed'});
+  }
+
   render() {
     const {loaded} = {...this.state};
     if (loaded) {
-      const {load, index, expanded, driver} = {...this.state};
+      const {load, loadStatus, index, expanded, driver} = {...this.state};
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
       let statusColor = '';
-      switch (load.loadStatus) {
+      switch (loadStatus) {
         case 'Approved':
           statusColor = '#006F53';
           break;
@@ -66,12 +85,16 @@ class LoadsExpandableRow extends Component {
               </IconButton>
             </TableCell>
             <TableCell align="left">{index + 1}</TableCell>
-            <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
+            <TableCell
+              align="left"
+            >{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}
+            </TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
-                       style={{fontStyle: !endTime ? 'italic' : 'normal'}}>{(!endTime ? 'In Progress' : endTime)}
+                       style={{fontStyle: !endTime ? 'italic' : 'normal'}}
+            >{(!endTime ? 'In Progress' : endTime)}
             </TableCell>
-            <TableCell align="left" style={{color: statusColor}}>{load.loadStatus}</TableCell>
+            <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
           {expanded && (
             <TableRow>
@@ -86,36 +109,37 @@ class LoadsExpandableRow extends Component {
                     <Col md={7}/>
                     <Col md={3}>
                       <p style={{color: statusColor, fontSize: 20}}>
-                        {load.loadStatus}
+                        {loadStatus}
                       </p>
                     </Col>
                   </Row>
                   <hr/>
-                  {load.loadStatus === 'Submitted' && (
-                  <Row justify="between">
-                    <Col md={3}>
-                      {/*<p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>*/}
-                      {/*  Driver Name: {`${driver.firstName} ${driver.lastName}`}*/}
-                      {/*</p>*/}
-                    </Col>
-                    <Col md={5}/>
+                  {loadStatus === 'Submitted' && (
+                    <Row justify="between">
+                      <Col md={3}>
+                        {/*<p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>*/}
+                        {/*  Driver Name: {`${driver.firstName} ${driver.lastName}`}*/}
+                        {/*</p>*/}
+                      </Col>
+                      <Col md={5}/>
                       <Col md={4}>
                         <Button
-                          // onClick={this.toggleNewJobModal}
+                          onClick={this.handleDisputeLoad}
+                          // name="DISPUTE"
                           type="button"
                           className="primaryButton"
                         >
                           DISPUTE
                         </Button>
                         <Button
-                          // onClick={this.toggleNewJobModal}
+                          onClick={this.handleApproveLoad}
                           type="button"
                           className="secondaryButton"
                         >
                           APPROVE
                         </Button>
                       </Col>
-                  </Row>
+                    </Row>
                   )
                   }
                   {/*<Row justify="between" style={{paddingTop: 20}}>*/}
