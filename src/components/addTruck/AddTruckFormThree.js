@@ -17,6 +17,7 @@ import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import ProfileService from '../../api/ProfileService';
 import SelectField from '../common/TSelect';
+import EquipmentService from '../../api/EquipmentService';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
@@ -35,6 +36,7 @@ class AddTruckFormThree extends PureComponent {
       isBanned: 0,
       preferredLanguage: 'English',
       userStatus: 'New',
+      reqHandlerDriver: { touched: false, error: '' },
       reqHandlerFName: { touched: false, error: '' },
       reqHandlerLName: { touched: false, error: '' },
       reqHandlerEmail: { touched: false, error: '' },
@@ -53,20 +55,19 @@ class AddTruckFormThree extends PureComponent {
     // check fo cached info
     const { getUserFullInfo, passedTruckFullInfoId, editDriverId } = this.props;
     const preloaded = getUserFullInfo();
-
     const profile = await ProfileService.getProfile();
-
-    // get all drivers for this company:
+    // const truck = await EquipmentService.getEquipmentById(passedTruckFullInfoId);
+    // const selectedDriverId = truck.driversId;
     let allDrivers = await DriverService.getDriverByCompanyId(profile.companyId);
-
     allDrivers = allDrivers.map(driver => ({
       value: String(driver.driverId),
-      label: `${driver.firstName} ${driver.lastName}`
+      label: `${driver.firstName} ${driver.lastName} - ${driver.mobilePhone} - ${driver.email}`
     }));
 
     // console.log(preloaded);
     if (Object.keys(preloaded).length > 0) {
       this.setState({
+        // selectedDriverId,
         firstName: preloaded.info.firstName,
         lastName: preloaded.info.lastName,
         mobilePhone: preloaded.info.mobilePhone,
@@ -76,6 +77,7 @@ class AddTruckFormThree extends PureComponent {
       });
     } else {
       this.setState({
+        // selectedDriverId,
         allDrivers,
         loaded: true
       });
@@ -83,7 +85,6 @@ class AddTruckFormThree extends PureComponent {
 
     // check for existing user (if this is loaded data)
     // TODO -> use only a bool to check for this (only pass the id)
-    // console.log(passedTruckFullInfoId);
     if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
     }
@@ -140,7 +141,8 @@ class AddTruckFormThree extends PureComponent {
         companyId: user.companyId,
         isBanned: user.isBanned,
         preferredLanguage: user.preferredLanguage,
-        userStatus: user.userStatus
+        userStatus: user.userStatus,
+        selectedDriverId: driver.id
       },
       function setUserInfo() { // wait until it loads
         this.saveUserInfo(false);
@@ -182,8 +184,18 @@ class AddTruckFormThree extends PureComponent {
 
   isFormValid() {
     const truck = this.state;
+    const { selectedDriverId } = this.state;
     let isValid = true;
 
+    if (selectedDriverId === null || selectedDriverId === 0 || selectedDriverId.length === 0) {
+      this.setState({
+        reqHandlerDriver: {
+          touched: true,
+          error: 'Please select a driver'
+        }
+      });
+      isValid = false;
+    }
     /*
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
@@ -241,6 +253,7 @@ class AddTruckFormThree extends PureComponent {
       email,
       selectedDriverId
     } = this.state;
+
     const userInfo = {
       id: selectedDriverId, // only to track if this is an edit
       firstName,
@@ -255,11 +268,27 @@ class AddTruckFormThree extends PureComponent {
     // this.saveUserInfo(true);
   }
 
-  selectChange(data) {
-    // const { selectedDriverId } = this.state;
+  async selectChange(data) {
+    const reqHandler = 'reqHandlerDriver';
+    const driver = await DriverService.getDriverById(data.value);
+    const user = await UserService.getUserById(driver.usersId);
     this.setState({
+      [reqHandler]: Object.assign({},
+        reqHandler,
+        {
+          touched: false
+        }),
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      mobilePhone: user.mobilePhone,
+      email: user.email,
+      companyId: user.companyId,
+      isBanned: user.isBanned,
+      preferredLanguage: user.preferredLanguage,
+      userStatus: user.userStatus,
       selectedDriverId: data.value
-    });
+    }, this.saveUserInfo(false));
   }
 
   async saveUser(e) {
@@ -292,6 +321,7 @@ class AddTruckFormThree extends PureComponent {
       isBanned,
       preferredLanguage,
       userStatus,
+      reqHandlerDriver,
       reqHandlerFName,
       reqHandlerLName,
       reqHandlerEmail,
@@ -372,7 +402,7 @@ class AddTruckFormThree extends PureComponent {
                         value: selectedDriverId
                       }
                     }
-                    // meta={this.handleInputChange}
+                    meta={reqHandlerDriver}
                     value={selectedDriverId}
                     options={allDrivers}
                     placeholder="All Drivers"

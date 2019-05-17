@@ -14,7 +14,7 @@ import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
-// import truckImage from '../../img/12.png';
+import defaultTruckImage from '../../img/default_truck.png';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
@@ -77,6 +77,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
+      truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.modifiedBy = profile.userId;
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
@@ -196,7 +197,8 @@ class AddTruckFormFour extends PureComponent {
       onClose
     } = this.props;
     const { userInfo } = this.state;
-    // show selected materials
+    // console.log(199, userInfo);
+    // console.log(200, userFullInfo.info);
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
       allMaterials += `${material.label}, `;
@@ -218,7 +220,10 @@ class AddTruckFormFour extends PureComponent {
                 <div className="">
                   <div className="row">
                     <div className="col-md-4 truck-profile">
-                      <img src={truckFullInfo.info.image} alt="avatar"/>
+                      { truckFullInfo.info.image
+                        ? <img src={truckFullInfo.info.image} alt="avatar"/>
+                        : <img src={defaultTruckImage} alt="avatar"/>
+                      }
                     </div>
                     <div className="col-md-8">
                       <div className="row">
@@ -237,12 +242,13 @@ class AddTruckFormFour extends PureComponent {
                           {truckFullInfo.info.type}
                         </div>
                       </div>
+                      <br />
                       <div className="row">
                         <div className="col-md-6">
                           <strong>Name: </strong>
                         </div>
                         <div className="col-md-6">
-                          {userInfo.firstName} {userInfo.lastName}
+                          {userFullInfo.info.firstName} {userFullInfo.info.lastName}
                         </div>
                       </div>
                       <div className="row">
@@ -250,7 +256,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Email: </strong>
                         </div>
                         <div className="col-md-6">
-                          <a href="mailto: {userInfo.email}"> {userInfo.email}</a>
+                          <a href="mailto: {userFullInfo.info.email}"> {userFullInfo.info.email}</a>
                         </div>
                       </div>
                       <div className="row">
@@ -258,9 +264,10 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Mobile phone: </strong>
                         </div>
                         <div className="col-md-6">
-                          <a href="tel: {userInfo.mobilePhone}"> {userInfo.mobilePhone}</a>
+                          <a href="tel: {userFullInfo.info.mobilePhone}"> {userFullInfo.info.mobilePhone}</a>
                         </div>
                       </div>
+                      <br />
                       <div className="row">
                         <div className="col-md-6">
                           <strong>Available from:</strong>
