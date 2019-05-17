@@ -93,6 +93,7 @@ class JobSavePage extends Component {
 
       const bids = await BidService.getBidsByJobId(job.id);
       if (bids && bids.length > 0) { // check if there's a bid
+        // If there's more than one bid
         if (bids.length > 1) {
           // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
           // and is assigned to the carrier (a favorite)
@@ -170,7 +171,7 @@ class JobSavePage extends Component {
     this.handlePageClick('Job');
   }
 
-  async handleConfirmRequest() { // Customer clicks on 'Accept Job Request'
+  async handleConfirmRequest(action) { // Customer 'Accepts' or 'Rejects' Job request
     const {
       job,
       bid,
@@ -178,7 +179,7 @@ class JobSavePage extends Component {
     } = this.state;
     let { booking, bookingEquipment } = this.state;
 
-    if (bid) { // we have a bid record
+    if (action === 'Approve') { // Customer is accepting the job request
       // console.log('accepting');
       const newJob = CloneDeep(job);
       const newBid = CloneDeep(bid);
@@ -278,6 +279,34 @@ class JobSavePage extends Component {
 
       job.status = 'Booked';
       this.setState({ job });
+    } else { // Customer is rejecting the job request
+      const newBid = CloneDeep(bid);
+
+      // UPDATING BID
+      newBid.hasCustomerAccepted = 0;
+      newBid.hasSchedulerAccepted = 1;
+      newBid.status = 'Declined';
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+      await BidService.updateBid(newBid);
+
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // Sending SMS to Truck's company
+      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: 'Your request for the job has been rejected'
+          };
+          await TwilioService.createSms(notification);
+        }
+      }
+
+      // eslint-disable-next-line no-alert
+      // alert('You have accepted this job request! Congratulations.');
     }
   }
 
@@ -305,7 +334,7 @@ class JobSavePage extends Component {
       newJob.modifiedOn = moment()
         .unix() * 1000;
       delete newJob.materials;
-      // await JobService.updateJob(newJob);
+      await JobService.updateJob(newJob);
 
       // Since the Job was sent to all favorites there's a bid, update existing bid
       const newBid = CloneDeep(bid);
@@ -569,20 +598,29 @@ class JobSavePage extends Component {
               </Button>
             </div>
           );
-          // TODO: Add a 'Decline Job' button for Carrier
         }
 
         // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
         if ((job.status === 'Requested' && companyType === 'Customer')
-        && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)) {
+        && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
+        && bid.status !== 'Declined') {
           // console.log('We are a customer and we have a Carrier's job request');
           buttonText = (
-            <Button
-              onClick={() => this.handleConfirmRequest()}
-              className="primaryButton"
-            >
-              Approve Job Request
-            </Button>
+            <div>
+              <Button
+                onClick={() => this.handleConfirmRequest('Reject')}
+                className="secondaryButton"
+              >
+                Reject Job Request
+              </Button>
+
+              <Button
+                onClick={() => this.handleConfirmRequest('Approve')}
+                className="primaryButton"
+              >
+                Approve Job Request
+              </Button>
+            </div>
           );
           // TODO: Add 'Reject Job Request' button for Customer
         }
