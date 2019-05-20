@@ -880,9 +880,9 @@ class JobCustomerForm extends Component {
               </div>
               <hr/>
               {this.renderJobRuns(job)}
-              {this.renderUploadedPhotos(images)}
               {this.renderGPSPoints(gpsTrackings)}
               {this.renderLoads(loads)}
+              {this.renderUploadedPhotos(images)}
             </CardBody>
           </Card>
         </Container>
