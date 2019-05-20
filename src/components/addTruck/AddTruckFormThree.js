@@ -35,6 +35,7 @@ class AddTruckFormThree extends PureComponent {
       isBanned: 0,
       preferredLanguage: 'English',
       userStatus: 'New',
+      reqHandlerDriver: { touched: false, error: '' },
       reqHandlerFName: { touched: false, error: '' },
       reqHandlerLName: { touched: false, error: '' },
       reqHandlerEmail: { touched: false, error: '' },
@@ -53,15 +54,12 @@ class AddTruckFormThree extends PureComponent {
     // check fo cached info
     const { getUserFullInfo, passedTruckFullInfoId, editDriverId } = this.props;
     const preloaded = getUserFullInfo();
-
     const profile = await ProfileService.getProfile();
 
-    // get all drivers for this company:
     let allDrivers = await DriverService.getDriverByCompanyId(profile.companyId);
-
     allDrivers = allDrivers.map(driver => ({
       value: String(driver.driverId),
-      label: `${driver.firstName} ${driver.lastName}`
+      label: `${driver.firstName} ${driver.lastName} - ${driver.mobilePhone} - ${driver.email}`
     }));
 
     // console.log(preloaded);
@@ -83,7 +81,6 @@ class AddTruckFormThree extends PureComponent {
 
     // check for existing user (if this is loaded data)
     // TODO -> use only a bool to check for this (only pass the id)
-    // console.log(passedTruckFullInfoId);
     if (passedTruckFullInfoId !== null && passedTruckFullInfoId !== 0) {
       this.getAndSetExistingUser(passedTruckFullInfoId);
     }
@@ -132,7 +129,7 @@ class AddTruckFormThree extends PureComponent {
     }
     if (user) {
       this.setState({
-        id: user.id,
+        id: driver.id,
         firstName: user.firstName,
         lastName: user.lastName,
         mobilePhone: user.mobilePhone,
@@ -140,7 +137,8 @@ class AddTruckFormThree extends PureComponent {
         companyId: user.companyId,
         isBanned: user.isBanned,
         preferredLanguage: user.preferredLanguage,
-        userStatus: user.userStatus
+        userStatus: user.userStatus,
+        selectedDriverId: driver.id
       },
       function setUserInfo() { // wait until it loads
         this.saveUserInfo(false);
@@ -181,9 +179,19 @@ class AddTruckFormThree extends PureComponent {
   }
 
   isFormValid() {
-    const truck = this.state;
+    // const truck = this.state;
+    const { selectedDriverId } = this.state;
     let isValid = true;
 
+    if (selectedDriverId === null || selectedDriverId === 0 || selectedDriverId.length === 0) {
+      this.setState({
+        reqHandlerDriver: {
+          touched: true,
+          error: 'Please select a driver'
+        }
+      });
+      isValid = false;
+    }
     /*
     if (truck.firstName === null || truck.firstName.length === 0) {
       this.setState({
@@ -241,6 +249,7 @@ class AddTruckFormThree extends PureComponent {
       email,
       selectedDriverId
     } = this.state;
+
     const userInfo = {
       id: selectedDriverId, // only to track if this is an edit
       firstName,
@@ -255,10 +264,18 @@ class AddTruckFormThree extends PureComponent {
     // this.saveUserInfo(true);
   }
 
-  selectChange(data) {
-    // const { selectedDriverId } = this.state;
+  async selectChange(data) {
+    const reqHandler = 'reqHandlerDriver';
+
     this.setState({
+      [reqHandler]: Object.assign({},
+        reqHandler,
+        {
+          touched: false
+        }),
       selectedDriverId: data.value
+    }, function wait() {
+      this.saveUserInfo(false);
     });
   }
 
@@ -283,18 +300,19 @@ class AddTruckFormThree extends PureComponent {
     const { previousPage, onClose, editDriverId } = this.props;
     const {
       id,
-      firstName,
-      lastName,
-      mobilePhone,
-      email,
-      equipmentId,
+      // firstName,
+      // lastName,
+      // mobilePhone,
+      // email,
+      // equipmentId,
       parentId,
       isBanned,
       preferredLanguage,
       userStatus,
-      reqHandlerFName,
-      reqHandlerLName,
-      reqHandlerEmail,
+      reqHandlerDriver,
+      // reqHandlerFName,
+      // reqHandlerLName,
+      // reqHandlerEmail,
       allDrivers,
       selectedDriverId,
       loaded
@@ -372,7 +390,7 @@ class AddTruckFormThree extends PureComponent {
                         value: selectedDriverId
                       }
                     }
-                    // meta={this.handleInputChange}
+                    meta={reqHandlerDriver}
                     value={selectedDriverId}
                     options={allDrivers}
                     placeholder="All Drivers"

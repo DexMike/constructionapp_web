@@ -12,9 +12,10 @@ import TFormat from '../common/TFormat';
 // import DriverService from '../../api/DriverService';
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
+import DriverService from '../../api/DriverService';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
-// import truckImage from '../../img/12.png';
+import defaultTruckImage from '../../img/default_truck.png';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
@@ -31,9 +32,11 @@ class AddTruckFormFour extends PureComponent {
     const {
       userFullInfo
     } = this.props;
-    const userInfoLoaded = await UserService.getUserById(userFullInfo.info.id);
+    // const userInfoLoaded = await UserService.getUserById(userFullInfo.info.id);
+    const driver = await DriverService.getDriverById(userFullInfo.info.id);
+    const user = await UserService.getUserById(driver.usersId);
     this.setState({
-      userInfo: userInfoLoaded
+      userInfo: user
     });
   }
 
@@ -77,6 +80,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = start.getTime(); // date as miliseconds
       truckFullInfo.info.endAvailability = end.getTime(); // date as miliseconds
+      truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.modifiedBy = profile.userId;
       await EquipmentService.updateEquipment(truckFullInfo.info);
       // return;
@@ -153,7 +157,8 @@ class AddTruckFormFour extends PureComponent {
       // convert false to 0
       const available = availabilityFullInfo.info.isAvailable;
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
-
+      truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
+      truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
       // remove unnecesary info
       delete truckFullInfo.info.id;
       delete truckFullInfo.info.redir;
@@ -188,7 +193,7 @@ class AddTruckFormFour extends PureComponent {
     const {
       availabilityFullInfo,
       truckFullInfo,
-      userFullInfo,
+      // userFullInfo,
       previousPage,
       getTruckFullInfo,
       getAvailiabilityFullInfo,
@@ -196,7 +201,6 @@ class AddTruckFormFour extends PureComponent {
       onClose
     } = this.props;
     const { userInfo } = this.state;
-    // show selected materials
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
       allMaterials += `${material.label}, `;
@@ -218,7 +222,10 @@ class AddTruckFormFour extends PureComponent {
                 <div className="">
                   <div className="row">
                     <div className="col-md-4 truck-profile">
-                      <img src={truckFullInfo.info.image} alt="avatar"/>
+                      { truckFullInfo.info.image
+                        ? <img src={truckFullInfo.info.image} alt="avatar"/>
+                        : <img src={defaultTruckImage} alt="avatar"/>
+                      }
                     </div>
                     <div className="col-md-8">
                       <div className="row">
@@ -237,6 +244,7 @@ class AddTruckFormFour extends PureComponent {
                           {truckFullInfo.info.type}
                         </div>
                       </div>
+                      <br />
                       <div className="row">
                         <div className="col-md-6">
                           <strong>Name: </strong>
@@ -261,6 +269,7 @@ class AddTruckFormFour extends PureComponent {
                           <a href="tel: {userInfo.mobilePhone}"> {userInfo.mobilePhone}</a>
                         </div>
                       </div>
+                      <br />
                       <div className="row">
                         <div className="col-md-6">
                           <strong>Available from:</strong>

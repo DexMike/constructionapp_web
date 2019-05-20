@@ -279,7 +279,6 @@ class AddTruckFormTwo extends PureComponent {
                 </div>
               </Row>
               <br/>
-              ES: {isAvailable.toString()}
               <div className="col-md-12 mt-1">
                 <div className="form-check checkbox-slider--b checkbox-slider-md">
                   <label>
@@ -288,7 +287,10 @@ class AddTruckFormTwo extends PureComponent {
                       onChange={this.makeAvailable}
                       checked={isAvailable}
                     />
-                    <span>Available to make deliveries</span>
+                    { isAvailable
+                      ? <span>Available to make deliveries</span>
+                      : <span>Not available to make deliveries</span>
+                    }
                   </label>
                 </div>
               </div>
