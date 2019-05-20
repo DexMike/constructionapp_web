@@ -624,7 +624,6 @@ class TrucksCustomerPage extends Component {
 
   renderEquipmentRow(equipment) {
     let imageTruck = '';
-
     // checking if there's an image for the truck
     if ((equipment.image).trim()) { // use of trim removes whitespace from img url
       imageTruck = equipment.image;
@@ -632,6 +631,7 @@ class TrucksCustomerPage extends Component {
       imageTruck = `${window.location.origin}/${truckImage}`;
     }
 
+    const materials = equipment.materials.split(', ');
     return (
       <React.Fragment>
         <Row className="truck-card truck-details">
@@ -757,7 +757,7 @@ class TrucksCustomerPage extends Component {
                     <h3 className="subhead">
                       Materials
                     </h3>
-                    {equipment.materials}
+                    {materials.map(material => <span key={material}>{material} </span>)}
                   </div>
                 </div>
               </div>

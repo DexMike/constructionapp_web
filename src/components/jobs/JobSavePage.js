@@ -92,10 +92,28 @@ class JobSavePage extends Component {
       job.materials = materials.map(material => material.value);
 
       const bids = await BidService.getBidsByJobId(job.id);
-      if (bids && bids.length > 0) {
-        bid = bids[0];
-        if (bids[1]) {
-          marketPlaceBid = bids[1];
+      if (bids && bids.length > 0) { // check if there's a bid
+        // If there's more than one bid
+        if (bids.length > 1) {
+          // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
+          // and is assigned to the carrier (a favorite)
+          bid = bids.filter((filteredBid) => {
+            if (profile.companyType === 'Carrier') {
+              if (filteredBid.hasCustomerAccepted === 1
+                // && filteredBid.hasSchedulerAccepted === 1
+                && filteredBid.companyCarrierId === profile.companyId) {
+                return filteredBid;
+              }
+              bid = bids[0];
+            // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
+            } else if (filteredBid.hasSchedulerAccepted === 1) {
+              return filteredBid;
+            }
+            bid = bids[0];
+            return bid;
+          });
+        } else { // There is just one bid
+          bid = bids[0];
         }
       }
 
@@ -119,7 +137,6 @@ class JobSavePage extends Component {
       this.setState({
         job,
         bid,
-        marketPlaceBid,
         booking,
         bookingEquipment,
         profile,
@@ -154,7 +171,7 @@ class JobSavePage extends Component {
     this.handlePageClick('Job');
   }
 
-  async handleConfirmRequest() { // Customer clicks on 'Accept Job Request'
+  async handleConfirmRequest(action) { // Customer 'Accepts' or 'Rejects' Job request
     const {
       job,
       bid,
@@ -162,7 +179,7 @@ class JobSavePage extends Component {
     } = this.state;
     let { booking, bookingEquipment } = this.state;
 
-    if (bid) { // we have a bid record
+    if (action === 'Approve') { // Customer is accepting the job request
       // console.log('accepting');
       const newJob = CloneDeep(job);
       const newBid = CloneDeep(bid);
@@ -262,6 +279,34 @@ class JobSavePage extends Component {
 
       job.status = 'Booked';
       this.setState({ job });
+    } else { // Customer is rejecting the job request
+      const newBid = CloneDeep(bid);
+
+      // UPDATING BID
+      newBid.hasCustomerAccepted = 0;
+      newBid.hasSchedulerAccepted = 1;
+      newBid.status = 'Declined';
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+      await BidService.updateBid(newBid);
+
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // Sending SMS to Truck's company
+      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: 'Your request for the job has been rejected'
+          };
+          await TwilioService.createSms(notification);
+        }
+      }
+
+      // eslint-disable-next-line no-alert
+      // alert('You have accepted this job request! Congratulations.');
     }
   }
 
@@ -275,12 +320,13 @@ class JobSavePage extends Component {
     let { booking, bookingEquipment } = this.state;
     let notification;
 
-    // Is the Carrier this Company's favorite? If so, accepting the job
+    // A favorite Carrier "accepts" the job
     if (action === 'Accept') {
       // console.log('accepting');
+      // console.log(bid);
       const newJob = CloneDeep(job);
 
-      // UPDATING JOB
+      // Updating the Job
       newJob.status = 'Booked';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
@@ -290,31 +336,23 @@ class JobSavePage extends Component {
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
-      // CREATING BID
+      // Since the Job was sent to all favorites there's a bid, update existing bid
+      const newBid = CloneDeep(bid);
+      newBid.companyCarrierId = profile.companyId;
+      newBid.hasSchedulerAccepted = 1;
+      newBid.status = 'Accepted';
+      newBid.rateEstimate = newJob.rateEstimate;
+      newBid.notes = newJob.notes;
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
       bid = {};
-      bid.jobId = newJob.id;
-      bid.userId = profile.userId;
-      bid.companyCarrierId = profile.companyId;
-      bid.hasCustomerAccepted = 1;
-      bid.hasSchedulerAccepted = 1;
-      bid.status = 'Accepted';
-      bid.rateType = newJob.rateType;
-      bid.rate = newJob.rate;
-      bid.rateEstimate = newJob.rateEstimate;
-      bid.notes = newJob.notes;
-      bid.createdBy = profile.userId;
-      bid.modifiedBy = profile.userId;
-      bid.modifiedOn = moment()
-        .unix() * 1000;
-      bid.createdOn = moment()
-        .unix() * 1000;
-      bid = await BidService.createBid(bid);
+      bid = await BidService.updateBid(newBid);
 
-      // CREATING BOOKING
-      // see if we have a booking first
+      // Create a Booking
+      // Check if we have a booking first
       const bookings = await BookingService.getBookingsByJobId(job.id);
       if (!bookings || bookings.length <= 0) {
-        // TODO create a booking
         booking = {};
         booking.bidId = bid.id;
         booking.rateType = bid.rateType;
@@ -331,8 +369,8 @@ class JobSavePage extends Component {
         booking = await BookingService.createBooking(booking);
       }
 
-      // CREATING BOOKING EQUIPMENT
-      // see if we have a booking equipment first
+      // Create Booking Equipment
+      // Check if we have a booking equipment first
       let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
@@ -387,11 +425,11 @@ class JobSavePage extends Component {
 
       job.status = 'Booked';
       this.setState({ job });
-    } else { // The Carrier is not this Company's favorite? requesting the job
+    } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
 
-      // UPDATING JOB
+      // Updating the Job
       newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
@@ -401,11 +439,11 @@ class JobSavePage extends Component {
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
-      // UPDATING BID
+      // Creating a bid
       bid = {};
       bid.jobId = job.id;
       bid.userId = profile.userId;
-      bid.companyCarrierId = job.companiesId;
+      bid.companyCarrierId = profile.companyId;
       bid.hasCustomerAccepted = 0;
       bid.hasSchedulerAccepted = 1;
       bid.status = 'Pending';
@@ -437,6 +475,33 @@ class JobSavePage extends Component {
       // alert('Your request has been sent.');
       job.status = newJob.status;
       this.setState({ job });
+    } else if (action === 'Decline') { // A Carrier "declines" a job request
+      // Update existing bid
+      const newBid = CloneDeep(bid);
+      newBid.companyCarrierId = profile.companyId;
+      newBid.hasCustomerAccepted = 1;
+      newBid.hasSchedulerAccepted = 0;
+      newBid.status = 'Declined';
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+      bid = {};
+      bid = await BidService.updateBid(newBid);
+
+      // Sending SMS to customer's Admin from the company who created the Job
+      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'Your job request has been declined.'
+          };
+          await TwilioService.createSms(notification);
+        }
+      }
+
+      // eslint-disable-next-line no-alert
+      // alert('Your request has been sent.');
     }
   }
 
@@ -497,7 +562,7 @@ class JobSavePage extends Component {
             buttonText = (
               <Button
                 onClick={() => this.handleConfirmRequestCarrier('Accept')}
-                className="btn btn-prsaveJobimary"
+                className="primaryButton"
               >
                 Accept Job
               </Button>
@@ -506,7 +571,7 @@ class JobSavePage extends Component {
             buttonText = (
               <Button
                 onClick={() => this.handleConfirmRequestCarrier('Request')}
-                className="btn btn-primary"
+                className="primaryButton"
               >
                 Request Job
               </Button>
@@ -515,32 +580,47 @@ class JobSavePage extends Component {
         }
 
         // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
-        if (job.status === 'On Offer' && companyType === 'Carrier') {
+        if (job.status === 'On Offer' && companyType === 'Carrier' && bid.status !== 'Declined') {
           buttonText = (
-            <Button
-              onClick={() => this.handleConfirmRequestCarrier('Accept')}
-              className="btn btn-prsaveJobimary"
-            >
-              Accept Job
-            </Button>
+            <div>
+              <Button
+                onClick={() => this.handleConfirmRequestCarrier('Decline')}
+                className="secondaryButton"
+              >
+                Decline Job
+              </Button>
+
+              <Button
+                onClick={() => this.handleConfirmRequestCarrier('Accept')}
+                className="primaryButton"
+              >
+                Accept Job
+              </Button>
+            </div>
           );
-          // TODO: Add a 'Decline Job' button for Carrier
         }
 
         // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
-        if (job.status === 'Requested' && companyType === 'Customer'
-        && (
-          (marketPlaceBid.hasSchedulerAccepted && !marketPlaceBid.hasCustomerAccepted)
-          || (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted))
-        ) {
+        if ((job.status === 'Requested' && companyType === 'Customer')
+        && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
+        && bid.status !== 'Declined') {
           // console.log('We are a customer and we have a Carrier's job request');
           buttonText = (
-            <Button
-              onClick={() => this.handleConfirmRequest()}
-              className="btn btn-primary"
-            >
-              Approve Job Request
-            </Button>
+            <div>
+              <Button
+                onClick={() => this.handleConfirmRequest('Reject')}
+                className="secondaryButton"
+              >
+                Reject Job Request
+              </Button>
+
+              <Button
+                onClick={() => this.handleConfirmRequest('Approve')}
+                className="primaryButton"
+              >
+                Approve Job Request
+              </Button>
+            </div>
           );
           // TODO: Add 'Reject Job Request' button for Customer
         }
@@ -548,12 +628,12 @@ class JobSavePage extends Component {
         return (
           <div className="container">
             <div className="row">
-              <div className="col-md-10">
+              <div className="col-md-9">
                 <h3 className="page-title">
                   Job Details
                 </h3>
               </div>
-              <div className="col-md-2">
+              <div className="col-md-3">
                 {buttonText}
               </div>
             </div>
