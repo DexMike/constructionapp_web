@@ -12,6 +12,7 @@ import TFormat from '../common/TFormat';
 // import DriverService from '../../api/DriverService';
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
+import DriverService from '../../api/DriverService';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import defaultTruckImage from '../../img/default_truck.png';
@@ -31,9 +32,11 @@ class AddTruckFormFour extends PureComponent {
     const {
       userFullInfo
     } = this.props;
-    const userInfoLoaded = await UserService.getUserById(userFullInfo.info.id);
+    // const userInfoLoaded = await UserService.getUserById(userFullInfo.info.id);
+    const driver = await DriverService.getDriverById(userFullInfo.info.id);
+    const user = await UserService.getUserById(driver.usersId);
     this.setState({
-      userInfo: userInfoLoaded
+      userInfo: user
     });
   }
 
@@ -154,7 +157,8 @@ class AddTruckFormFour extends PureComponent {
       // convert false to 0
       const available = availabilityFullInfo.info.isAvailable;
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
-
+      truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
+      truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
       // remove unnecesary info
       delete truckFullInfo.info.id;
       delete truckFullInfo.info.redir;
@@ -189,7 +193,7 @@ class AddTruckFormFour extends PureComponent {
     const {
       availabilityFullInfo,
       truckFullInfo,
-      userFullInfo,
+      // userFullInfo,
       previousPage,
       getTruckFullInfo,
       getAvailiabilityFullInfo,
@@ -197,8 +201,6 @@ class AddTruckFormFour extends PureComponent {
       onClose
     } = this.props;
     const { userInfo } = this.state;
-    // console.log(199, userInfo);
-    // console.log(200, userFullInfo.info);
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
       allMaterials += `${material.label}, `;
@@ -248,7 +250,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Name: </strong>
                         </div>
                         <div className="col-md-6">
-                          {userFullInfo.info.firstName} {userFullInfo.info.lastName}
+                          {userInfo.firstName} {userInfo.lastName}
                         </div>
                       </div>
                       <div className="row">
@@ -256,7 +258,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Email: </strong>
                         </div>
                         <div className="col-md-6">
-                          <a href="mailto: {userFullInfo.info.email}"> {userFullInfo.info.email}</a>
+                          <a href="mailto: {userInfo.email}"> {userInfo.email}</a>
                         </div>
                       </div>
                       <div className="row">
@@ -264,7 +266,7 @@ class AddTruckFormFour extends PureComponent {
                           <strong>Mobile phone: </strong>
                         </div>
                         <div className="col-md-6">
-                          <a href="tel: {userFullInfo.info.mobilePhone}"> {userFullInfo.info.mobilePhone}</a>
+                          <a href="tel: {userInfo.mobilePhone}"> {userInfo.mobilePhone}</a>
                         </div>
                       </div>
                       <br />

@@ -251,6 +251,7 @@ class AddTruckForm extends PureComponent {
       validateOnTabTwoClick,
       validateOnTabThreeClick
     } = this.state;
+
     if (loaded) {
       return (
         <Container className="dashboard">

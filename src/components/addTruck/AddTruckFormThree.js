@@ -17,7 +17,6 @@ import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import ProfileService from '../../api/ProfileService';
 import SelectField from '../common/TSelect';
-import EquipmentService from '../../api/EquipmentService';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
@@ -56,8 +55,7 @@ class AddTruckFormThree extends PureComponent {
     const { getUserFullInfo, passedTruckFullInfoId, editDriverId } = this.props;
     const preloaded = getUserFullInfo();
     const profile = await ProfileService.getProfile();
-    // const truck = await EquipmentService.getEquipmentById(passedTruckFullInfoId);
-    // const selectedDriverId = truck.driversId;
+
     let allDrivers = await DriverService.getDriverByCompanyId(profile.companyId);
     allDrivers = allDrivers.map(driver => ({
       value: String(driver.driverId),
@@ -67,7 +65,6 @@ class AddTruckFormThree extends PureComponent {
     // console.log(preloaded);
     if (Object.keys(preloaded).length > 0) {
       this.setState({
-        // selectedDriverId,
         firstName: preloaded.info.firstName,
         lastName: preloaded.info.lastName,
         mobilePhone: preloaded.info.mobilePhone,
@@ -77,7 +74,6 @@ class AddTruckFormThree extends PureComponent {
       });
     } else {
       this.setState({
-        // selectedDriverId,
         allDrivers,
         loaded: true
       });
@@ -133,7 +129,7 @@ class AddTruckFormThree extends PureComponent {
     }
     if (user) {
       this.setState({
-        id: user.id,
+        id: driver.id,
         firstName: user.firstName,
         lastName: user.lastName,
         mobilePhone: user.mobilePhone,
@@ -183,7 +179,7 @@ class AddTruckFormThree extends PureComponent {
   }
 
   isFormValid() {
-    const truck = this.state;
+    // const truck = this.state;
     const { selectedDriverId } = this.state;
     let isValid = true;
 
@@ -270,25 +266,17 @@ class AddTruckFormThree extends PureComponent {
 
   async selectChange(data) {
     const reqHandler = 'reqHandlerDriver';
-    const driver = await DriverService.getDriverById(data.value);
-    const user = await UserService.getUserById(driver.usersId);
+
     this.setState({
       [reqHandler]: Object.assign({},
         reqHandler,
         {
           touched: false
         }),
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      mobilePhone: user.mobilePhone,
-      email: user.email,
-      companyId: user.companyId,
-      isBanned: user.isBanned,
-      preferredLanguage: user.preferredLanguage,
-      userStatus: user.userStatus,
       selectedDriverId: data.value
-    }, this.saveUserInfo(false));
+    }, function wait() {
+      this.saveUserInfo(false);
+    });
   }
 
   async saveUser(e) {
@@ -312,19 +300,19 @@ class AddTruckFormThree extends PureComponent {
     const { previousPage, onClose, editDriverId } = this.props;
     const {
       id,
-      firstName,
-      lastName,
-      mobilePhone,
-      email,
-      equipmentId,
+      // firstName,
+      // lastName,
+      // mobilePhone,
+      // email,
+      // equipmentId,
       parentId,
       isBanned,
       preferredLanguage,
       userStatus,
       reqHandlerDriver,
-      reqHandlerFName,
-      reqHandlerLName,
-      reqHandlerEmail,
+      // reqHandlerFName,
+      // reqHandlerLName,
+      // reqHandlerEmail,
       allDrivers,
       selectedDriverId,
       loaded

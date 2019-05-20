@@ -637,7 +637,7 @@ class AddTruckFormOne extends PureComponent {
 
               <Row className="col-md-12">
                 <div className="col-md-12 form__form-group">
-                  <span className="form__form-group-label" style={{ marginTop: '8px'}}>
+                  <span className="form__form-group-label mt-8">
                     Materials Hauled
                   </span>
                   <MultiSelect
@@ -788,7 +788,7 @@ class AddTruckFormOne extends PureComponent {
                     type="number"
                     meta={reqHandlerMaxCapacity}
                   />
-                  <span className="form__form-group-label" style={{ marginTop: '8px'}}>
+                  <span className="form__form-group-label mt-8">
                     Max Distance to Pickup (Miles)
                   </span>
                   <input
