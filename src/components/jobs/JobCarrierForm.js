@@ -231,7 +231,7 @@ class JobCarrierForm extends JobCustomerForm {
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
-          Rate: ${job.rate} / {job.rateType}
+          Rate: {TFormat.asMoney(job.rate)} / {job.rateType}
           <br/>
           Product: {this.materialsAsString(job.materials)}
         </div>
