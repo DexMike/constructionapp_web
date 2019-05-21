@@ -1,6 +1,6 @@
 import AgentService from './AgentService';
 
-const PATH = '/gpstracking';
+const PATH = '/gpstrackings';
 
 class GPSTrackingService extends AgentService {
   static async getGPSTrackingByBookingEquipmentId(bookingEquipmentId) {
