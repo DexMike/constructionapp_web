@@ -757,7 +757,11 @@ class TrucksCustomerPage extends Component {
                     <h3 className="subhead">
                       Materials
                     </h3>
-                    {materials.map(material => <span key={material}>{material} </span>)}
+                    {materials.map(material => (
+                      <span key={material} className="badge badge-success" style={{borderRadius: '15px', padding: '6px 20px', margin: '2px'}}>
+                        {material}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
