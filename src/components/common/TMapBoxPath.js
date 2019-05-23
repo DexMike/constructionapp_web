@@ -4,23 +4,13 @@ import mapboxgl from 'mapbox-gl';
 import { Container } from 'reactstrap';
 import './css/mapBox.css';
 
-class TMapBoxOriginDestination extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      origin: '',
-      destination: '',
-      zoom: 13
-    };
-  }
-
+class TMapBoxPath extends PureComponent {
   componentDidMount() {
-    const { input } = this.props;
-    const waypoints = input.gpsData.gps;
-    this.setMap(input.origin, input.destination, waypoints, input.coords);
+    const { gpsTrackings } = this.props;
+    this.setMap(gpsTrackings);
   }
 
-  setMap(origin, destination, waypoints, coords) {
+  setMap(gpsTrackings) {
     // const cPointOrigin = waypoints[0];
     // const cPointDestination = waypoints[waypoints.length - 1];
 
@@ -35,44 +25,6 @@ class TMapBoxOriginDestination extends PureComponent {
     });
 
     map.on('load', () => {
-      // FIRST
-      const directions = new MapboxDirections(
-        {
-          accessToken: mapboxgl.accessToken,
-          // unit: 'metric',
-          // profile: 'driving',
-          container: 'directions', // Specify an element thats not the map container.
-          controls: {
-            inputs: false,
-            instructions: false
-          }
-        }
-      );
-      map.addControl(directions, 'top-left');
-      map.addControl(new mapboxgl.FullscreenControl());
-      directions.setOrigin(origin);
-      directions.setDestination(destination);
-
-      // Plot the actual route (as recorded by GPS)
-      map.addLayer({
-        id: 'points',
-        type: 'symbol',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: waypoints
-          }
-        },
-        layout: {
-          'icon-image': '{icon}-15',
-          'text-field': '{title}',
-          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-          'text-offset': [0, 0.6],
-          'text-anchor': 'top'
-        }
-      });
-
       map.addLayer({
         id: 'route',
         type: 'line',
@@ -83,20 +35,10 @@ class TMapBoxOriginDestination extends PureComponent {
             properties: {},
             geometry: {
               type: 'LineString',
-              coordinates: coords
+              coordinates: gpsTrackings
             }
           }
         }
-        /*
-        layout: {
-          line-join: 'round',
-          line-cap: 'round'
-        },
-        paint: {
-          line-color: '#888',
-          line-width: 8
-        }
-        */
       });
     });
   }
@@ -110,13 +52,8 @@ class TMapBoxOriginDestination extends PureComponent {
   }
 }
 
-TMapBoxOriginDestination.propTypes = {
-  input: PropTypes.shape({
-    origin: PropTypes.string,
-    destination: PropTypes.string,
-    gpsData: PropTypes.object,
-    gpsCoords: PropTypes.object
-  }).isRequired
+TMapBoxPath.propTypes = {
+  gpsTrackings: PropTypes.array.isRequired
 };
 
-export default TMapBoxOriginDestination;
+export default TMapBoxPath;

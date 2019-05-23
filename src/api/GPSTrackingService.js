@@ -8,6 +8,12 @@ class GPSTrackingService extends AgentService {
     const response = await super.get(url);
     return (response);
   }
+
+  static async getGPSTrackingByLoadId(loadId) {
+    const url = `/load/${loadId}${PATH}`;
+    const response = await super.get(url);
+    return (response);
+  }
 }
 
 export default GPSTrackingService;

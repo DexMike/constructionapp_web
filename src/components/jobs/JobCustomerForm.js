@@ -328,7 +328,7 @@ class JobCustomerForm extends Component {
           fontSize: 22
         }}
         >
-          Loads
+          Run Information
         </h3>
         <LoadsTable loads={loads}/>
       </React.Fragment>
@@ -850,7 +850,7 @@ class JobCustomerForm extends Component {
                 </div>
               </div>
               <hr/>
-              {this.renderJobRuns(job)}
+              {/*{this.renderJobRuns(job)}*/}
               {this.renderGPSPoints(gpsTrackings)}
               {this.renderLoads(loads)}
               {this.renderUploadedPhotos(images)}

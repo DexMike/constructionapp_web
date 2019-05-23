@@ -6,7 +6,10 @@ import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button} from 'reactstrap';
 import UserService from '../../api/UserService';
-import LoadService from "../../api/LoadService";
+import LoadService from '../../api/LoadService';
+import GPSTrackingService from '../../api/GPSTrackingService';
+import TMapBoxPath
+  from '../common/TMapBoxPath';
 
 class LoadsExpandableRow extends Component {
   constructor(props) {
@@ -17,18 +20,27 @@ class LoadsExpandableRow extends Component {
       loaded: false, // if page is loading
       index: props.index,
       expanded: false,
-      driver: null
+      driver: null,
+      gpsTrackings: null
     };
     this.toggle = this.toggle.bind(this);
   }
 
   async componentDidMount() {
     const {props} = this;
+    const {load} = this.state;
+    let {gpsTrackings} = this.state;
+    gpsTrackings = await this.fetchGPSPoints(load.id);
     const driver = await UserService.getDriverByBookingId(props.load.bookingId);
-    console.log(driver);
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.handleDisputeLoad = this.handleDisputeLoad.bind(this);
+    this.setState({gpsTrackings});
+    console.log(gpsTrackings);
+  }
+
+  async fetchGPSPoints(loadId) {
+    return GPSTrackingService.getGPSTrackingByLoadId(loadId);
   }
 
   toggle() {
@@ -55,7 +67,7 @@ class LoadsExpandableRow extends Component {
   render() {
     const {loaded} = {...this.state};
     if (loaded) {
-      const {load, loadStatus, index, expanded, driver} = {...this.state};
+      const {load, loadStatus, index, expanded, driver, gpsTrackings} = {...this.state};
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
       let statusColor = '';
@@ -142,6 +154,13 @@ class LoadsExpandableRow extends Component {
                     </Row>
                   )
                   }
+                  <Row style={{paddingTop: 20}}>
+                    <Col md={3}>
+                      <React.Fragment>
+                        <TMapBoxPath gpsTrackings={gpsTrackings}/>
+                      </React.Fragment>
+                    </Col>
+                  </Row>
                   {/*<Row justify="between" style={{paddingTop: 20}}>*/}
                   {/*  <Col md={4}>*/}
                   {/*    <h4 style={{fontSize: 15, color: '#006F53', paddingLeft: 10}}>*/}
