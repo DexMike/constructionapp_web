@@ -17,10 +17,10 @@ class TMapBoxOriginDestination extends PureComponent {
   componentDidMount() {
     const { input } = this.props;
     const waypoints = input.gpsData.gps;
-    this.setMap(input.origin, input.destination, waypoints);
+    this.setMap(input.origin, input.destination, waypoints, input.coords);
   }
 
-  setMap(origin, destination, waypoints) {
+  setMap(origin, destination, waypoints, coords) {
     // const cPointOrigin = waypoints[0];
     // const cPointDestination = waypoints[waypoints.length - 1];
 
@@ -53,44 +53,6 @@ class TMapBoxOriginDestination extends PureComponent {
       directions.setOrigin(origin);
       directions.setDestination(destination);
 
-      // This is a reference, please do not delete
-      /*
-      const directionsTwo = new MapboxDirections(
-        {
-          accessToken: mapboxgl.accessToken,
-          container: 'directions',
-          controls: {
-            inputs: false,
-            instructions: false
-          }
-        }
-      );
-      map.addControl(directionsTwo, 'top-left');
-      map.addControl(new mapboxgl.FullscreenControl());
-      directionsTwo.setOrigin(cPointOrigin);
-
-      if (waypoints.length > 1) {
-        for (let i = 0; i < waypoints.length; i += 1) {
-          const loc = {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [
-                waypoints[i][1],
-                waypoints[i][0]
-              ]
-            },
-            properties: {
-              title: 'Mapbox DC',
-              icon: 'monument'
-            }
-          };
-          directionsTwo.addWaypoint(i, loc);
-        }
-        directionsTwo.setDestination(cPointDestination);
-      }
-      */
-
       // Plot the actual route (as recorded by GPS)
       map.addLayer({
         id: 'points',
@@ -110,6 +72,32 @@ class TMapBoxOriginDestination extends PureComponent {
           'text-anchor': 'top'
         }
       });
+
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: coords
+            }
+          }
+        }
+        /*
+        layout: {
+          line-join: 'round',
+          line-cap: 'round'
+        },
+        paint: {
+          line-color: '#888',
+          line-width: 8
+        }
+        */
+      });
     });
   }
 
@@ -126,7 +114,8 @@ TMapBoxOriginDestination.propTypes = {
   input: PropTypes.shape({
     origin: PropTypes.string,
     destination: PropTypes.string,
-    gpsData: PropTypes.object
+    gpsData: PropTypes.object,
+    gpsCoords: PropTypes.object
   }).isRequired
 };
 
