@@ -7,7 +7,9 @@ import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 
 import './jobs.css';
 import mapboxgl from 'mapbox-gl';
+// import MapboxClient from '@mapbox/mapbox-sdk';
 // import TMap from '../common/TMapOriginDestination';
+
 import TMapBoxOriginDestinationWithOverlay
   from '../common/TMapBoxOriginDestinationWithOverlay';
 import TTable from '../common/TTable';
@@ -23,6 +25,10 @@ import LoadsTable from '../loads/LoadsTable';
 
 mapboxgl.accessToken = process.env.MAPBOX_API;
 const MAPBOX_MAX = 23;
+const MAPBOX_MATCH_MAX = 100;
+
+const mbxClient = require('@mapbox/mapbox-sdk');
+const mbxMapMatch = require('@mapbox/mapbox-sdk/services/map-matching');
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -52,7 +58,8 @@ class JobCustomerForm extends Component {
       gpsTrackings: null,
       coords: null,
       loads: null,
-      loaded: false
+      loaded: false,
+      gpsDataLoaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -69,8 +76,8 @@ class JobCustomerForm extends Component {
     let gpsData = [];
     if (bookings.length > 0) {
       gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-        bookings[0].id
-        // 6
+        // bookings[0].id
+        6
       );
       loads = await LoadService.getLoadsByBookingId(
         bookings[0].id // booking.id 6
@@ -104,11 +111,72 @@ class JobCustomerForm extends Component {
           const remainder = (reducer % 1);
           if (remainder === 0) {
             gps.push(loc);
-            coords.push(coord);
+            // coords.push(coord);
           }
         }
       }
     }
+
+    const matchWaypoints = [];
+    if (gpsData.length > 0) {
+      for (const datum in gpsData) {
+        const matchWayPoint = {
+          coordinates: [gpsData[datum][1], gpsData[datum][0]]
+        };
+        /*
+        const steps = Math.ceil(gpsData.length / MAPBOX_MATCH_MAX);
+        const reducer = datum / steps;
+        const remainder = (reducer % 1);
+        if (remainder === 0) {
+          matchWaypoints.push(matchWayPoint);
+        }
+        */
+       matchWaypoints.push(matchWayPoint);
+      }
+    }
+
+    // reduce
+    const allWaypoints = [];
+    if (matchWaypoints.length >= 100) {
+      for (let i = 0; i < 100; i += 1) {
+        allWaypoints.push(matchWaypoints[i]);
+      }
+    }
+
+    // Mapbox map matching should support up to 100 points
+    console.log(allWaypoints);
+    const that = this;
+    const baseClient = mbxClient({ accessToken: mapboxgl.accessToken });
+    const mapMatchingService = mbxMapMatch(baseClient);
+    mapMatchingService.getMatch({
+      points: allWaypoints,
+      tidy: false
+    })
+      .send()
+      .then((response) => {
+
+        //AQUI ME QUEDO< OBTENGO LOS WAYPOOINTS PERO IMPRIME MAL
+        const points = response.body.tracepoints;
+        console.log(points);
+        const newCoords = [];
+        if (points.length > 0) {
+          for (const p in points) {
+            if (points[p] !== null) {
+              newCoords.push(points[p].location);
+            }
+          }
+          console.log('>>GOT COORDS');
+          console.log(newCoords);
+          that.setState({
+            coords: newCoords,
+            gpsDataLoaded: true
+          });
+        } else {
+          that.setState({
+            gpsDataLoaded: true
+          });
+        }
+      });
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
@@ -782,7 +850,13 @@ class JobCustomerForm extends Component {
   }
 
   renderEverything() {
-    const {images, gpsTrackings, coords, overlayMapData, loads} = this.state;
+    const {
+      images,
+      gpsTrackings,
+      coords,
+      overlayMapData,
+      loads
+    } = this.state;
     const {job} = this.props;
     let origin = '';
     let destination = '';
@@ -914,8 +988,8 @@ class JobCustomerForm extends Component {
   }
 
   render() {
-    const {loaded} = this.state;
-    if (loaded) {
+    const { loaded, gpsDataLoaded } = this.state;
+    if (loaded && gpsDataLoaded) {
       return (
         <Container className="dashboard">
           {this.renderEverything()}
