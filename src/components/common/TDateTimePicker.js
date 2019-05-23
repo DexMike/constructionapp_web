@@ -76,15 +76,21 @@ class TDateTimePickerField extends PureComponent {
 
   render() {
     const { startDate } = this.state;
-    const { dateFormat, meta: { touched, error }, disabled } = this.props;
+    const {
+      dateFormat,
+      meta: { touched, error },
+      showTime,
+      timeFormat,
+      disabled
+    } = this.props;
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
           <DatePicker
-            timeFormat="HH:mm"
+            timeFormat={timeFormat}
             className="form__form-group-datepicker"
             selected={startDate}
-            // showTimeSelect //shows Time picker as well
+            showTimeSelect={showTime}
             onChange={this.handleChange}
             dateFormat={dateFormat}
             disabled={disabled}
@@ -103,22 +109,24 @@ TDateTimePickerField.propTypes = {
     name: PropTypes.string,
     value: PropTypes.object
   }).isRequired,
-  // givenDate: PropTypes.number,
   dateFormat: PropTypes.string,
+  timeFormat: PropTypes.string,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
   }),
+  showTime: PropTypes.bool,
   disabled: PropTypes.bool
 };
 
 TDateTimePickerField.defaultProps = {
-  // givenDate: PropTypes.number,
   dateFormat: 'MMMM dd, yyyy hh:mm aaa',
+  timeFormat: 'HH:mm',
   meta: {
     touched: null,
     error: null
   },
+  showTime: false,
   disabled: false
 };
 
