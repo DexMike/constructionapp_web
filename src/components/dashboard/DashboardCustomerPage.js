@@ -193,6 +193,7 @@ class DashboardCustomerPage extends Component {
   async toggleNewJobModal() {
     const {modalAddJob, filters} = this.state;
     if (modalAddJob) {
+      this.fetchJobsInfo();
       this.refs.filterChild.filterWithStatus(filters);
       this.setState({loaded: true});
     }
