@@ -50,6 +50,7 @@ class JobCustomerForm extends Component {
       ...job,
       images: [],
       gpsTrackings: null,
+      coords: null,
       loads: null,
       loaded: false
     };
@@ -68,7 +69,8 @@ class JobCustomerForm extends Component {
     let gpsData = [];
     if (bookings.length > 0) {
       gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-        bookings[0].id // booking.id 6
+        bookings[0].id
+        // 6
       );
       loads = await LoadService.getLoadsByBookingId(
         bookings[0].id // booking.id 6
@@ -77,6 +79,7 @@ class JobCustomerForm extends Component {
 
     // prepare the waypoints in an appropiate format for MB (GEOJson point)
     const gps = [];
+    const coords = [];
     if (gpsData.length > 0) {
       for (const datum in gpsData) {
         if (gpsData[datum][0]) {
@@ -90,10 +93,10 @@ class JobCustomerForm extends Component {
               ]
             },
             properties: {
-              title: 'Actual route',
               icon: 'car'
             }
           };
+          const coord = [gpsData[datum][1], gpsData[datum][0]];
           // reduce the total of results to a maximum of 23
           // Mapbox's limit is 25 points plus an origin and destination
           const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
@@ -101,6 +104,7 @@ class JobCustomerForm extends Component {
           const remainder = (reducer % 1);
           if (remainder === 0) {
             gps.push(loc);
+            coords.push(coord);
           }
         }
       }
@@ -119,6 +123,7 @@ class JobCustomerForm extends Component {
       images,
       loaded: true,
       gpsTrackings,
+      coords,
       loads,
       overlayMapData: {gps}
     });
@@ -328,41 +333,6 @@ class JobCustomerForm extends Component {
         <LoadsTable loads={loads}/>
       </React.Fragment>
     );
-    // console.log(loads);
-    // if (loads != null && loads.length > 0) {
-    //   return (
-    //     <React.Fragment>
-    //       <hr/>
-    //       <h3 className="subhead">
-    //         Loads
-    //       </h3>
-    //       <Row>
-    //         <Col md={12} lg={12}>
-    //           <Card>
-    //             <CardBody className="products-list">
-    //               <div className="tabs tabs--bordered-bottom">
-    //                 <div className="tabs__wrap">
-    //                   <TTable
-    //                     columns={
-    //                       [
-    //                         {
-    //                           name: 'id',
-    //                           displayName: 'IDs'
-    //                         }
-    //                       ]
-    //                     }
-    //                     data={loads}
-    //                     handleIdClick={this.handleInputChange}
-    //                   />
-    //                 </div>
-    //               </div>
-    //             </CardBody>
-    //           </Card>
-    //         </Col>
-    //       </Row>
-    //     </React.Fragment>
-    //   );
-    // }
   }
 
   renderJobTons() {
@@ -794,7 +764,7 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderMBMap(origin, destination, gpsData) {
+  renderMBMap(origin, destination, gpsData, coords) {
     return (
       <React.Fragment>
         <TMapBoxOriginDestinationWithOverlay
@@ -802,7 +772,8 @@ class JobCustomerForm extends Component {
             {
               origin,
               destination,
-              gpsData
+              gpsData,
+              coords
             }
           }
         />
@@ -811,7 +782,7 @@ class JobCustomerForm extends Component {
   }
 
   renderEverything() {
-    const {images, gpsTrackings, overlayMapData, loads} = this.state;
+    const {images, gpsTrackings, coords, overlayMapData, loads} = this.state;
     const {job} = this.props;
     let origin = '';
     let destination = '';
@@ -845,7 +816,7 @@ class JobCustomerForm extends Component {
               <hr/>
               <Row>
                 <div className="col-md-8 mr-24">
-                  {this.renderMBMap(origin, destination, overlayMapData)}
+                  {this.renderMBMap(origin, destination, overlayMapData, coords)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -898,7 +869,7 @@ class JobCustomerForm extends Component {
             <hr/>
             <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
               <div className="col-md-8" style={{padding: 0}}>
-                {this.renderMBMap(origin, destination, overlayMapData)}
+                {this.renderMBMap(origin, destination, overlayMapData, coords)}
               </div>
               <div className="col-md-4">
                 <div className="row">
