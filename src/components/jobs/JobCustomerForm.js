@@ -7,8 +7,6 @@ import {Card, CardBody, Col, Row, Container} from 'reactstrap';
 
 import './jobs.css';
 import mapboxgl from 'mapbox-gl';
-// import MapboxClient from '@mapbox/mapbox-sdk';
-// import TMap from '../common/TMapOriginDestination';
 
 import TMapBoxOriginDestinationWithOverlay
   from '../common/TMapBoxOriginDestinationWithOverlay';
@@ -24,8 +22,6 @@ import LoadService from '../../api/LoadService';
 import LoadsTable from '../loads/LoadsTable';
 
 mapboxgl.accessToken = process.env.MAPBOX_API;
-const MAPBOX_MAX = 23;
-const MAPBOX_MATCH_MAX = 100;
 
 const mbxClient = require('@mapbox/mapbox-sdk');
 const mbxMapMatch = require('@mapbox/mapbox-sdk/services/map-matching');
@@ -76,8 +72,8 @@ class JobCustomerForm extends Component {
     let gpsData = [];
     if (bookings.length > 0) {
       gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-        // bookings[0].id
-        6
+        bookings[0].id
+        // 6
       );
       loads = await LoadService.getLoadsByBookingId(
         bookings[0].id // booking.id 6
@@ -87,35 +83,6 @@ class JobCustomerForm extends Component {
     // prepare the waypoints in an appropiate format for MB (GEOJson point)
     const gps = [];
     const coords = [];
-    if (gpsData.length > 0) {
-      for (const datum in gpsData) {
-        if (gpsData[datum][0]) {
-          const loc = {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [
-                gpsData[datum][1],
-                gpsData[datum][0]
-              ]
-            },
-            properties: {
-              icon: 'car'
-            }
-          };
-          const coord = [gpsData[datum][1], gpsData[datum][0]];
-          // reduce the total of results to a maximum of 23
-          // Mapbox's limit is 25 points plus an origin and destination
-          const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
-          const reducer = datum / steps;
-          const remainder = (reducer % 1);
-          if (remainder === 0) {
-            gps.push(loc);
-            // coords.push(coord);
-          }
-        }
-      }
-    }
 
     const matchWaypoints = [];
     if (gpsData.length > 0) {
@@ -123,14 +90,6 @@ class JobCustomerForm extends Component {
         const matchWayPoint = {
           coordinates: [gpsData[datum][1], gpsData[datum][0]]
         };
-        /*
-        const steps = Math.ceil(gpsData.length / MAPBOX_MATCH_MAX);
-        const reducer = datum / steps;
-        const remainder = (reducer % 1);
-        if (remainder === 0) {
-          matchWaypoints.push(matchWayPoint);
-        }
-        */
        matchWaypoints.push(matchWayPoint);
       }
     }
@@ -144,39 +103,61 @@ class JobCustomerForm extends Component {
     }
 
     // Mapbox map matching should support up to 100 points
-    console.log(allWaypoints);
+    // https://docs.mapbox.com/api/navigation/#map-matching
+    // "Map matching works best with a sample rate of 5 seconds between points"
+    // console.log(allWaypoints);
     const that = this;
     const baseClient = mbxClient({ accessToken: mapboxgl.accessToken });
     const mapMatchingService = mbxMapMatch(baseClient);
-    mapMatchingService.getMatch({
-      points: allWaypoints,
-      tidy: false
-    })
-      .send()
-      .then((response) => {
 
-        //AQUI ME QUEDO< OBTENGO LOS WAYPOOINTS PERO IMPRIME MAL
-        const points = response.body.tracepoints;
-        console.log(points);
-        const newCoords = [];
-        if (points.length > 0) {
-          for (const p in points) {
-            if (points[p] !== null) {
-              newCoords.push(points[p].location);
+    if (matchWaypoints.length > 2) {
+      mapMatchingService.getMatch({
+        points: allWaypoints,
+        tidy: false
+      })
+        .send()
+        .then((response) => {
+          const points = response.body.tracepoints;
+          const newCoords = [];
+          if (points.length > 0) {
+            for (const p in points) {
+              if (points[p] !== null) {
+                newCoords.push(points[p].location);
+
+                const loc = {
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: [
+                      points[p].location[0],
+                      points[p].location[1]
+                    ]
+                  },
+                  properties: {
+                    icon: 'car'
+                  }
+                };
+                gps.push(loc);
+              }
             }
+            that.setState({
+              coords: newCoords,
+              gpsDataLoaded: true,
+              overlayMapData: {gps}
+            });
+
+            // /////////////////////////////////
+          } else {
+            that.setState({
+              gpsDataLoaded: true
+            });
           }
-          console.log('>>GOT COORDS');
-          console.log(newCoords);
-          that.setState({
-            coords: newCoords,
-            gpsDataLoaded: true
-          });
-        } else {
-          that.setState({
-            gpsDataLoaded: true
-          });
-        }
+        });
+    } else {
+      that.setState({
+        gpsDataLoaded: true
       });
+    }
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
@@ -192,8 +173,7 @@ class JobCustomerForm extends Component {
       loaded: true,
       gpsTrackings,
       coords,
-      loads,
-      overlayMapData: {gps}
+      loads
     });
   }
 

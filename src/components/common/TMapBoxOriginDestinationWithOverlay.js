@@ -21,8 +21,6 @@ class TMapBoxOriginDestination extends PureComponent {
   }
 
   setMap(origin, destination, waypoints, coords) {
-    // const cPointOrigin = waypoints[0];
-    // const cPointDestination = waypoints[waypoints.length - 1];
 
     mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
@@ -53,6 +51,30 @@ class TMapBoxOriginDestination extends PureComponent {
       directions.setOrigin(origin);
       directions.setDestination(destination);
 
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: coords
+            }
+          }
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#888',
+          'line-width': 8
+        }
+      });
+
       // Plot the actual route (as recorded by GPS)
       map.addLayer({
         id: 'points',
@@ -71,32 +93,6 @@ class TMapBoxOriginDestination extends PureComponent {
           'text-offset': [0, 0.6],
           'text-anchor': 'top'
         }
-      });
-
-      map.addLayer({
-        id: 'route',
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: coords
-            }
-          }
-        }
-        /*
-        layout: {
-          line-join: 'round',
-          line-cap: 'round'
-        },
-        paint: {
-          line-color: '#888',
-          line-width: 8
-        }
-        */
       });
     });
   }
