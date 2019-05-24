@@ -127,6 +127,9 @@
 // ---- Datetime Picker
 .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
   width: 85px;
+  ul.react-datepicker__time-list {
+    font-size: 11px;
+  }
 }
 
 .date-picker

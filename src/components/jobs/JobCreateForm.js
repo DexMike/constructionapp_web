@@ -898,7 +898,7 @@ class JobCreateForm extends Component {
                     }
                   }
                   onChange={this.handleStartTimeChange}
-                  dateFormat="MMMM-dd-yyyy HH:mm"
+                  dateFormat="MMMM-dd-yyyy h:mm aa"
                   showTime
                   meta={reqHandlerDate}
                 />
