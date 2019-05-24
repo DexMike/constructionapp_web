@@ -4,21 +4,21 @@ import { ClipLoader } from 'react-spinners';
 import * as PropTypes from 'prop-types';
 
 const override = css`
-    display: block;
+    display: inline-block;
     margin: 0 auto;
     border-color: red;
 `;
 
 class TSpinner extends PureComponent {
   render() {
-    const { loading } = this.props;
+    const { loading, color, customCss, loaderSize } = this.props;
     return (
-      <div className="sweet-loading">
+      <div className="sweet-loading" style={customCss}>
         <ClipLoader
           css={override}
           sizeUnit="px"
-          size={20}
-          color="#006f53"
+          size={loaderSize}
+          color={color}
           loading={loading}
         />
       </div>
@@ -27,11 +27,17 @@ class TSpinner extends PureComponent {
 }
 
 TSpinner.propTypes = {
-  loading: PropTypes.bool
+  loading: PropTypes.bool,
+  color: PropTypes.string,
+  customCss: PropTypes.shape(),
+  loaderSize: PropTypes.number
 };
 
 TSpinner.defaultProps = {
-  loading: true
+  loading: true,
+  color: '#006f53',
+  customCss: null,
+  loaderSize: 20
 };
 
 export default TSpinner;
