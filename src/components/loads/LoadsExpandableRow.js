@@ -110,7 +110,7 @@ class LoadsExpandableRow extends Component {
           </TableRow>
           {expanded && (
             <TableRow>
-              <TableCell colspan="6" style={{'text-align': 'center', padding: 20}}>
+              <TableCell colSpan="6" style={{padding: 20}}>
                 <Container style={{backgroundColor: 'rgb(219, 219, 219)', borderRadius: 3}}>
                   <Row style={{paddingTop: 20}}>
                     <Col md={2}>
@@ -154,7 +154,7 @@ class LoadsExpandableRow extends Component {
                     </Row>
                   )
                   }
-                  <Row style={{paddingTop: 20}}>
+                  <Row style={{paddingTop: 0}}>
                     <Col md={3}>
                       <React.Fragment>
                         <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>

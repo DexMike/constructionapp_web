@@ -11,12 +11,11 @@ class TMapBoxPath extends PureComponent {
   }
 
   setMap(gpsTrackings) {
-    // const cPointOrigin = waypoints[0];
-    // const cPointDestination = waypoints[waypoints.length - 1];
+    const { loadId } = this.props;
 
     mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
-      container: 'map',
+      container: `map_${loadId}`,
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [-97.7430608, 30.267153],
       zoom: 13,
@@ -47,7 +46,7 @@ class TMapBoxPath extends PureComponent {
     const { loadId } = this.props;
     return (
       <Container className="dashboard">
-        <div id={loadId} />
+        <div id={`map_${loadId}`} style={{width: '100%', height: '200px'}} />
       </Container>
     );
   }
