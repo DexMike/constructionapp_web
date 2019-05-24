@@ -111,7 +111,7 @@ class LoadsExpandableRow extends Component {
           {expanded && (
             <TableRow>
               <TableCell colSpan="6" style={{padding: 20}}>
-                <Container style={{backgroundColor: 'rgb(219, 219, 219)', borderRadius: 3}}>
+                <Container style={{backgroundColor: '#ffffff', borderRadius: 3}}>
                   <Row style={{paddingTop: 20}}>
                     <Col md={2}>
                       <p style={{color: '#006F53', fontSize: 20}}>

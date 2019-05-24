@@ -859,6 +859,45 @@ class JobCustomerForm extends Component {
         </Container>
       );
     }
+    if (job.status === 'In Progress') {
+      return (
+        <Container>
+          <Card>
+            <CardBody className="card-full-height">
+              <Row>
+                {this.renderJobTop(job)}
+              </Row>
+              <hr/>
+              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
+                <div className="col-md-8" style={{padding: 0}}>
+                  {this.renderMBMap(origin, destination, overlayMapData, coords)}
+                </div>
+                <div className="col-md-4">
+                  <div className="row">
+                    <div className="col-md-12">
+                      {this.renderStartAddress(job.startAddress)}
+                    </div>
+                  </div>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {endAddress}
+                    </div>
+                  </div>
+                  <hr/>
+                  <div className="row mt-1">
+                    <div className="col-md-12">
+                      {this.renderJobBottom(job)}
+                    </div>
+                  </div>
+                </div>
+              </Row>
+              <hr/>
+              {this.renderLoads(loads)}
+            </CardBody>
+          </Card>
+        </Container>
+      );
+    }
     return (
       <Container>
         <Card>

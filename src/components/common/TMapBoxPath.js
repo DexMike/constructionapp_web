@@ -6,19 +6,18 @@ import './css/mapBox.css';
 
 class TMapBoxPath extends PureComponent {
   componentDidMount() {
-    const { gpsTrackings } = this.props;
-    this.setMap(gpsTrackings);
+    const { loadId, gpsTrackings } = this.props;
+    this.setMap(loadId, gpsTrackings);
   }
 
-  setMap(gpsTrackings) {
-    const { loadId } = this.props;
-
+  setMap(loadId, gpsTrackings) {
+    const center = Math.floor(gpsTrackings.length / 2);
     mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
       container: `map_${loadId}`,
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: [-97.7430608, 30.267153],
-      zoom: 13,
+      center: [gpsTrackings[center][0], gpsTrackings[center][1]],
+      zoom: 15,
       mode: 'driving',
       attributionControl: false
     });
@@ -46,7 +45,7 @@ class TMapBoxPath extends PureComponent {
     const { loadId } = this.props;
     return (
       <Container className="dashboard">
-        <div id={`map_${loadId}`} style={{width: '100%', height: '200px'}} />
+        <div id={`map_${loadId}`} style={{width: '100%', height: '400px'}} />
       </Container>
     );
   }
