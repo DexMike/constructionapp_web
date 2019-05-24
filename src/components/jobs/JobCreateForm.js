@@ -859,7 +859,7 @@ class JobCreateForm extends Component {
     return (
       <React.Fragment>
         <div className="row">
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="form__form-group">
               <div className="">
                 { /* <input name="name"
@@ -884,7 +884,7 @@ class JobCreateForm extends Component {
               </div>
             </div>
           </div>
-          <div className="col-md-4 form--horizontal">
+          <div className="col-md-6 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
               <div className="">
@@ -898,13 +898,14 @@ class JobCreateForm extends Component {
                     }
                   }
                   onChange={this.handleStartTimeChange}
-                  dateFormat="MMMM-dd-yyyy"
+                  dateFormat="MMMM-dd-yyyy h:mm aa"
+                  showTime
                   meta={reqHandlerDate}
                 />
               </div>
             </div>
           </div>
-          <div className="col-md-4 form--horizontal">
+          <div className="col-md-3 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
               <div className="">
