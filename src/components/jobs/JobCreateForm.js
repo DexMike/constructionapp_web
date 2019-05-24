@@ -963,7 +963,7 @@ class JobCreateForm extends Component {
                 }
               }
               // meta={reqHandlerMaterials}
-              value={selectedStartAddressId}
+              // value={selectedStartAddressId}
               options={allAddresses}
               placeholder="Select a location"
             />
