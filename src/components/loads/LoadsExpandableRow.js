@@ -157,7 +157,7 @@ class LoadsExpandableRow extends Component {
                   <Row style={{paddingTop: 20}}>
                     <Col md={3}>
                       <React.Fragment>
-                        <TMapBoxPath gpsTrackings={gpsTrackings}/>
+                        <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
                       </React.Fragment>
                     </Col>
                   </Row>

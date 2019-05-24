@@ -44,16 +44,18 @@ class TMapBoxPath extends PureComponent {
   }
 
   render() {
+    const { loadId } = this.props;
     return (
       <Container className="dashboard">
-        <div id="map" />
+        <div id={loadId} />
       </Container>
     );
   }
 }
 
 TMapBoxPath.propTypes = {
-  gpsTrackings: PropTypes.array.isRequired
+  gpsTrackings: PropTypes.array.isRequired,
+  loadId: PropTypes.number.isRequired
 };
 
 export default TMapBoxPath;
