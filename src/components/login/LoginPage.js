@@ -90,6 +90,7 @@ class LoginPage extends SignIn {
         || !this.state.password || this.state.password.length <= 0) {
         this.setState({
           error: 'Incorrect username or password.',
+          btnSubmitting: false,
           loading: false
         });
         return;
@@ -196,14 +197,14 @@ class LoginPage extends SignIn {
         <TAlert color="danger" visible={!!this.state.confirmUsername} onDismiss={this.onDismiss}>
           <p>
             User not confirmed.
-            {this.state.errorCode === 'UserNotConfirmedException' &&
+            {this.state.errorCode === 'UserNotConfirmedException' && (
             <button type="button"
                     className="account__confirm"
                     onClick={this.handleUserNotConfirmed}
             >
               Confirm: {this.state.confirmUsername}
             </button>
-            }
+            )}
             &nbsp;
             {this.state.userConfirmError}
           </p>
