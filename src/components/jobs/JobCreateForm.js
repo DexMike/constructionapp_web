@@ -19,6 +19,7 @@ import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import UserService from '../../api/UserService';
+import TSubmitButton from '../common/TSubmitButton';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -29,6 +30,7 @@ class JobCreateForm extends Component {
     // job.
     this.state = {
       loaded: false,
+      btnSubmitting: false,
       job,
       states: [],
       startAddress: AddressService.getDefaultAddress(),
@@ -352,8 +354,9 @@ class JobCreateForm extends Component {
     }
   }
 
-  async createJob(e) {
-    e.preventDefault();
+  async createJob() {
+    this.setState({ btnSubmitting: true });
+
     const { closeModal, selectedEquipment } = this.props;
     const {
       startAddress,
@@ -1227,6 +1230,7 @@ class JobCreateForm extends Component {
 
   renderJobFormButtons() {
     const { closeModal } = this.props;
+    const { btnSubmitting } = this.state;
 
     return (
       <div className="row float-right">
@@ -1237,9 +1241,13 @@ class JobCreateForm extends Component {
             </button>
           </div>
           <div className="col-sm-8">
-            <button type="submit" className="btn btn-primary">
-              Request Truck
-            </button>
+            <TSubmitButton
+              onClick={this.createJob}
+              className="primaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Request Truck"
+            />
           </div>
         </div>
       </div>
@@ -1250,7 +1258,7 @@ class JobCreateForm extends Component {
     const { loaded } = this.state;
     if (loaded) {
       return (
-        <form id="job-request" onSubmit={e => this.createJob(e)}>
+        <form id="job-request">
           {this.renderSelectedEquipment()}
           <div className="cl-md-12">
             <hr />
