@@ -62,6 +62,10 @@ class SidebarCarrierContent extends Component {
                      icon="ic_airline_seat_recline_normal"
                      route="/drivers"
                      onClick={this.hideSidebar}/>
+        <SideElement title="Payments"
+                     icon="ic_attach_money"
+                     route="/payments"
+                     onClick={this.hideSidebar}/>
         <SideElement title="Reports"
                      icon="ic_timeline"
                      route="/Reports"
