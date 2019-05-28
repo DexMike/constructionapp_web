@@ -8,7 +8,7 @@ import ThemeContext from '../../ThemeContext';
 class TopbarMenuLink extends Component {
   async logOut() {
     try {
-      await Auth.signOut({global: true});
+      await Auth.signOut();
     } catch (err) {
       // POST https://cognito-idp.us-east-1.amazonaws.com/ 400
       // Uncaught (in promise) {code: "NotAuthorizedException",

@@ -19,6 +19,7 @@ import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import UserService from '../../api/UserService';
+import TSubmitButton from '../common/TSubmitButton';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -29,6 +30,7 @@ class JobCreateForm extends Component {
     // job.
     this.state = {
       loaded: false,
+      btnSubmitting: false,
       job,
       states: [],
       startAddress: AddressService.getDefaultAddress(),
@@ -352,8 +354,9 @@ class JobCreateForm extends Component {
     }
   }
 
-  async createJob(e) {
-    e.preventDefault();
+  async createJob() {
+    this.setState({ btnSubmitting: true });
+
     const { closeModal, selectedEquipment } = this.props;
     const {
       startAddress,
@@ -856,7 +859,7 @@ class JobCreateForm extends Component {
     return (
       <React.Fragment>
         <div className="row">
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="form__form-group">
               <div className="">
                 { /* <input name="name"
@@ -881,7 +884,7 @@ class JobCreateForm extends Component {
               </div>
             </div>
           </div>
-          <div className="col-md-4 form--horizontal">
+          <div className="col-md-6 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
               <div className="">
@@ -895,13 +898,14 @@ class JobCreateForm extends Component {
                     }
                   }
                   onChange={this.handleStartTimeChange}
-                  dateFormat="MMMM-dd-yyyy"
+                  dateFormat="MMMM-dd-yyyy h:mm aa"
+                  showTime
                   meta={reqHandlerDate}
                 />
               </div>
             </div>
           </div>
-          <div className="col-md-4 form--horizontal">
+          <div className="col-md-3 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
               <div className="">
@@ -1226,6 +1230,7 @@ class JobCreateForm extends Component {
 
   renderJobFormButtons() {
     const { closeModal } = this.props;
+    const { btnSubmitting } = this.state;
 
     return (
       <div className="row float-right">
@@ -1236,9 +1241,13 @@ class JobCreateForm extends Component {
             </button>
           </div>
           <div className="col-sm-8">
-            <button type="submit" className="btn btn-primary">
-              Request Truck
-            </button>
+            <TSubmitButton
+              onClick={this.createJob}
+              className="primaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Request Truck"
+            />
           </div>
         </div>
       </div>
@@ -1249,7 +1258,7 @@ class JobCreateForm extends Component {
     const { loaded } = this.state;
     if (loaded) {
       return (
-        <form id="job-request" onSubmit={e => this.createJob(e)}>
+        <form id="job-request">
           {this.renderSelectedEquipment()}
           <div className="cl-md-12">
             <hr />
