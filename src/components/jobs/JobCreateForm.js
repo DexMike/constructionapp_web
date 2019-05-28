@@ -178,7 +178,6 @@ class JobCreateForm extends Component {
     } catch (e) {
       // console.log('No materials');
     }
-
     await this.fetchForeignValues();
     this.setState({
       job,
@@ -377,6 +376,7 @@ class JobCreateForm extends Component {
     if (!this.isFormValid()) {
       // TODO display error message
       // console.error('didnt put all the required fields.');
+      this.setState({ btnSubmitting: false });
       return;
     }
     startAddress.modifiedOn = moment()
@@ -386,6 +386,7 @@ class JobCreateForm extends Component {
 
     // start address
     let newStartAddress;
+
     if (selectedStartAddressId === 0) {
       newStartAddress = await AddressService.createAddress(startAddress);
       newJob.startAddress = newStartAddress.id;
@@ -488,20 +489,8 @@ class JobCreateForm extends Component {
     // Lets copy the bid info
     bookingEquipment.startTime = createdBooking.startTime;
     bookingEquipment.endTime = createdBooking.endTime;
-
-    // TEST
-    // if the startaddress is the actual ID
-    if (Number.isInteger(createdJob.startAddress)) {
-      bookingEquipment.startAddressId = createdBooking.startAddress;
-    } else {
-      bookingEquipment.startAddressId = createdBooking.startAddress.id;
-    }
-
-    if (Number.isInteger(createdJob.endAddress)) {
-      bookingEquipment.endAddressId = createdBooking.endAddress;
-    } else {
-      bookingEquipment.endAddressId = createdBooking.endAddress.id;
-    }
+    bookingEquipment.startAddressId = createdBooking.startAddressId;
+    bookingEquipment.endAddressId = createdBooking.endAddressId;
 
     // Since this is booking method 1, we do not have any notes as this is getting created
     // automatically and not by a user
@@ -551,14 +540,14 @@ class JobCreateForm extends Component {
 
   handleStartAddressIdChange(data) {
     this.setState({
-      startAddress: [],
+      // startAddress: [],
       selectedStartAddressId: data.value
     });
   }
 
   handleEndAddressIdChange(data) {
     this.setState({
-      endAddress: [],
+      // endAddress: [],
       selectedEndAddressId: data.value
     });
   }
