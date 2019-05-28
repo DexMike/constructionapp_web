@@ -116,7 +116,8 @@ class UserForm extends Component {
   async fetchParentValues(user) {
     // const companyId = user.companyId;
 
-    let users = await UserService.getUsers();
+    const response = await UserService.getUsers();
+    let users = response.data;
     const managers = [];
     users = users.map(userMap => ({
       value: String(userMap.id),

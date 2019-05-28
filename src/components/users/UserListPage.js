@@ -30,7 +30,8 @@ class UserListPage extends Component {
   }
 
   async fetchUsers() {
-    let users = await UserService.getUsers();
+    const response = await UserService.getUsers();
+    let users = response.data;
     users = users.map((user) => {
       const newUser = user;
       // newUser.modifiedOn = moment(user.modifiedOn).format();
