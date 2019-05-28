@@ -156,8 +156,8 @@ class JobCreateForm extends Component {
     booking.endTime = job.endTime;
 
     // should load all addresses even if already set
-    let allAddresses = await AddressService.getAddresses();
-    allAddresses = allAddresses.map(address => ({
+    const response = await AddressService.getAddresses();
+    const allAddresses = response.data.map(address => ({
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));

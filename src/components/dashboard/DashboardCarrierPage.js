@@ -52,16 +52,15 @@ class DashboardCarrierPage extends Component {
 
   async fetchJobsInfo() {
     const profile = await ProfileService.getProfile();
-    const jobsInfo = await JobService.getCarrierJobsInfo(profile.companyId);
-    const { totalJobs } = jobsInfo[0];
+    const response = await JobService.getCarrierJobsInfo(profile.companyId);
+    const jobsInfo = response.data;
+    const { totalJobs } = response;
     this.setState({ jobsInfo, totalJobs });
   }
 
-  returnJobs(jobs, filters) {
-    let totalCount = 0;
-    if (jobs.length > 0) {
-      totalCount = jobs[0].totalJobs;
-    }
+  returnJobs(jobs, filters, metadata) {
+    const { totalCount } = metadata;
+
     this.setState({
       jobs,
       filters,
