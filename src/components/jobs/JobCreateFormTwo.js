@@ -21,7 +21,7 @@ import './jobs.css';
 import GroupListService from '../../api/GroupListService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TSpinner from '../common/TSpinner';
-
+import TSubmitButton from '../common/TSubmitButton';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -34,6 +34,7 @@ class JobCreateFormTwo extends PureComponent {
       favoriteAdminTels: [],
       nonFavoriteAdminTels: [],
       loaded: false,
+      btnSubmitting: false,
       reqCheckABox: {
         touched: false,
         error: ''
@@ -42,6 +43,7 @@ class JobCreateFormTwo extends PureComponent {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.saveJobMaterials = this.saveJobMaterials.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.saveJob = this.saveJob.bind(this);
   }
 
   async componentDidMount() {
@@ -145,10 +147,11 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
-  async saveJob(e) {
-    e.preventDefault();
-    e.persist();
+  async saveJob() {
+    this.setState({ btnSubmitting: true });
+
     if (!this.isFormValid()) {
+      this.setState({ btnSubmitting: false });
       return;
     }
     const { firstTabData } = this.props;
@@ -363,7 +366,8 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites,
       showSendtoFavorites,
       reqCheckABox,
-      loaded
+      loaded,
+      btnSubmitting
     } = this.state;
     const { onClose } = this.props;
     if (loaded) {
@@ -373,7 +377,6 @@ class JobCreateFormTwo extends PureComponent {
             <CardBody>
               <form
                 className="form form--horizontal addtruck__form"
-                onSubmit={e => this.saveJob(e)}
               >
                 <Row className="col-md-12">
                   <div className="row mt-1">
@@ -469,13 +472,13 @@ class JobCreateFormTwo extends PureComponent {
                     </Button>
                   </ButtonToolbar>
                   <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                    <Button
-                      color="primary"
-                      type="submit"
-                      className="next"
-                    >
-                      Send Job
-                    </Button>
+                    <TSubmitButton
+                      onClick={this.saveJob}
+                      className="primaryButton"
+                      loading={btnSubmitting}
+                      loaderSize={10}
+                      bntText="Send Job"
+                    />
                   </ButtonToolbar>
                   <TSpinner loading={false}/>
                 </Row>
