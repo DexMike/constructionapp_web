@@ -10,7 +10,7 @@ import {
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
-import {DashboardObjectClickable} from './DashboardObjectClickable';
+import DashboardObjectClickable from './DashboardObjectClickable';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
@@ -216,7 +216,6 @@ class DashboardCarrierPage extends Component {
     const { loaded, filters, jobsInfo } = this.state;
     let jobs = jobsInfo;
     let onOfferJobCount = 0;
-    let publishedJobCount = 0;
     let bookedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
@@ -237,10 +236,6 @@ class DashboardCarrierPage extends Component {
         if (newJob.status === 'On Offer') {
           // onOfferJobCount += 1;
           onOfferJobCount = newJob.countJobs;
-        }
-        if (newJob.status === 'Published') {
-          // publishedJobCount += 1;
-          publishedJobCount = newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;
@@ -304,14 +299,6 @@ class DashboardCarrierPage extends Component {
               status={filters.status}
             />
             <DashboardObjectClickable
-              title="Published Jobs"
-              displayVal={publishedJobCount}
-              value="Published"
-              handle={this.handleFilterStatusChange}
-              name="status"
-              status={filters.status}
-            />
-            <DashboardObjectClickable
               title="Booked Jobs"
               displayVal={bookedJobCount}
               value="Booked"
@@ -363,7 +350,6 @@ class DashboardCarrierPage extends Component {
     let { jobs } = this.state;
 
     let onOfferJobCount = 0;
-    let publishedJobCount = 0;
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
@@ -379,11 +365,9 @@ class DashboardCarrierPage extends Component {
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
-      if (newJob.status === 'On Offer') {
+      if (newJob.status === 'On Offer' || newJob.status === 'Published And Offered') {
         onOfferJobCount += 1;
-      }
-      if (newJob.status === 'Published') {
-        publishedJobCount += 1;
+        newJob.status = 'On Offer';
       }
       if (newJob.status === 'Booked') {
         acceptedJobCount += 1;

@@ -204,6 +204,7 @@ class JobFilter extends Component {
       filters.createdBy = profile.userId;
     } else if (profile.companyType === 'Carrier' && url === marketplaceUrl) { // Marketplace
       filters.status = 'Published';
+      filters.isMarketplaceView = true;
       filters.isFavorited = 0;
     }
     const jobs = await JobService.getJobDashboardByFilters(filters);

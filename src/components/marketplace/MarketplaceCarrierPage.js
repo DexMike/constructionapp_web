@@ -48,13 +48,14 @@ class MarketplaceCarrierPage extends Component {
     this.setState({ totalJobs });
   }
 
-
   returnJobs(jobs) {
-    const totalCount = jobs[0].totalJobs;
-    this.setState({
-      totalCount,
-      jobs
-    });
+    if (jobs.length > 0) {
+      const totalCount = jobs[0].totalJobs;
+      this.setState({
+        totalCount,
+        jobs
+      });
+    }
   }
 
   handlePageClick(menuItem) {
@@ -85,7 +86,6 @@ class MarketplaceCarrierPage extends Component {
       modal: true
     });
   } */
-  
 
   toggleAddJobModal() {
     const { modal } = this.state;
