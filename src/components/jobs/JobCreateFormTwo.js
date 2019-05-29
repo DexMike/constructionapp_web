@@ -165,6 +165,7 @@ class JobCreateFormTwo extends PureComponent {
     } = this.state;
     const d = firstTabData();
     const profile = await ProfileService.getProfile();
+    let status = 'Published';
 
     // start location
     let startAddress = {
@@ -223,10 +224,22 @@ class JobCreateFormTwo extends PureComponent {
       rateType = 'Ton';
     }
 
+    // if both checks (Send to Mkt and Send to All Favorites) are selected
+    if (
+      (sendToMkt === true || sendToMkt === 1)
+      && (sendToFavorites === true || sendToFavorites === 1)
+    ) {
+      status = 'Published And Offered';
+    } else if (sendToFavorites === true || sendToFavorites === 1) { // sending to All Favorites only
+      status = 'On Offer';
+    } else { // default
+      status = 'Published';
+    }
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
-      status: 'Published',
+      status,
       isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,

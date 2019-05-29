@@ -85,7 +85,6 @@ class MarketplaceCarrierPage extends Component {
       modal: true
     });
   } */
-  
 
   toggleAddJobModal() {
     const { modal } = this.state;

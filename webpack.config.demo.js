@@ -1,10 +1,10 @@
 import webpack from 'webpack';
 import path from 'path';
 // import ExtractTextPlugin from 'extract-text-webpack-plugin';
-// import CompressionPlugin from 'compression-webpack-plugin';
 // import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import Dotenv from 'dotenv-webpack';
+import CompressionPlugin from 'compression-webpack-plugin';
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production')
@@ -37,14 +37,18 @@ export default {
     }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
+    }),
+    new CompressionPlugin({
+      filename: '[path].br[query]',
+      // filename: '[path].gz[query]',
+      algorithm: 'brotliCompress',
+      // algorithm: 'gzip',
+      test: new RegExp('\\.(js|css)$'),
+      compressionOptions: { level: 11 },
+      threshold: 10240,
+      minRatio: 0.8,
+      deleteOriginalAssets: false
     })
-    // new CompressionPlugin({
-    //   asset: '[path].gz[query]',
-    //   algorithm: 'gzip',
-    //   test: new RegExp('\\.(js|css)$'),
-    //   threshold: 10240,
-    //   minRatio: 0.8
-    // })
   ],
   module: {
     rules: [
