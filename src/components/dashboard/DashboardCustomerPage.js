@@ -16,7 +16,7 @@ import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
 
-import {DashboardObjectClickable} from './DashboardObjectClickable';
+import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
 
@@ -331,7 +331,7 @@ class DashboardCustomerPage extends Component {
               status={filters.status}
             />
             <DashboardObjectClickable
-              title="Published Jobs"
+              title="Posted Jobs"
               displayVal={publishedJobCount}
               value="Published"
               handle={this.handleFilterStatusChange}

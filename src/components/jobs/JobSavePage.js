@@ -549,7 +549,9 @@ class JobSavePage extends Component {
       // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
         let type = '';
-        // console.log(companyType);
+        // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
+        if (job.status === 'Published And Offered' && companyType === 'Carrier') job.status = 'On Offer';
+
         if (companyType === 'Carrier') {
           type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick}/>);
         } else {
@@ -582,7 +584,7 @@ class JobSavePage extends Component {
         }
 
         // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
-        if (job.status === 'On Offer' && companyType === 'Carrier' && bid.status !== 'Declined') {
+        if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
           buttonText = (
             <div>
               <Button

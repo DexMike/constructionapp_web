@@ -1,21 +1,32 @@
-import React from "react";
-import {useTranslation} from "react-i18next";
-import classNames from "classnames";
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
-
-export const DashboardObjectClickable = ({title, displayVal, handle, name, value, status}) => {
+const DashboardObjectClickable = ({
+  title,
+  displayVal,
+  handle,
+  name,
+  value,
+  status
+}) => {
   const {t} = useTranslation();
-  const func = () => {
-    return handle({value, name})
-  }
+  const func = () => handle({value, name});
   const cardClass = classNames({
-    "dashboard__card-widget card-body card-filter active": value === status,
-    "dashboard__card-widget card-body card-filter": value != status,
+    'dashboard__card-widget card-body card-filter active': value === status,
+    'dashboard__card-widget card-body card-filter': value !== status
   });
   return (
-    <div className="col-12 col-md-2 col-lg-2">
+    <div
+      className="col"
+    >
       <div className="card">
-        <div className={cardClass} onClick={func}>
+        <div
+          className={cardClass}
+          onClick={func}
+          role="presentation"
+        >
           <h5 className="card__title bold-text">
             <center>{t(title)}</center>
           </h5>
@@ -23,5 +34,24 @@ export const DashboardObjectClickable = ({title, displayVal, handle, name, value
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+DashboardObjectClickable.propTypes = {
+  title: PropTypes.string,
+  displayVal: PropTypes.number,
+  value: PropTypes.string,
+  handle: PropTypes.func.isRequired,
+  name: PropTypes.string,
+  status: PropTypes.string
+};
+
+DashboardObjectClickable.defaultProps = {
+  title: '',
+  displayVal: 0,
+  value: '',
+  name: '',
+  status: ''
+};
+
+export default DashboardObjectClickable;
