@@ -48,13 +48,13 @@ class CreateJobFormOne extends PureComponent {
       endLocationCity: '',
       endLocationState: '',
       endLocationZip: '',
-      // date
-      jobDate: new Date(),
       startLocationAddress1: '',
       startLocationAddress2: '',
       startLocationCity: '',
       startLocationState: '',
       startLocationZip: '',
+      // date
+      jobDate: new Date(),
       // job properties
       name: '',
       instructions: '',
@@ -184,16 +184,16 @@ class CreateJobFormOne extends PureComponent {
         endLocationCity: p.endLocationCity,
         endLocationState: p.endLocationState,
         endLocationZip: p.endLocationZip,
-        // date
         selectedStartAddressId: p.selectedStartAddressId,
         startLocationAddress1: p.startLocationAddress1,
         startLocationAddress2: p.startLocationAddress2,
         startLocationCity: p.startLocationCity,
         startLocationState: p.startLocationState,
         startLocationZip: p.startLocationZip,
+        // date
+        jobDate: p.jobDate,
         // job properties
         name: p.name,
-        jobDate: p.jobDate,
         instructions: p.instructions
       });
     } else {
