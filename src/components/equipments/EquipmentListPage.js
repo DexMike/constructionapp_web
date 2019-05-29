@@ -58,8 +58,9 @@ class EquipmentListPage extends Component {
     const { modal } = this.state;
     // load only if the modal is not present
     if (!modal) {
-      const equipments = await this.fetchEquipments();
-      const totalCount = equipments[0].totalEquipments;
+      const response = await this.fetchEquipments();
+      const equipments = response.data;
+      const { totalCount } = response.metadata;
       this.setState({
         equipments,
         totalCount

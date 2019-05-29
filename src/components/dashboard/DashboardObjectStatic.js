@@ -21,7 +21,7 @@ export const DashboardObjectStatic = ({title, displayVal}) => {
 
 DashboardObjectStatic.propTypes = {
   title: PropTypes.string,
-  displayVal: PropTypes.number
+  displayVal: PropTypes.shape()
 };
 
 DashboardObjectStatic.defaultProps = {

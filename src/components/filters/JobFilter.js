@@ -207,9 +207,13 @@ class JobFilter extends Component {
       filters.isMarketplaceView = true;
       filters.isFavorited = 0;
     }
-    const jobs = await JobService.getJobDashboardByFilters(filters);
+
+    const result = await JobService.getJobDashboardByFilters(filters);
+    const jobs = result.data;
+    const { metadata } = result;
     const {returnJobs} = this.props;
-    returnJobs(jobs, filters);
+
+    returnJobs(jobs, filters, metadata);
     return jobs;
   }
 

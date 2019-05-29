@@ -43,19 +43,18 @@ class MarketplaceCarrierPage extends Component {
   }
 
   async fetchJobsInfo() {
-    const jobsInfo = await JobService.getMarketplaceJobsInfo();
-    const { totalJobs } = jobsInfo[0];
+    const response = await JobService.getMarketplaceJobsInfo();
+    const { totalJobs } = response;
     this.setState({ totalJobs });
   }
 
-  returnJobs(jobs) {
-    if (jobs.length > 0) {
-      const totalCount = jobs[0].totalJobs;
-      this.setState({
-        totalCount,
-        jobs
-      });
-    }
+
+  returnJobs(jobs, filters, metadata) {
+    const { totalCount } = metadata;
+    this.setState({
+      totalCount,
+      jobs
+    });
   }
 
   handlePageClick(menuItem) {

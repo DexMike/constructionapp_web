@@ -116,7 +116,8 @@ class EquipmentForm extends Component {
   }
 
   async fetchParentValues() {
-    const users = await UserService.getUsers();
+    const response = await UserService.getUsers();
+    const users = response.data;
     const { companyId } = this.state;
     const drivers = [];
     Object.values(users).forEach((itm) => {
