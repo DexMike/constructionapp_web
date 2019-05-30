@@ -33,6 +33,8 @@ class TMapBoxOriginDestination extends PureComponent {
       mode: 'driving',
       attributionControl: false
     });
+    
+    map.on('click', this.clickHandler());
 
     map.on('load', () => {
       const directions = new MapboxDirections(
@@ -49,7 +51,6 @@ class TMapBoxOriginDestination extends PureComponent {
       );
       map.addControl(directions, 'top-left');
       map.addControl(new mapboxgl.FullscreenControl());
-      map.on('click', this.clickHandler());
 
       directions.setOrigin(origin);
       directions.setDestination(destination);
