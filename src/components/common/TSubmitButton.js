@@ -35,7 +35,10 @@ TSubmitButton.propTypes = {
   bntText: PropTypes.string.isRequired,
   className: PropTypes.string,
   customCss: PropTypes.shape(),
-  onClick: PropTypes.func,
+  onClick: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.func
+  ]),
   loaderSize: PropTypes.number,
   disabled: PropTypes.bool,
   loading: PropTypes.bool

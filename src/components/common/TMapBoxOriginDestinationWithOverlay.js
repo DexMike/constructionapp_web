@@ -31,6 +31,8 @@ class TMapBoxOriginDestination extends PureComponent {
       attributionControl: false
     });
 
+    map.on('click', this.clickHandler());
+
     map.on('load', () => {
       const directions = new MapboxDirections(
         {
@@ -93,6 +95,10 @@ class TMapBoxOriginDestination extends PureComponent {
         }
       });
     });
+  }
+
+  clickHandler() {
+    return false;
   }
 
   render() {

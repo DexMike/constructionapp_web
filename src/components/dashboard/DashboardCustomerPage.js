@@ -191,6 +191,7 @@ class DashboardCustomerPage extends Component {
   async toggleNewJobModal() {
     const {modalAddJob, filters} = this.state;
     if (modalAddJob) {
+      this.fetchJobsInfo();
       this.refs.filterChild.filterWithStatus(filters);
       this.setState({loaded: true});
     }
@@ -271,7 +272,11 @@ class DashboardCustomerPage extends Component {
         }
         if (newJob.status === 'Published') {
           // publishedJobCount += 1;
-          publishedJobCount = newJob.countJobs;
+          publishedJobCount += newJob.countJobs;
+        }
+        if (newJob.status === 'Published And Offered') {
+          // publishedJobCount += 1;
+          publishedJobCount += newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;

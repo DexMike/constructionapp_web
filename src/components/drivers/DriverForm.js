@@ -12,6 +12,7 @@ import NumberFormat from 'react-number-format';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
+import TSubmitButton from '../common/TSubmitButton';
 
 class DriverForm extends Component {
   constructor(props) {
@@ -24,6 +25,7 @@ class DriverForm extends Component {
       email: '',
       mobilePhone: '',
       selectedUser: [],
+      btnSubmitting: false,
       reqHandlerFName: { touched: false, error: '' },
       reqHandlerLName: { touched: false, error: '' },
       reqHandlerEmail: { touched: false, error: '' },
@@ -58,10 +60,11 @@ class DriverForm extends Component {
     }
   }
 
-  async saveUser(e) {
-    e.preventDefault();
+  async saveUser() {
+    this.setState({ btnSubmitting: true });
 
     if (!this.isFormValid()) {
+      this.setState({ btnSubmitting: false });
       return;
     }
 
@@ -179,6 +182,7 @@ class DriverForm extends Component {
       lastName,
       email,
       mobilePhone,
+      btnSubmitting,
       reqHandlerFName,
       reqHandlerLName,
       reqHandlerEmail,
@@ -191,7 +195,7 @@ class DriverForm extends Component {
           <br />
           <Card>
             <CardBody>
-              <form className="form" onSubmit={e => this.saveUser(e)}>
+              <form className="form">
                 <div className="form__half">
                   <div className="form__form-group">
                     <span className="form__form-group-label">
@@ -256,7 +260,13 @@ class DriverForm extends Component {
                   <br />
                   <div className="float-right">
                     <Button key="2" onClick={this.goToDriversList} className="secondaryButton">Cancel</Button>
-                    <Button key="1" onClick={this.saveUser} className="primaryButton">Update Driver</Button>
+                    <TSubmitButton
+                      onClick={this.saveUser}
+                      className="primaryButton"
+                      loading={btnSubmitting}
+                      loaderSize={10}
+                      bntText="Update Driver"
+                    />
                   </div>
                 </div>
               </form>
