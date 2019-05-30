@@ -234,7 +234,11 @@ class DashboardCarrierPage extends Component {
         // const tempRate = newJob.rate;
         if (newJob.status === 'On Offer') {
           // onOfferJobCount += 1;
-          onOfferJobCount = newJob.countJobs;
+          onOfferJobCount += newJob.countJobs;
+        }
+        if (newJob.status === 'Published And Offered') {
+          // publishedJobCount += 1;
+          onOfferJobCount += newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;
