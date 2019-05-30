@@ -143,12 +143,6 @@ class JobCarrierForm extends JobCustomerForm {
     }
   }
 
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
-    }
-  }
-
   async saveJob(e) {
     e.preventDefault();
     const {job, handlePageClick} = this.props;
