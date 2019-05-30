@@ -21,6 +21,7 @@ import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
+import TSubmitButton from '../common/TSubmitButton';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -51,7 +52,8 @@ class JobSavePage extends Component {
       profile: [],
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
-      companyType: null
+      companyType: null,
+      btnSubmitting: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -172,6 +174,7 @@ class JobSavePage extends Component {
   }
 
   async handleConfirmRequest(action) { // Customer 'Accepts' or 'Rejects' Job request
+    this.setState({ btnSubmitting: true });
     const {
       job,
       bid,
@@ -313,6 +316,8 @@ class JobSavePage extends Component {
 
   // Carrier clicks on 'Accept Job' or 'Request Job'
   async handleConfirmRequestCarrier(action) {
+    this.setState({ btnSubmitting: true });
+
     const {
       job,
       profile
@@ -542,7 +547,8 @@ class JobSavePage extends Component {
       marketPlaceBid,
       companyType,
       favoriteCompany,
-      loaded
+      loaded,
+      btnSubmitting
     } = this.state;
     let buttonText;
     if (loaded) {
@@ -564,21 +570,23 @@ class JobSavePage extends Component {
           if (favoriteCompany.length > 0) {
             // console.log('We are a carrier and we are a favorite');
             buttonText = (
-              <Button
+              <TSubmitButton
                 onClick={() => this.handleConfirmRequestCarrier('Accept')}
                 className="primaryButton"
-              >
-                Accept Job
-              </Button>
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Accept Job"
+              />
             );
           } else { // the carrier is not a favorite
             buttonText = (
-              <Button
+              <TSubmitButton
                 onClick={() => this.handleConfirmRequestCarrier('Request')}
                 className="primaryButton"
-              >
-                Request Job
-              </Button>
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Request Job"
+              />
             );
           }
         }
@@ -587,19 +595,21 @@ class JobSavePage extends Component {
         if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
           buttonText = (
             <div>
-              <Button
+              <TSubmitButton
                 onClick={() => this.handleConfirmRequestCarrier('Decline')}
                 className="secondaryButton"
-              >
-                Decline Job
-              </Button>
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Decline Job"
+              />
 
-              <Button
+              <TSubmitButton
                 onClick={() => this.handleConfirmRequestCarrier('Accept')}
                 className="primaryButton"
-              >
-                Accept Job
-              </Button>
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Accept Job"
+              />
             </div>
           );
         }
@@ -611,22 +621,23 @@ class JobSavePage extends Component {
           // console.log('We are a customer and we have a Carrier's job request');
           buttonText = (
             <div>
-              <Button
+              <TSubmitButton
                 onClick={() => this.handleConfirmRequest('Reject')}
                 className="secondaryButton"
-              >
-                Reject Job Request
-              </Button>
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Reject Job Request"
+              />
 
-              <Button
+              <TSubmitButton
                 onClick={() => this.handleConfirmRequest('Approve')}
                 className="primaryButton"
-              >
-                Approve Job Request
-              </Button>
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Approve Job Request"
+              />
             </div>
           );
-          // TODO: Add 'Reject Job Request' button for Customer
         }
 
         return (

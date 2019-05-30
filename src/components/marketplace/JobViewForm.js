@@ -19,6 +19,7 @@ import CompanyService from '../../api/CompanyService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
+import TSubmitButton from '../common/TSubmitButton';
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -37,7 +38,8 @@ class JobViewForm extends Component {
       bid: null,
       loaded: false,
       favoriteCompany: [],
-      profile: []
+      profile: [],
+      btnSubmitting: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -138,6 +140,7 @@ class JobViewForm extends Component {
 
   // save after the user has checked the info
   async saveJob() {
+    this.setState({ btnSubmitting: true });
     // console.log('saveJob ');
     // save new or update?
     const {
@@ -146,11 +149,11 @@ class JobViewForm extends Component {
       profile
     } = this.state;
     let {
+      bid,
       booking,
       bookingEquipment
     } = this.state;
     let notification;
-    let bid;
 
     // Is the Carrier this Company's favorite? If so, accepting the job
     if (favoriteCompany.length > 0) {
@@ -168,7 +171,7 @@ class JobViewForm extends Component {
       await JobService.updateJob(newJob);
 
       // Since the Job was sent to all favorites there's a bid, update existing bid
-      const newBid = CloneDeep(bid);
+      const newBid = CloneDeep(bid[0]);
       newBid.companyCarrierId = profile.companyId;
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
@@ -353,7 +356,8 @@ class JobViewForm extends Component {
   renderJobTop(job) {
     const {
       companyName,
-      favoriteCompany
+      favoriteCompany,
+      btnSubmitting
     } = this.state;
     let showModalButton;
     let jobStatus;
@@ -368,22 +372,24 @@ class JobViewForm extends Component {
     // Job was 'Published' to the Marketplace, Carrier is a favorite
     if (jobStatus === 'Published' && favoriteCompany.length > 0) {
       showModalButton = (
-        <Button
-            onClick={() => this.saveJob()}
-            className="btn btn-primary float-right"
-        >
-          Accept Job
-        </Button>
+        <TSubmitButton
+          onClick={this.saveJob}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Accept Job"
+        />
       );
     // Job was 'Published' to the Marketplace
     } else if (jobStatus === 'Published') {
       showModalButton = (
-        <Button
-          onClick={() => this.saveJob()}
-          className="btn btn-primary float-right"
-        >
-          Request Job
-        </Button>
+        <TSubmitButton
+          onClick={this.saveJob}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Request Job"
+        />
       );
     }
 

@@ -16,13 +16,15 @@ import DriverService from '../../api/DriverService';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import defaultTruckImage from '../../img/default_truck.png';
+import TSubmitButton from '../common/TSubmitButton';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       // showPassword: false
-      userInfo: {}
+      userInfo: {},
+      btnSubmitting: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.saveInfo = this.saveInfo.bind(this);
@@ -59,6 +61,7 @@ class AddTruckFormFour extends PureComponent {
 
   // save after the user has checked the info
   async saveInfo() {
+    this.setState({ btnSubmitting: true });
     // save new or update?
     const {
       truckFullInfo, // saved info
@@ -200,7 +203,7 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
-    const { userInfo } = this.state;
+    const { userInfo, btnSubmitting } = this.state;
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
       allMaterials += `${material.label}, `;
@@ -356,7 +359,13 @@ class AddTruckFormFour extends PureComponent {
                 </ButtonToolbar>
                 <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
                   <Button type="button" className="secondaryButton" onClick={previousPage}>Go back</Button>
-                  <Button onClick={this.saveInfo} type="submit" className="primaryButton">Save now</Button>
+                  <TSubmitButton
+                    onClick={this.saveInfo}
+                    className="primaryButton"
+                    loading={btnSubmitting}
+                    loaderSize={10}
+                    bntText="Save now"
+                  />
                 </ButtonToolbar>
               </div>
             </CardBody>
