@@ -1,11 +1,12 @@
-import React from "react";
-import {useTranslation} from "react-i18next";
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import PropTypes from 'prop-types';
 
 
 export const DashboardObjectStatic = ({title, displayVal}) => {
   const {t} = useTranslation();
   return (
-    <div className="col-12 col-md-2 col-lg-2">
+    <div className="col">
       <div className="card">
         <div className="dashboard__card-widget card-body">
           <h5 className="card__title bold-text">
@@ -15,5 +16,17 @@ export const DashboardObjectStatic = ({title, displayVal}) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+DashboardObjectStatic.propTypes = {
+  title: PropTypes.string,
+  displayVal: PropTypes.shape()
+};
+
+DashboardObjectStatic.defaultProps = {
+  title: '',
+  displayVal: 0
+};
+
+export default DashboardObjectStatic;

@@ -19,6 +19,7 @@ import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import UserService from '../../api/UserService';
+import TSubmitButton from '../common/TSubmitButton';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -29,6 +30,7 @@ class JobCreateForm extends Component {
     // job.
     this.state = {
       loaded: false,
+      btnSubmitting: false,
       job,
       states: [],
       startAddress: AddressService.getDefaultAddress(),
@@ -156,8 +158,8 @@ class JobCreateForm extends Component {
     booking.endTime = job.endTime;
 
     // should load all addresses even if already set
-    let allAddresses = await AddressService.getAddresses();
-    allAddresses = allAddresses.map(address => ({
+    const response = await AddressService.getAddresses();
+    const allAddresses = response.data.map(address => ({
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
@@ -176,7 +178,6 @@ class JobCreateForm extends Component {
     } catch (e) {
       // console.log('No materials');
     }
-
     await this.fetchForeignValues();
     this.setState({
       job,
@@ -352,8 +353,9 @@ class JobCreateForm extends Component {
     }
   }
 
-  async createJob(e) {
-    e.preventDefault();
+  async createJob() {
+    this.setState({ btnSubmitting: true });
+
     const { closeModal, selectedEquipment } = this.props;
     const {
       startAddress,
@@ -374,6 +376,7 @@ class JobCreateForm extends Component {
     if (!this.isFormValid()) {
       // TODO display error message
       // console.error('didnt put all the required fields.');
+      this.setState({ btnSubmitting: false });
       return;
     }
     startAddress.modifiedOn = moment()
@@ -383,6 +386,7 @@ class JobCreateForm extends Component {
 
     // start address
     let newStartAddress;
+
     if (selectedStartAddressId === 0) {
       newStartAddress = await AddressService.createAddress(startAddress);
       newJob.startAddress = newStartAddress.id;
@@ -485,20 +489,8 @@ class JobCreateForm extends Component {
     // Lets copy the bid info
     bookingEquipment.startTime = createdBooking.startTime;
     bookingEquipment.endTime = createdBooking.endTime;
-
-    // TEST
-    // if the startaddress is the actual ID
-    if (Number.isInteger(createdJob.startAddress)) {
-      bookingEquipment.startAddressId = createdBooking.startAddress;
-    } else {
-      bookingEquipment.startAddressId = createdBooking.startAddress.id;
-    }
-
-    if (Number.isInteger(createdJob.endAddress)) {
-      bookingEquipment.endAddressId = createdBooking.endAddress;
-    } else {
-      bookingEquipment.endAddressId = createdBooking.endAddress.id;
-    }
+    bookingEquipment.startAddressId = createdBooking.startAddressId;
+    bookingEquipment.endAddressId = createdBooking.endAddressId;
 
     // Since this is booking method 1, we do not have any notes as this is getting created
     // automatically and not by a user
@@ -548,14 +540,14 @@ class JobCreateForm extends Component {
 
   handleStartAddressIdChange(data) {
     this.setState({
-      startAddress: [],
+      // startAddress: [],
       selectedStartAddressId: data.value
     });
   }
 
   handleEndAddressIdChange(data) {
     this.setState({
-      endAddress: [],
+      // endAddress: [],
       selectedEndAddressId: data.value
     });
   }
@@ -856,7 +848,7 @@ class JobCreateForm extends Component {
     return (
       <React.Fragment>
         <div className="row">
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="form__form-group">
               <div className="">
                 { /* <input name="name"
@@ -881,7 +873,7 @@ class JobCreateForm extends Component {
               </div>
             </div>
           </div>
-          <div className="col-md-4 form--horizontal">
+          <div className="col-md-6 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Start Date</span>
               <div className="">
@@ -895,13 +887,14 @@ class JobCreateForm extends Component {
                     }
                   }
                   onChange={this.handleStartTimeChange}
-                  dateFormat="MMMM-dd-yyyy"
+                  dateFormat="MMMM-dd-yyyy h:mm aa"
+                  showTime
                   meta={reqHandlerDate}
                 />
               </div>
             </div>
           </div>
-          <div className="col-md-4 form--horizontal">
+          <div className="col-md-3 form--horizontal">
             <div className="form__form-group">
               <span className="form__form-group-label">Estimated {job.rateType}s</span>
               <div className="">
@@ -1226,6 +1219,7 @@ class JobCreateForm extends Component {
 
   renderJobFormButtons() {
     const { closeModal } = this.props;
+    const { btnSubmitting } = this.state;
 
     return (
       <div className="row float-right">
@@ -1236,9 +1230,13 @@ class JobCreateForm extends Component {
             </button>
           </div>
           <div className="col-sm-8">
-            <button type="submit" className="btn btn-primary">
-              Request Truck
-            </button>
+            <TSubmitButton
+              onClick={this.createJob}
+              className="primaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Request Truck"
+            />
           </div>
         </div>
       </div>
@@ -1249,7 +1247,7 @@ class JobCreateForm extends Component {
     const { loaded } = this.state;
     if (loaded) {
       return (
-        <form id="job-request" onSubmit={e => this.createJob(e)}>
+        <form id="job-request">
           {this.renderSelectedEquipment()}
           <div className="cl-md-12">
             <hr />

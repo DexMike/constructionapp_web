@@ -216,7 +216,8 @@ class JobViewForm extends Component {
         return null;
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const equipments = await EquipmentService.getEquipments();
+        const response = await EquipmentService.getEquipments();
+        const equipments = response.data;
         if (equipments && equipments.length > 0) {
           const equipment = equipments[0]; // temporary for now.
           // Ideally this should be the carrier/driver's truck
@@ -355,9 +356,17 @@ class JobViewForm extends Component {
       favoriteCompany
     } = this.state;
     let showModalButton;
+    let jobStatus;
+
+    // A Carrier will see 'Published And Offered' as 'Published' in the Marketplace
+    if (job.status === 'Published And Offered') {
+      jobStatus = 'Published';
+    } else {
+      jobStatus = job.status;
+    }
 
     // Job was 'Published' to the Marketplace, Carrier is a favorite
-    if (job.status === 'Published' && favoriteCompany.length > 0) {
+    if (jobStatus === 'Published' && favoriteCompany.length > 0) {
       showModalButton = (
         <Button
             onClick={() => this.saveJob()}
@@ -367,7 +376,7 @@ class JobViewForm extends Component {
         </Button>
       );
     // Job was 'Published' to the Marketplace
-    } else if (job.status === 'Published') {
+    } else if (jobStatus === 'Published') {
       showModalButton = (
         <Button
           onClick={() => this.saveJob()}

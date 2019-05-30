@@ -4,8 +4,13 @@ import AgentService from './AgentService';
 const PATH = '/addresses';
 
 class AddressService extends AgentService {
-  static async getAddresses() {
-    const response = await super.get(PATH);
+  static async getAddresses(pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await super.get(`${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await super.get(PATH);
+    }
     return (response);
   }
 
@@ -14,8 +19,13 @@ class AddressService extends AgentService {
     return (response);
   }
 
-  static async getAddressesByCompanyId(id) {
-    const response = await this.get(`/companies/${id}/addresses`);
+  static async getAddressesByCompanyId(id, pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await this.get(`/companies/${id}${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await this.get(`/companies/${id}${PATH}`);
+    }
     return (response);
   }
 
