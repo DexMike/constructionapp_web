@@ -317,6 +317,7 @@ class JobSavePage extends Component {
   // Carrier clicks on 'Accept Job' or 'Request Job'
   async handleConfirmRequestCarrier(action) {
     this.setState({ btnSubmitting: true });
+
     const {
       job,
       profile
@@ -570,7 +571,7 @@ class JobSavePage extends Component {
             // console.log('We are a carrier and we are a favorite');
             buttonText = (
               <TSubmitButton
-                onClick={this.handleConfirmRequestCarrier('Accept')}
+                onClick={() => this.handleConfirmRequestCarrier('Accept')}
                 className="primaryButton"
                 loading={btnSubmitting}
                 loaderSize={10}
@@ -580,7 +581,7 @@ class JobSavePage extends Component {
           } else { // the carrier is not a favorite
             buttonText = (
               <TSubmitButton
-                onClick={this.handleConfirmRequestCarrier('Request')}
+                onClick={() => this.handleConfirmRequestCarrier('Request')}
                 className="primaryButton"
                 loading={btnSubmitting}
                 loaderSize={10}
@@ -595,7 +596,7 @@ class JobSavePage extends Component {
           buttonText = (
             <div>
               <TSubmitButton
-                onClick={this.handleConfirmRequestCarrier('Decline')}
+                onClick={() => this.handleConfirmRequestCarrier('Decline')}
                 className="secondaryButton"
                 loading={btnSubmitting}
                 loaderSize={10}
@@ -603,7 +604,7 @@ class JobSavePage extends Component {
               />
 
               <TSubmitButton
-                onClick={this.handleConfirmRequestCarrier('Accept')}
+                onClick={() => this.handleConfirmRequestCarrier('Accept')}
                 className="primaryButton"
                 loading={btnSubmitting}
                 loaderSize={10}
@@ -621,7 +622,7 @@ class JobSavePage extends Component {
           buttonText = (
             <div>
               <TSubmitButton
-                onClick={this.handleConfirmRequest('Reject')}
+                onClick={() => this.handleConfirmRequest('Reject')}
                 className="secondaryButton"
                 loading={btnSubmitting}
                 loaderSize={10}
@@ -629,7 +630,7 @@ class JobSavePage extends Component {
               />
 
               <TSubmitButton
-                onClick={this.handleConfirmRequest('Approve')}
+                onClick={() => this.handleConfirmRequest('Approve')}
                 className="primaryButton"
                 loading={btnSubmitting}
                 loaderSize={10}
