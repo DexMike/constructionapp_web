@@ -89,7 +89,6 @@ class DashboardCustomerPage extends Component {
     const profile = await ProfileService.getProfile();
     const response = await JobService.getCustomerJobsInfo(profile.userId);
     const jobsInfo = response.data;
-    console.log(92, jobsInfo);
     const { totalJobs } = response;
     this.setState({ totalJobs, jobsInfo });
   }
