@@ -24,7 +24,7 @@ class TMapBoxOriginDestination extends PureComponent {
   }
 
   setMap(origin, destination) {
-    mapboxgl.accessToken = 'pk.eyJ1IjoicmF1bHRyZWxhciIsImEiOiJjanV1MnVkM2wwZWY1NDNrZjZ5dXJkbTR4In0.rMU0bd9xlsFxupjk7vlWhA';
+    mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v11',
@@ -38,7 +38,6 @@ class TMapBoxOriginDestination extends PureComponent {
       const directions = new MapboxDirections(
         {
           accessToken: mapboxgl.accessToken,
-          // unit: 'metric',
           // profile: 'driving',
           container: 'directions', // Specify an element thats not the map container.
           // UI controls
@@ -50,10 +49,15 @@ class TMapBoxOriginDestination extends PureComponent {
       );
       map.addControl(directions, 'top-left');
       map.addControl(new mapboxgl.FullscreenControl());
+      map.on('click', this.clickHandler());
 
       directions.setOrigin(origin);
       directions.setDestination(destination);
     });
+  }
+
+  clickHandler() {
+    return false;
   }
 
   render() {

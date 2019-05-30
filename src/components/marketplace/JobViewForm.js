@@ -18,8 +18,8 @@ import CompanyService from '../../api/CompanyService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
-import TMapBoxOriginDestinationWithOverlay
-  from '../common/TMapBoxOriginDestinationWithOverlay';
+import TMapBoxOriginDestination
+  from '../common/TMapBoxOriginDestination';
 import GPSTrackingService from '../../api/GPSTrackingService';
 
 const MAPBOX_MAX = 23;
@@ -41,8 +41,7 @@ class JobViewForm extends Component {
       bid: null,
       loaded: false,
       favoriteCompany: [],
-      profile: [],
-      overlayMapData: {}
+      profile: []
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -172,7 +171,6 @@ class JobViewForm extends Component {
       customerAccepted,
       profile,
       favoriteCompany,
-      overlayMapData: {gps},
       loaded: true
     });
 
@@ -465,15 +463,14 @@ class JobViewForm extends Component {
     );
   }
 
-  renderMBMap(origin, destination, gpsData) {
+  renderMBMap(origin, destination) {
     return (
       <React.Fragment>
-        <TMapBoxOriginDestinationWithOverlay
+        <TMapBoxOriginDestination
           input={
             {
               origin,
-              destination,
-              gpsData
+              destination
             }
           }
         />
@@ -482,7 +479,6 @@ class JobViewForm extends Component {
   }
 
   renderJobAddresses(job) {
-    const {overlayMapData} = this.state;
     let origin = '';
     let destination = '';
     if (!job.startAddress && job.endAddress) {
@@ -508,7 +504,7 @@ class JobViewForm extends Component {
           </span>
         </Row>
         <span className="col-md-12 mapbox-jobViewForm">
-          {this.renderMBMap(origin, destination, overlayMapData)}
+          {this.renderMBMap(origin, destination)}
         </span>
       </Container>
     );
