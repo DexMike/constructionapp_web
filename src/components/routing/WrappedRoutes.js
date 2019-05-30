@@ -24,6 +24,7 @@ import JobCreatePage from '../jobs/JobCreatePage';
 import FileUploadPage from '../FileUploadPage';
 import ReportsPage from '../reports/ReportsPage';
 import PaymentsPage from '../payments/PaymentsPage';
+import PaymentDetails from '../payments/PaymentDetails';
 // import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
 
 // No longer using TableRoutes
@@ -76,6 +77,12 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/payments"
             component={PaymentsPage}
+          />
+
+          <Route
+            exact
+            path="/payments/:id"
+            component={PaymentDetails}
           />
 
           <Route

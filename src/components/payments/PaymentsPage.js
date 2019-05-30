@@ -3,25 +3,35 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 
 import TTable from '../common/TTable';
+import TFormat from '../common/TFormat';
 
+import PaymentsService from '../../api/PaymentsService';
 
 class PaymentsPage extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      loaded: false,
+      id: 0,
+      goToPaymentDetails: false,
+      payments: []
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.handleRowEdit = this.handleRowEdit.bind(this);
+    this.handlePaymentId = this.handlePaymentId.bind(this);
   }
 
   async componentDidMount() {
-    
+    await this.fetchPayments();
+    this.setState({ loaded: true });
   }
 
-  handleRowEdit(id) {
-    console.log(id);
+  handlePaymentId(id) {
+    this.setState({
+      goToPaymentDetails: true,
+      id
+    });
   }
 
   handlePageClick(menuItem) {
@@ -30,26 +40,75 @@ class PaymentsPage extends Component {
     }
   }
 
-  async fetchPaymentsList() {
-    
+  async fetchPayments() {
+    let payments = await PaymentsService.getPayments();
+
+    payments = payments.map((payment) => {
+      const newPayment = payment;
+      newPayment.id = payment.clientPaymentId;
+      newPayment.amount = TFormat.asMoney(payment.amount);
+      newPayment.createdOn = TFormat.asDate(payment.createdOn);
+      return newPayment;
+    });
+
+    this.setState({ payments });
   }
 
   renderGoTo() {
-    const status = this.state;
-    if (status.goToDashboard) {
-      return <Redirect push to="/"/>;
-    }
-    if (status.goToAddJob) {
-      return <Redirect push to="/jobs/save"/>;
-    }
-    if (status.goToUpdateJob) {
-      return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
+    const {goToPaymentDetails, id} = this.state;
+    if (goToPaymentDetails) {
+      return <Redirect push to={`/payments/${id}`}/>;
     }
     return false;
   }
 
   render() {
-    const jobs = [{ date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88' }];
+    // const payments = [{ date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88' }];
+    const { loaded, payments } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderGoTo()}
+          <Row>
+            <Col md={12}>
+              <h3 className="page-title">Payments</h3>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12}>
+              <Card>
+                <CardBody>
+                  <TTable
+                    columns={
+                      [
+                        {
+                          name: 'createdOn',
+                          displayName: 'Job Date'
+                        },
+                        {
+                          name: 'purpose',
+                          displayName: 'Job Name'
+                        },
+                        {
+                          name: 'notes',
+                          displayName: 'Load #'
+                        },
+                        {
+                          name: 'amount',
+                          displayName: 'Amount'
+                        }
+                      ]
+                    }
+                    data={payments}
+                    handleIdClick={this.handlePaymentId}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      );
+    }
     return (
       <Container className="dashboard">
         <Row>
@@ -59,34 +118,7 @@ class PaymentsPage extends Component {
         </Row>
         <Row>
           <Col md={12}>
-            <Card>
-              <CardBody>
-                <TTable
-                  columns={
-                    [
-                      {
-                        name: 'date',
-                        displayName: 'Job Date'
-                      },
-                      {
-                        name: 'name',
-                        displayName: 'Job Name'
-                      },
-                      {
-                        name: 'load',
-                        displayName: 'Load #'
-                      },
-                      {
-                        name: 'amount',
-                        displayName: 'Amount'
-                      }
-                    ]
-                  }
-                  data={jobs}
-                  handleIdClick={this.handleJobEdit}
-                />
-              </CardBody>
-            </Card>
+            Loading ...
           </Col>
         </Row>
       </Container>
