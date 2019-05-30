@@ -89,6 +89,7 @@ class DashboardCustomerPage extends Component {
     const profile = await ProfileService.getProfile();
     const response = await JobService.getCustomerJobsInfo(profile.userId);
     const jobsInfo = response.data;
+    console.log(92, jobsInfo);
     const { totalJobs } = response;
     this.setState({ totalJobs, jobsInfo });
   }
@@ -272,7 +273,11 @@ class DashboardCustomerPage extends Component {
         }
         if (newJob.status === 'Published') {
           // publishedJobCount += 1;
-          publishedJobCount = newJob.countJobs;
+          publishedJobCount += newJob.countJobs;
+        }
+        if (newJob.status === 'Published And Offered') {
+          // publishedJobCount += 1;
+          publishedJobCount += newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;
