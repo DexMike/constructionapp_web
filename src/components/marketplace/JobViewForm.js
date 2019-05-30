@@ -13,12 +13,16 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TFormat from '../common/TFormat';
-import TMap from '../common/TMapOriginDestination';
 import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
+import TMapBoxOriginDestinationWithOverlay
+  from '../common/TMapBoxOriginDestinationWithOverlay';
+import GPSTrackingService from '../../api/GPSTrackingService';
+
+const MAPBOX_MAX = 23;
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -37,7 +41,8 @@ class JobViewForm extends Component {
       bid: null,
       loaded: false,
       favoriteCompany: [],
-      profile: []
+      profile: [],
+      overlayMapData: {}
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -58,6 +63,7 @@ class JobViewForm extends Component {
       favoriteCompany
     } = this.state;
     const { jobId } = this.props;
+    const gps = [];
     profile = await ProfileService.getProfile();
 
     job = await JobService.getJobById(jobId);
@@ -109,6 +115,44 @@ class JobViewForm extends Component {
           bookEq => bookEq.bookingId === booking.id, booking
         );
       }
+
+      // get overlay data
+      let gpsData = [];
+      if (bookings.length > 0) {
+        gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+          bookings[0].id // booking.id
+        );
+      }
+
+      // prepare the waypoints in an appropiate format for MB (GEOJson point)
+      if (gpsData.length > 0) {
+        for (const datum in gpsData) {
+          if (gpsData[datum][0]) {
+            const loc = {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [
+                  gpsData[datum][1],
+                  gpsData[datum][0]
+                ]
+              },
+              properties: {
+                title: 'Actual route',
+                icon: 'car'
+              }
+            };
+            // reduce the total of results to a maximum of 23
+            // Mapbox's limit is 25 points plus an origin and destination
+            const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
+            const reducer = datum / steps;
+            const remainder = (reducer % 1);
+            if (remainder === 0) {
+              gps.push(loc);
+            }
+          }
+        }
+      }
     }
 
     // Check if carrier is favorite for this job's customer
@@ -128,6 +172,7 @@ class JobViewForm extends Component {
       customerAccepted,
       profile,
       favoriteCompany,
+      overlayMapData: {gps},
       loaded: true
     });
 
@@ -420,7 +465,24 @@ class JobViewForm extends Component {
     );
   }
 
+  renderMBMap(origin, destination, gpsData) {
+    return (
+      <React.Fragment>
+        <TMapBoxOriginDestinationWithOverlay
+          input={
+            {
+              origin,
+              destination,
+              gpsData
+            }
+          }
+        />
+      </React.Fragment>
+    );
+  }
+
   renderJobAddresses(job) {
+    const {overlayMapData} = this.state;
     let origin = '';
     let destination = '';
     if (!job.startAddress && job.endAddress) {
@@ -445,15 +507,8 @@ class JobViewForm extends Component {
             {this.renderAddress(job.endAddress, 'end')}
           </span>
         </Row>
-        <span className="col-md-12">
-          <TMap
-            input={
-              {
-                origin,
-                destination
-              }
-            }
-          />
+        <span className="col-md-12 mapbox-jobViewForm">
+          {this.renderMBMap(origin, destination, overlayMapData)}
         </span>
       </Container>
     );
