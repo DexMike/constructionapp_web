@@ -40,10 +40,10 @@ export default {
     }),
     // initially bundle.js file is 3.7 MB
     new CompressionPlugin({
-      filename: '[path].br[query]',
-      // filename: '[path].gz[query]',
-      algorithm: 'brotliCompress',
-      // algorithm: 'gzip',
+      // filename: '[path].br[query]',
+      filename: '[path].gz[query]',
+      // algorithm: 'brotliCompress',
+      algorithm: 'gzip',
       test: new RegExp('\\.(js|css)$'),
       compressionOptions: { level: 11 },
       threshold: 10240,
