@@ -16,7 +16,7 @@ import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
 
-import {DashboardObjectClickable} from './DashboardObjectClickable';
+import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
 
@@ -87,16 +87,15 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobsInfo() {
     const profile = await ProfileService.getProfile();
-    const jobsInfo = await JobService.getCustomerJobsInfo(profile.userId);
-    const { totalJobs } = jobsInfo[0];
+    const response = await JobService.getCustomerJobsInfo(profile.userId);
+    const jobsInfo = response.data;
+    const { totalJobs } = response;
     this.setState({ totalJobs, jobsInfo });
   }
 
-  returnJobs(jobs, filters) {
-    let totalCount = 0;
-    if (jobs.length > 0) {
-      totalCount = jobs[0].totalJobs;
-    }
+  returnJobs(jobs, filters, metadata) {
+    const { totalCount } = metadata;
+
     this.setState({
       jobs,
       filters,
@@ -152,7 +151,6 @@ class DashboardCustomerPage extends Component {
   }
 
   async fetchJobs() {
-    // console.log(237);
     const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
 
@@ -334,7 +332,7 @@ class DashboardCustomerPage extends Component {
               status={filters.status}
             />
             <DashboardObjectClickable
-              title="Published Jobs"
+              title="Posted Jobs"
               displayVal={publishedJobCount}
               value="Published"
               handle={this.handleFilterStatusChange}

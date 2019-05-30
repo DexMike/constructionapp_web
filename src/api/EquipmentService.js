@@ -3,8 +3,13 @@ import AgentService from './AgentService';
 const PATH = '/equipments';
 
 class EquipmentService extends AgentService {
-  static async getEquipments() {
-    const response = await super.get(PATH);
+  static async getEquipments(pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await this.get(`${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await this.get(PATH);
+    }
     return (response);
   }
 
@@ -13,9 +18,13 @@ class EquipmentService extends AgentService {
     return (response);
   }
 
-  static async getEquipmentByCompanyId(companyId, rows, page) {
-    // response = await this.get(`/companies/${companyId}${PATH}`);
-    const response = await this.get(`/companies/${companyId}${PATH}?rows=${rows}&page=${page}`);
+  static async getEquipmentByCompanyId(companyId, pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await this.get(`/companies/${companyId}${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await this.get(PATH);
+    }
     return (response);
   }
 

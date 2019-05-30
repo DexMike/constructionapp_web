@@ -234,7 +234,8 @@ class JobSavePage extends Component {
         return null;
       });
       if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const equipments = await EquipmentService.getEquipments();
+        const response = await EquipmentService.getEquipments();
+        const equipments = response.data;
         if (equipments && equipments.length > 0) {
           const equipment = equipments[0]; // temporary for now.
           // Ideally this should be the carrier/driver's truck
@@ -380,7 +381,8 @@ class JobSavePage extends Component {
       });
 
       if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const equipments = await EquipmentService.getEquipments();
+        const response = await EquipmentService.getEquipments();
+        const equipments = response.data;
         if (equipments && equipments.length > 0) {
           const equipment = equipments[0]; // temporary for now.
           // Ideally this should be the carrier/driver's truck
@@ -547,7 +549,9 @@ class JobSavePage extends Component {
       // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
         let type = '';
-        // console.log(companyType);
+        // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
+        if (job.status === 'Published And Offered' && companyType === 'Carrier') job.status = 'On Offer';
+
         if (companyType === 'Carrier') {
           type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick}/>);
         } else {
@@ -580,7 +584,7 @@ class JobSavePage extends Component {
         }
 
         // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
-        if (job.status === 'On Offer' && companyType === 'Carrier' && bid.status !== 'Declined') {
+        if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
           buttonText = (
             <div>
               <Button

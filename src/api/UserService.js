@@ -3,8 +3,13 @@ import AgentService from './AgentService';
 const PATH = '/users';
 
 class UserService extends AgentService {
-  static async getUsers() {
-    const response = await super.get(PATH);
+  static async getUsers(pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await super.get(`${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await super.get(PATH);
+    }
     return (response);
   }
 

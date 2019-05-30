@@ -12,6 +12,7 @@ import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
 import UserService from '../../api/UserService';
+import TSubmitButton from '../common/TSubmitButton';
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -33,7 +34,8 @@ class LoginPage extends SignIn {
       userConfirmError: null,
       username: this.props.authData.username || '',
       password: this.props.authData.password || '',
-      user: null
+      user: null,
+      btnSubmitting: false // Used by TSubmitButton
     };
     this.showPassword = this.showPassword.bind(this);
     this.onSignIn = this.onSignIn.bind(this);
@@ -82,12 +84,13 @@ class LoginPage extends SignIn {
   }
 
   async onSignIn() {
-    this.setState({loading: true});
+    this.setState({loading: true, btnSubmitting: true});
     try {
       if (!this.state.username || this.state.username.length <= 0
         || !this.state.password || this.state.password.length <= 0) {
         this.setState({
           error: 'Incorrect username or password.',
+          btnSubmitting: false,
           loading: false
         });
         return;
@@ -179,7 +182,7 @@ class LoginPage extends SignIn {
   }
 
   renderLogInForm() {
-    const {showPassword} = this.state;
+    const {showPassword, btnSubmitting} = this.state;
     return (
       <div className="form">
         <TAlert color="danger" visible={!!this.state.error && !this.state.confirmUsername} onDismiss={this.onDismiss}>
@@ -194,14 +197,14 @@ class LoginPage extends SignIn {
         <TAlert color="danger" visible={!!this.state.confirmUsername} onDismiss={this.onDismiss}>
           <p>
             User not confirmed.
-            {this.state.errorCode === 'UserNotConfirmedException' &&
+            {this.state.errorCode === 'UserNotConfirmedException' && (
             <button type="button"
                     className="account__confirm"
                     onClick={this.handleUserNotConfirmed}
             >
               Confirm: {this.state.confirmUsername}
             </button>
-            }
+            )}
             &nbsp;
             {this.state.userConfirmError}
           </p>
@@ -259,11 +262,13 @@ class LoginPage extends SignIn {
             />
           </div>
         </div>
-        <button type="button" className="btn btn-primary account__btn account__btn--small"
-                onClick={this.onSignIn}
-        >
-          Sign In
-        </button>
+        <TSubmitButton
+          onClick={this.onSignIn}
+          className="btn btn-primary account__btn account__btn--small"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Sign In"
+        />
         <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
                 onClick={this.onSignUp}
         >
