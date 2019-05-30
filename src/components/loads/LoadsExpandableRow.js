@@ -7,6 +7,7 @@ import moment from 'moment';
 import {Container, Row, Col, Button} from 'reactstrap';
 import UserService from '../../api/UserService';
 import LoadService from '../../api/LoadService';
+import LoadInvoiceService from '../../api/LoadInvoiceService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import TMapBoxPath
   from '../common/TMapBoxPath';
@@ -21,7 +22,8 @@ class LoadsExpandableRow extends Component {
       index: props.index,
       expanded: false,
       driver: null,
-      gpsTrackings: null
+      gpsTrackings: null,
+      loadInvoices: []
     };
     this.toggle = this.toggle.bind(this);
   }
@@ -29,14 +31,14 @@ class LoadsExpandableRow extends Component {
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let {gpsTrackings} = this.state;
+    let {gpsTrackings, loadInvoices} = this.state;
     gpsTrackings = await this.fetchGPSPoints(load.id);
+    loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
     const driver = await UserService.getDriverByBookingId(props.load.bookingId);
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.handleDisputeLoad = this.handleDisputeLoad.bind(this);
-    this.setState({gpsTrackings});
-    console.log(gpsTrackings);
+    this.setState({gpsTrackings, loadInvoices});
   }
 
   async fetchGPSPoints(loadId) {
@@ -67,7 +69,7 @@ class LoadsExpandableRow extends Component {
   render() {
     const {loaded} = {...this.state};
     if (loaded) {
-      const {load, loadStatus, index, expanded, driver, gpsTrackings} = {...this.state};
+      const {load, loadStatus, index, expanded, driver, gpsTrackings, loadInvoices} = {...this.state};
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
       let statusColor = '';
@@ -87,6 +89,7 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
+      console.log(loadInvoices);
       return (
         <React.Fragment>
           <TableRow key={load.id}>
@@ -160,6 +163,14 @@ class LoadsExpandableRow extends Component {
                         <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
                       </React.Fragment>
                     </Col>
+                    <Row>
+                      {loadInvoices.map(item => (
+                        <Col className="col-md-3 pt-3" key={`img-${item}`}>
+                          <img key={item} src={`${item[2]}`} alt={`${item}`}/>
+                        </Col>
+                      ))
+                      }
+                    </Row>
                   </Row>
                   {/*<Row justify="between" style={{paddingTop: 20}}>*/}
                   {/*  <Col md={4}>*/}
