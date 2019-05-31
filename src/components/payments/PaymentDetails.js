@@ -115,8 +115,6 @@ class PaymentDetails extends Component {
                       </Link>
                     </div>
                   </div>
-                  
-                  
                 </CardBody>
               </Card>
             </Col>
