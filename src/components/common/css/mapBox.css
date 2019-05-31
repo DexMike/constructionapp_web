@@ -9,3 +9,8 @@ body {
   bottom: 0;
   width: 100%;
 }
+
+.mapbox-jobViewForm #map {
+  position: relative;
+  height: 400px;
+}

@@ -13,12 +13,17 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TFormat from '../common/TFormat';
-import TMap from '../common/TMapOriginDestination';
 import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
+import TMapBoxOriginDestination
+  from '../common/TMapBoxOriginDestination';
+import GPSTrackingService from '../../api/GPSTrackingService';
+import TSubmitButton from '../common/TSubmitButton';
+
+const MAPBOX_MAX = 23;
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -37,7 +42,8 @@ class JobViewForm extends Component {
       bid: null,
       loaded: false,
       favoriteCompany: [],
-      profile: []
+      profile: [],
+      btnSubmitting: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -58,6 +64,7 @@ class JobViewForm extends Component {
       favoriteCompany
     } = this.state;
     const { jobId } = this.props;
+    const gps = [];
     profile = await ProfileService.getProfile();
 
     job = await JobService.getJobById(jobId);
@@ -109,6 +116,44 @@ class JobViewForm extends Component {
           bookEq => bookEq.bookingId === booking.id, booking
         );
       }
+
+      // get overlay data
+      let gpsData = [];
+      if (bookings.length > 0) {
+        gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+          bookings[0].id // booking.id
+        );
+      }
+
+      // prepare the waypoints in an appropiate format for MB (GEOJson point)
+      if (gpsData.length > 0) {
+        for (const datum in gpsData) {
+          if (gpsData[datum][0]) {
+            const loc = {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [
+                  gpsData[datum][1],
+                  gpsData[datum][0]
+                ]
+              },
+              properties: {
+                title: 'Actual route',
+                icon: 'car'
+              }
+            };
+            // reduce the total of results to a maximum of 23
+            // Mapbox's limit is 25 points plus an origin and destination
+            const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
+            const reducer = datum / steps;
+            const remainder = (reducer % 1);
+            if (remainder === 0) {
+              gps.push(loc);
+            }
+          }
+        }
+      }
     }
 
     // Check if carrier is favorite for this job's customer
@@ -138,6 +183,7 @@ class JobViewForm extends Component {
 
   // save after the user has checked the info
   async saveJob() {
+    this.setState({ btnSubmitting: true });
     // console.log('saveJob ');
     // save new or update?
     const {
@@ -146,11 +192,11 @@ class JobViewForm extends Component {
       profile
     } = this.state;
     let {
+      bid,
       booking,
       bookingEquipment
     } = this.state;
     let notification;
-    let bid;
 
     // Is the Carrier this Company's favorite? If so, accepting the job
     if (favoriteCompany.length > 0) {
@@ -168,7 +214,7 @@ class JobViewForm extends Component {
       await JobService.updateJob(newJob);
 
       // Since the Job was sent to all favorites there's a bid, update existing bid
-      const newBid = CloneDeep(bid);
+      const newBid = CloneDeep(bid[0]);
       newBid.companyCarrierId = profile.companyId;
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
@@ -353,7 +399,8 @@ class JobViewForm extends Component {
   renderJobTop(job) {
     const {
       companyName,
-      favoriteCompany
+      favoriteCompany,
+      btnSubmitting
     } = this.state;
     let showModalButton;
     let jobStatus;
@@ -368,22 +415,24 @@ class JobViewForm extends Component {
     // Job was 'Published' to the Marketplace, Carrier is a favorite
     if (jobStatus === 'Published' && favoriteCompany.length > 0) {
       showModalButton = (
-        <Button
-            onClick={() => this.saveJob()}
-            className="btn btn-primary float-right"
-        >
-          Accept Job
-        </Button>
+        <TSubmitButton
+          onClick={this.saveJob}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Accept Job"
+        />
       );
     // Job was 'Published' to the Marketplace
     } else if (jobStatus === 'Published') {
       showModalButton = (
-        <Button
-          onClick={() => this.saveJob()}
-          className="btn btn-primary float-right"
-        >
-          Request Job
-        </Button>
+        <TSubmitButton
+          onClick={this.saveJob}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Request Job"
+        />
       );
     }
 
@@ -420,6 +469,21 @@ class JobViewForm extends Component {
     );
   }
 
+  renderMBMap(origin, destination) {
+    return (
+      <React.Fragment>
+        <TMapBoxOriginDestination
+          input={
+            {
+              origin,
+              destination
+            }
+          }
+        />
+      </React.Fragment>
+    );
+  }
+
   renderJobAddresses(job) {
     let origin = '';
     let destination = '';
@@ -445,15 +509,8 @@ class JobViewForm extends Component {
             {this.renderAddress(job.endAddress, 'end')}
           </span>
         </Row>
-        <span className="col-md-12">
-          <TMap
-            input={
-              {
-                origin,
-                destination
-              }
-            }
-          />
+        <span className="col-md-12 mapbox-jobViewForm">
+          {this.renderMBMap(origin, destination)}
         </span>
       </Container>
     );

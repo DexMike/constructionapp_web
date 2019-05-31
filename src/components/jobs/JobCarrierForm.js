@@ -143,12 +143,6 @@ class JobCarrierForm extends JobCustomerForm {
     }
   }
 
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
-    }
-  }
-
   async saveJob(e) {
     e.preventDefault();
     const {job, handlePageClick} = this.props;
@@ -350,8 +344,8 @@ class JobCarrierForm extends JobCustomerForm {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
-              <Row>
-                <div className="col-md-8 mr-24">
+              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
+                <div className="col-md-8" style={{padding: 0}}>
                   {this.renderMBMap(origin, destination, overlayMapData)}
                 </div>
                 <div className="col-md-4">

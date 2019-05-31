@@ -21,7 +21,6 @@ class TMapBoxOriginDestination extends PureComponent {
   }
 
   setMap(origin, destination, waypoints, coords) {
-
     mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
       container: 'map',
@@ -32,8 +31,9 @@ class TMapBoxOriginDestination extends PureComponent {
       attributionControl: false
     });
 
+    map.on('click', this.clickHandler());
+
     map.on('load', () => {
-      // FIRST
       const directions = new MapboxDirections(
         {
           accessToken: mapboxgl.accessToken,
@@ -95,6 +95,10 @@ class TMapBoxOriginDestination extends PureComponent {
         }
       });
     });
+  }
+
+  clickHandler() {
+    return false;
   }
 
   render() {
