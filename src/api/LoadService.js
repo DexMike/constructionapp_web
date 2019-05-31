@@ -18,13 +18,13 @@ class LoadService extends AgentService {
     return (response);
   }
 
-  static async endLoad(load) {
-    const response = await this.put(PATH, load);
+  static async endLoad(id, load) {
+    const response = await this.put(`${PATH}/${id}/end`, load);
     return (response);
   }
 
-  static async updateLoad(load) {
-    const response = await this.put('/update/load', load);
+  static async updateLoad(id, load) {
+    const response = await this.put(`${PATH}/${id}/update`, load);
     return (response);
   }
 

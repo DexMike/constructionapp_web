@@ -55,14 +55,14 @@ class LoadsExpandableRow extends Component {
   async handleApproveLoad() {
     const {load} = {...this.state};
     load.loadStatus = 'Approved';
-    await LoadService.updateLoad(load);
+    await LoadService.updateLoad(load.id, load);
     this.setState({loadStatus: 'Approved'});
   }
 
   async handleDisputeLoad() {
     const {load} = {...this.state};
     load.loadStatus = 'Disputed';
-    await LoadService.updateLoad(load);
+    await LoadService.updateLoad(load.id, load);
     this.setState({loadStatus: 'Disputed'});
   }
 
@@ -89,7 +89,7 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
-      console.log(loadInvoices);
+
       return (
         <React.Fragment>
           <TableRow key={load.id}>
@@ -158,37 +158,59 @@ class LoadsExpandableRow extends Component {
                   )
                   }
                   <Row style={{paddingTop: 0}}>
-                    <Col md={3}>
+                    <Col md={6}>
+                      <h3 className="subhead" style={{
+                        paddingTop: 30,
+                        color: '#006F53',
+                        fontSize: 22
+                      }}
+                      >
+                        Route
+                      </h3>
+                    </Col>
+                    <Col md={6}>
+                      <h3 className="subhead" style={{
+                        paddingTop: 30,
+                        color: '#006F53',
+                        fontSize: 22
+                      }}
+                      >
+                        Ticket
+                      </h3>
+                    </Col>
+                  </Row>
+                  <Row style={{paddingTop: 0}}>
+                    <Col md={6}>
                       <React.Fragment>
                         <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
                       </React.Fragment>
                     </Col>
-                    <Row>
-                      {loadInvoices.map(item => (
-                        <Col className="col-md-3 pt-3" key={`img-${item}`}>
-                          <img key={item} src={`${item[2]}`} alt={`${item}`}/>
+                    <Col md={6}>
+                      <Row>
+                        <Col md={6}>
+                          <h3 className="subhead" style={{
+                            paddingTop: 30,
+                            color: 'black',
+                            fontSize: 15
+                          }}
+                          >
+                            Ticket Number: {load.ticketNumber}
+                          </h3>
                         </Col>
-                      ))
-                      }
-                    </Row>
+                      </Row>
+                      <Row>
+                        {loadInvoices.map(item => (
+                          <Col md={12} key={`img-${item}`}>
+                            <img key={item} src={`${item[2]}`} alt={`${item[2]}`}/>
+                          </Col>
+                          // <Col className="col-md-3 pt-3" key={`img-${item}`}>
+                          //   <img key={item} src={`${item[2]}`} alt={`${item}`}/>
+                          // </Col>
+                        ))
+                        }
+                      </Row>
+                    </Col>
                   </Row>
-                  {/*<Row justify="between" style={{paddingTop: 20}}>*/}
-                  {/*  <Col md={4}>*/}
-                  {/*    <h4 style={{fontSize: 15, color: '#006F53', paddingLeft: 10}}>*/}
-                  {/*      Route taken*/}
-                  {/*    </h4>*/}
-                  {/*  </Col>*/}
-                  {/*  <Col md={4}>*/}
-                  {/*    <h4 style={{fontSize: 15, color: '#006F53', paddingLeft: 10}}>*/}
-                  {/*      Ticket*/}
-                  {/*    </h4>*/}
-                  {/*  </Col>*/}
-                  {/*  <Col md={4}>*/}
-                  {/*    <h4 style={{fontSize: 15, color: '#006F53', paddingLeft: 10}}>*/}
-                  {/*      Signature*/}
-                  {/*    </h4>*/}
-                  {/*  </Col>*/}
-                  {/*</Row>*/}
                 </Container>
               </TableCell>
             </TableRow>
