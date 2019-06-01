@@ -175,7 +175,7 @@ class JobCreateFormTwo extends PureComponent {
       const address1 = {
         type: 'Delivery',
         name: 'Delivery Start Location',
-        companyId: 19, // 'this should change',
+        companyId: profile.companyId,
         address1: d.startLocationAddress1,
         address2: d.startLocationAddress2,
         city: d.startLocationCity,
@@ -201,7 +201,7 @@ class JobCreateFormTwo extends PureComponent {
       const address2 = {
         type: 'Delivery',
         name: 'Delivery End Location',
-        companyId: 19, // 'this should change',
+        companyId: profile.companyId,
         address1: d.endLocationAddress1,
         address2: d.endLocationAddress2,
         city: d.endLocationCity,
@@ -460,13 +460,6 @@ class JobCreateFormTwo extends PureComponent {
                     ) : null }
                   </div>
                   <br/>
-                  {/*<div className="row mt-1">*/}
-                  {/*  <div className="col-md-12 form__form-group">*/}
-                  {/*    <div className="sendjob">* Note - This job will be sent to all Trelar Partners*/}
-                  {/*      for review*/}
-                  {/*    </div>*/}
-                  {/*  </div>*/}
-                  {/*</div>*/}
                 </Row>
                 <Row className="col-md-12">
                   <hr/>
