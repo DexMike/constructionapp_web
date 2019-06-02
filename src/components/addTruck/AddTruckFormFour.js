@@ -86,43 +86,6 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.modifiedBy = profile.userId;
       await EquipmentService.updateEquipment(truckFullInfo.info);
-      // return;
-
-      // now let's save the user ..
-      /*
-      if (userFullInfo.info.id === 0) {
-
-        // ID SHOULD NOT BE 0, SINCE THERE'S ALWAYS
-        // SOMEONE ALREADY SELECTED
-
-        // let's not save a new driver for now
-        /*
-        // setup info for user
-        delete userFullInfo.info.redir;
-        delete userFullInfo.info.id;
-        userFullInfo.info.companyId = companyId;
-        // userFullInfo.info.equipmentId = 1; // setting as 1 since I don't have the ID yet
-        userFullInfo.info.preferredLanguage = 'English';
-        userFullInfo.info.isBanned = 0;
-        userFullInfo.info.userStatus = 'New';
-        const newUser = await UserService.createUser(userFullInfo.info);
-        userFullInfo.info.id = newUser.id;
-
-        const driver = {
-          id: truckFullInfo.info.driversId,
-          usersId: newUser.id,
-          driverLicenseId: 1 // THIS IS A FK
-        };
-        await DriverService.updateDriver(driver);
-        // return false;
-      } else {
-        userFullInfo.info.companyId = companyId;
-        userFullInfo.info.isBanned = 0; // TODO read from current profile
-        userFullInfo.info.preferredLanguage = 'English'; // TODO read from current profile
-        userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
-        await UserService.updateUser(userFullInfo.info);
-      }
-      */
 
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(
@@ -140,16 +103,6 @@ class AddTruckFormFour extends PureComponent {
       userFullInfo.info.preferredLanguage = 'English';
       userFullInfo.info.isBanned = 0;
       userFullInfo.info.userStatus = 'New';
-      // do not create a new user for now
-      // const newUser = await UserService.createUser(userFullInfo.info);
-      // return false;
-
-      // const driver = {
-      //   // usersId: newUser.id,
-      //   usersId: userFullInfo.info.id,
-      //   driverLicenseId: 1 // THIS IS A FK
-      // };
-      // const newDriver = await DriverService.createDriver(driver);
 
       truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.companyId = companyId;
@@ -162,6 +115,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
       truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
+      truckFullInfo.info.rateType = truckFullInfo.info.isRatedHour ? 'Hour' : 'Ton';
       // remove unnecesary info
       delete truckFullInfo.info.id;
       delete truckFullInfo.info.redir;
@@ -190,6 +144,35 @@ class AddTruckFormFour extends PureComponent {
 
   availableButtonColor(isAvailable) {
     return isAvailable ? 'secondary' : 'minimal';
+  }
+
+  renderHourOrTon(hourTon, info) {
+    if (hourTon) {
+      return (
+        <React.Fragment>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per hour: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.hourRate)}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+        <div className="row">
+          <div className="col-md-4">
+            <strong>Rate per ton: </strong>
+          </div>
+          <div className="col-md-8">
+            {TFormat.asMoneyByTons(info.tonRate)}
+          </div>
+        </div>
+      </React.Fragment>
+    );
   }
 
   render() {
@@ -332,14 +315,7 @@ class AddTruckFormFour extends PureComponent {
                       {truckFullInfo.info.licensePlate}
                     </div>
                   </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>Rate per hour: </strong>
-                    </div>
-                    <div className="col-md-8">
-                      {TFormat.asMoneyByHour(truckFullInfo.info.hourRate)}
-                    </div>
-                  </div>
+                  {this.renderHourOrTon(truckFullInfo.info.isRatedHour, truckFullInfo.info)}
                   <div className="row">
                     <div className="col-md-4">
                       <strong>Maximum distance pickup: </strong>
