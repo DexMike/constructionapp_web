@@ -37,8 +37,13 @@ class CreateJobFormOne extends PureComponent {
       rate: 0,
       ratebyBoth: false,
       rateByTon: false,
+      rateByTonValue: 0,
+      estimatedTons: 0,
       rateByHour: true,
+      rateByHourValue: 0,
+      estimatedHours: 0,
       isRatedHour: true,
+      selectedRatedHourOrTon: 'ton',
       tonnage: 0, // estimated amount of tonnage
       hourEstimatedHours: 0,
       hourTrucksNumber: 1,
@@ -141,6 +146,7 @@ class CreateJobFormOne extends PureComponent {
     this.toggleNewStartAddress = this.toggleNewStartAddress.bind(this);
     this.toggleNewEndAddress = this.toggleNewEndAddress.bind(this);
     this.handleSameAddresses = this.handleSameAddresses.bind(this);
+    this.handleRateChange = this.handleRateChange.bind(this);
   }
 
   async componentDidMount() {
@@ -175,7 +181,7 @@ class CreateJobFormOne extends PureComponent {
         rateByTon: p.rateByTon,
         rateByHour: p.rateByHour,
         tonnage: p.tonnage, // estimated amount of tonnage
-        hourEstimatedHours: p.hourEstimatedHours,
+        estimatedHours: p.estimatedHours,
         hourTrucksNumber: p.hourTrucksNumber,
         // rateTab: r.rateTab,
         // location
@@ -311,6 +317,10 @@ class CreateJobFormOne extends PureComponent {
       }
     });
     this.setState({[e.target.name]: e.target.value});
+  }
+
+  handleRateChange(e) {
+    this.setState({ selectedRatedHourOrTon: e.value });
   }
 
   handleSameAddresses() {
@@ -754,26 +764,77 @@ class CreateJobFormOne extends PureComponent {
     this.setState({selectedEndAddressId: 0});
   }
 
+  renderHourOrTon(hourTon) {
+    //AQUI ME QUEDO NO SE PUEDE ESCRIBIR A LOS INPUTS
+    //HAY QUE AREGLAR LOS MAREGENES DE ABAJO
+    const {
+      rateByTonValue,
+      rateByHourValue,
+      estimatedTons,
+      estimatedHours
+    } = this.state;
+    if (hourTon === 'ton') {
+      return (
+        <React.Fragment>
+          <div className="col-md-4 form__form-group">
+            <span className="form__form-group-label">Rate / Ton</span>
+            <input
+              name="rateByTon"
+              type="number" step="0.01"
+              value={rateByTonValue}
+              onChange={this.handleInputChange}
+              placeholder="0.00"
+            />
+          </div>
+          <div className="col-md-5 form__form-group">
+            <span className="form__form-group-label">Estimated Tons</span>
+            <input
+              name="estimatedTons"
+              type="number"
+              value={estimatedTons}
+              onChange={this.handleInputChange}
+              placeholder="0"
+            />
+          </div>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+        <div className="col-md-4 form__form-group">
+          <span className="form__form-group-label">Rate / Hour</span>
+          <input
+            name="rateByHour"
+            type="number" step="0.01"
+            value={rateByHourValue}
+            onChange={this.handleInputChange}
+            placeholder="0.00"
+          />
+        </div>
+        <div className="col-md-5 form__form-group">
+          <span className="form__form-group-label">Estimated Hours</span>
+          <input
+            name="estimatedTons"
+            type="number"
+            value={estimatedHours}
+            onChange={this.handleInputChange}
+            placeholder="0"
+          />
+        </div>
+      </React.Fragment>
+    );
+  }
+
   render() {
     const {
       truckType,
       allTruckTypes,
-      // capacity,
-      rate,
       allMaterials,
       selectedMaterials,
       allUSstates,
       allAddresses,
       selectedStartAddressId,
       selectedEndAddressId,
-      /*
-      ratebyBoth,
-      rateByTon,
-      rateByHour,
-      */
-      rateTab,
-      tonnage,
-      hourEstimatedHours,
       hourTrucksNumber,
       endLocationAddress1,
       endLocationAddress2,
@@ -788,7 +849,6 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip,
       name,
       instructions,
-      reqHandlerTonnage,
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerTrucksEstimate,
@@ -803,6 +863,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndCity,
       reqHandlerSameAddresses,
       reqHandlerDate,
+      selectedRatedHourOrTon,
       isRatedHour
     } = this.state;
     const today = new Date();
@@ -902,52 +963,33 @@ class CreateJobFormOne extends PureComponent {
               <Row className="col-md-12">
                 <div className="col-md-3 form__form-group">
                   <span className="form__form-group-label">Rate</span>
-                  //AQUI ME QUEDO HAY QUE HACER FUNIONAR ESTE SELECT
                   <SelectField
                     input={
                       {
                         onChange: this.handleRateChange,
                         name: 'materialType',
-                        value: isRatedHour
+                        value: selectedRatedHourOrTon
                       }
                     }
                     // meta={reqHandlerMaterials}
-                    value={isRatedHour}
+                    value={selectedRatedHourOrTon}
                     options={
                       [
                         {
-                          value: 1,
+                          value: 'hour',
                           label: 'Hour'
                         },
                         {
-                          value: 0,
+                          value: 'ton',
                           label: 'Ton'
                         }
                       ]
                     }
                   />
                 </div>
-                <div className="col-md-4 form__form-group">
-                  col1 
-                </div>
-                <div className="col-md-5 form__form-group">
-                  col1 
-                </div>
+                {this.renderHourOrTon(selectedRatedHourOrTon)}
               </Row>
-
-              <Row>
-                <div className="col-md-3">
-                  <span className="form__form-group-label">Rate per hour</span>
-                  <input
-                    name="rate"
-                    type="number"
-                    value={rate}
-                    onChange={this.handleInputChange}
-                    placeholder="$"
-                  />
-                </div>
-              </Row>
-
+              
               <Row className="col-md-12">
                 <hr/>
                 {/* <hr className="bighr"/> */}
@@ -957,24 +999,6 @@ class CreateJobFormOne extends PureComponent {
                 <div className="col-md-12 wizard">
                   <div className="wizard__form-wrapper">
                     <Row>
-                      {/* FIRST ROW */}
-                      <div className="col-md-6 form__form-group">
-                        <span className="form__form-group-label">
-                          Estimated hours
-                        </span>
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleHourDetails,
-                              name: 'hourEstimatedHours',
-                              value: hourEstimatedHours
-                            }
-                          }
-                          type="number"
-                          meta={reqHandlerHoursEstimate}
-                        />
-                      </div>
-                      <hr/>
                       <div className="col-md-6">
                         <h3 className="subhead">
                           Start Location
