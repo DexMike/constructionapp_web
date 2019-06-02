@@ -910,7 +910,7 @@ class CreateJobFormOne extends PureComponent {
                         {/* FIRST ROW */}
                         <div className="col-md-6 form__form-group">
                           <span className="form__form-group-label">
-                            Estimated hours.
+                            Estimated hours
                           </span>
                           <TField
                             input={
@@ -1185,7 +1185,7 @@ class CreateJobFormOne extends PureComponent {
                         <div className="form__form-group">
                           <div className="col-md-6">
                             <h3 className="subhead">
-                              Starting Location 1188
+                              Starting Location
                             </h3>
                             <div className="form__form-group">
                               <TField
