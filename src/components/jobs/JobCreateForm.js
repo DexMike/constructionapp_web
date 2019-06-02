@@ -946,7 +946,7 @@ class JobCreateForm extends Component {
         <div className="col-md-6">
 
           <h3 className="subhead">
-            Starting Location 949
+            Starting Location
           </h3>
           <small>
             Select a starting address
