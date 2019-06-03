@@ -44,20 +44,21 @@ class AddTruckFormOne extends PureComponent {
       description: '',
       vin: '',
       licensePlate: '',
-      ratesByBoth: false, // this only tracks the select
       ratesByHour: false,
       ratesByTon: false,
       ratesCostPerTon: '',
       ratesCostPerHour: '',
       minOperatingTime: '',
+      minTons: '',
       maxDistanceToPickup: '',
       truckType: '',
+      isRatedHour: true,
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerMinRate: { touched: false, error: '' },
       reqHandlerMinTime: { touched: false, error: '' },
-      reqHandlerCostTon: { touched: false, error: '' },
-      reqHandlerChecks: { touched: false, error: '' },
+      // reqHandlerCostTon: { touched: false, error: '' },
+      // reqHandlerChecks: { touched: false, error: '' },
       reqHandlerMaxCapacity: { touched: false, error: '' }
     };
 
@@ -234,61 +235,25 @@ class AddTruckFormOne extends PureComponent {
       description,
       vin,
       licensePlate,
-      ratesByBoth,
-      ratesByHour,
-      ratesByTon,
+      isRatedHour,
       ratesCostPerHour,
       ratesCostPerTon,
       minOperatingTime,
+      minTons,
       maxDistanceToPickup
     } = this.state;
     let {saveValues} = this.state;
     const { onTruckFullInfo } = this.props;
 
-    // set states for checkboxes
-    let chargeBy = '';
-    if (ratesByBoth) {
-      chargeBy = 'Both';
-    } else {
-      if (ratesByHour) {
-        chargeBy = 'Hour';
-      }
-      if (ratesByTon) {
-        chargeBy = 'Tons';
-      }
-    }
-
     // map the values with the ones on equipment
     const shortDesc = description.substring(0, 45);
-    let start = new Date();
-    let end = new Date();
-    // let available = false;
 
     // dates if preloaded
     const {
       getTruckFullInfo,
-      // getAvailiabilityFullInfo,
       equipmentId
     } = this.props;
     const preloaded = getTruckFullInfo();
-    // const preloadedAvailability = getAvailiabilityFullInfo();
-
-    // load info from cached (if coming back from next tabs)
-    // if (typeof preloaded.info !== 'undefined') {
-    //   if (Object.keys(preloaded.info).length > 0) {
-    //     start = preloaded.info.startAvailability;
-    //     end = preloaded.info.endAvailability;
-    //     available = preloadedAvailability.info.isAvailable;
-    //   }
-    // }
-    // // however, if there is already saved dates, we'll use that one
-    // if (typeof preloadedAvailability.info !== 'undefined') {
-    //   if (Object.keys(preloadedAvailability.info).length > 0) {
-    //     start = preloadedAvailability.info.startDate;
-    //     end = preloadedAvailability.info.endDate;
-    //     available = preloadedAvailability.info.isAvailable;
-    //   }
-    // }
 
     // TODO-> Ask which params are required
     saveValues = {
@@ -300,6 +265,7 @@ class AddTruckFormOne extends PureComponent {
       maxCapacity, // This is a shorthand of (maxCapacity: maxCapacity)
       minCapacity: 0, // unasigned
       minHours: minOperatingTime,
+      minTons,
       maxDistance: maxDistanceToPickup,
       description,
       licensePlate,
@@ -308,12 +274,10 @@ class AddTruckFormOne extends PureComponent {
       // currentAvailability: available, // unasigned
       // startAvailability: start, // careful here, it's date unless it exists
       // endAvailability: end,
-      ratesByBoth, // keeping here in order to track it
-      ratesByHour, // keeping here in order to track it
-      ratesByTon, // keeping here in order to track it
+      isRatedHour,
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
-      rateType: chargeBy, // PENDING
+      // rateType: chargeBy, // PENDING
       equipmentId,
       defaultDriverId, // unasigned
       driverEquipmentsId: 0, // unasigned
@@ -355,45 +319,36 @@ class AddTruckFormOne extends PureComponent {
   handleInputChange(e) {
     let { value } = e.target;
     let reqHandler = '';
-    if (e.target.name === 'ratesByBoth') {
-      value = e.target.checked ? Number(1) : Number(0);
-      if (e.target.checked) {
-        this.setState({
-          ratesByHour: 1,
-          ratesByTon: 1
-        });
-      } else {
-        this.setState({
-          ratesByHour: 0,
-          ratesByTon: 0
-        });
-      }
-    }
+
     if (e.target.name === 'ratesByHour' && e.target.checked) {
-      this.setState({ ratesByTon: 0 });
+      this.setState({ isRatedHour: true });
     }
     if (e.target.name === 'ratesByTon' && e.target.checked) {
-      this.setState({ ratesByHour: 0 });
+      this.setState({ isRatedHour: false });
     }
     if (e.target.name === 'maxCapacity') {
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
 
     // We take the input name prop to set the respective requiredHandler
-    if (e.target.name === 'ratesCostPerHour') {
-      reqHandler = 'reqHandlerMinRate';
-    } else if (e.target.name === 'minOperatingTime') {
-      reqHandler = 'reqHandlerMinTime';
-    } else if (e.target.name === 'ratesCostPerTon') {
+    /* else if (e.target.name === 'ratesCostPerTon') {
       reqHandler = 'reqHandlerCostTon';
-    } else if (e.target.name === 'maxCapacity') {
-      reqHandler = 'reqHandlerMaxCapacity';
-    } else if (
+    } */
+    /*
+    else if (
       e.target.name === 'ratesByTon'
       || e.target.name === 'ratesByHour'
       || e.target.name === 'ratesByBoth'
     ) {
       reqHandler = 'reqHandlerChecks';
+    }
+    */
+    if (e.target.name === 'ratesCostPerHour') {
+      reqHandler = 'reqHandlerMinRate';
+    } else if (e.target.name === 'minOperatingTime') {
+      reqHandler = 'reqHandlerMinTime';
+    } else if (e.target.name === 'maxCapacity') {
+      reqHandler = 'reqHandlerMaxCapacity';
     }
     // Then we set the touched prop to false, hiding the error label
     this.setState({
@@ -476,7 +431,9 @@ class AddTruckFormOne extends PureComponent {
         ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
         ratesCostPerHour: passedTruckFullInfo.hourRate,
         truckType: passedTruckFullInfo.type,
-        selectedMaterials: truckMaterials
+        selectedMaterials: truckMaterials,
+        isRatedHour: passedTruckFullInfo.isRatedHour,
+        minTons: passedTruckFullInfo.minTons
       });
       // set booleans
       if (passedTruckFullInfo.rateType === 'Both') {
@@ -511,7 +468,7 @@ class AddTruckFormOne extends PureComponent {
         licensePlate: preloaded.info.licensePlate,
         ratesByBoth: preloaded.info.ratesByBoth,
         ratesByHour: preloaded.info.ratesByHour,
-        ratesByTon: preloaded.info.ratesByTon,
+        // ratesByTon: preloaded.info.ratesByTon,
         minOperatingTime: preloaded.info.minHours,
         maxDistanceToPickup: preloaded.info.maxDistance,
         // ratesCostPerTon: preloaded.info.tonRate,
@@ -519,7 +476,10 @@ class AddTruckFormOne extends PureComponent {
         truckType: preloaded.info.type,
         selectedMaterials: preloaded.info.selectedMaterials,
         image: preloaded.info.image,
-        files
+        files,
+        isRatedHour: preloaded.info.isRatedHour,
+        minTons: preloaded.info.minTons,
+        ratesCostPerTon: Number(preloaded.info.tonRate)
       });
       // Materials Hauled is missing
     }
@@ -563,21 +523,18 @@ class AddTruckFormOne extends PureComponent {
       // descriptionTouched,
       vin,
       licensePlate,
-      ratesByBoth,
-      ratesByHour,
       ratesCostPerHour,
-      ratesByTon,
+      isRatedHour,
       ratesCostPerTon,
       minOperatingTime,
+      minTons,
       maxDistanceToPickup,
       truckTypes,
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerMinRate,
       reqHandlerMinTime,
-      reqHandlerCostTon,
       imageUploading,
-      reqHandlerChecks,
       reqHandlerMaxCapacity
     } = this.state;
     const { p, onClose } = this.props;
@@ -585,13 +542,6 @@ class AddTruckFormOne extends PureComponent {
       <Col md={12} lg={12}>
         <Card>
           <CardBody>
-            {/*
-            <div className="card__title">
-              <h5 className="bold-text">
-                Welcome to Trelar, Lets add a truck so customers can find you
-              </h5>
-            </div>
-            */}
 
             {/* this.handleSubmit  */}
             <form
@@ -686,30 +636,24 @@ class AddTruckFormOne extends PureComponent {
                     Truck Rates
                   </h3>
                 </div>
+              </Row>
 
-                {/* FIRST ROW */}
-
-                <div className="col-md-12 form__form-group">
-                  <TCheckBox
-                    onChange={this.handleInputChange}
-                    name="ratesByBoth"
-                    value={!!ratesByBoth}
-                    label="By Both"
-                    meta={reqHandlerChecks}
-                  />
-                </div>
-
-                <div className="col-md-4 form__form-group">
+              {/* BY THE HOUR */}
+              <Row className="col-md-12">
+                <div className="col-md-2 form__form-group pt-20">
                   <TCheckBox
                     type="hidden"
                     onChange={this.handleInputChange}
                     name="ratesByHour"
-                    // value={!!ratesByHour}
-                    value="on"
+                    value={isRatedHour}
                     label="By Hour"
                   />
                 </div>
-                <div className="col-md-4 form__form-group">
+                <div
+                  className={
+                    `${isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                    }
+                >
                   <span className="label">$ Cost / Hour</span>
                   <TField
                     input={
@@ -724,8 +668,12 @@ class AddTruckFormOne extends PureComponent {
                     meta={reqHandlerMinRate}
                   />
                 </div>
-                <div className="col-md-4 form__form-group">
-                  <span className="label">Minimum hours</span>
+                <div
+                  className={
+                    `${isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                    }
+                >
+                  <span className="label">Minimum Hours</span>
                   <TField
                     input={
                       {
@@ -741,16 +689,21 @@ class AddTruckFormOne extends PureComponent {
                 </div>
               </Row>
 
-
+              {/* BY THE TON */}
               <Row className="col-md-12">
-                <div className="col-md-3 form__form-group">
-                  <TCheckBox onChange={this.handleInputChange} name="ratesByTon"
-                             value={!!ratesByTon} label="By Ton"
+                <div className="col-md-2 form__form-group pt-20">
+                  <TCheckBox onChange={this.handleInputChange}
+                    name="ratesByTon"
+                    value={!isRatedHour}
+                    label="By Ton"
                   />
                 </div>
-                {/*
-                <div className="col-md-3 form__form-group">
-                  <span className="label">Cost per Ton $</span>
+                <div
+                  className={
+                    `${!isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                    }
+                >
+                  <span className="label">$ Cost / Ton</span>
                   <TField
                     input={
                       {
@@ -761,10 +714,28 @@ class AddTruckFormOne extends PureComponent {
                     }
                     placeholder="0"
                     type="number"
-                    meta={reqHandlerCostTon}
+                    // meta={reqHandlerMinRate}
                   />
                 </div>
-                */}
+                <div
+                  className={
+                    `${!isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                    }
+                >
+                  <span className="label">Minimum Tons</span>
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleInputChange,
+                        name: 'minTons',
+                        value: minTons
+                      }
+                    }
+                    placeholder="0"
+                    type="number"
+                    // meta={reqHandlerMinTime}
+                  />
+                </div>
               </Row>
 
               <Row className="col-md-12">
