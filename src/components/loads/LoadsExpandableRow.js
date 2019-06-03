@@ -7,8 +7,11 @@ import moment from 'moment';
 import {Container, Row, Col, Button} from 'reactstrap';
 import UserService from '../../api/UserService';
 import LoadService from '../../api/LoadService';
+import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
 import GPSTrackingService from '../../api/GPSTrackingService';
+import ProfileService from '../../api/ProfileService';
+import CompanyService from '../../api/CompanyService';
 import TMapBoxPath
   from '../common/TMapBoxPath';
 
@@ -23,7 +26,8 @@ class LoadsExpandableRow extends Component {
       expanded: false,
       driver: null,
       gpsTrackings: null,
-      loadInvoices: []
+      loadInvoices: [],
+      disputeEmail: null
     };
     this.toggle = this.toggle.bind(this);
   }
@@ -31,14 +35,30 @@ class LoadsExpandableRow extends Component {
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let {gpsTrackings, loadInvoices} = this.state;
+    let {gpsTrackings, loadInvoices, disputeEmail} = {...this.state};
     gpsTrackings = await this.fetchGPSPoints(load.id);
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
     const driver = await UserService.getDriverByBookingId(props.load.bookingId);
+    const profile = await ProfileService.getProfile();
+    const company = await CompanyService.getCompanyById(profile.companyId);
+    const date = new Date();
+    disputeEmail = {
+      toEmail: 'martin@trelar.net',
+      toName: 'Trelar CSR',
+      subject: `[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
+      isHTML: true,
+      body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
+        + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
+        + `Company: ${company.legalName}`,
+      recipients: [
+        {name: 'Trelar Customer #1', email: 'martin@trelar.net'}
+      ],
+      attachments: []
+    }
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.handleDisputeLoad = this.handleDisputeLoad.bind(this);
-    this.setState({gpsTrackings, loadInvoices});
+    this.setState({gpsTrackings, loadInvoices, disputeEmail});
   }
 
   async fetchGPSPoints(loadId) {
@@ -60,10 +80,11 @@ class LoadsExpandableRow extends Component {
   }
 
   async handleDisputeLoad() {
-    const {load} = {...this.state};
+    const {load, disputeEmail} = {...this.state};
     load.loadStatus = 'Disputed';
     await LoadService.updateLoad(load.id, load);
-    this.setState({loadStatus: 'Disputed'});
+    await EmailService.sendEmail(disputeEmail)
+    this.setState({load, loadStatus: 'Disputed'});
   }
 
   render() {
@@ -131,12 +152,7 @@ class LoadsExpandableRow extends Component {
                   <hr/>
                   {loadStatus === 'Submitted' && (
                     <Row justify="between">
-                      <Col md={3}>
-                        {/*<p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>*/}
-                        {/*  Driver Name: {`${driver.firstName} ${driver.lastName}`}*/}
-                        {/*</p>*/}
-                      </Col>
-                      <Col md={5}/>
+                      <Col md={8}/>
                       <Col md={4}>
                         <Button
                           onClick={this.handleDisputeLoad}
@@ -175,40 +191,29 @@ class LoadsExpandableRow extends Component {
                         fontSize: 22
                       }}
                       >
-                        Ticket
+                        Ticket Number: {load.ticketNumber}
                       </h3>
                     </Col>
                   </Row>
-                  <Row style={{paddingTop: 0}}>
+                  <Row>
                     <Col md={6}>
                       <React.Fragment>
                         <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
+                        <p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>
+                          Driver Name: {`${driver.firstName} ${driver.lastName}`}
+                        </p>
                       </React.Fragment>
                     </Col>
                     <Col md={6}>
-                      <Row>
-                        <Col md={6}>
-                          <h3 className="subhead" style={{
-                            paddingTop: 30,
-                            color: 'black',
-                            fontSize: 15
-                          }}
-                          >
-                            Ticket Number: {load.ticketNumber}
-                          </h3>
+                      {loadInvoices.map(item => (
+                        <Col md={12} key={`img-${item}`}>
+                          <img key={item} src={`${item[2]}`} alt={`${item[2]}`}/>
                         </Col>
-                      </Row>
-                      <Row>
-                        {loadInvoices.map(item => (
-                          <Col md={12} key={`img-${item}`}>
-                            <img key={item} src={`${item[2]}`} alt={`${item[2]}`}/>
-                          </Col>
-                          // <Col className="col-md-3 pt-3" key={`img-${item}`}>
-                          //   <img key={item} src={`${item[2]}`} alt={`${item}`}/>
-                          // </Col>
-                        ))
-                        }
-                      </Row>
+                        // <Col className="col-md-3 pt-3" key={`img-${item}`}>
+                        //   <img key={item} src={`${item[2]}`} alt={`${item}`}/>
+                        // </Col>
+                      ))
+                      }
                     </Col>
                   </Row>
                 </Container>
