@@ -1,12 +1,12 @@
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 import mapboxgl from 'mapbox-gl';
-import { Container } from 'reactstrap';
+import {Container} from 'reactstrap';
 import './css/mapBox.css';
 
 class TMapBoxPath extends PureComponent {
   componentDidMount() {
-    const { loadId, gpsTrackings } = this.props;
+    const {loadId, gpsTrackings} = this.props;
     this.setMap(loadId, gpsTrackings);
   }
 
@@ -36,16 +36,59 @@ class TMapBoxPath extends PureComponent {
               coordinates: gpsTrackings
             }
           }
+        },
+        paint: {
+          'line-width': 3,
+          'line-color': 'green'
+        }
+      });
+
+      map.addLayer({
+        id: 'points',
+        type: 'symbol',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [{
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: gpsTrackings[1]
+              },
+              properties: {
+                title: 'Start',
+                icon: 'marker'
+              }
+            }, {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: gpsTrackings[gpsTrackings.length - 2]
+              },
+              properties: {
+                title: 'Finish',
+                icon: 'marker'
+              }
+            }]
+          }
+        },
+        layout: {
+          'icon-image': '{icon}-15',
+          'text-field': '{title}',
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+          'text-offset': [0, 0.6],
+          'text-anchor': 'top'
         }
       });
     });
   }
 
   render() {
-    const { loadId } = this.props;
+    const {loadId} = this.props;
     return (
       <Container className="dashboard">
-        <div id={`map_${loadId}`} style={{width: '100%', height: '400px'}} />
+        <div id={`map_${loadId}`} style={{width: '100%', height: '400px'}}/>
       </Container>
     );
   }
