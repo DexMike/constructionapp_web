@@ -36,10 +36,8 @@ class CreateJobFormOne extends PureComponent {
       // rates
       rate: 0,
       ratebyBoth: false,
-      rateByTon: false,
       rateByTonValue: 0,
       estimatedTons: 0,
-      rateByHour: true,
       rateByHourValue: 0,
       estimatedHours: 0,
       isRatedHour: true,
@@ -183,8 +181,6 @@ class CreateJobFormOne extends PureComponent {
         // rates
         rate: p.rate,
         ratebyBoth: p.ratebyBoth,
-        rateByTon: p.rateByTon,
-        rateByHour: p.rateByHour,
         tonnage: p.tonnage, // estimated amount of tonnage
         hourTrucksNumber: p.hourTrucksNumber,
         // rateTab: r.rateTab,
@@ -210,8 +206,8 @@ class CreateJobFormOne extends PureComponent {
         // PUT back hour/ton
         selectedRatedHourOrTon: p.selectedRatedHourOrTon,
         rateByTonValue: p.rateByTonValue,
-        estimatedTons: p.estimatedTons,
         rateByHourValue: p.rateByHourValue,
+        estimatedTons: p.estimatedTons,
         estimatedHours: p.estimatedHours
       });
     } else {
@@ -318,19 +314,6 @@ class CreateJobFormOne extends PureComponent {
     });
     this.setState({[e.target.name]: e.target.value});
   }
-
-  /*
-  handleTonnageDetails(e) {
-    const {reqHandlerTonnage} = this.state;
-    this.setState({
-      reqHandlerTonnage: {
-        ...reqHandlerTonnage,
-        touched: false
-      }
-    });
-    this.setState({[e.target.name]: e.target.value});
-  }
-  */
 
   handleRateChange(e) {
     this.setState({ selectedRatedHourOrTon: e.value });
@@ -576,33 +559,6 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
-    // only work if tab is 1
-    /*
-    if (job.tonnage <= 0 && rateTab === 2) {
-      this.setState({
-        reqHandlerTonnage: {
-          ...reqHandlerTonnage,
-          touched: true,
-          error: 'A value for number of tons must be set'
-        }
-      });
-      isValid = false;
-    }
-    */
-
-    /*
-    if (job.hourEstimatedHours <= 0 && rateTab === 1) {
-      this.setState({
-        reqHandlerHoursEstimate: {
-          ...reqHandlerHoursEstimate,
-          touched: true,
-          error: 'Required input'
-        }
-      });
-      isValid = false;
-    }
-    */
-
     if (job.hourTrucksNumber <= 0 && rateTab === 1) {
       this.setState({
         reqHandlerTrucksEstimate: {
@@ -746,8 +702,8 @@ class CreateJobFormOne extends PureComponent {
     // clear all data from tab 2
     this.setState({
       ratebyBoth: false,
-      rateByHour: true,
-      rateByTon: false,
+      // rateByHour: true,
+      // rateByTon: false,
       tonnage: 0,
       endLocationAddress1: '',
       endLocationAddress2: '',
@@ -762,8 +718,8 @@ class CreateJobFormOne extends PureComponent {
     // clear all from tab 1
     this.setState({
       ratebyBoth: false,
-      rateByHour: false,
-      rateByTon: true,
+      // rateByHour: false,
+      // rateByTon: true,
       hourEstimatedHours: 0,
       hourTrucksNumber: 0
     });
