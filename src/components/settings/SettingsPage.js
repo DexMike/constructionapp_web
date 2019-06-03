@@ -13,6 +13,7 @@ import classnames from 'classnames';
 import './Settings.css';
 
 import UserSettings from './UserSettings';
+import NotificationsSettings from './NotificationsSettings';
 
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
@@ -145,7 +146,9 @@ class SettingsPage extends Component {
             />
           </TabPane>
           <TabPane tabId="2">
-            &nbsp;
+            <NotificationsSettings
+              company={company}
+            />
           </TabPane>
           <TabPane tabId="3">
             <Row>
