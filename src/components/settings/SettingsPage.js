@@ -1,56 +1,191 @@
 import React, { Component } from 'react';
 import {
-  Card,
-  CardBody,
   Col,
   Container,
-  Row
+  Row,
+  TabContent,
+  TabPane,
+  Nav,
+  NavItem,
+  NavLink
 } from 'reactstrap';
+import classnames from 'classnames';
+import './Settings.css';
 
-import MapboxDemo1 from '../../img/Mapbox_Demo1.png';
-import MapboxDemo2 from '../../img/Mapbox_Demo2.png';
+import UserSettings from './UserSettings';
+import NotificationsSettings from './NotificationsSettings';
+
+import ProfileService from '../../api/ProfileService';
+import UserService from '../../api/UserService';
+import CompanyService from '../../api/CompanyService';
+import AddressService from '../../api/AddressService';
 
 class SettingsPage extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      loaded: true
+      loaded: false,
+      company: [],
+      user: [],
+      address: [],
+      activeTab: '1',
+      title: 'User Profile',
+      isAdmin: false
     };
-  } // constructor
 
-
-  async componentDidMount() {
-    //
+    this.toggle = this.toggle.bind(this);
   }
 
-  renderMapboxDemo() {
+  async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    const user = await UserService.getUserById(profile.userId);
+    const company = await CompanyService.getCompanyById(profile.companyId);
+    const address = await AddressService.getAddressById(company.addressId);
+    let isAdmin = false;
+    if (company.adminId === user.id) {
+      isAdmin = true;
+    }
+    this.setState({
+      company,
+      user,
+      address,
+      isAdmin,
+      loaded: true
+    });
+  }
+
+  toggle(tab) {
+    const { activeTab } = this.state;
+    let { title } = this.state;
+    switch (tab) {
+      case '1':
+        title = 'User Profile';
+        break;
+      case '2':
+        title = 'Notifications';
+        break;
+      case '3':
+        title = 'Roles & Permissions';
+        break;
+      case '4':
+        title = 'Payment Method';
+        break;
+      default:
+        break;
+    }
+    if (activeTab !== tab) {
+      this.setState({
+        activeTab: tab,
+        title
+      });
+    }
+  }
+
+  renderSettingsTabs() {
+    const { activeTab, user, company, address, isAdmin } = this.state;
     return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-              <Row>
-                <div className="col-md-12 mt-1">
-                  <img width="100%" height="100%" src={MapboxDemo1} alt=""/>
-                </div>
-                <div className="col-md-12 mt-1">
-                  <img width="100%" height="100%" src={MapboxDemo2} alt=""/>
-                </div>
-              </Row>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+      <div>
+        <Nav tabs>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '1' }, 'tab')}
+              onClick={() => { this.toggle('1'); }}
+            >
+              <div className="navLink">User Profile</div>
+            </NavLink>
+          </NavItem>
+          { isAdmin ? (
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === '2' }, 'tab')}
+                onClick={() => { this.toggle('2'); }}
+              >
+                Notifications
+              </NavLink>
+            </NavItem>
+          ) : null
+          }
+          {
+            /* Disabling these for now
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === '3' }, 'tab')}
+                onClick={() => { this.toggle('3'); }}
+              >
+                Permissions / Roles
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === '4' }, 'tab')}
+                onClick={() => { this.toggle('4'); }}
+              >
+                Payment Method
+              </NavLink>
+            </NavItem>
+            */
+          }
+        </Nav>
+
+        <TabContent
+          activeTab={activeTab}
+          style={{
+            backgroundColor: '#FFF',
+            marginLeft: 8,
+            marginRight: 8,
+            paddingLeft: 32,
+            paddingRight: 32,
+            borderRadius: 5
+          }}
+        >
+          <TabPane tabId="1">
+            <UserSettings
+              user={user}
+              company={company}
+              address={address}
+            />
+          </TabPane>
+          <TabPane tabId="2">
+            <NotificationsSettings
+              company={company}
+            />
+          </TabPane>
+          <TabPane tabId="3">
+            <Row>
+              <Col sm="12">
+                Permisions
+              </Col>
+            </Row>
+          </TabPane>
+          <TabPane tabId="4">
+            <Row>
+              <Col sm="12">
+                Payment Method
+              </Col>
+            </Row>
+          </TabPane>
+        </TabContent>
+      </div>
     );
   }
 
   render() {
-    const { loaded } = this.state;
+    const { loaded, title } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderMapboxDemo()}
+          <Row>
+            <Col md={12}>
+              <h3 className="page-title">Settings / {title}</h3>
+            </Col>
+          </Row>
+          <Container>
+            <Row>
+              <Col md={12}>
+                {this.renderSettingsTabs()}
+              </Col>
+            </Row>
+          </Container>
         </Container>
       );
     }
