@@ -10,6 +10,7 @@ class TField extends PureComponent {
     return (
       <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
         <input
+          style={{borderRadius: 0}}
           {...input}
           placeholder={placeholder}
           type={type}
