@@ -720,6 +720,8 @@ class JobCreateForm extends Component {
       imageTruck = `${window.location.origin}/${truckImage}`;
     }
 
+    const { rateType } = selectedEquipment.rateType;
+
     // if ANY is selected, let's show all material
     if (availableMaterials.length > 0) {
       for (const mat in availableMaterials) {
@@ -771,7 +773,7 @@ class JobCreateForm extends Component {
                     fixedDecimalScale
                     thousandSeparator
                     prefix=" "
-                    suffix=" Tons"
+                    suffix={` ${rateType}s`}
                   />
                 </span>
               </div>
