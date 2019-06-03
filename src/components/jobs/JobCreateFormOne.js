@@ -181,8 +181,6 @@ class CreateJobFormOne extends PureComponent {
         // rates
         rate: p.rate,
         ratebyBoth: p.ratebyBoth,
-        rateByTon: p.rateByTon,
-        // rateByHour: p.rateByHour,
         tonnage: p.tonnage, // estimated amount of tonnage
         hourTrucksNumber: p.hourTrucksNumber,
         // rateTab: r.rateTab,
