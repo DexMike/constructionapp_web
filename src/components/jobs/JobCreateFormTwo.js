@@ -219,9 +219,14 @@ class JobCreateFormTwo extends PureComponent {
       isFavorited = 1;
     }
 
-    let rateType = 'Hour';
-    if (d.rateByTon) {
+    let rateType = '';
+    let rate = 0;
+    if (d.selectedRatedHourOrTon === 'ton') {
       rateType = 'Ton';
+      rate = Number(d.rateByTonValue);
+    } else {
+      rateType = 'Hour';
+      rate = Number(d.rateByHourValue);
     }
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
@@ -247,7 +252,7 @@ class JobCreateFormTwo extends PureComponent {
       equipmentType: d.truckType.value,
       numEquipments: d.hourTrucksNumber,
       rateType,
-      rate: d.rate,
+      rate,
       rateEstimate: d.hourEstimatedHours,
       rateTotal: 0,
       notes: d.instructions,

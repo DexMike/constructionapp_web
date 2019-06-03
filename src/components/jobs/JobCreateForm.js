@@ -206,6 +206,7 @@ class JobCreateForm extends Component {
   }
 
   handleJobInputChange(e) {
+    console.log(209);
     const { job } = this.state;
     let reqHandler = '';
     job[e.target.name] = e.target.value;
