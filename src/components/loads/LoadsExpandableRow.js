@@ -27,7 +27,8 @@ class LoadsExpandableRow extends Component {
       driver: null,
       gpsTrackings: null,
       loadInvoices: [],
-      disputeEmail: null
+      disputeEmail: null,
+      profile: null
     };
     this.toggle = this.toggle.bind(this);
   }
@@ -58,7 +59,7 @@ class LoadsExpandableRow extends Component {
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.handleDisputeLoad = this.handleDisputeLoad.bind(this);
-    this.setState({gpsTrackings, loadInvoices, disputeEmail});
+    this.setState({gpsTrackings, loadInvoices, disputeEmail, profile});
   }
 
   async fetchGPSPoints(loadId) {
@@ -90,7 +91,7 @@ class LoadsExpandableRow extends Component {
   render() {
     const {loaded} = {...this.state};
     if (loaded) {
-      const {load, loadStatus, index, expanded, driver, gpsTrackings, loadInvoices} = {...this.state};
+      const {load, loadStatus, index, expanded, driver, gpsTrackings, loadInvoices, profile} = {...this.state};
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
       let statusColor = '';
@@ -150,7 +151,7 @@ class LoadsExpandableRow extends Component {
                     </Col>
                   </Row>
                   <hr/>
-                  {loadStatus === 'Submitted' && (
+                  {loadStatus === 'Submitted' && profile.companyType === 'Customer' && (
                     <Row justify="between">
                       <Col md={8}/>
                       <Col md={4}>
