@@ -23,6 +23,14 @@ class TMapBoxPath extends PureComponent {
     });
 
     map.on('load', () => {
+      const markerStart = new mapboxgl.Marker().setLngLat(gpsTrackings[0]).addTo(map);
+    });
+
+    map.on('load', () => {
+      const markerEnd = new mapboxgl.Marker().setLngLat(gpsTrackings[gpsTrackings.length - 1]).addTo(map);
+    });
+
+    map.on('load', () => {
       map.addLayer({
         id: 'route',
         type: 'line',
@@ -39,7 +47,7 @@ class TMapBoxPath extends PureComponent {
         },
         paint: {
           'line-width': 3,
-          'line-color': 'green'
+          'line-color': 'rgb(63, 177, 205)'
         }
       });
 
@@ -54,27 +62,24 @@ class TMapBoxPath extends PureComponent {
               type: 'Feature',
               geometry: {
                 type: 'Point',
-                coordinates: gpsTrackings[1]
+                coordinates: gpsTrackings[0]
               },
               properties: {
-                title: 'Start',
-                icon: 'marker'
+                title: 'Start'
               }
             }, {
               type: 'Feature',
               geometry: {
                 type: 'Point',
-                coordinates: gpsTrackings[gpsTrackings.length - 2]
+                coordinates: gpsTrackings[gpsTrackings.length - 1]
               },
               properties: {
-                title: 'Finish',
-                icon: 'marker'
+                title: 'Finish'
               }
             }]
           }
         },
         layout: {
-          'icon-image': '{icon}-15',
           'text-field': '{title}',
           'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
           'text-offset': [0, 0.6],
@@ -82,6 +87,8 @@ class TMapBoxPath extends PureComponent {
         }
       });
     });
+
+
   }
 
   render() {

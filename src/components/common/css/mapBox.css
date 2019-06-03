@@ -14,3 +14,11 @@ body {
   position: relative;
   height: 400px;
 }
+
+.mapboxgl-marker-REMOVETHIS {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border:1px solid gray;
+  background-color:yellow;
+}
