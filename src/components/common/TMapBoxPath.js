@@ -3,14 +3,16 @@ import PropTypes from 'prop-types';
 import mapboxgl from 'mapbox-gl';
 import {Container} from 'reactstrap';
 import './css/mapBox.css';
+import LoadService from "../../api/LoadService";
 
 class TMapBoxPath extends PureComponent {
-  componentDidMount() {
+  async componentDidMount() {
     const {loadId, gpsTrackings} = this.props;
-    this.setMap(loadId, gpsTrackings);
+    const load = await LoadService.getLoadById(loadId);
+    this.setMap(loadId, gpsTrackings, load);
   }
 
-  setMap(loadId, gpsTrackings) {
+  setMap(loadId, gpsTrackings, load) {
     const center = Math.floor(gpsTrackings.length / 2);
     mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
@@ -74,7 +76,7 @@ class TMapBoxPath extends PureComponent {
                 coordinates: gpsTrackings[gpsTrackings.length - 1]
               },
               properties: {
-                title: 'Finish'
+                title: load.loadStatus === 'Started' ? 'In Progress' : 'Finish'
               }
             }]
           }
