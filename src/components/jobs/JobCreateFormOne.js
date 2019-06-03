@@ -37,7 +37,13 @@ class CreateJobFormOne extends PureComponent {
       rate: 0,
       ratebyBoth: false,
       rateByTon: false,
+      rateByTonValue: 0,
+      estimatedTons: 0,
       rateByHour: true,
+      rateByHourValue: 0,
+      estimatedHours: 0,
+      isRatedHour: true,
+      selectedRatedHourOrTon: 'ton',
       tonnage: 0, // estimated amount of tonnage
       hourEstimatedHours: 0,
       hourTrucksNumber: 1,
@@ -63,10 +69,12 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
+      /*
       reqHandlerTonnage: {
         touched: false,
         error: ''
       },
+      */
       reqHandlerDate: {
         touched: false,
         error: ''
@@ -79,10 +87,12 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
+      /*
       reqHandlerHoursEstimate: {
         touched: false,
         error: ''
       },
+      */
       reqHandleTrucksEstimate: {
         touched: false,
         error: ''
@@ -123,7 +133,7 @@ class CreateJobFormOne extends PureComponent {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleTruckTypeChange = this.handleTruckTypeChange.bind(this);
     this.handleMaterialsChange = this.handleMaterialsChange.bind(this);
-    this.handleTonnageDetails = this.handleTonnageDetails.bind(this);
+    // this.handleTonnageDetails = this.handleTonnageDetails.bind(this);
     this.handleHourDetails = this.handleHourDetails.bind(this);
     this.handleStartAddressChange = this.handleStartAddressChange.bind(this);
     this.handleEndAddressChange = this.handleEndAddressChange.bind(this);
@@ -140,6 +150,8 @@ class CreateJobFormOne extends PureComponent {
     this.toggleNewStartAddress = this.toggleNewStartAddress.bind(this);
     this.toggleNewEndAddress = this.toggleNewEndAddress.bind(this);
     this.handleSameAddresses = this.handleSameAddresses.bind(this);
+    this.handleRateChange = this.handleRateChange.bind(this);
+    this.handleInputChangeTonHour = this.handleInputChangeTonHour.bind(this);
   }
 
   async componentDidMount() {
@@ -174,7 +186,6 @@ class CreateJobFormOne extends PureComponent {
         rateByTon: p.rateByTon,
         rateByHour: p.rateByHour,
         tonnage: p.tonnage, // estimated amount of tonnage
-        hourEstimatedHours: p.hourEstimatedHours,
         hourTrucksNumber: p.hourTrucksNumber,
         // rateTab: r.rateTab,
         // location
@@ -194,7 +205,14 @@ class CreateJobFormOne extends PureComponent {
         jobDate: p.jobDate,
         // job properties
         name: p.name,
-        instructions: p.instructions
+        instructions: p.instructions,
+
+        // PUT back hour/ton
+        selectedRatedHourOrTon: p.selectedRatedHourOrTon,
+        rateByTonValue: p.rateByTonValue,
+        estimatedTons: p.estimatedTons,
+        rateByHourValue: p.rateByHourValue,
+        estimatedHours: p.estimatedHours
       });
     } else {
       // we don't have preloaded info, let's hit the server
@@ -301,6 +319,7 @@ class CreateJobFormOne extends PureComponent {
     this.setState({[e.target.name]: e.target.value});
   }
 
+  /*
   handleTonnageDetails(e) {
     const {reqHandlerTonnage} = this.state;
     this.setState({
@@ -310,6 +329,11 @@ class CreateJobFormOne extends PureComponent {
       }
     });
     this.setState({[e.target.name]: e.target.value});
+  }
+  */
+
+  handleRateChange(e) {
+    this.setState({ selectedRatedHourOrTon: e.value });
   }
 
   handleSameAddresses() {
@@ -325,9 +349,11 @@ class CreateJobFormOne extends PureComponent {
   handleHourDetails(e) {
     let reqHandler = '';
     switch (e.target.name) {
+      /*
       case 'hourEstimatedHours':
         reqHandler = 'reqHandlerHoursEstimate';
         break;
+      */
       case 'hourTrucksNumber':
         reqHandler = 'reqHandlerTrucksEstimate';
         break;
@@ -385,7 +411,7 @@ class CreateJobFormOne extends PureComponent {
     const job = this.state;
     const {rateTab} = this.state;
     const {
-      reqHandlerTonnage,
+      // reqHandlerTonnage,
       reqHandlerEndAddress,
       reqHandlerEndState,
       reqHandlerEndCity,
@@ -397,12 +423,10 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerStartZip,
       reqHandlerTruckType,
       reqHandlerMaterials,
-      reqHandlerHoursEstimate,
       reqHandlerTrucksEstimate,
       reqHandlerDate
     } = this.state;
     let isValid = true;
-
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
       this.setState({
         reqHandlerMaterials: {
@@ -552,8 +576,8 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
-
     // only work if tab is 1
+    /*
     if (job.tonnage <= 0 && rateTab === 2) {
       this.setState({
         reqHandlerTonnage: {
@@ -564,7 +588,9 @@ class CreateJobFormOne extends PureComponent {
       });
       isValid = false;
     }
+    */
 
+    /*
     if (job.hourEstimatedHours <= 0 && rateTab === 1) {
       this.setState({
         reqHandlerHoursEstimate: {
@@ -575,6 +601,7 @@ class CreateJobFormOne extends PureComponent {
       });
       isValid = false;
     }
+    */
 
     if (job.hourTrucksNumber <= 0 && rateTab === 1) {
       this.setState({
@@ -621,6 +648,18 @@ class CreateJobFormOne extends PureComponent {
   handleInputChange(e) {
     const {value} = e.target;
     this.setState({[e.target.name]: value});
+  }
+
+  handleInputChangeTonHour(e) {
+    if (e.target.name === 'rateByTonValue') {
+      this.setState({ rateByTonValue: e.target.value });
+    } else if (e.target.name === 'estimatedTons') {
+      this.setState({ estimatedTons: e.target.value });
+    } else if (e.target.name === 'rateByHourValue') {
+      this.setState({ rateByHourValue: e.target.value });
+    } else if (e.target.name === 'estimatedHours') {
+      this.setState({ estimatedHours: e.target.value });
+    }
   }
 
   // Pull materials
@@ -753,26 +792,71 @@ class CreateJobFormOne extends PureComponent {
     this.setState({selectedEndAddressId: 0});
   }
 
+  renderHourOrTon(hourTon) {
+    const {
+      rateByTonValue,
+      rateByHourValue,
+      estimatedTons,
+      estimatedHours
+    } = this.state;
+    if (hourTon === 'ton') {
+      return (
+        <React.Fragment>
+          <div className="col-md-4 form__form-group">
+            <span className="form__form-group-label">Rate / Ton</span>
+            <input
+              name="rateByTonValue"
+              type="number" step="0.1"
+              value={rateByTonValue}
+              onChange={this.handleInputChangeTonHour}
+            />
+          </div>
+          <div className="col-md-5 form__form-group">
+            <span className="form__form-group-label">Estimated Tons</span>
+            <input
+              name="estimatedTons"
+              type="number"
+              value={estimatedTons}
+              onChange={this.handleInputChangeTonHour}
+            />
+          </div>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+        <div className="col-md-4 form__form-group">
+          <span className="form__form-group-label">Rate / Hour</span>
+          <input
+            name="rateByHourValue"
+            type="number" step="0.1"
+            value={rateByHourValue}
+            onChange={this.handleInputChangeTonHour}
+          />
+        </div>
+        <div className="col-md-5 form__form-group">
+          <span className="form__form-group-label">Estimated Hours</span>
+          <input
+            name="estimatedHours"
+            type="number"
+            value={estimatedHours}
+            onChange={this.handleInputChangeTonHour}
+          />
+        </div>
+      </React.Fragment>
+    );
+  }
+
   render() {
     const {
       truckType,
       allTruckTypes,
-      // capacity,
-      rate,
       allMaterials,
       selectedMaterials,
       allUSstates,
       allAddresses,
       selectedStartAddressId,
       selectedEndAddressId,
-      /*
-      ratebyBoth,
-      rateByTon,
-      rateByHour,
-      */
-      rateTab,
-      tonnage,
-      hourEstimatedHours,
       hourTrucksNumber,
       endLocationAddress1,
       endLocationAddress2,
@@ -787,11 +871,9 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip,
       name,
       instructions,
-      reqHandlerTonnage,
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerTrucksEstimate,
-      reqHandlerHoursEstimate,
       reqHandlerStartAddress,
       reqHandlerStartCity,
       reqHandlerStartZip,
@@ -801,7 +883,8 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndZip,
       reqHandlerEndCity,
       reqHandlerSameAddresses,
-      reqHandlerDate
+      reqHandlerDate,
+      selectedRatedHourOrTon
     } = this.state;
     const today = new Date();
     const currentDate = today.getTime();
@@ -827,6 +910,42 @@ class CreateJobFormOne extends PureComponent {
                     placeholder="Job Name"
                   />
                 </div>
+                <div className="col-md-12 form__form-group">
+                  <span className="form__form-group-label">Date of Job</span>
+                  <TDateTimePicker
+                    input={
+                      {
+                        onChange: this.jobDateChange,
+                        name: 'jobDate',
+                        value: {jobDate},
+                        givenDate: currentDate
+                      }
+                    }
+                    onChange={this.jobDateChange}
+                    dateFormat="MMMM-dd-yyyy h:mm aa"
+                    showTime
+                    meta={reqHandlerDate}
+                  />
+                </div>
+              </Row>
+
+              <Row className="col-md-12">
+                <div className="col-md-3 form__form-group">
+                  <span className="form__form-group-label">
+                    Number of trucks
+                  </span>
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleHourDetails,
+                        name: 'hourTrucksNumber',
+                        value: hourTrucksNumber
+                      }
+                    }
+                    type="number"
+                    meta={reqHandlerTrucksEstimate}
+                  />
+                </div>
                 <div className="col-md-4">
                   <span className="form__form-group-label">Truck Type</span>
                   <SelectField
@@ -841,16 +960,6 @@ class CreateJobFormOne extends PureComponent {
                     value={truckType}
                     options={allTruckTypes}
                     placeholder="Truck Type"
-                  />
-                </div>
-                <div className="col-md-3">
-                  <span className="form__form-group-label">Rate per hour</span>
-                  <input
-                    name="rate"
-                    type="number"
-                    value={rate}
-                    onChange={this.handleInputChange}
-                    placeholder="$"
                   />
                 </div>
                 <div className="col-md-5 form__form-group">
@@ -872,466 +981,255 @@ class CreateJobFormOne extends PureComponent {
               </Row>
 
               <Row className="col-md-12">
+                <div className="col-md-3 form__form-group">
+                  <span className="form__form-group-label">Rate</span>
+                  <SelectField
+                    input={
+                      {
+                        onChange: this.handleRateChange,
+                        name: 'materialType',
+                        value: selectedRatedHourOrTon
+                      }
+                    }
+                    // meta={reqHandlerMaterials}
+                    value={selectedRatedHourOrTon}
+                    options={
+                      [
+                        {
+                          value: 'hour',
+                          label: 'Hour'
+                        },
+                        {
+                          value: 'ton',
+                          label: 'Ton'
+                        }
+                      ]
+                    }
+                  />
+                </div>
+                {this.renderHourOrTon(selectedRatedHourOrTon)}
+              </Row>
+              
+              <Row className="col-md-12">
                 <hr/>
                 {/* <hr className="bighr"/> */}
               </Row>
 
-              {/* RATES */}
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Select Date of Job
-                  </h3>
-                </div>
-                <div className="col-md-12 form__form-group">
-                  <TDateTimePicker
-                    input={
-                      {
-                        onChange: this.jobDateChange,
-                        name: 'jobDate',
-                        value: {jobDate},
-                        givenDate: currentDate
-                      }
-                    }
-                    onChange={this.jobDateChange}
-                    dateFormat="MMMM-dd-yyyy h:mm aa"
-                    showTime
-                    meta={reqHandlerDate}
-                  />
-                </div>
-              </Row>
-
               <Row className="col-md-12 rateTab">
-                <div className="col-md-12 wizard">
-                  <div className="wizard__form-wrapper">
-                    {rateTab === 1
-                    && (
-                      <Row>
-                        {/* FIRST ROW */}
-                        <div className="col-md-6 form__form-group">
-                          <span className="form__form-group-label">
-                            Estimated hours
-                          </span>
-                          <TField
-                            input={
-                              {
-                                onChange: this.handleHourDetails,
-                                name: 'hourEstimatedHours',
-                                value: hourEstimatedHours
-                              }
-                            }
-                            type="number"
-                            meta={reqHandlerHoursEstimate}
-                          />
-                        </div>
-                        {/* SECOND ROW */}
-                        <div className="col-md-6 form__form-group">
-                          <span className="form__form-group-label">
-                            Number of trucks
-                          </span>
-                          <TField
-                            input={
-                              {
-                                onChange: this.handleHourDetails,
-                                name: 'hourTrucksNumber',
-                                value: hourTrucksNumber
-                              }
-                            }
-                            type="number"
-                            meta={reqHandlerTrucksEstimate}
-                          />
-                        </div>
-                        <hr/>
-                        <div className="col-md-6">
-                          <h3 className="subhead">
-                            Start Location
-                          </h3>
-                          <small>
-                            Select a starting address:
-                          </small>
-                          <div
-                            id="starting_id"
-                          >
-                            <SelectField
-                              input={
-                                {
-                                  onChange: this.handleStartAddressIdChange,
-                                  name: 'selectedStartAddress',
-                                  value: selectedStartAddressId
-                                }
-                              }
-                              // meta={reqHandlerMaterials}
-                              value={selectedStartAddressId}
-                              options={allAddresses}
-                              placeholder="Select a location"
-                              meta={reqHandlerSameAddresses}
-                            />
-                          </div>
-                          <div>
-                            &nbsp;
-                          </div>
-                          <small>
-                            Or create a new one:
-                          </small>
-                          <div
-                            id="starting"
-                            className={`${selectedStartAddressId === 0 ? 'shown' : 'fifty'}`}
-                            role="link"
-                            tabIndex="0"
-                            onKeyPress={this.handleKeyPress}
-                            onClick={this.toggleNewStartAddress}
-                          >
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleStartAddressChange,
-                                    name: 'startLocationAddress1',
-                                    value: startLocationAddress1
-                                  }
-                                }
-                                placeholder="Address 1"
-                                type="text"
-                                meta={reqHandlerStartAddress}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <input
-                                name="startLocationAddress2"
-                                type="text"
-                                value={startLocationAddress2}
-                                onChange={this.handleStartAddressChange}
-                                placeholder="Address 2"
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleStartAddressChange,
-                                    name: 'startLocationCity',
-                                    value: startLocationCity
-                                  }
-                                }
-                                placeholder="City"
-                                type="text"
-                                meta={reqHandlerStartCity}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <SelectField
-                                input={
-                                  {
-                                    onChange: this.handleStartLocationChange,
-                                    name: 'startLocationState',
-                                    value: startLocationState
-                                  }
-                                }
-                                placeholder="State"
-                                meta={reqHandlerStartState}
-                                value={startLocationState}
-                                options={allUSstates}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleStartAddressChange,
-                                    name: 'startLocationZip',
-                                    value: startLocationZip
-                                  }
-                                }
-                                placeholder="Zip"
-                                type="text"
-                                meta={reqHandlerStartZip}
-                              />
-                            </div>
-                          </div>
-                        </div>
+                <div className="col-md-6">
+                  <h3 className="subhead">
+                    Start Location
+                  </h3>
+                  <small>
+                    Select a starting address:
+                  </small>
+                  <div
+                    id="starting_id"
+                  >
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.handleStartAddressIdChange,
+                          name: 'selectedStartAddress',
+                          value: selectedStartAddressId
+                        }
+                      }
+                      // meta={reqHandlerMaterials}
+                      value={selectedStartAddressId}
+                      options={allAddresses}
+                      placeholder="Select a location"
+                      meta={reqHandlerSameAddresses}
+                    />
+                  </div>
+                  <div>
+                    &nbsp;
+                  </div>
+                  <small>
+                    Or create a new one:
+                  </small>
+                  <div
+                    id="starting"
+                    className={`${selectedStartAddressId === 0 ? 'shown' : 'fifty'}`}
+                    role="link"
+                    tabIndex="0"
+                    onKeyPress={this.handleKeyPress}
+                    onClick={this.toggleNewStartAddress}
+                  >
+                    <div className="form__form-group">
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleStartAddressChange,
+                            name: 'startLocationAddress1',
+                            value: startLocationAddress1
+                          }
+                        }
+                        placeholder="Address 1"
+                        type="text"
+                        meta={reqHandlerStartAddress}
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <input
+                        name="startLocationAddress2"
+                        type="text"
+                        value={startLocationAddress2}
+                        onChange={this.handleStartAddressChange}
+                        placeholder="Address 2"
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleStartAddressChange,
+                            name: 'startLocationCity',
+                            value: startLocationCity
+                          }
+                        }
+                        placeholder="City"
+                        type="text"
+                        meta={reqHandlerStartCity}
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <SelectField
+                        input={
+                          {
+                            onChange: this.handleStartLocationChange,
+                            name: 'startLocationState',
+                            value: startLocationState
+                          }
+                        }
+                        placeholder="State"
+                        meta={reqHandlerStartState}
+                        value={startLocationState}
+                        options={allUSstates}
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleStartAddressChange,
+                            name: 'startLocationZip',
+                            value: startLocationZip
+                          }
+                        }
+                        placeholder="Zip"
+                        type="text"
+                        meta={reqHandlerStartZip}
+                      />
+                    </div>
+                  </div>
+                </div>
 
-                        {/* END LOCATION */}
-                        <div className="col-md-6">
-                          <h3 className="subhead">
-                            End Location
-                          </h3>
-                          <small>
-                            Select a ending address:
-                          </small>
-                          <div
-                            id="ending_id"
-                          >
-                            <SelectField
-                              input={
-                                {
-                                  onChange: this.handleEndAddressIdChange,
-                                  name: 'selectedEndAddress',
-                                  value: selectedEndAddressId
-                                }
-                              }
-                              // meta={reqHandlerMaterials}
-                              value={selectedEndAddressId}
-                              options={allAddresses}
-                              placeholder="Select a location"
-                            />
-                          </div>
-                          <div>
-                            &nbsp;
-                          </div>
-                          <small>
-                            Or create a new one:
-                          </small>
-                          <div
-                            id="ending"
-                            className={`${selectedEndAddressId === 0 ? 'shown' : 'fifty'}`}
-                            role="link"
-                            tabIndex="0"
-                            onKeyPress={this.handleKeyPress}
-                            onClick={this.toggleNewEndAddress}
-                          >
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationAddress1',
-                                    value: endLocationAddress1
-                                  }
-                                }
-                                placeholder="Address 1"
-                                type="text"
-                                meta={reqHandlerEndAddress}
-                              />
-                            </div>
+                <div className="col-md-6">
+                  <h3 className="subhead">
+                    End Location
+                  </h3>
+                  <small>
+                    Select a ending address:
+                  </small>
+                  <div
+                    id="ending_id"
+                  >
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.handleEndAddressIdChange,
+                          name: 'selectedEndAddress',
+                          value: selectedEndAddressId
+                        }
+                      }
+                      // meta={reqHandlerMaterials}
+                      value={selectedEndAddressId}
+                      options={allAddresses}
+                      placeholder="Select a location"
+                    />
+                  </div>
+                  <div>
+                    &nbsp;
+                  </div>
+                  <small>
+                    Or create a new one:
+                  </small>
+                  <div
+                    id="ending"
+                    className={`${selectedEndAddressId === 0 ? 'shown' : 'fifty'}`}
+                    role="link"
+                    tabIndex="0"
+                    onKeyPress={this.handleKeyPress}
+                    onClick={this.toggleNewEndAddress}
+                  >
+                    <div className="form__form-group">
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleEndAddressChange,
+                            name: 'endLocationAddress1',
+                            value: endLocationAddress1
+                          }
+                        }
+                        placeholder="Address 1"
+                        type="text"
+                        meta={reqHandlerEndAddress}
+                      />
+                    </div>
 
-                            <div className="form__form-group">
-                              <input
-                                name="endLocationAddress2"
-                                type="text"
-                                value={endLocationAddress2}
-                                onChange={this.handleEndAddressChange}
-                                placeholder="Address 2"
-                                autoComplete="new-password"
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationCity',
-                                    value: endLocationCity
-                                  }
-                                }
-                                placeholder="City"
-                                type="text"
-                                meta={reqHandlerEndCity}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <SelectField
-                                input={
-                                  {
-                                    onChange: this.handleEndLocationChange,
-                                    name: 'endLocationState',
-                                    value: endLocationState
-                                  }
-                                }
-                                placeholder="State"
-                                meta={reqHandlerEndState}
-                                value={endLocationState}
-                                options={allUSstates}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationZip',
-                                    value: endLocationZip
-                                  }
-                                }
-                                placeholder="Zip"
-                                type="text"
-                                meta={reqHandlerEndZip}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </Row>
-                    )}
-                    {/* onSubmit={this.nextPage} */}
-                    {rateTab === 2
-                    && (
-                      <Row>
-                        <div className="col-md-12 form__form-group">
-                          <span className="form__form-group-label">
-                            Estimated Amount of Tonnage
-                          </span>
-                          <TField
-                            input={
-                              {
-                                onChange: this.handleTonnageDetails,
-                                name: 'tonnage',
-                                value: tonnage
-                              }
-                            }
-                            placeholder="Capacity"
-                            type="number"
-                            meta={reqHandlerTonnage}
-                          />
-                        </div>
-                        <div className="form__form-group">
-                          <div className="col-md-6">
-                            <h3 className="subhead">
-                              Starting Location
-                            </h3>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleStartAddressChange,
-                                    name: 'startLocationAddress1',
-                                    value: startLocationAddress1
-                                  }
-                                }
-                                placeholder="Address 1"
-                                type="text"
-                                meta={reqHandlerStartAddress}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <input
-                                name="startLocationAddress2"
-                                type="text"
-                                value={startLocationAddress2}
-                                onChange={this.handleStartAddressChange}
-                                placeholder="Address 2"
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleStartAddressChange,
-                                    name: 'startLocationCity',
-                                    value: startLocationCity
-                                  }
-                                }
-                                placeholder="City"
-                                type="text"
-                                meta={reqHandlerStartCity}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <SelectField
-                                input={
-                                  {
-                                    onChange: this.handleStartLocationChange,
-                                    name: 'startLocationState',
-                                    value: startLocationState
-                                  }
-                                }
-                                placeholder="State"
-                                meta={reqHandlerEndState}
-                                value={startLocationState}
-                                options={allUSstates}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleStartAddressChange,
-                                    name: 'startLocationZip',
-                                    value: startLocationZip
-                                  }
-                                }
-                                placeholder="Zip"
-                                type="text"
-                                meta={reqHandlerStartZip}
-                              />
-                            </div>
-                          </div>
-
-
-                          {/* END LOCATION */}
-                          <div className="col-md-6">
-                            <h3 className="subhead">
-                              End Location
-                            </h3>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationAddress1',
-                                    value: endLocationAddress1
-                                  }
-                                }
-                                placeholder="Address 1"
-                                type="text"
-                                meta={reqHandlerEndAddress}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <input
-                                name="endLocationAddress2"
-                                type="text"
-                                value={endLocationAddress2}
-                                onChange={this.handleEndAddressChange}
-                                placeholder="Address 2"
-                                autoComplete="new-password"
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationCity',
-                                    value: endLocationCity
-                                  }
-                                }
-                                placeholder="City"
-                                type="text"
-                                meta={reqHandlerEndCity}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <SelectField
-                                input={
-                                  {
-                                    onChange: this.handleEndLocationChange,
-                                    name: 'endLocationState',
-                                    value: endLocationState
-                                  }
-                                }
-                                placeholder="State"
-                                meta={reqHandlerEndState}
-                                value={endLocationState}
-                                options={allUSstates}
-                              />
-                            </div>
-                            <div className="form__form-group">
-                              <TField
-                                input={
-                                  {
-                                    onChange: this.handleEndAddressChange,
-                                    name: 'endLocationZip',
-                                    value: endLocationZip
-                                  }
-                                }
-                                placeholder="Zip"
-                                type="text"
-                                meta={reqHandlerEndZip}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </Row>
-                    )}
+                    <div className="form__form-group">
+                      <input
+                        name="endLocationAddress2"
+                        type="text"
+                        value={endLocationAddress2}
+                        onChange={this.handleEndAddressChange}
+                        placeholder="Address 2"
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleEndAddressChange,
+                            name: 'endLocationCity',
+                            value: endLocationCity
+                          }
+                        }
+                        placeholder="City"
+                        type="text"
+                        meta={reqHandlerEndCity}
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <SelectField
+                        input={
+                          {
+                            onChange: this.handleEndLocationChange,
+                            name: 'endLocationState',
+                            value: endLocationState
+                          }
+                        }
+                        placeholder="State"
+                        meta={reqHandlerEndState}
+                        value={endLocationState}
+                        options={allUSstates}
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleEndAddressChange,
+                            name: 'endLocationZip',
+                            value: endLocationZip
+                          }
+                        }
+                        placeholder="Zip"
+                        type="text"
+                        meta={reqHandlerEndZip}
+                      />
+                    </div>
                   </div>
                 </div>
               </Row>

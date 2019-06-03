@@ -99,17 +99,6 @@ class AddTruckForm extends PureComponent {
     const {truckCachedInfo, page} = this.state;
     truckCachedInfo.info = e;
 
-    // also set availability info
-    // const availableInfo = {
-    //   info: {
-    //     startDate: e.startAvailability,
-    //     endDate: e.endAvailability,
-    //     isAvailable: e.currentAvailability
-    //   }
-    // };
-    //
-    // this.setState({ availabilityCachedInfo: availableInfo });
-
     if (truckCachedInfo.info.redir) {
       this.setState({
         page: page + 1

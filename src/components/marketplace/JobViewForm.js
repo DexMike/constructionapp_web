@@ -310,7 +310,7 @@ class JobViewForm extends Component {
       const newJob = CloneDeep(job);
 
       // Updating the Job
-      newJob.status = 'Requested';
+      // newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
