@@ -16,10 +16,10 @@ class NotificationsSettings extends Component {
     super(props);
     this.state = {
       communicationTypes: [
-        { id: 1, name: 'In App' },
-        { id: 2, name: 'Mobile' },
-        { id: 3, name: 'SMS' },
-        { id: 4, name: 'Email'}
+        { id: 1, name: 'In App', enabled: false},
+        { id: 2, name: 'Mobile', enabled: false },
+        { id: 3, name: 'SMS', enabled: true },
+        { id: 4, name: 'Email', enabled: false}
       ],
       equipmentTypes: [],
       materialTypes: [],
@@ -36,10 +36,10 @@ class NotificationsSettings extends Component {
           enabled: true,
           name: 'Notify me jobs scheduled for the next day',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -48,7 +48,7 @@ class NotificationsSettings extends Component {
           enabled: false,
           name: 'Notify me when a customer requests me for a Job',
           options: [
-            { id: 1, name: 'In App', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
             { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
             { id: 4, name: 'Email', enabled: false }
@@ -60,7 +60,7 @@ class NotificationsSettings extends Component {
           enabled: true,
           name: 'Notify me when a Carrier has accepted my job offer',
           options: [
-            { id: 1, name: 'In App', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
             { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
             { id: 4, name: 'Email', enabled: false }
@@ -73,7 +73,7 @@ class NotificationsSettings extends Component {
           name: 'Notify me when a Carrier has requested my job',
           options: [
             { id: 1, name: 'In App', enabled: false },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
             { id: 4, name: 'Email', enabled: false }
           ]
@@ -84,10 +84,10 @@ class NotificationsSettings extends Component {
           enabled: true,
           name: 'Notify me when the Carrier has started the job',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -96,10 +96,10 @@ class NotificationsSettings extends Component {
           enabled: false,
           name: 'Notify me when the carrier has completed the job',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -108,10 +108,10 @@ class NotificationsSettings extends Component {
           enabled: true,
           name: 'Notify me of jobs that match my job preferences',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -120,10 +120,10 @@ class NotificationsSettings extends Component {
           enabled: true,
           name: 'Notify me when a load is being disputed',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -132,10 +132,10 @@ class NotificationsSettings extends Component {
           enabled: false,
           name: 'Notify me (Friday) when i receive a payment',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -144,10 +144,10 @@ class NotificationsSettings extends Component {
           enabled: false,
           name: 'Notify me when a load has started',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         },
         {
@@ -156,10 +156,10 @@ class NotificationsSettings extends Component {
           enabled: false,
           name: 'Notify me when a load has completed',
           options: [
-            { id: 1, name: 'In App', enabled: true },
-            { id: 2, name: 'Mobile', enabled: true },
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
             { id: 3, name: 'SMS', enabled: true },
-            { id: 4, name: 'Email', enabled: true }
+            { id: 4, name: 'Email', enabled: false }
           ]
         }
       ]
@@ -258,6 +258,7 @@ class NotificationsSettings extends Component {
   }
 
   setNotificationOptionState(notificationId, optionId, e) {
+    console.log(213);
     const { notifications } = this.state;
     let { value } = e.target;
     value = value === 'true';
@@ -486,6 +487,7 @@ class NotificationsSettings extends Component {
                       <label className="checkbox-container" htmlFor={`${objectSettings.type}option${item.id}SelectAll`}>
                         <input
                           type="checkbox"
+                          disabled={!item.enabled}
                           onChange={e => this.setAllNotificationOptionState(
                             objectSettings.type,
                             item.id,
@@ -495,7 +497,7 @@ class NotificationsSettings extends Component {
                           }
                           id={`${objectSettings.type}option${item.id}SelectAll`}
                         />
-                        <span className="checkmark centered" />
+                        <span className={`checkmark centered ${!item.enabled ? 'disabled-checkbox' : null}`}/>
                       </label>
                     </td>
                   ))
@@ -520,18 +522,19 @@ class NotificationsSettings extends Component {
                 </td>
                 <td>{notification.name}</td>
                 {
-                  notification.options.map(option => (
+                  notification.options.map((option, i) => (
                     <td className="text-center" key={`${notification.id}-${option.id}`}>
                       <label className="checkbox-container" htmlFor={`${notification.id}-${option.id}`}>
                         <input
                           type="checkbox"
                           value={option.enabled}
                           checked={option.enabled}
+                          disabled={!objectSettings.communicationTypes[i].enabled}
                           id={`${notification.id}-${option.id}`}
                           onChange={
                             e => this.setNotificationOptionState(notification.id, option.id, e)}
                         />
-                        <span className="checkmark centered" />
+                        <span className={`checkmark centered ${!objectSettings.communicationTypes[i].enabled ? 'disabled-checkbox' : null}`} />
                       </label>
                     </td>
                   ))

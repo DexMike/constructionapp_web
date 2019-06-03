@@ -13,6 +13,16 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getUsersByCompanyId(companyId, pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await this.get(`/companies/${companyId}${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await this.get(`/companies/${companyId}${PATH}`);
+    }
+    return (response);
+  }
+
   static async getUsersByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/users`);
     return (response);
