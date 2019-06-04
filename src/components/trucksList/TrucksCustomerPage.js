@@ -31,6 +31,7 @@ import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
+import EquipmentRow from './EquipmentRow';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -827,9 +828,22 @@ class TrucksCustomerPage extends Component {
             </Row>
             {
               equipments.map(equipment => (
-                <React.Fragment key={equipment.id}>
-                  {this.renderEquipmentRow(equipment)}
-                </React.Fragment>
+                <EquipmentRow
+                  id={equipment.id}
+                  companyId={equipment.companyId}
+                  favorite={equipment.favorite}
+                  rateType={equipment.rateType}
+                  hourRate={equipment.hourRate}
+                  minHours={equipment.minHours}
+                  minCapacity={equipment.minCapacity}
+                  image={equipment.image}
+                  maxCapacity={equipment.maxCapacity}
+                  type={equipment.type}
+                  key={equipment.id}
+                  tonRate={equipment.tonRate}
+                  name={equipment.name}
+                  materials={equipment.materials}
+                />
               ))
             }
           </CardBody>
