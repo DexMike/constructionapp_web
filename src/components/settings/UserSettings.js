@@ -225,7 +225,7 @@ class UserSettings extends Component {
 
     this.setState({
       languages,
-      countries,
+      // countries,
       states,
       countryStates
     });
@@ -516,7 +516,7 @@ class UserSettings extends Component {
       address2,
       city,
       state,
-      country,
+      // country,
       zipCode,
       reqHandlerAddress,
       reqHandlerCity,
@@ -526,7 +526,7 @@ class UserSettings extends Component {
 
     const {
       languages,
-      countries,
+      // countries,
       countryStates,
       // states,
       timeZones
@@ -598,7 +598,7 @@ class UserSettings extends Component {
           <Col md={1}>&nbsp;</Col>
           <Col md={5}>
             <span>
-              Work phone
+              Work Phone
             </span>
             <TField
               input={{
@@ -694,24 +694,28 @@ class UserSettings extends Component {
                   meta={reqHandlerZip}
                 />
               </Col>
-              <Col md={12} className="pt-2">
-                <span>
-                  Country
-                </span>
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handleCountryChange,
-                      name: 'country',
-                      value: country,
-                      disabled: !admin
+              {
+                /*
+                  <Col md={12} className="pt-2">
+                  <span>
+                    Country
+                  </span>
+                  <TSelect
+                    input={
+                      {
+                        onChange: this.handleCountryChange,
+                        name: 'country',
+                        value: country,
+                        disabled: !admin
+                      }
                     }
-                  }
-                  // meta={}
-                  options={countries}
-                  placeholder="Select a country"
-                />
-              </Col>
+                    // meta={}
+                    options={countries}
+                    placeholder="Select a Country"
+                  />
+                </Col>
+                */
+              }
             </Row>
           </Col>
           <Col md={1}>&nbsp;</Col>
@@ -732,7 +736,7 @@ class UserSettings extends Component {
                   }
                   // meta={}
                   options={timeZones}
-                  placeholder="Select a Time zone"
+                  placeholder="Select a Time Zone"
                 />
               </Col>
               <Col md={12} className="pt-3">

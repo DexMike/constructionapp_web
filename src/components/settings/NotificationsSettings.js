@@ -33,7 +33,7 @@ class NotificationsSettings extends Component {
       notifications: [
         {
           id: 1,
-          type: 'customerJobs',
+          type: 'carrierJobs',
           enabled: true,
           name: 'Notify me jobs scheduled for the next day',
           options: [
@@ -45,7 +45,7 @@ class NotificationsSettings extends Component {
         },
         {
           id: 2,
-          type: 'customerJobs',
+          type: 'carrierJobs',
           enabled: false,
           name: 'Notify me when a customer requests me for a Job',
           options: [
@@ -55,9 +55,10 @@ class NotificationsSettings extends Component {
             { id: 4, name: 'Email', enabled: false }
           ]
         },
+        //
         {
           id: 3,
-          type: 'carrierJobs',
+          type: 'customerJobs',
           enabled: true,
           name: 'Notify me when a Carrier has accepted my job offer',
           options: [
@@ -69,7 +70,7 @@ class NotificationsSettings extends Component {
         },
         {
           id: 4,
-          type: 'carrierJobs',
+          type: 'customerJobs',
           enabled: false,
           name: 'Notify me when a Carrier has requested my job',
           options: [
@@ -81,7 +82,7 @@ class NotificationsSettings extends Component {
         },
         {
           id: 5,
-          type: 'carrierJobs',
+          type: 'customerJobs',
           enabled: true,
           name: 'Notify me when the Carrier has started the job',
           options: [
@@ -93,7 +94,7 @@ class NotificationsSettings extends Component {
         },
         {
           id: 6,
-          type: 'carrierJobs',
+          type: 'customerJobs',
           enabled: false,
           name: 'Notify me when the carrier has completed the job',
           options: [

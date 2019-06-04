@@ -87,6 +87,7 @@ class SettingsPage extends Component {
   }
 
   renderAdminTabs(activeTab) {
+    const { company } = this.state;
     return (
       <Nav tabs>
         <NavItem>
@@ -105,22 +106,30 @@ class SettingsPage extends Component {
             Notifications
           </NavLink>
         </NavItem>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '3' }, 'tab')}
-            onClick={() => { this.toggle('3'); }}
-          >
-            Permissions
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '4' }, 'tab')}
-            onClick={() => { this.toggle('4'); }}
-          >
-            Payment Method
-          </NavLink>
-        </NavItem>
+        {
+          /*
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '3' }, 'tab')}
+              onClick={() => { this.toggle('3'); }}
+            >
+              Permissions
+            </NavLink>
+          </NavItem>
+          */
+        }
+        {
+          company.type === 'Customer' ? (
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === '4' }, 'tab')}
+                onClick={() => { this.toggle('4'); }}
+              >
+                Payment Method
+              </NavLink>
+            </NavItem>
+          ) : null
+        }
       </Nav>
     );
   }
