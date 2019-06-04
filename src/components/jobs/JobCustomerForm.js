@@ -367,7 +367,7 @@ class JobCustomerForm extends Component {
     );
   }
 
-  renderLoads(loads) {
+  renderLoads(loads, job) {
     return (
       <React.Fragment>
         <h3 className="subhead" style={{
@@ -378,7 +378,7 @@ class JobCustomerForm extends Component {
         >
           Run Information
         </h3>
-        <LoadsTable loads={loads}/>
+        <LoadsTable loads={loads} job={job}/>
       </React.Fragment>
     );
   }
@@ -906,7 +906,7 @@ class JobCustomerForm extends Component {
               <hr/>
               {/*{this.renderJobRuns(job)}*/}
               {this.renderGPSPoints(gpsTrackings)}
-              {this.renderLoads(loads)}
+              {this.renderLoads(loads, job)}
               {this.renderUploadedPhotos(images)}
             </CardBody>
           </Card>
@@ -946,7 +946,7 @@ class JobCustomerForm extends Component {
                 </div>
               </Row>
               <hr/>
-              {this.renderLoads(loads)}
+              {this.renderLoads(loads, job)}
             </CardBody>
           </Card>
         </Container>

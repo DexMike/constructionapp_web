@@ -21,6 +21,7 @@ class LoadsExpandableRow extends Component {
     this.state = {
       load: props.load,
       loadStatus: props.load.loadStatus,
+      job: props.job,
       loaded: false, // if page is loading
       index: props.index,
       expanded: false,
@@ -144,7 +145,7 @@ class LoadsExpandableRow extends Component {
   render() {
     const {loaded} = {...this.state};
     if (loaded) {
-      const {load, loadStatus, index, expanded, driver, gpsTrackings, loadInvoices, profile} = {...this.state};
+      const {load, loadStatus, index, expanded, driver, gpsTrackings, loadInvoices, profile, job} = {...this.state};
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
       let statusColor = '';
@@ -164,7 +165,6 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
-
       return (
         <React.Fragment>
           {this.renderModal()}
@@ -176,20 +176,20 @@ class LoadsExpandableRow extends Component {
               </IconButton>
             </TableCell>
             <TableCell align="left">{index + 1}</TableCell>
-            <TableCell
-              align="left"
-            >{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}
-            </TableCell>
+            <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
                        style={{fontStyle: !endTime ? 'italic' : 'normal'}}
             >{(!endTime ? 'In Progress' : endTime)}
             </TableCell>
+            <TableCell align="left">{job.rateType === 'Hour' ? `$${job.rate} / hour` : `$${job.rate} / ton`}</TableCell>
+            <TableCell align="left">{job.rateType === 'Hour' ? `${load.hoursEntered} hours` : `${load.tonsEntered} tons`}</TableCell>
+            <TableCell align="left">${job.rateType === 'Hour' ? job.rate * load.hoursEntered : job.rate * load.tonsEntered}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
           {expanded && (
             <TableRow>
-              <TableCell colSpan="6" style={{padding: 20}}>
+              <TableCell colSpan="9" style={{padding: 20}}>
                 <Container style={{backgroundColor: '#ffffff', borderRadius: 3}}>
                   <Row style={{paddingTop: 20}}>
                     <Col md={2}>
@@ -290,6 +290,8 @@ class LoadsExpandableRow extends Component {
 LoadsExpandableRow.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   load: PropTypes.object.isRequired,
+  // eslint-disable-next-line react/forbid-prop-types,react/no-unused-prop-types
+  job: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired
 };
 
