@@ -43,7 +43,7 @@ class CreateJobFormOne extends PureComponent {
       isRatedHour: true,
       selectedRatedHourOrTon: 'ton',
       tonnage: 0, // estimated amount of tonnage
-      hourEstimatedHours: 0,
+      rateEstimate: 0,
       hourTrucksNumber: 1,
       rateTab: 1,
       // location
@@ -333,7 +333,7 @@ class CreateJobFormOne extends PureComponent {
     let reqHandler = '';
     switch (e.target.name) {
       /*
-      case 'hourEstimatedHours':
+      case 'rateEstimate':
         reqHandler = 'reqHandlerHoursEstimate';
         break;
       */
@@ -610,11 +610,17 @@ class CreateJobFormOne extends PureComponent {
     if (e.target.name === 'rateByTonValue') {
       this.setState({ rateByTonValue: e.target.value });
     } else if (e.target.name === 'estimatedTons') {
-      this.setState({ estimatedTons: e.target.value });
+      this.setState({
+        rateEstimate: e.target.value,
+        estimatedTons: e.target.value
+      });
     } else if (e.target.name === 'rateByHourValue') {
       this.setState({ rateByHourValue: e.target.value });
     } else if (e.target.name === 'estimatedHours') {
-      this.setState({ estimatedHours: e.target.value });
+      this.setState({
+        rateEstimate: e.target.value,
+        estimatedHours: e.target.value
+      });
     }
   }
 
@@ -720,7 +726,7 @@ class CreateJobFormOne extends PureComponent {
       ratebyBoth: false,
       // rateByHour: false,
       // rateByTon: true,
-      hourEstimatedHours: 0,
+      rateEstimate: 0,
       hourTrucksNumber: 0
     });
     this.setState({rateTab: 2});
