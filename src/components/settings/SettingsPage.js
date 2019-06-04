@@ -14,6 +14,7 @@ import './Settings.css';
 
 import UserSettings from './UserSettings';
 import NotificationsSettings from './NotificationsSettings';
+import PermissionsRolesSettings from './PermissionsRolesSettings';
 
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
@@ -27,6 +28,7 @@ class SettingsPage extends Component {
       loaded: false,
       company: [],
       user: [],
+      users: [],
       address: [],
       activeTab: '1',
       title: 'User Profile',
@@ -41,6 +43,8 @@ class SettingsPage extends Component {
     const user = await UserService.getUserById(profile.userId);
     const company = await CompanyService.getCompanyById(profile.companyId);
     const address = await AddressService.getAddressById(company.addressId);
+    const usersResponse = await UserService.getUsersByCompanyId(company.id);
+    const users = usersResponse.data;
     let isAdmin = false;
     if (company.adminId === user.id) {
       isAdmin = true;
@@ -48,6 +52,7 @@ class SettingsPage extends Component {
     this.setState({
       company,
       user,
+      users,
       address,
       isAdmin,
       loaded: true
@@ -81,40 +86,40 @@ class SettingsPage extends Component {
     }
   }
 
-  renderSettingsTabs() {
-    const { activeTab, user, company, address, isAdmin } = this.state;
+  renderAdminTabs(activeTab) {
+    const { company } = this.state;
     return (
-      <div>
-        <Nav tabs>
+      <Nav tabs>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '1' }, 'tab')}
+            onClick={() => { this.toggle('1'); }}
+          >
+            <div className="navLink">User Profile</div>
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '2' }, 'tab')}
+            onClick={() => { this.toggle('2'); }}
+          >
+            Notifications
+          </NavLink>
+        </NavItem>
+        {
+          /*
           <NavItem>
             <NavLink
-              className={classnames({ active: activeTab === '1' }, 'tab')}
-              onClick={() => { this.toggle('1'); }}
+              className={classnames({ active: activeTab === '3' }, 'tab')}
+              onClick={() => { this.toggle('3'); }}
             >
-              <div className="navLink">User Profile</div>
+              Permissions
             </NavLink>
           </NavItem>
-          { isAdmin ? (
-            <NavItem>
-              <NavLink
-                className={classnames({ active: activeTab === '2' }, 'tab')}
-                onClick={() => { this.toggle('2'); }}
-              >
-                Notifications
-              </NavLink>
-            </NavItem>
-          ) : null
-          }
-          {
-            /* Disabling these for now
-            <NavItem>
-              <NavLink
-                className={classnames({ active: activeTab === '3' }, 'tab')}
-                onClick={() => { this.toggle('3'); }}
-              >
-                Permissions / Roles
-              </NavLink>
-            </NavItem>
+          */
+        }
+        {
+          company.type === 'Customer' ? (
             <NavItem>
               <NavLink
                 className={classnames({ active: activeTab === '4' }, 'tab')}
@@ -123,9 +128,34 @@ class SettingsPage extends Component {
                 Payment Method
               </NavLink>
             </NavItem>
-            */
-          }
-        </Nav>
+          ) : null
+        }
+      </Nav>
+    );
+  }
+
+  renderUserTabs(activeTab) {
+    return (
+      <Nav tabs>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '1' }, 'tab')}
+            onClick={() => { this.toggle('1'); }}
+          >
+            <div className="navLink">User Profile</div>
+          </NavLink>
+        </NavItem>
+      </Nav>
+    );
+  }
+
+  renderSettingsTabs() {
+    const { activeTab, user, users, company, address, isAdmin } = this.state;
+    return (
+      <div>
+        {
+          isAdmin ? this.renderAdminTabs(activeTab) : this.renderUserTabs(activeTab)
+        }
 
         <TabContent
           activeTab={activeTab}
@@ -141,8 +171,8 @@ class SettingsPage extends Component {
           <TabPane tabId="1">
             <UserSettings
               user={user}
-              company={company}
               address={address}
+              admin={isAdmin}
             />
           </TabPane>
           <TabPane tabId="2">
@@ -151,16 +181,12 @@ class SettingsPage extends Component {
             />
           </TabPane>
           <TabPane tabId="3">
-            <Row>
-              <Col sm="12">
-                Permisions
-              </Col>
-            </Row>
+            <PermissionsRolesSettings users={users}/>
           </TabPane>
           <TabPane tabId="4">
             <Row>
-              <Col sm="12">
-                Payment Method
+              <Col sm="12" style={{margin: 80}}>
+                &nbsp;
               </Col>
             </Row>
           </TabPane>
