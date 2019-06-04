@@ -55,6 +55,18 @@ class NotificationsSettings extends Component {
             { id: 4, name: 'Email', enabled: false }
           ]
         },
+        {
+          id: 12,
+          type: 'carrierJobs',
+          enabled: false,
+          name: 'Notify me when a customer accepts my request for Job',
+          options: [
+            { id: 1, name: 'In App', enabled: false },
+            { id: 2, name: 'Mobile', enabled: false },
+            { id: 3, name: 'SMS', enabled: true },
+            { id: 4, name: 'Email', enabled: false }
+          ]
+        },
         //
         {
           id: 3,
