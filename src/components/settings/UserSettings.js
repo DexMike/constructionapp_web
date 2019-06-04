@@ -463,7 +463,7 @@ class UserSettings extends Component {
                   value: ''
                 }
               }
-              placeholder="Enter new Password"
+              placeholder="Enter New Password"
             />
           </Col>
         </Row>
@@ -480,7 +480,7 @@ class UserSettings extends Component {
                   value: ''
                 }
               }
-              placeholder="Confirm new Password"
+              placeholder="Confirm New Password"
             />
           </Col>
         </Row>
@@ -614,10 +614,8 @@ class UserSettings extends Component {
         <Row className="mt-4 line-separator">
           <Col md={5} className="pt-4">
             <Row>
-              <Col md={12} style={{fontSize: 16}}>
-                <strong>Address</strong>
-              </Col>
               <Col md={12}>
+                <span>Address</span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -689,7 +687,7 @@ class UserSettings extends Component {
                     value: zipCode,
                     disabled: !admin
                   }}
-                  placeholder="Zip"
+                  placeholder="Zip Code"
                   type="text"
                   meta={reqHandlerZip}
                 />
