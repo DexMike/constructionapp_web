@@ -59,7 +59,7 @@ class JobCreateFormTwo extends PureComponent {
     const filters = {
       tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
-      hourEstimatedHours: d.hourEstimatedHours,
+      rateEstimate: d.rateEstimate,
       hourTrucksNumber: d.hourTrucksNumber
     };
     favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
@@ -241,6 +241,9 @@ class JobCreateFormTwo extends PureComponent {
       status = 'Published';
     }
 
+    const calcTotal = d.rateEstimate * rate;
+    const rateTotal = Math.round(calcTotal * 100) / 100;
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
@@ -253,8 +256,8 @@ class JobCreateFormTwo extends PureComponent {
       numEquipments: d.hourTrucksNumber,
       rateType,
       rate,
-      rateEstimate: d.hourEstimatedHours,
-      rateTotal: 0,
+      rateEstimate: d.rateEstimate,
+      rateTotal,
       notes: d.instructions,
       createdBy: profile.userId,
       createdOn: moment()
@@ -287,7 +290,7 @@ class JobCreateFormTwo extends PureComponent {
           status: 'New',
           rateType,
           rate: 0,
-          rateEstimate: d.hourEstimatedHours,
+          rateEstimate: d.rateEstimate,
           notes: d.instructions,
           createdBy: profile.userId,
           createdOn: moment()
