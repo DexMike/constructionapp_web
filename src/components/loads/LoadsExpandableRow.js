@@ -4,7 +4,7 @@ import TableCell from '@material-ui/core/TableCell/index';
 import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
-import {Container, Row, Col, Button} from 'reactstrap';
+import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
 import UserService from '../../api/UserService';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
@@ -24,12 +24,14 @@ class LoadsExpandableRow extends Component {
       loaded: false, // if page is loading
       index: props.index,
       expanded: false,
+      modal: false,
       driver: null,
       gpsTrackings: null,
       loadInvoices: [],
       disputeEmail: null,
       profile: null
     };
+    this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
   }
 
@@ -44,21 +46,22 @@ class LoadsExpandableRow extends Component {
     const company = await CompanyService.getCompanyById(profile.companyId);
     const date = new Date();
     disputeEmail = {
-      toEmail: 'martin@trelar.net',
+      toEmail: 'csr@trelar.net',
       toName: 'Trelar CSR',
       subject: `[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
       isHTML: true,
       body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
         + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
-        + `Company: ${company.legalName}`,
+        + `Company: ${company.legalName}<br>`
+        + `Load Ticket Number: ${load.ticketNumber}`,
       recipients: [
-        {name: 'Trelar Customer #1', email: 'martin@trelar.net'}
+        {name: 'CSR', email: 'csr@trelar.net'}
       ],
       attachments: []
     }
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
-    this.handleDisputeLoad = this.handleDisputeLoad.bind(this);
+    this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
     this.setState({gpsTrackings, loadInvoices, disputeEmail, profile});
   }
 
@@ -80,13 +83,63 @@ class LoadsExpandableRow extends Component {
     this.setState({loadStatus: 'Approved'});
   }
 
-  async handleDisputeLoad() {
+  async confirmDisputeLoad() {
     const {load, disputeEmail} = {...this.state};
     load.loadStatus = 'Disputed';
     await LoadService.updateLoad(load.id, load);
     await EmailService.sendEmail(disputeEmail)
     this.setState({load, loadStatus: 'Disputed'});
+    this.toggleDisputeModal();
   }
+
+  toggleDisputeModal() {
+    const {modal} = this.state;
+    this.setState({modal: !modal});
+  }
+
+  renderModal() {
+    const {modal} = this.state;
+    return (
+      <Modal
+        isOpen={modal}
+        toggle={this.toggleDisputeModal}
+        className="modal-dialog--primary modal-dialog--header form"
+      >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleDisputeModal}
+          />
+          <div className="bold-text modal__title">Dispute Load</div>
+        </div>
+        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
+          <Row className="col-md-12">
+            <h5 style={{paddingBottom: '25px'}}>Are you sure you wish to dispute this load?</h5>
+          </Row>
+          <Row className="col-md-12">
+            <ButtonToolbar className="col-md-6 wizard__toolbar">
+              <Button color="minimal" className="btn btn-outline-secondary"
+                      type="button"
+                      onClick={this.toggleDisputeModal}
+              >
+                Cancel
+              </Button>
+            </ButtonToolbar>
+            <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+              <Button
+                color="primary"
+                type="submit"
+                className="confirm"
+                onClick={this.confirmDisputeLoad}
+              >
+                Dispute
+              </Button>
+            </ButtonToolbar>
+          </Row>
+        </div>
+      </Modal>
+    );
+  }
+
 
   render() {
     const {loaded} = {...this.state};
@@ -114,6 +167,7 @@ class LoadsExpandableRow extends Component {
 
       return (
         <React.Fragment>
+          {this.renderModal()}
           <TableRow key={load.id}>
             <TableCell component="th" scope="row" align="left">
               <IconButton onClick={this.toggle}
@@ -156,7 +210,7 @@ class LoadsExpandableRow extends Component {
                       <Col md={8}/>
                       <Col md={4}>
                         <Button
-                          onClick={this.handleDisputeLoad}
+                          onClick={this.toggleDisputeModal}
                           // name="DISPUTE"
                           type="button"
                           className="primaryButton"
