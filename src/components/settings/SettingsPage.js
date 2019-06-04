@@ -86,44 +86,67 @@ class SettingsPage extends Component {
     }
   }
 
+  renderAdminTabs(activeTab) {
+    return (
+      <Nav tabs>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '1' }, 'tab')}
+            onClick={() => { this.toggle('1'); }}
+          >
+            <div className="navLink">User Profile</div>
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '2' }, 'tab')}
+            onClick={() => { this.toggle('2'); }}
+          >
+            Notifications
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '3' }, 'tab')}
+            onClick={() => { this.toggle('3'); }}
+          >
+            Permissions
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '4' }, 'tab')}
+            onClick={() => { this.toggle('4'); }}
+          >
+            Payment Method
+          </NavLink>
+        </NavItem>
+      </Nav>
+    );
+  }
+
+  renderUserTabs(activeTab) {
+    return (
+      <Nav tabs>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '1' }, 'tab')}
+            onClick={() => { this.toggle('1'); }}
+          >
+            <div className="navLink">User Profile</div>
+          </NavLink>
+        </NavItem>
+      </Nav>
+    );
+  }
+
   renderSettingsTabs() {
     const { activeTab, user, users, company, address, isAdmin } = this.state;
     return (
       <div>
-        <Nav tabs>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === '1' }, 'tab')}
-              onClick={() => { this.toggle('1'); }}
-            >
-              <div className="navLink">User Profile</div>
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === '2' }, 'tab')}
-              onClick={() => { this.toggle('2'); }}
-            >
-              Notifications
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === '3' }, 'tab')}
-              onClick={() => { this.toggle('3'); }}
-            >
-              Permissions
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === '4' }, 'tab')}
-              onClick={() => { this.toggle('4'); }}
-            >
-              Payment Method
-            </NavLink>
-          </NavItem>
-        </Nav>
+        {
+          isAdmin ? this.renderAdminTabs(activeTab) : this.renderUserTabs(activeTab)
+        }
 
         <TabContent
           activeTab={activeTab}
@@ -139,8 +162,8 @@ class SettingsPage extends Component {
           <TabPane tabId="1">
             <UserSettings
               user={user}
-              company={company}
               address={address}
+              admin={isAdmin}
             />
           </TabPane>
           <TabPane tabId="2">

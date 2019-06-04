@@ -4,11 +4,9 @@ import {
   Col,
   Container,
   Row,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter
+  Modal
 } from 'reactstrap';
+import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 // import CloneDeep from 'lodash.clonedeep';
@@ -66,10 +64,10 @@ class UserSettings extends Component {
         touched: false,
         error: ''
       },
-      reqHandlerEmail: {
-        touched: false,
-        error: ''
-      },
+      // reqHandlerEmail: {
+      //   touched: false,
+      //   error: ''
+      // },
       reqHandlerPhone: {
         touched: false,
         error: ''
@@ -150,6 +148,48 @@ class UserSettings extends Component {
     this.setState({
       countryStates
     });
+  }
+
+  setUserInfo() {
+    const { user } = this.props;
+    const {
+      firstName,
+      lastName,
+      email,
+      mobilePhone,
+      phone,
+      preferredLanguage
+    } = this.state;
+    const newUser = user;
+
+    newUser.firstName = firstName;
+    newUser.lastName = lastName;
+    newUser.email = email;
+    newUser.mobilePhone = mobilePhone;
+    newUser.phone = phone;
+    newUser.preferredLanguage = preferredLanguage;
+    return newUser;
+  }
+
+  setAddressInfo() {
+    const { address } = this.props;
+    const {
+      address1,
+      address2,
+      city,
+      state,
+      zipCode,
+      country
+    } = this.state;
+    const newAddress = address;
+
+    newAddress.address1 = address1;
+    newAddress.address2 = address2;
+    newAddress.city = city;
+    newAddress.state = state;
+    newAddress.zipCode = zipCode;
+    newAddress.country = country;
+    return newAddress;
   }
 
   async fetchLookupsValues() {
@@ -355,6 +395,7 @@ class UserSettings extends Component {
       reqHandlerLName,
       reqHandlerPhone,
       reqHandlerAddress,
+      reqHandlerState,
       reqHandlerCity,
       reqHandlerZip
     });
@@ -363,48 +404,6 @@ class UserSettings extends Component {
     }
 
     return false;
-  }
-
-  setUserInfo() {
-    const { user } = this.props;
-    const {
-      firstName,
-      lastName,
-      email,
-      mobilePhone,
-      phone,
-      preferredLanguage
-    } = this.state;
-    const newUser = user;
-
-    newUser.firstName = firstName;
-    newUser.lastName = lastName;
-    newUser.email = email;
-    newUser.mobilePhone = mobilePhone;
-    newUser.phone = phone;
-    newUser.preferredLanguage = preferredLanguage;
-    return newUser;
-  }
-
-  setAddressInfo(info) {
-    const { address } = this.props;
-    const {
-      address1,
-      address2,
-      city,
-      state,
-      zipCode,
-      country
-    } = this.state;
-    const newAddress = address;
-
-    newAddress.address1 = address1;
-    newAddress.address2 = address2;
-    newAddress.city = city;
-    newAddress.state = state;
-    newAddress.zipCode = zipCode;
-    newAddress.country = country;
-    return newAddress;
   }
 
   async saveUser() {
@@ -500,7 +499,7 @@ class UserSettings extends Component {
   }
 
   render() {
-    const { user, company, address } = this.props;
+    const { user, admin } = this.props;
     const {
       firstName,
       lastName,
@@ -521,14 +520,15 @@ class UserSettings extends Component {
       zipCode,
       reqHandlerAddress,
       reqHandlerCity,
-      reqHandlerZip
+      reqHandlerZip,
+      timeZone
     } = this.state;
 
     const {
       languages,
       countries,
       countryStates,
-      states,
+      // states,
       timeZones
     } = this.state;
     return (
@@ -536,12 +536,12 @@ class UserSettings extends Component {
         <Row className="tab-content-header">
           {this.renderModal()}
           <Col md={6}>
-						<span style={{fontWeight: 'bold', fontSize: 20}}>
-						  { user.id === company.adminId ? 'Admin' : 'User' } - {user.firstName} {user.lastName}
-						</span>
+            <span style={{fontWeight: 'bold', fontSize: 20}}>
+              { admin ? 'Admin' : 'User' } - {user.firstName} {user.lastName}
+            </span>
           </Col>
-					<Col md={6} className="text-right">
-						<strong>Email:</strong> {user.email} 
+          <Col md={6} className="text-right">
+            <strong>Email:</strong> {user.email}
           </Col>
         </Row>
         <Row className="pt-2">
@@ -622,7 +622,8 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'address1',
-                    value: address1
+                    value: address1,
+                    disabled: !admin
                   }}
                   placeholder="Address 1"
                   type="text"
@@ -637,7 +638,8 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'address2',
-                    value: address2
+                    value: address2,
+                    disabled: !admin
                   }}
                   placeholder="Address 2"
                   type="text"
@@ -651,7 +653,8 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'city',
-                    value: city
+                    value: city,
+                    disabled: !admin
                   }}
                   placeholder="City"
                   type="text"
@@ -667,7 +670,8 @@ class UserSettings extends Component {
                     {
                       onChange: this.handleStateChange,
                       name: 'state',
-                      value: state
+                      value: state,
+                      disabled: !admin
                     }
                   }
                   options={countryStates}
@@ -682,7 +686,8 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'zipCode',
-                    value: zipCode
+                    value: zipCode,
+                    disabled: !admin
                   }}
                   placeholder="Zip"
                   type="text"
@@ -698,11 +703,11 @@ class UserSettings extends Component {
                     {
                       onChange: this.handleCountryChange,
                       name: 'country',
-                      value: country
+                      value: country,
+                      disabled: !admin
                     }
                   }
-                  // meta={reqHandlerLanguage}
-                  // value={preferredLanguage}
+                  // meta={}
                   options={countries}
                   placeholder="Select a country"
                 />
@@ -721,11 +726,11 @@ class UserSettings extends Component {
                     {
                       onChange: this.handleTimeZoneChange,
                       name: 'timeZone',
-                      value: ''
+                      value: timeZone,
+                      disabled: !admin
                     }
                   }
-                  // meta={reqHandlerLanguage}
-                  // value={preferredLanguage}
+                  // meta={}
                   options={timeZones}
                   placeholder="Select a Time zone"
                 />
@@ -750,12 +755,12 @@ class UserSettings extends Component {
               </Col>
             </Row>
           </Col>
-				</Row>
+        </Row>
         <Row className="mt-4 line-separator">
           <Col md={2} className="pt-4">
             <Button onClick={this.toggle}>Reset Password</Button>
           </Col>
-				</Row>
+        </Row>
         <Row>
           <Col md={12} className="text-right">
             <Link to="/">
@@ -775,5 +780,51 @@ class UserSettings extends Component {
     );
   }
 }
+
+UserSettings.propTypes = {
+  user: PropTypes.shape({
+    companyId: PropTypes.number,
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+    email: PropTypes.string,
+    mobilePhone: PropTypes.string,
+    phone: PropTypes.string,
+    preferredLanguage: PropTypes.string
+  }),
+  address: PropTypes.shape({
+    companyId: PropTypes.number,
+    name: PropTypes.string,
+    address1: PropTypes.string,
+    address2: PropTypes.string,
+    city: PropTypes.string,
+    state: PropTypes.string,
+    zipCode: PropTypes.string,
+    country: PropTypes.string
+  }),
+  admin: PropTypes.bool
+};
+
+UserSettings.defaultProps = {
+  user: {
+    companyId: 0,
+    firstName: '',
+    lastName: '',
+    email: '',
+    mobilePhone: '',
+    phone: '',
+    preferredLanguage: ''
+  },
+  address: {
+    companyId: 0,
+    name: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'US'
+  },
+  admin: false
+};
 
 export default UserSettings;

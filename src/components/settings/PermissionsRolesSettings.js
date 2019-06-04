@@ -4,19 +4,16 @@ import {
   Container,
   Row
 } from 'reactstrap';
+import * as PropTypes from 'prop-types';
 import './Settings.css';
-
 
 class PermissionsRolesSettings extends Component {
   constructor(props) {
     super(props);
-
+    // dummyData
     this.state = {
       permissions: ['Admin', 'Dispatcher', 'Driver']
     };
-  }
-
-  async componentDidMount() {
   }
 
   renderPermissionTable() {
@@ -63,9 +60,9 @@ class PermissionsRolesSettings extends Component {
       <Container>
         <Row className="tab-content-header">
           <Col md={6}>
-						<span style={{fontWeight: 'bold', fontSize: 20}}>
+            <span style={{fontWeight: 'bold', fontSize: 20}}>
               Roles / Permissions
-						</span>
+            </span>
           </Col>
         </Row>
         <Row className="pt-2 pb-4">
@@ -77,5 +74,14 @@ class PermissionsRolesSettings extends Component {
     );
   }
 }
+
+PermissionsRolesSettings.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  users: PropTypes.array
+};
+
+PermissionsRolesSettings.defaultProps = {
+  users: []
+};
 
 export default PermissionsRolesSettings;

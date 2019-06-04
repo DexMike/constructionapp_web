@@ -5,6 +5,7 @@ import {
   Row,
   Button
 } from 'reactstrap';
+import * as PropTypes from 'prop-types';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import './Settings.css';
@@ -258,7 +259,6 @@ class NotificationsSettings extends Component {
   }
 
   setNotificationOptionState(notificationId, optionId, e) {
-    console.log(213);
     const { notifications } = this.state;
     let { value } = e.target;
     value = value === 'true';
@@ -439,7 +439,7 @@ class NotificationsSettings extends Component {
       notificationsSettings.jobs = carrierJobs;
     }
     // notificationsSettings will be the object created from the selections
-    console.log(362, notificationsSettings);
+    // console.log(362, notificationsSettings);
   }
 
   renderTable(objectSettings) {
@@ -501,7 +501,7 @@ class NotificationsSettings extends Component {
                       </label>
                     </td>
                   ))
-                }            
+                }
               </tr>
             ) : null
           }
@@ -822,5 +822,19 @@ class NotificationsSettings extends Component {
     );
   }
 }
+
+NotificationsSettings.propTypes = {
+  company: PropTypes.shape({
+    id: PropTypes.number,
+    type: PropTypes.string
+  })
+};
+
+NotificationsSettings.defaultProps = {
+  company: {
+    id: 0,
+    type: ''
+  }
+};
 
 export default NotificationsSettings;
