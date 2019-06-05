@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
+// import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Row, Container } from 'reactstrap';
 
 import './jobs.css';
@@ -52,7 +52,8 @@ class JobCarrierForm extends JobCustomerForm {
   }
 
   async componentDidMount() {
-    let {job, images} = this.props;
+    const {job} = this.props;
+    let {images} = this.props;
     let {gpsTrackings} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
@@ -201,8 +202,7 @@ class JobCarrierForm extends JobCustomerForm {
           {job.company.legalName}
           <br/>
           {/* Find the company admin name */}
-          Phone #: <a
-          href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
+          Phone #: <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
           <br/>
           Number of Trucks: {job.numEquipments}
           <br/>
@@ -442,14 +442,33 @@ class JobCarrierForm extends JobCustomerForm {
     );
   }
 
-  render() {
+  renderLoader() {
     return (
-      <Container className="dashboard">
-        {this.renderEverything()}
-      </Container>
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
     );
   }
 
+  render() {
+    const { loaded } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {this.renderEverything()}
+        </Container>
+      );
+    }
+    return (
+      <Container className="dashboard">
+        {this.renderLoader()}
+      </Container>
+    );
+  }
 }
 
 JobCarrierForm.propTypes = {

@@ -22,6 +22,7 @@ import TMapBoxOriginDestination
   from '../common/TMapBoxOriginDestination';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import TSubmitButton from '../common/TSubmitButton';
+import TSpinner from '../common/TSpinner';
 
 const MAPBOX_MAX = 23;
 
@@ -722,9 +723,13 @@ class JobViewForm extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }

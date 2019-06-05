@@ -4,8 +4,10 @@ import { Redirect } from 'react-router-dom';
 import {
   Card,
   CardBody,
+  Container,
   Col,
-  Button
+  Button,
+  Row
 } from 'reactstrap';
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
@@ -29,7 +31,8 @@ class DriverForm extends Component {
       reqHandlerFName: { touched: false, error: '' },
       reqHandlerLName: { touched: false, error: '' },
       reqHandlerEmail: { touched: false, error: '' },
-      reqHandlerPhone: { touched: false, error: '' }
+      reqHandlerPhone: { touched: false, error: '' },
+      loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -50,7 +53,15 @@ class DriverForm extends Component {
       ({ email } = selectedUser);
       ({ mobilePhone } = selectedUser);
 
-      this.setState({ selectedUser, id, firstName, lastName, email, mobilePhone });
+      this.setState({
+        selectedUser,
+        id,
+        firstName,
+        lastName,
+        email,
+        mobilePhone,
+        loaded: true
+      });
     }
   }
 
@@ -176,6 +187,18 @@ class DriverForm extends Component {
     return true;
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const {
       firstName,
@@ -186,94 +209,108 @@ class DriverForm extends Component {
       reqHandlerFName,
       reqHandlerLName,
       reqHandlerEmail,
-      reqHandlerPhone } = this.state;
-    return (
-      <React.Fragment>
-        {this.renderGoTo()}
-        <Col md={12} lg={12}>
-          <h3 className="page-title">Edit Driver</h3>
-          <br />
-          <Card>
-            <CardBody>
-              <form className="form">
-                <div className="form__half">
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">
-                          First Name
-                    </span>
-                    <TField
-                      input={{
-                        onChange: this.handleInputChange,
-                        name: 'firstName',
-                        value: firstName
-                      }}
-                      placeholder=""
-                      type="text"
-                      meta={reqHandlerFName}
-                    />
-                  </div>
+      reqHandlerPhone,
+      loaded
+    } = this.state;
+    if (loaded) {
+      return (
+        <React.Fragment>
+          {this.renderGoTo()}
+          <Col md={12} lg={12}>
+            <h3 className="page-title">Edit Driver</h3>
+            <br />
+            <Card>
+              <CardBody>
+                <form className="form">
+                  <div className="form__half">
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">
+                            First Name
+                      </span>
+                      <TField
+                        input={{
+                          onChange: this.handleInputChange,
+                          name: 'firstName',
+                          value: firstName
+                        }}
+                        placeholder=""
+                        type="text"
+                        meta={reqHandlerFName}
+                      />
+                    </div>
 
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">Email</span>
-                    <TField
-                        input={{
-                          onChange: this.handleInputChange,
-                          name: 'email',
-                          value: email
-                        }}
-                        placeholder=""
-                        type="text"
-                        meta={reqHandlerEmail}
-                    />
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">Email</span>
+                      <TField
+                          input={{
+                            onChange: this.handleInputChange,
+                            name: 'email',
+                            value: email
+                          }}
+                          placeholder=""
+                          type="text"
+                          meta={reqHandlerEmail}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="form__half">
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">
-                          Last Name
-                    </span>
-                    <TField
-                        input={{
-                          onChange: this.handleInputChange,
-                          name: 'lastName',
-                          value: lastName
-                        }}
-                        placeholder=""
-                        type="text"
-                        meta={reqHandlerLName}
-                    />
+                  <div className="form__half">
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">
+                            Last Name
+                      </span>
+                      <TField
+                          input={{
+                            onChange: this.handleInputChange,
+                            name: 'lastName',
+                            value: lastName
+                          }}
+                          placeholder=""
+                          type="text"
+                          meta={reqHandlerLName}
+                      />
+                    </div>
+                    <div className="form__form-group">
+                      <span className="form__form-group-label">
+                            Mobile Phone
+                      </span>
+                      <NumberFormat
+                          name="mobilePhone"
+                          type="text"
+                          format="(###) ###-####"
+                          mask="_"
+                          value={mobilePhone}
+                          onChange={this.handleInputChange}
+                          meta={reqHandlerPhone}
+                      />
+                    </div>
+                    <br />
+                    <div className="float-right">
+                      <Button key="2" onClick={this.goToDriversList} className="secondaryButton">Cancel</Button>
+                      <TSubmitButton
+                        onClick={this.saveUser}
+                        className="primaryButton"
+                        loading={btnSubmitting}
+                        loaderSize={10}
+                        bntText="Update Driver"
+                      />
+                    </div>
                   </div>
-                  <div className="form__form-group">
-                    <span className="form__form-group-label">
-                          Mobile Phone
-                    </span>
-                    <NumberFormat
-                        name="mobilePhone"
-                        type="text"
-                        format="(###) ###-####"
-                        mask="_"
-                        value={mobilePhone}
-                        onChange={this.handleInputChange}
-                        meta={reqHandlerPhone}
-                    />
-                  </div>
-                  <br />
-                  <div className="float-right">
-                    <Button key="2" onClick={this.goToDriversList} className="secondaryButton">Cancel</Button>
-                    <TSubmitButton
-                      onClick={this.saveUser}
-                      className="primaryButton"
-                      loading={btnSubmitting}
-                      loaderSize={10}
-                      bntText="Update Driver"
-                    />
-                  </div>
-                </div>
-              </form>
-            </CardBody>
-          </Card>
-        </Col>
-      </React.Fragment>
+                </form>
+              </CardBody>
+            </Card>
+          </Col>
+        </React.Fragment>
+      );
+    }
+    return (
+      <Container className="dashboard">
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Edit Driver</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
+      </Container>
     );
   }
 }

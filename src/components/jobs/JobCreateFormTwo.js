@@ -56,12 +56,19 @@ class JobCreateFormTwo extends PureComponent {
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
     // get only those that match criteria
+    if (d.selectedRatedHourOrTon === 'ton') {
+      d.rateTab = 2;
+    } else {
+      d.rateTab = 1;
+    }
     const filters = {
       tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
       rateEstimate: d.rateEstimate,
       hourTrucksNumber: d.hourTrucksNumber
     };
+    console.log(d.selectedRatedHourOrTon);
+    console.log(filters);
     favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
       profile.userId,
       filters
@@ -469,10 +476,10 @@ class JobCreateFormTwo extends PureComponent {
                   </div>
                   <br/>
                 </Row>
+                
                 <Row className="col-md-12">
                   <hr/>
                 </Row>
-
 
                 <Row className="col-md-12 ">
                   <ButtonToolbar className="col-md-6 wizard__toolbar">
@@ -503,9 +510,13 @@ class JobCreateFormTwo extends PureComponent {
       );
     }
     return (
-      <Container>
-        <TSpinner loading/>
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }
