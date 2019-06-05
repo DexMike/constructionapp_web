@@ -22,6 +22,7 @@ import './AddTruck.css';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import TFileUploadSingle from '../common/TFileUploadSingle';
 import StringGenerator from '../../utils/StringGenerator';
+import TSpinner from '../common/TSpinner';
 
 // import validate from '../common/validate ';
 
@@ -45,7 +46,7 @@ class AddTruckFormOne extends PureComponent {
       vin: '',
       licensePlate: '',
       ratesByHour: false,
-      ratesByTon: false,
+      // ratesByTon: false,
       ratesCostPerTon: '',
       ratesCostPerHour: '',
       minOperatingTime: '',
@@ -59,7 +60,8 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinTime: { touched: false, error: '' },
       // reqHandlerCostTon: { touched: false, error: '' },
       // reqHandlerChecks: { touched: false, error: '' },
-      reqHandlerMaxCapacity: { touched: false, error: '' }
+      reqHandlerMaxCapacity: { touched: false, error: '' },
+      loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -71,6 +73,7 @@ class AddTruckFormOne extends PureComponent {
 
   async componentDidMount() {
     await this.fetchMaterials();
+    this.setState({loaded: true});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -129,7 +132,7 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate: { touched: false },
       reqHandlerMinTime: { touched: false },
       // reqHandlerCostTon: { touched: false },
-      reqHandlerChecks: { touched: false },
+      // reqHandlerChecks: { touched: false },
       reqHandlerMaxCapacity: { touched: false }
     });
 
@@ -317,7 +320,7 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    let { value } = e.target;
+    const { value } = e.target;
     let reqHandler = '';
 
     if (e.target.name === 'ratesByHour' && e.target.checked) {
@@ -535,282 +538,294 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate,
       reqHandlerMinTime,
       imageUploading,
-      reqHandlerMaxCapacity
+      reqHandlerMaxCapacity,
+      loaded
     } = this.state;
     const { p, onClose } = this.props;
-    return (
-      <Col md={12} lg={12}>
-        <Card>
-          <CardBody>
+    if (loaded) {
+      return (
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
 
-            {/* this.handleSubmit  */}
-            <form
-              className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveTruck(e)}
-            >
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Tell us about your truck
-                  </h3>
-                </div>
-                <div className="col-md-6">
-                  <span className="form__form-group-label">Truck description</span>
-                  <input
-                    name="description"
-                    type="text"
-                    value={description}
-                    onChange={this.handleInputChange}
-                  />
-                  <input type="hidden" val={p}/>
-                  <input type="hidden" val={id}/>
-                  <input type="hidden" val={defaultDriverId}/>
-                  <input type="hidden" val={driversId}/>
-                </div>
-                <div className="col-md-6">
-                  <span className="form__form-group-label">Truck Type</span>
-                  <SelectField
-                    input={
-                      {
-                        onChange: this.selectChange,
-                        name: 'Truck Type',
-                        value: truckType
+              {/* this.handleSubmit  */}
+              <form
+                className="form form--horizontal addtruck__form"
+                onSubmit={e => this.saveTruck(e)}
+              >
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Tell us about your truck
+                    </h3>
+                  </div>
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">Truck description</span>
+                    <input
+                      name="description"
+                      type="text"
+                      value={description}
+                      onChange={this.handleInputChange}
+                    />
+                    <input type="hidden" val={p}/>
+                    <input type="hidden" val={id}/>
+                    <input type="hidden" val={defaultDriverId}/>
+                    <input type="hidden" val={driversId}/>
+                  </div>
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">Truck Type</span>
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.selectChange,
+                          name: 'Truck Type',
+                          value: truckType
+                        }
                       }
-                    }
-                    meta={reqHandlerTruckType}
-                    value={truckType}
-                    options={truckTypes}
-                    placeholder="Truck Type"
-                  />
-                </div>
-              </Row>
+                      meta={reqHandlerTruckType}
+                      value={truckType}
+                      options={truckTypes}
+                      placeholder="Truck Type"
+                    />
+                  </div>
+                </Row>
 
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <span className="form__form-group-label mt-8">
-                    Materials Hauled
-                  </span>
-                  <MultiSelect
-                    input={
-                      {
-                        onChange: this.handleMultiChange,
-                        name: 'materials',
-                        value: selectedMaterials
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <span className="form__form-group-label mt-8">
+                      Materials Hauled
+                    </span>
+                    <MultiSelect
+                      input={
+                        {
+                          onChange: this.handleMultiChange,
+                          name: 'materials',
+                          value: selectedMaterials
+                        }
                       }
-                    }
-                    meta={reqHandlerMaterials}
-                    options={allMaterials}
-                    placeholder="Materials"
-                  />
-                </div>
-              </Row>
+                      meta={reqHandlerMaterials}
+                      options={allMaterials}
+                      placeholder="Materials"
+                    />
+                  </div>
+                </Row>
 
-              <Row className="col-md-12">
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Vin #</span>
-                  <input
-                    name="vin"
-                    type="text"
-                    value={vin}
-                    onChange={this.handleInputChange}
-                  />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">License Plate</span>
-                  <input
-                    name="licensePlate"
-                    type="text"
-                    value={licensePlate}
-                    onChange={this.handleInputChange}
-                  />
-                </div>
-              </Row>
+                <Row className="col-md-12">
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">Vin #</span>
+                    <input
+                      name="vin"
+                      type="text"
+                      value={vin}
+                      onChange={this.handleInputChange}
+                    />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">License Plate</span>
+                    <input
+                      name="licensePlate"
+                      type="text"
+                      value={licensePlate}
+                      onChange={this.handleInputChange}
+                    />
+                  </div>
+                </Row>
 
-              <Row className="col-md-12">
-                <hr />
-              </Row>
+                <Row className="col-md-12">
+                  <hr />
+                </Row>
 
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Truck Rates
-                  </h3>
-                </div>
-              </Row>
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Truck Rates
+                    </h3>
+                  </div>
+                </Row>
 
-              {/* BY THE HOUR */}
-              <Row className="col-md-12">
-                <div className="col-md-2 form__form-group pt-20">
-                  <TCheckBox
-                    type="hidden"
-                    onChange={this.handleInputChange}
-                    name="ratesByHour"
-                    value={isRatedHour}
-                    label="By Hour"
-                  />
-                </div>
-                <div
-                  className={
-                    `${isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
-                    }
-                >
-                  <span className="label">$ Cost / Hour</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'ratesCostPerHour',
-                        value: ratesCostPerHour
+                {/* BY THE HOUR */}
+                <Row className="col-md-12">
+                  <div className="col-md-2 form__form-group pt-20">
+                    <TCheckBox
+                      type="hidden"
+                      onChange={this.handleInputChange}
+                      name="ratesByHour"
+                      value={isRatedHour}
+                      label="By Hour"
+                    />
+                  </div>
+                  <div
+                    className={
+                      `${isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
                       }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerMinRate}
-                  />
-                </div>
-                <div
-                  className={
-                    `${isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
-                    }
-                >
-                  <span className="label">Minimum Hours</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'minOperatingTime',
-                        value: minOperatingTime
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerMinTime}
-                  />
-                </div>
-              </Row>
-
-              {/* BY THE TON */}
-              <Row className="col-md-12">
-                <div className="col-md-2 form__form-group pt-20">
-                  <TCheckBox onChange={this.handleInputChange}
-                    name="ratesByTon"
-                    value={!isRatedHour}
-                    label="By Ton"
-                  />
-                </div>
-                <div
-                  className={
-                    `${!isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
-                    }
-                >
-                  <span className="label">$ Cost / Ton</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'ratesCostPerTon',
-                        value: ratesCostPerTon
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    // meta={reqHandlerMinRate}
-                  />
-                </div>
-                <div
-                  className={
-                    `${!isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
-                    }
-                >
-                  <span className="label">Minimum Tons</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'minTons',
-                        value: minTons
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    // meta={reqHandlerMinTime}
-                  />
-                </div>
-              </Row>
-
-              <Row className="col-md-12">
-                <hr/>
-              </Row>
-
-              <Row className="col-md-12">
-                <div className="col-md-6">
-                  <span className="form__form-group-label">
-                    Maximum Capacity (Tons)
-                  </span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'maxCapacity',
-                        value: maxCapacity
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerMaxCapacity}
-                  />
-                  <span className="form__form-group-label mt-8">
-                    Max Distance to Pickup (Miles)
-                  </span>
-                  <input
-                    name="maxDistanceToPickup"
-                    type="number"
-                    value={maxDistanceToPickup}
-                    onChange={this.handleInputChange}
-                    placeholder="How far will you travel per job"
-                  />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <h4 className="subhead">
-                    Upload a picture of your Truck (Optional)
-                  </h4>
-                  <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
-                  {imageUploading && <span>Uploading Image...</span>}
-                </div>
-              </Row>
-              {/*
-              <Row>
-                <DropZoneMultipleField
-                  input={
-                    {
-                      onChange: this.handleImg,
-                      name: 'materials',
-                      value: { maxDistanceToPickup }
-                    }
-                  }
-                />
-              </Row>
-              */}
-              <Row className="col-md-12">
-                <hr />
-              </Row>
-
-              <Row className="col-md-12">
-                <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button className="tertiaryButton" type="button"
-                          onClick={onClose} disabled={imageUploading}
                   >
-                    Cancel
-                  </Button>
-                </ButtonToolbar>
-                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button type="button" disabled className="secondaryButton">Back</Button>
-                  <Button type="submit" className="primaryButton" disabled={imageUploading}>
-                    Next
-                  </Button>
-                </ButtonToolbar>
-              </Row>
-            </form>
+                    <span className="label">$ Cost / Hour</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'ratesCostPerHour',
+                          value: ratesCostPerHour
+                        }
+                      }
+                      placeholder="0"
+                      type="number"
+                      meta={reqHandlerMinRate}
+                    />
+                  </div>
+                  <div
+                    className={
+                      `${isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                      }
+                  >
+                    <span className="label">Minimum Hours</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'minOperatingTime',
+                          value: minOperatingTime
+                        }
+                      }
+                      placeholder="0"
+                      type="number"
+                      meta={reqHandlerMinTime}
+                    />
+                  </div>
+                </Row>
+
+                {/* BY THE TON */}
+                <Row className="col-md-12">
+                  <div className="col-md-2 form__form-group pt-20">
+                    <TCheckBox onChange={this.handleInputChange}
+                      name="ratesByTon"
+                      value={!isRatedHour}
+                      label="By Ton"
+                    />
+                  </div>
+                  <div
+                    className={
+                      `${!isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                      }
+                  >
+                    <span className="label">$ Cost / Ton</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'ratesCostPerTon',
+                          value: ratesCostPerTon
+                        }
+                      }
+                      placeholder="0"
+                      type="number"
+                      // meta={reqHandlerMinRate}
+                    />
+                  </div>
+                  <div
+                    className={
+                      `${!isRatedHour ? 'col-md-5 form__form-group shown' : 'col-md-5 form__form-group fifty'}`
+                      }
+                  >
+                    <span className="label">Minimum Tons</span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'minTons',
+                          value: minTons
+                        }
+                      }
+                      placeholder="0"
+                      type="number"
+                      // meta={reqHandlerMinTime}
+                    />
+                  </div>
+                </Row>
+
+                <Row className="col-md-12">
+                  <hr/>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">
+                      Maximum Capacity (Tons)
+                    </span>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'maxCapacity',
+                          value: maxCapacity
+                        }
+                      }
+                      placeholder="0"
+                      type="number"
+                      meta={reqHandlerMaxCapacity}
+                    />
+                    <span className="form__form-group-label mt-8">
+                      Max Distance to Pickup (Miles)
+                    </span>
+                    <input
+                      name="maxDistanceToPickup"
+                      type="number"
+                      value={maxDistanceToPickup}
+                      onChange={this.handleInputChange}
+                      placeholder="How far will you travel per job"
+                    />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <h4 className="subhead">
+                      Upload a picture of your Truck (Optional)
+                    </h4>
+                    <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
+                    {imageUploading && <span>Uploading Image...</span>}
+                  </div>
+                </Row>
+                {/*
+                <Row>
+                  <DropZoneMultipleField
+                    input={
+                      {
+                        onChange: this.handleImg,
+                        name: 'materials',
+                        value: { maxDistanceToPickup }
+                      }
+                    }
+                  />
+                </Row>
+                */}
+                <Row className="col-md-12">
+                  <hr />
+                </Row>
+
+                <Row className="col-md-12">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button className="tertiaryButton" type="button"
+                            onClick={onClose} disabled={imageUploading}
+                    >
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    <Button type="button" disabled className="secondaryButton">Back</Button>
+                    <Button type="submit" className="primaryButton" disabled={imageUploading}>
+                      Next
+                    </Button>
+                  </ButtonToolbar>
+                </Row>
+              </form>
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
+    return (
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
           </CardBody>
         </Card>
       </Col>

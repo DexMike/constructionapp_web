@@ -15,6 +15,15 @@
   &.loaded {
     animation: ease loaded 0.5s;
   }
+
+  &.inside-page {
+    &.loaded {
+      animation: none;
+    }
+    height: 85vh;
+    width: 85vw;
+    background: none;
+  }
 }
 
 .load__icon {

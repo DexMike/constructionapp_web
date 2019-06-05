@@ -90,7 +90,7 @@ class JobCustomerForm extends Component {
         const matchWayPoint = {
           coordinates: [gpsData[datum][1], gpsData[datum][0]]
         };
-       matchWaypoints.push(matchWayPoint);
+        matchWaypoints.push(matchWayPoint);
       }
     }
 
@@ -287,8 +287,7 @@ class JobCustomerForm extends Component {
           {job.company.legalName}
           <br/>
           {/* Find the company admin name */}
-          Phone #: <a
-          href={'tel:' + TFormat.asPhoneText(job.company.phone)}>{TFormat.asPhoneText(job.company.phone)}</a>
+          Phone #: <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
           <br/>
           Number of Trucks: {job.numEquipments}
           <br/>
@@ -1006,6 +1005,18 @@ class JobCustomerForm extends Component {
     );
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const { loaded, gpsDataLoaded } = this.state;
     if (loaded && gpsDataLoaded) {
@@ -1017,7 +1028,7 @@ class JobCustomerForm extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        {this.renderLoader()}
       </Container>
     );
   }

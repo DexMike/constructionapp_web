@@ -247,7 +247,7 @@ class AddTruckForm extends PureComponent {
           <Row>
             {/* <h1>TEST</h1> */}
             <Col md={12} lg={12}>
-              <Card>
+              <Card style={{paddingBottom: 0}}>
                 <div className="wizard">
                   <div className="wizard__steps">
                     {/* onClick={this.gotoPage(1)} */}
@@ -366,8 +366,12 @@ class AddTruckForm extends PureComponent {
       );
     }
     return (
-      <Container>
-        Loading...
+      <Container className="dashboard">
+        <Row>
+          <Col md={12}>
+            <Card>Loading...</Card>
+          </Col>
+        </Row>
       </Container>
     );
   }

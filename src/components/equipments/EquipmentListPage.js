@@ -13,7 +13,7 @@ import {
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import EquipmentService from '../../api/EquipmentService';
-import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
+// import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import '../addTruck/AddTruck.css';
@@ -51,7 +51,6 @@ class EquipmentListPage extends Component {
     const profile = await ProfileService.getProfile();
     this.setState({ companyId: profile.companyId });
     this.loadEquipments();
-    this.setState({ loaded: true });
   }
 
   async loadEquipments() {
@@ -63,7 +62,8 @@ class EquipmentListPage extends Component {
       const { totalCount } = response.metadata;
       this.setState({
         equipments,
-        totalCount
+        totalCount,
+        loaded: true
       });
     }
   }
@@ -173,6 +173,18 @@ class EquipmentListPage extends Component {
     );
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     let { equipments } = this.state;
     const { loaded, totalCount } = this.state;
@@ -273,7 +285,12 @@ class EquipmentListPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Trucks</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

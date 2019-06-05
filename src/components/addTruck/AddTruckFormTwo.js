@@ -10,7 +10,7 @@ import {
 // import EyeIcon from 'mdi-react/EyeIcon';
 import * as PropTypes from 'prop-types';
 import TDateTimePicker from '../common/TDateTimePicker';
-import CheckBox from '@material-ui/core/es/internal/svg-icons/CheckBox';
+import TSpinner from '../common/TSpinner';
 // import CheckBox from '@material-ui/core/es/internal/svg-icons/CheckBox';
 // import { start } from 'repl';
 
@@ -29,7 +29,8 @@ class AddTruckFormTwo extends PureComponent {
         error: 'Please select an end date for when your truck is available'
       },
       isAvailable: false,
-      redir: false
+      redir: false,
+      loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.startDateChange = this.startDateChange.bind(this);
@@ -55,6 +56,7 @@ class AddTruckFormTwo extends PureComponent {
     } else {
       // console.log(47);
     }
+    this.setState({loaded: true});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -207,7 +209,8 @@ class AddTruckFormTwo extends PureComponent {
       endDate,
       isAvailable,
       reqHandlerStartDate,
-      reqHandlerEndDate
+      reqHandlerEndDate,
+      loaded
     } = this.state;
 
     const today = new Date();
@@ -226,97 +229,108 @@ class AddTruckFormTwo extends PureComponent {
       currentDate = today.getTime();
     }
 
-    return (
-      <Col md={12} lg={12}>
-        <Card>
-          <CardBody>
-            {/*  onSubmit={handleSubmit} */}
-            <form
-              className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveAvailability(e)}
-            >
+    if (loaded) {
+      return (
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
+              {/*  onSubmit={handleSubmit} */}
+              <form
+                className="form form--horizontal addtruck__form"
+                onSubmit={e => this.saveAvailability(e)}
+              >
 
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Set availability by date range
-                  </h3>
-                  <br/>
-                </div>
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Set availability by date range
+                    </h3>
+                    <br/>
+                  </div>
 
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Start</span>
-                  <TDateTimePicker
-                    input={
-                      {
-                        onChange: this.startDateChange,
-                        name: 'startDate',
-                        value: { startDate },
-                        givenDate: currentDate
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">Start</span>
+                    <TDateTimePicker
+                      input={
+                        {
+                          onChange: this.startDateChange,
+                          name: 'startDate',
+                          value: { startDate },
+                          givenDate: currentDate
+                        }
                       }
-                    }
-                    onChange={this.startDateChange}
-                    meta={reqHandlerStartDate}
-                    dateFormat="MM/dd/yy"
-                  />
-                  <input type="hidden" value={p}/>
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">End</span>
-                  <TDateTimePicker
-                    input={
-                      {
-                        onChange: this.endDateChange,
-                        name: 'endDate',
-                        value: { endDate },
-                        givenDate: tomorrowDate
-                      }
-                    }
-                    onChange={this.endDateChange}
-                    meta={reqHandlerEndDate}
-                    dateFormat="MM/dd/yy"
-                  />
-                </div>
-              </Row>
-              <br/>
-              <div className="col-md-12 mt-1">
-                <div className="form-check checkbox-slider--b checkbox-slider-md">
-                  <label>
-                    <input
-                      type="checkbox"
-                      onChange={this.makeAvailable}
-                      checked={isAvailable}
+                      onChange={this.startDateChange}
+                      meta={reqHandlerStartDate}
+                      dateFormat="MM/dd/yy"
                     />
-                    { isAvailable
-                      ? <span>Available to make deliveries</span>
-                      : <span>Not available to make deliveries</span>
-                    }
-                  </label>
+                    <input type="hidden" value={p}/>
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">End</span>
+                    <TDateTimePicker
+                      input={
+                        {
+                          onChange: this.endDateChange,
+                          name: 'endDate',
+                          value: { endDate },
+                          givenDate: tomorrowDate
+                        }
+                      }
+                      onChange={this.endDateChange}
+                      meta={reqHandlerEndDate}
+                      dateFormat="MM/dd/yy"
+                    />
+                  </div>
+                </Row>
+                <br/>
+                <div className="col-md-12 mt-1">
+                  <div className="form-check checkbox-slider--b checkbox-slider-md">
+                    <label>
+                      <input
+                        type="checkbox"
+                        onChange={this.makeAvailable}
+                        checked={isAvailable}
+                      />
+                      { isAvailable
+                        ? <span>Available to make deliveries</span>
+                        : <span>Not available to make deliveries</span>
+                      }
+                    </label>
+                  </div>
                 </div>
-              </div>
 
-              <Row className="col-md-12">
-                <hr/>
-              </Row>
+                <Row className="col-md-12">
+                  <hr/>
+                </Row>
 
-              <Row className="col-md-12">
-                <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button type="button" className="tertiaryButton" onClick={onClose}>
-                    Cancel
-                  </Button>
-                </ButtonToolbar>
-                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button type="button" className="secondaryButton"
-                          onClick={this.saveAndGoBack}
-                  >
-                    Back
-                  </Button>
-                  <Button type="submit" className="primaryButton">Next</Button>
-                </ButtonToolbar>
-              </Row>
+                <Row className="col-md-12">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button type="button" className="tertiaryButton" onClick={onClose}>
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    <Button type="button" className="secondaryButton"
+                            onClick={this.saveAndGoBack}
+                    >
+                      Back
+                    </Button>
+                    <Button type="submit" className="primaryButton">Next</Button>
+                  </ButtonToolbar>
+                </Row>
 
-            </form>
+              </form>
 
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
+    return (
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
           </CardBody>
         </Card>
       </Col>

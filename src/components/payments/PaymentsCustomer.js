@@ -67,8 +67,22 @@ class PaymentsCustomer extends Component {
     return false;
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
-    // const payments = [{ date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88' }];
+    /* const payments = [{
+      date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88'
+    }]; */
     const { loaded, payments } = this.state;
     if (loaded) {
       return (
@@ -121,17 +135,13 @@ class PaymentsCustomer extends Component {
       );
     }
     return (
-      <Container className="dashboard">
+      <Container className="container">
         <Row>
           <Col md={12}>
             <h3 className="page-title">Customer Payments</h3>
           </Col>
         </Row>
-        <Row>
-          <Col md={12}>
-            Loading ...
-          </Col>
-        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

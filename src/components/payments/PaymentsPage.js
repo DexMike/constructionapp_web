@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+// import { Redirect } from 'react-router-dom';
+import { Container } from 'reactstrap';
 
 import PaymentsCarrier from './PaymentsCarrier';
 import PaymentsCustomer from './PaymentsCustomer';
@@ -11,6 +11,7 @@ class PaymentsPage extends Component {
     super(props);
 
     this.state = {
+      loaded: false,
       companyType: ''
     };
   }
@@ -18,24 +19,43 @@ class PaymentsPage extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     const { companyType } = profile;
-    this.setState({ companyType });
+    this.setState({ companyType, loaded: true });
+  }
+
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
   }
 
   render() {
-    const { companyType } = this.state;
+    const { companyType, loaded } = this.state;
+    if (loaded) {
+      return (
+        <Container className="dashboard">
+          {
+            companyType === 'Customer'
+              ? <PaymentsCustomer/>
+              : null
+          }
+          {
+            companyType === 'Carrier'
+              ? <PaymentsCarrier/>
+              : null
+          }
+        </Container>
+      );
+    }
     return (
-      <Container className="dashboard">
-        {
-          companyType === 'Customer'
-            ? <PaymentsCustomer/>
-            : null
-        }
-        {
-          companyType === 'Carrier'
-            ? <PaymentsCarrier/>
-            : null
-        }
-      </Container>
+      <React.Fragment>
+        {this.renderLoader()}
+      </React.Fragment>
     );
   }
 }
