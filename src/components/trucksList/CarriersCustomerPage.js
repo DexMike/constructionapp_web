@@ -12,14 +12,13 @@ import {
 // import classnames from 'classnames';
 import moment from 'moment';
 // import { Select } from '@material-ui/core';
-import NumberFormat from 'react-number-format';
+
 import TSelect from '../common/TSelect';
 
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
-import truckImage from '../../img/default_truck.png';
-// import truckImage from '../../img/belly-dump.jpg';
+
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
@@ -30,7 +29,7 @@ import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import EquipmentRow from './EquipmentRow';
 
-class TrucksCustomerPage extends Component {
+class CarriersCustomerPage extends Component {
   constructor(props) {
     super(props);
 
@@ -71,7 +70,10 @@ class TrucksCustomerPage extends Component {
         zipCode: '',
         rateType: '',
         currentAvailability: 1,
-        sortBy: sortByList[0]
+        sortBy: sortByList[0],
+        // carriers custom page
+        name: '',
+        numberOfTrucks: 0
       }
     };
 
@@ -87,6 +89,8 @@ class TrucksCustomerPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
+    this.retrieveEquipment = this.retrieveEquipment.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   async componentDidMount() {
@@ -97,6 +101,10 @@ class TrucksCustomerPage extends Component {
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({loaded: true});
+  }
+
+  retrieveEquipment(equipment) {
+    return equipment;
   }
 
   retrieveAllMaterials() {
@@ -170,7 +178,9 @@ class TrucksCustomerPage extends Component {
 
   async fetchEquipments() {
     const {filters} = this.state;
-    const equipments = await EquipmentService.getEquipmentByFilters(filters);
+    const equipments = await EquipmentService.getEquipmentByFiltersCarrier(filters);
+
+    // console.log(equipments);
 
     if (equipments) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -321,6 +331,15 @@ class TrucksCustomerPage extends Component {
     this.setState({filters});
   }
 
+  handleInputChange(e) {
+    const {filters} = this.state;
+    filters.name = e.target.value;
+    this.setState({filters}, async function search() {
+      await this.fetchEquipments();
+    });
+    // this.setState({filters});
+  }
+
   toggleAddJobModal() {
     const {modal, filters} = this.state;
     if (modal) {
@@ -421,7 +440,6 @@ class TrucksCustomerPage extends Component {
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
-      // console.log(367);
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
@@ -485,16 +503,34 @@ class TrucksCustomerPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
-                    <Col md="2">
+                    <Col md="4">
                       <div className="filter-item-title">
-                        Availability
+                        Materials
                       </div>
-                      <TIntervalDatePicker
-                        startDate={startDate}
-                        endDate={endDate}
-                        name="dateInterval"
-                        onChange={this.handleIntervalInputChange}
-                        dateFormat="MM/dd/yy"
+                      <MultiSelect
+                        input={
+                          {
+                            onChange: this.handleMultiChange,
+                            // onChange: this.handleSelectFilterChange,
+                            name: 'materialType',
+                            value: filters.materialType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        options={
+                          materialTypeList.map(materialType => ({
+                            name: 'materialType',
+                            value: materialType.trim(),
+                            label: materialType.trim()
+                          }))
+                        }
+                        // placeholder="Materials"
+                        placeholder={materialTypeList[0]}
                       />
                     </Col>
                     <Col md="2">
@@ -528,6 +564,19 @@ class TrucksCustomerPage extends Component {
                     </Col>
                     <Col md="2">
                       <div className="filter-item-title">
+                        Number of trucks
+                      </div>
+                      <input
+                        name="numberOfTrucks"
+                        type="number"
+                        placeholder="#"
+                        value={filters.numberOfTrucks}
+                        // onChange={this.handleInputChange}
+                        readOnly
+                      />
+                    </Col>
+                    <Col md="2">
+                      <div className="filter-item-title">
                         Rate Type
                       </div>
                       <TSelect
@@ -557,6 +606,19 @@ class TrucksCustomerPage extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
+                        Zip
+                      </div>
+                      <input name="zipCode"
+                             className="filter-text"
+                             type="text"
+                             placeholder="Zip Code"
+                             value={filters.zipCode}
+                             onChange={this.handleFilterChange}
+                      />
+                    </Col>
+                    {/*
+                    <Col md="1">
+                      <div className="filter-item-title">
                         Min Capacity
                       </div>
                       <input name="minCapacity"
@@ -567,208 +629,53 @@ class TrucksCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    <Col md="4">
-                      <div className="filter-item-title">
-                        Materials
-                      </div>
-                      <MultiSelect
-                        input={
-                          {
-                            onChange: this.handleMultiChange,
-                            // onChange: this.handleSelectFilterChange,
-                            name: 'materialType',
-                            value: filters.materialType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        options={
-                          materialTypeList.map(materialType => ({
-                            name: 'materialType',
-                            value: materialType.trim(),
-                            label: materialType.trim()
-                          }))
-                        }
-                        // placeholder="Materials"
-                        placeholder={materialTypeList[0]}
-                      />
-                    </Col>
+                    */}
                     <Col md="1">
                       <div className="filter-item-title">
-                        Zip Code
+                        More
                       </div>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
-                      />
                     </Col>
                   </Row>
                 </Col>
                 <br/>
+
+                <Col lg={12}>
+                  <Row lg={12} id="filter-input-row">
+                    <Col md="4">
+                      <div className="filter-item-title">
+                        Search by Carrier by name
+                      </div>
+                      <input
+                        name="name"
+                        type="text"
+                        placeholder="Name"
+                        value={filters.name}
+                        onChange={this.handleInputChange}
+                      />
+                    </Col>
+                    <Col md="4">
+                      <div className="filter-item-title">
+                        Availability.
+                      </div>
+                      <TIntervalDatePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        name="dateInterval"
+                        onChange={this.handleIntervalInputChange}
+                        dateFormat="MM/dd/yy"
+                      />
+                    </Col>
+                    <Col md="4">
+                      [Reset filters]
+                    </Col>
+                  </Row>
+                </Col>
+
               </form>
             </CardBody>
           </Card>
         </Col>
       </Row>
-    );
-  }
-
-  renderEquipmentRow(equipment) {
-    let imageTruck = '';
-    // checking if there's an image for the truck
-    if ((equipment.image).trim()) { // use of trim removes whitespace from img url
-      imageTruck = equipment.image;
-    } else {
-      imageTruck = `${window.location.origin}/${truckImage}`;
-    }
-
-    const materials = equipment.materials.split(', ');
-    return (
-      <React.Fragment>
-        <Row className="truck-card truck-details">
-          <div className="col-md-12">
-            <div className="row">
-              <div className="col-md-3">
-                <img width="100%" src={imageTruck} alt=""
-                     styles="background-size:contain;"
-                />
-              </div>
-              <div className="col-md-9">
-                <div className="row truck-card">
-                  <div className="col-md-9">
-                    <h3 className="subhead">
-                      {equipment.name} | {equipment.type} | <NumberFormat
-                      value={equipment.maxCapacity}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={0}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix=" "
-                      suffix=" Tons"
-                      />
-                    </h3>
-                  </div>
-                  <div className="col-md-3 button-card">
-                    <Button
-                      onClick={() => this.handleEquipmentEdit(equipment.id)}
-                      className="btn btn-primary"
-                      styles="margin:0px !important"
-                    >
-                      Request
-                    </Button>
-                    <Button
-                      color="link"
-                      onClick={() => this.handleSetFavorite(equipment.companyId)}
-                      className="material-icons favoriteIcon"
-                    >
-                      {equipment.favorite ? 'favorite' : 'favorite_border'}
-                    </Button>
-                  </div>
-                </div>
-                <div className="row truck-card">
-                  <div className="col-md-6">
-                    <h3 className="subhead">Rates</h3>
-                    <Row>
-                      {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
-                        <React.Fragment>
-                          <div className="col-md-6">
-                            Hourly Rate:
-                          </div>
-                          <div className="col-md-6">
-                            <NumberFormat
-                              value={equipment.hourRate}
-                              displayType="text"
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              thousandSeparator
-                              prefix="$ "
-                              suffix=" / Hour"
-                            />
-                          </div>
-                        </React.Fragment>
-                      )}
-                    </Row>
-                    <Row>
-                      <div className="col-md-6">
-                        Hourly Minimum:
-                      </div>
-                      <div className="col-md-6">
-                        <NumberFormat
-                          value={equipment.minHours}
-                          displayType="text"
-                          decimalSeparator="."
-                          decimalScale={2}
-                          fixedDecimalScale
-                          thousandSeparator
-                          suffix=" hours min"
-                        />
-                      </div>
-                    </Row>
-                    {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
-                      <React.Fragment>
-                        <div className="row">
-                          <div className="col-md-6">
-                            Rate per Ton:
-                          </div>
-                          <div className="col-md-6">
-                            <NumberFormat
-                              value={equipment.tonRate}
-                              displayType="text"
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              thousandSeparator
-                              prefix="$ "
-                              suffix=" / Ton"
-                            />
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="col-md-6">
-                            Minimum Tonnage Capacity:
-                          </div>
-                          <div className="col-md-6">
-                            <NumberFormat
-                              value={equipment.minCapacity}
-                              displayType="text"
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              thousandSeparator
-                              suffix=" tons min"
-                            />
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    )}
-                  </div>
-                  <div className="col-md-6">
-                    <h3 className="subhead">
-                      Materials
-                    </h3>
-                    {materials.map(material => (
-                      <span key={material} className="badge badge-success" style={{borderRadius: '15px', padding: '6px 20px', margin: '2px'}}>
-                        {material}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Row>
-        <hr/>
-      </React.Fragment>
-
     );
   }
 
@@ -849,18 +756,6 @@ class TrucksCustomerPage extends Component {
     );
   }
 
-  renderLoader() {
-    return (
-      <div className="load loaded inside-page">
-        <div className="load__icon-wrap">
-          <svg className="load__icon">
-            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
-          </svg>
-        </div>
-      </div>
-    );
-  }
-
   render() {
     const {loaded} = this.state;
     if (loaded) {
@@ -878,16 +773,11 @@ class TrucksCustomerPage extends Component {
       );
     }
     return (
-      <Container className="container">
-        <Row>
-          <Col md={12}>
-            <h3 className="page-title">Truck Search</h3>
-          </Col>
-        </Row>
-        {this.renderLoader()}
-      </Container>
+      <div>
+        Loading...
+      </div>
     );
   }
 }
 
-export default TrucksCustomerPage;
+export default CarriersCustomerPage;
