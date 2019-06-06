@@ -179,8 +179,7 @@ class CarriersCustomerPage extends Component {
     const {filters} = this.state;
     const equipments = await EquipmentService.getEquipmentByFiltersCarrier(filters);
 
-    console.log(182);
-    console.log(equipments);
+    // console.log(equipments);
 
     if (equipments) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -212,7 +211,6 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleFilterChange(e) {
-    console.log(207, e);
     const {value} = e.target;
     const {filters} = this.state;
     filters[e.target.name] = value;
@@ -221,7 +219,6 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleSelectFilterChange(option) {
-    console.log(216, option);
     const {value, name} = option;
     const {filters} = this.state;
     filters[name] = value;
@@ -230,7 +227,6 @@ class CarriersCustomerPage extends Component {
   }
 
   handleMultiChange(data) {
-    console.log(225, data);
     const {filters} = this.state;
     filters.materialType = data;
     this.setState({
@@ -443,7 +439,6 @@ class CarriersCustomerPage extends Component {
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
-      // console.log(367);
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
