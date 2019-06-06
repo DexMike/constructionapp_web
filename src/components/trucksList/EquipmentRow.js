@@ -9,15 +9,6 @@ import PropTypes from 'prop-types';
 import truckImage from '../../img/default_truck.png';
 
 class EquipmentRow extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      chido: null
-    };
-    // this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
-  } // constructor
-
   render() {
     const {
       id,
@@ -34,6 +25,8 @@ class EquipmentRow extends Component {
       name,
       materials
     } = this.props;
+
+    // console.log('>>FAV: ', favorite);
 
     let imageTruck = '';
     // checking if there's an image for the truck

@@ -19,13 +19,9 @@ import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
-// import truckImage from '../../img/belly-dump.jpg';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
-// import JobsService from '../../api/JobsService';
-// import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
@@ -74,7 +70,9 @@ class CarriersCustomerPage extends Component {
         zipCode: '',
         rateType: '',
         currentAvailability: 1,
-        sortBy: sortByList[0]
+        sortBy: sortByList[0],
+        // carriers custom page
+        name: ''
       }
     };
 
@@ -91,6 +89,7 @@ class CarriersCustomerPage extends Component {
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveEquipment = this.retrieveEquipment.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   async componentDidMount() {
@@ -178,7 +177,10 @@ class CarriersCustomerPage extends Component {
 
   async fetchEquipments() {
     const {filters} = this.state;
-    const equipments = await EquipmentService.getEquipmentByFilters(filters);
+    const equipments = await EquipmentService.getEquipmentByFiltersCarrier(filters);
+
+    console.log(182);
+    console.log(equipments);
 
     if (equipments) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -330,6 +332,15 @@ class CarriersCustomerPage extends Component {
     filters.endAvailability = e.end;
     await this.fetchEquipments();
     this.setState({filters});
+  }
+
+  handleInputChange(e) {
+    const {filters} = this.state;
+    filters.name = e.target.value;
+    this.setState({filters}, async function search() {
+      await this.fetchEquipments();
+    });
+    // this.setState({filters});
   }
 
   toggleAddJobModal() {
@@ -623,7 +634,16 @@ class CarriersCustomerPage extends Component {
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
                     <Col md="4">
-                      FIRST
+                      <div className="filter-item-title">
+                        Search by Carrier by name
+                      </div>
+                      <input
+                        name="name"
+                        type="text"
+                        placeholder="Name"
+                        value={filters.name}
+                        onChange={this.handleInputChange}
+                      />
                     </Col>
                     <Col md="4">
                       <div className="filter-item-title">
