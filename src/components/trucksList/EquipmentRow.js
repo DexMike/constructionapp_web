@@ -36,7 +36,9 @@ class EquipmentRow extends Component {
       imageTruck = `${window.location.origin}/${truckImage}`;
     }
 
-    const allMaterials = materials.split(', ');
+    // disabled while we get materials back
+    // const allMaterials = materials.split(', ');
+    const allMaterials = [];
     return (
       <React.Fragment>
         <Row className="truck-card truck-details" key={id}>

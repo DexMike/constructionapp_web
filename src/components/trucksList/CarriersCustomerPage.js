@@ -72,7 +72,8 @@ class CarriersCustomerPage extends Component {
         currentAvailability: 1,
         sortBy: sortByList[0],
         // carriers custom page
-        name: ''
+        name: '',
+        numberOfTrucks: 0
       }
     };
 
@@ -562,7 +563,17 @@ class CarriersCustomerPage extends Component {
                       />
                     </Col>
                     <Col md="2">
-                      NUMBER OF TRUCKS
+                      <div className="filter-item-title">
+                        Number of trucks
+                      </div>
+                      <input
+                        name="numberOfTrucks"
+                        type="number"
+                        placeholder="#"
+                        value={filters.numberOfTrucks}
+                        // onChange={this.handleInputChange}
+                        readOnly
+                      />
                     </Col>
                     <Col md="2">
                       <div className="filter-item-title">
@@ -620,7 +631,9 @@ class CarriersCustomerPage extends Component {
                     </Col>
                     */}
                     <Col md="1">
-                      COL 573
+                      <div className="filter-item-title">
+                        More
+                      </div>
                     </Col>
                   </Row>
                 </Col>
@@ -653,7 +666,7 @@ class CarriersCustomerPage extends Component {
                       />
                     </Col>
                     <Col md="4">
-                      THIRD
+                      [Reset filters]
                     </Col>
                   </Row>
                 </Col>
