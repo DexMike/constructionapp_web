@@ -53,7 +53,6 @@ class SidebarCustomerContent extends Component {
 
         <SideElement title="Payments" icon="ic_attach_money" route="/payments" handle={this.hideSidebar}/>       
         <SideElement title="Reporting" icon="ic_timeline" route="/Reports" handle={this.hideSidebar}/>
-        <SideElement title="Settings" icon="ic_settings" route="/Settings" handle={this.hideSidebar}/>
       </div>
     );
   }

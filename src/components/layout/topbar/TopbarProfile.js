@@ -63,6 +63,8 @@ class TopbarProfile extends PureComponent {
         {collapse && <button type="button" className="topbar__back" onClick={this.toggle}/>}
         <Collapse isOpen={collapse} className="topbar__menu-wrap">
           <div className="topbar__menu">
+            <TopbarMenuLink title="Settings" icon="cog" path="/settings"/>
+            <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Toggle Theme" icon="layers" path="/"/>
             <div className="topbar__menu-divider"/>
             <ToggleLanguage handle={this.changeLang}/>

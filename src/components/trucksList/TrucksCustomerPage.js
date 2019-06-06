@@ -849,6 +849,18 @@ class TrucksCustomerPage extends Component {
     );
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const {loaded} = this.state;
     if (loaded) {
@@ -866,9 +878,14 @@ class TrucksCustomerPage extends Component {
       );
     }
     return (
-      <div>
-        Loading...
-      </div>
+      <Container className="container">
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Truck Search</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
+      </Container>
     );
   }
 }

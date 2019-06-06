@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import {
-  Container,
-  Button
+  Col,
+  Row,
+  Container
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
@@ -45,7 +46,6 @@ class JobSavePage extends Component {
         status: null
       },
       bid: null,
-      marketPlaceBid: null,
       booking: null,
       bookingEquipment: null,
       favoriteCompany: [],
@@ -66,7 +66,6 @@ class JobSavePage extends Component {
     const { match } = this.props;
     let {
       bid,
-      marketPlaceBid,
       booking,
       bookingEquipment,
       profile,
@@ -540,11 +539,22 @@ class JobSavePage extends Component {
     return false;
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const {
       job,
       bid,
-      marketPlaceBid,
       companyType,
       favoriteCompany,
       loaded,
@@ -644,9 +654,7 @@ class JobSavePage extends Component {
           <div className="container">
             <div className="row">
               <div className="col-md-9">
-                <h3 className="page-title">
-                  Job Details
-                </h3>
+                <h3 className="page-title">Job Details</h3>
               </div>
               <div className="col-md-3">
                 {buttonText}
@@ -660,8 +668,13 @@ class JobSavePage extends Component {
       }
     }
     return (
-      <Container className="dashboard">
-        Loading...
+      <Container className="container">
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Job Details</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

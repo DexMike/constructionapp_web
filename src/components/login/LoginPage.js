@@ -115,6 +115,7 @@ class LoginPage extends SignIn {
         this.setState({
           user: data,
           loading: false,
+          btnSubmitting: false,
           modalShowing: true
         });
       }
@@ -128,6 +129,7 @@ class LoginPage extends SignIn {
         this.setState({
           error: err.message,
           loading: false,
+          btnSubmitting: false,
           errorCode: err.code,
           confirmUsername: username
         });
@@ -135,6 +137,7 @@ class LoginPage extends SignIn {
         this.setState({
           error: err.message,
           loading: false,
+          btnSubmitting: false,
           errorCode: err.code,
           confirmUsername: null
         });

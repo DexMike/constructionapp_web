@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import { Container } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Col,
+  Row
+} from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
@@ -20,6 +25,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
+import TSpinner from '../common/TSpinner';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -1269,9 +1275,13 @@ class JobCreateForm extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }
