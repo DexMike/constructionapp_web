@@ -77,7 +77,6 @@ class JobSavePage extends Component {
 
     if (match.params.id) {
       const job = await JobService.getJobById(match.params.id);
-      console.log(79, job);
       // company
       const company = await CompanyService.getCompanyById(job.companiesId);
       // start address
