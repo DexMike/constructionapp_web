@@ -44,4 +44,14 @@ npm run deployDemo'''
       }
     }
   }
+  post {
+    always {
+      slackSend botUser: true, 
+      channel: 'jenkins', 
+      color: 'good', 
+      message: '${env.JOB_NAME} completed ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)', 
+      teamDomain: 'trelarlogistics', 
+      tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
+    }
+  }
 }
