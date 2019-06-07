@@ -16,6 +16,7 @@ import SelectField from '../common/TSelect';
 // import TField from '../common/TField';
 import TCheckBox from '../common/TCheckBox';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
@@ -660,7 +661,7 @@ class AddTruckFormOne extends PureComponent {
                       }
                   >
                     <span className="label">$ Cost / Hour</span>
-                    <TField
+                    <TFieldNumber
                       input={
                         {
                           onChange: this.handleInputChange,
@@ -669,7 +670,7 @@ class AddTruckFormOne extends PureComponent {
                         }
                       }
                       placeholder="0"
-                      type="number"
+                      decimal
                       meta={reqHandlerMinRate}
                     />
                   </div>
@@ -679,7 +680,7 @@ class AddTruckFormOne extends PureComponent {
                       }
                   >
                     <span className="label">Minimum Hours</span>
-                    <TField
+                    <TFieldNumber
                       input={
                         {
                           onChange: this.handleInputChange,
@@ -688,7 +689,6 @@ class AddTruckFormOne extends PureComponent {
                         }
                       }
                       placeholder="0"
-                      type="number"
                       meta={reqHandlerMinTime}
                     />
                   </div>
@@ -709,7 +709,7 @@ class AddTruckFormOne extends PureComponent {
                       }
                   >
                     <span className="label">$ Cost / Ton</span>
-                    <TField
+                    <TFieldNumber
                       input={
                         {
                           onChange: this.handleInputChange,
@@ -718,7 +718,7 @@ class AddTruckFormOne extends PureComponent {
                         }
                       }
                       placeholder="0"
-                      type="number"
+                      decimal
                       // meta={reqHandlerMinRate}
                     />
                   </div>
@@ -728,7 +728,7 @@ class AddTruckFormOne extends PureComponent {
                       }
                   >
                     <span className="label">Minimum Tons</span>
-                    <TField
+                    <TFieldNumber
                       input={
                         {
                           onChange: this.handleInputChange,
@@ -737,7 +737,6 @@ class AddTruckFormOne extends PureComponent {
                         }
                       }
                       placeholder="0"
-                      type="number"
                       // meta={reqHandlerMinTime}
                     />
                   </div>
@@ -752,7 +751,7 @@ class AddTruckFormOne extends PureComponent {
                     <span className="form__form-group-label">
                       Maximum Capacity (Tons)
                     </span>
-                    <TField
+                    <TFieldNumber
                       input={
                         {
                           onChange: this.handleInputChange,
@@ -761,18 +760,21 @@ class AddTruckFormOne extends PureComponent {
                         }
                       }
                       placeholder="0"
-                      type="number"
                       meta={reqHandlerMaxCapacity}
                     />
                     <span className="form__form-group-label mt-8">
                       Max Distance to Pickup (Miles)
                     </span>
-                    <input
-                      name="maxDistanceToPickup"
-                      type="number"
-                      value={maxDistanceToPickup}
-                      onChange={this.handleInputChange}
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'maxDistanceToPickup',
+                          value: maxDistanceToPickup
+                        }
+                      }
                       placeholder="How far will you travel per job"
+                      // meta={}
                     />
                   </div>
                   <div className="col-md-6 form__form-group">

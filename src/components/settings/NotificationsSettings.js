@@ -725,14 +725,13 @@ class NotificationsSettings extends Component {
             <span>
               Location Radius (Miles)
             </span>
-            <TField
+            <TFieldNumber
               input={{
                 onChange: this.handleInputChange,
                 name: 'locationRadius',
                 value: locationRadius
               }}
               placeholder="Location Radius"
-              type="number"
             />
           </Col>
         </Row>

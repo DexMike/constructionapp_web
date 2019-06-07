@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
@@ -359,7 +360,7 @@ class JobFilter extends Component {
                       <div className="filter-item-title">
                         Min Rate
                       </div>
-                      <TField
+                      <TFieldNumber
                         input={
                           {
                             onChange: this.handleFilterChangeDelayed,
@@ -367,16 +368,16 @@ class JobFilter extends Component {
                             value: filters.rate
                           }
                         }
+                        decimal
                         className="filter-text"
                         placeholder="Any"
-                        type="number"
                       />
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
-                      <TField
+                      <TFieldNumber
                         input={
                           {
                             onChange: this.handleFilterChangeDelayed,
@@ -386,7 +387,6 @@ class JobFilter extends Component {
                         }
                         className="filter-text"
                         placeholder="# of tons"
-                        type="number"
                       />
                     </Col>
                     <Col md="2">
@@ -422,7 +422,7 @@ class JobFilter extends Component {
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
-                      <TField
+                      <TFieldNumber
                         input={
                           {
                             onChange: this.handleFilterChangeDelayed,
@@ -432,7 +432,6 @@ class JobFilter extends Component {
                         }
                         className="filter-text"
                         placeholder="Any"
-                        type="number"
                       />
                     </Col>
                     <Col md="1">
