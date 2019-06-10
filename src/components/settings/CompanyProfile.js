@@ -3,8 +3,7 @@ import {
   Button,
   Col,
   Container,
-  Row,
-  Modal
+  Row
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
@@ -12,24 +11,30 @@ import moment from 'moment';
 // import CloneDeep from 'lodash.clonedeep';
 // import TFormat from '../common/TFormat';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
+
 import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
 import './Settings.css';
+import CompanyService from '../../api/CompanyService';
 
 
-class UserSettings extends Component {
+class CompanyProfile extends Component {
   constructor(props) {
     super(props);
-    const user = {
-      companyId: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      mobilePhone: '',
+    const company = {
+      id: 0,
+      legalName: '',
+      dba: '',
+      addressId: '0',
       phone: '',
-      preferredLanguage: ''
+      url: '',
+      fax: '',
+      rating: 0,
+      operatingRange: 0,
+      type: '0'
     };
 
     const address = {
@@ -44,34 +49,24 @@ class UserSettings extends Component {
     };
 
     this.state = {
-      modal: false,
-      ...user,
+      ...company,
       ...address,
-      languages: [],
-      countries: [],
+      equipmentTypes: [],
+      materialTypes: [],
+      rateTypes: [],
+      selectedEquipments: ['Any'],
+      selectedMaterials: ['Any'],
+      selectedRateType: 'Any',
+      // countries: [],
       states: [],
       countryStates: [],
-      timeZones: [],
       state: '',
       country: '',
-      timeZone: '',
-      reqHandlerFName: {
+      reqHandlerLegalName: {
         touched: false,
         error: ''
       },
-      reqHandlerLName: {
-        touched: false,
-        error: ''
-      },
-      // reqHandlerEmail: {
-      //   touched: false,
-      //   error: ''
-      // },
       reqHandlerPhone: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerLanguage: {
         touched: false,
         error: ''
       },
@@ -92,33 +87,34 @@ class UserSettings extends Component {
         error: ''
       }
     };
+
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handlePreferredLangChange = this.handlePreferredLangChange.bind(this);
+    this.handleRateTypeChange = this.handleRateTypeChange.bind(this);
     this.handleStateChange = this.handleStateChange.bind(this);
     this.handleCountryChange = this.handleCountryChange.bind(this);
-    this.handleTimeZoneChange = this.handleTimeZoneChange.bind(this);
-    this.saveUser = this.saveUser.bind(this);
-    this.toggle = this.toggle.bind(this);
+    this.handleCheckedMaterials = this.handleCheckedMaterials.bind(this);
+    this.handleCheckedEquipments = this.handleCheckedEquipments.bind(this);
+    this.saveCompany = this.saveCompany.bind(this);
   }
 
   async componentDidMount() {
-    const { user, address } = this.props;
-    await this.setUser(user);
+    const { company, address } = this.props;
+    await this.setCompany(company);
     await this.setAddress(address);
     await this.fetchLookupsValues();
   }
 
-  async setUser(userProps) {
-    const user = userProps;
-    Object.keys(user)
+  async setCompany(companyProps) {
+    const company = companyProps;
+    Object.keys(company)
       .map((key) => {
-        if (user[key] === null) {
-          user[key] = '';
+        if (company[key] === null) {
+          company[key] = '';
         }
         return true;
       });
     this.setState({
-      ...user
+      ...company
     });
   }
 
@@ -149,25 +145,21 @@ class UserSettings extends Component {
     });
   }
 
-  setUserInfo() {
-    const { user } = this.props;
+  setCompanyInfo() {
+    const { company } = this.props;
     const {
-      firstName,
-      lastName,
-      email,
-      mobilePhone,
+      legalName,
       phone,
-      preferredLanguage
+      url,
+      fax
     } = this.state;
-    const newUser = user;
+    const newCompany = company;
 
-    newUser.firstName = firstName;
-    newUser.lastName = lastName;
-    newUser.email = email;
-    newUser.mobilePhone = mobilePhone;
-    newUser.phone = phone;
-    newUser.preferredLanguage = preferredLanguage;
-    return newUser;
+    newCompany.legalName = legalName;
+    newCompany.phone = phone;
+    newCompany.url = url;
+    newCompany.fax = fax;
+    return newCompany;
   }
 
   setAddressInfo() {
@@ -191,24 +183,30 @@ class UserSettings extends Component {
     return newAddress;
   }
 
+  setCheckedStatus(state, checkboxClass) {
+    const x = document.getElementsByClassName(checkboxClass);
+    for (let i = 0; i < x.length; i += 1) {
+      x[i].checked = state;
+    }
+  }
+
   async fetchLookupsValues() {
     const lookups = await LookupsService.getLookups();
 
-    let languages = [];
     let countries = [];
     let states = [];
     let countryStates = [];
+    let rateTypes = [];
+    const equipmentTypes = [];
+    const materialTypes = [];
     Object.values(lookups)
       .forEach((itm) => {
-        if (itm.key === 'Language') languages.push(itm);
         if (itm.key === 'Country') countries.push(itm);
         if (itm.key === 'States') states.push(itm);
+        if (itm.key === 'RateType') rateTypes.push(itm);
+        if (itm.key === 'EquipmentType') equipmentTypes.push(itm.val1);
+        if (itm.key === 'MaterialType') materialTypes.push(itm.val1);
       });
-
-    languages = languages.map(language => ({
-      value: String(language.val1),
-      label: language.val1
-    }));
 
     countries = countries.map(countrie => ({
       value: String(countrie.val2),
@@ -222,31 +220,36 @@ class UserSettings extends Component {
 
     countryStates = states;
 
+    rateTypes = rateTypes.map(rateType => ({
+      value: String(rateType.val1),
+      label: `${rateType.val1}`
+    }));
+
+    let index = equipmentTypes.indexOf('Any');
+    equipmentTypes.splice(index, 1);
+    equipmentTypes.push('Any');
+    index = materialTypes.indexOf('Any');
+    materialTypes.splice(index, 1);
+    materialTypes.push('Any');
+
     this.setState({
-      languages,
       // countries,
       states,
-      countryStates
+      countryStates,
+      equipmentTypes,
+      materialTypes,
+      rateTypes
     });
-  }
-
-  toggle() {
-    this.setState(prevState => ({
-      modal: !prevState.modal
-    }));
   }
 
   handleInputChange(e) {
     const { value } = e.target;
     let reqHandler = '';
 
-    if (e.target.name === 'firstName') {
-      reqHandler = 'reqHandlerFName';
+    if (e.target.name === 'legalName') {
+      reqHandler = 'reqHandlerLegalName';
     }
-    if (e.target.name === 'lastName') {
-      reqHandler = 'reqHandlerLName';
-    }
-    if (e.target.name === 'mobilePhone') {
+    if (e.target.name === 'phone') {
       reqHandler = 'reqHandlerPhone';
     }
 
@@ -271,13 +274,72 @@ class UserSettings extends Component {
     });
   }
 
-  handlePreferredLangChange(e) {
-    const reqHandler = 'reqHandlerLanguage';
+  handleRateTypeChange(e) {
     this.setState({
-      [reqHandler]: Object.assign({}, reqHandler, {
-        touched: false
-      }),
-      preferredLanguage: e.value
+      selectedRateType: e.value
+    });
+  }
+
+  handleCheckedEquipments(e) {
+    let { selectedEquipments } = this.state;
+    const { value } = e.target;
+
+    if (value === 'Any') {
+      this.setCheckedStatus(false, 'equipments-checkbox');
+      if (selectedEquipments.indexOf(value) >= 0) {
+        selectedEquipments = [];
+      } else {
+        selectedEquipments = ['Any'];
+      }
+      this.setState({
+        selectedEquipments
+      });
+      return;
+    }
+
+    if (selectedEquipments.indexOf('Any') >= 0) {
+      selectedEquipments.splice(0, 1);
+    }
+
+    if (selectedEquipments.indexOf(value) >= 0) {
+      const index = selectedEquipments.indexOf(value);
+      selectedEquipments.splice(index, 1);
+    } else {
+      selectedEquipments.push(value);
+    }
+    this.setState({
+      selectedEquipments
+    });
+  }
+
+  handleCheckedMaterials(e) {
+    let { selectedMaterials } = this.state;
+    const { value } = e.target;
+    if (value === 'Any') {
+      this.setCheckedStatus(false, 'materials-checkbox');
+      if (selectedMaterials.indexOf(value) >= 0) {
+        selectedMaterials = [];
+      } else {
+        selectedMaterials = ['Any'];
+      }
+      this.setState({
+        selectedMaterials
+      });
+      return;
+    }
+
+    if (selectedMaterials.indexOf('Any') >= 0) {
+      selectedMaterials.splice(0, 1);
+    }
+
+    if (selectedMaterials.indexOf(value) >= 0) {
+      const index = selectedMaterials.indexOf(value);
+      selectedMaterials.splice(index, 1);
+    } else {
+      selectedMaterials.push(value);
+    }
+    this.setState({
+      selectedMaterials
     });
   }
 
@@ -302,21 +364,10 @@ class UserSettings extends Component {
     });
   }
 
-  handleTimeZoneChange(e) {
-    const reqHandler = 'reqHandlerTimezone';
-    this.setState({
-      [reqHandler]: Object.assign({}, reqHandler, {
-        touched: false
-      }),
-      timeZone: e.value
-    });
-  }
-
   isFormValid() {
     const {
-      firstName,
-      lastName,
-      mobilePhone,
+      legalName,
+      phone,
       address1,
       city,
       state,
@@ -324,8 +375,7 @@ class UserSettings extends Component {
       country
     } = this.state;
     let {
-      reqHandlerFName,
-      reqHandlerLName,
+      reqHandlerLegalName,
       reqHandlerPhone,
       reqHandlerAddress,
       reqHandlerCity,
@@ -333,23 +383,15 @@ class UserSettings extends Component {
       reqHandlerZip
     } = this.state;
     let isValid = true;
-    if (firstName === null || firstName.length === 0) {
-      reqHandlerFName = {
+    if (legalName === null || legalName.length === 0) {
+      reqHandlerLegalName = {
         touched: true,
         error: 'Please enter user first name'
       };
       isValid = false;
     }
 
-    if (lastName === null || lastName.length === 0) {
-      reqHandlerLName = {
-        touched: true,
-        error: 'Please enter user last name'
-      };
-      isValid = false;
-    }
-
-    if (mobilePhone === null || mobilePhone.length === 0) {
+    if (phone === null || phone.length === 0) {
       reqHandlerPhone = {
         touched: true,
         error: 'Please enter phone number'
@@ -390,8 +432,7 @@ class UserSettings extends Component {
     }
 
     this.setState({
-      reqHandlerFName,
-      reqHandlerLName,
+      reqHandlerLegalName,
       reqHandlerPhone,
       reqHandlerAddress,
       reqHandlerState,
@@ -405,18 +446,18 @@ class UserSettings extends Component {
     return false;
   }
 
-  async saveUser() {
+  async saveCompany() {
     if (!this.isFormValid()) {
       return;
     }
 
-    const user = this.setUserInfo();
+    const company = this.setCompanyInfo();
     const address = this.setAddressInfo();
-    if (user && user.id) {
-      user.modifiedOn = moment()
+    if (company && company.id) {
+      company.modifiedOn = moment()
         .unix() * 1000;
       try {
-        await UserService.updateUser(user);
+        await CompanyService.updateCompany(company);
         await AddressService.updateAddress(address);
         // console.log('Updated');
       } catch (err) {
@@ -425,92 +466,142 @@ class UserSettings extends Component {
     }
   }
 
-  renderModal() {
-    const { modal } = this.state;
+  renderCompanyPreferences() {
+    const {
+      operatingRange,
+      materialTypes,
+      equipmentTypes,
+      rateTypes,
+      selectedMaterials,
+      selectedEquipments,
+      selectedRateType
+    } = this.state;
     return (
-      <Modal isOpen={modal} toggle={this.toggle}>
-        <Row className="pt-2">
-          <Col className="text-left" md={12} style={{fontSize: 16}}>
-            <strong>Password Reset</strong>
+      <div className="pt-4">
+        <Row style={{fontSize: 14}}>
+          <Col md={4}>
+            <Row style={{paddingLeft: 12}}>
+              <Col md={12}>
+                <strong>Material Type</strong>
+                {
+                  /*
+                  <TField
+                    input={{
+                      name: 'materials',
+                      value: selectedMaterials.toString(),
+                      readOnly: true
+                    }}
+                    placeholder="Material Types"
+                    type="text"
+                  />
+                  */
+                }
+              </Col>
+              {
+                materialTypes.map((material, i) => (
+                  <Col md={12} key={material}>
+                    <div className="item-row">
+                      <label className="checkbox-container" htmlFor={`enableMaterial${i}`}>
+                        <input
+                          id={`enableMaterial${i}`}
+                          className={`materials-checkbox material-${material}`}
+                          type="checkbox"
+                          value={material}
+                          checked={selectedMaterials.includes(material)}
+                          onChange={this.handleCheckedMaterials}
+                        />
+                        <span className="checkmark" />
+                        &nbsp;{material}
+                      </label>
+                    </div>
+                  </Col>
+                ))
+              }
+            </Row>
           </Col>
-          <Col md={12} className="text-left pt-4">
-            <span >
-              Current Password
-            </span>
-            <TField
+          <Col md={4}>
+            <Row>
+              <Col md={12}>
+                <strong>
+                  Truck Type
+                </strong>
+                {
+                  /*
+                  <TField
+                    input={{
+                      name: 'equipments',
+                      value: selectedEquipments.toString(),
+                      readOnly: true
+                    }}
+                    placeholder="Equipment Types"
+                    type="text"
+                  />
+                  */
+                }
+              </Col>
+              {
+                equipmentTypes.map((equipment, i) => (
+                  <Col md={12} key={equipment}>
+                    <div className="item-row">
+                      <label className="checkbox-container" htmlFor={`enableTruck${i}`}>
+                        <input
+                          id={`enableTruck${i}`}
+                          className="trucks-checkbox"
+                          type="checkbox"
+                          value={equipment}
+                          checked={selectedEquipments.includes(equipment)}
+                          onChange={this.handleCheckedEquipments}
+                        />
+                        <span className="checkmark" />
+                        &nbsp;{equipment}
+                      </label>
+                    </div>
+                  </Col>
+                ))
+              }
+            </Row>
+          </Col>
+          <Col md={2}>
+            <strong>
+              Rate Type
+            </strong>
+            <TSelect
               input={
                 {
-                  onChange: this.handleInputChange,
-                  name: 'password',
-                  value: ''
+                  onChange: this.handleRateTypeChange,
+                  name: 'selectedRateType',
+                  value: selectedRateType
                 }
               }
-              placeholder="Enter Current Password"
+              options={rateTypes}
+              placeholder="Select rate type"
+            />
+          </Col>
+          <Col md={2}>
+            <strong>
+              Location Radius (Miles)
+            </strong>
+            <TFieldNumber
+              input={{
+                onChange: this.handleInputChange,
+                name: 'operatingRange',
+                value: operatingRange
+              }}
+              placeholder="Location Radius"
             />
           </Col>
         </Row>
-        <Row className="pt-2">
-          <Col md={12} className="text-left">
-            <span>
-              New Password
-            </span>
-            <TField
-              input={
-                {
-                  onChange: this.handleInputChange,
-                  name: 'newpassword',
-                  value: ''
-                }
-              }
-              placeholder="Enter New Password"
-            />
-          </Col>
-        </Row>
-        <Row className="pt-2">
-          <Col md={12} className="text-left">
-            <span>
-              Confirm Password
-            </span>
-            <TField
-              input={
-                {
-                  onChange: this.handleInputChange,
-                  name: 'confirmpassword',
-                  value: ''
-                }
-              }
-              placeholder="Confirm New Password"
-            />
-          </Col>
-        </Row>
-        <Row style={{paddingTop: 32}}>
-          <Col md={12} className="text-right">
-            <Button onClick={this.toggle}>
-              Cancel
-            </Button>
-            <Button color="primary" onClick={this.toggle}>
-              Save
-            </Button>
-          </Col>
-        </Row>
-      </Modal>
+      </div>
     );
   }
 
   render() {
-    const { user, admin } = this.props;
+    const { company } = this.props;
     const {
-      firstName,
-      lastName,
-      // email,
-      mobilePhone,
+      legalName,
       phone,
-      preferredLanguage,
-      reqHandlerFName,
-      reqHandlerLName,
-      // reqHandlerEmail,
-      reqHandlerPhone,
-      reqHandlerLanguage,
+      url,
+      fax,
       address1,
       address2,
       city,
@@ -519,83 +610,64 @@ class UserSettings extends Component {
       zipCode,
       reqHandlerAddress,
       reqHandlerCity,
-      reqHandlerZip,
-      timeZone
+      reqHandlerZip
     } = this.state;
 
     const {
-      languages,
       // countries,
-      countryStates,
       // states,
-      timeZones
+      countryStates
     } = this.state;
     return (
       <Container>
         <Row className="tab-content-header">
-          {this.renderModal()}
           <Col md={6}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              { admin ? 'Admin' : 'User' } - {user.firstName} {user.lastName}
+              Company - {legalName}
             </span>
           </Col>
           <Col md={6} className="text-right">
-            <strong>Email:</strong> {user.email}
+            <strong>Website:</strong> {url}
           </Col>
         </Row>
         <Row className="pt-2">
           <Col md={12}>&nbsp;</Col>
           <Col md={6}>
             <span>
-              First Name
+              Company Name
             </span>
             <TField
               className="settings-input"
               input={{
                 onChange: this.handleInputChange,
-                name: 'firstName',
-                value: firstName
+                name: 'legalName',
+                value: legalName
               }}
               placeholder="First Name"
               type="text"
-              meta={reqHandlerFName}
+              // meta={reqHandlerFName}
             />
           </Col>
           <Col md={6}>
             <span>
-              Last Name
+              Website
             </span>
             <TField
               input={{
                 onChange: this.handleInputChange,
-                name: 'lastName',
-                value: lastName
+                name: 'url',
+                value: url
               }}
               placeholder="Last Name"
               type="text"
-              meta={reqHandlerLName}
+              // meta={reqHandlerLName}
             />
           </Col>
         </Row>
         <Row className="pt-2">
           <Col md={6}>
             <span>
-              Mobile Phone
-            </span>
-            <TField
-              input={{
-                onChange: this.handleInputChange,
-                name: 'mobilePhone',
-                value: mobilePhone
-              }}
-              placeholder="Mobile Phone"
-              type="text"
-              meta={reqHandlerPhone}
-            />
-          </Col>
-          <Col md={6}>
-            <span>
-              Work Phone
+              Phone Number
             </span>
             <TField
               input={{
@@ -603,7 +675,22 @@ class UserSettings extends Component {
                 name: 'phone',
                 value: phone
               }}
-              placeholder="Work Phone"
+              placeholder="Phone number"
+              type="text"
+              // meta={reqHandlerPhone}
+            />
+          </Col>
+          <Col md={6}>
+            <span>
+              Fax
+            </span>
+            <TField
+              input={{
+                onChange: this.handleInputChange,
+                name: 'fax',
+                value: fax
+              }}
+              placeholder="Fax"
               type="text"
             />
           </Col>
@@ -622,8 +709,7 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'address1',
-                    value: address1,
-                    disabled: !admin
+                    value: address1
                   }}
                   placeholder="Address 1"
                   type="text"
@@ -638,8 +724,7 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'address2',
-                    value: address2,
-                    disabled: !admin
+                    value: address2
                   }}
                   placeholder="Address 2"
                   type="text"
@@ -653,8 +738,7 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'city',
-                    value: city,
-                    disabled: !admin
+                    value: city
                   }}
                   placeholder="City"
                   type="text"
@@ -670,8 +754,7 @@ class UserSettings extends Component {
                     {
                       onChange: this.handleStateChange,
                       name: 'state',
-                      value: state,
-                      disabled: !admin
+                      value: state
                     }
                   }
                   options={countryStates}
@@ -686,8 +769,7 @@ class UserSettings extends Component {
                   input={{
                     onChange: this.handleInputChange,
                     name: 'zipCode',
-                    value: zipCode,
-                    disabled: !admin
+                    value: zipCode
                   }}
                   placeholder="Zip Code"
                   type="text"
@@ -718,55 +800,15 @@ class UserSettings extends Component {
               }
             </Row>
           </Col>
-         
-          <Col md={6} className="pt-4">
-            <Row>
-              <Col md={12}>
-                <span>
-                  Time Zone
-                </span>
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handleTimeZoneChange,
-                      name: 'timeZone',
-                      value: timeZone,
-                      disabled: !admin
-                    }
-                  }
-                  // meta={}
-                  options={timeZones}
-                  placeholder="Select a Time Zone"
-                />
-              </Col>
-              <Col md={12} className="pt-2">
-                <span >
-                  Primary Language
-                </span>
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handlePreferredLangChange,
-                      name: 'preferredLanguage',
-                      value: preferredLanguage
-                    }
-                  }
-                  meta={reqHandlerLanguage}
-                  value={preferredLanguage}
-                  options={languages}
-                  placeholder="Select a language"
-                />
-              </Col>
-            </Row>
+        </Row>
+        <Row className="pt-4 pl-3 pr-3">
+          <Col md={12} className="separator">
+            <span className="sub-header">Notifications</span>
           </Col>
         </Row>
-        <Row className="mt-4 line-separator">
-          <Col md={2} className="pt-4">
-            <Button onClick={this.toggle}>Reset Password</Button>
-          </Col>
-        </Row>
+        {this.renderCompanyPreferences()}
         <Row>
-          <Col md={12} className="text-right">
+          <Col md={12} className="pt-4 text-right">
             <Link to="/">
               <Button className="mr-2">
               Cancel
@@ -774,7 +816,7 @@ class UserSettings extends Component {
             </Link>
             <Button
               color="primary"
-              onClick={this.saveUser}
+              onClick={this.saveCompany}
             >
               Save
             </Button>
@@ -785,7 +827,7 @@ class UserSettings extends Component {
   }
 }
 
-UserSettings.propTypes = {
+CompanyProfile.propTypes = {
   user: PropTypes.shape({
     companyId: PropTypes.number,
     firstName: PropTypes.string,
@@ -804,11 +846,10 @@ UserSettings.propTypes = {
     state: PropTypes.string,
     zipCode: PropTypes.string,
     country: PropTypes.string
-  }),
-  admin: PropTypes.bool
+  })
 };
 
-UserSettings.defaultProps = {
+CompanyProfile.defaultProps = {
   user: {
     companyId: 0,
     firstName: '',
@@ -827,8 +868,7 @@ UserSettings.defaultProps = {
     state: '',
     zipCode: '',
     country: 'US'
-  },
-  admin: false
+  }
 };
 
-export default UserSettings;
+export default CompanyProfile;

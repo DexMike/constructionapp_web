@@ -9,10 +9,11 @@ import {
   NavItem,
   NavLink
 } from 'reactstrap';
+import { Redirect } from 'react-router-dom';
 import classnames from 'classnames';
 import './Settings.css';
 
-import UserSettings from './UserSettings';
+import CompanyProfile from './CompanyProfile';
 import NotificationsSettings from './NotificationsSettings';
 import PermissionsRolesSettings from './PermissionsRolesSettings';
 
@@ -21,7 +22,7 @@ import UserService from '../../api/UserService';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 
-class SettingsPage extends Component {
+class CompanySettingsPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -31,14 +32,15 @@ class SettingsPage extends Component {
       users: [],
       address: [],
       activeTab: '1',
-      title: 'User Profile',
-      isAdmin: false
+      title: 'Company Profile',
+      isAdmin: null
     };
 
     this.toggle = this.toggle.bind(this);
   }
 
   async componentDidMount() {
+    this.mounted = true;
     const profile = await ProfileService.getProfile();
     const user = await UserService.getUserById(profile.userId);
     const company = await CompanyService.getCompanyById(profile.companyId);
@@ -48,15 +50,23 @@ class SettingsPage extends Component {
     let isAdmin = false;
     if (company.adminId === user.id) {
       isAdmin = true;
+    } else {
+      isAdmin = false;
     }
-    this.setState({
-      company,
-      user,
-      users,
-      address,
-      isAdmin,
-      loaded: true
-    });
+    if (this.mounted) {
+      this.setState({
+        company,
+        user,
+        users,
+        address,
+        isAdmin,
+        loaded: true
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   toggle(tab) {
@@ -64,7 +74,7 @@ class SettingsPage extends Component {
     let { title } = this.state;
     switch (tab) {
       case '1':
-        title = 'User Profile';
+        title = 'Company Profile';
         break;
       case '2':
         title = 'Notifications';
@@ -86,64 +96,28 @@ class SettingsPage extends Component {
     }
   }
 
-  renderAdminTabs(activeTab) {
-    const { company } = this.state;
-    return (
-      <Nav tabs>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '1' }, 'tab')}
-            onClick={() => { this.toggle('1'); }}
-          >
-            <div className="navLink">User Profile</div>
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '2' }, 'tab')}
-            onClick={() => { this.toggle('2'); }}
-          >
-            Notifications
-          </NavLink>
-        </NavItem>
-        {
-          /*
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === '3' }, 'tab')}
-              onClick={() => { this.toggle('3'); }}
-            >
-              Permissions
-            </NavLink>
-          </NavItem>
-          */
-        }
-      </Nav>
-    );
-  }
-
-  renderUserTabs(activeTab) {
-    return (
-      <Nav tabs>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '1' }, 'tab')}
-            onClick={() => { this.toggle('1'); }}
-          >
-            <div className="navLink">User Profile</div>
-          </NavLink>
-        </NavItem>
-      </Nav>
-    );
-  }
-
-  renderSettingsTabs() {
+  renderTabs() {
     const { activeTab, user, users, company, address, isAdmin } = this.state;
     return (
       <div>
-        {
-          isAdmin ? this.renderAdminTabs(activeTab) : this.renderUserTabs(activeTab)
-        }
+        <Nav tabs>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '1' }, 'tab')}
+              onClick={() => { this.toggle('1'); }}
+            >
+              <div className="navLink">Company Profile</div>
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '4' }, 'tab')}
+              onClick={() => { this.toggle('4'); }}
+            >
+              Payment Method
+            </NavLink>
+          </NavItem>
+        </Nav>
         <TabContent
           activeTab={activeTab}
           style={{
@@ -156,9 +130,10 @@ class SettingsPage extends Component {
           }}
         >
           <TabPane tabId="1">
-            <UserSettings
+            <CompanyProfile
               user={user}
               address={address}
+              company={company}
               admin={isAdmin}
             />
           </TabPane>
@@ -170,25 +145,31 @@ class SettingsPage extends Component {
           <TabPane tabId="3">
             <PermissionsRolesSettings users={users}/>
           </TabPane>
+          <TabPane tabId="4">
+            &nbsp;
+          </TabPane>
         </TabContent>
       </div>
     );
   }
 
   render() {
-    const { loaded, title } = this.state;
+    const { loaded, title, isAdmin } = this.state;
+    if (isAdmin === false && this.mounted) {
+      return <Redirect to="/settings" />;
+    }
     if (loaded) {
       return (
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Settings / {title}</h3>
+              <h3 className="page-title">Company Settings / {title}</h3>
             </Col>
           </Row>
           <Container>
             <Row>
               <Col md={12}>
-                {this.renderSettingsTabs()}
+                {this.renderTabs()}
               </Col>
             </Row>
           </Container>
@@ -203,4 +184,4 @@ class SettingsPage extends Component {
   }
 }
 
-export default SettingsPage;
+export default CompanySettingsPage;

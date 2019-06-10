@@ -6,12 +6,7 @@ import {
   Button
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
-import TField from '../common/TField';
-import TFieldNumber from '../common/TFieldNumber';
-import TSelect from '../common/TSelect';
 import './Settings.css';
-
-import LookupsService from '../../api/LookupsService';
 
 class NotificationsSettings extends Component {
   constructor(props) {
@@ -23,13 +18,6 @@ class NotificationsSettings extends Component {
         { id: 3, name: 'SMS', enabled: true },
         { id: 4, name: 'Email', enabled: false}
       ],
-      equipmentTypes: [],
-      materialTypes: [],
-      rateTypes: [],
-      selectedEquipments: ['Any'],
-      selectedMaterials: ['Any'],
-      selectedRateType: 'Any',
-      locationRadius: 0,
       // dummyData
       notifications: [
         {
@@ -180,16 +168,12 @@ class NotificationsSettings extends Component {
       ]
     };
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleRateTypeChange = this.handleRateTypeChange.bind(this);
-    this.handleCheckedMaterials = this.handleCheckedMaterials.bind(this);
-    this.handleCheckedEquipments = this.handleCheckedEquipments.bind(this);
     this.setNotificationState = this.setNotificationState.bind(this);
     this.setAllNotificationsState = this.setAllNotificationsState.bind(this);
     this.saveSettings = this.saveSettings.bind(this);
   }
 
   async componentDidMount() {
-    await this.fetchLookupsValues();
     // const notifications = await LookupsService.getDefaultNotificationsSettings();
   }
   // to check or uncheck all checkboxes of the same class
@@ -294,42 +278,6 @@ class NotificationsSettings extends Component {
     }
   }
 
-  async fetchLookupsValues() {
-    const lookups = await LookupsService.getLookups();
-
-    let rateTypes = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'RateType') rateTypes.push(itm);
-    });
-    rateTypes = rateTypes.map(rateType => ({
-      value: String(rateType.val1),
-      label: `${rateType.val1}`
-    }));
-
-    const equipmentTypes = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'EquipmentType') equipmentTypes.push(itm.val1);
-    });
-
-    let index = equipmentTypes.indexOf('Any');
-    equipmentTypes.splice(index, 1);
-    equipmentTypes.push('Any');
-
-    const materialTypes = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'MaterialType') materialTypes.push(itm.val1);
-    });
-    index = materialTypes.indexOf('Any');
-    materialTypes.splice(index, 1);
-    materialTypes.push('Any');
-
-    this.setState({
-      equipmentTypes,
-      materialTypes,
-      rateTypes
-    });
-  }
-
   handleInputChange(e) {
     const { value } = e.target;
     this.setState({
@@ -337,85 +285,10 @@ class NotificationsSettings extends Component {
     });
   }
 
-  handleRateTypeChange(e) {
-    this.setState({
-      selectedRateType: e.value
-    });
-  }
-
-  handleCheckedMaterials(e) {
-    // const { materialTypes } = this.state;
-    let { selectedMaterials } = this.state;
-    const { value } = e.target;
-    if (value === 'Any') {
-      this.setCheckedStatus(false, 'materials-checkbox');
-      if (selectedMaterials.indexOf(value) >= 0) {
-        selectedMaterials = [];
-      } else {
-        selectedMaterials = ['Any'];
-      }
-      this.setState({
-        selectedMaterials
-      });
-      return;
-    }
-
-    if (selectedMaterials.indexOf('Any') >= 0) {
-      selectedMaterials.splice(0, 1);
-    }
-
-    if (selectedMaterials.indexOf(value) >= 0) {
-      const index = selectedMaterials.indexOf(value);
-      selectedMaterials.splice(index, 1);
-    } else {
-      selectedMaterials.push(value);
-    }
-    this.setState({
-      selectedMaterials
-    });
-  }
-
-  handleCheckedEquipments(e) {
-    // const { equipmentTypes } = this.state;
-    let { selectedEquipments } = this.state;
-    const { value } = e.target;
-
-    if (value === 'Any') {
-      this.setCheckedStatus(false, 'equipments-checkbox');
-      if (selectedEquipments.indexOf(value) >= 0) {
-        selectedEquipments = [];
-      } else {
-        selectedEquipments = ['Any'];
-      }
-      this.setState({
-        selectedEquipments
-      });
-      return;
-    }
-
-    if (selectedEquipments.indexOf('Any') >= 0) {
-      selectedEquipments.splice(0, 1);
-    }
-
-    if (selectedEquipments.indexOf(value) >= 0) {
-      const index = selectedEquipments.indexOf(value);
-      selectedEquipments.splice(index, 1);
-    } else {
-      selectedEquipments.push(value);
-    }
-    this.setState({
-      selectedEquipments
-    });
-  }
-
   saveSettings() {
     const { company } = this.props;
     const {
-      notifications,
-      selectedEquipments,
-      selectedMaterials,
-      selectedRateType,
-      locationRadius
+      notifications
     } = this.state;
 
     const carrierJobs = [];
@@ -434,13 +307,7 @@ class NotificationsSettings extends Component {
     const notificationsSettings = {
       companyId: company.id,
       jobs: {},
-      marketplace: {
-        marketplace,
-        materials: selectedMaterials,
-        equipments: selectedEquipments,
-        rateType: selectedRateType,
-        locationRadius
-      },
+      marketplace,
       payments,
       loads
     };
@@ -595,13 +462,6 @@ class NotificationsSettings extends Component {
   renderMarketplaceSection() {
     const {
       communicationTypes,
-      materialTypes,
-      equipmentTypes,
-      rateTypes,
-      selectedMaterials,
-      selectedEquipments,
-      selectedRateType,
-      locationRadius,
       notifications
     } = this.state;
 
@@ -620,122 +480,6 @@ class NotificationsSettings extends Component {
     return (
       <div className="pt-4">
         {this.renderTable(marketplaceSettings)}
-
-        <Row style={{fontSize: 14}}>
-          <Col md={4}>
-            <Row style={{paddingLeft: 12}}>
-              <Col md={12}>
-                <span>
-                  Material Type
-                </span>
-                {
-                  /*
-                  <TField
-                    input={{
-                      name: 'materials',
-                      value: selectedMaterials.toString(),
-                      readOnly: true
-                    }}
-                    placeholder="Material Types"
-                    type="text"
-                  />
-                  */
-                }
-              </Col>
-              {
-                materialTypes.map((material, i) => (
-                  <Col md={12} key={material}>
-                    <div className="item-row">
-                      <label className="checkbox-container" htmlFor={`enableMaterial${i}`}>
-                        <input
-                          id={`enableMaterial${i}`}
-                          className={`materials-checkbox material-${material}`}
-                          type="checkbox"
-                          value={material}
-                          checked={selectedMaterials.includes(material)}
-                          onChange={this.handleCheckedMaterials}
-                        />
-                        <span className="checkmark" />
-                        &nbsp;{material}
-                      </label>
-                    </div>
-                  </Col>
-                ))
-              }
-            </Row>
-          </Col>
-          <Col md={4}>
-            <Row>
-              <Col md={12}>
-                <span>
-                  Truck Type
-                </span>
-                {
-                  /*
-                  <TField
-                    input={{
-                      name: 'equipments',
-                      value: selectedEquipments.toString(),
-                      readOnly: true
-                    }}
-                    placeholder="Equipment Types"
-                    type="text"
-                  />
-                  */
-                }
-              </Col>
-              {
-                equipmentTypes.map((equipment, i) => (
-                  <Col md={12} key={equipment}>
-                    <div className="item-row">
-                      <label className="checkbox-container" htmlFor={`enableTruck${i}`}>
-                        <input
-                          id={`enableTruck${i}`}
-                          className="trucks-checkbox"
-                          type="checkbox"
-                          value={equipment}
-                          checked={selectedEquipments.includes(equipment)}
-                          onChange={this.handleCheckedEquipments}
-                        />
-                        <span className="checkmark" />
-                        &nbsp;{equipment}
-                      </label>
-                    </div>
-                  </Col>
-                ))
-              }
-            </Row>
-          </Col>
-          <Col md={2}>
-            <span>
-              Rate Type
-            </span>
-            <TSelect
-              input={
-                {
-                  onChange: this.handleRateTypeChange,
-                  name: 'selectedRateType',
-                  value: selectedRateType
-                }
-              }
-              options={rateTypes}
-              placeholder="Select rate type"
-            />
-          </Col>
-          <Col md={2}>
-            <span>
-              Location Radius (Miles)
-            </span>
-            <TFieldNumber
-              input={{
-                onChange: this.handleInputChange,
-                name: 'locationRadius',
-                value: locationRadius
-              }}
-              placeholder="Location Radius"
-            />
-          </Col>
-        </Row>
       </div>
     );
   }
