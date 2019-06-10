@@ -3,25 +3,25 @@ import AgentService from './AgentService';
 const PATH = '/loads';
 
 class LoadService extends AgentService {
-  static async getLoads() {
-    const response = await super.get(PATH);
-    return (response);
-  }
+  // static async getLoads() {
+  //   const response = await super.get(PATH);
+  //   return (response);
+  // }
 
   static async getLoadById(id) {
     const response = await this.get(`${PATH}/${id}`);
     return (response);
   }
 
-  static async createLoad(load) {
-    const response = await this.post(PATH, load);
-    return (response);
-  }
-
-  static async endLoad(id, load) {
-    const response = await this.put(`${PATH}/${id}/end`, load);
-    return (response);
-  }
+  // static async createLoad(load) {
+  //   const response = await this.post(PATH, load);
+  //   return (response);
+  // }
+  //
+  // static async endLoad(id, load) {
+  //   const response = await this.put(`${PATH}/${id}/end`, load);
+  //   return (response);
+  // }
 
   static async updateLoad(id, load) {
     const response = await this.put(`${PATH}/${id}/update`, load);
@@ -32,14 +32,14 @@ class LoadService extends AgentService {
     const response = await this.get(`/bookings/${id}${PATH}`);
     return (response);
   }
-
-  static async getLatestLoadByBookingId(id) {
-    const response = await this.get(`/bookings/${id}${PATH}`);
-    return (response);
-  }
+  //
+  // static async getLatestLoadByBookingId(id) {
+  //   const response = await this.get(`/bookings/${id}${PATH}`);
+  //   return (response);
+  // }
 
   static async getLoadsByBookingId(id) {
-    const response = await this.get(`/bookings/${id}/allloads`);
+    const response = await this.get(`/bookingequipments/${id}/loads`);
     return (response);
   }
   // static async getLatestLoadByJobId(id) {

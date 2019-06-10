@@ -118,7 +118,6 @@ class JobCreateForm extends Component {
   }
 
   async componentDidMount() {
-    // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
     let { availableMaterials } = this.state;
