@@ -15,6 +15,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
   constructor(props) {
@@ -63,6 +64,10 @@ class JobFilter extends Component {
         sortBy: sortByList[0],
         page: 0,
         rows: 5
+      },
+      reqHandlerZip: {
+        touched: false,
+        error: ''
       }
     };
 
@@ -82,15 +87,23 @@ class JobFilter extends Component {
     } = this.state;
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
+
     const startAv = new Date(intervals.startInterval);
     const endAv = new Date(intervals.endInterval);
     filters.startAvailability = this.getUTCStartInterval(startAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
-    this.setState(
-      {
-        filters
+
+    if (profile.companyId) {
+      const company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        const address = await AddressService.getAddressById(company.addressId);
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
       }
-    );
+    }
+
+    this.setState({filters, profile});
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -150,15 +163,6 @@ class JobFilter extends Component {
 
   async fetchFilterLists() {
     const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
-    const profile = await ProfileService.getProfile();
-
-    if (profile.companyId) {
-      const company = await CompanyService.getCompanyById(profile.companyId);
-      if (company.addressId) {
-        const address = await AddressService.getAddressById(company.addressId);
-        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
-      }
-    }
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
@@ -193,8 +197,7 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const { filters } = this.state;
-    const profile = await ProfileService.getProfile();
+    const { filters, profile, reqHandlerZip } = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
 
@@ -208,6 +211,22 @@ class JobFilter extends Component {
       filters.isFavorited = 0;
     }
 
+    if (filters.zipCode) {
+      try {
+        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode); // 78645: Austin, TX
+        filters.companyLatitude = geoLocation.features[0].center[1];
+        filters.companyLongitude = geoLocation.features[0].center[0];
+      } catch (e) {
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            error: 'Invalid US Zip Code',
+            touched: true
+          }
+        });
+      }
+    }
+
     const result = await JobService.getJobDashboardByFilters(filters);
     const jobs = result.data;
     const { metadata } = result;
@@ -217,13 +236,34 @@ class JobFilter extends Component {
     return jobs;
   }
 
-  handleFilterChangeDelayed(e) {
+  async handleFilterChangeDelayed(e) {
     const self = this;
     const {value} = e.target;
-    const {filters} = this.state;
+    const {filters, reqHandlerZip} = this.state;
+    const filter = e.target.name;
+    let invalidZip = false;
 
     if (self.state.typingTimeout) {
       clearTimeout(self.state.typingTimeout);
+    }
+
+    if (filter === 'zipCode' && (value.length !== 5)) {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          error: 'Please enter a valid 5-digit Zip Code',
+          touched: true
+        }
+      });
+      invalidZip = true;
+    } else {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          touched: false
+        }
+      });
+      invalidZip = false;
     }
 
     filters[e.target.name] = value;
@@ -231,7 +271,9 @@ class JobFilter extends Component {
     self.setState({
       typing: false,
       typingTimeout: setTimeout(async () => {
-        await this.fetchJobs();
+        if (!invalidZip) {
+          await this.fetchJobs();
+        }
       }, 1000),
       filters
     });
@@ -302,8 +344,8 @@ class JobFilter extends Component {
       rateTypeList,
       intervals,
       // filters
-      filters
-
+      filters,
+      reqHandlerZip
     } = this.state;
     // let start = filters.startAvailability;
     return (
@@ -437,14 +479,20 @@ class JobFilter extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
-                        Zip Code
+                        Distance From
                       </div>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                     <Col md="3">
