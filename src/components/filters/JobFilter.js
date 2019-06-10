@@ -41,6 +41,7 @@ class JobFilter extends Component {
         startInterval: startDate,
         endInterval: endDate
       },
+      company: {},
       profile: {},
       // Rate Type Button toggle
       // isAvailable: true,
@@ -85,6 +86,7 @@ class JobFilter extends Component {
       intervals,
       filters
     } = this.state;
+    let { address } = this.state;
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
 
@@ -96,14 +98,14 @@ class JobFilter extends Component {
     if (profile.companyId) {
       const company = await CompanyService.getCompanyById(profile.companyId);
       if (company.addressId) {
-        const address = await AddressService.getAddressById(company.addressId);
+        address = await AddressService.getAddressById(company.addressId);
         filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
         filters.companyLatitude = address.latitude;
         filters.companyLongitude = address.longitude;
       }
     }
 
-    this.setState({filters, profile});
+    this.setState({address, filters, profile});
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -197,7 +199,7 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const { filters, profile, reqHandlerZip } = this.state;
+    const { address, filters, profile, reqHandlerZip } = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
 
@@ -211,9 +213,11 @@ class JobFilter extends Component {
       filters.isFavorited = 0;
     }
 
-    if (filters.zipCode) {
+    // if the filter zip code is not the same as the initial zip code (company's
+    // zip code) we search for that zip code coordinates with MapBox API
+    if (address.zipCode !== filters.zipCode) {
       try {
-        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode); // 78645: Austin, TX
+        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
         filters.companyLatitude = geoLocation.features[0].center[1];
         filters.companyLongitude = geoLocation.features[0].center[0];
       } catch (e) {
