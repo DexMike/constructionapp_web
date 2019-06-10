@@ -234,6 +234,7 @@ class TrucksCustomerPage extends Component {
   }
 
   async handleSetFavorite(companyId) {
+    console.log('>Trying to set favorites');
     const {equipments} = this.state;
 
     try {
@@ -840,6 +841,7 @@ class TrucksCustomerPage extends Component {
                   tonRate={equipment.tonRate}
                   name={equipment.name}
                   materials={equipment.materials}
+                  // setFavorite={this.handleSetFavorite(equipment.companyId)}
                 />
               ))
             }

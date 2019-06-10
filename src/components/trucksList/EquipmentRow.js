@@ -23,7 +23,8 @@ class EquipmentRow extends Component {
       type,
       tonRate,
       name,
-      materials
+      materials,
+      setFavorite
     } = this.props;
 
     // console.log('>>FAV: ', favorite);
@@ -75,7 +76,7 @@ class EquipmentRow extends Component {
                     </Button>
                     <Button
                       color="link"
-                      onClick={() => this.handleSetFavorite(companyId)}
+                      onClick={setFavorite(companyId)}
                       className="material-icons favoriteIcon"
                     >
                       {favorite ? 'favorite' : 'favorite_border'}
@@ -200,7 +201,8 @@ EquipmentRow.propTypes = {
   type: PropTypes.string,
   tonRate: PropTypes.number,
   name: PropTypes.string,
-  materials: PropTypes.string
+  materials: PropTypes.string,
+  setFavorite: PropTypes.func
 };
 
 EquipmentRow.defaultProps = {
@@ -216,7 +218,8 @@ EquipmentRow.defaultProps = {
   type: PropTypes.string,
   tonRate: PropTypes.number,
   name: PropTypes.string,
-  materials: PropTypes.string
+  materials: PropTypes.string,
+  setFavorite: null
 };
 
 export default EquipmentRow;
