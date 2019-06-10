@@ -13,6 +13,21 @@ class CompanyService extends AgentService {
     return (response);
   }
 
+  static async getCarriersByFilters(filters) {
+    const response = await super.post(`${PATH}/filters`, filters);
+    return (response);
+  }
+
+  static async getCarriersTrucks(companyId) {
+    const response = await super.get(`${PATH}/${companyId}/truck`);
+    return (response);
+  }
+
+  static async getCarriersMaterials(companyId) {
+    const response = await super.get(`${PATH}/${companyId}/materials`);
+    return (response);
+  }
+
   static async createCompany(company) {
     const response = await super.post(PATH, company);
     return (response);

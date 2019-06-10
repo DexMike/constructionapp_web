@@ -50,6 +50,7 @@ class JobSavePage extends Component {
       bookingEquipment: null,
       favoriteCompany: [],
       profile: [],
+      companyCarrier: 0,
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null,
@@ -135,9 +136,12 @@ class JobSavePage extends Component {
         );
       }
 
+      const companyCarrier = bid.companyCarrierId;
+
       this.setState({
         job,
         bid,
+        companyCarrier,
         booking,
         bookingEquipment,
         profile,
@@ -558,7 +562,8 @@ class JobSavePage extends Component {
       companyType,
       favoriteCompany,
       loaded,
-      btnSubmitting
+      btnSubmitting,
+      companyCarrier
     } = this.state;
     let buttonText;
     if (loaded) {
@@ -571,7 +576,7 @@ class JobSavePage extends Component {
         if (companyType === 'Carrier') {
           type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick}/>);
         } else {
-          type = (<JobCustomerForm job={job} handlePageClick={this.handlePageClick}/>);
+          type = (<JobCustomerForm job={job} companyCarrier={companyCarrier} handlePageClick={this.handlePageClick}/>);
         }
 
         // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it

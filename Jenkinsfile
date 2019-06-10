@@ -30,6 +30,12 @@ pipeline {
           steps {
             sh '''npm install
 npm run deployDev'''
+            slackSend botUser: true, 
+              channel: 'jenkins', 
+              color: 'good', 
+              message: 'Stargate dev deploy finished successfully', 
+              teamDomain: 'trelarlogistics', 
+              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
           }
         }
         stage('Build / Package demo') {
@@ -39,19 +45,15 @@ npm run deployDev'''
           steps {
             sh '''npm install
 npm run deployDemo'''
+            slackSend botUser: true, 
+              channel: 'jenkins', 
+              color: 'good', 
+              message: 'Stargate demo deploy finished successfully', 
+              teamDomain: 'trelarlogistics', 
+              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
           }
         }
       }
-    }
-  }
-  post {
-    always {
-      slackSend botUser: true, 
-      channel: 'jenkins', 
-      color: 'good', 
-      message: '${env.JOB_NAME} completed ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)', 
-      teamDomain: 'trelarlogistics', 
-      tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
     }
   }
 }
