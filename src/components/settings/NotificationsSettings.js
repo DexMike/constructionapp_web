@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import './Settings.css';
 
