@@ -69,7 +69,7 @@ class CarriersCustomerPage extends Component {
         sortBy: sortByList[0],
         // carriers custom page
         name: '',
-        numberOfTrucks: 0
+        numEquipments: 0
       }
     };
 
@@ -87,6 +87,8 @@ class CarriersCustomerPage extends Component {
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveCarrier = this.retrieveCarrier.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleNumChange = this.handleNumChange.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   async componentDidMount() {
@@ -97,6 +99,28 @@ class CarriersCustomerPage extends Component {
     await this.fetchCarriers();
     await this.fetchFilterLists();
     this.setState({loaded: true});
+  }
+
+  clear() {
+    const filters = {
+      startAvailability: null,
+      endAvailability: null,
+      searchType: 'Customer Truck',
+      userId: '',
+      equipmentType: '',
+      minCapacity: '',
+      // materialType: '',
+      materialType: [],
+      zipCode: '',
+      rateType: '',
+      currentAvailability: 1,
+      // carriers custom page
+      name: '',
+      numEquipments: 0
+    };
+    this.setState({filters}, async function search() {
+      await this.fetchCarriers();
+    });
   }
 
   retrieveCarrier(equipment) {
@@ -332,6 +356,15 @@ class CarriersCustomerPage extends Component {
     // this.setState({filters});
   }
 
+  handleNumChange(e) {
+    const {filters} = this.state;
+    filters.numEquipments = e.target.value;
+    this.setState({filters}, async function search() {
+      await this.fetchCarriers();
+    });
+    // this.setState({filters});
+  }
+
   toggleAddJobModal() {
     const {modal, filters} = this.state;
     if (modal) {
@@ -559,12 +592,11 @@ class CarriersCustomerPage extends Component {
                         Number of trucks
                       </div>
                       <input
-                        name="numberOfTrucks"
+                        name="numEquipments"
                         type="number"
                         placeholder="#"
-                        value={filters.numberOfTrucks}
-                        // onChange={this.handleInputChange}
-                        readOnly
+                        value={filters.numEquipments}
+                        onChange={this.handleNumChange}
                       />
                     </Col>
                     <Col md="2">
@@ -608,20 +640,6 @@ class CarriersCustomerPage extends Component {
                              onChange={this.handleFilterChange}
                       />
                     </Col>
-                    {/*
-                    <Col md="1">
-                      <div className="filter-item-title">
-                        Min Capacity
-                      </div>
-                      <input name="minCapacity"
-                             className="filter-text"
-                             type="number"
-                             placeholder="# of tons"
-                             value={filters.minCapacity}
-                             onChange={this.handleFilterChange}
-                      />
-                    </Col>
-                    */}
                   </Row>
                 </Col>
                 <br/>
@@ -654,7 +672,7 @@ class CarriersCustomerPage extends Component {
                     </Col>
                     <Col md="4" className="">
                       <Button
-                        onClick={() => this.resetFilters()}
+                        onClick={() => this.clear()}
                         className="btn btn-primary float-right mt-20"
                         styles="margin:0px !important"
                       >
