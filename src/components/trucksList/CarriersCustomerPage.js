@@ -9,13 +9,9 @@ import {
   Modal,
   Row
 } from 'reactstrap';
-// import classnames from 'classnames';
 import moment from 'moment';
-// import { Select } from '@material-ui/core';
 
 import TSelect from '../common/TSelect';
-
-import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
 
@@ -27,14 +23,14 @@ import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
-import EquipmentRow from './EquipmentRow';
+import CarrierRow from './CarrierRow';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
     super(props);
 
     // NOTE: if you update this list you have to update
-    // Orion.EquipmentDao.filtersOrderByClause
+    // Orion.CarrierDao.filtersOrderByClause
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
 
@@ -48,8 +44,8 @@ class CarriersCustomerPage extends Component {
       rateTypeList: [],
       sortByList,
 
-      equipments: [],
-      selectedEquipment: {},
+      carriers: [],
+      selectedCarrier: {},
 
       modal: false,
       goToDashboard: false,
@@ -73,12 +69,12 @@ class CarriersCustomerPage extends Component {
         sortBy: sortByList[0],
         // carriers custom page
         name: '',
-        numberOfTrucks: 0
+        numEquipments: 0
       }
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.handleEquipmentEdit = this.handleEquipmentEdit.bind(this);
+    this.handleCarrierEdit = this.handleCarrierEdit.bind(this);
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
     this.toggleSelectMaterialsModal = this.toggleSelectMaterialsModal.bind(this);
     this.retrieveAllMaterials = this.retrieveAllMaterials.bind(this);
@@ -89,8 +85,10 @@ class CarriersCustomerPage extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
-    this.retrieveEquipment = this.retrieveEquipment.bind(this);
+    this.retrieveCarrier = this.retrieveCarrier.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleNumChange = this.handleNumChange.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   async componentDidMount() {
@@ -98,12 +96,34 @@ class CarriersCustomerPage extends Component {
     // await this.fetchJobs();
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
-    await this.fetchEquipments();
+    await this.fetchCarriers();
     await this.fetchFilterLists();
     this.setState({loaded: true});
   }
 
-  retrieveEquipment(equipment) {
+  clear() {
+    const filters = {
+      startAvailability: null,
+      endAvailability: null,
+      searchType: 'Customer Truck',
+      userId: '',
+      equipmentType: '',
+      minCapacity: '',
+      // materialType: '',
+      materialType: [],
+      zipCode: '',
+      rateType: '',
+      currentAvailability: 1,
+      // carriers custom page
+      name: '',
+      numEquipments: 0
+    };
+    this.setState({filters}, async function search() {
+      await this.fetchCarriers();
+    });
+  }
+
+  retrieveCarrier(equipment) {
     return equipment;
   }
 
@@ -127,8 +147,9 @@ class CarriersCustomerPage extends Component {
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
 
-    const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
-    Object.values(lookupEquipmentList)
+    /**/
+    const lookupCarrierList = await LookupsService.getLookupsByType('CarrierType');
+    Object.values(lookupCarrierList)
       .forEach((itm) => {
         equipmentTypeList.push(itm.val1);
       });
@@ -145,6 +166,12 @@ class CarriersCustomerPage extends Component {
         rateTypeList.push(itm.val1);
       });
 
+    const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
+    Object.values(lookupEquipmentList)
+      .forEach((itm) => {
+        equipmentTypeList.push(itm.val1);
+      });
+
     [filters.equipmentType] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
@@ -156,58 +183,47 @@ class CarriersCustomerPage extends Component {
     });
   }
 
-  async fetchFavoriteEquipments(equipments) {
+  async fetchFavoriteCarriers(carriers) {
     // we get all groups.companyId that have name 'Favorite'
     const groupsFavorites = await GroupListService.getGroupListsFavorites();
 
     if (groupsFavorites) {
       // if we find the equipment's companyId in
       // groupsFavorites we favorite it
-      equipments.map((equipment) => {
-        const newEquipment = equipment;
-        if (groupsFavorites.includes(newEquipment.companyId)) {
-          newEquipment.favorite = true;
+      carriers.map((equipment) => {
+        const newCarrier = equipment;
+        if (groupsFavorites.includes(newCarrier.companyId)) {
+          newCarrier.favorite = true;
         } else {
-          newEquipment.favorite = false;
+          newCarrier.favorite = false;
         }
-        return newEquipment;
+        return newCarrier;
       });
-      this.setState({equipments});
+      this.setState({carriers});
     }
   }
 
-  async fetchEquipments() {
+  async fetchCarriers() {
     const {filters} = this.state;
-    const equipments = await EquipmentService.getEquipmentByFiltersCarrier(filters);
+    // const carriers = await CarrierService.getCarrierByFiltersCarrier(filters);
+    const carriers = await CompanyService.getCarriersByFilters(filters);
 
-    // console.log(equipments);
-
-    if (equipments) {
+    if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
       // Promise.all(
 
-      this.fetchFavoriteEquipments(equipments); // we fetch what equipments are favorite
-      // this.fetchEquipmentMaterials(equipments);
+      this.fetchFavoriteCarriers(carriers); // we fetch what carriers are favorite
+      // this.fetchCarrierMaterials(carriers);
 
-      equipments.map((equipment) => {
-        const newEquipment = equipment;
-        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-        //     newEquipment.companyName = company.legalName;
-        // console.log(companyName);
-        // console.log(job.companyName)
-        // const materialsList = await EquipmentMaterialsService
-        // .getEquipmentMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
-        newEquipment.modifiedOn = moment(equipment.modifiedOn)
+      carriers.map((equipment) => {
+        const newCarrier = equipment;
+        newCarrier.modifiedOn = moment(equipment.modifiedOn)
           .format();
-        newEquipment.createdOn = moment(equipment.createdOn)
+        newCarrier.createdOn = moment(equipment.createdOn)
           .format();
-        return newEquipment;
+        return newCarrier;
       });
-      this.setState({equipments});
+      this.setState({carriers});
     }
   }
 
@@ -216,7 +232,7 @@ class CarriersCustomerPage extends Component {
     const {filters} = this.state;
     filters[e.target.name] = value;
     this.setState({filters});
-    await this.fetchEquipments();
+    await this.fetchCarriers();
   }
 
   async handleSelectFilterChange(option) {
@@ -224,7 +240,7 @@ class CarriersCustomerPage extends Component {
     const {filters} = this.state;
     filters[name] = value;
     this.setState({filters});
-    await this.fetchEquipments();
+    await this.fetchCarriers();
   }
 
   handleMultiChange(data) {
@@ -233,7 +249,7 @@ class CarriersCustomerPage extends Component {
     this.setState({
       filters
     }, async function changed() {
-      await this.fetchEquipments();
+      await this.fetchCarriers();
     });
   }
 
@@ -244,7 +260,7 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleSetFavorite(companyId) {
-    const {equipments} = this.state;
+    const {carriers} = this.state;
 
     try {
       const group = await GroupListService.getGroupListsByCompanyId(companyId);
@@ -271,16 +287,16 @@ class CarriersCustomerPage extends Component {
         };
         await GroupListService.createFavoriteGroupList(groupData);
       }
-      this.fetchFavoriteEquipments(equipments);
+      this.fetchFavoriteCarriers(carriers);
     } catch (error) {
-      this.setState({equipments});
+      this.setState({carriers});
     }
   }
 
-  handleEquipmentEdit(id) {
-    const {equipments, filters} = this.state;
+  handleCarrierEdit(id) {
+    const {carriers, filters} = this.state;
 
-    const [selectedEquipment] = equipments.filter((equipment) => {
+    const [selectedCarrier] = carriers.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
       }
@@ -288,7 +304,7 @@ class CarriersCustomerPage extends Component {
     }, id);
     // prevent dialog if no selected materials
     if (filters.materialType.length === 0) {
-      const hauledMaterials = selectedEquipment.materials.match(/[^\r\n]+/g);
+      const hauledMaterials = selectedCarrier.materials.match(/[^\r\n]+/g);
       const options = [];
       hauledMaterials.forEach((material) => {
         const m = {
@@ -303,7 +319,7 @@ class CarriersCustomerPage extends Component {
       // return false;
     }
     this.setState({
-      selectedEquipment,
+      selectedCarrier,
       modal: true
     });
     return true;
@@ -312,14 +328,14 @@ class CarriersCustomerPage extends Component {
   async handleStartDateChange(e) {
     const {filters} = this.state;
     filters.startAvailability = e;
-    await this.fetchEquipments();
+    await this.fetchCarriers();
     this.setState({filters});
   }
 
   async handleEndDateChange(e) {
     const {filters} = this.state;
     filters.endAvailability = e;
-    await this.fetchEquipments();
+    await this.fetchCarriers();
     this.setState({filters});
   }
 
@@ -327,7 +343,7 @@ class CarriersCustomerPage extends Component {
     const {filters} = this.state;
     filters.startAvailability = e.start;
     filters.endAvailability = e.end;
-    await this.fetchEquipments();
+    await this.fetchCarriers();
     this.setState({filters});
   }
 
@@ -335,7 +351,16 @@ class CarriersCustomerPage extends Component {
     const {filters} = this.state;
     filters.name = e.target.value;
     this.setState({filters}, async function search() {
-      await this.fetchEquipments();
+      await this.fetchCarriers();
+    });
+    // this.setState({filters});
+  }
+
+  handleNumChange(e) {
+    const {filters} = this.state;
+    filters.numEquipments = e.target.value;
+    this.setState({filters}, async function search() {
+      await this.fetchCarriers();
     });
     // this.setState({filters});
   }
@@ -431,9 +456,8 @@ class CarriersCustomerPage extends Component {
   renderModal() {
     const {
       modal,
-      selectedEquipment,
       materialTypeList
-      // equipments
+      // carriers
     } = this.state;
     // let { modalSelectMaterials } = this.state;
 
@@ -460,12 +484,13 @@ class CarriersCustomerPage extends Component {
           <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
+          { /*
           <JobCreateForm
-            selectedEquipment={selectedEquipment}
+            selectedCarrier={selectedCarrier}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
             getAllMaterials={this.retrieveAllMaterials}
-          />
+          /> */}
         </div>
       </Modal>
     );
@@ -567,12 +592,11 @@ class CarriersCustomerPage extends Component {
                         Number of trucks
                       </div>
                       <input
-                        name="numberOfTrucks"
+                        name="numEquipments"
                         type="number"
                         placeholder="#"
-                        value={filters.numberOfTrucks}
-                        // onChange={this.handleInputChange}
-                        readOnly
+                        value={filters.numEquipments}
+                        onChange={this.handleNumChange}
                       />
                     </Col>
                     <Col md="2">
@@ -604,7 +628,7 @@ class CarriersCustomerPage extends Component {
                         placeholder="Select materials"
                       />
                     </Col>
-                    <Col md="1">
+                    <Col md="2">
                       <div className="filter-item-title">
                         Zip
                       </div>
@@ -615,25 +639,6 @@ class CarriersCustomerPage extends Component {
                              value={filters.zipCode}
                              onChange={this.handleFilterChange}
                       />
-                    </Col>
-                    {/*
-                    <Col md="1">
-                      <div className="filter-item-title">
-                        Min Capacity
-                      </div>
-                      <input name="minCapacity"
-                             className="filter-text"
-                             type="number"
-                             placeholder="# of tons"
-                             value={filters.minCapacity}
-                             onChange={this.handleFilterChange}
-                      />
-                    </Col>
-                    */}
-                    <Col md="1">
-                      <div className="filter-item-title">
-                        More
-                      </div>
                     </Col>
                   </Row>
                 </Col>
@@ -655,7 +660,7 @@ class CarriersCustomerPage extends Component {
                     </Col>
                     <Col md="4">
                       <div className="filter-item-title">
-                        Availability.
+                        Availability
                       </div>
                       <TIntervalDatePicker
                         startDate={startDate}
@@ -665,8 +670,14 @@ class CarriersCustomerPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col md="4">
-                      [Reset filters]
+                    <Col md="4" className="">
+                      <Button
+                        onClick={() => this.clear()}
+                        className="btn btn-primary float-right mt-20"
+                        styles="margin:0px !important"
+                      >
+                        Reset Filters
+                      </Button>
                     </Col>
                   </Row>
                 </Col>
@@ -679,11 +690,11 @@ class CarriersCustomerPage extends Component {
     );
   }
 
-  renderEquipmentTable() {
+  renderCarrierTable() {
     const {
       sortByList,
       filters,
-      equipments
+      carriers
     } = this.state;
 
     return (
@@ -693,13 +704,15 @@ class CarriersCustomerPage extends Component {
             <Row className="truck-card">
               <Col md={6} id="equipment-display-count">
                 Displaying&nbsp;
-                {equipments.length}
+                {carriers.length}
                 &nbsp;of&nbsp;
-                {equipments.length}
+                {carriers.length}
               </Col>
               <Col md={6}>
                 <Row>
+                  {/*
                   <Col md={6} id="sortby">Sort By</Col>
+                  */}
                   <Col md={6}>
                     <TSelect
                       input={
@@ -730,23 +743,12 @@ class CarriersCustomerPage extends Component {
               </Col>
               <hr/>
             </Row>
-            {
-              equipments.map(equipment => (
-                <EquipmentRow
-                  id={equipment.id}
-                  companyId={equipment.companyId}
-                  favorite={equipment.favorite}
-                  rateType={equipment.rateType}
-                  hourRate={equipment.hourRate}
-                  minHours={equipment.minHours}
-                  minCapacity={equipment.minCapacity}
-                  image={equipment.image}
-                  maxCapacity={equipment.maxCapacity}
-                  type={equipment.type}
-                  key={equipment.id}
-                  tonRate={equipment.tonRate}
-                  name={equipment.name}
-                  materials={equipment.materials}
+            {/**/
+              carriers.map(c => (
+                <CarrierRow
+                  key={c.id}
+                  carrierId={c.id}
+                  carrierName={c.legalName}
                 />
               ))
             }
@@ -767,7 +769,7 @@ class CarriersCustomerPage extends Component {
           <div className="truck-container">
             {this.renderFilter()}
             {/* {this.renderTable()} */}
-            {this.renderEquipmentTable()}
+            {this.renderCarrierTable()}
           </div>
         </Container>
       );
