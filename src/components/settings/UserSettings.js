@@ -8,6 +8,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import moment from 'moment';
 // import CloneDeep from 'lodash.clonedeep';
 // import TFormat from '../common/TFormat';
@@ -537,18 +538,18 @@ class UserSettings extends Component {
           {this.renderModal()}
           <Col md={6}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              { admin ? 'Admin' : 'User' } - {user.firstName} {user.lastName}
+              <Trans>{ admin ? 'Admin' : 'User' }</Trans> - {user.firstName} {user.lastName}
             </span>
           </Col>
           <Col md={6} className="text-right">
-            <strong>Email:</strong> {user.email}
+            <strong><Trans>Email:</Trans></strong> {user.email}
           </Col>
         </Row>
         <Row className="pt-2">
           <Col md={12}>&nbsp;</Col>
           <Col md={5}>
             <span>
-              First Name
+              <Trans>First Name</Trans>
             </span>
             <TField
               className="settings-input"
@@ -565,7 +566,7 @@ class UserSettings extends Component {
           <Col md={1}>&nbsp;</Col>
           <Col md={5}>
             <span>
-              Last Name
+            <Trans>Last Name</Trans>
             </span>
             <TField
               input={{
@@ -582,7 +583,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={5}>
             <span>
-              Mobile Phone
+            <Trans>Mobile Phone</Trans>
             </span>
             <TField
               input={{
@@ -598,7 +599,7 @@ class UserSettings extends Component {
           <Col md={1}>&nbsp;</Col>
           <Col md={5}>
             <span>
-              Work Phone
+            <Trans>Work Phone</Trans>
             </span>
             <TField
               input={{
@@ -615,7 +616,7 @@ class UserSettings extends Component {
           <Col md={5} className="pt-4">
             <Row>
               <Col md={12}>
-                <span>Address</span>
+                <span><Trans>Address</Trans></span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -721,7 +722,7 @@ class UserSettings extends Component {
             <Row>
               <Col md={12}>
                 <span>
-                  Time Zone
+                  <Trans>Time Zone</Trans>
                 </span>
                 <TSelect
                   input={
@@ -739,7 +740,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={12} className="pt-3">
                 <span >
-                  Primary Language
+                  <Trans>Primary Language</Trans>
                 </span>
                 <TSelect
                   input={
