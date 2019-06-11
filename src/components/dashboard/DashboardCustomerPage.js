@@ -447,7 +447,9 @@ class DashboardCustomerPage extends Component {
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
-      newJob.distance = TFormat.asDistance(job.distance);
+      if (typeof job.distance === 'number') {
+        newJob.distance = TFormat.asDistance(job.distance);
+      }
 
       potentialIncome += tempRate * newJob.rateEstimate;
 
