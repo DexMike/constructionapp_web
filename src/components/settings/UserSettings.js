@@ -542,7 +542,7 @@ class UserSettings extends Component {
             </span>
           </Col>
           <Col md={6} className="text-right">
-            <strong><Trans>Email:</Trans></strong> {user.email}
+            <strong><Trans>Email</Trans>:</strong> {user.email}
           </Col>
         </Row>
         <Row className="pt-2">
@@ -761,21 +761,21 @@ class UserSettings extends Component {
         </Row>
         <Row className="mt-4 line-separator">
           <Col md={2} className="pt-4">
-            <Button onClick={this.toggle}>Reset Password</Button>
+            <Button onClick={this.toggle}><Trans>Reset Password</Trans></Button>
           </Col>
         </Row>
         <Row>
           <Col md={12} className="text-right">
             <Link to="/">
               <Button>
-              Cancel
+              <Trans>Cancel</Trans>
               </Button>
             </Link>
             <Button
               color="primary"
               onClick={this.saveUser}
             >
-              Save
+              <Trans>Save</Trans>
             </Button>
           </Col>
         </Row>
