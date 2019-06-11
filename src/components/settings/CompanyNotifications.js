@@ -10,7 +10,6 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
-import AddressService from '../../api/AddressService';
 import CompanyService from '../../api/CompanyService';
 import LookupsService from '../../api/LookupsService';
 
@@ -19,8 +18,16 @@ import './Settings.css';
 class CompanyNotifications extends Component {
   constructor(props) {
     super(props);
-
+    const settings = {
+      id: 0,
+      companyId: 0,
+      rateType: '',
+      operatingRange: 0,
+      materialType: 'Any',
+      equipmentType: 'Any'
+    };
     this.state = {
+      ...settings,
       equipmentTypes: [],
       materialTypes: [],
       rateTypes: [],
@@ -28,6 +35,8 @@ class CompanyNotifications extends Component {
       selectedMaterials: ['Any'],
       selectedRateType: 'Any'
     };
+
+    this.handleInputChange = this.handleInputChange.bind(this);
     this.handleRateTypeChange = this.handleRateTypeChange.bind(this);
     this.handleCheckedMaterials = this.handleCheckedMaterials.bind(this);
     this.handleCheckedEquipments = this.handleCheckedEquipments.bind(this);
@@ -36,7 +45,26 @@ class CompanyNotifications extends Component {
 
   async componentDidMount() {
     const { company } = this.props;
+    const settings = await CompanyService.getCompanySettings(company.id);
+    await this.setSettings(settings);
     await this.fetchLookupsValues();
+    this.setState({
+      settings
+    });
+  }
+
+  async setSettings(settingsProps) {
+    const settings = settingsProps;
+    Object.keys(settings)
+      .map((key) => {
+        if (settings[key] === null) {
+          settings[key] = '';
+        }
+        return true;
+      });
+    this.setState({
+      ...settings
+    });
   }
 
   setCheckedStatus(state, checkboxClass) {
@@ -47,6 +75,20 @@ class CompanyNotifications extends Component {
   }
 
   async fetchLookupsValues() {
+    const {
+      rateType,
+      materialType,
+      equipmentType
+    } = this.state;
+    let {
+      selectedEquipments,
+      selectedMaterials,
+      selectedRateType
+    } = this.state;
+
+    selectedEquipments = equipmentType.split(', ');
+    selectedMaterials = materialType.split(', ');
+    selectedRateType = rateType;
     const lookups = await LookupsService.getLookups();
 
     let rateTypes = [];
@@ -59,9 +101,9 @@ class CompanyNotifications extends Component {
         if (itm.key === 'MaterialType') materialTypes.push(itm.val1);
       });
 
-    rateTypes = rateTypes.map(rateType => ({
-      value: String(rateType.val1),
-      label: `${rateType.val1}`
+    rateTypes = rateTypes.map(rate => ({
+      value: String(rate.val1),
+      label: `${rate.val1}`
     }));
 
     let index = equipmentTypes.indexOf('Any');
@@ -74,7 +116,17 @@ class CompanyNotifications extends Component {
     this.setState({
       equipmentTypes,
       materialTypes,
-      rateTypes
+      rateTypes,
+      selectedEquipments,
+      selectedMaterials,
+      selectedRateType
+    });
+  }
+
+  handleInputChange(e) {
+    const { value } = e.target;
+    this.setState({
+      [e.target.name]: value
     });
   }
 
@@ -85,7 +137,6 @@ class CompanyNotifications extends Component {
   }
 
   handleCheckedEquipments(e) {
-    console.log(88);
     let { selectedEquipments } = this.state;
     const { value } = e.target;
 
@@ -118,7 +169,6 @@ class CompanyNotifications extends Component {
   }
 
   handleCheckedMaterials(e) {
-    console.log(118);
     let { selectedMaterials } = this.state;
     const { value } = e.target;
     if (value === 'Any') {
@@ -150,22 +200,26 @@ class CompanyNotifications extends Component {
   }
 
   async saveCompanyNotificationsSettings() {
-    if (!this.isFormValid()) {
-      return;
-    }
+    const {
+      settings,
+      selectedRateType,
+      selectedMaterials,
+      selectedEquipments,
+      operatingRange
+    } = this.state;
 
-    const company = this.setCompanyInfo();
-    const address = this.setAddressInfo();
-    if (company && company.id) {
-      company.modifiedOn = moment()
+    const newSettings = settings;
+    newSettings.materialType = selectedMaterials.join(', ');
+    newSettings.equipmentType = selectedEquipments.join(', ');
+    newSettings.operatingRange = parseInt(operatingRange, 10);
+    newSettings.rateType = selectedRateType;
+    console.log(216, newSettings);
+    try {
+      newSettings.modifiedOn = moment()
         .unix() * 1000;
-      try {
-        await CompanyService.updateCompany(company);
-        await AddressService.updateAddress(address);
-        // console.log('Updated');
-      } catch (err) {
-        // console.log(err);
-      }
+      await CompanyService.updateCompanySettings(newSettings);
+    } catch (err) {
+      // console.log(err);
     }
   }
 
@@ -327,7 +381,7 @@ class CompanyNotifications extends Component {
             </Link>
             <Button
               color="primary"
-              onClick={this.saveCompany}
+              onClick={this.saveCompanyNotificationsSettings}
             >
               Save
             </Button>
