@@ -87,7 +87,6 @@ class SettingsPage extends Component {
   }
 
   renderAdminTabs(activeTab) {
-    const { company } = this.state;
     return (
       <Nav tabs>
         <NavItem>
@@ -165,12 +164,25 @@ class SettingsPage extends Component {
           <TabPane tabId="2">
             <NotificationsSettings
               company={company}
+              user={user}
             />
           </TabPane>
           <TabPane tabId="3">
             <PermissionsRolesSettings users={users}/>
           </TabPane>
         </TabContent>
+      </div>
+    );
+  }
+
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
       </div>
     );
   }
@@ -197,7 +209,12 @@ class SettingsPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Settings / {title}</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

@@ -5,6 +5,7 @@ import {
   Row
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
+import moment from 'moment';
 import './Settings.css';
 import UserService from '../../api/UserService';
 
@@ -34,6 +35,7 @@ class NotificationsSettings extends Component {
   }
 
   async setAllNotificationsState(type, checkBoxId, e) {
+    const { user } = this.props;
     const { settings } = this.state;
     const newSettings = settings;
     let { value } = e.target;
@@ -48,6 +50,8 @@ class NotificationsSettings extends Component {
     for (const i in newSettings) {
       if (newSettings[i].key === type) {
         newSettings[i].enabled = value;
+        newSettings[i].modifiedBy = user.id;
+        newSettings[i].modifiedOn = moment().unix() * 1000;
       }
     }
 
@@ -62,26 +66,33 @@ class NotificationsSettings extends Component {
     });
   }
 
-  setNotificationState(notificationId, e) {
-    const { notifications } = this.state;
-    let { value } = e.target;
-    value = value === 'true';
-    const notification = notifications.find(x => x.id === notificationId);
-    notification.enabled = !value;
-
-    const index = notifications.findIndex(x => x.id === notificationId);
-    if (index !== -1) {
-      this.setState({
-        notifications: [
-          ...notifications.slice(0, index),
-          Object.assign({}, notifications[index], notification),
-          ...notifications.slice(index + 1)
-        ]
-      });
+  async setNotificationState(notificationId) {
+    const {user} = this.props;
+    const { settings } = this.state;
+    const notification = settings.find(x => x.id === notificationId);
+    const enabled = notification.enabled ? 0 : 1;
+    notification.enabled = enabled;
+    notification.modifiedBy = user.id;
+    notification.modifiedOn = moment().unix() * 1000;
+    try {
+      await UserService.updateUserNotification(notification);
+      const index = settings.findIndex(x => x.id === notificationId);
+      if (index !== -1) {
+        this.setState({
+          settings: [
+            ...settings.slice(0, index),
+            Object.assign({}, settings[index], notification),
+            ...settings.slice(index + 1)
+          ]
+        });
+      }
+    } catch (e) {
+      // console.log(e);
     }
   }
 
   async setAllNotificationOptionState(key, method, checkBoxId, e) {
+    const {user} = this.props;
     const { settings } = this.state;
     const newSettings = settings;
     let { value } = e.target;
@@ -96,6 +107,8 @@ class NotificationsSettings extends Component {
     for (const i in newSettings) {
       if (newSettings[i].key === key) {
         newSettings[i][method] = value;
+        newSettings[i].modifiedBy = user.id;
+        newSettings[i].modifiedOn = moment().unix() * 1000;
       }
     }
 
@@ -118,12 +131,13 @@ class NotificationsSettings extends Component {
     const enabled = notification[key] ? 0 : 1;
     notification[key] = enabled;
     notification.modifiedBy = user.id;
+    notification.modifiedOn = moment().unix() * 1000;
     try {
       await UserService.updateUserNotification(notification);
       const index = settings.findIndex(x => x.id === notificationId);
       if (index !== -1) {
         this.setState({
-          notifications: [
+          settings: [
             ...settings.slice(0, index),
             Object.assign({}, settings[index], notification),
             ...settings.slice(index + 1)
@@ -143,7 +157,6 @@ class NotificationsSettings extends Component {
   }
 
   renderTable(objectSettings) {
-    console.log(147, objectSettings);
     return (
       <table className="table table-sm">
         <thead>
@@ -422,6 +435,9 @@ NotificationsSettings.propTypes = {
   company: PropTypes.shape({
     id: PropTypes.number,
     type: PropTypes.string
+  }),
+  user: PropTypes.shape({
+    id: PropTypes.number
   })
 };
 
@@ -429,6 +445,9 @@ NotificationsSettings.defaultProps = {
   company: {
     id: 0,
     type: ''
+  },
+  user: {
+    id: 0
   }
 };
 

@@ -352,17 +352,13 @@ class CompanyNotifications extends Component {
   }
 
   render() {
-    const { company } = this.props;
     return (
       <Container>
         <Row className="tab-content-header">
-          <Col md={6}>
+          <Col md={12}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              Company - {company.legalName}
+              Company Notifications
             </span>
-          </Col>
-          <Col md={6} className="text-right">
-            <strong>Website:</strong> {company.url}
           </Col>
         </Row>
         <Row className="pt-4 pl-3 pr-3">
@@ -390,5 +386,17 @@ class CompanyNotifications extends Component {
     );
   }
 }
+
+CompanyNotifications.propTypes = {
+  company: PropTypes.shape({
+    id: PropTypes.number
+  })
+};
+
+CompanyNotifications.defaultProps = {
+  company: {
+    id: 0
+  }
+};
 
 export default CompanyNotifications;

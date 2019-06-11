@@ -48,7 +48,7 @@ class UserSettings extends Component {
       ...user,
       ...address,
       languages: [],
-      countries: [],
+      // countries: [],
       states: [],
       countryStates: [],
       timeZones: [],
@@ -63,10 +63,6 @@ class UserSettings extends Component {
         touched: false,
         error: ''
       },
-      // reqHandlerEmail: {
-      //   touched: false,
-      //   error: ''
-      // },
       reqHandlerPhone: {
         touched: false,
         error: ''
@@ -718,7 +714,6 @@ class UserSettings extends Component {
               }
             </Row>
           </Col>
-         
           <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>

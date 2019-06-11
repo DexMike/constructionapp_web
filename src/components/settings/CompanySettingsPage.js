@@ -28,7 +28,6 @@ class CompanySettingsPage extends Component {
       loaded: false,
       company: [],
       user: [],
-      users: [],
       address: [],
       activeTab: '1',
       title: 'Company Profile',
@@ -44,8 +43,6 @@ class CompanySettingsPage extends Component {
     const user = await UserService.getUserById(profile.userId);
     const company = await CompanyService.getCompanyById(profile.companyId);
     const address = await AddressService.getAddressById(company.addressId);
-    const usersResponse = await UserService.getUsersByCompanyId(company.id);
-    const users = usersResponse.data;
     let isAdmin = false;
     if (company.adminId === user.id) {
       isAdmin = true;
@@ -56,7 +53,6 @@ class CompanySettingsPage extends Component {
       this.setState({
         company,
         user,
-        users,
         address,
         isAdmin,
         loaded: true
@@ -73,10 +69,10 @@ class CompanySettingsPage extends Component {
     let { title } = this.state;
     switch (tab) {
       case '1':
-        title = 'Company Profile';
+        title = 'Profile';
         break;
       case '2':
-        title = 'Company Notifications';
+        title = 'Notifications';
         break;
       default:
         break;
@@ -144,6 +140,18 @@ class CompanySettingsPage extends Component {
     );
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const { loaded, title, isAdmin } = this.state;
     if (isAdmin === false && this.mounted) {
@@ -157,19 +165,22 @@ class CompanySettingsPage extends Component {
               <h3 className="page-title">Company Settings / {title}</h3>
             </Col>
           </Row>
-          <Container>
-            <Row>
-              <Col md={12}>
-                {this.renderTabs()}
-              </Col>
-            </Row>
-          </Container>
+          <Row>
+            <Col md={12}>
+              {this.renderTabs()}
+            </Col>
+          </Row>
         </Container>
       );
     }
     return (
       <Container className="dashboard">
-        Loading...
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Company Settings</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }
