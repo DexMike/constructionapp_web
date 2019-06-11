@@ -61,7 +61,7 @@ npm run deployDemo'''
               tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
           }
         }
-        stage('Build / Package demo') {
+        stage('Build / Package qa') {
           when {
             branch 'qa'
           }
