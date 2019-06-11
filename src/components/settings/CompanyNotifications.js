@@ -213,7 +213,6 @@ class CompanyNotifications extends Component {
     newSettings.equipmentType = selectedEquipments.join(', ');
     newSettings.operatingRange = parseInt(operatingRange, 10);
     newSettings.rateType = selectedRateType;
-    console.log(216, newSettings);
     try {
       newSettings.modifiedOn = moment()
         .unix() * 1000;
@@ -368,7 +367,7 @@ class CompanyNotifications extends Component {
         </Row>
         <Row className="pt-4 pl-3 pr-3">
           <Col md={12} className="separator">
-            <span className="sub-header">Notifications</span>
+            <span className="sub-header">Job Preferences</span>
           </Col>
         </Row>
         {this.renderCompanyPreferences()}
