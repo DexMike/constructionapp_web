@@ -14,8 +14,7 @@ import classnames from 'classnames';
 import './Settings.css';
 
 import CompanyProfile from './CompanyProfile';
-import NotificationsSettings from './NotificationsSettings';
-import PermissionsRolesSettings from './PermissionsRolesSettings';
+import CompanyNotifications from './CompanyNotifications';
 
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
@@ -77,13 +76,7 @@ class CompanySettingsPage extends Component {
         title = 'Company Profile';
         break;
       case '2':
-        title = 'Notifications';
-        break;
-      case '3':
-        title = 'Roles & Permissions';
-        break;
-      case '4':
-        title = 'Payment Method';
+        title = 'Company Notifications';
         break;
       default:
         break;
@@ -97,7 +90,7 @@ class CompanySettingsPage extends Component {
   }
 
   renderTabs() {
-    const { activeTab, user, users, company, address, isAdmin } = this.state;
+    const { activeTab, user, company, address, isAdmin } = this.state;
     return (
       <div>
         <Nav tabs>
@@ -109,14 +102,18 @@ class CompanySettingsPage extends Component {
               <div className="navLink">Company Profile</div>
             </NavLink>
           </NavItem>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: activeTab === '4' }, 'tab')}
-              onClick={() => { this.toggle('4'); }}
-            >
-              Payment Method
-            </NavLink>
-          </NavItem>
+          {
+            company.type === 'Carrier' ? (
+              <NavItem>
+                <NavLink
+                  className={classnames({ active: activeTab === '2' }, 'tab')}
+                  onClick={() => { this.toggle('2'); }}
+                >
+                  Notifications
+                </NavLink>
+              </NavItem>
+            ) : null
+          }
         </Nav>
         <TabContent
           activeTab={activeTab}
@@ -138,15 +135,9 @@ class CompanySettingsPage extends Component {
             />
           </TabPane>
           <TabPane tabId="2">
-            <NotificationsSettings
+            <CompanyNotifications
               company={company}
             />
-          </TabPane>
-          <TabPane tabId="3">
-            <PermissionsRolesSettings users={users}/>
-          </TabPane>
-          <TabPane tabId="4">
-            &nbsp;
           </TabPane>
         </TabContent>
       </div>
