@@ -30,6 +30,7 @@ import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import EquipmentRow from './EquipmentRow';
 import TFieldNumber from '../common/TFieldNumber';
+import TField from '../common/TField';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -73,6 +74,15 @@ class TrucksCustomerPage extends Component {
         rateType: '',
         currentAvailability: 1,
         sortBy: sortByList[0]
+      },
+
+      reqHandlerZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerRange: {
+        touched: false,
+        error: ''
       }
     };
 
@@ -474,7 +484,10 @@ class TrucksCustomerPage extends Component {
       endDate,
 
       // filters
-      filters
+      filters,
+
+      reqHandlerZip,
+      reqHandlerRange
 
     } = this.state;
 
@@ -574,7 +587,7 @@ class TrucksCustomerPage extends Component {
                         // meta={reqHandlerMinRate}
                       />
                     </Col>
-                    <Col md="4">
+                    <Col md="3">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -608,12 +621,36 @@ class TrucksCustomerPage extends Component {
                       <div className="filter-item-title">
                         Zip Code
                       </div>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </Col>
+                    <Col md="1">
+                      <div className="filter-item-title">
+                        Range (mi)
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="50"
+                        type="number"
                       />
                     </Col>
                   </Row>

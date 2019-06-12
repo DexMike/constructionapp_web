@@ -538,7 +538,7 @@ class JobFilter extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
-                        Range
+                        Range (mi)
                       </div>
                       <TField
                         input={
