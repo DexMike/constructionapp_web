@@ -31,7 +31,7 @@ class SettingsPage extends Component {
       users: [],
       address: [],
       activeTab: '1',
-      title: 'User Profile',
+      title: 'Profile',
       isAdmin: false
     };
 
@@ -64,7 +64,7 @@ class SettingsPage extends Component {
     let { title } = this.state;
     switch (tab) {
       case '1':
-        title = 'User Profile';
+        title = 'Profile';
         break;
       case '2':
         title = 'Notifications';
@@ -94,7 +94,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink">User Profile</div>
+            <div className="navLink">Profile</div>
           </NavLink>
         </NavItem>
         <NavItem>
@@ -129,7 +129,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink">User Profile</div>
+            <div className="navLink">Profile</div>
           </NavLink>
         </NavItem>
       </Nav>
@@ -194,7 +194,7 @@ class SettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Settings / {title}</h3>
+              <h3 className="page-title">User Settings / {title}</h3>
             </Col>
           </Row>
           <Container>
