@@ -91,21 +91,20 @@ class CompanySettingsPage extends Component {
   renderCarrierPayment() {
     return (
       <Col md={12}>
-        <p>
-          Hello.<br/>
-          <br/>
+        <h3>Hello.</h3>
+        <p style={{fontSize: 14}}>
           For your security we at Trelar do not keep or
           track your payment account information.
           That is kept securely at Hyperwallet, a PayPal company.
-          To make changes to your account, please click this link<br/>
-          <a href="https://www.hyperwallet.com" target="_blank">www.hyperwallet.com</a><br/>
-          or go directly to www.hyperwallet.com.<br/>
+          To make changes to your account, please click this&nbsp;
+          <a href="https://www.hyperwallet.com" target="_blank">link</a>
+          &nbsp;or go directly to www.hyperwallet.com.<br/>
           <br/>
           Please remember that no one at Trelar will ever ask you for your
           bank or account information.<br/>
           <br/>
           Thank you.<br/>
-          Trelar CSR team.<br/>
+          <strong>Trelar CSR team.</strong><br/>
         </p>
       </Col>
     );
@@ -114,16 +113,15 @@ class CompanySettingsPage extends Component {
   renderCustomerPayment() {
     return (
       <Col md={12}>
-        <p>
-          Hello.<br />
-          <br/>
+        <h2>Hello.</h2>
+        <p style={{fontSize: 14}}>
           We do not store your full banking and account information.<br/>
           <br/>
           Please contact customer support at csr@trelar.net if you'd
           like to update your payment information.<br />
           <br/>
           Thank you.<br />
-          Trelar CSR team.<br />
+          <strong>Trelar CSR team.</strong><br/>
         </p>
       </Col>
     );
