@@ -29,6 +29,7 @@ import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import EquipmentRow from './EquipmentRow';
+import TFieldNumber from '../common/TFieldNumber';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -570,7 +571,7 @@ class TrucksCustomerPage extends Component {
                         }
                         placeholder="# of tons"
                         decimal
-                        meta={reqHandlerMinRate}
+                        // meta={reqHandlerMinRate}
                       />
                     </Col>
                     <Col md="4">
