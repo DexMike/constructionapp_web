@@ -74,6 +74,9 @@ class CompanySettingsPage extends Component {
       case '2':
         title = 'Notifications';
         break;
+      case '3':
+        title = 'Payment Method';
+        break;
       default:
         break;
     }
@@ -83,6 +86,45 @@ class CompanySettingsPage extends Component {
         title
       });
     }
+  }
+
+  renderCarrierPayment() {
+    return (
+      <Col md={12}>
+        <h3>Hello.</h3>
+        <p style={{fontSize: 14}}>
+          For your security we at Trelar do not keep or
+          track your payment account information.
+          That is kept securely at Hyperwallet, a PayPal company.
+          To make changes to your account, please click this&nbsp;
+          <a href="https://www.hyperwallet.com" target="_blank">link</a>
+          &nbsp;or go directly to www.hyperwallet.com.<br/>
+          <br/>
+          Please remember that no one at Trelar will ever ask you for your
+          bank or account information.<br/>
+          <br/>
+          Thank you.<br/>
+          <strong>Trelar CSR team.</strong><br/>
+        </p>
+      </Col>
+    );
+  }
+
+  renderCustomerPayment() {
+    return (
+      <Col md={12}>
+        <h2>Hello.</h2>
+        <p style={{fontSize: 14}}>
+          We do not store your full banking and account information.<br/>
+          <br/>
+          Please contact customer support at csr@trelar.net if you'd
+          like to update your payment information.<br />
+          <br/>
+          Thank you.<br />
+          <strong>Trelar CSR team.</strong><br/>
+        </p>
+      </Col>
+    );
   }
 
   renderTabs() {
@@ -110,6 +152,14 @@ class CompanySettingsPage extends Component {
               </NavItem>
             ) : null
           }
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '3' }, 'tab')}
+              onClick={() => { this.toggle('3'); }}
+            >
+              Payment Method
+            </NavLink>
+          </NavItem>
         </Nav>
         <TabContent
           activeTab={activeTab}
@@ -134,6 +184,16 @@ class CompanySettingsPage extends Component {
             <CompanyNotifications
               company={company}
             />
+          </TabPane>
+          <TabPane tabId="3">
+            <Row className="pt-4 pb-4">
+              {
+                company.type === 'Customer' ? this.renderCustomerPayment() : null
+              }
+              {
+                company.type === 'Carrier' ? this.renderCarrierPayment() : null
+              }
+            </Row>
           </TabPane>
         </TabContent>
       </div>
