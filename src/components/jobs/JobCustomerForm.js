@@ -20,6 +20,7 @@ import GPSPointService from '../../api/GPSPointService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import LoadService from '../../api/LoadService';
 import LoadsTable from '../loads/LoadsTable';
+import CompanyService from '../../api/CompanyService';
 
 mapboxgl.accessToken = process.env.MAPBOX_API;
 
@@ -51,6 +52,7 @@ class JobCustomerForm extends Component {
     this.state = {
       ...job,
       images: [],
+      carrier: [],
       gpsTrackings: null,
       coords: null,
       loads: null,
@@ -62,12 +64,12 @@ class JobCustomerForm extends Component {
   }
 
   async componentDidMount() {
-    const {job} = this.props;
+    const {job, companyCarrier} = this.props;
     let {images} = this.props;
     let {gpsTrackings, loads} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
-
+    const carrier = await CompanyService.getCompanyById(companyCarrier);
     // get overlay data
     let gpsData = [];
     if (bookings.length > 0) {
@@ -170,6 +172,7 @@ class JobCustomerForm extends Component {
 
     this.setState({
       images,
+      carrier,
       loaded: true,
       gpsTrackings,
       coords,
@@ -276,20 +279,26 @@ class JobCustomerForm extends Component {
   }
 
   renderJobTop(job) {
+    const {carrier} = this.state;
+    let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
+    estimatedCost = estimatedCost.props.value;
+    const fee = estimatedCost * 0.1;
     return (
       <React.Fragment>
         <div className="col-md-4">
           <h3 className="subhead">
-            Job: {job.name}
+            Joba: {job.name}
           </h3>
 
           {/* <br/> */}
-          {job.company.legalName}
+          Carrier: {carrier.legalName}
           <br/>
           {/* Find the company admin name */}
-          Phone #: <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
+          Phone #: <a href={`tel:${TFormat.asPhoneText(carrier.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
           <br/>
           Number of Trucks: {job.numEquipments}
+          <br/>
+          Truck Type: {job.equipmentType}
           <br/>
         </div>
         <div className="col-md-4">
@@ -304,9 +313,20 @@ class JobCustomerForm extends Component {
           <h3 className="subhead">
             Job Status: {job.status}
           </h3>
-          Estimated Cost: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
+          Estimated Cost:
+          {
+            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+          }
+          <br/>
+          Trelar Fee:
+          {
+            TFormat.asMoney(fee)
+          }
+          <br/>
+          Total Cost:
+          {
+            TFormat.asMoney(estimatedCost + fee)
+          }
           <br/>
           Estimated Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
@@ -383,6 +403,20 @@ class JobCustomerForm extends Component {
   }
 
   renderJobTons() {
+    const { loads } = this.state;
+    const total = loads.length;
+    let delivered = 0;
+    let completed = 0;
+    if (loads.length > 0) {
+      for (const i in loads) {
+        if (loads[i].loadStatus === 'Submitted') {
+          delivered += 1;
+        }
+      }
+    }
+    if (total) {
+      completed = parseFloat((delivered * 100 / total).toFixed(2));
+    }
     return (
       <React.Fragment>
         <Row>
@@ -391,13 +425,13 @@ class JobCustomerForm extends Component {
               Delivery Metrics
             </h3>
             <div>
-              <span>Total Tons:  <span>42</span></span>
+              <span>Total Tons:  <span>{total}</span></span>
               <br/>
-              <span>Tons Delivered: <span>125</span></span>
+              <span>Load Tonnage Delivered: <span>{delivered}</span></span>
               <br/>
-              <span>Tons Remaining: <span>8.5</span></span>
+              <span>Tons Remaining: <span>{total - delivered}</span></span>
               <br/>
-              <span>% Completed: <span>80%</span></span>
+              <span>% Completed: <span>{completed}%</span></span>
               <br/>
             </div>
             <br/>
@@ -428,247 +462,6 @@ class JobCustomerForm extends Component {
             <br/>
           </Col>
         </Row>
-      </React.Fragment>
-    );
-  }
-
-  renderJobRuns() {
-    return (
-      <React.Fragment>
-        <h3 className="subhead">
-          Run Information
-        </h3>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span><b>Activity</b></span>
-              <div>
-                <span>Waiting to Load</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span><b>Start Time</b></span>
-              <div>
-                <span>8:00 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span><b>End Time</b></span>
-              <div>
-                <span>8:30 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span><b>Duration</b></span>
-              <div>
-                <span>30 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span><b>Distance</b></span>
-              <div>
-                <span>0</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <span><b>Load Amount</b></span>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Loading</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8:30 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8:50 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>20 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Driving</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8:50 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:20 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>30 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Unloading</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:20 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:40 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>20 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>Driving</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>9:40 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>10:15 AM</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>35 mins</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={2} lg={2} md={2} sm={12}>
-            <div>
-              <div>
-                <span>8.5</span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
       </React.Fragment>
     );
   }
@@ -867,8 +660,8 @@ class JobCustomerForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
-              <Row>
-                <div className="col-md-8 mr-24">
+              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
+                <div className="col-md-8" style={{padding: 0}}>
                   {this.renderMBMap(origin, destination, overlayMapData, coords)}
                 </div>
                 <div className="col-md-4">
@@ -891,6 +684,11 @@ class JobCustomerForm extends Component {
                 </div>
               </Row>
               <hr/>
+              {/*{this.renderJobRuns(job)}*/}
+              {this.renderGPSPoints(gpsTrackings)}
+              {this.renderLoads(loads, job)}
+              {this.renderUploadedPhotos(images)}
+              <hr/>
               <div className="row">
                 <div className="col-md-4">
                   {this.renderJobTons(job)}
@@ -902,11 +700,6 @@ class JobCustomerForm extends Component {
                   {this.renderRunSummary(job)}
                 </div>
               </div>
-              <hr/>
-              {/*{this.renderJobRuns(job)}*/}
-              {this.renderGPSPoints(gpsTrackings)}
-              {this.renderLoads(loads, job)}
-              {this.renderUploadedPhotos(images)}
             </CardBody>
           </Card>
         </Container>

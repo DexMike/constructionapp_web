@@ -216,6 +216,21 @@ class TFormat {
     );
   }
 
+  static asDistance(inputValue) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={2}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=" mi"
+      />
+    );
+  }
+
   materialsAsString(materials) {
     let materialsString = '';
     if (materials) {

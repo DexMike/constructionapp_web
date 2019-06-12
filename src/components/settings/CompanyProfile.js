@@ -8,10 +8,7 @@ import {
 import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
-// import CloneDeep from 'lodash.clonedeep';
-// import TFormat from '../common/TFormat';
 import TField from '../common/TField';
-import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 
 import LookupsService from '../../api/LookupsService';
@@ -32,7 +29,6 @@ class CompanyProfile extends Component {
       url: '',
       fax: '',
       rating: 0,
-      operatingRange: 0,
       type: '0'
     };
 
@@ -286,7 +282,7 @@ class CompanyProfile extends Component {
     if (legalName === null || legalName.length === 0) {
       reqHandlerLegalName = {
         touched: true,
-        error: 'Please enter user first name'
+        error: 'Please enter company name'
       };
       isValid = false;
     }
@@ -318,7 +314,7 @@ class CompanyProfile extends Component {
     if (country === 'USA' && (state === null || state.length === 0)) {
       reqHandlerState = {
         touched: true,
-        error: 'Please select a State'
+        error: 'Please select a state'
       };
       isValid = false;
     }
@@ -326,7 +322,7 @@ class CompanyProfile extends Component {
     if (zipCode === null || zipCode.length === 0) {
       reqHandlerZip = {
         touched: true,
-        error: 'Please enter Zip code'
+        error: 'Please enter zip code'
       };
       isValid = false;
     }
@@ -367,7 +363,6 @@ class CompanyProfile extends Component {
   }
 
   render() {
-    const { company } = this.props;
     const {
       legalName,
       phone,
@@ -379,6 +374,8 @@ class CompanyProfile extends Component {
       state,
       // country,
       zipCode,
+      reqHandlerLegalName,
+      reqHandlerPhone,
       reqHandlerAddress,
       reqHandlerCity,
       reqHandlerZip
@@ -414,9 +411,9 @@ class CompanyProfile extends Component {
                 name: 'legalName',
                 value: legalName
               }}
-              placeholder="First Name"
+              placeholder="Company Name"
               type="text"
-              // meta={reqHandlerFName}
+              meta={reqHandlerLegalName}
             />
           </Col>
           <Col md={6}>
@@ -429,9 +426,8 @@ class CompanyProfile extends Component {
                 name: 'url',
                 value: url
               }}
-              placeholder="Last Name"
+              placeholder="Website"
               type="text"
-              // meta={reqHandlerLName}
             />
           </Col>
         </Row>
@@ -448,7 +444,7 @@ class CompanyProfile extends Component {
               }}
               placeholder="Phone number"
               type="text"
-              // meta={reqHandlerPhone}
+              meta={reqHandlerPhone}
             />
           </Col>
           <Col md={6}>
@@ -593,14 +589,16 @@ class CompanyProfile extends Component {
 }
 
 CompanyProfile.propTypes = {
-  user: PropTypes.shape({
-    companyId: PropTypes.number,
-    firstName: PropTypes.string,
-    lastName: PropTypes.string,
-    email: PropTypes.string,
-    mobilePhone: PropTypes.string,
+  company: PropTypes.shape({
+    id: PropTypes.number,
+    legalName: PropTypes.string,
+    dba: PropTypes.string,
+    addressId: PropTypes.number,
     phone: PropTypes.string,
-    preferredLanguage: PropTypes.string
+    url: PropTypes.string,
+    fax: PropTypes.string,
+    rating: PropTypes.string,
+    type: PropTypes.string
   }),
   address: PropTypes.shape({
     companyId: PropTypes.number,
@@ -615,14 +613,16 @@ CompanyProfile.propTypes = {
 };
 
 CompanyProfile.defaultProps = {
-  user: {
-    companyId: 0,
-    firstName: '',
-    lastName: '',
-    email: '',
-    mobilePhone: '',
+  company: {
+    id: 0,
+    legalName: '',
+    dba: '',
+    addressId: 0,
     phone: '',
-    preferredLanguage: ''
+    url: '',
+    fax: '',
+    rating: '0',
+    type: 'Customer'
   },
   address: {
     companyId: 0,
