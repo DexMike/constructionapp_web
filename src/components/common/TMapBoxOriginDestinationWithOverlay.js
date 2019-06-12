@@ -31,8 +31,6 @@ class TMapBoxOriginDestinationWithOverlay extends PureComponent {
       attributionControl: false
     });
 
-    map.on('click', this.clickHandler());
-
     map.on('load', () => {
       const directions = new MapboxDirections(
         {
@@ -43,7 +41,8 @@ class TMapBoxOriginDestinationWithOverlay extends PureComponent {
           controls: {
             inputs: false,
             instructions: false
-          }
+          },
+          interactive: false // disable dragging
         }
       );
       map.addControl(directions, 'top-left');
@@ -74,7 +73,6 @@ class TMapBoxOriginDestinationWithOverlay extends PureComponent {
       //     'line-width': 8
       //   }
       // });
-
       // Plot the actual route (as recorded by GPS)
       // map.addLayer({
       //   id: 'points',
@@ -95,10 +93,6 @@ class TMapBoxOriginDestinationWithOverlay extends PureComponent {
       //   }
       // });
     });
-  }
-
-  clickHandler() {
-    return false;
   }
 
   render() {
