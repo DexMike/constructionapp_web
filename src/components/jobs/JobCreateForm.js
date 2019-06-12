@@ -19,6 +19,7 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TwilioService from '../../api/TwilioService';
 import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -911,7 +912,7 @@ class JobCreateForm extends Component {
                       value={job.rateEstimate}
                       onChange={this.handleJobInputChange}
                 /> */}
-                <TField
+                <TFieldNumber
                   input={
                     {
                       onChange: this.handleJobInputChange,
@@ -920,7 +921,7 @@ class JobCreateForm extends Component {
                     }
                   }
                   placeholder="0"
-                  type="number"
+                  decimal
                   meta={reqHandlerEstHours}
                 />
               </div>
@@ -1053,7 +1054,7 @@ class JobCreateForm extends Component {
               </div>
               <div className="col-sm-12">
                 <div className="form__form-group">
-                  <TField
+                  <TFieldNumber
                     input={
                       {
                         onChange: this.handleStartAddressInputChange,
@@ -1062,7 +1063,6 @@ class JobCreateForm extends Component {
                       }
                     }
                     placeholder="Zip Code"
-                    type="number"
                     meta={reqHandlerSZip}
                   />
                 </div>
@@ -1190,7 +1190,7 @@ class JobCreateForm extends Component {
               </div>
               <div className="col-sm-12">
                 <div className="form__form-group">
-                  <TField
+                  <TFieldNumber
                     input={
                       {
                         onChange: this.handleEndAddressInputChange,
@@ -1199,7 +1199,6 @@ class JobCreateForm extends Component {
                       }
                     }
                     placeholder="Zip Code"
-                    type="number"
                     meta={reqHandlerEZip}
                   />
                 </div>

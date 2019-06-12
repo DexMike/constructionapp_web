@@ -16,6 +16,8 @@ import BookingInvoiceService from '../../api/BookingInvoiceService';
 import GPSPointService from '../../api/GPSPointService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import JobCustomerForm from './JobCustomerForm';
+import LoadService from '../../api/LoadService';
+import LoadsTable from '../loads/LoadsTable';
 
 const MAPBOX_MAX = 23;
 
@@ -45,6 +47,7 @@ class JobCarrierForm extends JobCustomerForm {
       ...job,
       images: [],
       gpsTrackings: null,
+      loads: [],
       loaded: false
     };
 
@@ -52,9 +55,10 @@ class JobCarrierForm extends JobCustomerForm {
   }
 
   async componentDidMount() {
+    console.log(58, 'Carrier');
     const {job} = this.props;
     let {images} = this.props;
-    let {gpsTrackings} = this.state;
+    let {gpsTrackings, loads} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
 
@@ -62,6 +66,9 @@ class JobCarrierForm extends JobCustomerForm {
     let gpsData = [];
     if (bookings.length > 0) {
       gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+        bookings[0].id // booking.id 6
+      );
+      loads = await LoadService.getLoadsByBookingId(
         bookings[0].id // booking.id 6
       );
     }
@@ -108,7 +115,8 @@ class JobCarrierForm extends JobCustomerForm {
       images,
       loaded: true,
       gpsTrackings,
-      overlayMapData: {gps}
+      overlayMapData: {gps},
+      loads
     });
   }
 
@@ -199,12 +207,14 @@ class JobCarrierForm extends JobCustomerForm {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {job.company.legalName}
+          Customer: {job.company.legalName}
           <br/>
           {/* Find the company admin name */}
           Phone #: <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>{TFormat.asPhoneText(job.company.phone)}</a>
           <br/>
           Number of Trucks: {job.numEquipments}
+          <br/>
+          Truck Type: {job.equipmentType}
           <br/>
         </div>
         <div className="col-md-4">
@@ -219,16 +229,43 @@ class JobCarrierForm extends JobCustomerForm {
           <h3 className="subhead">
             Status: {job.status}
           </h3>
-          Potential Earnings: {
-          TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-        }
+          {
+            job.status === 'Job Completed'
+              ? 'Total'
+              : 'Estimated'
+          }
+          &nbsp;Earnings:
+          {
+            TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+          }
           <br/>
-          Estimated Amount: {job.rateEstimate} {job.rateType}(s)
+          {
+            job.status === 'Job Completed'
+              ? 'Total'
+              : 'Estimated'
+          }
+          &nbsp;Amount: {job.rateEstimate} {job.rateType}(s)
           <br/>
           Rate: {TFormat.asMoney(job.rate)} / {job.rateType}
           <br/>
           Product: {this.materialsAsString(job.materials)}
         </div>
+      </React.Fragment>
+    );
+  }
+
+  renderLoads(loads, job) {
+    return (
+      <React.Fragment>
+        <h3 className="subhead" style={{
+          paddingTop: 30,
+          color: '#006F53',
+          fontSize: 22
+        }}
+        >
+          Run Information
+        </h3>
+        <LoadsTable loads={loads} job={job}/>
       </React.Fragment>
     );
   }
@@ -312,7 +349,12 @@ class JobCarrierForm extends JobCustomerForm {
   }
 
   renderEverything() {
-    const {images, gpsTrackings, overlayMapData} = this.state;
+    const {
+      images,
+      gpsTrackings,
+      overlayMapData,
+      loads
+    } = this.state;
     const { job } = this.props;
     let origin = '';
     let destination = '';
@@ -368,6 +410,10 @@ class JobCarrierForm extends JobCustomerForm {
                 </div>
               </Row>
               <hr/>
+              {this.renderUploadedPhotos(images)}
+              {this.renderGPSPoints(gpsTrackings)}
+              {this.renderLoads(loads, job)}
+              <hr/>
               <div className="row">
                 <div className="col-md-4">
                   {this.renderJobTons(job)}
@@ -379,10 +425,6 @@ class JobCarrierForm extends JobCustomerForm {
                   {this.renderRunSummary(job)}
                 </div>
               </div>
-              <hr/>
-              {this.renderJobRuns(job)}
-              {this.renderUploadedPhotos(images)}
-              {this.renderGPSPoints(gpsTrackings)}
             </CardBody>
           </Card>
         </Container>
@@ -423,6 +465,7 @@ class JobCarrierForm extends JobCustomerForm {
               {/*</div>*/}
             </Row>
             <hr/>
+            {this.renderLoads(loads, job)}
             {/*<div className="row">*/}
             {/*  <div className="col-md-4">*/}
             {/*    {this.renderJobTons(job)}*/}

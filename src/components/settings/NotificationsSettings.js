@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import './Settings.css';
 
@@ -725,14 +726,13 @@ class NotificationsSettings extends Component {
             <span>
               Location Radius (Miles)
             </span>
-            <TField
+            <TFieldNumber
               input={{
                 onChange: this.handleInputChange,
                 name: 'locationRadius',
                 value: locationRadius
               }}
               placeholder="Location Radius"
-              type="number"
             />
           </Col>
         </Row>

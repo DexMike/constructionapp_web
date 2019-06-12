@@ -19,6 +19,9 @@
     "predeployDemo": "npm run clean-dist && npm run build:html",
     "deployDemo": "npx babel-node tools/buildDemo.js",
     "postdeployDemo": "aws s3 sync dist/ s3://demo.app.mytrelar.com && aws cloudfront create-invalidation --distribution-id E3VLWJXIOSHO30 --paths '/*'",
+    "predeployQa": "npm run clean-dist && npm run build:html",
+    "deployQa": "npx babel-node tools/buildQa.js",
+    "postdeployQa": "aws s3 sync dist/ s3://qa.app.mytrelar.com && aws cloudfront create-invalidation --distribution-id E2W2Q6ROFYLZDI --paths '/*'",
     "lint": "npx esw webpack.config.* src"
   },
   "repository": {

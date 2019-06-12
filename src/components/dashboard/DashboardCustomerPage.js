@@ -24,11 +24,7 @@ import JobFilter from '../filters/JobFilter';
 function PageTitle() {
   const {t} = useTranslation();
   return (
-    <Row>
-      <Col md={12}>
-        <h3 className="page-title">{t('Jobs')}</h3>
-      </Col>
-    </Row>
+    <h3 className="page-title">{t('Job Dashboard')}</h3>
   );
 }
 
@@ -42,6 +38,24 @@ function AddJobButton({handle}) {
     >
       {t('ADD A JOB')}
     </Button>
+  );
+}
+
+function DashboardLoading () {
+  const {t} = useTranslation();
+  return (
+    <Container className="dashboard">
+        {t('Loading...')}
+    </Container>
+  );
+}
+
+function TableLegend({displayed, totalCount, totalJobs}) {
+  const {t} = useTranslation();
+  return(
+    <div className="ml-4 mt-4">
+      {t('Displaying')} {displayed} {t('out of')} {totalCount} {t('filtered jobs')} ({totalJobs} {t('total jobs')})
+    </div>
   );
 }
 
@@ -235,7 +249,7 @@ class DashboardCustomerPage extends Component {
     return (
       <Row>
         <Col md={10}>
-          <h3 className="page-title">Job Dashboard</h3>
+          <PageTitle />
         </Col>
         <Col md={2}>
           <AddJobButton handle={this.toggleNewJobModal}/>
@@ -378,9 +392,7 @@ class DashboardCustomerPage extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <DashboardLoading  />
     );
   }
 
@@ -435,6 +447,8 @@ class DashboardCustomerPage extends Component {
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
+      newJob.distance = TFormat.asDistance(job.distance);
+
       potentialIncome += tempRate * newJob.rateEstimate;
 
       return newJob;
@@ -459,9 +473,7 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <div className="ml-4 mt-4">
-                    Displaying {jobs.length} out of {totalCount} filtered jobs ({totalJobs} total jobs)
-                  </div>
+                  <TableLegend displayed={TFormat.asWholeNumber(jobs.length)} totalCount={TFormat.asWholeNumber(totalCount)} totalJobs={TFormat.asWholeNumber(totalJobs)} />
                   <TTable
                     columns={
                       [
@@ -490,8 +502,8 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Start Date'
                         },
                         {
-                          name: 'zipCode',
-                          displayName: 'Start Zip'
+                          name: 'distance',
+                          displayName: 'Distance'
                         },
                         {
                           name: 'newRate',
@@ -563,11 +575,11 @@ class DashboardCustomerPage extends Component {
     }
     return (
       <Container className="dashboard">
-        <Row>
+        {<Row>
           <Col md={12}>
-            <h3 className="page-title">Job Dashboard</h3>
+            <PageTitle />
           </Col>
-        </Row>
+        </Row>}
         {this.renderLoader()}
       </Container>
     );

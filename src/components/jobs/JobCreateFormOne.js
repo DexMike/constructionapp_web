@@ -14,6 +14,7 @@ import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import './jobs.css';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
 
@@ -769,20 +770,32 @@ class CreateJobFormOne extends PureComponent {
         <React.Fragment>
           <div className="col-md-4 form__form-group">
             <span className="form__form-group-label">Rate / Ton</span>
-            <input
-              name="rateByTonValue"
-              type="number" step="0.1"
-              value={rateByTonValue}
-              onChange={this.handleInputChangeTonHour}
+            <TFieldNumber
+              input={
+                {
+                  onChange: this.handleInputChangeTonHour,
+                  name: 'rateByTonValue',
+                  value: rateByTonValue
+                }
+              }
+              placeholder="0"
+              decimal
+              // meta={}
             />
           </div>
           <div className="col-md-5 form__form-group">
             <span className="form__form-group-label">Estimated Tons</span>
-            <input
-              name="estimatedTons"
-              type="number"
-              value={estimatedTons}
-              onChange={this.handleInputChangeTonHour}
+            <TFieldNumber
+              input={
+                {
+                  onChange: this.handleInputChangeTonHour,
+                  name: 'estimatedTons',
+                  value: estimatedTons
+                }
+              }
+              placeholder="0"
+              decimal
+              // meta={}
             />
           </div>
         </React.Fragment>
@@ -792,20 +805,32 @@ class CreateJobFormOne extends PureComponent {
       <React.Fragment>
         <div className="col-md-4 form__form-group">
           <span className="form__form-group-label">Rate / Hour</span>
-          <input
-            name="rateByHourValue"
-            type="number" step="0.1"
-            value={rateByHourValue}
-            onChange={this.handleInputChangeTonHour}
+          <TFieldNumber
+            input={
+              {
+                onChange: this.handleInputChangeTonHour,
+                name: 'rateByHourValue',
+                value: rateByHourValue
+              }
+            }
+            placeholder="0"
+            decimal
+            // meta={}
           />
         </div>
         <div className="col-md-5 form__form-group">
           <span className="form__form-group-label">Estimated Hours</span>
-          <input
-            name="estimatedHours"
-            type="number"
-            value={estimatedHours}
-            onChange={this.handleInputChangeTonHour}
+          <TFieldNumber
+            input={
+              {
+                onChange: this.handleInputChangeTonHour,
+                name: 'estimatedHours',
+                value: estimatedHours
+              }
+            }
+            placeholder="0"
+            decimal
+            // meta={}
           />
         </div>
       </React.Fragment>
@@ -901,7 +926,7 @@ class CreateJobFormOne extends PureComponent {
                     <span className="form__form-group-label">
                       Number of trucks
                     </span>
-                    <TField
+                    <TFieldNumber
                       input={
                         {
                           onChange: this.handleHourDetails,
@@ -909,7 +934,6 @@ class CreateJobFormOne extends PureComponent {
                           value: hourTrucksNumber
                         }
                       }
-                      type="number"
                       meta={reqHandlerTrucksEstimate}
                     />
                   </div>

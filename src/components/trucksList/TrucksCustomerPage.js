@@ -559,12 +559,18 @@ class TrucksCustomerPage extends Component {
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
-                      <input name="minCapacity"
-                             className="filter-text"
-                             type="number"
-                             placeholder="# of tons"
-                             value={filters.minCapacity}
-                             onChange={this.handleFilterChange}
+                      <TFieldNumber
+                        className="filter-text"
+                        input={
+                          {
+                            onChange: this.handleFilterChange,
+                            name: 'minCapacity',
+                            value: filters.minCapacity
+                          }
+                        }
+                        placeholder="# of tons"
+                        decimal
+                        meta={reqHandlerMinRate}
                       />
                     </Col>
                     <Col md="4">

@@ -14,6 +14,7 @@ import moment from 'moment';
 // import { Select } from '@material-ui/core';
 import NumberFormat from 'react-number-format';
 import TSelect from '../common/TSelect';
+import TFieldNumber from '../common/TFieldNumber';
 import PropTypes from "prop-types";
 import EquipmentService from '../../api/EquipmentService';
 import LookupsService from '../../api/LookupsService';
@@ -307,12 +308,17 @@ class TruckFilter extends Component {
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
-                      <input name="minCapacity"
-                             className="filter-text"
-                             type="number"
-                             placeholder="# of tons"
-                             value={filters.minCapacity}
-                             onChange={this.handleFilterChange}
+                      <TFieldNumber
+                        className="filter-text"
+                        input={
+                          {
+                            onChange: this.handleFilterChange,
+                            name: 'minCapacity',
+                            value: filters.minCapacity
+                          }
+                        }
+                        placeholder="# of tons"
+                        // meta={}
                       />
                     </Col>
                     <Col md="4">
