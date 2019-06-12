@@ -19,6 +19,14 @@ pipeline {
             echo 'Starting Demo'
           }
         }
+        stage('Initialize qa') {
+          when {
+            branch 'qa'
+          }
+          steps {
+            echo 'Starting qa'
+          }
+        }
       }
     }
     stage('Build / Package') {
@@ -49,6 +57,21 @@ npm run deployDemo'''
               channel: 'jenkins', 
               color: 'good', 
               message: 'Stargate demo deploy finished successfully', 
+              teamDomain: 'trelarlogistics', 
+              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
+          }
+        }
+        stage('Build / Package qa') {
+          when {
+            branch 'qa'
+          }
+          steps {
+            sh '''npm install
+npm run deployQa'''
+            slackSend botUser: true, 
+              channel: 'jenkins', 
+              color: 'good', 
+              message: 'Stargate qa deploy finished successfully', 
               teamDomain: 'trelarlogistics', 
               tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
           }

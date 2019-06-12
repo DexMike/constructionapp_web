@@ -473,7 +473,7 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <TableLegend displayed={jobs.length.toString()} totalCount={totalCount.toString()} totalJobs={totalJobs.toString()} />
+                  <TableLegend displayed={TFormat.asWholeNumber(jobs.length)} totalCount={TFormat.asWholeNumber(totalCount)} totalJobs={TFormat.asWholeNumber(totalJobs)} />
                   <TTable
                     columns={
                       [

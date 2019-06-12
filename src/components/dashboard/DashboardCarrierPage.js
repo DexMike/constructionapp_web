@@ -7,6 +7,7 @@ import {
   Container,
   Row
 } from 'reactstrap';
+import {useTranslation} from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
@@ -14,6 +15,31 @@ import DashboardObjectClickable from './DashboardObjectClickable';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
+
+function PageTitle() {
+  const {t} = useTranslation();
+  return (
+    <h3 className="page-title">{t('Job Dashboard')}</h3>
+  );
+}
+
+function DashboardLoading () {
+  const {t} = useTranslation();
+  return (
+    <Container className="dashboard">
+        {t('Loading...')}
+    </Container>
+  );
+}
+
+function TableLegend({displayed, totalCount, totalJobs}) {
+  const {t} = useTranslation();
+  return(
+    <div className="ml-4 mt-4">
+      {t('Displaying')} {displayed} {t('out of')} {totalCount} {t('filtered jobs')} ({totalJobs} {t('total jobs')})
+    </div>
+  );
+}
 
 class DashboardCarrierPage extends Component {
   constructor(props) {
@@ -203,11 +229,7 @@ class DashboardCarrierPage extends Component {
 
   renderTitle() {
     return (
-      <Row>
-        <Col md={12}>
-          <h3 className="page-title">Job Dashboard</h3>
-        </Col>
-      </Row>
+      <PageTitle />
     );
   }
 
@@ -342,9 +364,7 @@ class DashboardCarrierPage extends Component {
       );
     }
     return (
-      <Container>
-        Loading...
-      </Container>
+      <DashboardLoading  />
     );
   }
 
@@ -415,9 +435,7 @@ class DashboardCarrierPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <div className="ml-4 mt-4">
-                    Displaying {jobs.length} out of {totalCount} filtered jobs ({totalJobs} total jobs)
-                  </div>
+                <TableLegend displayed={TFormat.asWholeNumber(jobs.length)} totalCount={TFormat.asWholeNumber(totalCount)} totalJobs={TFormat.asWholeNumber(totalJobs)} />
                   <TTable
                     columns={
                       [
@@ -520,7 +538,7 @@ class DashboardCarrierPage extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Job Dashboard</h3>
+            <PageTitle />
           </Col>
         </Row>
         {this.renderLoader()}
