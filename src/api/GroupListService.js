@@ -18,6 +18,11 @@ class GroupListService extends AgentService {
     return (response);
   }
 
+  static async getGroupListsByCompanyIdName(companyId) {
+    const response = await this.get(`/companies/${companyId}/name${PATH}`);
+    return (response);
+  }
+
   static async getGroupListsFavorites() {
     const response = await this.get(`/favorites${PATH}`);
     return (response);

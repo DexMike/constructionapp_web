@@ -46,17 +46,14 @@ class TrucksList extends Component {
     */
     // DO NOT LAUNCH THE MODAL AT THIS TIME
     // this.toggleAddTruckModal();
-    // console.log(materials.length);
     this.setState({
       // companyId: profile.companyId,
       // totalTrucks: equipments.length,
       loaded: true
     });
   }
-  /**/
 
   renderTrucksFromCompanyType() {
-    // console.log(56);
     const { companyType } = this.state;
     return (
       <React.Fragment>
@@ -77,6 +74,7 @@ class TrucksList extends Component {
       </div>
     );
   }
+  
 
   render() {
     const { companyType, loaded } = this.state;
