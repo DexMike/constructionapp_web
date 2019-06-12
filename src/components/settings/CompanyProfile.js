@@ -374,6 +374,8 @@ class CompanyProfile extends Component {
       state,
       // country,
       zipCode,
+      reqHandlerLegalName,
+      reqHandlerPhone,
       reqHandlerAddress,
       reqHandlerCity,
       reqHandlerZip
@@ -409,9 +411,9 @@ class CompanyProfile extends Component {
                 name: 'legalName',
                 value: legalName
               }}
-              placeholder="First Name"
+              placeholder="Company Name"
               type="text"
-              // meta={reqHandlerFName}
+              meta={reqHandlerLegalName}
             />
           </Col>
           <Col md={6}>
@@ -424,9 +426,8 @@ class CompanyProfile extends Component {
                 name: 'url',
                 value: url
               }}
-              placeholder="Last Name"
+              placeholder="Website"
               type="text"
-              // meta={reqHandlerLName}
             />
           </Col>
         </Row>
@@ -443,7 +444,7 @@ class CompanyProfile extends Component {
               }}
               placeholder="Phone number"
               type="text"
-              // meta={reqHandlerPhone}
+              meta={reqHandlerPhone}
             />
           </Col>
           <Col md={6}>
@@ -592,11 +593,11 @@ CompanyProfile.propTypes = {
     id: PropTypes.number,
     legalName: PropTypes.string,
     dba: PropTypes.string,
-    addressId: PropTypes.string,
+    addressId: PropTypes.number,
     phone: PropTypes.string,
     url: PropTypes.string,
     fax: PropTypes.string,
-    rating: PropTypes.number,
+    rating: PropTypes.string,
     type: PropTypes.string
   }),
   address: PropTypes.shape({
@@ -616,11 +617,11 @@ CompanyProfile.defaultProps = {
     id: 0,
     legalName: '',
     dba: '',
-    addressId: '0',
+    addressId: 0,
     phone: '',
     url: '',
     fax: '',
-    rating: 0,
+    rating: '0',
     type: 'Customer'
   },
   address: {
