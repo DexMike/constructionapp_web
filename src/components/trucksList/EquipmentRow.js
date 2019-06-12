@@ -10,7 +10,6 @@ import truckImage from '../../img/default_truck.png';
 
 class EquipmentRow extends Component {
   sendFavorite(companyId) {
-    console.log('>>CHILD CLICK');
     const {
       setFavorite
     } = this.props;
