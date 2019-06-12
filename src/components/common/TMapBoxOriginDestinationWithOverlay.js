@@ -4,7 +4,7 @@ import mapboxgl from 'mapbox-gl';
 import { Container } from 'reactstrap';
 import './css/mapBox.css';
 
-class TMapBoxOriginDestination extends PureComponent {
+class TMapBoxOriginDestinationWithOverlay extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,11 +16,11 @@ class TMapBoxOriginDestination extends PureComponent {
 
   componentDidMount() {
     const { input } = this.props;
-    const waypoints = input.gpsData.gps;
-    this.setMap(input.origin, input.destination, waypoints, input.coords);
+    // const waypoints = input.gpsData.gps;
+    this.setMap(input.origin, input.destination);
   }
 
-  setMap(origin, destination, waypoints, coords) {
+  setMap(origin, destination) {
     mapboxgl.accessToken = process.env.MAPBOX_API;
     const map = new mapboxgl.Map({
       container: 'map',
@@ -50,52 +50,48 @@ class TMapBoxOriginDestination extends PureComponent {
       directions.setOrigin(origin);
       directions.setDestination(destination);
 
-      // not sure if we need anymore (don't remove yet)
-      /*
-      map.addLayer({
-        id: 'route',
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: coords
-            }
-          }
-        },
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#888',
-          'line-width': 8
-        }
-      });
-      */
-
+      // map.addLayer({
+      //   id: 'route',
+      //   type: 'line',
+      //   source: {
+      //     type: 'geojson',
+      //     data: {
+      //       type: 'Feature',
+      //       properties: {},
+      //       geometry: {
+      //         type: 'LineString',
+      //         coordinates: coords
+      //       }
+      //     }
+      //   },
+      //   layout: {
+      //     'line-join': 'round',
+      //     'line-cap': 'round'
+      //   },
+      //   paint: {
+      //     'line-color': '#888',
+      //     'line-width': 8
+      //   }
+      // });
       // Plot the actual route (as recorded by GPS)
-      map.addLayer({
-        id: 'points',
-        type: 'symbol',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: waypoints
-          }
-        },
-        layout: {
-          'icon-image': '{icon}-15',
-          'text-field': '{title}',
-          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-          'text-offset': [0, 0.6],
-          'text-anchor': 'top'
-        }
-      });
+      // map.addLayer({
+      //   id: 'points',
+      //   type: 'symbol',
+      //   source: {
+      //     type: 'geojson',
+      //     data: {
+      //       type: 'FeatureCollection',
+      //       features: waypoints
+      //     }
+      //   },
+      //   layout: {
+      //     'icon-image': '{icon}-15',
+      //     'text-field': '{title}',
+      //     'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+      //     'text-offset': [0, 0.6],
+      //     'text-anchor': 'top'
+      //   }
+      // });
     });
   }
 
@@ -108,7 +104,7 @@ class TMapBoxOriginDestination extends PureComponent {
   }
 }
 
-TMapBoxOriginDestination.propTypes = {
+TMapBoxOriginDestinationWithOverlay.propTypes = {
   input: PropTypes.shape({
     origin: PropTypes.string,
     destination: PropTypes.string,
@@ -117,4 +113,4 @@ TMapBoxOriginDestination.propTypes = {
   }).isRequired
 };
 
-export default TMapBoxOriginDestination;
+export default TMapBoxOriginDestinationWithOverlay;

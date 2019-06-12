@@ -10,22 +10,21 @@ import mapboxgl from 'mapbox-gl';
 
 import TMapBoxOriginDestinationWithOverlay
   from '../common/TMapBoxOriginDestinationWithOverlay';
-import TTable from '../common/TTable';
+// import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
-import GPSPointService from '../../api/GPSPointService';
-import GPSTrackingService from '../../api/GPSTrackingService';
 import LoadService from '../../api/LoadService';
 import LoadsTable from '../loads/LoadsTable';
 import CompanyService from '../../api/CompanyService';
+import BookingEquipmentService from '../../api/BookingEquipmentService';
 
 mapboxgl.accessToken = process.env.MAPBOX_API;
 
-const mbxClient = require('@mapbox/mapbox-sdk');
-const mbxMapMatch = require('@mapbox/mapbox-sdk/services/map-matching');
+// const mbxClient = require('@mapbox/mapbox-sdk');
+// const mbxMapMatch = require('@mapbox/mapbox-sdk/services/map-matching');
 
 class JobCustomerForm extends Component {
   constructor(props) {
@@ -53,11 +52,10 @@ class JobCustomerForm extends Component {
       ...job,
       images: [],
       carrier: [],
-      gpsTrackings: null,
+      // gpsTrackings: null,
       coords: null,
-      loads: null,
-      loaded: false,
-      gpsDataLoaded: false
+      loads: [],
+      loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -66,100 +64,100 @@ class JobCustomerForm extends Component {
   async componentDidMount() {
     const {job, companyCarrier} = this.props;
     let {images} = this.props;
-    let {gpsTrackings, loads} = this.state;
+    let {loads} = this.state;
 
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const carrier = await CompanyService.getCompanyById(companyCarrier);
     // get overlay data
-    let gpsData = [];
+    // let gpsData =
     if (bookings.length > 0) {
-      gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-        bookings[0].id
-        // 6
-      );
-      loads = await LoadService.getLoadsByBookingId(
-        bookings[0].id // booking.id 6
-      );
+      const bookingEquipments = BookingEquipmentService
+        .getBookingEquipmentsByBookingId(bookings[0].id);
+      if (bookingEquipments.length > 0) {
+        loads = await LoadService.getLoadsByBookingId(
+          bookings[0].id // booking.id 6
+        );
+      }
     }
 
     // prepare the waypoints in an appropiate format for MB (GEOJson point)
-    const gps = [];
-    const coords = [];
+    // const gps = [];
+    // const coords = [];
 
-    const matchWaypoints = [];
-    if (gpsData.length > 0) {
-      for (const datum in gpsData) {
-        const matchWayPoint = {
-          coordinates: [gpsData[datum][1], gpsData[datum][0]]
-        };
-        matchWaypoints.push(matchWayPoint);
-      }
-    }
+    // const matchWaypoints = [];
+    // if (gpsData.length > 0) {
+    //   for (const datum in gpsData) {
+    //     const matchWayPoint = {
+    //       coordinates: [gpsData[datum][1], gpsData[datum][0]]
+    //     };
+    //     matchWaypoints.push(matchWayPoint);
+    //   }
+    // }
 
     // reduce
-    const allWaypoints = [];
-    if (matchWaypoints.length >= 100) {
-      for (let i = 0; i < 100; i += 1) {
-        allWaypoints.push(matchWaypoints[i]);
-      }
-    }
+    // const allWaypoints = [];
+    // if (matchWaypoints.length >= 100) {
+    //   for (let i = 0; i < 100; i += 1) {
+    //     allWaypoints.push(matchWaypoints[i]);
+    //   }
+    // }
 
     // Mapbox map matching should support up to 100 points
     // https://docs.mapbox.com/api/navigation/#map-matching
     // "Map matching works best with a sample rate of 5 seconds between points"
     // console.log(allWaypoints);
-    const that = this;
-    const baseClient = mbxClient({ accessToken: mapboxgl.accessToken });
-    const mapMatchingService = mbxMapMatch(baseClient);
+    // const that = this;
+    // const baseClient = mbxClient({ accessToken: mapboxgl.accessToken });
+    // const mapMatchingService = mbxMapMatch(baseClient);
 
-    if (matchWaypoints.length > 2) {
-      mapMatchingService.getMatch({
-        points: allWaypoints,
-        tidy: false
-      })
-        .send()
-        .then((response) => {
-          const points = response.body.tracepoints;
-          const newCoords = [];
-          if (points.length > 0) {
-            for (const p in points) {
-              if (points[p] !== null) {
-                newCoords.push(points[p].location);
-
-                const loc = {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: [
-                      points[p].location[0],
-                      points[p].location[1]
-                    ]
-                  },
-                  properties: {
-                    icon: 'car'
-                  }
-                };
-                gps.push(loc);
-              }
-            }
-            that.setState({
-              coords: newCoords,
-              gpsDataLoaded: true,
-              overlayMapData: {gps}
-            });
-
-            // /////////////////////////////////
-          } else {
-            that.setState({
-              gpsDataLoaded: true
-            });
-          }
-        });
-    } else {
-      that.setState({
-        gpsDataLoaded: true
-      });
-    }
+    // if (matchWaypoints.length > 2) {
+    //   mapMatchingService.getMatch({
+    //     points: allWaypoints,
+    //     tidy: false
+    //   })
+    //     .send()
+    //     .then((response) => {
+    //       const points = response.body.tracepoints;
+    //       const newCoords = [];
+    //       if (points.length > 0) {
+    //         for (const p in points) {
+    //           if (points[p] !== null) {
+    //             newCoords.push(points[p].location);
+    //
+    //             const loc = {
+    //               type: 'Feature',
+    //               geometry: {
+    //                 type: 'Point',
+    //                 coordinates: [
+    //                   points[p].location[0],
+    //                   points[p].location[1]
+    //                 ]
+    //               },
+    //               properties: {
+    //                 icon: 'car'
+    //               }
+    //             };
+    //             gps.push(loc);
+    //           }
+    //         }
+    //         that.setState({
+    //           coords: newCoords,
+    //           gpsDataLoaded: true,
+    //           overlayMapData: {gps}
+    //         });
+    //
+    //         // /////////////////////////////////
+    //       } else {
+    //         that.setState({
+    //           gpsDataLoaded: true
+    //         });
+    //       }
+    //     });
+    // } else {
+    //   that.setState({
+    //     gpsDataLoaded: true
+    //   });
+    // }
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
@@ -167,15 +165,15 @@ class JobCustomerForm extends Component {
         booking.id
       );
       images = bookingInvoices.map(item => item.image);
-      gpsTrackings = await this.fetchGPSPoints(booking.id);
+      // gpsTrackings = await this.fetchGPSPoints(booking.id);
     }
 
     this.setState({
       images,
       carrier,
       loaded: true,
-      gpsTrackings,
-      coords,
+      // gpsTrackings,
+      // coords,
       loads
     });
   }
@@ -261,10 +259,6 @@ class JobCustomerForm extends Component {
       }
     }
     return materialsString;
-  }
-
-  async fetchGPSPoints(bookingId) {
-    return GPSPointService.getGPSTrackingsByBookingId(bookingId);
   }
 
   renderGoTo() {
@@ -512,68 +506,6 @@ class JobCustomerForm extends Component {
     return false;
   }
 
-  renderGPSPoints(gpsTrackings) {
-    if (gpsTrackings && gpsTrackings != null && gpsTrackings.length > 0) {
-      gpsTrackings = gpsTrackings.map((gps) => {
-        const newGPS = gps;
-        // newGPS.newRecordedAt = moment(gps.recordedAt)
-        newGPS.newRecordedAt = TFormat.asDayWeek(gps.recordedAt);
-        newGPS.accuracy = '90%';
-        newGPS.battery = '87%';
-        return newGPS;
-      });
-
-      return (
-        <React.Fragment>
-          <hr/>
-          <h3 className="subhead">
-            GPS Tracking Data
-          </h3>
-          <Row>
-            <Col md={12} lg={12}>
-              <Card>
-                <CardBody className="products-list">
-                  <div className="tabs tabs--bordered-bottom">
-                    <div className="tabs__wrap">
-                      <TTable
-                        columns={
-                          [
-                            {
-                              name: 'newRecordedAt',
-                              displayName: 'Time'
-                            },
-                            {
-                              name: 'latitude',
-                              displayName: 'Latitude'
-                            },
-                            {
-                              name: 'longitude',
-                              displayName: 'Longitude'
-                            },
-                            {
-                              name: 'accuracy',
-                              displayName: 'Accuracy'
-                            },
-                            {
-                              name: 'battery',
-                              displayName: 'Battery level'
-                            }
-                          ]
-                        }
-                        data={gpsTrackings}
-                        handleIdClick={this.handleInputChange}
-                      />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-        </React.Fragment>
-      );
-    }
-  }
-
   renderStartAddress(address) {
     return (
       <React.Fragment>
@@ -662,6 +594,7 @@ class JobCustomerForm extends Component {
               <hr/>
               <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
                 <div className="col-md-8" style={{padding: 0}}>
+                  {/* NOTE seems like we dont need overlayMapData or coords */}
                   {this.renderMBMap(origin, destination, overlayMapData, coords)}
                 </div>
                 <div className="col-md-4">
@@ -684,8 +617,6 @@ class JobCustomerForm extends Component {
                 </div>
               </Row>
               <hr/>
-              {/*{this.renderJobRuns(job)}*/}
-              {this.renderGPSPoints(gpsTrackings)}
               {this.renderLoads(loads, job)}
               {this.renderUploadedPhotos(images)}
               <hr/>
@@ -716,7 +647,7 @@ class JobCustomerForm extends Component {
               <hr/>
               <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
                 <div className="col-md-8" style={{padding: 0}}>
-                  {this.renderMBMap(origin, destination, overlayMapData, coords)}
+                  {this.renderMBMap(origin, destination)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -754,7 +685,7 @@ class JobCustomerForm extends Component {
             <hr/>
             <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
               <div className="col-md-8" style={{padding: 0}}>
-                {this.renderMBMap(origin, destination, overlayMapData, coords)}
+                {this.renderMBMap(origin, destination)}
               </div>
               <div className="col-md-4">
                 <div className="row">
@@ -774,24 +705,8 @@ class JobCustomerForm extends Component {
                   </div>
                 </div>
               </div>
-              {/*<div className="col-md-12">*/}
-              {/*  {this.renderImages(images)}*/}
-              {/*</div>*/}
             </Row>
             <hr/>
-            {/*<div className="row">*/}
-            {/*  <div className="col-md-4">*/}
-            {/*    {this.renderJobTons(job)}*/}
-            {/*  </div>*/}
-            {/*  <div className="col-md-4">*/}
-            {/*    {this.renderJobLoads(job)}*/}
-            {/*  </div>*/}
-            {/*  <div className="col-md-4">*/}
-            {/*    {this.renderRunSummary(job)}*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-            {/*<hr/>*/}
-            {/*{this.renderJobRuns(job)}*/}
           </CardBody>
         </Card>
       </Container>
@@ -811,8 +726,8 @@ class JobCustomerForm extends Component {
   }
 
   render() {
-    const { loaded, gpsDataLoaded } = this.state;
-    if (loaded && gpsDataLoaded) {
+    const { loaded } = this.state;
+    if (loaded) {
       return (
         <Container className="dashboard">
           {this.renderEverything()}
