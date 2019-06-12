@@ -14,6 +14,7 @@ import moment from 'moment';
 // import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
+
 import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
@@ -614,11 +615,7 @@ class UserSettings extends Component {
           <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
-<<<<<<< HEAD
-                <span><Trans>Address</Trans></span>
-=======
-                <span>Address #1</span>
->>>>>>> origin/SG-517
+                <span><Trans>Address #1</Trans></span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -768,13 +765,8 @@ class UserSettings extends Component {
         <Row>
           <Col md={12} className="text-right">
             <Link to="/">
-<<<<<<< HEAD
-              <Button>
-              <Trans>Cancel</Trans>
-=======
               <Button className="mr-2">
-              Cancel
->>>>>>> origin/SG-517
+              <Trans>Cancel</Trans>
               </Button>
             </Link>
             <Button
