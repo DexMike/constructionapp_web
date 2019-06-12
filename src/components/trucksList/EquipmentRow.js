@@ -9,6 +9,14 @@ import PropTypes from 'prop-types';
 import truckImage from '../../img/default_truck.png';
 
 class EquipmentRow extends Component {
+  sendFavorite(companyId) {
+    console.log('>>CHILD CLICK');
+    const {
+      setFavorite
+    } = this.props;
+    setFavorite(companyId);
+  }
+
   render() {
     const {
       id,
@@ -22,12 +30,8 @@ class EquipmentRow extends Component {
       maxCapacity,
       type,
       tonRate,
-      name,
-      materials,
-      setFavorite
+      name
     } = this.props;
-
-    // console.log('>>FAV: ', favorite);
 
     let imageTruck = '';
     // checking if there's an image for the truck
@@ -76,7 +80,7 @@ class EquipmentRow extends Component {
                     </Button>
                     <Button
                       color="link"
-                      onClick={setFavorite(companyId)}
+                      onClick={() => this.sendFavorite(companyId)}
                       className="material-icons favoriteIcon"
                     >
                       {favorite ? 'favorite' : 'favorite_border'}
@@ -201,7 +205,6 @@ EquipmentRow.propTypes = {
   type: PropTypes.string,
   tonRate: PropTypes.number,
   name: PropTypes.string,
-  materials: PropTypes.string,
   setFavorite: PropTypes.func
 };
 
@@ -218,8 +221,7 @@ EquipmentRow.defaultProps = {
   type: PropTypes.string,
   tonRate: PropTypes.number,
   name: PropTypes.string,
-  materials: PropTypes.string,
-  setFavorite: null
+  setFavorite: PropTypes.func
 };
 
 export default EquipmentRow;

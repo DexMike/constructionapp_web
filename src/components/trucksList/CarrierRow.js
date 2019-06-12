@@ -89,11 +89,7 @@ class CarrierRow extends Component {
       materials
     } = this.state;
 
-    const {
-      carrierName,
-      carrierId,
-      favorite
-    } = this.props;
+    const { carrierName } = this.props;
 
     if (loaded) {
       return (
@@ -125,12 +121,8 @@ class CarrierRow extends Component {
                       >
                         Request
                       </Button>
-                      <Button
-                        color="link"
-                        onClick={() => this.handleSetFavorite(carrierId)}
-                        className="material-icons favoriteIcon"
-                      >
-                        {favorite ? 'favorite' : 'favorite_border'}
+                      <Button type="button" className="material-icons favoriteIcon btn btn-link">
+                        favorite
                       </Button>
                     </div>
                   </div>
@@ -152,14 +144,12 @@ class CarrierRow extends Component {
 
 CarrierRow.propTypes = {
   carrierId: PropTypes.number,
-  carrierName: PropTypes.string,
-  favorite: PropTypes.bool,
+  carrierName: PropTypes.string
 };
 
 CarrierRow.defaultProps = {
   carrierId: null,
-  carrierName: null,
-  favorite: null
+  carrierName: null
 };
 
 export default CarrierRow;

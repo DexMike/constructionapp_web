@@ -55,6 +55,10 @@ class TrucksList extends Component {
   }
   /**/
 
+  setFavorite() {
+    console.log('>>SE');
+  }
+
   renderTrucksFromCompanyType() {
     // console.log(56);
     const { companyType } = this.state;
@@ -77,6 +81,7 @@ class TrucksList extends Component {
       </div>
     );
   }
+  
 
   render() {
     const { companyType, loaded } = this.state;
