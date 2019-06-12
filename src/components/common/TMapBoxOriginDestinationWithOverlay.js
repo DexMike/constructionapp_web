@@ -31,8 +31,6 @@ class TMapBoxOriginDestination extends PureComponent {
       attributionControl: false
     });
 
-    map.on('click', this.clickHandler());
-
     map.on('load', () => {
       const directions = new MapboxDirections(
         {
@@ -43,7 +41,8 @@ class TMapBoxOriginDestination extends PureComponent {
           controls: {
             inputs: false,
             instructions: false
-          }
+          },
+          interactive: false // disable dragging
         }
       );
       map.addControl(directions, 'top-left');
@@ -51,6 +50,8 @@ class TMapBoxOriginDestination extends PureComponent {
       directions.setOrigin(origin);
       directions.setDestination(destination);
 
+      // not sure if we need anymore (don't remove yet)
+      /*
       map.addLayer({
         id: 'route',
         type: 'line',
@@ -74,6 +75,7 @@ class TMapBoxOriginDestination extends PureComponent {
           'line-width': 8
         }
       });
+      */
 
       // Plot the actual route (as recorded by GPS)
       map.addLayer({
@@ -95,10 +97,6 @@ class TMapBoxOriginDestination extends PureComponent {
         }
       });
     });
-  }
-
-  clickHandler() {
-    return false;
   }
 
   render() {

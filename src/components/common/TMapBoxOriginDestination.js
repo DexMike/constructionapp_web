@@ -4,6 +4,7 @@ import mapboxgl from 'mapbox-gl';
 import { Container } from 'reactstrap';
 import './css/mapBox.css';
 
+
 mapboxgl.accessToken = process.env.MAPBOX_API;
 // console.log(process.env.MAPBOX_API);
 // console.log(process.env.GOOGLE_MAPS_API);
@@ -33,8 +34,6 @@ class TMapBoxOriginDestination extends PureComponent {
       mode: 'driving',
       attributionControl: false
     });
-    
-    map.on('click', this.clickHandler());
 
     map.on('load', () => {
       const directions = new MapboxDirections(
@@ -46,7 +45,8 @@ class TMapBoxOriginDestination extends PureComponent {
           controls: {
             inputs: false,
             instructions: false
-          }
+          },
+          interactive: false // disable dragging
         }
       );
       map.addControl(directions, 'top-left');
@@ -55,10 +55,6 @@ class TMapBoxOriginDestination extends PureComponent {
       directions.setOrigin(origin);
       directions.setDestination(destination);
     });
-  }
-
-  clickHandler() {
-    return false;
   }
 
   render() {
