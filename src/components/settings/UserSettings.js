@@ -8,11 +8,13 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import moment from 'moment';
 // import CloneDeep from 'lodash.clonedeep';
 // import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
+
 import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
@@ -427,11 +429,11 @@ class UserSettings extends Component {
       <Modal isOpen={modal} toggle={this.toggle}>
         <Row className="pt-2">
           <Col className="text-left" md={12} style={{fontSize: 16}}>
-            <strong>Password Reset</strong>
+            <strong><Trans>Password Reset</Trans></strong>
           </Col>
           <Col md={12} className="text-left pt-4">
             <span >
-              Current Password
+              <Trans>Current Password</Trans>
             </span>
             <TField
               input={
@@ -448,7 +450,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={12} className="text-left">
             <span>
-              New Password
+              <Trans>New Password</Trans>
             </span>
             <TField
               input={
@@ -465,7 +467,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={12} className="text-left">
             <span>
-              Confirm Password
+              <Trans>Confirm Password</Trans>
             </span>
             <TField
               input={
@@ -482,10 +484,10 @@ class UserSettings extends Component {
         <Row style={{paddingTop: 32}}>
           <Col md={12} className="text-right">
             <Button onClick={this.toggle}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button color="primary" onClick={this.toggle}>
-              Save
+              <Trans>Save</Trans>
             </Button>
           </Col>
         </Row>
@@ -532,18 +534,18 @@ class UserSettings extends Component {
           {this.renderModal()}
           <Col md={6}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              { admin ? 'Admin' : 'User' } - {user.firstName} {user.lastName}
+              <Trans>{ admin ? 'Admin' : 'User' }</Trans> - {user.firstName} {user.lastName}
             </span>
           </Col>
           <Col md={6} className="text-right">
-            <strong>Email:</strong> {user.email}
+            <strong><Trans>Email</Trans>:</strong> {user.email}
           </Col>
         </Row>
         <Row className="pt-2">
           <Col md={12}>&nbsp;</Col>
           <Col md={6}>
             <span>
-              First Name
+              <Trans>First Name</Trans>
             </span>
             <TField
               className="settings-input"
@@ -559,7 +561,7 @@ class UserSettings extends Component {
           </Col>
           <Col md={6}>
             <span>
-              Last Name
+            <Trans>Last Name</Trans>
             </span>
             <TField
               input={{
@@ -576,7 +578,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={6}>
             <span>
-              Mobile Phone
+            <Trans>Mobile Phone</Trans>
             </span>
             <TField
               input={{
@@ -591,7 +593,7 @@ class UserSettings extends Component {
           </Col>
           <Col md={6}>
             <span>
-              Work Phone
+            <Trans>Work Phone</Trans>
             </span>
             <TField
               input={{
@@ -606,14 +608,14 @@ class UserSettings extends Component {
         </Row>
         <Row className="pt-4 pl-3 pr-3">
           <Col md={12} className="separator">
-            <span className="sub-header">Company Address</span>
+            <span className="sub-header"><Trans>Company Address</Trans></span>
           </Col>
         </Row>
         <Row>
           <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
-                <span>Address #1</span>
+                <span><Trans>Address #1</Trans></span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -628,7 +630,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={12} className="pt-2">
                 <span>
-                  Address #2
+                  <Trans>Address #2</Trans>
                 </span>
                 <TField
                   input={{
@@ -643,7 +645,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={6} className="pt-2">
                 <span>
-                  City
+                  <Trans>City</Trans>
                 </span>
                 <TField
                   input={{
@@ -659,7 +661,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={3} className="pt-2">
                 <span>
-                  State
+                  <Trans>State</Trans>
                 </span>
                 <TSelect
                   input={
@@ -676,7 +678,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={3} className="pt-2">
                 <span>
-                  Zip Code
+                  <Trans>Zip Code</Trans>
                 </span>
                 <TField
                   input={{
@@ -718,7 +720,7 @@ class UserSettings extends Component {
             <Row>
               <Col md={12}>
                 <span>
-                  Time Zone
+                  <Trans>Time Zone</Trans>
                 </span>
                 <TSelect
                   input={
@@ -736,7 +738,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={12} className="pt-2">
                 <span >
-                  Primary Language
+                  <Trans>Primary Language</Trans>
                 </span>
                 <TSelect
                   input={
@@ -757,21 +759,21 @@ class UserSettings extends Component {
         </Row>
         <Row className="mt-4 line-separator">
           <Col md={2} className="pt-4">
-            <Button onClick={this.toggle}>Reset Password</Button>
+            <Button onClick={this.toggle}><Trans>Reset Password</Trans></Button>
           </Col>
         </Row>
         <Row>
           <Col md={12} className="text-right">
             <Link to="/">
               <Button className="mr-2">
-              Cancel
+              <Trans>Cancel</Trans>
               </Button>
             </Link>
             <Button
               color="primary"
               onClick={this.saveUser}
             >
-              Save
+              <Trans>Save</Trans>
             </Button>
           </Col>
         </Row>

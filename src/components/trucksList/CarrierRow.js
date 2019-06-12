@@ -121,12 +121,8 @@ class CarrierRow extends Component {
                       >
                         Request
                       </Button>
-                      <Button
-                        color="link"
-                        onClick={() => this.handleSetFavorite(6)}
-                        className="material-icons favoriteIcon"
-                      >
-                        .
+                      <Button type="button" className="material-icons favoriteIcon btn btn-link">
+                        favorite
                       </Button>
                     </div>
                   </div>

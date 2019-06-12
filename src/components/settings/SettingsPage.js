@@ -11,6 +11,8 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 import './Settings.css';
+import { Trans } from 'react-i18next';
+
 
 import UserSettings from './UserSettings';
 import NotificationsSettings from './NotificationsSettings';
@@ -94,7 +96,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink">Profile</div>
+            <div className="navLink"><Trans>Profile</Trans></div>
           </NavLink>
         </NavItem>
         <NavItem>
@@ -129,7 +131,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink">Profile</div>
+            <div className="navLink"><Trans>Profile</Trans></div>
           </NavLink>
         </NavItem>
       </Nav>
@@ -194,7 +196,7 @@ class SettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title">User Settings / {title}</h3>
+              <h3 className="page-title"><Trans>User Settings</Trans> / {title}</h3>
             </Col>
           </Row>
           <Container>
@@ -211,7 +213,7 @@ class SettingsPage extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Settings / {title}</h3>
+            <h3 className="page-title"><Trans>User Settings</Trans></h3>
           </Col>
         </Row>
         {this.renderLoader()}
