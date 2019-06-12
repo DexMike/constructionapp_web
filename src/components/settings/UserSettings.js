@@ -429,11 +429,11 @@ class UserSettings extends Component {
       <Modal isOpen={modal} toggle={this.toggle}>
         <Row className="pt-2">
           <Col className="text-left" md={12} style={{fontSize: 16}}>
-            <strong>Password Reset</strong>
+            <strong><Trans>Password Reset</Trans></strong>
           </Col>
           <Col md={12} className="text-left pt-4">
             <span >
-              Current Password
+              <Trans>Current Password</Trans>
             </span>
             <TField
               input={
@@ -450,7 +450,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={12} className="text-left">
             <span>
-              New Password
+              <Trans>New Password</Trans>
             </span>
             <TField
               input={
@@ -467,7 +467,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={12} className="text-left">
             <span>
-              Confirm Password
+              <Trans>Confirm Password</Trans>
             </span>
             <TField
               input={
@@ -484,10 +484,10 @@ class UserSettings extends Component {
         <Row style={{paddingTop: 32}}>
           <Col md={12} className="text-right">
             <Button onClick={this.toggle}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button color="primary" onClick={this.toggle}>
-              Save
+              <Trans>Save</Trans>
             </Button>
           </Col>
         </Row>
@@ -608,7 +608,7 @@ class UserSettings extends Component {
         </Row>
         <Row className="pt-4 pl-3 pr-3">
           <Col md={12} className="separator">
-            <span className="sub-header">Company Address</span>
+            <span className="sub-header"><Trans>Company Address</Trans></span>
           </Col>
         </Row>
         <Row>
@@ -630,7 +630,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={12} className="pt-2">
                 <span>
-                  Address #2
+                  <Trans>Address #2</Trans>
                 </span>
                 <TField
                   input={{
@@ -645,7 +645,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={6} className="pt-2">
                 <span>
-                  City
+                  <Trans>City</Trans>
                 </span>
                 <TField
                   input={{
@@ -661,7 +661,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={3} className="pt-2">
                 <span>
-                  State
+                  <Trans>State</Trans>
                 </span>
                 <TSelect
                   input={
@@ -678,7 +678,7 @@ class UserSettings extends Component {
               </Col>
               <Col md={3} className="pt-2">
                 <span>
-                  Zip Code
+                  <Trans>Zip Code</Trans>
                 </span>
                 <TField
                   input={{
