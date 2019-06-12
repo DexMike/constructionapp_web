@@ -66,7 +66,7 @@
   border: none !important;
 }
 
-table.table > thead > tr > th {
+table.table > thead > tr > th, .separator {
   border-bottom: 3px solid #B2B2B2 !important;
   font-size: 18px;
   padding: 0px !important;
@@ -76,6 +76,12 @@ table.table > tbody > tr > td, .item-row {
   border-bottom: 1px solid #D8D8D8 !important;
   color: #000 !important;
   font-size: 14px;
+}
+
+.sub-header {
+  color: #666666;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 

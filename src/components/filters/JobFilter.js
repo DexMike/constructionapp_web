@@ -62,12 +62,17 @@ class JobFilter extends Component {
         equipmentType: '',
         numEquipments: '',
         zipCode: '',
+        range: 50,
         materialType: [],
         sortBy: sortByList[0],
         page: 0,
         rows: 5
       },
       reqHandlerZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerRange: {
         touched: false,
         error: ''
       }
@@ -85,9 +90,9 @@ class JobFilter extends Component {
   async componentDidMount() {
     const {
       intervals,
-      filters
+      filters,
     } = this.state;
-    let { address } = this.state;
+    let { address, company } = this.state;
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
 
@@ -97,7 +102,7 @@ class JobFilter extends Component {
     filters.endAvailability = this.getUTCEndInterval(endAv);
 
     if (profile.companyId) {
-      const company = await CompanyService.getCompanyById(profile.companyId);
+      company = await CompanyService.getCompanyById(profile.companyId);
       if (company.addressId) {
         address = await AddressService.getAddressById(company.addressId);
         filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
@@ -106,7 +111,7 @@ class JobFilter extends Component {
       }
     }
 
-    this.setState({address, filters, profile});
+    this.setState({company, address, filters, profile});
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -200,9 +205,20 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const { address, filters, profile, reqHandlerZip } = this.state;
+    const { filters, reqHandlerZip } = this.state;
+    let { company, address, profile } = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
+
+    if (!profile) {
+      profile = await ProfileService.getProfile();
+      if (!company) {
+        company = await CompanyService.getCompanyById(profile.companyId);
+        if (!address) {
+          address = await AddressService.getAddressById(company.addressId);
+        }
+      }
+    }
 
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
@@ -215,8 +231,9 @@ class JobFilter extends Component {
     }
 
     // if the filter zip code is not the same as the initial zip code (company's
-    // zip code) we search for that zip code coordinates with MapBox API
-    if (address.zipCode !== filters.zipCode) {
+    // zip code) or we don't have any coordinates on our db
+    // we search for that zip code coordinates with MapBox API
+    if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
       try {
         const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
         filters.companyLatitude = geoLocation.features[0].center[1];
@@ -244,9 +261,10 @@ class JobFilter extends Component {
   async handleFilterChangeDelayed(e) {
     const self = this;
     const {value} = e.target;
-    const {filters, reqHandlerZip} = this.state;
+    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
     const filter = e.target.name;
     let invalidZip = false;
+    let invalidRange = false;
 
     if (self.state.typingTimeout) {
       clearTimeout(self.state.typingTimeout);
@@ -271,12 +289,31 @@ class JobFilter extends Component {
       invalidZip = false;
     }
 
+    if (filter === 'range' && (value.length > 3 || value < 0)) {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          error: 'Range can not be more than 999 and less than 0',
+          touched: true
+        }
+      });
+      invalidRange = true;
+    } else {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          touched: false
+        }
+      });
+      invalidRange = false;
+    }
+
     filters[e.target.name] = value;
 
     self.setState({
       typing: false,
       typingTimeout: setTimeout(async () => {
-        if (!invalidZip) {
+        if (!invalidZip && !invalidRange) {
           await this.fetchJobs();
         }
       }, 1000),
@@ -350,7 +387,8 @@ class JobFilter extends Component {
       intervals,
       // filters
       filters,
-      reqHandlerZip
+      reqHandlerZip,
+      reqHandlerRange
     } = this.state;
     // let start = filters.startAvailability;
     return (
@@ -482,7 +520,7 @@ class JobFilter extends Component {
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
-                        Distance From
+                        Zip Code
                       </div>
                       <TField
                         input={
@@ -498,7 +536,25 @@ class JobFilter extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col md="3">
+                    <Col md="1">
+                      <div className="filter-item-title">
+                        Range
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="50"
+                        type="number"
+                      />
+                    </Col>
+                    <Col md="2">
                       <div className="filter-item-title">
                         Materials
                       </div>

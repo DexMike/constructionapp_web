@@ -11,6 +11,8 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 import './Settings.css';
+import { Trans } from 'react-i18next';
+
 
 import UserSettings from './UserSettings';
 import NotificationsSettings from './NotificationsSettings';
@@ -87,7 +89,6 @@ class SettingsPage extends Component {
   }
 
   renderAdminTabs(activeTab) {
-    const { company } = this.state;
     return (
       <Nav tabs>
         <NavItem>
@@ -95,7 +96,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink">User Profile</div>
+            <div className="navLink"><Trans>User Profile</Trans></div>
           </NavLink>
         </NavItem>
         <NavItem>
@@ -118,18 +119,6 @@ class SettingsPage extends Component {
           </NavItem>
           */
         }
-        {
-          company.type === 'Customer' ? (
-            <NavItem>
-              <NavLink
-                className={classnames({ active: activeTab === '4' }, 'tab')}
-                onClick={() => { this.toggle('4'); }}
-              >
-                Payment Method
-              </NavLink>
-            </NavItem>
-          ) : null
-        }
       </Nav>
     );
   }
@@ -142,7 +131,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink">User Profile</div>
+            <div className="navLink"><Trans>User Profile</Trans></div>
           </NavLink>
         </NavItem>
       </Nav>
@@ -156,7 +145,6 @@ class SettingsPage extends Component {
         {
           isAdmin ? this.renderAdminTabs(activeTab) : this.renderUserTabs(activeTab)
         }
-
         <TabContent
           activeTab={activeTab}
           style={{
@@ -178,19 +166,25 @@ class SettingsPage extends Component {
           <TabPane tabId="2">
             <NotificationsSettings
               company={company}
+              user={user}
             />
           </TabPane>
           <TabPane tabId="3">
             <PermissionsRolesSettings users={users}/>
           </TabPane>
-          <TabPane tabId="4">
-            <Row>
-              <Col sm="12" style={{margin: 80}}>
-                &nbsp;
-              </Col>
-            </Row>
-          </TabPane>
         </TabContent>
+      </div>
+    );
+  }
+
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
       </div>
     );
   }
@@ -202,7 +196,7 @@ class SettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Settings / {title}</h3>
+              <h3 className="page-title"><Trans>Settings</Trans> / {title}</h3>
             </Col>
           </Row>
           <Container>
@@ -217,7 +211,12 @@ class SettingsPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title"><Trans>Settings</Trans> / {title}</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

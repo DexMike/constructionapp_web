@@ -7,6 +7,11 @@ import Ava from '../../../img/ava.png';
 import i18n from "i18next";
 import {Link} from "react-router-dom";
 
+import ProfileService from '../../../api/ProfileService';
+import UserService from '../../../api/UserService';
+import CompanyService from '../../../api/CompanyService';
+import AddressService from '../../../api/AddressService';
+
 // const Ava = `${process.env.PUBLIC_URL}/img/ava.png`;
 
 function ToggleLanguage({handle}) {
@@ -32,6 +37,21 @@ class TopbarProfile extends PureComponent {
     this.changeLang = this.changeLang.bind(this);
   }
 
+  async componentDidMount() {
+    const currentSession = await Auth.currentSession();
+    const profile = await ProfileService.getProfile();
+    const user = await UserService.getUserById(profile.userId);
+    const company = await CompanyService.getCompanyById(profile.companyId);
+    let isAdmin = false;
+    if (company.adminId === user.id) {
+      isAdmin = true;
+    }
+    this.setState({ 
+      email: currentSession.idToken.payload.email,
+      isAdmin
+    });
+  }
+
   changeLang() {
     if (i18n.language == 'es') {
       i18n.changeLanguage('us');
@@ -40,11 +60,6 @@ class TopbarProfile extends PureComponent {
       i18n.changeLanguage('es');
       this.setState({lang: 'Spanish'});
     }
-  };
-
-  async componentDidMount() {
-    const currentSession = await Auth.currentSession();
-    this.setState({ email: currentSession.idToken.payload.email });
   }
 
   toggle() {
@@ -53,7 +68,7 @@ class TopbarProfile extends PureComponent {
   }
 
   render() {
-    const { collapse, email } = this.state;
+    const { collapse, email, isAdmin } = this.state;
     return (
       <div className="topbar__profile">
         <button type="button" className="topbar__avatar" onClick={this.toggle}>
@@ -63,7 +78,17 @@ class TopbarProfile extends PureComponent {
         {collapse && <button type="button" className="topbar__back" onClick={this.toggle}/>}
         <Collapse isOpen={collapse} className="topbar__menu-wrap">
           <div className="topbar__menu">
-            <TopbarMenuLink title="Settings" icon="cog" path="/settings"/>
+            {
+              isAdmin ? (
+                <TopbarMenuLink title="Company Settings" icon="cog" path="/settings/company"/>
+              ) : null
+            }
+            {
+              isAdmin ? (
+                <div className="topbar__menu-divider"/>
+              ) : null
+            }
+            <TopbarMenuLink title="User Settings" icon="user" path="/settings"/>
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Toggle Theme" icon="layers" path="/"/>
             <div className="topbar__menu-divider"/>

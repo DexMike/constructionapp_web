@@ -21,6 +21,7 @@ import TrucksList from '../trucksList/TrucksList';
 import CarriersCustomerPage from '../trucksList/CarriersCustomerPage';
 import MarketplaceCarrierPage from '../marketplace/MarketplaceCarrierPage';
 import SettingsPage from '../settings/SettingsPage';
+import CompanySettingsPage from '../settings/CompanySettingsPage';
 import JobCreatePage from '../jobs/JobCreatePage';
 import FileUploadPage from '../FileUploadPage';
 import ReportsPage from '../reports/ReportsPage';
@@ -175,8 +176,14 @@ class WrappedRoutes extends PureComponent {
 
           <Route
             exact
-            path="/settings"
+            path="/settings/"
             component={SettingsPage}
+          />
+
+          <Route
+            exact
+            path="/settings/company"
+            component={CompanySettingsPage}
           />
 
           <Route
