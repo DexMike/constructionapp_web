@@ -14,7 +14,6 @@ import moment from 'moment';
 // import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
-
 import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
@@ -50,7 +49,7 @@ class UserSettings extends Component {
       ...user,
       ...address,
       languages: [],
-      countries: [],
+      // countries: [],
       states: [],
       countryStates: [],
       timeZones: [],
@@ -65,10 +64,6 @@ class UserSettings extends Component {
         touched: false,
         error: ''
       },
-      // reqHandlerEmail: {
-      //   touched: false,
-      //   error: ''
-      // },
       reqHandlerPhone: {
         touched: false,
         error: ''
@@ -547,7 +542,7 @@ class UserSettings extends Component {
         </Row>
         <Row className="pt-2">
           <Col md={12}>&nbsp;</Col>
-          <Col md={5}>
+          <Col md={6}>
             <span>
               <Trans>First Name</Trans>
             </span>
@@ -563,8 +558,7 @@ class UserSettings extends Component {
               meta={reqHandlerFName}
             />
           </Col>
-          <Col md={1}>&nbsp;</Col>
-          <Col md={5}>
+          <Col md={6}>
             <span>
             <Trans>Last Name</Trans>
             </span>
@@ -581,7 +575,7 @@ class UserSettings extends Component {
           </Col>
         </Row>
         <Row className="pt-2">
-          <Col md={5}>
+          <Col md={6}>
             <span>
             <Trans>Mobile Phone</Trans>
             </span>
@@ -596,8 +590,7 @@ class UserSettings extends Component {
               meta={reqHandlerPhone}
             />
           </Col>
-          <Col md={1}>&nbsp;</Col>
-          <Col md={5}>
+          <Col md={6}>
             <span>
             <Trans>Work Phone</Trans>
             </span>
@@ -612,11 +605,20 @@ class UserSettings extends Component {
             />
           </Col>
         </Row>
-        <Row className="mt-4 line-separator">
-          <Col md={5} className="pt-4">
+        <Row className="pt-4 pl-3 pr-3">
+          <Col md={12} className="separator">
+            <span className="sub-header">Company Address</span>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
+<<<<<<< HEAD
                 <span><Trans>Address</Trans></span>
+=======
+                <span>Address #1</span>
+>>>>>>> origin/SG-517
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -629,9 +631,9 @@ class UserSettings extends Component {
                   meta={reqHandlerAddress}
                 />
               </Col>
-              <Col md={12}>
+              <Col md={12} className="pt-2">
                 <span>
-                  &nbsp;
+                  Address #2
                 </span>
                 <TField
                   input={{
@@ -644,9 +646,9 @@ class UserSettings extends Component {
                   type="text"
                 />
               </Col>
-              <Col md={6}>
+              <Col md={6} className="pt-2">
                 <span>
-                  &nbsp;
+                  City
                 </span>
                 <TField
                   input={{
@@ -660,9 +662,9 @@ class UserSettings extends Component {
                   meta={reqHandlerCity}
                 />
               </Col>
-              <Col md={3}>
+              <Col md={3} className="pt-2">
                 <span>
-                  &nbsp;
+                  State
                 </span>
                 <TSelect
                   input={
@@ -677,9 +679,9 @@ class UserSettings extends Component {
                   placeholder="State"
                 />
               </Col>
-              <Col md={3}>
+              <Col md={3} className="pt-2">
                 <span>
-                  &nbsp;
+                  Zip Code
                 </span>
                 <TField
                   input={{
@@ -717,8 +719,7 @@ class UserSettings extends Component {
               }
             </Row>
           </Col>
-          <Col md={1}>&nbsp;</Col>
-          <Col md={5} className="pt-4">
+          <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
                 <span>
@@ -738,7 +739,7 @@ class UserSettings extends Component {
                   placeholder="Select a Time Zone"
                 />
               </Col>
-              <Col md={12} className="pt-3">
+              <Col md={12} className="pt-2">
                 <span >
                   <Trans>Primary Language</Trans>
                 </span>
@@ -767,8 +768,13 @@ class UserSettings extends Component {
         <Row>
           <Col md={12} className="text-right">
             <Link to="/">
+<<<<<<< HEAD
               <Button>
               <Trans>Cancel</Trans>
+=======
+              <Button className="mr-2">
+              Cancel
+>>>>>>> origin/SG-517
               </Button>
             </Link>
             <Button
