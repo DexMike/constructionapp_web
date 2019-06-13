@@ -226,3 +226,10 @@ table.table > tbody > tr > td, .item-row {
   .slider.round:before {
     border-radius: 50%;
   }
+
+  .account-card {
+    float: none;
+    margin: 0 auto;
+    border-radius: 5px;
+    border: 1px solid #CCCCCC;
+  }
