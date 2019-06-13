@@ -14,10 +14,26 @@ class PaymentSettings extends Component {
     this.state = {
       modal: false,
       termsAgreed: false,
-      hasPaymentMethod: null
+      hasPaymentMethod: null,
+      accountName: '',
+      account: '',
+      routing: '',
+      reqHandlerAccountName: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerAccount: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerRouting: {
+        touched: false,
+        error: ''
+      }
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.saveAccount = this.saveAccount.bind(this);
     this.toggle = this.toggle.bind(this);
   }
 
@@ -37,10 +53,81 @@ class PaymentSettings extends Component {
 
   handleInputChange(e) {
     const { value } = e.target;
+    let reqHandler = '';
+
+    if (e.target.name === 'accountName') {
+      reqHandler = 'reqHandlerAccountName';
+    }
+    if (e.target.name === 'account') {
+      reqHandler = 'reqHandlerAccount';
+    }
+    if (e.target.name === 'routing') {
+      reqHandler = 'reqHandlerRouting';
+    }
+
     this.setState({
+      [reqHandler]: Object.assign({}, reqHandler, {
+        touched: false
+      }),
       [e.target.name]: value
     });
   }
+
+  isFormValid() {
+    const {
+      accountName,
+      account,
+      routing
+    } = this.state;
+    let {
+      reqHandlerAccountName,
+      reqHandlerAccount,
+      reqHandlerRouting
+    } = this.state;
+    let isValid = true;
+    if (accountName === null || accountName.length === 0) {
+      reqHandlerAccountName = {
+        touched: true,
+        error: 'Please enter account name'
+      };
+      isValid = false;
+    }
+
+    if (account === null || account.length === 0) {
+      reqHandlerAccount = {
+        touched: true,
+        error: 'Please enter account number'
+      };
+      isValid = false;
+    }
+
+    if (routing === null || routing.length === 0) {
+      reqHandlerRouting = {
+        touched: true,
+        error: 'Please enter routing number'
+      };
+      isValid = false;
+    }
+
+    this.setState({
+      reqHandlerAccountName,
+      reqHandlerAccount,
+      reqHandlerRouting
+    });
+    if (isValid) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async saveAccount() {
+    if (!this.isFormValid()) {
+      return;
+    }
+    // console.log(124);
+  }
+
 
   renderSummary() {
     const { company } = this.props;
@@ -65,7 +152,15 @@ class PaymentSettings extends Component {
   }
 
   renderForm() {
-    const { termsAgreed } = this.state;
+    const {
+      termsAgreed,
+      account,
+      accountName,
+      routing,
+      reqHandlerAccount,
+      reqHandlerAccountName,
+      reqHandlerRouting
+    } = this.state;
     return (
       <React.Fragment>
         <Row>
@@ -92,13 +187,23 @@ class PaymentSettings extends Component {
               input={
                 {
                   onChange: this.handleInputChange,
-                  name: 'a1',
-                  value: ''
+                  name: 'accountName',
+                  value: accountName
                 }
               }
+              // meta={reqHandlerAccountName} Had a bug with the error label position
             />
+            {
+              reqHandlerAccountName.touched
+                ? (
+                  <span style={{color: '#D32F2F'}}>
+                    * Please enter account name
+                  </span>
+                )
+                : null
+            }
             <br/>
-            <span >
+            <span>
               Account #
             </span>
             <br/>
@@ -106,24 +211,42 @@ class PaymentSettings extends Component {
               input={
                 {
                   onChange: this.handleInputChange,
-                  name: 'a2',
-                  value: ''
+                  name: 'account',
+                  value: account
                 }
               }
             />
+            {
+              reqHandlerAccount.touched
+                ? (
+                  <span style={{color: '#D32F2F'}}>
+                    * Please enter account number
+                  </span>
+                )
+                : null
+            }
             <br/>
-            <span >
+            <span>
               Routing #
             </span>
             <TField
               input={
                 {
                   onChange: this.handleInputChange,
-                  name: 'a3',
-                  value: ''
+                  name: 'routing',
+                  value: routing
                 }
               }
             />
+            {
+              reqHandlerRouting.touched
+                ? (
+                  <span style={{color: '#D32F2F'}}>
+                    * Please enter routing number
+                  </span>
+                )
+                : null
+            }
             <Row style={{paddingTop: 32}}>
               <Col md={1}>
                 <label className="checkbox-container" htmlFor="terms">
@@ -143,6 +266,7 @@ class PaymentSettings extends Component {
                 <Button
                   color="primary"
                   disabled={!termsAgreed}
+                  onClick={this.saveAccount}
                 >
                   Save
                 </Button>
@@ -187,14 +311,14 @@ class PaymentSettings extends Component {
 PaymentSettings.propTypes = {
   company: PropTypes.shape({
     id: PropTypes.number,
-    btCustomerId: PropTypes.number
+    btCustomerId: PropTypes.string
   })
 };
 
 PaymentSettings.defaultProps = {
   company: {
     id: 0,
-    btCustomerId: 0
+    btCustomerId: ''
   }
 };
 

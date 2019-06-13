@@ -231,8 +231,3 @@ table.table > tbody > tr > td, .item-row {
     border-radius: 5px;
     border: 1px solid #CCCCCC;
   }
-
-  .mx-auto {
-    float: none;
-    margin: 0 auto;
-  }
