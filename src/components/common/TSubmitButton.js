@@ -7,7 +7,7 @@ import TSpinner from './TSpinner';
 
 class TSubmitButton extends Component {
   render() {
-    const { bntText, className, onClick, loaderSize, loading } = this.props;
+    const { bntText, className, onClick, loaderSize, loading, id } = this.props;
     let { disabled, customCss } = this.props;
     if (loading === true) {
       disabled = true;
@@ -18,6 +18,7 @@ class TSubmitButton extends Component {
         className={className}
         onClick={onClick}
         disabled={disabled}
+        id= {id}
       >
         <div style={{display: 'inline-block'}}>{bntText}</div>
         <TSpinner

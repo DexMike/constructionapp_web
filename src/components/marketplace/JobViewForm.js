@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import { Container, Card, CardBody, Col, Row, Button } from 'reactstrap';
+import { Container, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 // import NumberFormat from 'react-number-format';
@@ -20,11 +20,11 @@ import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
 import TMapBoxOriginDestination
   from '../common/TMapBoxOriginDestination';
-import GPSTrackingService from '../../api/GPSTrackingService';
+// import GPSTrackingService from '../../api/GPSTrackingService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
 
-const MAPBOX_MAX = 23;
+// const MAPBOX_MAX = 23;
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -65,7 +65,7 @@ class JobViewForm extends Component {
       favoriteCompany
     } = this.state;
     const { jobId } = this.props;
-    const gps = [];
+    // const gps = [];
     profile = await ProfileService.getProfile();
 
     job = await JobService.getJobById(jobId);
@@ -119,42 +119,42 @@ class JobViewForm extends Component {
       }
 
       // get overlay data
-      let gpsData = [];
-      if (bookings.length > 0) {
-        gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-          bookings[0].id // booking.id
-        );
-      }
+      // let gpsData = [];
+      // if (bookings.length > 0) {
+      //   gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+      //     bookings[0].id // booking.id
+      //   );
+      // }
 
       // prepare the waypoints in an appropiate format for MB (GEOJson point)
-      if (gpsData.length > 0) {
-        for (const datum in gpsData) {
-          if (gpsData[datum][0]) {
-            const loc = {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [
-                  gpsData[datum][1],
-                  gpsData[datum][0]
-                ]
-              },
-              properties: {
-                title: 'Actual route',
-                icon: 'car'
-              }
-            };
-            // reduce the total of results to a maximum of 23
-            // Mapbox's limit is 25 points plus an origin and destination
-            const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
-            const reducer = datum / steps;
-            const remainder = (reducer % 1);
-            if (remainder === 0) {
-              gps.push(loc);
-            }
-          }
-        }
-      }
+      // if (gpsData.length > 0) {
+      //   for (const datum in gpsData) {
+      //     if (gpsData[datum][0]) {
+      //       const loc = {
+      //         type: 'Feature',
+      //         geometry: {
+      //           type: 'Point',
+      //           coordinates: [
+      //             gpsData[datum][1],
+      //             gpsData[datum][0]
+      //           ]
+      //         },
+      //         properties: {
+      //           title: 'Actual route',
+      //           icon: 'car'
+      //         }
+      //       };
+      //       // reduce the total of results to a maximum of 23
+      //       // Mapbox's limit is 25 points plus an origin and destination
+      //       const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
+      //       const reducer = datum / steps;
+      //       const remainder = (reducer % 1);
+      //       if (remainder === 0) {
+      //         gps.push(loc);
+      //       }
+      //     }
+      //   }
+      // }
     }
 
     // Check if carrier is favorite for this job's customer

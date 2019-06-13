@@ -271,6 +271,7 @@ class LoginPage extends SignIn {
           loading={btnSubmitting}
           loaderSize={10}
           bntText="Sign In"
+          id="signinbutton"
         />
         <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
                 onClick={this.onSignUp}

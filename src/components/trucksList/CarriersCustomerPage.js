@@ -889,6 +889,8 @@ class CarriersCustomerPage extends Component {
                   key={c.id}
                   carrierId={c.id}
                   carrierName={c.legalName}
+                  favorite={c.favorite}
+                  setFavorite={() => this.handleSetFavorite(c.companyId)}
                   distance={c.distance}
                 />
               ))

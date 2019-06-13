@@ -29,6 +29,11 @@ class BookingService extends AgentService {
     return (response);
   }
 
+  static async getBookingEquipmentsByBookingId(bookingId) {
+    const response = await this.get(`/bookings/${bookingId}${PATH}`);
+    return (response);
+  }
+
   static getDefaultBookingEquipment() {
     return {
       bookingId: 0,
