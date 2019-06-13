@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import {
   Button,
   Row,
-  Container,
-  ObjectRow
+  Container
 } from 'reactstrap';
 import '../addTruck/AddTruck.css';
 // import NumberFormat from 'react-number-format';
@@ -21,6 +20,8 @@ class CarrierRow extends Component {
       totals: [],
       materials: []
     };
+
+    this.sendFavorite = this.sendFavorite.bind(this);
   }
 
   async componentDidMount() {
@@ -32,6 +33,14 @@ class CarrierRow extends Component {
       totals,
       materials
     });
+  }
+
+  sendFavorite(companyId) {
+    // console.log(39, companyId);
+    const {
+      setFavorite
+    } = this.props;
+    setFavorite(companyId);
   }
 
   renderMaterials(materials) {
@@ -89,7 +98,11 @@ class CarrierRow extends Component {
       materials
     } = this.state;
 
-    const { carrierName } = this.props;
+    const {
+      carrierName,
+      carrierId,
+      favorite
+    } = this.props;
 
     if (loaded) {
       return (
@@ -121,8 +134,12 @@ class CarrierRow extends Component {
                       >
                         Request
                       </Button>
-                      <Button type="button" className="material-icons favoriteIcon btn btn-link">
-                        favorite
+                      <Button
+                        color="link"
+                        onClick={() => this.sendFavorite(carrierId)}
+                        className="material-icons favoriteIcon"
+                      >
+                        {favorite ? 'favorite' : 'favorite_border'}
                       </Button>
                     </div>
                   </div>
@@ -144,12 +161,16 @@ class CarrierRow extends Component {
 
 CarrierRow.propTypes = {
   carrierId: PropTypes.number,
-  carrierName: PropTypes.string
+  carrierName: PropTypes.string,
+  favorite: PropTypes.bool,
+  setFavorite: PropTypes.func
 };
 
 CarrierRow.defaultProps = {
   carrierId: null,
-  carrierName: null
+  carrierName: null,
+  favorite: PropTypes.bool,
+  setFavorite: null
 };
 
 export default CarrierRow;
