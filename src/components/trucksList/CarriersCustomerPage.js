@@ -11,6 +11,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 
+import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
 import JobCreateForm from '../jobs/JobCreateForm';
@@ -24,6 +25,7 @@ import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import CarrierRow from './CarrierRow';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -52,6 +54,10 @@ class CarriersCustomerPage extends Component {
       startDate: null,
       endDate: null,
 
+      company: {},
+      profile: {},
+      address: {},
+
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
@@ -64,12 +70,21 @@ class CarriersCustomerPage extends Component {
         // materialType: '',
         materialType: [],
         zipCode: '',
+        range: 50,
         rateType: '',
         currentAvailability: 1,
         sortBy: sortByList[0],
         // carriers custom page
         name: '',
         numEquipments: 0
+      },
+      reqHandlerZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerRange: {
+        touched: false,
+        error: ''
       }
     };
 
@@ -86,19 +101,31 @@ class CarriersCustomerPage extends Component {
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveCarrier = this.retrieveCarrier.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.handleNumChange = this.handleNumChange.bind(this);
     this.clear = this.clear.bind(this);
   }
 
   async componentDidMount() {
     const { filters } = this.state;
+    let { address, company } = this.state;
     // await this.fetchJobs();
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
+
+    if (profile.companyId) {
+      company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        address = await AddressService.getAddressById(company.addressId);
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
+      }
+    }
+
+    this.setState({company, address, profile, loaded: true});
     await this.fetchCarriers();
     await this.fetchFilterLists();
-    this.setState({loaded: true});
   }
 
   clear() {
@@ -112,6 +139,7 @@ class CarriersCustomerPage extends Component {
       // materialType: '',
       materialType: [],
       zipCode: '',
+      range: 50,
       rateType: '',
       currentAvailability: 1,
       // carriers custom page
@@ -134,15 +162,6 @@ class CarriersCustomerPage extends Component {
 
   async fetchFilterLists() {
     const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
-    const profile = await ProfileService.getProfile();
-
-    if (profile.companyId) {
-      const company = await CompanyService.getCompanyById(profile.companyId);
-      if (company.addressId) {
-        const address = await AddressService.getAddressById(company.addressId);
-        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
-      }
-    }
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
@@ -204,8 +223,39 @@ class CarriersCustomerPage extends Component {
   }
 
   async fetchCarriers() {
-    const {filters} = this.state;
+    const {filters, reqHandlerZip} = this.state;
+    let { company, address, profile } = this.state;
     // const carriers = await CarrierService.getCarrierByFiltersCarrier(filters);
+
+    if (!profile) {
+      profile = await ProfileService.getProfile();
+      if (!company) {
+        company = await CompanyService.getCompanyById(profile.companyId);
+        if (!address) {
+          address = await AddressService.getAddressById(company.addressId);
+        }
+      }
+    }
+
+    // if the filter zip code is not the same as the initial zip code (company's
+    // zip code) or we don't have any coordinates on our db
+    // we search for that zip code coordinates with MapBox API
+    if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
+      try {
+        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+        filters.companyLatitude = geoLocation.features[0].center[1];
+        filters.companyLongitude = geoLocation.features[0].center[0];
+      } catch (e) {
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            error: 'Invalid US Zip Code',
+            touched: true
+          }
+        });
+      }
+    }
+
     const carriers = await CompanyService.getCarriersByFilters(filters);
 
     if (carriers) {
@@ -225,14 +275,6 @@ class CarriersCustomerPage extends Component {
       });
       this.setState({carriers});
     }
-  }
-
-  async handleFilterChange(e) {
-    const {value} = e.target;
-    const {filters} = this.state;
-    filters[e.target.name] = value;
-    this.setState({filters});
-    await this.fetchCarriers();
   }
 
   async handleSelectFilterChange(option) {
@@ -347,13 +389,81 @@ class CarriersCustomerPage extends Component {
     this.setState({filters});
   }
 
-  handleInputChange(e) {
-    const {filters} = this.state;
+  handleFilterChangeDelayed(e) {
+    /* const {filters} = this.state;
     filters.name = e.target.value;
     this.setState({filters}, async function search() {
       await this.fetchCarriers();
+    }); */
+    const self = this;
+    const {value} = e.target;
+    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const filter = e.target.name;
+    let invalidZip = false;
+    let invalidRange = false;
+
+    if (self.state.typingTimeout) {
+      clearTimeout(self.state.typingTimeout);
+    }
+
+    if (filter === 'zipCode' && (value.length !== 5)) {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          error: 'Please enter a valid 5-digit Zip Code',
+          touched: true
+        }
+      });
+      invalidZip = true;
+    } else {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          touched: false
+        }
+      });
+      invalidZip = false;
+    }
+
+    if (filter === 'range' && (value.length > 3 || value < 0)) {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          error: 'Range can not be more than 999 and less than 0',
+          touched: true
+        }
+      });
+      invalidRange = true;
+    } else {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          touched: false
+        }
+      });
+      invalidRange = false;
+    }
+
+    filters[e.target.name] = value;
+
+    self.setState({
+      typing: false,
+      typingTimeout: setTimeout(async () => {
+        if (!invalidZip && !invalidRange) {
+          await this.fetchCarriers();
+        }
+      }, 1000),
+      filters
     });
     // this.setState({filters});
+  }
+
+  async handleFilterChange(e) {
+    const {value} = e.target;
+    const {filters} = this.state;
+    filters[e.target.name] = value;
+    this.setState({filters});
+    await this.fetchCarriers();
   }
 
   handleNumChange(e) {
@@ -516,7 +626,10 @@ class CarriersCustomerPage extends Component {
       endDate,
 
       // filters
-      filters
+      filters,
+
+      reqHandlerZip,
+      reqHandlerRange
 
     } = this.state;
 
@@ -628,16 +741,40 @@ class CarriersCustomerPage extends Component {
                         placeholder="Select materials"
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="1">
                       <div className="filter-item-title">
-                        Zip
+                        Zip Code
                       </div>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </Col>
+                    <Col md="1">
+                      <div className="filter-item-title">
+                        Range (mi)
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="50"
+                        type="number"
                       />
                     </Col>
                   </Row>
@@ -655,7 +792,7 @@ class CarriersCustomerPage extends Component {
                         type="text"
                         placeholder="Name"
                         value={filters.name}
-                        onChange={this.handleInputChange}
+                        onChange={this.handleFilterChangeDelayed}
                       />
                     </Col>
                     <Col md="4">
@@ -696,6 +833,7 @@ class CarriersCustomerPage extends Component {
       filters,
       carriers
     } = this.state;
+
 
     return (
       <Container>
@@ -749,6 +887,7 @@ class CarriersCustomerPage extends Component {
                   key={c.id}
                   carrierId={c.id}
                   carrierName={c.legalName}
+                  distance={c.distance}
                 />
               ))
             }
