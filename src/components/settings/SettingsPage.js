@@ -33,7 +33,7 @@ class SettingsPage extends Component {
       users: [],
       address: [],
       activeTab: '1',
-      title: 'User Profile',
+      title: 'Profile',
       isAdmin: false
     };
 
@@ -66,7 +66,7 @@ class SettingsPage extends Component {
     let { title } = this.state;
     switch (tab) {
       case '1':
-        title = 'User Profile';
+        title = 'Profile';
         break;
       case '2':
         title = 'Notifications';
@@ -96,7 +96,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink"><Trans>User Profile</Trans></div>
+            <div className="navLink"><Trans>Profile</Trans></div>
           </NavLink>
         </NavItem>
         <NavItem>
@@ -131,7 +131,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '1' }, 'tab')}
             onClick={() => { this.toggle('1'); }}
           >
-            <div className="navLink"><Trans>User Profile</Trans></div>
+            <div className="navLink"><Trans>Profile</Trans></div>
           </NavLink>
         </NavItem>
       </Nav>
@@ -196,7 +196,7 @@ class SettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title"><Trans>Settings</Trans> / {title}</h3>
+              <h3 className="page-title"><Trans>User Settings</Trans> / {title}</h3>
             </Col>
           </Row>
           <Container>
@@ -213,7 +213,7 @@ class SettingsPage extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title"><Trans>Settings</Trans> / {title}</h3>
+            <h3 className="page-title"><Trans>User Settings</Trans></h3>
           </Col>
         </Row>
         {this.renderLoader()}
