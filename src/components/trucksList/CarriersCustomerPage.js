@@ -129,6 +129,7 @@ class CarriersCustomerPage extends Component {
   }
 
   clear() {
+    const { address } = this.state;
     const filters = {
       startAvailability: null,
       endAvailability: null,
@@ -138,7 +139,7 @@ class CarriersCustomerPage extends Component {
       minCapacity: '',
       // materialType: '',
       materialType: [],
-      zipCode: '',
+      zipCode: address.zipCode,
       range: 50,
       rateType: '',
       currentAvailability: 1,
@@ -257,6 +258,7 @@ class CarriersCustomerPage extends Component {
     }
 
     const carriers = await CompanyService.getCarriersByFilters(filters);
+    console.log(carriers);
 
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
