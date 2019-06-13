@@ -448,7 +448,7 @@ class DashboardCustomerPage extends Component {
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
       if (typeof job.distance === 'number') {
-        newJob.distance = TFormat.asNumber(job.distance);
+        newJob.distance = newJob.distance.toFixed(2);
       }
 
       potentialIncome += tempRate * newJob.rateEstimate;

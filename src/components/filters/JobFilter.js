@@ -90,7 +90,7 @@ class JobFilter extends Component {
   async componentDidMount() {
     const {
       intervals,
-      filters,
+      filters
     } = this.state;
     let { address, company } = this.state;
     const profile = await ProfileService.getProfile();

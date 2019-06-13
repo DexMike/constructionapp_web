@@ -31,6 +31,7 @@ import GroupListService from '../../api/GroupListService';
 import EquipmentRow from './EquipmentRow';
 import TFieldNumber from '../common/TFieldNumber';
 import TField from '../common/TField';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -71,6 +72,7 @@ class TrucksCustomerPage extends Component {
         // materialType: '',
         materialType: [],
         zipCode: '',
+        range: 50,
         rateType: '',
         currentAvailability: 1,
         sortBy: sortByList[0]
@@ -102,9 +104,21 @@ class TrucksCustomerPage extends Component {
 
   async componentDidMount() {
     const { filters } = this.state;
+    let { address, company } = this.state;
     // await this.fetchJobs();
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
+
+    if (profile.companyId) {
+      company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        address = await AddressService.getAddressById(company.addressId);
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
+      }
+    }
+
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({loaded: true});
@@ -180,7 +194,38 @@ class TrucksCustomerPage extends Component {
   }
 
   async fetchEquipments() {
-    const {filters} = this.state;
+    const { filters, reqHandlerZip} = this.state;
+    let { company, address, profile } = this.state;
+
+    if (!profile) {
+      profile = await ProfileService.getProfile();
+      if (!company) {
+        company = await CompanyService.getCompanyById(profile.companyId);
+        if (!address) {
+          address = await AddressService.getAddressById(company.addressId);
+        }
+      }
+    }
+
+    // if the filter zip code is not the same as the initial zip code (company's
+    // zip code) or we don't have any coordinates on our db
+    // we search for that zip code coordinates with MapBox API
+    if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
+      try {
+        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+        filters.companyLatitude = geoLocation.features[0].center[1];
+        filters.companyLongitude = geoLocation.features[0].center[0];
+      } catch (e) {
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            error: 'Invalid US Zip Code',
+            touched: true
+          }
+        });
+      }
+    }
+
     const equipments = await EquipmentService.getEquipmentByFilters(filters);
 
     if (equipments) {
@@ -213,11 +258,67 @@ class TrucksCustomerPage extends Component {
   }
 
   async handleFilterChange(e) {
+    const self = this;
     const {value} = e.target;
-    const {filters} = this.state;
+    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const filter = e.target.name;
+    let invalidZip = false;
+    let invalidRange = false;
+
+    if (self.state.typingTimeout) {
+      clearTimeout(self.state.typingTimeout);
+    }
+
+    if (filter === 'zipCode' && (value.length !== 5)) {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          error: 'Please enter a valid 5-digit Zip Code',
+          touched: true
+        }
+      });
+      invalidZip = true;
+    } else {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          touched: false
+        }
+      });
+      invalidZip = false;
+    }
+
+    if (filter === 'range' && (value.length > 3 || value < 0)) {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          error: 'Range can not be more than 999 and less than 0',
+          touched: true
+        }
+      });
+      invalidRange = true;
+    } else {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          touched: false
+        }
+      });
+      invalidRange = false;
+    }
+
     filters[e.target.name] = value;
-    this.setState({filters});
-    await this.fetchEquipments();
+
+    self.setState({
+      typing: false,
+      typingTimeout: setTimeout(async () => {
+        if (!invalidZip && !invalidRange) {
+          await this.fetchEquipments();
+        }
+      }, 1000),
+      filters
+    });
+    // await this.fetchEquipments();
   }
 
   async handleSelectFilterChange(option) {
@@ -624,7 +725,7 @@ class TrucksCustomerPage extends Component {
                       <TField
                         input={
                           {
-                            onChange: this.handleFilterChangeDelayed,
+                            onChange: this.handleFilterChange,
                             name: 'zipCode',
                             value: filters.zipCode
                           }
@@ -642,7 +743,7 @@ class TrucksCustomerPage extends Component {
                       <TField
                         input={
                           {
-                            onChange: this.handleFilterChangeDelayed,
+                            onChange: this.handleFilterChange,
                             name: 'range',
                             value: filters.range
                           }
@@ -733,6 +834,7 @@ class TrucksCustomerPage extends Component {
                   name={equipment.name}
                   materials={equipment.materials}
                   setFavorite={() => this.handleSetFavorite(equipment.companyId)}
+                  distance={equipment.distance}
                 />
               ))
             }
