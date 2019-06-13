@@ -67,76 +67,98 @@ class PaymentSettings extends Component {
   renderForm() {
     const { termsAgreed } = this.state;
     return (
-      <Row className="w100">
-        <Col md={5} className="account-card">
-          <br />
-          <h3>Enter your company bank information:</h3>
-          <br/>
-          <span>
-            Account Name
-          </span>
-          <TField
-            input={
-              {
-                onChange: this.handleInputChange,
-                name: 'a1',
-                value: ''
+      <React.Fragment>
+        <Row>
+          <Col md={12} className="text-center mt-4">
+            <h3>Welcome to Trelar! To start ordering materials for deliver,
+              please set up your bank account for ACH withdrawls.
+            </h3>
+            <p>
+              Nothing will post from your account until load deliveries with attached
+              invoices are approved by your company.
+            </p>
+          </Col>
+        </Row>
+        <br/>
+        <Row>
+          <Col md={5} className="account-card mx-auto mt-4">
+            <br />
+            <h3>Enter your company bank information:</h3>
+            <br/>
+            <span>
+              Account Name
+            </span>
+            <TField
+              input={
+                {
+                  onChange: this.handleInputChange,
+                  name: 'a1',
+                  value: ''
+                }
               }
-            }
-          />
-          <br/>
-          <span >
-            Account #
-          </span>
-          <br/>
-          <TField
-            input={
-              {
-                onChange: this.handleInputChange,
-                name: 'a2',
-                value: ''
+            />
+            <br/>
+            <span >
+              Account #
+            </span>
+            <br/>
+            <TField
+              input={
+                {
+                  onChange: this.handleInputChange,
+                  name: 'a2',
+                  value: ''
+                }
               }
-            }
-          />
-          <br/>
-          <span >
-            Routing #
-          </span>
-          <TField
-            input={
-              {
-                onChange: this.handleInputChange,
-                name: 'a3',
-                value: ''
+            />
+            <br/>
+            <span >
+              Routing #
+            </span>
+            <TField
+              input={
+                {
+                  onChange: this.handleInputChange,
+                  name: 'a3',
+                  value: ''
+                }
               }
-            }
-          />
-          <Row style={{paddingTop: 32}}>
-            <Col md={1}>
-              <label className="checkbox-container" htmlFor="terms">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  checked={termsAgreed}
-                  onChange={() => this.setState({ termsAgreed: !termsAgreed})}
-                />
-                <span className="checkmark centered" />
-              </label>
-            </Col>
-            <Col md={8}>
-            I agree to let Trelar withdraw from my account
-            </Col>
-            <Col md={3} className="text-right">
-              <Button
-                color="primary"
-                disabled={!termsAgreed}
-              >
-                Save
-              </Button>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
+            />
+            <Row style={{paddingTop: 32}}>
+              <Col md={1}>
+                <label className="checkbox-container" htmlFor="terms">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={termsAgreed}
+                    onChange={() => this.setState({ termsAgreed: !termsAgreed})}
+                  />
+                  <span className="checkmark centered" />
+                </label>
+              </Col>
+              <Col md={8}>
+              I agree to let Trelar withdraw from my account
+              </Col>
+              <Col md={3} className="text-right">
+                <Button
+                  color="primary"
+                  disabled={!termsAgreed}
+                >
+                  Save
+                </Button>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+        <br />
+        <Row>
+          <Col md={5} className="mx-auto text-center mb-4">
+            <a href="mailto:support@trelar.net">
+              Having problems getting sing up? Contact our team to get help.
+            </a>
+          </Col>
+        </Row>
+      </React.Fragment>
     );
   }
 
