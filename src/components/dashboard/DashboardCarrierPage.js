@@ -419,6 +419,10 @@ class DashboardCarrierPage extends Component {
 
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
+      if (typeof job.distance === 'number') {
+        newJob.distance = newJob.distance.toFixed(2);
+      }
+
       potentialIncome += (tempRate * newJob.rateEstimate) * 0.95;
 
       return newJob;
@@ -460,8 +464,8 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Customer'
                         },
                         {
-                          name: 'zipCode',
-                          displayName: 'Start Zip'
+                          name: 'distance',
+                          displayName: 'Distance (mi)'
                         },
                         {
                           name: 'estimatedIncome',

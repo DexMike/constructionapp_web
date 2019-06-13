@@ -67,8 +67,7 @@ class JobCreateFormTwo extends PureComponent {
       rateEstimate: d.rateEstimate,
       hourTrucksNumber: d.hourTrucksNumber
     };
-    console.log(d.selectedRatedHourOrTon);
-    console.log(filters);
+
     favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
       profile.userId,
       filters

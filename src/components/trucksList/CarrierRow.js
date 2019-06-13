@@ -101,7 +101,8 @@ class CarrierRow extends Component {
     const {
       carrierName,
       carrierId,
-      favorite
+      favorite,
+      distance
     } = this.props;
 
     if (loaded) {
@@ -112,7 +113,7 @@ class CarrierRow extends Component {
               <div className="row">
                 <div className="col-md-3">
                   <h5>
-                    {carrierName}
+                    {carrierName} {distance ? `[Distance: ${distance.toFixed(2)} mi]` : ''}
                   </h5>
                   <img width="100%" src={truckImage} alt=""
                       styles="background-size:contain;"
@@ -163,14 +164,16 @@ CarrierRow.propTypes = {
   carrierId: PropTypes.number,
   carrierName: PropTypes.string,
   favorite: PropTypes.bool,
-  setFavorite: PropTypes.func
+  setFavorite: PropTypes.func,
+  distance: PropTypes.number
 };
 
 CarrierRow.defaultProps = {
   carrierId: null,
   carrierName: null,
   favorite: PropTypes.bool,
-  setFavorite: null
+  setFavorite: null,
+  distance: null
 };
 
 export default CarrierRow;

@@ -30,7 +30,7 @@ class CompanySettingsPage extends Component {
       user: [],
       address: [],
       activeTab: '1',
-      title: 'Company Profile',
+      title: 'Profile',
       isAdmin: null
     };
 
@@ -137,7 +137,7 @@ class CompanySettingsPage extends Component {
               className={classnames({ active: activeTab === '1' }, 'tab')}
               onClick={() => { this.toggle('1'); }}
             >
-              <div className="navLink">Company Profile</div>
+              <div className="navLink">Profile</div>
             </NavLink>
           </NavItem>
           {

@@ -29,7 +29,8 @@ class EquipmentRow extends Component {
       maxCapacity,
       type,
       tonRate,
-      name
+      name,
+      distance
     } = this.props;
 
     let imageTruck = '';
@@ -122,7 +123,7 @@ class EquipmentRow extends Component {
                           decimalScale={2}
                           fixedDecimalScale
                           thousandSeparator
-                          suffix=" hours min"
+                          suffix=" Hours Min"
                         />
                       </div>
                     </Row>
@@ -163,6 +164,14 @@ class EquipmentRow extends Component {
                         </div>
                       </React.Fragment>
                     )}
+                    <Row className="distance">
+                      <div className="col-md-6">
+                        Distance (mi):
+                      </div>
+                      <div className="col-md-6">
+                        {distance ? distance.toFixed(2) : ''}
+                      </div>
+                    </Row>
                   </div>
                   <div className="col-md-6">
                     <h3 className="subhead">
@@ -204,7 +213,8 @@ EquipmentRow.propTypes = {
   type: PropTypes.string,
   tonRate: PropTypes.number,
   name: PropTypes.string,
-  setFavorite: PropTypes.func
+  setFavorite: PropTypes.func,
+  distance: PropTypes.number
 };
 
 EquipmentRow.defaultProps = {
@@ -220,7 +230,8 @@ EquipmentRow.defaultProps = {
   type: PropTypes.string,
   tonRate: PropTypes.number,
   name: PropTypes.string,
-  setFavorite: PropTypes.func
+  setFavorite: PropTypes.func,
+  distance: PropTypes.number
 };
 
 export default EquipmentRow;
