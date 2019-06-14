@@ -59,11 +59,11 @@ class JobFilter extends Component {
         minHours: '',
         minCapacity: '',
         userId: '',
-        equipmentType: '',
         numEquipments: '',
         zipCode: '',
         range: 50,
         materialType: [],
+        equipmentType: [],
         sortBy: sortByList[0],
         page: 0,
         rows: 5
@@ -81,6 +81,7 @@ class JobFilter extends Component {
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
@@ -178,7 +179,7 @@ class JobFilter extends Component {
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
     Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        equipmentTypeList.push(itm.val1);
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
       });
 
     const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
@@ -193,7 +194,7 @@ class JobFilter extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.equipmentType] = equipmentTypeList;
+    [filters.equipments] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -347,6 +348,16 @@ class JobFilter extends Component {
     });
   }
 
+  handleMultiTruckChange(data) {
+    const {filters} = this.state;
+    filters.equipmentType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchJobs();
+    });
+  }
+
   async handleIntervalInputChange(e) {
     const {filters, intervals} = {...this.state};
     let sAv = null;
@@ -477,10 +488,11 @@ class JobFilter extends Component {
                       <div className="filter-item-title">
                         Truck Type
                       </div>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'equipmentType',
                             value: filters.equipmentType
                           }
@@ -491,15 +503,15 @@ class JobFilter extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
                             name: 'equipmentType',
-                            value: equipmentType,
-                            label: equipmentType
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
                           }))
                         }
-                        placeholder={equipmentTypeList[0]}
+                        // placeholder="Materials"
+                        placeholder="Any"
                       />
                     </Col>
                     <Col md="1">
