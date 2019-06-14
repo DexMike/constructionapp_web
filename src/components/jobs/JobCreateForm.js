@@ -143,6 +143,8 @@ class JobCreateForm extends Component {
     endAddress.createdBy = profile.userId;
     bid.hasCustomerAccepted = 1;
 
+    console.log('>>', profile);
+
     // bid.userId should be the userid of the driver linked to that equipment
     if (!selectedEquipment.defaultDriverId) {
       bid.userId = profile.selectedEquipment.defaultDriverId;
@@ -754,8 +756,8 @@ class JobCreateForm extends Component {
         <h3 className="subhead">{selectedEquipment.name}</h3>
         <div className="row">
           <div className="col-sm-3">
-            <img width="100" height="85" src={imageTruck} alt=""
-                 style={{ width: '100px' }}
+            <img src={imageTruck} alt=""
+                 style={{ width: '100%', height: 'auto' }}
             />
           </div>
           <div className="col-sm-3">

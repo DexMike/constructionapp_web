@@ -338,6 +338,10 @@ class CarriersCustomerPage extends Component {
   handleCarrierEdit(id) {
     const {carriers, filters} = this.state;
 
+    //AQUI ME QUEDO, NORMALNETE ESTO MANDA UN EQUIPMENT AL MODAL
+    //PERO LO QUE TENGO ES UN CARRIER
+    console.log('>>CARRIERS', carriers);
+
     const [selectedCarrier] = carriers.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
@@ -360,6 +364,9 @@ class CarriersCustomerPage extends Component {
       // alert('Please select a some materials');
       // return false;
     }
+
+    console.log('>>SELECTED CARRIER', selectedCarrier);
+
     this.setState({
       selectedCarrier,
       modal: true
@@ -566,10 +573,12 @@ class CarriersCustomerPage extends Component {
   renderModal() {
     const {
       modal,
+      selectedCarrier,
       materialTypeList
       // carriers
     } = this.state;
-    // let { modalSelectMaterials } = this.state;
+
+    console.log('>>');
 
     const mats = this.returnSelectedMaterials();
 
@@ -594,13 +603,12 @@ class CarriersCustomerPage extends Component {
           <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
-          { /*
           <JobCreateForm
-            selectedCarrier={selectedCarrier}
+            selectedEquipment={selectedCarrier}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
             getAllMaterials={this.retrieveAllMaterials}
-          /> */}
+          />
         </div>
       </Modal>
     );
@@ -889,6 +897,7 @@ class CarriersCustomerPage extends Component {
                   carrierName={c.legalName}
                   favorite={c.favorite}
                   setFavorite={() => this.handleSetFavorite(c.companyId)}
+                  requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
                 />
               ))

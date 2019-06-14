@@ -382,6 +382,8 @@ class TrucksCustomerPage extends Component {
   handleEquipmentEdit(id) {
     const {equipments, filters} = this.state;
 
+    console.log('>>EQUIPMENTS', equipments);
+
     const [selectedEquipment] = equipments.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
@@ -404,6 +406,9 @@ class TrucksCustomerPage extends Component {
       // alert('Please select a some materials');
       // return false;
     }
+
+    console.log('>>SELECTED EQUIPMENT', selectedEquipment);
+
     this.setState({
       selectedEquipment,
       modal: true
@@ -569,7 +574,7 @@ class TrucksCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Truck Search</h3>
+          <h3 className="page-title">Truck Search 572</h3>
         </Col>
       </Row>
     );
@@ -834,6 +839,7 @@ class TrucksCustomerPage extends Component {
                   name={equipment.name}
                   materials={equipment.materials}
                   setFavorite={() => this.handleSetFavorite(equipment.companyId)}
+                  requestEquipment={() => this.handleEquipmentEdit(equipment.id)}
                   distance={equipment.distance}
                 />
               ))
