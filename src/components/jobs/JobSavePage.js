@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Col,
   Row,
-  Container
+  Container, Modal, Card
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
@@ -53,13 +53,16 @@ class JobSavePage extends Component {
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null,
-      btnSubmitting: false
+      btnSubmitting: false,
+      allocateDriversModal: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleConfirmRequest = this.handleConfirmRequest.bind(this);
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
+    this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
+
   }
 
   async componentDidMount() {
@@ -154,6 +157,11 @@ class JobSavePage extends Component {
       companyType: profile.companyType,
       loaded: true
     });
+  }
+
+  toggleAllocateDriversModal() {
+    const { allocateDriversModal } = this.state;
+    this.setState({ allocateDriversModal: !allocateDriversModal });
   }
 
   handlePageClick(menuItem) {
@@ -637,7 +645,41 @@ class JobSavePage extends Component {
         </div>
       );
     }
-    return (<React.Fragment />);
+    if (job.status === 'Booked' && companyType === 'Carrier') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleAllocateDriversModal()}
+          className="primaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Allocate Drivers"
+        />
+      );
+    }
+    return (<React.Fragment/>);
+  }
+
+  renderAllocateDriversModal() {
+    const { allocateDriversModal } = this.state;
+    return (
+      <Modal
+        isOpen={allocateDriversModal}
+        toggle={this.toggleAllocateDriversModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__body" style={{ padding: '0px' }}>
+          <Container className="dashboard">
+            <Row>
+              <Col md={12} lg={12}>
+                <Card style={{paddingBottom: 0}}>
+                  <span>Under Construction...</span>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </Modal>
+    );
   }
 
   render() {
@@ -655,6 +697,7 @@ class JobSavePage extends Component {
       if (companyType !== null && job !== null) {
         return (
           <div className="container">
+            {this.renderAllocateDriversModal()}
             <div className="row">
               <div className="col-md-9">
                 <h3 className="page-title">Job Details</h3>
