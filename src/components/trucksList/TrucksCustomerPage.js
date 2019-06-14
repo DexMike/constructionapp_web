@@ -212,16 +212,27 @@ class TrucksCustomerPage extends Component {
     // zip code) or we don't have any coordinates on our db
     // we search for that zip code coordinates with MapBox API
     if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
-      try {
-        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-        filters.companyLatitude = geoLocation.features[0].center[1];
-        filters.companyLongitude = geoLocation.features[0].center[0];
-      } catch (e) {
+      if (filters.zipCode.length > 0) {
+        try {
+          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+          filters.companyLatitude = geoLocation.features[0].center[1];
+          filters.companyLongitude = geoLocation.features[0].center[0];
+        } catch (e) {
+          this.setState({
+            reqHandlerZip: {
+              ...reqHandlerZip,
+              error: 'Invalid US Zip Code',
+              touched: true
+            }
+          });
+        }
+      } else { // if the zipCode filter is empty, default the coordinates to user's address
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
         this.setState({
           reqHandlerZip: {
             ...reqHandlerZip,
-            error: 'Invalid US Zip Code',
-            touched: true
+            touched: false
           }
         });
       }
@@ -762,7 +773,7 @@ class TrucksCustomerPage extends Component {
                         }
                         meta={reqHandlerRange}
                         className="filter-text"
-                        placeholder="50"
+                        placeholder="Any"
                         type="number"
                       />
                     </Col>
