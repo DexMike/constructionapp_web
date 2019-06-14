@@ -65,7 +65,7 @@ class CarriersCustomerPage extends Component {
         endAvailability: null,
         searchType: 'Customer Truck',
         userId: '',
-        equipmentType: '',
+        equipmentType: [],
         minCapacity: '',
         // materialType: '',
         materialType: [],
@@ -98,6 +98,7 @@ class CarriersCustomerPage extends Component {
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveCarrier = this.retrieveCarrier.bind(this);
@@ -189,10 +190,10 @@ class CarriersCustomerPage extends Component {
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
     Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        equipmentTypeList.push(itm.val1);
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
       });
 
-    [filters.equipmentType] = equipmentTypeList;
+    [filters.equipments] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -290,6 +291,16 @@ class CarriersCustomerPage extends Component {
   handleMultiChange(data) {
     const {filters} = this.state;
     filters.materialType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchCarriers();
+    });
+  }
+
+  handleMultiTruckChange(data) {
+    const {filters} = this.state;
+    filters.equipmentType = data;
     this.setState({
       filters
     }, async function changed() {
@@ -677,10 +688,11 @@ class CarriersCustomerPage extends Component {
                       <div className="filter-item-title">
                         Truck Type
                       </div>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'equipmentType',
                             value: filters.equipmentType
                           }
@@ -691,15 +703,14 @@ class CarriersCustomerPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
                             name: 'equipmentType',
-                            value: equipmentType,
-                            label: equipmentType
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
                           }))
                         }
-                        placeholder={equipmentTypeList[0]}
+                        placeholder="Any"
                       />
                     </Col>
                     <Col md="2">
