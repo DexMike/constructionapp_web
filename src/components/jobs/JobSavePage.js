@@ -22,6 +22,7 @@ import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
+import TTable from '../common/TTable';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -661,6 +662,27 @@ class JobSavePage extends Component {
 
   renderAllocateDriversModal() {
     const { allocateDriversModal } = this.state;
+    // TODO api call
+    const driverData = [
+      {
+        id: 1,
+        firstName: 'Test1',
+        lastName: 'Trelar'
+      }, {
+        id: 2,
+        firstName: 'Test2',
+        lastName: 'Trelar'
+      }
+    ];
+    const driverColumns = [
+      {
+        displayName: 'First Name',
+        name: 'firstName'
+      }, {
+        displayName: 'Last Name',
+        name: 'lastName'
+      }
+    ];
     return (
       <Modal
         isOpen={allocateDriversModal}
@@ -672,7 +694,16 @@ class JobSavePage extends Component {
             <Row>
               <Col md={12} lg={12}>
                 <Card style={{paddingBottom: 0}}>
+                  <h1>Allocate Drivers</h1>
                   <span>Under Construction...</span>
+                  {/* TODO checkboxes */}
+                  <TTable
+                    handleRowsChange={() => {}}
+                    data={driverData}
+                    columns={driverColumns}
+                    handlePageChange={() => {}}
+                    handleIdClick={() => {}}
+                  />
                 </Card>
               </Col>
             </Row>
