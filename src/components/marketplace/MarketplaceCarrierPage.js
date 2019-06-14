@@ -194,6 +194,10 @@ class MarketplaceCarrierPage extends Component {
 
         newJob.newStartDate = TFormat.asDate(job.startTime);
 
+        if (typeof job.distance === 'number') {
+          newJob.distance = newJob.distance.toFixed(2);
+        }
+
         return newJob;
       });
     } else {
@@ -236,8 +240,8 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Min Hours'
                       },
                       {
-                        name: 'zipCode',
-                        displayName: 'Zip Code'
+                        name: 'distance',
+                        displayName: 'Distance (mi)'
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
