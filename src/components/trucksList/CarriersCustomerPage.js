@@ -130,6 +130,7 @@ class CarriersCustomerPage extends Component {
   }
 
   clear() {
+    const { address } = this.state;
     const filters = {
       startAvailability: null,
       endAvailability: null,
@@ -139,7 +140,7 @@ class CarriersCustomerPage extends Component {
       minCapacity: '',
       // materialType: '',
       materialType: [],
-      zipCode: '',
+      zipCode: address.zipCode,
       range: 50,
       rateType: '',
       currentAvailability: 1,
@@ -242,22 +243,34 @@ class CarriersCustomerPage extends Component {
     // zip code) or we don't have any coordinates on our db
     // we search for that zip code coordinates with MapBox API
     if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
-      try {
-        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-        filters.companyLatitude = geoLocation.features[0].center[1];
-        filters.companyLongitude = geoLocation.features[0].center[0];
-      } catch (e) {
+      if (filters.zipCode.length > 0) {
+        try {
+          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+          filters.companyLatitude = geoLocation.features[0].center[1];
+          filters.companyLongitude = geoLocation.features[0].center[0];
+        } catch (e) {
+          this.setState({
+            reqHandlerZip: {
+              ...reqHandlerZip,
+              error: 'Invalid US Zip Code',
+              touched: true
+            }
+          });
+        }
+      } else { // if the zipCode filter is empty, default the coordinates to user's address
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
         this.setState({
           reqHandlerZip: {
             ...reqHandlerZip,
-            error: 'Invalid US Zip Code',
-            touched: true
+            touched: false
           }
         });
       }
     }
 
     const carriers = await CompanyService.getCarriersByFilters(filters);
+    console.log(carriers);
 
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -784,7 +797,7 @@ class CarriersCustomerPage extends Component {
                         }
                         meta={reqHandlerRange}
                         className="filter-text"
-                        placeholder="50"
+                        placeholder="Any"
                         type="number"
                       />
                     </Col>
