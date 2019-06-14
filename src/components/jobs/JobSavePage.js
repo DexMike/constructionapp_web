@@ -2,14 +2,12 @@ import React, { Component } from 'react';
 import {
   Col,
   Row,
-  Container
+  Container, Modal, Card
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import JobCarrierForm from './JobCarrierForm';
-import JobCustomerForm from './JobCustomerForm';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -23,6 +21,8 @@ import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
+import JobForm from './JobForm';
+import TTable from '../common/TTable';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -54,13 +54,16 @@ class JobSavePage extends Component {
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null,
-      btnSubmitting: false
+      btnSubmitting: false,
+      allocateDriversModal: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleConfirmRequest = this.handleConfirmRequest.bind(this);
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
+    this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
+
   }
 
   async componentDidMount() {
@@ -106,22 +109,22 @@ class JobSavePage extends Component {
                 && filteredBid.companyCarrierId === profile.companyId) {
                 return filteredBid;
               }
-              bid = bids[0];
-            // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
+              [bid] = bids;
+              // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
             } else if (filteredBid.hasSchedulerAccepted === 1) {
               return filteredBid;
             }
-            bid = bids[0];
+            [bid] = bids;
             return bid;
           });
         } else { // There is just one bid
-          bid = bids[0];
+          [bid] = bids;
         }
       }
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
       if (bookings && bookings.length > 0) {
-        booking = bookings[0];
+        [booking] = bookings;
         const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
         bookingEquipment = bookingEquipments.find(
           bookingEq => bookingEq.bookingId === booking.id,
@@ -145,22 +148,21 @@ class JobSavePage extends Component {
         booking,
         bookingEquipment,
         profile,
-        profileCompanyId: profile.companyId,
         companyType: profile.companyType,
         favoriteCompany
       });
-      this.setState({ job });
     }
 
     // moved the loader to the mount function
     this.setState({
-      profileCompanyId: profile.companyId,
       companyType: profile.companyType,
       loaded: true
-    },
-    () => {
-      // console.log('setState completed', this.state);
     });
+  }
+
+  toggleAllocateDriversModal() {
+    const { allocateDriversModal } = this.state;
+    this.setState({ allocateDriversModal: !allocateDriversModal });
   }
 
   handlePageClick(menuItem) {
@@ -355,7 +357,6 @@ class JobSavePage extends Component {
       newBid.modifiedBy = profile.userId;
       newBid.modifiedOn = moment()
         .unix() * 1000;
-      bid = {};
       bid = await BidService.updateBid(newBid);
 
       // Create a Booking
@@ -555,6 +556,163 @@ class JobSavePage extends Component {
     );
   }
 
+  renderJobForm(companyType, companyCarrier, job) {
+    if (companyType === 'Carrier') {
+      return (
+        <JobForm
+          job={job}
+          handlePageClick={this.handlePageClick}
+        />
+      );
+    }
+    return (
+      <JobForm
+        job={job}
+        companyCarrier={companyCarrier}
+        handlePageClick={this.handlePageClick}
+      />
+    );
+  }
+
+  renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
+    // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
+    if (job.status === 'Published' && companyType === 'Carrier') {
+      // If the carrier is a favorite
+      if (favoriteCompany.length > 0) {
+        return (
+          <TSubmitButton
+            onClick={() => this.handleConfirmRequestCarrier('Accept')}
+            className="primaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Accept Job"
+          />
+        );
+      }
+      // the carrier is not a favorite
+      return (
+        <TSubmitButton
+          onClick={() => this.handleConfirmRequestCarrier('Request')}
+          className="primaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Request Job"
+        />
+      );
+    }
+    // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
+    if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
+      return (
+        <div>
+          <TSubmitButton
+            onClick={() => this.handleConfirmRequestCarrier('Decline')}
+            className="secondaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Decline Job"
+          />
+          <TSubmitButton
+            onClick={() => this.handleConfirmRequestCarrier('Accept')}
+            className="primaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Accept Job"
+          />
+        </div>
+      );
+    }
+    // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
+    if ((job.status === 'Requested' && companyType === 'Customer')
+      && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
+      && bid.status !== 'Declined') {
+      // console.log('We are a customer and we have a Carrier's job request');
+      return (
+        <div>
+          <TSubmitButton
+            onClick={() => this.handleConfirmRequest('Reject')}
+            className="secondaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Reject Job Request"
+          />
+
+          <TSubmitButton
+            onClick={() => this.handleConfirmRequest('Approve')}
+            className="primaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Approve Job Request"
+          />
+        </div>
+      );
+    }
+    if (job.status === 'Booked' && companyType === 'Carrier') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleAllocateDriversModal()}
+          className="primaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Allocate Drivers"
+        />
+      );
+    }
+    return (<React.Fragment/>);
+  }
+
+  renderAllocateDriversModal() {
+    const { allocateDriversModal } = this.state;
+    // TODO api call
+    const driverData = [
+      {
+        id: 1,
+        firstName: 'Test1',
+        lastName: 'Trelar'
+      }, {
+        id: 2,
+        firstName: 'Test2',
+        lastName: 'Trelar'
+      }
+    ];
+    const driverColumns = [
+      {
+        displayName: 'First Name',
+        name: 'firstName'
+      }, {
+        displayName: 'Last Name',
+        name: 'lastName'
+      }
+    ];
+    return (
+      <Modal
+        isOpen={allocateDriversModal}
+        toggle={this.toggleAllocateDriversModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__body" style={{ padding: '0px' }}>
+          <Container className="dashboard">
+            <Row>
+              <Col md={12} lg={12}>
+                <Card style={{paddingBottom: 0}}>
+                  <h1>Allocate Drivers</h1>
+                  <span>Under Construction...</span>
+                  {/* TODO checkboxes */}
+                  <TTable
+                    handleRowsChange={() => {}}
+                    data={driverData}
+                    columns={driverColumns}
+                    handlePageChange={() => {}}
+                    handleIdClick={() => {}}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </Modal>
+    );
+  }
+
   render() {
     const {
       job,
@@ -565,109 +723,21 @@ class JobSavePage extends Component {
       btnSubmitting,
       companyCarrier
     } = this.state;
-    let buttonText;
+
     if (loaded) {
-      // waiting for jobs and type to be available
       if (companyType !== null && job !== null) {
-        let type = '';
-        // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
-        if (job.status === 'Published And Offered' && companyType === 'Carrier') job.status = 'On Offer';
-
-        if (companyType === 'Carrier') {
-          type = (<JobCarrierForm job={job} handlePageClick={this.handlePageClick}/>);
-        } else {
-          type = (<JobCustomerForm job={job} companyCarrier={companyCarrier} handlePageClick={this.handlePageClick}/>);
-        }
-
-        // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
-        if (job.status === 'Published' && companyType === 'Carrier') {
-          // If the carrier is a favorite
-          if (favoriteCompany.length > 0) {
-            // console.log('We are a carrier and we are a favorite');
-            buttonText = (
-              <TSubmitButton
-                onClick={() => this.handleConfirmRequestCarrier('Accept')}
-                className="primaryButton"
-                loading={btnSubmitting}
-                loaderSize={10}
-                bntText="Accept Job"
-              />
-            );
-          } else { // the carrier is not a favorite
-            buttonText = (
-              <TSubmitButton
-                onClick={() => this.handleConfirmRequestCarrier('Request')}
-                className="primaryButton"
-                loading={btnSubmitting}
-                loaderSize={10}
-                bntText="Request Job"
-              />
-            );
-          }
-        }
-
-        // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
-        if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
-          buttonText = (
-            <div>
-              <TSubmitButton
-                onClick={() => this.handleConfirmRequestCarrier('Decline')}
-                className="secondaryButton"
-                loading={btnSubmitting}
-                loaderSize={10}
-                bntText="Decline Job"
-              />
-
-              <TSubmitButton
-                onClick={() => this.handleConfirmRequestCarrier('Accept')}
-                className="primaryButton"
-                loading={btnSubmitting}
-                loaderSize={10}
-                bntText="Accept Job"
-              />
-            </div>
-          );
-        }
-
-        // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
-        if ((job.status === 'Requested' && companyType === 'Customer')
-        && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
-        && bid.status !== 'Declined') {
-          // console.log('We are a customer and we have a Carrier's job request');
-          buttonText = (
-            <div>
-              <TSubmitButton
-                onClick={() => this.handleConfirmRequest('Reject')}
-                className="secondaryButton"
-                loading={btnSubmitting}
-                loaderSize={10}
-                bntText="Reject Job Request"
-              />
-
-              <TSubmitButton
-                onClick={() => this.handleConfirmRequest('Approve')}
-                className="primaryButton"
-                loading={btnSubmitting}
-                loaderSize={10}
-                bntText="Approve Job Request"
-              />
-            </div>
-          );
-        }
-
         return (
           <div className="container">
+            {this.renderAllocateDriversModal()}
             <div className="row">
               <div className="col-md-9">
                 <h3 className="page-title">Job Details</h3>
               </div>
               <div className="col-md-3">
-                {buttonText}
+                {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
             </div>
-            {/* <JobForm job={job} handlePageClick={this.handlePageClick} /> */}
-            {/* this.carrierOrCustomerForm(job) */}
-            {type}
+            {this.renderJobForm(companyType, companyCarrier, job)}
           </div>
         );
       }
