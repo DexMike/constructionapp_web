@@ -882,7 +882,7 @@ class TrucksCustomerPage extends Component {
       <Container className="container">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Truck Search</h3>
+            <h3 className="page-title">Truck Search 885</h3>
           </Col>
         </Row>
         {this.renderLoader()}

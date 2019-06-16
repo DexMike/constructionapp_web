@@ -14,7 +14,7 @@ import moment from 'moment';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
-import JobCreateForm from '../jobs/JobCreateForm';
+import JobCreateFormCarrier from '../jobs/JobCreateFormCarrier';
 
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
@@ -338,10 +338,6 @@ class CarriersCustomerPage extends Component {
   handleCarrierEdit(id) {
     const {carriers, filters} = this.state;
 
-    //AQUI ME QUEDO, NORMALNETE ESTO MANDA UN EQUIPMENT AL MODAL
-    //PERO LO QUE TENGO ES UN CARRIER
-    console.log('>>CARRIERS', carriers);
-
     const [selectedCarrier] = carriers.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
@@ -365,7 +361,7 @@ class CarriersCustomerPage extends Component {
       // return false;
     }
 
-    console.log('>>SELECTED CARRIER', selectedCarrier);
+    // console.log('>>SELECTED CARRIER', selectedCarrier);
 
     this.setState({
       selectedCarrier,
@@ -603,7 +599,7 @@ class CarriersCustomerPage extends Component {
           <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
-          <JobCreateForm
+          <JobCreateFormCarrier
             selectedEquipment={selectedCarrier}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
@@ -912,16 +908,16 @@ class CarriersCustomerPage extends Component {
     const {loaded} = this.state;
     if (loaded) {
       return (
-        <Container className="dashboard">
+        <React.Fragment>
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          <div className="truck-container">
+          <div>
             {this.renderFilter()}
             {/* {this.renderTable()} */}
             {this.renderCarrierTable()}
           </div>
-        </Container>
+        </React.Fragment>
       );
     }
     return (
