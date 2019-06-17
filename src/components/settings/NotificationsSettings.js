@@ -91,7 +91,7 @@ class NotificationsSettings extends Component {
     }
   }
 
-  async setAllNotificationOptionState(method, checkBoxId, e) {
+  async setAllNotificationOptionState(key, method, checkBoxId, e) {
     const {user} = this.props;
     const { settings } = this.state;
     const newSettings = settings;
@@ -105,7 +105,7 @@ class NotificationsSettings extends Component {
     }
 
     for (const i in newSettings) {
-      if (newSettings[i].method === method) {
+      if (newSettings[i].method === method && newSettings[i].key === key) {
         newSettings[i].val1 = value;
         newSettings[i].modifiedBy = user.id;
         newSettings[i].modifiedOn = moment().unix() * 1000;
@@ -202,6 +202,7 @@ class NotificationsSettings extends Component {
                           type="checkbox"
                           disabled={!item.enabled}
                           onChange={e => this.setAllNotificationOptionState(
+                            objectSettings.title,
                             item.method,
                             `${objectSettings.type}option${item.name}SelectAll`,
                             e
