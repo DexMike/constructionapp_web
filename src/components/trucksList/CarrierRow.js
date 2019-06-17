@@ -22,6 +22,7 @@ class CarrierRow extends Component {
     };
 
     this.sendFavorite = this.sendFavorite.bind(this);
+    this.editEquipment = this.editEquipment.bind(this);
   }
 
   async componentDidMount() {
@@ -41,6 +42,13 @@ class CarrierRow extends Component {
       setFavorite
     } = this.props;
     setFavorite(companyId);
+  }
+
+  editEquipment(companyId) {
+    const {
+      requestEquipment
+    } = this.props;
+    requestEquipment(companyId);
   }
 
   renderMaterials(materials) {
@@ -129,7 +137,7 @@ class CarrierRow extends Component {
                     </div>
                     <div className="col-md-2 button-card">
                       <Button
-                        onClick={() => this.handleEquipmentEdit(5)}
+                        onClick={() => this.editEquipment(5)}
                         className="btn btn-primary"
                         styles="margin:0px !important"
                       >
@@ -165,6 +173,7 @@ CarrierRow.propTypes = {
   carrierName: PropTypes.string,
   favorite: PropTypes.bool,
   setFavorite: PropTypes.func,
+  requestEquipment: PropTypes.func,
   distance: PropTypes.number
 };
 
@@ -173,6 +182,7 @@ CarrierRow.defaultProps = {
   carrierName: null,
   favorite: PropTypes.bool,
   setFavorite: null,
+  requestEquipment: null,
   distance: null
 };
 
