@@ -88,7 +88,8 @@ class JobCreateFormCarrier extends Component {
     this.handleEndStateChange = this.handleEndStateChange.bind(this);
     this.toggleJobRateType = this.toggleJobRateType.bind(this);
     this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
-    this.createJob = this.createJob.bind(this);
+    // this.createJob = this.createJob.bind(this);
+    this.saveJob = this.saveJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
@@ -142,12 +143,15 @@ class JobCreateFormCarrier extends Component {
 
   // save begins ///////////////////////////////////////////////////////
   async saveJob() {
+    console.log('>Trying to save job...');
     this.setState({ btnSubmitting: true });
 
     if (!this.isFormValid()) {
       this.setState({ btnSubmitting: false });
       return;
     }
+
+    const profile = await ProfileService.getProfile();
 
     // consts
     const {
@@ -165,10 +169,17 @@ class JobCreateFormCarrier extends Component {
       endLocationZip,
 
       selectedStartAddressId,
-      selectedEndAddressId
+      selectedEndAddressId,
+      selectedRatedHourOrTon,
+      rateByTonValue,
+      rateByHourValue,
+      rateEstimate,
+      jobName,
+      jobDate,
+      jobTruckType,
+      jobTrucksNeeded,
+      material
     } = this.state;
-
-    //AQUI ME QUEDO, HAY QUE GUARDAR EL TRABAJO
 
     // start location
     let startAddress = {
@@ -179,11 +190,11 @@ class JobCreateFormCarrier extends Component {
         type: 'Delivery',
         name: 'Delivery Start Location',
         companyId: profile.companyId,
-        address1: d.startLocationAddress1,
-        address2: d.startLocationAddress2,
-        city: d.startLocationCity,
-        state: d.startLocationState,
-        zipCode: d.startLocationZip,
+        address1: startLocationAddress1,
+        address2: startLocationAddress2,
+        city: startLocationCity,
+        state: startLocationState,
+        zipCode: startLocationZip,
         createdBy: profile.userId,
         createdOn: moment()
           .unix() * 1000,
@@ -193,75 +204,64 @@ class JobCreateFormCarrier extends Component {
       };
       startAddress = await AddressService.createAddress(address1);
     } else {
-      startAddress.id = d.selectedStartAddressId;
+      startAddress.id = selectedStartAddressId;
     }
 
     // end location
     let endAddress = {
       id: null
     };
-    if (d.selectedEndAddressId === 0) {
+    if (selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
         name: 'Delivery End Location',
         companyId: profile.companyId,
-        address1: d.endLocationAddress1,
-        address2: d.endLocationAddress2,
-        city: d.endLocationCity,
-        state: d.endLocationState,
-        zipCode: d.endLocationZip
+        address1: endLocationAddress1,
+        address2: endLocationAddress2,
+        city: endLocationCity,
+        state: endLocationState,
+        zipCode: endLocationZip
       };
       endAddress = await AddressService.createAddress(address2);
     } else {
-      endAddress.id = d.selectedEndAddressId;
+      endAddress.id = selectedEndAddressId;
     }
 
-    // job p
+    /*
     let isFavorited = 0;
     if (showSendtoFavorites) {
       isFavorited = 1;
     }
+    */
 
     let rateType = '';
     let rate = 0;
-    if (d.selectedRatedHourOrTon === 'ton') {
+    if (selectedRatedHourOrTon === 'ton') {
       rateType = 'Ton';
-      rate = Number(d.rateByTonValue);
+      rate = Number(rateByTonValue);
     } else {
       rateType = 'Hour';
-      rate = Number(d.rateByHourValue);
+      rate = Number(rateByHourValue);
     }
 
-    // if both checks (Send to Mkt and Send to All Favorites) are selected
-    if (
-      (sendToMkt === true || sendToMkt === 1)
-      && (sendToFavorites === true || sendToFavorites === 1)
-    ) {
-      status = 'Published And Offered';
-    } else if (sendToFavorites === true || sendToFavorites === 1) { // sending to All Favorites only
-      status = 'On Offer';
-    } else { // default
-      status = 'Published';
-    }
-
-    const calcTotal = d.rateEstimate * rate;
+    const calcTotal = rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
     const job = {
       companiesId: profile.companyId,
-      name: d.name,
-      status,
-      isFavorited,
+      name: jobName,
+      status: 'Published And Offered',
+      isFavorited: false,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: new Date(d.jobDate),
-      equipmentType: d.truckType.value,
-      numEquipments: d.hourTrucksNumber,
-      rateType,
+      startTime: new Date(jobDate),
+      equipmentType: jobTruckType.value,
+      numEquipments: jobTrucksNeeded,
+      rateType: selectedRatedHourOrTon,
       rate,
-      rateEstimate: d.rateEstimate,
+      rateEstimate,
       rateTotal,
-      notes: d.instructions,
+      notes: '',
       createdBy: profile.userId,
       createdOn: moment()
         .unix() * 1000,
@@ -269,17 +269,23 @@ class JobCreateFormCarrier extends Component {
       modifiedOn: moment()
         .unix() * 1000
     };
+    console.log('JOB BEFORE SENDING: ', job);
     const newJob = await JobService.createJob(job);
     // return false;
 
     // add materials
     if (newJob) {
+      /*
       if (d.selectedMaterials) { // check if there's materials to add
         this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
       }
+      */
+      // one material only
+      this.saveJobMaterials(newJob.id, material);
     }
 
     // create bids if this user has favorites:
+    /*
     if (showSendtoFavorites && sendToFavorites && newJob) {
       const results = [];
       for (const companyId of favoriteCompanies) {
@@ -320,8 +326,10 @@ class JobCreateFormCarrier extends Component {
       }
       await Promise.all(allSms);
     }
+    */
 
     // if sending to mktplace, let's send SMS to everybody
+    /*
     if (sendToMkt) {
       const allBiddersSms = [];
       for (const bidderTel of nonFavoriteAdminTels) {
@@ -334,9 +342,10 @@ class JobCreateFormCarrier extends Component {
         }
       }
     }
+    */
 
-    const { onClose } = this.props;
-    onClose();
+    const { closeModal } = this.props;
+    closeModal();
   }
   // save ends /////////////////////////////////////////////////////////
 
@@ -511,6 +520,8 @@ class JobCreateFormCarrier extends Component {
   }
 
   async createJob() {
+    /*
+    console.log(522);
     this.setState({ btnSubmitting: true });
 
     const { closeModal, selectedEquipment } = this.props;
@@ -676,6 +687,7 @@ class JobCreateFormCarrier extends Component {
       }
     }
     closeModal();
+    */
   }
 
   handleHourDetails(e) {
@@ -1366,7 +1378,7 @@ class JobCreateFormCarrier extends Component {
           </div>
           <div className="col-sm-8">
             <TSubmitButton
-              onClick={this.createJob}
+              onClick={this.saveJob}
               className="primaryButton"
               loading={btnSubmitting}
               loaderSize={10}
