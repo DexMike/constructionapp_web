@@ -18,6 +18,11 @@ class LoadService extends AgentService {
     const response = await this.get(`/bookings/${id}${PATH}`);
     return (response);
   }
+
+  static async getLoadsByBookingEquipmentId(id) {
+    const response = await this.get(`/bookingequipments/${id}${PATH}`);
+    return (response);
+  }
 }
 
 export default LoadService;

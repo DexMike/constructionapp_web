@@ -249,16 +249,6 @@ class TrucksCustomerPage extends Component {
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
-        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-        //     newEquipment.companyName = company.legalName;
-        // console.log(companyName);
-        // console.log(job.companyName)
-        // const materialsList = await EquipmentMaterialsService
-        // .getEquipmentMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
         newEquipment.modifiedOn = moment(equipment.modifiedOn)
           .format();
         newEquipment.createdOn = moment(equipment.createdOn)
@@ -426,6 +416,7 @@ class TrucksCustomerPage extends Component {
       // alert('Please select a some materials');
       // return false;
     }
+
     this.setState({
       selectedEquipment,
       modal: true
@@ -555,7 +546,6 @@ class TrucksCustomerPage extends Component {
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
-      // console.log(367);
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
@@ -857,6 +847,7 @@ class TrucksCustomerPage extends Component {
                   name={equipment.name}
                   materials={equipment.materials}
                   setFavorite={() => this.handleSetFavorite(equipment.companyId)}
+                  requestEquipment={() => this.handleEquipmentEdit(equipment.id)}
                   distance={equipment.distance}
                 />
               ))
@@ -877,7 +868,7 @@ class TrucksCustomerPage extends Component {
         </div>
       </div>
     );
-  };
+  }
 
   render() {
     const {loaded} = this.state;

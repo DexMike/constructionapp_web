@@ -14,7 +14,7 @@ import moment from 'moment';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
-import JobCreateForm from '../jobs/JobCreateForm';
+import JobCreateFormCarrier from '../jobs/JobCreateFormCarrier';
 
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
@@ -47,7 +47,7 @@ class CarriersCustomerPage extends Component {
       sortByList,
 
       carriers: [],
-      selectedCarrier: {},
+      selectedCarrier: 0,
 
       modal: false,
       goToDashboard: false,
@@ -359,31 +359,7 @@ class CarriersCustomerPage extends Component {
     }
   }
 
-  handleCarrierEdit(id) {
-    const {carriers, filters} = this.state;
-
-    const [selectedCarrier] = carriers.filter((equipment) => {
-      if (id === equipment.id) {
-        return equipment;
-      }
-      return false;
-    }, id);
-    // prevent dialog if no selected materials
-    if (filters.materialType.length === 0) {
-      const hauledMaterials = selectedCarrier.materials.match(/[^\r\n]+/g);
-      const options = [];
-      hauledMaterials.forEach((material) => {
-        const m = {
-          label: material,
-          name: 'materialType',
-          value: material
-        };
-        options.push(m);
-      });
-      filters.materialType = options;
-      // alert('Please select a some materials');
-      // return false;
-    }
+  handleCarrierEdit(selectedCarrier) {
     this.setState({
       selectedCarrier,
       modal: true
@@ -590,10 +566,10 @@ class CarriersCustomerPage extends Component {
   renderModal() {
     const {
       modal,
+      selectedCarrier,
       materialTypeList
       // carriers
     } = this.state;
-    // let { modalSelectMaterials } = this.state;
 
     const mats = this.returnSelectedMaterials();
 
@@ -618,13 +594,12 @@ class CarriersCustomerPage extends Component {
           <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
-          { /*
-          <JobCreateForm
-            selectedCarrier={selectedCarrier}
+          <JobCreateFormCarrier
+            selectedCarrierId={selectedCarrier}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
-            getAllMaterials={this.retrieveAllMaterials}
-          /> */}
+            // getAllMaterials={this.retrieveAllMaterials}
+          />
         </div>
       </Modal>
     );
@@ -634,7 +609,7 @@ class CarriersCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Truck Search</h3>
+          <h3 className="page-title">Carrier Search</h3>
         </Col>
       </Row>
     );
@@ -913,6 +888,7 @@ class CarriersCustomerPage extends Component {
                   carrierName={c.legalName}
                   favorite={c.favorite}
                   setFavorite={() => this.handleSetFavorite(c.companyId)}
+                  requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
                 />
               ))
@@ -931,7 +907,7 @@ class CarriersCustomerPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          <div className="truck-container">
+          <div>
             {this.renderFilter()}
             {/* {this.renderTable()} */}
             {this.renderCarrierTable()}
