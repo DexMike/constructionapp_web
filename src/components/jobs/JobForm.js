@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Row, Container, Col } from 'reactstrap';
+import {Redirect} from 'react-router-dom';
+import {Card, CardBody, Row, Container, Col} from 'reactstrap';
 import './jobs.css';
 import TFormat from '../common/TFormat';
 import TMapBoxOriginDestinationWithOverlay
@@ -50,19 +50,18 @@ class JobForm extends Component {
   }
 
   async componentDidMount() {
-    const { job, companyCarrier } = this.props;
-    let { loads, carrier, images } = this.state;
+    const {job, companyCarrier} = this.props;
+    let {loads, carrier, images} = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
     if (bookings.length > 0) {
-      const bookingEquipments = BookingEquipmentService
+      const bookingEquipments = await BookingEquipmentService
         .getBookingEquipmentsByBookingId(bookings[0].id);
       if (bookingEquipments.length > 0) {
-        loads = await LoadService.getLoadsByBookingId(
-          bookings[0].id // booking.id 6
-        );
+        loads = await LoadService
+          .getLoadsByBookingEquipmentId(bookingEquipments[0].id);
       }
     }
 
@@ -82,7 +81,7 @@ class JobForm extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
-      const { job } = nextProps;
+      const {job} = nextProps;
       Object.keys(job)
         .map((key) => {
           if (job[key] === null) {
@@ -99,12 +98,12 @@ class JobForm extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
   toggle(tab) {
-    const { activeTab } = this.state;
+    const {activeTab} = this.state;
     if (activeTab !== tab) {
       this.setState({
         activeTab: tab
@@ -114,7 +113,7 @@ class JobForm extends Component {
 
   async saveJob(e) {
     e.preventDefault();
-    const { job, handlePageClick } = this.props;
+    const {job, handlePageClick} = this.props;
     if (!this.isFormValid()) {
       // TODO display error message
       // console.error('didnt put all the required fields.');
@@ -147,7 +146,7 @@ class JobForm extends Component {
   }
 
   handleInputChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({[e.target.name]: e.target.value});
   }
 
   materialsAsString(materials) {
@@ -167,7 +166,7 @@ class JobForm extends Component {
   }
 
   renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
+    const {goToDashboard, goToJob} = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
@@ -319,7 +318,9 @@ class JobForm extends Component {
     );
   }
 
-  renderLoads(loads, job) {
+  renderLoads() {
+    const {loads, job} = {...this.state};
+    console.log(loads);
     return (
       <React.Fragment>
         <h3 className="subhead" style={{
@@ -336,7 +337,7 @@ class JobForm extends Component {
   }
 
   renderJobTons() {
-    const { loads } = this.state;
+    const {loads} = this.state;
     const total = loads.length;
     let delivered = 0;
     let completed = 0;
@@ -499,7 +500,7 @@ class JobForm extends Component {
       overlayMapData,
       loads
     } = this.state;
-    const { job } = this.props;
+    const {job} = this.props;
     let origin = '';
     let destination = '';
     let endAddress;
@@ -555,7 +556,7 @@ class JobForm extends Component {
                 </div>
               </Row>
               <hr/>
-              {this.renderLoads(loads, job)}
+              {this.renderLoads()}
               {this.renderUploadedPhotos(images)}
               <hr/>
               <div className="row">
@@ -665,7 +666,7 @@ class JobForm extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">

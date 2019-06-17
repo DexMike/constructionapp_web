@@ -33,6 +33,25 @@ class TMapBoxPath extends PureComponent {
     });
 
     map.on('load', () => {
+
+      const directions = new MapboxDirections(
+        {
+          accessToken: mapboxgl.accessToken,
+          // unit: 'metric',
+          // profile: 'driving',
+          container: 'directions', // Specify an element thats not the map container.
+          controls: {
+            inputs: false,
+            instructions: false
+          },
+          interactive: false // disable dragging
+        }
+      );
+      map.addControl(directions, 'top-left');
+      map.addControl(new mapboxgl.FullscreenControl());
+      directions.setOrigin(gpsTrackings[0]);
+      directions.setDestination(gpsTrackings[gpsTrackings.length - 1]);
+
       map.addLayer({
         id: 'route',
         type: 'line',
