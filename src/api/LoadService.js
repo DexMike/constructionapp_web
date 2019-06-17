@@ -3,7 +3,6 @@ import AgentService from './AgentService';
 const PATH = '/loads';
 
 class LoadService extends AgentService {
-
   static async getLoadById(id) {
     const response = await this.get(`${PATH}/${id}`);
     return (response);
@@ -16,11 +15,6 @@ class LoadService extends AgentService {
 
   static async getLoadsByBookingId(id) {
     const response = await this.get(`/bookings/${id}${PATH}`);
-    return (response);
-  }
-
-  static async getLoadsByBookingEquipmentId(id) {
-    const response = await this.get(`/bookingequipments/${id}${PATH}`);
     return (response);
   }
 }
