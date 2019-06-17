@@ -509,7 +509,7 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     bookingEquipment.createdOn = moment()
       .unix() * 1000;
-    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
+    await BookingEquipmentService.createBookingEquipment(bookingEquipment);
 
     // Let's make a call to Twilio to send an SMS
     // We need to get the phone number from the carrier co
