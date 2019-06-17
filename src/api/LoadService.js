@@ -3,7 +3,6 @@ import AgentService from './AgentService';
 const PATH = '/loads';
 
 class LoadService extends AgentService {
-
   static async getLoadById(id) {
     const response = await this.get(`${PATH}/${id}`);
     return (response);

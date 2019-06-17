@@ -16,6 +16,13 @@ class EquipmentRow extends Component {
     setFavorite(companyId);
   }
 
+  editEquipment(companyId) {
+    const {
+      requestEquipment
+    } = this.props;
+    requestEquipment(companyId);
+  }
+
   render() {
     const {
       id,
@@ -72,7 +79,7 @@ class EquipmentRow extends Component {
                   </div>
                   <div className="col-md-3 button-card">
                     <Button
-                      onClick={() => this.handleEquipmentEdit(id)}
+                      onClick={() => this.editEquipment(id)}
                       className="btn btn-primary"
                       styles="margin:0px !important"
                     >
@@ -214,6 +221,7 @@ EquipmentRow.propTypes = {
   tonRate: PropTypes.number,
   name: PropTypes.string,
   setFavorite: PropTypes.func,
+  requestEquipment: PropTypes.func,
   distance: PropTypes.number
 };
 
@@ -231,6 +239,7 @@ EquipmentRow.defaultProps = {
   tonRate: PropTypes.number,
   name: PropTypes.string,
   setFavorite: PropTypes.func,
+  requestEquipment: PropTypes.func,
   distance: PropTypes.number
 };
 
