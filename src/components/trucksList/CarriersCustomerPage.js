@@ -47,7 +47,7 @@ class CarriersCustomerPage extends Component {
       sortByList,
 
       carriers: [],
-      selectedCarrier: {},
+      selectedCarrier: 0,
 
       modal: false,
       goToDashboard: false,
@@ -335,34 +335,7 @@ class CarriersCustomerPage extends Component {
     }
   }
 
-  handleCarrierEdit(id) {
-    const {carriers, filters} = this.state;
-
-    const [selectedCarrier] = carriers.filter((equipment) => {
-      if (id === equipment.id) {
-        return equipment;
-      }
-      return false;
-    }, id);
-    // prevent dialog if no selected materials
-    if (filters.materialType.length === 0) {
-      const hauledMaterials = selectedCarrier.materials.match(/[^\r\n]+/g);
-      const options = [];
-      hauledMaterials.forEach((material) => {
-        const m = {
-          label: material,
-          name: 'materialType',
-          value: material
-        };
-        options.push(m);
-      });
-      filters.materialType = options;
-      // alert('Please select a some materials');
-      // return false;
-    }
-
-    // console.log('>>SELECTED CARRIER', selectedCarrier);
-
+  handleCarrierEdit(selectedCarrier) {
     this.setState({
       selectedCarrier,
       modal: true
@@ -574,8 +547,6 @@ class CarriersCustomerPage extends Component {
       // carriers
     } = this.state;
 
-    console.log('>>');
-
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
@@ -600,10 +571,10 @@ class CarriersCustomerPage extends Component {
         </div>
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           <JobCreateFormCarrier
-            selectedEquipment={selectedCarrier}
+            selectedCarrierId={selectedCarrier}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
-            getAllMaterials={this.retrieveAllMaterials}
+            // getAllMaterials={this.retrieveAllMaterials}
           />
         </div>
       </Modal>
@@ -614,7 +585,7 @@ class CarriersCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Truck Search</h3>
+          <h3 className="page-title">Carrier Search</h3>
         </Col>
       </Row>
     );
@@ -908,7 +879,7 @@ class CarriersCustomerPage extends Component {
     const {loaded} = this.state;
     if (loaded) {
       return (
-        <React.Fragment>
+        <Container className="dashboard">
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
@@ -917,7 +888,7 @@ class CarriersCustomerPage extends Component {
             {/* {this.renderTable()} */}
             {this.renderCarrierTable()}
           </div>
-        </React.Fragment>
+        </Container>
       );
     }
     return (

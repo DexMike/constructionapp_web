@@ -237,16 +237,6 @@ class TrucksCustomerPage extends Component {
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
-        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-        //     newEquipment.companyName = company.legalName;
-        // console.log(companyName);
-        // console.log(job.companyName)
-        // const materialsList = await EquipmentMaterialsService
-        // .getEquipmentMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
         newEquipment.modifiedOn = moment(equipment.modifiedOn)
           .format();
         newEquipment.createdOn = moment(equipment.createdOn)
@@ -382,8 +372,6 @@ class TrucksCustomerPage extends Component {
   handleEquipmentEdit(id) {
     const {equipments, filters} = this.state;
 
-    console.log('>>EQUIPMENTS', equipments);
-
     const [selectedEquipment] = equipments.filter((equipment) => {
       if (id === equipment.id) {
         return equipment;
@@ -406,8 +394,6 @@ class TrucksCustomerPage extends Component {
       // alert('Please select a some materials');
       // return false;
     }
-
-    console.log('>>SELECTED EQUIPMENT', selectedEquipment);
 
     this.setState({
       selectedEquipment,
@@ -538,7 +524,6 @@ class TrucksCustomerPage extends Component {
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
-      // console.log(367);
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
@@ -574,7 +559,7 @@ class TrucksCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Truck Search 572</h3>
+          <h3 className="page-title">Truck Search</h3>
         </Col>
       </Row>
     );
@@ -860,7 +845,7 @@ class TrucksCustomerPage extends Component {
         </div>
       </div>
     );
-  };
+  }
 
   render() {
     const {loaded} = this.state;
@@ -882,7 +867,7 @@ class TrucksCustomerPage extends Component {
       <Container className="container">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Truck Search 885</h3>
+            <h3 className="page-title">Truck Search</h3>
           </Col>
         </Row>
         {this.renderLoader()}

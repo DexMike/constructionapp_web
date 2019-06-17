@@ -143,8 +143,6 @@ class JobCreateForm extends Component {
     endAddress.createdBy = profile.userId;
     bid.hasCustomerAccepted = 1;
 
-    console.log('>>', profile);
-
     // bid.userId should be the userid of the driver linked to that equipment
     if (!selectedEquipment.defaultDriverId) {
       bid.userId = profile.selectedEquipment.defaultDriverId;
