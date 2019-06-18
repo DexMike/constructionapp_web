@@ -184,7 +184,8 @@ class LoadsExpandableRow extends Component {
             >{(!endTime ? 'In Progress' : endTime)}
             </TableCell>
             <TableCell align="left">{job.rateType === 'Hour' ? `$${job.rate} / hour` : `$${job.rate} / ton`}</TableCell>
-            <TableCell align="left">{job.rateType === 'Hour' ? `${load.hoursEntered} hours` : `${load.tonsEntered} tons`}</TableCell>
+            {job.rateType === 'Hour' && <TableCell align="left">{`${load.hoursEntered} hours`}</TableCell>}
+            <TableCell align="left">{`${load.tonsEntered} tons`}</TableCell>
             <TableCell align="left">${job.rateType === 'Hour' ? job.rate * load.hoursEntered : job.rate * load.tonsEntered}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
