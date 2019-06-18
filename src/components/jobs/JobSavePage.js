@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Col,
   Row,
-  Container, Modal, Card, Button, ButtonToolbar
+  Container, Modal, Card, Button
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
@@ -47,7 +47,6 @@ class JobSavePage extends Component {
       },
       bid: null,
       booking: null,
-      bookingEquipment: null,
       favoriteCompany: [],
       profile: {},
       companyCarrier: 0,
@@ -73,13 +72,12 @@ class JobSavePage extends Component {
     let {
       bid,
       booking,
-      bookingEquipment,
       profile,
-      favoriteCompany
+      favoriteCompany,
+      selectedDrivers
     } = this.state;
 
     try {
-
       profile = await ProfileService.getProfile();
 
       if (match.params.id) {
@@ -125,15 +123,17 @@ class JobSavePage extends Component {
             [bid] = bids;
           }
         }
-
         const bookings = await BookingService.getBookingsByJobId(job.id);
         if (bookings && bookings.length > 0) {
           [booking] = bookings;
-          const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-          bookingEquipment = bookingEquipments.find(
-            bookingEq => bookingEq.bookingId === booking.id,
-            booking
-          );
+          const bookingEquipments = await BookingEquipmentService
+            .getBookingEquipmentsByBookingId(booking.id);
+          selectedDrivers = bookingEquipments
+            .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
+          // bookingEquipment = bookingEquipments.find(
+          //   bookingEq => bookingEq.bookingId === booking.id,
+          //   booking
+          // );
         }
 
         // If the customer is Carrier, check if it's a favorite
@@ -151,7 +151,6 @@ class JobSavePage extends Component {
           bid,
           companyCarrier,
           booking,
-          bookingEquipment,
           profile,
           companyType: profile.companyType,
           favoriteCompany,
@@ -162,7 +161,8 @@ class JobSavePage extends Component {
       // moved the loader to the mount function
       this.setState({
         companyType: profile.companyType,
-        loaded: true
+        loaded: true,
+        selectedDrivers
       });
     } catch (err) {
       console.error(err);
@@ -563,7 +563,7 @@ class JobSavePage extends Component {
         modifiedBy: profile.userId,
         modifiedOn: new Date()
       }));
-      await BookingEquipmentService.createBookingEquipments(bookingEquipments);
+      await BookingEquipmentService.allocateDrivers(bookingEquipments, booking.id);
     } catch (err) {
       console.error(err);
     }
@@ -698,7 +698,7 @@ class JobSavePage extends Component {
   }
 
   renderAllocateDriversModal() {
-    const { allocateDriversModal, drivers, btnSubmitting } = this.state;
+    const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
     const driverData = drivers.data;
     const driverColumns = [
       {
@@ -751,23 +751,22 @@ class JobSavePage extends Component {
                       />
                       <Button type="button" className="tertiaryButton" onClick={() => {
                         this.toggleAllocateDriversModal();
-                      }}>
+                      }}
+                      >
                         Cancel
                       </Button>
                     </div>
                   </div>
 
                   <TTable
-                    handleRowsChange={() => {
-                    }}
+                    handleRowsChange={() => {}}
                     data={driverData}
                     columns={driverColumns}
-                    handlePageChange={() => {
-                    }}
-                    handleIdClick={() => {
-                    }}
+                    handlePageChange={() => {}}
+                    handleIdClick={() => {}}
                     isSelectable
-                    onSelect={selected => this.setState({selectedDrivers: selected})}
+                    onSelect={selected => this.setState({ selectedDrivers: selected })}
+                    selected={selectedDrivers}
                   />
                 </Card>
               </Col>

@@ -14,8 +14,8 @@ class BookingService extends AgentService {
     return (response);
   }
 
-  static async createBookingEquipments(bookingEquipments) {
-    const response = await super.post(`${PATH}/list`, bookingEquipments);
+  static async allocateDrivers(bookingEquipments, bookingId) {
+    const response = await super.post(`/bookings/${bookingId}${PATH}/allocate`, bookingEquipments);
     return response;
   }
 

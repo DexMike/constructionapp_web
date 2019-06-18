@@ -16,11 +16,11 @@ import truckImage from '../../img/default_truck.png';
 class TTable extends Component {
   constructor(props) {
     super(props);
-    const { order, orderBy } = this.props;
+    const { order, orderBy, selected } = this.props;
     this.state = {
       order,
       orderBy,
-      selected: [],
+      selected,
       page: 0,
       rowsPerPage: 10
     };
@@ -265,6 +265,7 @@ TTable.propTypes = {
     })
   ).isRequired,
   onSelect: PropTypes.func,
+  selected: PropTypes.arrayOf(PropTypes.number),
   isSelectable: PropTypes.bool
 };
 
@@ -272,6 +273,7 @@ TTable.defaultProps = {
   totalCount: 5,
   order: 'asc',
   orderBy: 'id',
+  selected: [],
   onSelect: () => {},
   isSelectable: false
 };
