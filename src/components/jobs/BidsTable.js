@@ -2,11 +2,16 @@ import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
 import { Card, CardBody, Row, Container, Col, Modal, ButtonToolbar, Button } from 'reactstrap';
 import './jobs.css';
+import CloneDeep from 'lodash.clonedeep';
+import moment from 'moment';
 import TFormat from '../common/TFormat';
 import CompanyService from '../../api/CompanyService';
 import BidService from '../../api/BidService';
 import TTable from '../common/TTable';
 import TSubmitButton from '../common/TSubmitButton';
+import JobService from '../../api/JobService';
+import UserService from '../../api/UserService';
+import TwilioService from '../../api/TwilioService';
 
 class BidsTable extends Component {
   constructor(props) {
@@ -49,6 +54,23 @@ class BidsTable extends Component {
         }
       }
 
+      /* newBid.actions = ({'
+        <TSubmitButton
+          onClick={() => this.saveBid('decline')}
+          className="secondaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Decline Job"
+        />
+        <TSubmitButton
+          onClick={() => this.saveBid('accept')}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Accept Job"
+        />
+      '}); */
+
       return newBid;
     });
 
@@ -81,15 +103,43 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
-    const { selectedBid } = this.state;
+    const { selectedBid, profile } = this.state;
     this.setState({ btnSubmitting: true });
 
-    if (action === 'assign') {
+    console.log(selectedBid);
+
+    const job = await JobService.getJobById(selectedBid.jobId);
+
+    if (action === 'accept') {
       // TODO assign job to carrier
-      // TODO decline all other Bids
+      // TODO decline all other Bids - status: Ignored
+
+      const bids = await BidService.getBidsByJobId(selectedBid.jobId);
     } else {
-      // TODO decline Bid
+      // TODO decline Bid - status: Declined
+
+      /* const newBid = CloneDeep(selectedBid);
+      newBid.status = 'Declined';
+      newBid.hasCustomerAccepted = 1;
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+
+      // Notify Carrier company's admin that the job request was declined
+      const carrierAdmin = await UserService.getAdminByCompanyId(selectedBid.companyCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: `We're sorry, your request for the Job [${job.name}] was not accepted.
+              Please log in to Trelar to look for more jobs.`
+          };
+          await TwilioService.createSms(notification);
+        }
+      } */
     }
+
+    this.setState({ btnSubmitting: false });
   }
 
   renderTitle() {
@@ -137,6 +187,10 @@ class BidsTable extends Component {
                     name: 'acceptanceRate',
                     displayName: 'Acceptance Rate'
                   }, */
+                  {
+                    name: 'actions',
+                    displayName: 'Actions'
+                  },
                   {
                     name: 'loadsNumber',
                     displayName: 'Loads Completed'
@@ -221,11 +275,11 @@ class BidsTable extends Component {
                             bntText="Decline Job"
                           />
                           <TSubmitButton
-                            onClick={() => this.saveBid('assign')}
+                            onClick={() => this.saveBid('accept')}
                             className="primaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-                            bntText="Assign Job"
+                            bntText="Accept Job"
                           />
                         </ButtonToolbar>
                       </Row>

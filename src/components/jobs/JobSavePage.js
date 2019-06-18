@@ -139,7 +139,7 @@ class JobSavePage extends Component {
         );
       }
 
-      const companyCarrier = bid.companyCarrierId;
+      const companyCarrier = (typeof bid === 'undefined') ? bid.companyCarrierId : null;
 
       this.setState({
         job,
