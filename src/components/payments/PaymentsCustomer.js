@@ -15,11 +15,14 @@ class PaymentsCustomer extends Component {
       loaded: false,
       id: 0,
       goToPaymentDetails: false,
-      payments: []
+      payments: [],
+      page: 0,
+      rows: 10,
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handlePaymentId = this.handlePaymentId.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
   }
 
   async componentDidMount() {
@@ -32,6 +35,14 @@ class PaymentsCustomer extends Component {
       goToPaymentDetails: true,
       id
     });
+  }
+
+  handlePageChange(page) {
+    this.setState({ page });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows });
   }
 
   handlePageClick(menuItem) {
@@ -126,6 +137,8 @@ class PaymentsCustomer extends Component {
                     }
                     data={payments}
                     handleIdClick={this.handlePaymentId}
+                    handlePageChange={this.handlePageChange}
+                    handleRowsChange={this.handleRowsPerPage}
                   />
                 </CardBody>
               </Card>

@@ -23,6 +23,7 @@ import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
 import TTable from '../common/TTable';
+import BidsTable from './BidsTable';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -611,6 +612,18 @@ class JobSavePage extends Component {
     );
   }
 
+  renderBidsTable() {
+    const { job, companyType } = this.state;
+    if (companyType === 'Customer') {
+      return (
+        <BidsTable
+          job={job}
+        />
+      );
+    }
+    return '';
+  }
+
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
     if (job.status === 'Published' && companyType === 'Carrier') {
@@ -803,6 +816,7 @@ class JobSavePage extends Component {
               </div>
             </div>
             {this.renderJobForm(companyType, companyCarrier, job)}
+            {this.renderBidsTable()}
           </div>
         );
       }

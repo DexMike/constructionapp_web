@@ -67,7 +67,7 @@ class TrucksCustomerPage extends Component {
         endAvailability: null,
         searchType: 'Customer Truck',
         userId: '',
-        equipmentType: '',
+        equipmentType: [],
         minCapacity: '',
         // materialType: '',
         materialType: [],
@@ -98,6 +98,7 @@ class TrucksCustomerPage extends Component {
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
   }
@@ -147,7 +148,7 @@ class TrucksCustomerPage extends Component {
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
     Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        equipmentTypeList.push(itm.val1);
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
       });
 
     const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
@@ -162,7 +163,7 @@ class TrucksCustomerPage extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.equipmentType] = equipmentTypeList;
+    [filters.equipments] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -211,16 +212,27 @@ class TrucksCustomerPage extends Component {
     // zip code) or we don't have any coordinates on our db
     // we search for that zip code coordinates with MapBox API
     if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
-      try {
-        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-        filters.companyLatitude = geoLocation.features[0].center[1];
-        filters.companyLongitude = geoLocation.features[0].center[0];
-      } catch (e) {
+      if (filters.zipCode.length > 0) {
+        try {
+          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+          filters.companyLatitude = geoLocation.features[0].center[1];
+          filters.companyLongitude = geoLocation.features[0].center[0];
+        } catch (e) {
+          this.setState({
+            reqHandlerZip: {
+              ...reqHandlerZip,
+              error: 'Invalid US Zip Code',
+              touched: true
+            }
+          });
+        }
+      } else { // if the zipCode filter is empty, default the coordinates to user's address
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
         this.setState({
           reqHandlerZip: {
             ...reqHandlerZip,
-            error: 'Invalid US Zip Code',
-            touched: true
+            touched: false
           }
         });
       }
@@ -237,16 +249,6 @@ class TrucksCustomerPage extends Component {
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
-        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-        //     newEquipment.companyName = company.legalName;
-        // console.log(companyName);
-        // console.log(job.companyName)
-        // const materialsList = await EquipmentMaterialsService
-        // .getEquipmentMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
         newEquipment.modifiedOn = moment(equipment.modifiedOn)
           .format();
         newEquipment.createdOn = moment(equipment.createdOn)
@@ -339,6 +341,16 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  handleMultiTruckChange(data) {
+    const {filters} = this.state;
+    filters.equipmentType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchEquipments();
+    });
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({[`goTo${menuItem}`]: true});
@@ -404,6 +416,7 @@ class TrucksCustomerPage extends Component {
       // alert('Please select a some materials');
       // return false;
     }
+
     this.setState({
       selectedEquipment,
       modal: true
@@ -533,7 +546,6 @@ class TrucksCustomerPage extends Component {
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
-      // console.log(367);
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
@@ -616,10 +628,11 @@ class TrucksCustomerPage extends Component {
                       <div className="filter-item-title">
                         Truck Type
                       </div>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'equipmentType',
                             value: filters.equipmentType
                           }
@@ -630,15 +643,15 @@ class TrucksCustomerPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
                             name: 'equipmentType',
-                            value: equipmentType,
-                            label: equipmentType
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
                           }))
                         }
-                        placeholder={equipmentTypeList[0]}
+                        // placeholder="Materials"
+                        placeholder="Any"
                       />
                     </Col>
                     <Col md="2">
@@ -750,7 +763,7 @@ class TrucksCustomerPage extends Component {
                         }
                         meta={reqHandlerRange}
                         className="filter-text"
-                        placeholder="50"
+                        placeholder="Any"
                         type="number"
                       />
                     </Col>
@@ -834,6 +847,7 @@ class TrucksCustomerPage extends Component {
                   name={equipment.name}
                   materials={equipment.materials}
                   setFavorite={() => this.handleSetFavorite(equipment.companyId)}
+                  requestEquipment={() => this.handleEquipmentEdit(equipment.id)}
                   distance={equipment.distance}
                 />
               ))
@@ -854,7 +868,7 @@ class TrucksCustomerPage extends Component {
         </div>
       </div>
     );
-  };
+  }
 
   render() {
     const {loaded} = this.state;

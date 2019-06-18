@@ -15,6 +15,7 @@ import './Settings.css';
 
 import CompanyProfile from './CompanyProfile';
 import CompanyNotifications from './CompanyNotifications';
+import PaymentSettings from './PaymentSettings';
 
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
@@ -91,6 +92,7 @@ class CompanySettingsPage extends Component {
   renderCarrierPayment() {
     return (
       <Col md={12}>
+        <br/>
         <h3>Hello.</h3>
         <p style={{fontSize: 14}}>
           For your security we at Trelar do not keep or
@@ -106,24 +108,17 @@ class CompanySettingsPage extends Component {
           Thank you.<br/>
           <strong>Trelar CSR team.</strong><br/>
         </p>
+        <br/>
       </Col>
     );
   }
 
   renderCustomerPayment() {
+    const { company } = this.state;
     return (
-      <Col md={12}>
-        <h2>Hello.</h2>
-        <p style={{fontSize: 14}}>
-          We do not store your full banking and account information.<br/>
-          <br/>
-          Please contact customer support at csr@trelar.net if you'd
-          like to update your payment information.<br />
-          <br/>
-          Thank you.<br />
-          <strong>Trelar CSR team.</strong><br/>
-        </p>
-      </Col>
+      <React.Fragment>
+        <PaymentSettings company={company}/>
+      </React.Fragment>
     );
   }
 
@@ -182,18 +177,17 @@ class CompanySettingsPage extends Component {
           </TabPane>
           <TabPane tabId="2">
             <CompanyNotifications
+              userId={user.id}
               company={company}
             />
           </TabPane>
           <TabPane tabId="3">
-            <Row className="pt-4 pb-4">
-              {
-                company.type === 'Customer' ? this.renderCustomerPayment() : null
-              }
-              {
-                company.type === 'Carrier' ? this.renderCarrierPayment() : null
-              }
-            </Row>
+            {
+              company.type === 'Customer' ? this.renderCustomerPayment() : null
+            }
+            {
+              company.type === 'Carrier' ? this.renderCarrierPayment() : null
+            }
           </TabPane>
         </TabContent>
       </div>

@@ -134,6 +134,14 @@ class SettingsPage extends Component {
             <div className="navLink"><Trans>Profile</Trans></div>
           </NavLink>
         </NavItem>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '2' }, 'tab')}
+            onClick={() => { this.toggle('2'); }}
+          >
+            Notifications
+          </NavLink>
+        </NavItem>
       </Nav>
     );
   }

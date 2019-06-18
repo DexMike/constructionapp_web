@@ -14,7 +14,7 @@ import moment from 'moment';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
-import JobCreateForm from '../jobs/JobCreateForm';
+import JobCreateFormCarrier from '../jobs/JobCreateFormCarrier';
 
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
@@ -47,7 +47,7 @@ class CarriersCustomerPage extends Component {
       sortByList,
 
       carriers: [],
-      selectedCarrier: {},
+      selectedCarrier: 0,
 
       modal: false,
       goToDashboard: false,
@@ -65,7 +65,7 @@ class CarriersCustomerPage extends Component {
         endAvailability: null,
         searchType: 'Customer Truck',
         userId: '',
-        equipmentType: '',
+        equipmentType: [],
         minCapacity: '',
         // materialType: '',
         materialType: [],
@@ -98,6 +98,7 @@ class CarriersCustomerPage extends Component {
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.retrieveCarrier = this.retrieveCarrier.bind(this);
@@ -129,6 +130,7 @@ class CarriersCustomerPage extends Component {
   }
 
   clear() {
+    const { address } = this.state;
     const filters = {
       startAvailability: null,
       endAvailability: null,
@@ -138,7 +140,7 @@ class CarriersCustomerPage extends Component {
       minCapacity: '',
       // materialType: '',
       materialType: [],
-      zipCode: '',
+      zipCode: address.zipCode,
       range: 50,
       rateType: '',
       currentAvailability: 1,
@@ -188,10 +190,10 @@ class CarriersCustomerPage extends Component {
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
     Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        equipmentTypeList.push(itm.val1);
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
       });
 
-    [filters.equipmentType] = equipmentTypeList;
+    [filters.equipments] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -241,22 +243,34 @@ class CarriersCustomerPage extends Component {
     // zip code) or we don't have any coordinates on our db
     // we search for that zip code coordinates with MapBox API
     if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
-      try {
-        const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-        filters.companyLatitude = geoLocation.features[0].center[1];
-        filters.companyLongitude = geoLocation.features[0].center[0];
-      } catch (e) {
+      if (filters.zipCode.length > 0) {
+        try {
+          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+          filters.companyLatitude = geoLocation.features[0].center[1];
+          filters.companyLongitude = geoLocation.features[0].center[0];
+        } catch (e) {
+          this.setState({
+            reqHandlerZip: {
+              ...reqHandlerZip,
+              error: 'Invalid US Zip Code',
+              touched: true
+            }
+          });
+        }
+      } else { // if the zipCode filter is empty, default the coordinates to user's address
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
         this.setState({
           reqHandlerZip: {
             ...reqHandlerZip,
-            error: 'Invalid US Zip Code',
-            touched: true
+            touched: false
           }
         });
       }
     }
 
     const carriers = await CompanyService.getCarriersByFilters(filters);
+    console.log(carriers);
 
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -288,6 +302,16 @@ class CarriersCustomerPage extends Component {
   handleMultiChange(data) {
     const {filters} = this.state;
     filters.materialType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchCarriers();
+    });
+  }
+
+  handleMultiTruckChange(data) {
+    const {filters} = this.state;
+    filters.equipmentType = data;
     this.setState({
       filters
     }, async function changed() {
@@ -335,31 +359,7 @@ class CarriersCustomerPage extends Component {
     }
   }
 
-  handleCarrierEdit(id) {
-    const {carriers, filters} = this.state;
-
-    const [selectedCarrier] = carriers.filter((equipment) => {
-      if (id === equipment.id) {
-        return equipment;
-      }
-      return false;
-    }, id);
-    // prevent dialog if no selected materials
-    if (filters.materialType.length === 0) {
-      const hauledMaterials = selectedCarrier.materials.match(/[^\r\n]+/g);
-      const options = [];
-      hauledMaterials.forEach((material) => {
-        const m = {
-          label: material,
-          name: 'materialType',
-          value: material
-        };
-        options.push(m);
-      });
-      filters.materialType = options;
-      // alert('Please select a some materials');
-      // return false;
-    }
+  handleCarrierEdit(selectedCarrier) {
     this.setState({
       selectedCarrier,
       modal: true
@@ -566,10 +566,10 @@ class CarriersCustomerPage extends Component {
   renderModal() {
     const {
       modal,
+      selectedCarrier,
       materialTypeList
       // carriers
     } = this.state;
-    // let { modalSelectMaterials } = this.state;
 
     const mats = this.returnSelectedMaterials();
 
@@ -594,13 +594,12 @@ class CarriersCustomerPage extends Component {
           <div className="bold-text modal__title">Job Request</div>
         </div>
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
-          { /*
-          <JobCreateForm
-            selectedCarrier={selectedCarrier}
+          <JobCreateFormCarrier
+            selectedCarrierId={selectedCarrier}
             closeModal={this.toggleAddJobModal}
             selectedMaterials={this.returnSelectedMaterials}
-            getAllMaterials={this.retrieveAllMaterials}
-          /> */}
+            // getAllMaterials={this.retrieveAllMaterials}
+          />
         </div>
       </Modal>
     );
@@ -610,7 +609,7 @@ class CarriersCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Truck Search</h3>
+          <h3 className="page-title">Carrier Search</h3>
         </Col>
       </Row>
     );
@@ -675,10 +674,11 @@ class CarriersCustomerPage extends Component {
                       <div className="filter-item-title">
                         Truck Type
                       </div>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'equipmentType',
                             value: filters.equipmentType
                           }
@@ -689,15 +689,14 @@ class CarriersCustomerPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
                             name: 'equipmentType',
-                            value: equipmentType,
-                            label: equipmentType
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
                           }))
                         }
-                        placeholder={equipmentTypeList[0]}
+                        placeholder="Any"
                       />
                     </Col>
                     <Col md="2">
@@ -773,7 +772,7 @@ class CarriersCustomerPage extends Component {
                         }
                         meta={reqHandlerRange}
                         className="filter-text"
-                        placeholder="50"
+                        placeholder="Any"
                         type="number"
                       />
                     </Col>
@@ -785,7 +784,7 @@ class CarriersCustomerPage extends Component {
                   <Row lg={12} id="filter-input-row">
                     <Col md="4">
                       <div className="filter-item-title">
-                        Search by Carrier by name
+                        Search by name
                       </div>
                       <input
                         name="name"
@@ -889,6 +888,7 @@ class CarriersCustomerPage extends Component {
                   carrierName={c.legalName}
                   favorite={c.favorite}
                   setFavorite={() => this.handleSetFavorite(c.companyId)}
+                  requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
                 />
               ))
@@ -907,7 +907,7 @@ class CarriersCustomerPage extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          <div className="truck-container">
+          <div>
             {this.renderFilter()}
             {/* {this.renderTable()} */}
             {this.renderCarrierTable()}
