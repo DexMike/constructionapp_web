@@ -784,7 +784,7 @@ class CarriersCustomerPage extends Component {
                   <Row lg={12} id="filter-input-row">
                     <Col md="4">
                       <div className="filter-item-title">
-                        Search by Carrier by name
+                        Search by name
                       </div>
                       <input
                         name="name"
