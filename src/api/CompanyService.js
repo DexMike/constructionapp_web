@@ -13,16 +13,6 @@ class CompanyService extends AgentService {
     return (response);
   }
 
-  static async getCompanySettings(id) {
-    const response = await this.get(`${PATH}/${id}/settings`);
-    return (response);
-  }
-
-  static async updateCompanySettings(company) {
-    const response = await this.put(`${PATH}/settings`, company);
-    return (response);
-  }
-
   static async getCarriersByFilters(filters) {
     const response = await super.post(`${PATH}/filters`, filters);
     return (response);
@@ -50,6 +40,26 @@ class CompanyService extends AgentService {
 
   static async deleteCompanyById(id) {
     const response = await this.delete(PATH, id);
+    return (response);
+  }
+
+  static async getCompanySettings(id) {
+    const response = await this.get(`${PATH}/${id}/settings`);
+    return (response);
+  }
+
+  static async createCompanySettings(item) {
+    const response = await super.post(`${PATH}/settings`, item);
+    return (response);
+  }
+
+  static async updateCompanySettings(company) {
+    const response = await this.put(`${PATH}/settings`, company);
+    return (response);
+  }
+
+  static async deleteCompanySettingsItem(id) {
+    const response = await this.delete(`${PATH}/settings`, id);
     return (response);
   }
 }

@@ -18,22 +18,15 @@ import './Settings.css';
 class CompanyNotifications extends Component {
   constructor(props) {
     super(props);
-    const settings = {
-      id: 0,
-      companyId: 0,
-      rateType: '',
-      operatingRange: 0,
-      materialType: 'Any',
-      equipmentType: 'Any'
-    };
     this.state = {
-      ...settings,
+      settings: [],
       equipmentTypes: [],
       materialTypes: [],
       rateTypes: [],
-      selectedEquipments: ['Any'],
-      selectedMaterials: ['Any'],
-      selectedRateType: 'Any'
+      companyEquipments: ['Any'],
+      companyMaterials: ['Any'],
+      companyOperatingRange: 0,
+      selectedRateType: null
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -45,50 +38,35 @@ class CompanyNotifications extends Component {
 
   async componentDidMount() {
     const { company } = this.props;
-    const settings = await CompanyService.getCompanySettings(company.id);
-    await this.setSettings(settings);
+    await this.fetchCompanySettings(company.id);
     await this.fetchLookupsValues();
-    this.setState({
-      settings
-    });
   }
 
-  async setSettings(settingsProps) {
-    const settings = settingsProps;
-    Object.keys(settings)
-      .map((key) => {
-        if (settings[key] === null) {
-          settings[key] = '';
-        }
-        return true;
+  async fetchCompanySettings(companyId) {
+    const settings = await CompanyService.getCompanySettings(companyId);
+
+    let companyOperatingRange = '';
+    let companyRateType = '';
+    const companyEquipments = [];
+    const companyMaterials = [];
+    Object.values(settings)
+      .forEach((itm) => {
+        if (itm.key === 'operatingRange') companyOperatingRange = itm.value;
+        if (itm.key === 'rateType') companyRateType = itm.value;
+        if (itm.key === 'equipmentType') companyEquipments.push(itm.value);
+        if (itm.key === 'materialType') companyMaterials.push(itm.value);
       });
-    this.setState({
-      ...settings
-    });
-  }
 
-  setCheckedStatus(state, checkboxClass) {
-    const x = document.getElementsByClassName(checkboxClass);
-    for (let i = 0; i < x.length; i += 1) {
-      x[i].checked = state;
-    }
+    this.setState({
+      settings,
+      companyOperatingRange,
+      companyRateType,
+      companyEquipments,
+      companyMaterials
+    });
   }
 
   async fetchLookupsValues() {
-    const {
-      rateType,
-      materialType,
-      equipmentType
-    } = this.state;
-    let {
-      selectedEquipments,
-      selectedMaterials,
-      selectedRateType
-    } = this.state;
-
-    selectedEquipments = equipmentType.split(', ');
-    selectedMaterials = materialType.split(', ');
-    selectedRateType = rateType;
     const lookups = await LookupsService.getLookups();
 
     let rateTypes = [];
@@ -116,10 +94,7 @@ class CompanyNotifications extends Component {
     this.setState({
       equipmentTypes,
       materialTypes,
-      rateTypes,
-      selectedEquipments,
-      selectedMaterials,
-      selectedRateType
+      rateTypes
     });
   }
 
@@ -130,108 +105,152 @@ class CompanyNotifications extends Component {
     });
   }
 
-  handleRateTypeChange(e) {
+  async handleRateTypeChange(e) {
     this.setState({
-      selectedRateType: e.value
+      companyRateType: e.value
     });
+    // try {
+    //   await CompanyService.updateCompanySettings(item);
+    //   this.setState({
+    //     rateType: [item],
+    //     selectedRateType: item.value
+    //   });
+    // } catch (error) {
+    //   // console.log(e);
+    // }
   }
 
   handleCheckedEquipments(e) {
-    let { selectedEquipments } = this.state;
+    let { companyEquipments } = this.state;
     const { value } = e.target;
 
     if (value === 'Any') {
-      this.setCheckedStatus(false, 'equipments-checkbox');
-      if (selectedEquipments.indexOf(value) >= 0) {
-        selectedEquipments = [];
-      } else {
-        selectedEquipments = ['Any'];
-      }
+      companyEquipments = ['Any'];
       this.setState({
-        selectedEquipments
+        companyEquipments
       });
       return;
     }
 
-    if (selectedEquipments.indexOf('Any') >= 0) {
-      selectedEquipments.splice(0, 1);
+    if (companyEquipments.indexOf('Any') >= 0) {
+      companyEquipments.splice(0, 1);
     }
 
-    if (selectedEquipments.indexOf(value) >= 0) {
-      const index = selectedEquipments.indexOf(value);
-      selectedEquipments.splice(index, 1);
+    if (companyEquipments.indexOf(value) >= 0) {
+      const index = companyEquipments.indexOf(value);
+      companyEquipments.splice(index, 1);
     } else {
-      selectedEquipments.push(value);
+      companyEquipments.push(value);
+    }
+
+    if (companyEquipments.length < 1) {
+      companyEquipments = ['Any'];
     }
     this.setState({
-      selectedEquipments
+      companyEquipments
     });
   }
 
   handleCheckedMaterials(e) {
-    let { selectedMaterials } = this.state;
+    let { companyMaterials } = this.state;
     const { value } = e.target;
     if (value === 'Any') {
-      this.setCheckedStatus(false, 'materials-checkbox');
-      if (selectedMaterials.indexOf(value) >= 0) {
-        selectedMaterials = [];
-      } else {
-        selectedMaterials = ['Any'];
-      }
+      companyMaterials = ['Any'];
       this.setState({
-        selectedMaterials
+        companyMaterials
       });
       return;
     }
 
-    if (selectedMaterials.indexOf('Any') >= 0) {
-      selectedMaterials.splice(0, 1);
+    if (companyMaterials.indexOf('Any') >= 0) {
+      companyMaterials.splice(0, 1);
     }
 
-    if (selectedMaterials.indexOf(value) >= 0) {
-      const index = selectedMaterials.indexOf(value);
-      selectedMaterials.splice(index, 1);
+    if (companyMaterials.indexOf(value) >= 0) {
+      const index = companyMaterials.indexOf(value);
+      companyMaterials.splice(index, 1);
     } else {
-      selectedMaterials.push(value);
+      companyMaterials.push(value);
+    }
+
+    if (companyMaterials.length < 1) {
+      companyMaterials = ['Any'];
     }
     this.setState({
-      selectedMaterials
+      companyMaterials
     });
   }
 
   async saveCompanyNotificationsSettings() {
+    const {company, userId} = this.props;
     const {
       settings,
-      selectedRateType,
-      selectedMaterials,
-      selectedEquipments,
-      operatingRange
+      companyOperatingRange,
+      companyRateType,
+      companyMaterials,
+      companyEquipments
     } = this.state;
+    const companyItemsIds = [];
+    const newCompanyRateType = settings.find(x => x.key === 'rateType');
+    newCompanyRateType.value = companyRateType;
+    const newCompanyOperatingRange = settings.find(x => x.key === 'operatingRange');
+    newCompanyOperatingRange.value = companyOperatingRange.toString();
+    Object.values(settings)
+      .forEach((itm) => {
+        if (itm.key === 'equipmentType') companyItemsIds.push(itm.id);
+        if (itm.key === 'materialType') companyItemsIds.push(itm.id);
+      });
 
-    const newSettings = settings;
-    newSettings.materialType = selectedMaterials.join(', ');
-    newSettings.equipmentType = selectedEquipments.join(', ');
-    newSettings.operatingRange = parseInt(operatingRange, 10);
-    newSettings.rateType = selectedRateType;
     try {
-      newSettings.modifiedOn = moment()
-        .unix() * 1000;
-      await CompanyService.updateCompanySettings(newSettings);
-    } catch (err) {
-      // console.log(err);
+      await CompanyService.updateCompanySettings(newCompanyRateType);
+      await CompanyService.updateCompanySettings(newCompanyOperatingRange);
+      await Promise.all(companyItemsIds.map(async (id) => {
+        await CompanyService.deleteCompanySettingsItem(id);
+      }));
+
+      await Promise.all(companyMaterials.map(async (material) => {
+        const item = {
+          companyId: company.id,
+          key: 'materialType',
+          value: material,
+          createdOn: moment().unix() * 1000,
+          createdBy: userId,
+          modifiedOn: moment().unix() * 1000,
+          modifiedBy: userId
+        };
+        await CompanyService.createCompanySettings(item);
+      }));
+
+      await Promise.all(companyEquipments.map(async (equipment) => {
+        const item = {
+          companyId: company.id,
+          key: 'equipmentType',
+          value: equipment,
+          createdOn: moment().unix() * 1000,
+          createdBy: userId,
+          modifiedOn: moment().unix() * 1000,
+          modifiedBy: userId
+        };
+        await CompanyService.createCompanySettings(item);
+      }));
+
+    } catch (error) {
+      // console.log(error);
     }
+    await this.fetchCompanySettings(company.id);
   }
 
   renderCompanyPreferences() {
     const {
-      operatingRange,
+      companyOperatingRange,
       materialTypes,
       equipmentTypes,
       rateTypes,
-      selectedMaterials,
-      selectedEquipments,
-      selectedRateType
+      companyMaterials,
+      companyEquipments,
+      companyRateType
     } = this.state;
+
     return (
       <div className="pt-4">
         <Row style={{fontSize: 14}}>
@@ -263,7 +282,7 @@ class CompanyNotifications extends Component {
                           className={`materials-checkbox material-${material}`}
                           type="checkbox"
                           value={material}
-                          checked={selectedMaterials.includes(material)}
+                          checked={companyMaterials.includes(material)}
                           onChange={this.handleCheckedMaterials}
                         />
                         <span className="checkmark" />
@@ -305,7 +324,7 @@ class CompanyNotifications extends Component {
                           className="trucks-checkbox"
                           type="checkbox"
                           value={equipment}
-                          checked={selectedEquipments.includes(equipment)}
+                          checked={companyEquipments.includes(equipment)}
                           onChange={this.handleCheckedEquipments}
                         />
                         <span className="checkmark" />
@@ -325,8 +344,8 @@ class CompanyNotifications extends Component {
               input={
                 {
                   onChange: this.handleRateTypeChange,
-                  name: 'selectedRateType',
-                  value: selectedRateType
+                  name: 'companyRateType',
+                  value: companyRateType
                 }
               }
               options={rateTypes}
@@ -340,8 +359,8 @@ class CompanyNotifications extends Component {
             <TFieldNumber
               input={{
                 onChange: this.handleInputChange,
-                name: 'operatingRange',
-                value: operatingRange
+                name: 'companyOperatingRange',
+                value: Number(companyOperatingRange)
               }}
               placeholder="Location Radius"
             />
@@ -390,13 +409,15 @@ class CompanyNotifications extends Component {
 CompanyNotifications.propTypes = {
   company: PropTypes.shape({
     id: PropTypes.number
-  })
+  }),
+  userId: PropTypes.number
 };
 
 CompanyNotifications.defaultProps = {
   company: {
     id: 0
-  }
+  },
+  userId: 0
 };
 
 export default CompanyNotifications;

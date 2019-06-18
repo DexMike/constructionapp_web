@@ -14,6 +14,11 @@ class PaymentsService extends AgentService {
     const response = await super.post(`${PATH}/transactions/search`, transactionSearchRequest);
     return response;
   }
+
+  static async getPayment(id) {
+    const response = await super.get(`${PATH}/transaction/${id}`);
+    return (response);
+  }
 }
 
 export default PaymentsService;

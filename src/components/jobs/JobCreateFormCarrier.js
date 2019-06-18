@@ -1245,13 +1245,16 @@ class JobCreateFormCarrier extends Component {
               Cancel
             </button>
           </div>
-          <div className="col-sm-8">
+          <div className="col-sm-2">
+            &nbsp;
+          </div>
+          <div className="col-sm-6">
             <TSubmitButton
               onClick={this.saveJob}
               className="primaryButton"
               loading={btnSubmitting}
               loaderSize={10}
-              bntText="Request Truck"
+              bntText="Request"
             />
           </div>
         </div>
@@ -1268,8 +1271,6 @@ class JobCreateFormCarrier extends Component {
           <div className="cl-md-12">
             <hr />
           </div>
-          {/* this.renderJobTop() */}
-          TOPP
           <div className="row">
             {this.renderJobStartLocation()}
             {/* this.isRateTypeTon(job.rateType) && this.renderJobEndLocation() */}
