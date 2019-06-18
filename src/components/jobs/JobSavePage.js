@@ -696,7 +696,7 @@ class JobSavePage extends Component {
         </div>
       );
     }
-    if (job.status === 'Booked' && companyType === 'Carrier') {
+    if ((job.status === 'Booked' || job.status === 'Allocated') && companyType === 'Carrier') {
       return (
         <TSubmitButton
           onClick={() => this.toggleAllocateDriversModal()}
