@@ -165,6 +165,7 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
+      const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
           {this.renderModal()}
@@ -255,7 +256,7 @@ class LoadsExpandableRow extends Component {
                       <React.Fragment>
                         <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
                         <p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>
-                          Driver Name: {`${driver.firstName} ${driver.lastName}`}
+                          {profile.companyType === 'Customer' ? '' : `${driverName}`}
                         </p>
                       </React.Fragment>
                     </Col>

@@ -76,7 +76,8 @@ class JobForm extends Component {
       images,
       carrier,
       loaded: true,
-      loads
+      loads,
+      job
     });
   }
 
