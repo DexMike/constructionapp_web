@@ -7,28 +7,25 @@ import {
   Row
 } from 'reactstrap';
 import moment from 'moment';
-import CloneDeep from 'lodash.clonedeep';
-import NumberFormat from 'react-number-format';
 import JobService from '../../api/JobService';
-import truckImage from '../../img/default_truck.png';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
+import ProfileService from '../../api/ProfileService';
 import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
+import UserService from '../../api/UserService';
+import TwilioService from '../../api/TwilioService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
-import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
-import TwilioService from '../../api/TwilioService';
 import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
-import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
 
-class JobCreateForm extends Component {
+class JobCreateFormCarrier extends Component {
   constructor(props) {
     super(props);
     const job = JobService.getDefaultJob();
@@ -42,63 +39,46 @@ class JobCreateForm extends Component {
       states: [],
       startAddress: AddressService.getDefaultAddress(),
       endAddress: AddressService.getDefaultAddress(),
+      /*
       bid: BidService.getDefaultBid(),
       booking: BookingService.getDefaultBooking(),
       bookingEquipment: BookingEquipmentService.getDefaultBookingEquipment(),
       material: '',
       availableMaterials: [],
+      */
+
+      // jobOptions
+      jobName: '',
+      // jobStartDate
+      jobStartDateTime: new Date(),
+      jobTruckType: '',
+      jobTrucksNeeded: '',
+      // PUT back hour/ton
+      selectedRatedHourOrTon: 'ton',
+      rateByTonValue: 0,
+      rateByHourValue: 0,
+      estimatedTons: 0,
+      estimatedHours: 0,
+      rateEstimate: 0,
+
       // addresses
       allAddresses: [],
       selectedStartAddressId: 0,
       selectedEndAddressId: 0,
-      reqHandlerName: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerDate: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerEstHours: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerEstTons: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerStartAddress: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerSCity: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerSState: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerSZip: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerEAddress: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerECity: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerEState: {
-        touched: false,
-        error: ''
-      },
-      reqHandlerEZip: {
-        touched: false,
-        error: ''
-      }
+
+      // address 1
+      startLocationAddress1: '',
+      startLocationAddress2: '',
+      startLocationCity: '',
+      startLocationState: '',
+      startLocationZip: '',
+
+      // address 1
+      endLocationAddress1: '',
+      endLocationAddress2: '',
+      endLocationCity: '',
+      endLocationState: '',
+      endLocationZip: ''
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
@@ -107,7 +87,8 @@ class JobCreateForm extends Component {
     this.handleEndStateChange = this.handleEndStateChange.bind(this);
     this.toggleJobRateType = this.toggleJobRateType.bind(this);
     this.handleStartTimeChange = this.handleStartTimeChange.bind(this);
-    this.createJob = this.createJob.bind(this);
+    // this.createJob = this.createJob.bind(this);
+    this.saveJob = this.saveJob.bind(this);
     this.isFormValid = this.isFormValid.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
@@ -115,53 +96,36 @@ class JobCreateForm extends Component {
     this.handleEndAddressIdChange = this.handleEndAddressIdChange.bind(this);
     this.toggleNewStartAddress = this.toggleNewStartAddress.bind(this);
     this.toggleNewEndAddress = this.toggleNewEndAddress.bind(this);
+    this.handleMaterialsChange = this.handleMaterialsChange.bind(this);
+    this.handleInputChangeTonHour = this.handleInputChangeTonHour.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleTruckTypeChange = this.handleTruckTypeChange.bind(this);
+    this.handleRateChange = this.handleRateChange.bind(this);
+    this.handleHourDetails = this.handleHourDetails.bind(this);
   }
 
   async componentDidMount() {
-    const profile = await ProfileService.getProfile();
-    const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
-    let { availableMaterials } = this.state;
-    const { selectedEquipment, selectedMaterials } = this.props;
-    job.companiesId = profile.companyId;
-    // I commented the line below as I am not sure what it is used for
-    // in the DB we have numEquipments
-    // job.numberOfTrucks = 1;
-    job.modifiedBy = profile.userId;
-    job.createdBy = profile.userId;
-    /* if (selectedEquipment.rateType !== 'All') {
-      job.rateType = selectedEquipment.rateType;
-    } */
-    job.rateType = 'Hour';
+    // we don't have preloaded info, let's hit the server
+    let allMaterials = await LookupsService.getLookupsByType('MaterialType');
+    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    const allTruckTypes = [];
 
-    // why are we setting these fields to profile.??
-
-    startAddress.companyId = profile.companyId;
-    startAddress.modifiedBy = profile.userId;
-    startAddress.createdBy = profile.userId;
-    endAddress.companyId = profile.companyId;
-    endAddress.modifiedBy = profile.userId;
-    endAddress.createdBy = profile.userId;
-    bid.hasCustomerAccepted = 1;
-
-    // bid.userId should be the userid of the driver linked to that equipment
-    if (!selectedEquipment.defaultDriverId) {
-      bid.userId = profile.selectedEquipment.defaultDriverId;
-    } else {
-      bid.userId = profile.userId;
-    }
-
-    // The bid creator should be set to the selectedEquipment driverId
-    // bids are supposed to get created by carriers
-    bid.createdBy = selectedEquipment.driversId;
-    bid.modifiedBy = selectedEquipment.driversId;
-
-    // set booking information based on job and bid
-    // createdBy and modifiedBy should be set to selectedEquipment.driversId
-    booking.createdBy = selectedEquipment.driversId;
-    booking.modifiedBy = selectedEquipment.driversId;
-    booking.rateType = job.rateType;
-    booking.startTime = job.startTime;
-    booking.endTime = job.endTime;
+    allMaterials = allMaterials.map(material => ({
+      value: material.val1,
+      label: material.val1
+    }));
+    Object.values(truckTypes)
+      .forEach((itm) => {
+        const inside = {
+          label: itm.val1,
+          value: itm.val1
+        };
+        allTruckTypes.push(inside);
+      });
+    this.setState({
+      allMaterials,
+      allTruckTypes
+    });
 
     // should load all addresses even if already set
     const response = await AddressService.getAddresses();
@@ -173,28 +137,264 @@ class JobCreateForm extends Component {
       allAddresses
     });
 
-    // We arrange selected equipment materials
-    try {
-      if (selectedMaterials()[0].value !== 'Any') { // User didn't select 'Any'
-        availableMaterials = selectedMaterials()[0].value;
-        availableMaterials = availableMaterials.split(',');
-      } else { // User selected 'Any'
-        availableMaterials = selectedMaterials();
-      }
-    } catch (e) {
-      // console.log('No materials');
-    }
-    await this.fetchForeignValues();
-    this.setState({
-      job,
-      startAddress,
-      endAddress,
-      bid,
-      booking,
-      bookingEquipment,
-      availableMaterials
-    });
     this.setState({ loaded: true });
+  }
+
+  // save begins ///////////////////////////////////////////////////////
+  async saveJob() {
+    this.setState({ btnSubmitting: true });
+
+    if (!this.isFormValid()) {
+      this.setState({ btnSubmitting: false });
+      return;
+    }
+
+    const profile = await ProfileService.getProfile();
+
+    // consts
+    const {
+      startLocationAddress1,
+      startLocationAddress2,
+      startLocationCity,
+      startLocationState,
+      startLocationZip,
+
+      // address 1
+      endLocationAddress1,
+      endLocationAddress2,
+      endLocationCity,
+      endLocationState,
+      endLocationZip,
+
+      selectedStartAddressId,
+      selectedEndAddressId,
+      selectedRatedHourOrTon,
+      rateByTonValue,
+      rateByHourValue,
+      rateEstimate,
+      jobName,
+      jobStartDateTime,
+      jobTruckType,
+      jobTrucksNeeded,
+      material
+    } = this.state;
+
+    const { selectedCarrierId } = this.props;
+
+    // start location
+    let startAddress = {
+      id: null
+    };
+    if (selectedStartAddressId === 0) {
+      const address1 = {
+        type: 'Delivery',
+        name: 'Delivery Start Location',
+        companyId: profile.companyId,
+        address1: startLocationAddress1,
+        address2: startLocationAddress2,
+        city: startLocationCity,
+        state: startLocationState,
+        zipCode: startLocationZip,
+        createdBy: profile.userId,
+        createdOn: moment()
+          .unix() * 1000,
+        modifiedBy: profile.userId,
+        modifiedOn: moment()
+          .unix() * 1000
+      };
+      startAddress = await AddressService.createAddress(address1);
+    } else {
+      startAddress.id = selectedStartAddressId;
+    }
+
+    // end location
+    let endAddress = {
+      id: null
+    };
+    if (selectedEndAddressId === 0) {
+      const address2 = {
+        type: 'Delivery',
+        name: 'Delivery End Location',
+        companyId: profile.companyId,
+        address1: endLocationAddress1,
+        address2: endLocationAddress2,
+        city: endLocationCity,
+        state: endLocationState,
+        zipCode: endLocationZip
+      };
+      endAddress = await AddressService.createAddress(address2);
+    } else {
+      endAddress.id = selectedEndAddressId;
+    }
+
+    /*
+    let isFavorited = 0;
+    if (showSendtoFavorites) {
+      isFavorited = 1;
+    }
+    */
+
+    let rateType = '';
+    let rate = 0;
+    if (selectedRatedHourOrTon === 'ton') {
+      rateType = 'Ton';
+      rate = Number(rateByTonValue);
+    } else {
+      rateType = 'Hour';
+      rate = Number(rateByHourValue);
+    }
+
+    const calcTotal = rateEstimate * rate;
+    const rateTotal = Math.round(calcTotal * 100) / 100;
+
+    const job = {
+      companiesId: profile.companyId,
+      name: jobName,
+      status: 'Published And Offered',
+      isFavorited: false,
+      startAddress: startAddress.id,
+      endAddress: endAddress.id,
+      startTime: new Date(jobStartDateTime),
+      equipmentType: jobTruckType.value,
+      numEquipments: jobTrucksNeeded,
+      rateType: selectedRatedHourOrTon,
+      rate,
+      rateEstimate,
+      rateTotal,
+      notes: '',
+      createdBy: profile.userId,
+      createdOn: moment()
+        .unix() * 1000,
+      modifiedBy: profile.userId,
+      modifiedOn: moment()
+        .unix() * 1000
+    };
+
+    const createdJob = await JobService.createJob(job);
+    // return false;
+
+    // add materials
+    if (createdJob) {
+      /*
+      if (d.selectedMaterials) { // check if there's materials to add
+        this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+      }
+      */
+      // one material only
+      this.saveJobMaterials(createdJob.id, material);
+    }
+
+    const bid = {};
+    const booking = {};
+    const bookingEquipment = {};
+
+    // final steps
+    bid.jobId = createdJob.id;
+    // bid.startAddress = createdJob.startAddress;
+    // bid.endAddress = createdJob.endAddress;
+    bid.companyCarrierId = selectedCarrierId;
+    bid.rate = createdJob.rate;
+    bid.rateType = createdJob.rateType;
+    bid.rateEstimate = createdJob.rateEstimate;
+    bid.hasCustomerAccepted = 1;
+    bid.status = 'Pending';
+    bid.modifiedOn = moment()
+      .unix() * 1000;
+    bid.createdOn = moment()
+      .unix() * 1000;
+    booking.modifiedOn = moment()
+      .unix() * 1000;
+    booking.createdOn = moment()
+      .unix() * 1000;
+    const createdBid = await BidService.createBid(bid);
+
+    // Now we need to create a Booking
+    booking.bidId = createdBid.id;
+    booking.schedulersCompanyId = selectedCarrierId.companyId;
+    booking.rateType = createdJob.rateType;
+    booking.schedulersCompanyId = selectedCarrierId;
+    booking.startTime = new Date(jobStartDateTime);
+
+    // if the startaddress is the actual ID
+    if (Number.isInteger(createdJob.startAddress)) {
+      booking.sourceAddressId = createdJob.startAddress;
+      booking.startAddressId = createdJob.startAddress;
+    } else {
+      booking.sourceAddressId = createdJob.startAddress.id;
+      booking.startAddressId = createdJob.startAddress.id;
+    }
+
+    if (Number.isInteger(createdJob.endAddress)) {
+      booking.endAddressId = createdJob.endAddress;
+    } else {
+      booking.endAddressId = createdJob.endAddress.id;
+    }
+
+    const createdBooking = await BookingService.createBooking(booking);
+
+    /*
+    // now we need to create a BookingEquipment record
+    // Since in this scenario we are only allowing 1 truck for one booking
+    // we are going to create one BookingEquipment.  NOTE: the idea going forward is
+    // to allow multiple trucks per booking
+    bookingEquipment.bookingId = createdBooking.id;
+
+    // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+
+    // this needs to be createdBid.carrierCompanyId.adminId
+    bookingEquipment.schedulerId = createdBid.userId;
+    // bookingEquipment.driverId = selectedCarrierId.driversId; // check out
+    // bookingEquipment.equipmentId = selectedCarrierId.id; // check out
+    bookingEquipment.rateType = createdBid.rateType;
+    // At this point we do not know what rateActual is, this will get set upon completion
+    // of the job
+    bookingEquipment.rateActual = 0;
+    // Lets copy the bid info
+    bookingEquipment.startTime = createdBooking.startTime;
+    bookingEquipment.endTime = createdBooking.endTime;
+    bookingEquipment.startAddressId = createdBooking.startAddressId;
+    bookingEquipment.endAddressId = createdBooking.endAddressId;
+
+    // Since this is booking method 1, we do not have any notes as this is getting created
+    // automatically and not by a user
+    bookingEquipment.notes = '';
+
+    // this needs to be createdBid.carrierCompanyId.adminId
+    bookingEquipment.createdBy = selectedCarrierId.driversId; // check out
+    bookingEquipment.modifiedBy = selectedCarrierId.driversId; // check out
+    bookingEquipment.modifiedOn = moment()
+      .unix() * 1000;
+    bookingEquipment.createdOn = moment()
+      .unix() * 1000;
+    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
+    */
+
+    // Let's make a call to Twilio to send an SMS
+    // We need to get the phone number from the carrier co
+    // Sending SMS to Truck's company's admin
+    const carrierAdmin = await UserService.getAdminByCompanyId(selectedCarrierId);
+    if (carrierAdmin.length > 0) { // check if we get a result
+      if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+        const notification = {
+          to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+          body: 'You have a new job offer, please log in to https://www.mytrelar.com'
+        };
+        await TwilioService.createSms(notification);
+      }
+    }
+
+    alert('Job Sent to carrier');
+    const { closeModal } = this.props;
+    closeModal();
+  }
+  // save ends /////////////////////////////////////////////////////////
+
+  handleTruckTypeChange(data) {
+    this.setState({jobTruckType: data});
+  }
+
+  handleMaterialsChange(data) {
+    this.setState({selectedMaterials: data});
   }
 
   async fetchForeignValues() {
@@ -306,9 +506,7 @@ class JobCreateForm extends Component {
   }
 
   handleStartTimeChange(e) {
-    const { job } = this.state;
-    job.startTime = e;
-    this.setState({ job });
+    this.setState({ jobStartDateTime: e });
   }
 
   handleMultiChange(data) {
@@ -359,178 +557,18 @@ class JobCreateForm extends Component {
     }
   }
 
-  async createJob() {
-    this.setState({ btnSubmitting: true });
-
-    const { closeModal, selectedEquipment } = this.props;
-    const {
-      startAddress,
-      job,
-      endAddress,
-      bid,
-      booking,
-      bookingEquipment,
-      material,
-      selectedStartAddressId,
-      selectedEndAddressId
-    } = this.state;
-
-    const newJob = CloneDeep(job);
-
-    startAddress.name = `Job: ${newJob.name}`;
-    endAddress.name = `Job: ${newJob.name}`;
-    if (!this.isFormValid()) {
-      // TODO display error message
-      // console.error('didnt put all the required fields.');
-      this.setState({ btnSubmitting: false });
-      return;
-    }
-    startAddress.modifiedOn = moment()
-      .unix() * 1000;
-    startAddress.createdOn = moment()
-      .unix() * 1000;
-
-    // start address
-    let newStartAddress;
-
-    if (selectedStartAddressId === 0) {
-      newStartAddress = await AddressService.createAddress(startAddress);
-      newJob.startAddress = newStartAddress.id;
-    } else {
-      newJob.startAddress = selectedStartAddressId;
-    }
-
-    // newJob.startAddress = newStartAddress.id;
-    newJob.status = 'On Offer';
-
-    endAddress.modifiedOn = moment()
-      .unix() * 1000;
-    endAddress.createdOn = moment()
-      .unix() * 1000;
-
-    // end address
-    let newEndAddress;
-    if (selectedEndAddressId === 0) {
-      newEndAddress = await AddressService.createAddress(endAddress);
-      newJob.endAddress = newEndAddress.id;
-    } else {
-      newJob.endAddress = selectedEndAddressId;
-    }
-
-    newJob.rate = selectedEquipment.hourRate;
-    newJob.modifiedOn = moment()
-      .unix() * 1000;
-    newJob.createdOn = moment()
-      .unix() * 1000;
-    newJob.equipmentType = selectedEquipment.type;
-    // In this scenario we are not letting a customer create a job with
-    // more than 1 truck so here we set the numEquipments to 1
-    // in the new job creation method we need to set it to the actual
-    // number they set in the field
-    newJob.numEquipments = 1;
-    const createdJob = await JobService.createJob(newJob);
-
-    // add material to new job
-    if (createdJob) {
-      if (material) { // check if there's material to add
-        this.saveJobMaterials(createdJob.id, material);
-      }
-    }
-
-    bid.jobId = createdJob.id;
-    // bid.startAddress = createdJob.startAddress;
-    // bid.endAddress = createdJob.endAddress;
-    bid.companyCarrierId = selectedEquipment.companyId;
-    bid.rate = createdJob.rate;
-    bid.rateEstimate = createdJob.rateEstimate;
-    bid.hasCustomerAccepted = 1;
-    bid.status = 'Pending';
-    bid.modifiedOn = moment()
-      .unix() * 1000;
-    bid.createdOn = moment()
-      .unix() * 1000;
-    booking.modifiedOn = moment()
-      .unix() * 1000;
-    booking.createdOn = moment()
-      .unix() * 1000;
-    const createdBid = await BidService.createBid(bid);
-
-    // Now we need to create a Booking
-    booking.bidId = createdBid.id;
-    booking.schedulersCompanyId = selectedEquipment.companyId;
-
-    // if the startaddress is the actual ID
-    if (Number.isInteger(createdJob.startAddress)) {
-      booking.sourceAddressId = createdJob.startAddress;
-      booking.startAddressId = createdJob.startAddress;
-    } else {
-      booking.sourceAddressId = createdJob.startAddress.id;
-      booking.startAddressId = createdJob.startAddress.id;
-    }
-
-    if (Number.isInteger(createdJob.endAddress)) {
-      booking.endAddressId = createdJob.endAddress;
-    } else {
-      booking.endAddressId = createdJob.endAddress.id;
-    }
-
-    const createdBooking = await BookingService.createBooking(booking);
-
-    // now we need to create a BookingEquipment record
-    // Since in this scenario we are only allowing 1 truck for one booking
-    // we are going to create one BookingEquipment.  NOTE: the idea going forward is
-    // to allow multiple trucks per booking
-    bookingEquipment.bookingId = createdBooking.id;
-
-    // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
-
-    // this needs to be createdBid.carrierCompanyId.adminId
-    bookingEquipment.schedulerId = createdBid.userId;
-    bookingEquipment.driverId = selectedEquipment.driversId;
-    bookingEquipment.equipmentId = selectedEquipment.id;
-    bookingEquipment.rateType = createdBid.rateType;
-    // At this point we do not know what rateActual is, this will get set upon completion
-    // of the job
-    bookingEquipment.rateActual = 0;
-    // Lets copy the bid info
-    bookingEquipment.startTime = createdBooking.startTime;
-    bookingEquipment.endTime = createdBooking.endTime;
-    bookingEquipment.startAddressId = createdBooking.startAddressId;
-    bookingEquipment.endAddressId = createdBooking.endAddressId;
-
-    // Since this is booking method 1, we do not have any notes as this is getting created
-    // automatically and not by a user
-    bookingEquipment.notes = '';
-
-    // this needs to be createdBid.carrierCompanyId.adminId
-    bookingEquipment.createdBy = selectedEquipment.driversId;
-    bookingEquipment.modifiedBy = selectedEquipment.driversId;
-    bookingEquipment.modifiedOn = moment()
-      .unix() * 1000;
-    bookingEquipment.createdOn = moment()
-      .unix() * 1000;
-    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
-
-    // Let's make a call to Twilio to send an SMS
-    // We need to get the phone number from the carrier co
-    // Sending SMS to Truck's company's admin
-    const carrierAdmin = await UserService.getAdminByCompanyId(createdBid.companyCarrierId);
-    if (carrierAdmin.length > 0) { // check if we get a result
-      if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
-        const notification = {
-          to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-          body: 'You have a new job offer, please log in to https://www.mytrelar.com'
-        };
-        await TwilioService.createSms(notification);
-      }
-    }
-    closeModal();
+  handleHourDetails(e) {
+    this.setState({[e.target.name]: e.target.value});
   }
 
   // remove non numeric
   phoneToNumberFormat(phone) {
     const num = Number(phone.replace(/\D/g, ''));
     return num;
+  }
+
+  handleRateChange(e) {
+    this.setState({ selectedRatedHourOrTon: e.value });
   }
 
   // check format ok
@@ -566,289 +604,41 @@ class JobCreateForm extends Component {
     this.setState({ selectedEndAddressId: 0 });
   }
 
-  isFormValid() {
-    const job = this.state;
-    const {
-      reqHandlerName,
-      reqHandlerDate,
-      reqHandlerEstHours,
-      reqHandlerEstTons,
-      reqHandlerStartAddress,
-      reqHandlerSCity,
-      reqHandlerSState,
-      reqHandlerSZip,
-      reqHandlerEAddress,
-      reqHandlerECity,
-      reqHandlerEState,
-      reqHandlerEZip,
-      selectedStartAddressId,
-      selectedEndAddressId
-    } = this.state;
-    let isValid = true;
-
-    if (job.job.name.length === 0) {
-      this.setState({
-        reqHandlerName: Object.assign({}, reqHandlerName, {
-          touched: true,
-          error: 'Please Enter a Name for this job'
-        })
-      });
-      isValid = false;
-    }
-
-    if (job.job.startTime.length === 0) {
-      this.setState({
-        reqHandlerDate: Object.assign({}, reqHandlerDate, {
-          touched: true,
-          error: 'Please select a start date for this job'
-        })
-      });
-      isValid = false;
-    }
-
-    if (job.job.rateEstimate.length === 0 || job.job.rateEstimate <= 0) {
-      this.setState({
-        reqHandlerEstHours: Object.assign({}, reqHandlerEstHours, {
-          touched: true,
-          error: 'Please enter an estimated number for this job'
-        })
-      });
-      isValid = false;
-    }
-
-    if (job.job.rateEstimate.length === 0 || job.job.rateEstimate <= 0) {
-      this.setState({
-        reqHandlerEstTons: Object.assign({}, reqHandlerEstTons, {
-          touched: true,
-          error: 'Please enter an estimated number for this job'
-        })
-      });
-      isValid = false;
-    }
-
-    if (selectedStartAddressId === 0) {
-      if (job.startAddress.address1.length === 0) {
-        this.setState({
-          reqHandlerStartAddress: Object.assign({}, reqHandlerStartAddress, {
-            touched: true,
-            error: 'Please enter a starting address for this job'
-          })
-        });
-        isValid = false;
-      }
-
-      if (job.startAddress.city.length === 0) {
-        this.setState({
-          reqHandlerSCity: Object.assign({}, reqHandlerSCity, {
-            touched: true,
-            error: 'This field is required'
-          })
-        });
-        isValid = false;
-      }
-
-      if (job.startAddress.state.length === 0) {
-        this.setState({
-          reqHandlerSState: Object.assign({}, reqHandlerSState, {
-            touched: true,
-            error: 'This field is required'
-          })
-        });
-        isValid = false;
-      }
-
-      if (job.startAddress.zipCode.length === 0) {
-        this.setState({
-          reqHandlerSZip: Object.assign({}, reqHandlerSZip, {
-            touched: true,
-            error: 'This field is required'
-          })
-        });
-        isValid = false;
-      }
-    }
-
-    if (selectedEndAddressId === 0) {
-      if (job.endAddress.address1.length === 0) {
-        this.setState({
-          reqHandlerEAddress: Object.assign({}, reqHandlerEAddress, {
-            touched: true,
-            error: 'Please enter a destination or end address for this job'
-          })
-        });
-        isValid = false;
-      }
-
-      if (job.endAddress.city.length === 0) {
-        this.setState({
-          reqHandlerECity: Object.assign({}, reqHandlerECity, {
-            touched: true,
-            error: 'This field is required'
-          })
-        });
-        isValid = false;
-      }
-
-      if (job.endAddress.state.length === 0) {
-        this.setState({
-          reqHandlerEState: Object.assign({}, reqHandlerEState, {
-            touched: true,
-            error: 'This field is required'
-          })
-        });
-        isValid = false;
-      }
-
-      if (job.endAddress.zipCode.length === 0) {
-        this.setState({
-          reqHandlerEZip: Object.assign({}, reqHandlerEZip, {
-            touched: true,
-            error: 'This field is required'
-          })
-        });
-        isValid = false;
-      }
-    }
-
-    return isValid;
+  handleInputChange(e) {
+    const {value} = e.target;
+    this.setState({[e.target.name]: value});
   }
 
-  renderSelectedEquipment() {
-    const { job, material, availableMaterials } = this.state;
-    const { selectedEquipment, getAllMaterials } = this.props;
-    let availableMaterialsOptions = [];
-
-    let imageTruck = '';
-    // checking if there's an image for the truck
-    if ((selectedEquipment.image).trim()) { // use of trim removes whitespace from img url
-      imageTruck = selectedEquipment.image;
-    } else {
-      imageTruck = `${window.location.origin}/${truckImage}`;
+  handleInputChangeTonHour(e) {
+    if (e.target.name === 'rateByTonValue') {
+      this.setState({ rateByTonValue: e.target.value });
+    } else if (e.target.name === 'estimatedTons') {
+      this.setState({
+        rateEstimate: e.target.value,
+        estimatedTons: e.target.value
+      });
+    } else if (e.target.name === 'rateByHourValue') {
+      this.setState({ rateByHourValue: e.target.value });
+    } else if (e.target.name === 'estimatedHours') {
+      this.setState({
+        rateEstimate: e.target.value,
+        estimatedHours: e.target.value
+      });
     }
+  }
 
-    const { rateType } = selectedEquipment.rateType;
-
-    // if ANY is selected, let's show all material
-    if (availableMaterials.length > 0) {
-      for (const mat in availableMaterials) {
-        if (availableMaterials[mat].value === 'Any') {
-          availableMaterialsOptions = getAllMaterials()
-            .map(rateType => ({
-              name: 'rateType',
-              value: rateType,
-              label: rateType
-            }));
-        } else {
-          availableMaterialsOptions = availableMaterials
-            .map(rateType => ({
-              name: 'rateType',
-              value: rateType,
-              label: rateType
-            }));
-        }
-      }
-    }
-
-    return (
-      <React.Fragment>
-        <h3 className="subhead">{selectedEquipment.name}</h3>
-        <div className="row">
-          <div className="col-sm-3">
-            <img src={imageTruck} alt=""
-                 style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
-          <div className="col-sm-3">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Truck Type</span>
-              <div className="form__form-group-field">
-                <span>{selectedEquipment.type}</span>
-              </div>
-            </div>
-          </div>
-          <div className="col-sm-3">
-            <div className="">
-              <span className="form__form-group-label">Capacity</span>
-              <div className="form__form-group-field">
-                <span>
-                  <NumberFormat
-                    value={selectedEquipment.maxCapacity}
-                    displayType="text"
-                    decimalSeparator="."
-                    decimalScale={0}
-                    fixedDecimalScale
-                    thousandSeparator
-                    prefix=" "
-                    suffix={` ${rateType}s`}
-                  />
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="col-sm-3">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Material</span>
-              <div className="form__form-group-field">
-                <SelectField
-                  input={
-                    {
-                      onChange: this.selectChange,
-                      name: 'materialType',
-                      value: material
-                    }
-                  }
-                  meta={
-                    {
-                      touched: false,
-                      error: 'Unable to select'
-                    }
-                  }
-                  value={material}
-                  options={availableMaterialsOptions}
-                  placeholder="Select material"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        {!this.isRateTypeTon(job.rateType) && (
-          <div style={{ marginTop: '5px' }}>
-            <NumberFormat
-              value={selectedEquipment.hourRate}
-              displayType="text"
-              decimalSeparator="."
-              decimalScale={2}
-              fixedDecimalScale
-              thousandSeparator
-              prefix="$ "
-              suffix=" per Hour"
-            />
-          </div>
-        )}
-        {this.isRateTypeTon(job.rateType) && (
-          <div style={{ marginTop: '5px' }}>
-            <NumberFormat
-              value={selectedEquipment.tonRate}
-              displayType="text"
-              decimalSeparator="."
-              decimalScale={2}
-              fixedDecimalScale
-              thousandSeparator
-              prefix="$ "
-              suffix=" per Ton"
-            />
-          </div>
-        )}
-      </React.Fragment>
-    );
+  isFormValid() {
+    return true;
   }
 
   renderJobTop() {
     const {
-      job,
+      jobName,
       reqHandlerName,
       reqHandlerDate,
-      reqHandlerEstHours/* ,
+      reqHandlerEstHours,
+      jobStartDateTime
+      /* ,
       reqHandlerEstTons */
     } = this.state;
     const today = new Date();
@@ -869,14 +659,14 @@ class JobCreateForm extends Component {
                 <TField
                   input={
                     {
-                      onChange: this.handleJobInputChange,
-                      name: 'name',
-                      value: job.name
+                      onChange: this.handleInputChange,
+                      name: 'jobName',
+                      value: jobName
                     }
                   }
                   placeholder="Job # 242423"
                   type="text"
-                  meta={reqHandlerName}
+                  // meta={reqHandlerName}
                 />
               </div>
             </div>
@@ -890,7 +680,7 @@ class JobCreateForm extends Component {
                     {
                       onChange: this.handleStartTimeChange,
                       name: 'startTime',
-                      value: job.startTime,
+                      value: jobStartDateTime,
                       givenDate: currentDate
                     }
                   }
@@ -927,13 +717,233 @@ class JobCreateForm extends Component {
             </div>
           </div>
         </div>
-        {/* selectedEquipment.rateType === 'Both' && (
-          <div className="col-sm-4">
-            <TButtonToggle isOtherToggled={this.isRateTypeTon(job.rateType)} buttonOne="Hour"
-                           buttonTwo="Ton" onChange={this.toggleJobRateType}
+      </React.Fragment>
+    );
+  }
+
+
+  // /////////////////////////////////////////////////
+  renderOptions() {
+    const {
+      jobName,
+      jobStartDateTime,
+      jobTruckType,
+      allTruckTypes,
+      jobTrucksNeeded,
+
+      selectedRatedHourOrTon,
+
+      // materials
+      allMaterials,
+      selectedMaterials
+    } = this.state;
+    const today = new Date();
+    const currentDate = today.getTime();
+    return (
+      <React.Fragment>
+        <div className="row">
+          <div className="col-md-4">
+            <div className="form__form-group">
+              <span className="form__form-group-label">Job Name</span>
+              <input
+                name="jobName"
+                type="text"
+                value={jobName}
+                onChange={this.handleInputChange}
+                placeholder="Job Name"
+              />
+            </div>
+          </div>
+          <div className="col-md-4 form--horizontal">
+            <div className="form__form-group">
+              <span className="form__form-group-label">Start Date</span>
+              <div className="">
+                <TDateTimePicker
+                  input={
+                    {
+                      onChange: this.handleStartTimeChange,
+                      name: 'startTime',
+                      value: jobStartDateTime,
+                      givenDate: currentDate
+                    }
+                  }
+                  onChange={this.handleStartTimeChange}
+                  dateFormat="MMMM-dd-yyyy h:mm aa"
+                  showTime
+                  // meta={reqHandlerDate}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4 form--horizontal">
+            <div className="form__form-group">
+              <span className="form__form-group-label">Truck Type</span>
+              <SelectField
+                input={
+                  {
+                    onChange: this.handleTruckTypeChange,
+                    name: 'jobTruckType',
+                    value: jobTruckType
+                  }
+                }
+                // meta={reqHandlerTruckType}
+                value={jobTruckType}
+                options={allTruckTypes}
+                placeholder="Truck Type"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* second row */}
+        <div className="row">
+          <div className="col-md-4">
+            <div className="form__form-group">
+              <span className="form__form-group-label">Material</span>
+              <SelectField
+                input={
+                  {
+                    onChange: this.handleMaterialsChange,
+                    name: 'materialType',
+                    value: selectedMaterials
+                  }
+                }
+                // meta={reqHandlerMaterials}
+                value={selectedMaterials}
+                options={allMaterials}
+                placeholder="Select material"
+              />
+            </div>
+          </div>
+          <div className="col-md-6 form--horizontal">
+            <Row className="col-md-12">
+              <div className="col-md-3 form__form-group">
+                <span className="form__form-group-label">Rate</span>
+                <SelectField
+                  input={
+                    {
+                      onChange: this.handleRateChange,
+                      name: 'materialType',
+                      value: selectedRatedHourOrTon
+                    }
+                  }
+                  // meta={reqHandlerMaterials}
+                  value={selectedRatedHourOrTon}
+                  options={
+                    [
+                      {
+                        value: 'hour',
+                        label: 'Hour'
+                      },
+                      {
+                        value: 'ton',
+                        label: 'Ton'
+                      }
+                    ]
+                  }
+                />
+              </div>
+              {this.renderHourOrTon(selectedRatedHourOrTon)}
+            </Row>
+          </div>
+          <div className="col-md-2 form--horizontal">
+            <div className="form__form-group">
+              <span className="form__form-group-label">
+                # of trucks
+              </span>
+              <TFieldNumber
+                input={
+                  {
+                    onChange: this.handleHourDetails,
+                    name: 'jobTrucksNeeded',
+                    value: jobTrucksNeeded
+                  }
+                }
+                // meta={reqHandlerTrucksEstimate}
+              />
+            </div>
+          </div>
+        </div>
+      </React.Fragment>
+    );
+  }
+  // /////////////////////////////////////////////////
+
+  renderHourOrTon(hourTon) {
+    const {
+      rateByTonValue,
+      rateByHourValue,
+      estimatedTons,
+      estimatedHours
+    } = this.state;
+    if (hourTon === 'ton') {
+      return (
+        <React.Fragment>
+          <div className="col-md-4 form__form-group">
+            <span className="form__form-group-label">Rate / Ton</span>
+            <TFieldNumber
+              input={
+                {
+                  onChange: this.handleInputChangeTonHour,
+                  name: 'rateByTonValue',
+                  value: rateByTonValue
+                }
+              }
+              placeholder="0"
+              decimal
+              // meta={}
             />
           </div>
-        ) */}
+          <div className="col-md-5 form__form-group">
+            <span className="form__form-group-label">Estimated Tons</span>
+            <TFieldNumber
+              input={
+                {
+                  onChange: this.handleInputChangeTonHour,
+                  name: 'estimatedTons',
+                  value: estimatedTons
+                }
+              }
+              placeholder="0"
+              decimal
+              // meta={}
+            />
+          </div>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+        <div className="col-md-4 form__form-group">
+          <span className="form__form-group-label">Rate / Hour</span>
+          <TFieldNumber
+            input={
+              {
+                onChange: this.handleInputChangeTonHour,
+                name: 'rateByHourValue',
+                value: rateByHourValue
+              }
+            }
+            placeholder="0"
+            decimal
+            // meta={}
+          />
+        </div>
+        <div className="col-md-5 form__form-group">
+          <span className="form__form-group-label">Estimated hrs.</span>
+          <TFieldNumber
+            input={
+              {
+                onChange: this.handleInputChangeTonHour,
+                name: 'estimatedHours',
+                value: estimatedHours
+              }
+            }
+            placeholder="0"
+            decimal
+            // meta={}
+          />
+        </div>
       </React.Fragment>
     );
   }
@@ -1235,13 +1245,16 @@ class JobCreateForm extends Component {
               Cancel
             </button>
           </div>
-          <div className="col-sm-8">
+          <div className="col-sm-2">
+            &nbsp;
+          </div>
+          <div className="col-sm-6">
             <TSubmitButton
-              onClick={this.createJob}
+              onClick={this.saveJob}
               className="primaryButton"
               loading={btnSubmitting}
               loaderSize={10}
-              bntText="Request Truck"
+              bntText="Request"
             />
           </div>
         </div>
@@ -1254,11 +1267,10 @@ class JobCreateForm extends Component {
     if (loaded) {
       return (
         <form id="job-request">
-          {this.renderSelectedEquipment()}
+          {this.renderOptions()}
           <div className="cl-md-12">
             <hr />
           </div>
-          {this.renderJobTop()}
           <div className="row">
             {this.renderJobStartLocation()}
             {/* this.isRateTypeTon(job.rateType) && this.renderJobEndLocation() */}
@@ -1284,13 +1296,17 @@ class JobCreateForm extends Component {
   }
 }
 
-JobCreateForm.propTypes = {
-  selectedEquipment: PropTypes.shape({
-    id: PropTypes.number
-  }).isRequired,
-  getAllMaterials: PropTypes.func.isRequired,
-  closeModal: PropTypes.func.isRequired,
-  selectedMaterials: PropTypes.func.isRequired
+JobCreateFormCarrier.propTypes = {
+  selectedCarrierId: PropTypes.number,
+  // getAllMaterials: PropTypes.func.isRequired,
+  closeModal: PropTypes.func.isRequired
+  // selectedMaterials: PropTypes.func.isRequired
 };
 
-export default JobCreateForm;
+JobCreateFormCarrier.defaultProps = {
+  selectedCarrierId: null,
+  // getAllMaterials: PropTypes.func,
+  // closeModal: PropTypes.bool
+};
+
+export default JobCreateFormCarrier;

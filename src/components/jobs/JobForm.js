@@ -57,7 +57,7 @@ class JobForm extends Component {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
     if (bookings.length > 0) {
-      const bookingEquipments = BookingEquipmentService
+      const bookingEquipments = await BookingEquipmentService
         .getBookingEquipmentsByBookingId(bookings[0].id);
       if (bookingEquipments.length > 0) {
         loads = await LoadService.getLoadsByBookingId(
@@ -76,7 +76,8 @@ class JobForm extends Component {
       images,
       carrier,
       loaded: true,
-      loads
+      loads,
+      job
     });
   }
 
@@ -319,7 +320,8 @@ class JobForm extends Component {
     );
   }
 
-  renderLoads(loads, job) {
+  renderLoads() {
+    const {loads, job} = {...this.state};
     return (
       <React.Fragment>
         <h3 className="subhead" style={{
@@ -555,7 +557,7 @@ class JobForm extends Component {
                 </div>
               </Row>
               <hr/>
-              {this.renderLoads(loads, job)}
+              {this.renderLoads()}
               {this.renderUploadedPhotos(images)}
               <hr/>
               <div className="row">
