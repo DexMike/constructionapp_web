@@ -1246,7 +1246,7 @@ class JobCreateFormCarrier extends Component {
             </button>
           </div>
           <div className="col-sm-2">
-            &nbsp; 
+            &nbsp;
           </div>
           <div className="col-sm-6">
             <TSubmitButton

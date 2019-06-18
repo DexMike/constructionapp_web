@@ -32,17 +32,24 @@ export default {
     // }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
-    new Dotenv(),
+    new Dotenv({
+      path: './.env.prod'
+    }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
+    }),
+    // initially bundle.js file is 3.7 MB
+    new CompressionPlugin({
+      // filename: '[path].br[query]',
+      filename: '[path].gz[query]',
+      // algorithm: 'brotliCompress',
+      algorithm: 'gzip',
+      test: new RegExp('\\.(js|css)$'),
+      compressionOptions: { level: 11 },
+      threshold: 10240,
+      minRatio: 0.8,
+      deleteOriginalAssets: false
     })
-    // new CompressionPlugin({
-    //   asset: '[path].gz[query]',
-    //   algorithm: 'gzip',
-    //   test: new RegExp('\\.(js|css)$'),
-    //   threshold: 10240,
-    //   minRatio: 0.8
-    // })
   ],
   module: {
     rules: [
