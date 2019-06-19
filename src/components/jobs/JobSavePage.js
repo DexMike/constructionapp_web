@@ -361,6 +361,7 @@ class JobSavePage extends Component {
       const newBid = CloneDeep(bid);
       newBid.companyCarrierId = profile.companyId;
       newBid.hasSchedulerAccepted = 1;
+      newBid.hasCustomerAccepted = 1;
       newBid.status = 'Accepted';
       newBid.rateEstimate = newJob.rateEstimate;
       newBid.notes = newJob.notes;
@@ -808,15 +809,12 @@ class JobSavePage extends Component {
           <div className="container">
             {this.renderAllocateDriversModal(profile)}
             <div className="row">
-              <div className="col-md-9">
-                <h3 className="page-title">Job Details</h3>
-              </div>
               <div className="col-md-3">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
             </div>
-            {this.renderJobForm(companyType, companyCarrier, job)}
             {this.renderBidsTable()}
+            {this.renderJobForm(companyType, companyCarrier, job)}
           </div>
         );
       }
