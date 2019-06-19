@@ -2,7 +2,7 @@ import webpack from 'webpack';
 import Dotenv from 'dotenv-webpack';
 import path from 'path';
 // import ExtractTextPlugin from 'extract-text-webpack-plugin';
-// import CompressionPlugin from 'compression-webpack-plugin';
+ import CompressionPlugin from 'compression-webpack-plugin';
 // import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 

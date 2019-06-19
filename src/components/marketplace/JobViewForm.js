@@ -289,7 +289,7 @@ class JobViewForm extends Component {
           bookingEquipment.modifiedBy = equipment.driversId;
           bookingEquipment.modifiedOn = moment().unix() * 1000;
           bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
             bookingEquipment
           );
         }

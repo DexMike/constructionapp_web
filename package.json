@@ -23,7 +23,7 @@
     "deployQa": "npx babel-node tools/buildQa.js",
     "postdeployQa": "aws s3 sync dist/ s3://qa.app.mytrelar.com && aws cloudfront create-invalidation --distribution-id E2W2Q6ROFYLZDI --paths '/*'",
     "predeployProd": "npm run clean-dist && npm run build:html",
-    "deployProd": "npx babel-node tools/buildQa.js",
+    "deployProd": "npx babel-node tools/buildProd.js",
     "postdeployProd": "aws s3 sync dist/ s3://app.mytrelar.com && aws cloudfront create-invalidation --distribution-id E1AHYHKY2WVINB --paths '/*'",
     "lint": "npx esw webpack.config.* src"
   },

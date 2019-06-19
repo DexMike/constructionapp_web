@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Col,
   Row,
-  Container, Modal, Card
+  Container, Modal, Card, Button
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
@@ -48,15 +48,16 @@ class JobSavePage extends Component {
       },
       bid: null,
       booking: null,
-      bookingEquipment: null,
       favoriteCompany: [],
-      profile: [],
+      profile: {},
       companyCarrier: 0,
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null,
       btnSubmitting: false,
-      allocateDriversModal: false
+      allocateDriversModal: false,
+      drivers: [],
+      selectedDrivers: []
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -64,6 +65,7 @@ class JobSavePage extends Component {
     this.handleConfirmRequest = this.handleConfirmRequest.bind(this);
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
+    this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
   }
 
   async componentDidMount() {
@@ -71,93 +73,101 @@ class JobSavePage extends Component {
     let {
       bid,
       booking,
-      bookingEquipment,
       profile,
-      favoriteCompany
+      favoriteCompany,
+      selectedDrivers
     } = this.state;
 
-    profile = await ProfileService.getProfile();
+    try {
+      profile = await ProfileService.getProfile();
 
-    if (match.params.id) {
-      const job = await JobService.getJobById(match.params.id);
-      // company
-      const company = await CompanyService.getCompanyById(job.companiesId);
-      // start address
-      const startAddress = await AddressService.getAddressById(job.startAddress);
-      // end address
-      let endAddress = null;
-      if (job.endAddress) {
-        endAddress = await AddressService.getAddressById(job.endAddress);
-      }
-      // materials
-      const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-      job.company = company;
-      job.startAddress = startAddress;
-      job.endAddress = endAddress;
-      job.materials = materials.map(material => material.value);
+      if (match.params.id) {
+        const job = await JobService.getJobById(match.params.id);
+        // company
+        const company = await CompanyService.getCompanyById(job.companiesId);
+        // start address
+        const startAddress = await AddressService.getAddressById(job.startAddress);
+        // end address
+        let endAddress = null;
+        if (job.endAddress) {
+          endAddress = await AddressService.getAddressById(job.endAddress);
+        }
+        // materials
+        const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        job.company = company;
+        job.startAddress = startAddress;
+        job.endAddress = endAddress;
+        job.materials = materials.map(material => material.value);
 
-      const bids = await BidService.getBidsByJobId(job.id);
-      if (bids && bids.length > 0) { // check if there's a bid
-        // If there's more than one bid
-        if (bids.length > 1) {
-          // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
-          // and is assigned to the carrier (a favorite)
-          bid = bids.filter((filteredBid) => {
-            if (profile.companyType === 'Carrier') {
-              if (filteredBid.hasCustomerAccepted === 1
-                // && filteredBid.hasSchedulerAccepted === 1
-                && filteredBid.companyCarrierId === profile.companyId) {
+        const bids = await BidService.getBidsByJobId(job.id);
+        if (bids && bids.length > 0) { // check if there's a bid
+          // If there's more than one bid
+          if (bids.length > 1) {
+            // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
+            // and is assigned to the carrier (a favorite)
+            bid = bids.filter((filteredBid) => {
+              if (profile.companyType === 'Carrier') {
+                if (filteredBid.hasCustomerAccepted === 1
+                  // && filteredBid.hasSchedulerAccepted === 1
+                  && filteredBid.companyCarrierId === profile.companyId) {
+                  return filteredBid;
+                }
+                [bid] = bids;
+                // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
+              } else if (filteredBid.hasSchedulerAccepted === 1) {
                 return filteredBid;
               }
               [bid] = bids;
-              // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
-            } else if (filteredBid.hasSchedulerAccepted === 1) {
-              return filteredBid;
-            }
+              return bid;
+            });
+          } else { // There is just one bid
             [bid] = bids;
-            return bid;
-          });
-        } else { // There is just one bid
-          [bid] = bids;
+          }
         }
+        const bookings = await BookingService.getBookingsByJobId(job.id);
+        if (bookings && bookings.length > 0) {
+          [booking] = bookings;
+          const bookingEquipments = await BookingEquipmentService
+            .getBookingEquipmentsByBookingId(booking.id);
+          selectedDrivers = bookingEquipments
+            .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
+          // bookingEquipment = bookingEquipments.find(
+          //   bookingEq => bookingEq.bookingId === booking.id,
+          //   booking
+          // );
+        }
+
+        // If the customer is Carrier, check if it's a favorite
+        if (profile.companyType === 'Carrier') {
+          favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
+            profile.companyId
+          );
+        }
+
+        const drivers = await UserService.getUsersByCompanyId(profile.companyId);
+        const companyCarrier = bid.companyCarrierId;
+
+        this.setState({
+          job,
+          bid,
+          companyCarrier,
+          booking,
+          profile,
+          companyType: profile.companyType,
+          favoriteCompany,
+          drivers
+        });
       }
 
-      const bookings = await BookingService.getBookingsByJobId(job.id);
-      if (bookings && bookings.length > 0) {
-        [booking] = bookings;
-        const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-        bookingEquipment = bookingEquipments.find(
-          bookingEq => bookingEq.bookingId === booking.id,
-          booking
-        );
-      }
-
-      // If the customer is Carrier, check if it's a favorite
-      if (profile.companyType === 'Carrier') {
-        favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
-          profile.companyId
-        );
-      }
-
-      const companyCarrier = (typeof bid === 'undefined') ? bid.companyCarrierId : null;
-
+      // moved the loader to the mount function
       this.setState({
-        job,
-        bid,
-        companyCarrier,
-        booking,
-        bookingEquipment,
-        profile,
         companyType: profile.companyType,
-        favoriteCompany
+        loaded: true,
+        selectedDrivers
       });
+    } catch (err) {
+      console.error(err);
     }
-
-    // moved the loader to the mount function
-    this.setState({
-      companyType: profile.companyType,
-      loaded: true
-    });
   }
 
   toggleAllocateDriversModal() {
@@ -263,7 +273,7 @@ class JobSavePage extends Component {
           bookingEquipment.modifiedBy = equipment.driversId;
           bookingEquipment.modifiedOn = moment().unix() * 1000;
           bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
             bookingEquipment
           );
         }
@@ -412,7 +422,7 @@ class JobSavePage extends Component {
           bookingEquipment.modifiedBy = equipment.driversId;
           bookingEquipment.modifiedOn = moment().unix() * 1000;
           bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
             bookingEquipment
           );
         }
@@ -532,6 +542,34 @@ class JobSavePage extends Component {
       return false;
     }
     return true;
+  }
+
+  async handleAllocateDrivers() {
+    try {
+      console.log('saving...');
+      const { selectedDrivers, booking, profile } = this.state;
+      const bookingEquipments = selectedDrivers.map(selectedDriver => ({
+        bookingId: booking.id,
+        schedulerId: profile.userId,
+        driverId: selectedDriver,
+        equipmentId: null, // NOTE: for now don't reference equipment
+        rateType: booking.rateType, // This could be from equipment
+        rateActual: 0,
+        startTime: new Date(),
+        endTime: new Date(),
+        startAddressId: 0,
+        endAddressId: 0,
+        notes: '',
+        createdBy: profile.userId,
+        createdOn: new Date(),
+        modifiedBy: profile.userId,
+        modifiedOn: new Date()
+      }));
+      await BookingEquipmentService.allocateDrivers(bookingEquipments, booking.id);
+    } catch (err) {
+      console.error(err);
+    }
+    this.toggleAllocateDriversModal();
   }
 
   renderGoTo() {
@@ -659,7 +697,7 @@ class JobSavePage extends Component {
         </div>
       );
     }
-    if (job.status === 'Booked' && companyType === 'Carrier') {
+    if ((job.status === 'Booked' || job.status === 'Allocated') && companyType === 'Carrier') {
       return (
         <TSubmitButton
           onClick={() => this.toggleAllocateDriversModal()}
@@ -674,19 +712,8 @@ class JobSavePage extends Component {
   }
 
   renderAllocateDriversModal() {
-    const { allocateDriversModal } = this.state;
-    // TODO api call
-    const driverData = [
-      {
-        id: 1,
-        firstName: 'Test1',
-        lastName: 'Trelar'
-      }, {
-        id: 2,
-        firstName: 'Test2',
-        lastName: 'Trelar'
-      }
-    ];
+    const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
+    const driverData = drivers.data;
     const driverColumns = [
       {
         displayName: 'First Name',
@@ -694,6 +721,18 @@ class JobSavePage extends Component {
       }, {
         displayName: 'Last Name',
         name: 'lastName'
+      }, {
+        displayName: 'Email',
+        name: 'email'
+      }, {
+        displayName: 'Phone',
+        name: 'mobilePhone'
+      }, {
+        displayName: 'Status',
+        name: 'userStatus'
+      }, {
+        displayName: 'Invited',
+        name: 'invited'
       }
     ];
     return (
@@ -706,16 +745,42 @@ class JobSavePage extends Component {
           <Container className="dashboard">
             <Row>
               <Col md={12} lg={12}>
-                <Card style={{paddingBottom: 0}}>
-                  <h1>Allocate Drivers</h1>
-                  <span>Under Construction...</span>
-                  {/* TODO checkboxes */}
+                <Card style={{ paddingBottom: 0 }}>
+                  <h1 style={{
+                    marginTop: 20,
+                    marginLeft: 20
+                  }}
+                  >
+                    Allocate Drivers
+                  </h1>
+                  <div className="row">
+                    <div className="col-md-8"/>
+                    <div className="col-md-4">
+                      <TSubmitButton
+                        onClick={this.handleAllocateDrivers}
+                        className="primaryButton"
+                        loading={btnSubmitting}
+                        loaderSize={10}
+                        bntText="Save"
+                      />
+                      <Button type="button" className="tertiaryButton" onClick={() => {
+                        this.toggleAllocateDriversModal();
+                      }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+
                   <TTable
                     handleRowsChange={() => {}}
                     data={driverData}
                     columns={driverColumns}
                     handlePageChange={() => {}}
                     handleIdClick={() => {}}
+                    isSelectable
+                    onSelect={selected => this.setState({ selectedDrivers: selected })}
+                    selected={selectedDrivers}
                   />
                 </Card>
               </Col>
@@ -734,14 +799,15 @@ class JobSavePage extends Component {
       favoriteCompany,
       loaded,
       btnSubmitting,
-      companyCarrier
+      companyCarrier,
+      profile
     } = this.state;
 
     if (loaded) {
       if (companyType !== null && job !== null) {
         return (
           <div className="container">
-            {this.renderAllocateDriversModal()}
+            {this.renderAllocateDriversModal(profile)}
             <div className="row">
               <div className="col-md-3">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
