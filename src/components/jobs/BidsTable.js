@@ -12,13 +12,21 @@ import TSubmitButton from '../common/TSubmitButton';
 import JobService from '../../api/JobService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
+import BookingService from '../../api/BookingService';
+import BookingEquipmentService from '../../api/BookingEquipmentService';
+import EquipmentService from '../../api/EquipmentService';
+import GroupService from '../../api/GroupService';
+import ProfileService from '../../api/ProfileService';
 
 class BidsTable extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      profile: [],
       bids: [],
+      booking: null,
+      bookingEquipment: null,
       selectedBid: [],
       selectedBidCompany: [],
       totalBids: 0,
@@ -38,7 +46,8 @@ class BidsTable extends Component {
 
   async componentDidMount() {
     const { job } = this.props;
-    let { totalBids } = this.state;
+    let { totalBids, profile } = this.state;
+    profile = await ProfileService.getProfile();
     let bids = await BidService.getBidsInfoByJobId(job.id);
 
     bids = bids.map((bid) => {
@@ -46,46 +55,31 @@ class BidsTable extends Component {
 
       newBid.date = TFormat.asDate(bid.createdOn);
 
-      if (newBid.status === 'New') {
-        if (newBid.isFavorite === 'Favorite') {
-          newBid.status = 'Requested and Offered';
-        } else {
-          newBid.status = 'Requested';
-        }
+      if (newBid.status === 'Pending') {
+        newBid.status = 'Requested';
       }
-
-      /* newBid.actions = ({'
-        <TSubmitButton
-          onClick={() => this.saveBid('decline')}
-          className="secondaryButton float-right"
-          loading={btnSubmitting}
-          loaderSize={10}
-          bntText="Decline Job"
-        />
-        <TSubmitButton
-          onClick={() => this.saveBid('accept')}
-          className="primaryButton float-right"
-          loading={btnSubmitting}
-          loaderSize={10}
-          bntText="Accept Job"
-        />
-      '}); */
 
       return newBid;
     });
 
     totalBids = bids.length;
 
-    this.setState({ bids, totalBids, loaded: true });
+    this.setState({ bids, totalBids, profile, loaded: true });
   }
 
   async toggleBidModal(bidId) {
-    const {modalAcceptBid} = this.state;
+    let {modalAcceptBid} = this.state;
     let { selectedBid, selectedBidCompany } = this.state;
 
     if (typeof bidId === 'number') {
       selectedBid = await BidService.getBidById(bidId);
       selectedBidCompany = await CompanyService.getCompanyById(selectedBid.companyCarrierId);
+
+      if (selectedBid.status === 'Declined'
+        || selectedBid.status === 'Ignored'
+        || selectedBid.status === 'Accepted') {
+        modalAcceptBid = true; // this prevents the modal from opening
+      }
     }
     this.setState({
       selectedBid,
@@ -103,29 +97,164 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
-    const { selectedBid, profile } = this.state;
+    const {
+      selectedBid,
+      profile
+    } = this.state;
+    let { bids, booking, bookingEquipment } = this.state;
+    let newBid = [];
+    let ignoredBids = [];
+    const ignoredCompanies = [];
     this.setState({ btnSubmitting: true });
 
-    console.log(selectedBid);
+    // console.log(selectedBid);
 
     const job = await JobService.getJobById(selectedBid.jobId);
 
     if (action === 'accept') {
-      // TODO assign job to carrier
-      // TODO decline all other Bids - status: Ignored
+      // Updating Job
+      const newJob = CloneDeep(job);
+      newJob.status = 'Booked';
+      newJob.startAddress = newJob.startAddress.id;
+      newJob.endAddress = newJob.endAddress.id;
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment()
+        .unix() * 1000;
+      delete newJob.materials;
+      await JobService.updateJob(newJob);
 
-      const bids = await BidService.getBidsByJobId(selectedBid.jobId);
-    } else {
-      // TODO decline Bid - status: Declined
+      // For all of the Bids that are going to be 'Ignored'
+      bids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
+      ignoredBids = bids.filter(bid => ((bid.id !== selectedBid.id)));
+      if (ignoredBids.length > 0) {
+        const ignoredBidsList = [];
+        for (let i = 0; i < ignoredBids.length; i += 1) {
+          // Get the Ids from those bids' companies
+          ignoredCompanies.push(ignoredBids[i].companyCarrierId);
 
-      /* const newBid = CloneDeep(selectedBid);
-      newBid.status = 'Declined';
+          // console.log(ignoredBids[i]);
+          const ignoredBid = CloneDeep(ignoredBids[i]);
+          ignoredBid.companyCarrierId = profile.companyId;
+          ignoredBid.hasSchedulerAccepted = 1;
+          ignoredBid.hasCustomerAccepted = 0;
+          ignoredBid.status = 'Ignored';
+          ignoredBid.rateEstimate = newJob.rateEstimate;
+          ignoredBid.notes = newJob.notes;
+          ignoredBid.modifiedBy = profile.userId;
+          ignoredBid.modifiedOn = moment()
+            .unix() * 1000;
+          ignoredBidsList.push(BidService.updateBid(ignoredBid));
+        }
+
+        // then we get those companies' admin phone numbers
+        const ignoredAdminTels = await GroupService.getGroupAdminsTels(ignoredCompanies);
+
+        // Send a notification SMS to the admins
+        const allIgnoreSms = [];
+        for (const adminTel of ignoredAdminTels) {
+          // console.log(`We're sorry, the job [${job.name}] is no longer available. Please log in to Trelar to look for more jobs.`);
+          if (this.checkPhoneFormat(adminTel)) {
+            const notification = {
+              to: this.phoneToNumberFormat(adminTel),
+              body: `We're sorry, the job [${job.name}] is no longer available. Please log in to Trelar to look for more jobs.`
+            };
+            allIgnoreSms.push(TwilioService.createSms(notification));
+          }
+        }
+        await Promise.all(ignoredBidsList);
+        await Promise.all(allIgnoreSms);
+
+        // TODO check if this works
+        this.setState(prevState => ({
+          bids: prevState.bids.map(
+            bid => ignoredBidsList.map(ignoredBid => (bid.id === ignoredBid.id ? {...bid, status: ignoredBid.status} : ignoredBid))
+          )
+        }));
+      }
+
+      // Updating 'winner' Bid
+      newBid = CloneDeep(selectedBid);
+      newBid.companyCarrierId = profile.companyId;
+      newBid.hasSchedulerAccepted = 1;
       newBid.hasCustomerAccepted = 1;
+      newBid.status = 'Accepted';
+      newBid.rateEstimate = newJob.rateEstimate;
+      newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
       newBid.modifiedOn = moment()
         .unix() * 1000;
+      newBid = await BidService.updateBid(newBid);
+
+      // Create a Booking
+      // Check if we have a booking first
+      const bookings = await BookingService.getBookingsByJobId(job.id);
+      if (!bookings || bookings.length <= 0) {
+        booking = {};
+        booking.bidId = newBid.id;
+        booking.rateType = newBid.rateType;
+        booking.startTime = job.startTime;
+        booking.schedulersCompanyId = newBid.companyCarrierId;
+        booking.sourceAddressId = job.startAddress.id;
+        booking.startAddressId = job.startAddress.id;
+        booking.endAddressId = job.endAddress.id;
+        booking.bookingStatus = 'New';
+        booking.createdBy = profile.userId;
+        booking.createdOn = moment().unix() * 1000;
+        booking.modifiedOn = moment().unix() * 1000;
+        booking.modifiedBy = profile.userId;
+        booking = await BookingService.createBooking(booking);
+      }
+
+      // Create Booking Equipment
+      // Check if we have a booking equipment first
+      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+      bookingEquipments = bookingEquipments.filter((bookingEq) => {
+        if (bookingEq.bookingId === booking.id) {
+          return bookingEq;
+        }
+        return null;
+      });
+
+      if (!bookingEquipments || bookingEquipments.length <= 0) {
+        const response = await EquipmentService.getEquipments();
+        const equipments = response.data;
+        if (equipments && equipments.length > 0) {
+          const equipment = equipments[0]; // temporary for now.
+          // Ideally this should be the carrier/driver's truck
+          bookingEquipment = {};
+          bookingEquipment.bookingId = booking.id;
+          bookingEquipment.schedulerId = newBid.userId;
+          bookingEquipment.driverId = equipment.driversId;
+          bookingEquipment.equipmentId = equipment.id;
+          bookingEquipment.rateType = newBid.rateType;
+          bookingEquipment.rateActual = 0;
+          bookingEquipment.startTime = booking.startTime;
+          bookingEquipment.endTime = booking.endTime;
+          bookingEquipment.startAddressId = booking.startAddressId;
+          bookingEquipment.endAddressId = booking.endAddressId;
+          bookingEquipment.notes = '';
+          bookingEquipment.createdBy = equipment.driversId;
+          bookingEquipment.modifiedBy = equipment.driversId;
+          bookingEquipment.modifiedOn = moment().unix() * 1000;
+          bookingEquipment.createdOn = moment().unix() * 1000;
+          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+            bookingEquipment
+          );
+        }
+      }
+    } else {
+      // Decline Bid
+      newBid = CloneDeep(selectedBid);
+      newBid.status = 'Declined';
+      newBid.hasCustomerAccepted = 0;
+      newBid.modifiedBy = profile.userId;
+      newBid.modifiedOn = moment()
+        .unix() * 1000;
+      newBid = await BidService.updateBid(newBid);
 
       // Notify Carrier company's admin that the job request was declined
+      /* console.log(`We're sorry, your request for the Job [${job.name}] was not accepted.
+      Please log in to Trelar to look for more jobs.`); */
       const carrierAdmin = await UserService.getAdminByCompanyId(selectedBid.companyCarrierId);
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
@@ -136,10 +265,35 @@ class BidsTable extends Component {
           };
           await TwilioService.createSms(notification);
         }
-      } */
+      }
     }
 
+    // console.log(bids);
+
     this.setState({ btnSubmitting: false });
+    this.setState(prevState => ({
+      bids: prevState.bids.map(
+        bid => (bid.id === selectedBid.id ? { ...bid, status: newBid.status } : bid)
+      )
+    }));
+    this.toggleBidModal();
+  }
+
+  // remove non numeric
+  phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
+  }
+
+  // check format ok
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
+      return false;
+    }
+    return true;
   }
 
   renderTitle() {
@@ -188,16 +342,12 @@ class BidsTable extends Component {
                     displayName: 'Acceptance Rate'
                   }, */
                   {
-                    name: 'actions',
-                    displayName: 'Actions'
-                  },
-                  {
                     name: 'loadsNumber',
                     displayName: 'Loads Completed'
                   },
                   {
                     name: 'date',
-                    displayName: 'Date'
+                    displayName: 'Date Requested'
                   }
                 ]
               }
