@@ -38,8 +38,9 @@ class LoadsTable extends Component {
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Driver Name</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Start Time</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>End Time</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Tons Moved</TableCell>
+              {job.rateType === 'Hour' && <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Hours Worked</TableCell>}
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Rate</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Amount</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Total Cost</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Status</TableCell>
             </TableRow>
