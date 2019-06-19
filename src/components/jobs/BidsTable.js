@@ -23,6 +23,7 @@ class BidsTable extends Component {
     super(props);
 
     this.state = {
+      newJob: [],
       profile: [],
       bids: [],
       booking: null,
@@ -64,7 +65,7 @@ class BidsTable extends Component {
 
     totalBids = bids.length;
 
-    this.setState({ bids, totalBids, profile, loaded: true });
+    this.setState({ newJob: job, bids, totalBids, profile, loaded: true });
   }
 
   async toggleBidModal(bidId) {
@@ -100,7 +101,7 @@ class BidsTable extends Component {
     const {
       selectedBid, profile
     } = this.state;
-    let { bids, booking, bookingEquipment } = this.state;
+    let { newJob, bids, booking, bookingEquipment } = this.state;
     let newBid = [];
     let ignoredBids = [];
     let allBids = [];
@@ -111,7 +112,7 @@ class BidsTable extends Component {
 
     if (action === 'accept') {
       // Updating Job
-      const newJob = CloneDeep(job);
+      newJob = CloneDeep(job);
       newJob.status = 'Booked';
       newJob.modifiedBy = profile.userId;
       newJob.modifiedOn = moment()
@@ -257,7 +258,7 @@ class BidsTable extends Component {
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
 
-    this.setState({ bids: allBids, btnSubmitting: false });
+    this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
   }
 
@@ -279,10 +280,11 @@ class BidsTable extends Component {
   }
 
   renderTitle() {
+    const { newJob } = this.state;
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Open Requests</h3>
+          <h3 className="page-title">{newJob.status === 'Published' || newJob.status === 'Published And Offered' ? 'Open Requests' : 'Requests History' }</h3>
         </Col>
       </Row>
     );
