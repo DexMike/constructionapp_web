@@ -24,7 +24,6 @@ function ToggleLanguage({handle}) {
   )
 }
 
-
 class TopbarProfile extends PureComponent {
   constructor(props) {
     super(props);
@@ -40,6 +39,9 @@ class TopbarProfile extends PureComponent {
   async componentDidMount() {
     const currentSession = await Auth.currentSession();
     const profile = await ProfileService.getProfile();
+
+    console.log('TUIT', profile);
+
     const user = await UserService.getUserById(profile.userId);
     const company = await CompanyService.getCompanyById(profile.companyId);
     let isAdmin = false;

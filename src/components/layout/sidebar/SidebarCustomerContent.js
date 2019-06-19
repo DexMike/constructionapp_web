@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import SidebarLink from './SidebarLink';
+import ReactCountryFlag from 'react-country-flag';
 import i18n from 'i18next';
 import { useTranslation } from 'react-i18next';
-import ReactCountryFlag from "react-country-flag";
-
+import SidebarLink from './SidebarLink';
 // import SidebarCategory from './SidebarCategory';
 // import ThemeTogglerButton from '../../App';
 // import ThemeContext from '../../ThemeContext';
@@ -22,7 +21,7 @@ function SideElement ({title, icon, route, custom, handle}) {
         onClick={handle}
       />
     </ul>
-  )
+  );
 }
 
 class SidebarCustomerContent extends Component {
