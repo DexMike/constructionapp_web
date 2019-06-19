@@ -113,7 +113,7 @@ npm run deployProd'''
           }
           steps {
             sh '''npm install
-npm run deploystaging'''
+npm run deployStaging'''
             slackSend botUser: true,
               channel: 'jenkins',
               color: 'good',
