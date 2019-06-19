@@ -1,6 +1,6 @@
 import AgentService from './AgentService';
 
-const PATH = '/companies/settings';
+const PATH = '/company_settings';
 
 class CompanySettingsService extends AgentService {
   static async getCompanySettings(id) {
