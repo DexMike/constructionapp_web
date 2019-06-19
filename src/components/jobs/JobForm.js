@@ -671,6 +671,9 @@ class JobForm extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          <div className="col-md-9">
+            <h3 className="page-title">Job Details</h3>
+          </div>
           {this.renderEverything()}
         </Container>
       );

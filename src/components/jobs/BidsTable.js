@@ -98,16 +98,14 @@ class BidsTable extends Component {
 
   async saveBid(action) {
     const {
-      selectedBid,
-      profile
+      selectedBid, profile
     } = this.state;
     let { bids, booking, bookingEquipment } = this.state;
     let newBid = [];
     let ignoredBids = [];
+    let allBids = [];
     const ignoredCompanies = [];
     this.setState({ btnSubmitting: true });
-
-    // console.log(selectedBid);
 
     const job = await JobService.getJobById(selectedBid.jobId);
 
@@ -115,12 +113,9 @@ class BidsTable extends Component {
       // Updating Job
       const newJob = CloneDeep(job);
       newJob.status = 'Booked';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
       newJob.modifiedOn = moment()
         .unix() * 1000;
-      delete newJob.materials;
       await JobService.updateJob(newJob);
 
       // For all of the Bids that are going to be 'Ignored'
@@ -128,21 +123,34 @@ class BidsTable extends Component {
       ignoredBids = bids.filter(bid => ((bid.id !== selectedBid.id)));
       if (ignoredBids.length > 0) {
         const ignoredBidsList = [];
-        for (let i = 0; i < ignoredBids.length; i += 1) {
-          // Get the Ids from those bids' companies
-          ignoredCompanies.push(ignoredBids[i].companyCarrierId);
+        let originalIgnoredBids = [];
 
-          // console.log(ignoredBids[i]);
-          const ignoredBid = CloneDeep(ignoredBids[i]);
-          ignoredBid.companyCarrierId = profile.companyId;
+        // Get the data from all ignored bids
+        for (let i = 0; i < ignoredBids.length; i += 1) {
+          originalIgnoredBids.push(BidService.getBidById(ignoredBids[i].id));
+        }
+        originalIgnoredBids = await Promise.all(originalIgnoredBids);
+
+        // Get the Ids from those bids' companies
+        for (let i = 0; i < originalIgnoredBids.length; i += 1) {
+          ignoredCompanies.push(originalIgnoredBids[i].companyCarrierId);
+        }
+
+        // Update Ingored Bids data
+        for (let i = 0; i < originalIgnoredBids.length; i += 1) {
+          // console.log(originalIgnoredBids[i]);
+          const ignoredBid = CloneDeep(originalIgnoredBids[i]);
           ignoredBid.hasSchedulerAccepted = 1;
           ignoredBid.hasCustomerAccepted = 0;
           ignoredBid.status = 'Ignored';
           ignoredBid.rateEstimate = newJob.rateEstimate;
+          ignoredBid.rateType = newJob.rateType;
+          ignoredBid.rate = newJob.rate;
           ignoredBid.notes = newJob.notes;
           ignoredBid.modifiedBy = profile.userId;
           ignoredBid.modifiedOn = moment()
             .unix() * 1000;
+          // console.log(ignoredBid);
           ignoredBidsList.push(BidService.updateBid(ignoredBid));
         }
 
@@ -152,7 +160,6 @@ class BidsTable extends Component {
         // Send a notification SMS to the admins
         const allIgnoreSms = [];
         for (const adminTel of ignoredAdminTels) {
-          // console.log(`We're sorry, the job [${job.name}] is no longer available. Please log in to Trelar to look for more jobs.`);
           if (this.checkPhoneFormat(adminTel)) {
             const notification = {
               to: this.phoneToNumberFormat(adminTel),
@@ -161,20 +168,15 @@ class BidsTable extends Component {
             allIgnoreSms.push(TwilioService.createSms(notification));
           }
         }
+
+        // console.log(ignoredBidsList);
         await Promise.all(ignoredBidsList);
         await Promise.all(allIgnoreSms);
-
-        // TODO check if this works
-        this.setState(prevState => ({
-          bids: prevState.bids.map(
-            bid => ignoredBidsList.map(ignoredBid => (bid.id === ignoredBid.id ? {...bid, status: ignoredBid.status} : ignoredBid))
-          )
-        }));
       }
 
       // Updating 'winner' Bid
-      newBid = CloneDeep(selectedBid);
-      newBid.companyCarrierId = profile.companyId;
+      newBid = await BidService.getBidById(selectedBid.id);
+      newBid = CloneDeep(newBid);
       newBid.hasSchedulerAccepted = 1;
       newBid.hasCustomerAccepted = 1;
       newBid.status = 'Accepted';
@@ -186,61 +188,46 @@ class BidsTable extends Component {
       newBid = await BidService.updateBid(newBid);
 
       // Create a Booking
-      // Check if we have a booking first
-      const bookings = await BookingService.getBookingsByJobId(job.id);
-      if (!bookings || bookings.length <= 0) {
-        booking = {};
-        booking.bidId = newBid.id;
-        booking.rateType = newBid.rateType;
-        booking.startTime = job.startTime;
-        booking.schedulersCompanyId = newBid.companyCarrierId;
-        booking.sourceAddressId = job.startAddress.id;
-        booking.startAddressId = job.startAddress.id;
-        booking.endAddressId = job.endAddress.id;
-        booking.bookingStatus = 'New';
-        booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
-        booking.modifiedBy = profile.userId;
-        booking = await BookingService.createBooking(booking);
-      }
+      booking = {};
+      booking.bidId = newBid.id;
+      booking.rateType = newBid.rateType;
+      booking.startTime = newJob.startTime;
+      booking.schedulersCompanyId = newBid.companyCarrierId;
+      booking.sourceAddressId = newJob.startAddress;
+      booking.startAddressId = newJob.startAddress;
+      booking.endAddressId = newJob.endAddress;
+      booking.bookingStatus = 'New';
+      booking.createdBy = profile.userId;
+      booking.createdOn = moment().unix() * 1000;
+      booking.modifiedOn = moment().unix() * 1000;
+      booking.modifiedBy = profile.userId;
+      booking = await BookingService.createBooking(booking);
 
       // Create Booking Equipment
-      // Check if we have a booking equipment first
-      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-      bookingEquipments = bookingEquipments.filter((bookingEq) => {
-        if (bookingEq.bookingId === booking.id) {
-          return bookingEq;
-        }
-        return null;
-      });
-
-      if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const response = await EquipmentService.getEquipments();
-        const equipments = response.data;
-        if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now.
-          // Ideally this should be the carrier/driver's truck
-          bookingEquipment = {};
-          bookingEquipment.bookingId = booking.id;
-          bookingEquipment.schedulerId = newBid.userId;
-          bookingEquipment.driverId = equipment.driversId;
-          bookingEquipment.equipmentId = equipment.id;
-          bookingEquipment.rateType = newBid.rateType;
-          bookingEquipment.rateActual = 0;
-          bookingEquipment.startTime = booking.startTime;
-          bookingEquipment.endTime = booking.endTime;
-          bookingEquipment.startAddressId = booking.startAddressId;
-          bookingEquipment.endAddressId = booking.endAddressId;
-          bookingEquipment.notes = '';
-          bookingEquipment.createdBy = equipment.driversId;
-          bookingEquipment.modifiedBy = equipment.driversId;
-          bookingEquipment.modifiedOn = moment().unix() * 1000;
-          bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
-            bookingEquipment
-          );
-        }
+      const response = await EquipmentService.getEquipments();
+      const equipments = response.data;
+      if (equipments && equipments.length > 0) {
+        const equipment = equipments[0]; // temporary for now.
+        // Ideally this should be the carrier/driver's truck
+        bookingEquipment = {};
+        bookingEquipment.bookingId = booking.id;
+        bookingEquipment.schedulerId = newBid.userId;
+        bookingEquipment.driverId = equipment.driversId;
+        bookingEquipment.equipmentId = equipment.id;
+        bookingEquipment.rateType = newBid.rateType;
+        bookingEquipment.rateActual = 0;
+        bookingEquipment.startTime = booking.startTime;
+        bookingEquipment.endTime = booking.endTime;
+        bookingEquipment.startAddressId = booking.startAddressId;
+        bookingEquipment.endAddressId = booking.endAddressId;
+        bookingEquipment.notes = '';
+        bookingEquipment.createdBy = equipment.driversId;
+        bookingEquipment.modifiedBy = equipment.driversId;
+        bookingEquipment.modifiedOn = moment().unix() * 1000;
+        bookingEquipment.createdOn = moment().unix() * 1000;
+        bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+          bookingEquipment
+        );
       }
     } else {
       // Decline Bid
@@ -268,14 +255,9 @@ class BidsTable extends Component {
       }
     }
 
-    // console.log(bids);
+    allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
 
-    this.setState({ btnSubmitting: false });
-    this.setState(prevState => ({
-      bids: prevState.bids.map(
-        bid => (bid.id === selectedBid.id ? { ...bid, status: newBid.status } : bid)
-      )
-    }));
+    this.setState({ bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
   }
 
