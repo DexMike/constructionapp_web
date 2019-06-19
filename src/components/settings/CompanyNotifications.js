@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
-import CompanyService from '../../api/CompanyService';
+import CompanySettingsService from '../../api/CompanySettingsService';
 import LookupsService from '../../api/LookupsService';
 
 import './Settings.css';
@@ -25,8 +25,7 @@ class CompanyNotifications extends Component {
       rateTypes: [],
       companyEquipments: ['Any'],
       companyMaterials: ['Any'],
-      companyOperatingRange: 0,
-      selectedRateType: null
+      companyOperatingRange: 0
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -43,7 +42,7 @@ class CompanyNotifications extends Component {
   }
 
   async fetchCompanySettings(companyId) {
-    const settings = await CompanyService.getCompanySettings(companyId);
+    const settings = await CompanySettingsService.getCompanySettings(companyId);
 
     let companyOperatingRange = '';
     let companyRateType = '';
@@ -109,15 +108,6 @@ class CompanyNotifications extends Component {
     this.setState({
       companyRateType: e.value
     });
-    // try {
-    //   await CompanyService.updateCompanySettings(item);
-    //   this.setState({
-    //     rateType: [item],
-    //     selectedRateType: item.value
-    //   });
-    // } catch (error) {
-    //   // console.log(e);
-    // }
   }
 
   handleCheckedEquipments(e) {
@@ -181,7 +171,7 @@ class CompanyNotifications extends Component {
     });
   }
 
-  async saveCompanyNotificationsSettings() {
+  createNewCompanyNotifications() {
     const {company, userId} = this.props;
     const {
       settings,
@@ -190,50 +180,50 @@ class CompanyNotifications extends Component {
       companyMaterials,
       companyEquipments
     } = this.state;
-    const companyItemsIds = [];
-    const newCompanyRateType = settings.find(x => x.key === 'rateType');
-    newCompanyRateType.value = companyRateType;
-    const newCompanyOperatingRange = settings.find(x => x.key === 'operatingRange');
-    newCompanyOperatingRange.value = companyOperatingRange.toString();
-    Object.values(settings)
-      .forEach((itm) => {
-        if (itm.key === 'equipmentType') companyItemsIds.push(itm.id);
-        if (itm.key === 'materialType') companyItemsIds.push(itm.id);
-      });
 
+    const newSettings = [];
+    let item = settings.find(x => x.key === 'rateType');
+    item.value = companyRateType;
+    delete item.id;
+    newSettings.push(item);
+    item = settings.find(x => x.key === 'operatingRange');
+    item.value = companyOperatingRange.toString();
+    delete item.id;
+    newSettings.push(item);
+
+    for (let i = 0; i < companyMaterials.length; i += 1) {
+      const newItem = {
+        companyId: company.id,
+        key: 'materialType',
+        value: companyMaterials[i],
+        createdOn: moment().unix() * 1000,
+        createdBy: userId,
+        modifiedOn: moment().unix() * 1000,
+        modifiedBy: userId
+      };
+      newSettings.push(newItem);
+    }
+
+    for (let i = 0; i < companyEquipments.length; i += 1) {
+      const newItem = {
+        companyId: company.id,
+        key: 'equipmentType',
+        value: companyEquipments[i],
+        createdOn: moment().unix() * 1000,
+        createdBy: userId,
+        modifiedOn: moment().unix() * 1000,
+        modifiedBy: userId
+      };
+      newSettings.push(newItem);
+    }
+    return newSettings;
+  }
+
+  async saveCompanyNotificationsSettings() {
+    const {company} = this.props;
+    const newSettings = this.createNewCompanyNotifications();
     try {
-      await CompanyService.updateCompanySettings(newCompanyRateType);
-      await CompanyService.updateCompanySettings(newCompanyOperatingRange);
-      await Promise.all(companyItemsIds.map(async (id) => {
-        await CompanyService.deleteCompanySettingsItem(id);
-      }));
-
-      await Promise.all(companyMaterials.map(async (material) => {
-        const item = {
-          companyId: company.id,
-          key: 'materialType',
-          value: material,
-          createdOn: moment().unix() * 1000,
-          createdBy: userId,
-          modifiedOn: moment().unix() * 1000,
-          modifiedBy: userId
-        };
-        await CompanyService.createCompanySettings(item);
-      }));
-
-      await Promise.all(companyEquipments.map(async (equipment) => {
-        const item = {
-          companyId: company.id,
-          key: 'equipmentType',
-          value: equipment,
-          createdOn: moment().unix() * 1000,
-          createdBy: userId,
-          modifiedOn: moment().unix() * 1000,
-          modifiedBy: userId
-        };
-        await CompanyService.createCompanySettings(item);
-      }));
-
+      await CompanySettingsService.updateCompanySettings(newSettings, company.id);
     } catch (error) {
       // console.log(error);
     }
