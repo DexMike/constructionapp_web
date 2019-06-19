@@ -149,8 +149,8 @@ class AddTruckFormFour extends PureComponent {
     return isAvailable ? 'secondary' : 'minimal';
   }
 
-  renderHourOrTon(hourTon, info) {
-    if (hourTon) {
+  renderHourOrTon(ratedHour, ratedTon, info) {
+    if (ratedHour && !ratedTon) {
       return (
         <React.Fragment>
           <div className="row">
@@ -164,16 +164,45 @@ class AddTruckFormFour extends PureComponent {
         </React.Fragment>
       );
     }
+    if (ratedTon && !ratedHour) {
+      return (
+        <React.Fragment>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per ton: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.tonRate)}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+    if (ratedTon && ratedHour) {
+      return (
+        <React.Fragment>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per ton: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.tonRate)}
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per hour: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.hourRate)}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
     return (
       <React.Fragment>
-        <div className="row">
-          <div className="col-md-4">
-            <strong>Rate per ton: </strong>
-          </div>
-          <div className="col-md-8">
-            {TFormat.asMoneyByTons(info.tonRate)}
-          </div>
-        </div>
+        Loading...
       </React.Fragment>
     );
   }
@@ -319,7 +348,13 @@ class AddTruckFormFour extends PureComponent {
                         {truckFullInfo.info.licensePlate}
                       </div>
                     </div>
-                    {this.renderHourOrTon(truckFullInfo.info.isRatedHour, truckFullInfo.info)}
+                    {
+                      this.renderHourOrTon(
+                        truckFullInfo.info.isRatedHour,
+                        truckFullInfo.info.isRatedTon,
+                        truckFullInfo.info
+                      )
+                    }
                     <div className="row">
                       <div className="col-md-4">
                         <strong>Maximum distance pickup: </strong>

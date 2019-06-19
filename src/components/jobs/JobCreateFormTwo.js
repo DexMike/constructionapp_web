@@ -450,32 +450,32 @@ class JobCreateFormTwo extends PureComponent {
                         Send this job to the Trelar Marketplace
                       </h3>
                     </div>
-                    {showSendtoFavorites ? ( // If there're no favorites, hide Hours input
-                      <React.Fragment>
-                        <div className="col-md-1 form__form-group">
-                          <h3 className="subhead">
-                            In
-                          </h3>
-                        </div>
-                        <div className="col-md-2 form__form-group">
-                          <input
-                            name="delay"
-                            type="number"
-                            placeholder="0"
-                            className="slickinput"
-                          />
-                        </div>
-                        <div className="col-md-1 form__form-group">
-                          <h3 className="subhead">
-                            Hours
-                          </h3>
-                        </div>
-                      </React.Fragment>
-                    ) : null }
+                    {/* {showSendtoFavorites ? ( // If there're no favorites, hide Hours input */}
+                    {/* <React.Fragment> */}
+                    {/* <div className="col-md-1 form__form-group"> */}
+                    {/* <h3 className="subhead"> */}
+                    {/* In */}
+                    {/* </h3> */}
+                    {/* </div> */}
+                    {/* <div className="col-md-2 form__form-group"> */}
+                    {/* <input */}
+                    {/* name="delay" */}
+                    {/* type="number" */}
+                    {/* placeholder="0" */}
+                    {/* className="slickinput" */}
+                    {/* /> */}
+                    {/* </div> */}
+                    {/* <div className="col-md-1 form__form-group"> */}
+                    {/* <h3 className="subhead"> */}
+                    {/* Hours */}
+                    {/* </h3> */}
+                    {/* </div> */}
+                    {/* </React.Fragment> */}
+                    {/* ) : null } */}
                   </div>
                   <br/>
                 </Row>
-                
+
                 <Row className="col-md-12">
                   <hr/>
                 </Row>
