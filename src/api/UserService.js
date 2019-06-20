@@ -67,16 +67,6 @@ class UserService extends AgentService {
     const response = await this.get(`/booking_equipments/${bookingId}/drivers/users`);
     return (response);
   }
-
-  static async getUserSettings(id) {
-    const response = await this.get(`${PATH}/${id}/settings`);
-    return (response);
-  }
-
-  static async updateUserNotification(notification) {
-    const response = await this.put(`${PATH}/settings`, notification);
-    return (response);
-  }
 }
 
 export default UserService;
