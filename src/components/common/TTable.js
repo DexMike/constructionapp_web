@@ -51,7 +51,7 @@ class TTable extends Component {
     };
   }
 
-  handleClick = (event, id) => {
+  handleClick(event, id) {
     const { onSelect } = this.props;
     const { selected } = this.state;
     const selectedIndex = selected.indexOf(id);
@@ -72,7 +72,7 @@ class TTable extends Component {
 
     this.setState({ selected: newSelected });
     onSelect(newSelected);
-  };
+  }
 
   handleSelectAllClick(event, checked) {
     const { onSelect } = this.props;
