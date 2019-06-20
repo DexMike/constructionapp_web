@@ -195,7 +195,6 @@ class JobFilter extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.equipments] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
