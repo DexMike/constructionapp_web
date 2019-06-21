@@ -7,7 +7,7 @@ import {
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
 import './Settings.css';
-import UserService from '../../api/UserService';
+import UserNotificationsService from '../../api/UserNotificationsService';
 
 class NotificationsSettings extends Component {
   constructor(props) {
@@ -28,7 +28,11 @@ class NotificationsSettings extends Component {
 
   async componentDidMount() {
     const { user } = this.props;
-    const settings = await UserService.getUserSettings(user.id);
+    await this.getUserSettings(user.id);
+  }
+
+  async getUserSettings(userId) {
+    const settings = await UserNotificationsService.getUserNotifications(userId);
     this.setState({
       settings
     });
@@ -46,21 +50,17 @@ class NotificationsSettings extends Component {
       document.getElementById(checkBoxId).value = 'on';
       value = 0;
     }
-
+    const notificationsToUpdate = [];
     for (const i in newSettings) {
       if (newSettings[i].key === type) {
         newSettings[i].enabled = value;
         newSettings[i].modifiedBy = user.id;
         newSettings[i].modifiedOn = moment().unix() * 1000;
+        notificationsToUpdate.push(newSettings[i]);
       }
     }
 
-    await Promise.all(newSettings.map(async (notification) => {
-      if (notification.key === type) {
-        await UserService.updateUserNotification(notification);
-      }
-    }));
-
+    UserNotificationsService.updateUserNotificationSection(notificationsToUpdate);
     this.setState({
       settings: newSettings
     });
@@ -75,7 +75,7 @@ class NotificationsSettings extends Component {
     notification.modifiedBy = user.id;
     notification.modifiedOn = moment().unix() * 1000;
     try {
-      await UserService.updateUserNotification(notification);
+      await UserNotificationsService.updateUserNotification(notification);
       const index = settings.findIndex(x => x.id === notificationId);
       if (index !== -1) {
         this.setState({
@@ -91,7 +91,7 @@ class NotificationsSettings extends Component {
     }
   }
 
-  async setAllNotificationOptionState(key, method, checkBoxId, e) {
+  setAllNotificationOptionState(key, method, checkBoxId, e) {
     const {user} = this.props;
     const { settings } = this.state;
     const newSettings = settings;
@@ -104,20 +104,16 @@ class NotificationsSettings extends Component {
       value = 0;
     }
 
+    const notificationsToUpdate = [];
     for (const i in newSettings) {
       if (newSettings[i].key === key) {
         newSettings[i][method] = value;
         newSettings[i].modifiedBy = user.id;
         newSettings[i].modifiedOn = moment().unix() * 1000;
+        notificationsToUpdate.push(newSettings[i]);
       }
     }
-
-    await Promise.all(newSettings.map(async (notification) => {
-      if (notification.key === key) {
-        await UserService.updateUserNotification(notification);
-      }
-    }));
-
+    UserNotificationsService.updateUserNotificationSection(notificationsToUpdate);
     this.setState({
       settings: newSettings
     });
@@ -133,7 +129,7 @@ class NotificationsSettings extends Component {
     notification.modifiedBy = user.id;
     notification.modifiedOn = moment().unix() * 1000;
     try {
-      await UserService.updateUserNotification(notification);
+      await UserNotificationsService.updateUserNotification(notification);
       const index = settings.findIndex(x => x.id === notificationId);
       if (index !== -1) {
         this.setState({
@@ -175,7 +171,7 @@ class NotificationsSettings extends Component {
               <strong>Notification</strong>
             </td>
             {
-              objectSettings.communicationTypes.map(item => <td key={item.id} className="text-center"><strong>{item.title}</strong></td>)
+              objectSettings.communicationTypes.map(item => <td key={item.name} className="text-center"><strong>{item.title}</strong></td>)
             }
           </tr>
           {/* Select All Headers */}
@@ -186,7 +182,12 @@ class NotificationsSettings extends Component {
                   <label className="checkbox-container" htmlFor={`${objectSettings.type}SelectAll`}>
                     <input
                       type="checkbox"
-                      onChange={e => this.setAllNotificationsState(objectSettings.title, `${objectSettings.type}SelectAll`, e)}
+                      onChange={e => this.setAllNotificationsState(
+                        objectSettings.title,
+                        `${objectSettings.type}SelectAll`,
+                        e
+                      )
+                      }
                       id={`${objectSettings.type}SelectAll`}
                     />
                     <span className="checkmark centered" />
@@ -295,9 +296,10 @@ class NotificationsSettings extends Component {
 
     const carrierJobs = [];
     const customerJobs = [];
-
     Object.values(settings).forEach((itm) => {
-      if (itm.key === 'Job Offers') carrierJobs.push(itm);
+      if (itm.key === 'Job Offers') {
+        carrierJobs.push(itm);
+      }
       if (itm.key === 'Jobs') customerJobs.push(itm);
     });
     const jobsSettings = {
