@@ -37,7 +37,7 @@ export default {
     }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
-    }),
+    })
     // initially bundle.js file is 3.7 MB
 
     /*
