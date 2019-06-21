@@ -99,10 +99,10 @@ class LoginPage extends SignIn {
     await UserService.updateUser(user);
   }
 
-  async createLoginLog() {
+  async createLoginLog(state) {
     const log = {
       attemptedUsername: this.state.username,
-      attemptedPassword: this.state.password,
+      attemptedPassword: !state ? this.state.password : null,
       ipAddress: this.state.ip.ip,
       browserType: this.state.browserVersion.name,
       browserVersion: this.state.browserVersion.version,
@@ -120,9 +120,9 @@ class LoginPage extends SignIn {
     try {
       if (!this.state.username || this.state.username.length <= 0
         || !this.state.password || this.state.password.length <= 0) {
-        await this.createLoginLog();
+        await this.createLoginLog(false);
         this.setState({
-          error: 'Errorororo',
+          error: 'Invalid username or password.',
           btnSubmitting: false,
           loading: false
         });
@@ -136,6 +136,7 @@ class LoginPage extends SignIn {
         if (this.props.onStateChange) {
           this.props.onStateChange('authenticated', data);
         }
+        await this.createLoginLog(true);
         // window.location = '/';
         this.setLogging(this.state.username);
         this.loginRouting();
@@ -159,7 +160,7 @@ class LoginPage extends SignIn {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
       if (err.code === 'UserNotConfirmedException') {
         const {username} = this.state;
-        await this.createLoginLog();
+        await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
@@ -168,7 +169,7 @@ class LoginPage extends SignIn {
           confirmUsername: username
         });
       } else {
-        await this.createLoginLog();
+        await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,

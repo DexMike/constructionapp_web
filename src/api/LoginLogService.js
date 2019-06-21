@@ -6,7 +6,7 @@ class LoginLogService {
     const init = {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json', 
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(entity)
     };
