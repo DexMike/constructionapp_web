@@ -179,16 +179,19 @@ class MarketplaceCarrierPage extends Component {
         if (newJob.rateType === 'Hour') {
           newJob.newSize = TFormat.asHours(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate) * 0.95
+          // Job's Potential Earnings
+          // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
+          newJob.potentialIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate)
           );
         }
         if (newJob.rateType === 'Ton') {
           newJob.newSize = TFormat.asTons(newJob.rateEstimate);
           newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-          // Job's Potencial Earnings
-          newJob.estimatedIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate) * 0.95
+          // Job's Potential Earnings
+          // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
+          newJob.potentialIncome = TFormat.asMoney(
+            (tempRate * newJob.rateEstimate)
           );
         }
 
@@ -228,7 +231,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Start Date'
                       },
                       {
-                        name: 'estimatedIncome',
+                        name: 'potentialIncome',
                         displayName: 'Potential Earnings'
                       },
                       {
