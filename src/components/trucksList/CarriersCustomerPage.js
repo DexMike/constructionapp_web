@@ -57,6 +57,8 @@ class CarriersCustomerPage extends Component {
       company: {},
       profile: {},
       address: {},
+      companyZipCode: '',
+      lastZipCode: '',
 
       // TODO: Refactor to a single filter object
       // Filter values
@@ -109,7 +111,7 @@ class CarriersCustomerPage extends Component {
 
   async componentDidMount() {
     const { filters } = this.state;
-    let { address, company } = this.state;
+    let { companyZipCode, lastZipCode, address, company } = this.state;
     // await this.fetchJobs();
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
@@ -119,12 +121,14 @@ class CarriersCustomerPage extends Component {
       if (company.addressId) {
         address = await AddressService.getAddressById(company.addressId);
         filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
+        companyZipCode = address.zipCode ? address.zipCode : 'Any'; // 'default' zipCode
+        lastZipCode = address.zipCode ? address.zipCode : 'Any'; // used for comparing while changing the zip code
         filters.companyLatitude = address.latitude;
         filters.companyLongitude = address.longitude;
       }
     }
 
-    this.setState({company, address, profile, loaded: true});
+    this.setState({companyZipCode, lastZipCode, company, address, profile, loaded: true});
     await this.fetchCarriers();
     await this.fetchFilterLists();
   }
@@ -136,7 +140,7 @@ class CarriersCustomerPage extends Component {
       endAvailability: null,
       searchType: 'Customer Truck',
       userId: '',
-      equipmentType: '',
+      equipmentType: [],
       minCapacity: '',
       // materialType: '',
       materialType: [],
@@ -225,7 +229,7 @@ class CarriersCustomerPage extends Component {
   }
 
   async fetchCarriers() {
-    const {filters, reqHandlerZip} = this.state;
+    const {lastZipCode, companyZipCode, filters, reqHandlerZip} = this.state;
     let { company, address, profile } = this.state;
     // const carriers = await CarrierService.getCarrierByFiltersCarrier(filters);
 
@@ -239,12 +243,11 @@ class CarriersCustomerPage extends Component {
       }
     }
 
-    // if the filter zip code is not the same as the initial zip code (company's
-    // zip code) or we don't have any coordinates on our db
-    // we search for that zip code coordinates with MapBox API
-    if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
-      if (filters.zipCode.length > 0) {
-        try {
+    // if we are changing the zip code
+    // or we don't have any coordinates on our db
+    if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
+      if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
+        try { // Search for that new zip code's coordinates with MapBox API
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
           filters.companyLongitude = geoLocation.features[0].center[0];
@@ -257,7 +260,9 @@ class CarriersCustomerPage extends Component {
             }
           });
         }
-      } else { // if the zipCode filter is empty, default the coordinates to user's address
+      } else {
+        // if the zipCode filter is empty, or it is the same as the initial code,
+        // default the coordinates to user's address
         filters.companyLatitude = address.latitude;
         filters.companyLongitude = address.longitude;
         this.setState({
@@ -289,6 +294,7 @@ class CarriersCustomerPage extends Component {
       });
       this.setState({carriers});
     }
+    this.setState({lastZipCode: filters.zipCode});
   }
 
   async handleSelectFilterChange(option) {
@@ -406,16 +412,7 @@ class CarriersCustomerPage extends Component {
       clearTimeout(self.state.typingTimeout);
     }
 
-    if (filter === 'zipCode' && (value.length !== 5)) {
-      this.setState({
-        reqHandlerZip: {
-          ...reqHandlerZip,
-          error: 'Please enter a valid 5-digit Zip Code',
-          touched: true
-        }
-      });
-      invalidZip = true;
-    } else {
+    if (filter === 'zipCode') {
       this.setState({
         reqHandlerZip: {
           ...reqHandlerZip,
@@ -625,6 +622,7 @@ class CarriersCustomerPage extends Component {
       endDate,
 
       // filters
+      companyZipCode,
       filters,
 
       reqHandlerZip,
@@ -754,7 +752,7 @@ class CarriersCustomerPage extends Component {
                         }
                         meta={reqHandlerZip}
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder={companyZipCode}
                         type="number"
                       />
                     </Col>
