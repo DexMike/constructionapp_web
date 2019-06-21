@@ -73,7 +73,7 @@ class ReportsCarrierPage extends Component {
         minHours: '',
         minCapacity: '',
 
-        equipmentType: '',
+        equipmentType: [],
         numEquipments: '',
         zipCode: '',
         materialType: [],
