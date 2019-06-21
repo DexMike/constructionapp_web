@@ -11,6 +11,8 @@ import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
 import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
+import UtilsService from '../../api/UtilsService';
+import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 
@@ -35,7 +37,10 @@ class LoginPage extends SignIn {
       username: this.props.authData.username || '',
       password: this.props.authData.password || '',
       user: null,
-      btnSubmitting: false // Used by TSubmitButton
+      btnSubmitting: false, // Used by TSubmitButton
+      ip: null,
+      browserVersion: null,
+      screenSize: null
     };
     this.showPassword = this.showPassword.bind(this);
     this.onSignIn = this.onSignIn.bind(this);
@@ -45,6 +50,17 @@ class LoginPage extends SignIn {
     this.onDismiss = this.onDismiss.bind(this);
     this.handleUserNotConfirmed = this.handleUserNotConfirmed.bind(this);
     this.changeState = this.changeState.bind(this);
+  }
+
+  async componentDidMount() {
+    const ip = await UtilsService.getUserIP();
+    const browserVersion = await UtilsService.getBrowserVersion();
+    const screenSize = await UtilsService.getScreenDimentions();
+    this.setState({
+      ip,
+      browserVersion,
+      screenSize
+    });
   }
 
   showPassword(e) {
@@ -83,13 +99,30 @@ class LoginPage extends SignIn {
     await UserService.updateUser(user);
   }
 
+  async createLoginLog() {
+    const log = {
+      attemptedUsername: this.state.username,
+      attemptedPassword: this.state.password,
+      ipAddress: this.state.ip.ip,
+      browserType: this.state.browserVersion.name,
+      browserVersion: this.state.browserVersion.version,
+      screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
+      createdBy: 1,
+      createdOn: moment().unix() * 1000,
+      modifiedBy: 1,
+      modifiedOn: moment().unix() * 1000
+    };
+    await LoginLogService.createLoginLog(log);
+  }
+
   async onSignIn() {
     this.setState({loading: true, btnSubmitting: true});
     try {
       if (!this.state.username || this.state.username.length <= 0
         || !this.state.password || this.state.password.length <= 0) {
+        await this.createLoginLog();
         this.setState({
-          error: 'Incorrect username or password.',
+          error: 'Errorororo',
           btnSubmitting: false,
           loading: false
         });
@@ -126,6 +159,7 @@ class LoginPage extends SignIn {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
       if (err.code === 'UserNotConfirmedException') {
         const {username} = this.state;
+        await this.createLoginLog();
         this.setState({
           error: err.message,
           loading: false,
@@ -134,6 +168,7 @@ class LoginPage extends SignIn {
           confirmUsername: username
         });
       } else {
+        await this.createLoginLog();
         this.setState({
           error: err.message,
           loading: false,
@@ -141,6 +176,7 @@ class LoginPage extends SignIn {
           errorCode: err.code,
           confirmUsername: null
         });
+
       }
     }
   }
