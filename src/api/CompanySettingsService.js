@@ -4,7 +4,7 @@ const PATH = '/company_settings';
 
 class CompanySettingsService extends AgentService {
   static async getCompanySettings(id) {
-    const response = await this.get(`/companies/${id}/settings`);
+    const response = await this.get(`${PATH}/${id}/get/create/default`);
     return (response);
   }
 
