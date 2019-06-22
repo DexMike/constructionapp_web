@@ -180,7 +180,7 @@ CarrierRow.propTypes = {
 CarrierRow.defaultProps = {
   carrierId: null,
   carrierName: null,
-  favorite: PropTypes.bool,
+  favorite: false,
   setFavorite: null,
   requestEquipment: null,
   distance: null

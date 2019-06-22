@@ -215,9 +215,9 @@ class CarriersCustomerPage extends Component {
     if (groupsFavorites) {
       // if we find the equipment's companyId in
       // groupsFavorites we favorite it
-      carriers.map((equipment) => {
-        const newCarrier = equipment;
-        if (groupsFavorites.includes(newCarrier.companyId)) {
+      carriers.map((carrier) => {
+        const newCarrier = carrier;
+        if (groupsFavorites.includes(newCarrier.id)) {
           newCarrier.favorite = true;
         } else {
           newCarrier.favorite = false;
@@ -275,7 +275,6 @@ class CarriersCustomerPage extends Component {
     }
 
     const carriers = await CompanyService.getCarriersByFilters(filters);
-    console.log(carriers);
 
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -831,7 +830,6 @@ class CarriersCustomerPage extends Component {
       carriers
     } = this.state;
 
-
     return (
       <Container>
         <Card>
@@ -885,7 +883,7 @@ class CarriersCustomerPage extends Component {
                   carrierId={c.id}
                   carrierName={c.legalName}
                   favorite={c.favorite}
-                  setFavorite={() => this.handleSetFavorite(c.companyId)}
+                  setFavorite={() => this.handleSetFavorite(c.id)}
                   requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
                 />
