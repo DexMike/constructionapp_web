@@ -275,7 +275,6 @@ class CarriersCustomerPage extends Component {
     }
 
     const carriers = await CompanyService.getCarriersByFilters(filters);
-    console.log(carriers);
 
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
@@ -332,7 +331,6 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleSetFavorite(companyId) {
-    console.log(companyId);
     const {carriers} = this.state;
 
     try {
@@ -831,8 +829,6 @@ class CarriersCustomerPage extends Component {
       filters,
       carriers
     } = this.state;
-
-    console.log(carriers);
 
     return (
       <Container>
