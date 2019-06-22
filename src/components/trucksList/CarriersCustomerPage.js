@@ -215,9 +215,9 @@ class CarriersCustomerPage extends Component {
     if (groupsFavorites) {
       // if we find the equipment's companyId in
       // groupsFavorites we favorite it
-      carriers.map((equipment) => {
-        const newCarrier = equipment;
-        if (groupsFavorites.includes(newCarrier.companyId)) {
+      carriers.map((carrier) => {
+        const newCarrier = carrier;
+        if (groupsFavorites.includes(newCarrier.id)) {
           newCarrier.favorite = true;
         } else {
           newCarrier.favorite = false;
@@ -332,6 +332,7 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleSetFavorite(companyId) {
+    console.log(companyId);
     const {carriers} = this.state;
 
     try {
@@ -831,6 +832,7 @@ class CarriersCustomerPage extends Component {
       carriers
     } = this.state;
 
+    console.log(carriers);
 
     return (
       <Container>
@@ -885,7 +887,7 @@ class CarriersCustomerPage extends Component {
                   carrierId={c.id}
                   carrierName={c.legalName}
                   favorite={c.favorite}
-                  setFavorite={() => this.handleSetFavorite(c.companyId)}
+                  setFavorite={() => this.handleSetFavorite(c.id)}
                   requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
                 />
