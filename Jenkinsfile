@@ -29,7 +29,7 @@ pipeline {
         }
         stage('Initialize prod') {
           when {
-            branch 'prod'
+            branch 'master'
           }
           steps {
             echo 'Starting prod'
@@ -94,7 +94,7 @@ npm run deployQa'''
         }
         stage('Build / Package prod') {
           when {
-            branch 'prod'
+            branch 'master'
           }
           steps {
             sh '''npm install
