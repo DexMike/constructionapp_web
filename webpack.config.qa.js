@@ -2,7 +2,7 @@ import webpack from 'webpack';
 import Dotenv from 'dotenv-webpack';
 import path from 'path';
 // import ExtractTextPlugin from 'extract-text-webpack-plugin';
-import CompressionPlugin from 'compression-webpack-plugin';
+// import CompressionPlugin from 'compression-webpack-plugin';
 // import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
@@ -37,19 +37,19 @@ export default {
     }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
-    }),
-    // initially bundle.js file is 3.7 MB
-    new CompressionPlugin({
-      // filename: '[path].br[query]',
-      filename: '[path].gz[query]',
-      // algorithm: 'brotliCompress',
-      algorithm: 'gzip',
-      test: new RegExp('\\.(js|css)$'),
-      compressionOptions: { level: 11 },
-      threshold: 10240,
-      minRatio: 0.8,
-      deleteOriginalAssets: false
     })
+    // initially bundle.js file is 3.7 MB
+    // new CompressionPlugin({
+    //   // filename: '[path].br[query]',
+    //   filename: '[path].gz[query]',
+    //   // algorithm: 'brotliCompress',
+    //   algorithm: 'gzip',
+    //   test: new RegExp('\\.(js|css)$'),
+    //   compressionOptions: { level: 11 },
+    //   threshold: 10240,
+    //   minRatio: 0.8,
+    //   deleteOriginalAssets: false
+    // })
   ],
   module: {
     rules: [
