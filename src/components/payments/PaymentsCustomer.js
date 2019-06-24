@@ -15,11 +15,14 @@ class PaymentsCustomer extends Component {
       loaded: false,
       id: 0,
       goToPaymentDetails: false,
-      payments: []
+      payments: [],
+      page: 0,
+      rows: 10,
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handlePaymentId = this.handlePaymentId.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
   }
 
   async componentDidMount() {
@@ -32,6 +35,14 @@ class PaymentsCustomer extends Component {
       goToPaymentDetails: true,
       id
     });
+  }
+
+  handlePageChange(page) {
+    this.setState({ page });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows });
   }
 
   handlePageClick(menuItem) {
@@ -90,7 +101,7 @@ class PaymentsCustomer extends Component {
           {this.renderGoTo()}
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Customer Payments</h3>
+              <h3 className="page-title">Customer Charges</h3>
             </Col>
           </Row>
           <Row>
@@ -100,32 +111,26 @@ class PaymentsCustomer extends Component {
                   <TTable
                     columns={
                       [
+                        // {
+                        //   name: 'id',
+                        //   displayName: 'ID'
+                        // },
                         {
-                          name: 'id',
-                          displayName: 'ID'
+                          name: 'createdAt',
+                          displayName: 'Date'
                         }, {
                           name: 'amount',
                           displayName: 'Amount'
                         }, {
-                          name: 'createdAt',
-                          displayName: 'Added'
-                        }, {
-                          name: 'type',
-                          displayName: 'Type'
-                        }, {
                           name: 'status',
                           displayName: 'Status'
-                        }, {
-                          name: 'company',
-                          displayName: 'Customer'
-                        }, {
-                          name: 'paymentMethod',
-                          displayName: 'Payment Method'
                         }
                       ]
                     }
                     data={payments}
                     handleIdClick={this.handlePaymentId}
+                    handlePageChange={this.handlePageChange}
+                    handleRowsChange={this.handleRowsPerPage}
                   />
                 </CardBody>
               </Card>

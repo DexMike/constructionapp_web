@@ -91,7 +91,7 @@ class ReportsCustomerPage extends Component {
         searchType: 'Customer Job',
         userId: '',
 
-        equipmentType: '',
+        equipmentType: [],
         numEquipments: '',
         zipCode: '',
         materialType: [],
@@ -112,7 +112,7 @@ class ReportsCustomerPage extends Component {
         minHours: '',
         minCapacity: '',
 
-        equipmentType: '',
+        equipmentType: [],
         numEquipments: '',
         zipCode: '',
         materialType: [],

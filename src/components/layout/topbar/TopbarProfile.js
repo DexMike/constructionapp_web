@@ -24,7 +24,6 @@ function ToggleLanguage({handle}) {
   )
 }
 
-
 class TopbarProfile extends PureComponent {
   constructor(props) {
     super(props);

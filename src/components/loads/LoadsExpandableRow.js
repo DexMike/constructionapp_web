@@ -165,6 +165,7 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
+      const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
           {this.renderModal()}
@@ -182,8 +183,9 @@ class LoadsExpandableRow extends Component {
                        style={{fontStyle: !endTime ? 'italic' : 'normal'}}
             >{(!endTime ? 'In Progress' : endTime)}
             </TableCell>
+            <TableCell align="left">{`${load.tonsEntered} tons`}</TableCell>
+            {job.rateType === 'Hour' && <TableCell align="left">{`${load.hoursEntered} hours`}</TableCell>}
             <TableCell align="left">{job.rateType === 'Hour' ? `$${job.rate} / hour` : `$${job.rate} / ton`}</TableCell>
-            <TableCell align="left">{job.rateType === 'Hour' ? `${load.hoursEntered} hours` : `${load.tonsEntered} tons`}</TableCell>
             <TableCell align="left">${job.rateType === 'Hour' ? job.rate * load.hoursEntered : job.rate * load.tonsEntered}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
@@ -255,7 +257,7 @@ class LoadsExpandableRow extends Component {
                       <React.Fragment>
                         <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
                         <p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>
-                          Driver Name: {`${driver.firstName} ${driver.lastName}`}
+                          {profile.companyType === 'Customer' ? '' : `${driverName}`}
                         </p>
                       </React.Fragment>
                     </Col>

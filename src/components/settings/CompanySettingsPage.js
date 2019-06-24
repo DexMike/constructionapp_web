@@ -177,6 +177,7 @@ class CompanySettingsPage extends Component {
           </TabPane>
           <TabPane tabId="2">
             <CompanyNotifications
+              userId={user.id}
               company={company}
             />
           </TabPane>
