@@ -240,7 +240,7 @@ class DashboardCarrierPage extends Component {
     let bookedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
-    let potentialIncome = 0;
+    let totalPotentialIncome = 0;
 
     // let jobsCompleted = 0;
     // let totalEarnings = 0;
@@ -278,37 +278,25 @@ class DashboardCarrierPage extends Component {
         // if (newJob.rateType === 'Hour') {
         //   newJob.newSize = TFormat.asHours(newJob.rateEstimate);
         //   newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        //   newJob.estimatedIncome = TFormat.asMoney(
+        //   newJob.potentialIncome = TFormat.asMoney(
         //     (tempRate * newJob.rateEstimate) * 0.95
         //   );
         // }
         // if (newJob.rateType === 'Ton') {
         //   newJob.newSize = TFormat.asTons(newJob.rateEstimate);
         //   newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        //   newJob.estimatedIncome = TFormat.asMoney(
+        //   newJob.potentialIncome = TFormat.asMoney(
         //     (tempRate * newJob.rateEstimate) * 0.95
         //   );
         // }
         //
         // newJob.newStartDate = TFormat.asDate(job.startTime);
         //
-        potentialIncome += (newJob.estimatedEarnings) * 0.95;
+        totalPotentialIncome += (newJob.estimatedEarnings) * 0.95;
 
         return newJob;
       });
     }
-
-    // jobsCompleted = onOfferJobCount * 20;
-    // totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
-    // earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
-    // cancelledJobs = 1;
-    // jobsPerTruck = TFormat.asNumber(onOfferJobCount / 0.7);
-    // idleTrucks = 1;
-
-    // Jobs completed / Job offers responded to
-    // completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
-    //
-    // potentialIncome = TFormat.asMoney(potentialIncome);
 
     if (loaded) {
       return (
@@ -357,7 +345,7 @@ class DashboardCarrierPage extends Component {
             }
             <DashboardObjectStatic
               title={filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings'}
-              displayVal={TFormat.asMoney(potentialIncome)}
+              displayVal={TFormat.asMoney(totalPotentialIncome)}
             />
           </div>
         </Container>
@@ -404,16 +392,16 @@ class DashboardCarrierPage extends Component {
       if (newJob.rateType === 'Hour') {
         newJob.newSize = TFormat.asHours(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(
-          (tempRate * newJob.rateEstimate) * 0.95
+        newJob.potentialIncome = TFormat.asMoney(
+          (tempRate * newJob.rateEstimate)
         );
       }
       if (newJob.rateType === 'Ton') {
         newJob.newSize = TFormat.asTons(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        // Job's Potencial Earnings
-        newJob.estimatedIncome = TFormat.asMoney(
-          (tempRate * newJob.rateEstimate) * 0.95
+        // Job's Potential Earnings
+        newJob.potentialIncome = TFormat.asMoney(
+          (tempRate * newJob.rateEstimate)
         );
       }
 
@@ -468,7 +456,7 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Distance (mi)'
                         },
                         {
-                          name: 'estimatedIncome',
+                          name: 'potentialIncome',
                           displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings'
                         },
                         {

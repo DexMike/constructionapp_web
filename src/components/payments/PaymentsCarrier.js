@@ -90,9 +90,8 @@ class PaymentsCarrier extends Component {
           </Row>
           <Row>
             <Col md={12}>
-
               <h5>For detailed information on your payments, please log into your &nbsp;
-                <a href="https://hyperwallet.com/">https://hyperwallet.com</a>&nbsp;account.
+                <a href="https://hyperwallet.com/" target="_blank">https://hyperwallet.com</a>&nbsp;account.
               </h5>
             </Col>
           </Row>
