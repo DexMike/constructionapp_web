@@ -11,6 +11,7 @@ import * as PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import moment from 'moment';
+import EyeIcon from 'mdi-react/EyeIcon';
 // import CloneDeep from 'lodash.clonedeep';
 // import TFormat from '../common/TFormat';
 import TField from '../common/TField';
@@ -90,6 +91,9 @@ class UserSettings extends Component {
         touched: false,
         error: ''
       },
+      showOldPassword: false,
+      showNewPassword: false,
+      showConfirmationPassword: false,
       oldPassword: '',
       newPassword: '',
       passwordConfirmation: '',
@@ -523,6 +527,9 @@ class UserSettings extends Component {
 
   renderModal() {
     const {
+      showOldPassword,
+      showNewPassword,
+      showConfirmationPassword,
       modal,
       oldPassword,
       newPassword,
@@ -535,10 +542,10 @@ class UserSettings extends Component {
     } = this.state;
     return (
       <Modal isOpen={modal} toggle={this.toggle} className="password-reset-modal">
-        <form autoComplete="new-password">
+        <form autoComplete="new-password" className="form">
           <Row>
             <Col className="text-left" md={12} style={{fontSize: 16}}>
-              <strong><Trans>Password Reset</Trans></strong>
+              <strong><Trans>Change Password</Trans></strong>
             </Col>
             <Col md={12}>
               {
@@ -550,67 +557,99 @@ class UserSettings extends Component {
                   ) : null
               }
             </Col>
-            <Col md={12} className="text-left pt-2">
-              <span >
+            <Col md={12} className="text-left pt-2 form__form-group">
+              <span>
                 <Trans>Current Password</Trans>
               </span>
-              <TField
-                input={
-                  {
-                    onChange: this.handleInputChange,
-                    name: 'oldPassword',
-                    value: oldPassword
-                  }
-                }
-                type="password"
-                autoComplete="none"
-                placeholder="Enter Current Password"
-                meta={reqHandlerOldPassword}
-              />
+              <div className="form__form-group-field">
+                <input
+                  name="oldPassword"
+                  type={showOldPassword ? 'text' : 'password'}
+                  placeholder="Enter Current Password"
+                  value={oldPassword}
+                  onChange={this.handleInputChange}
+                />
+                <button
+                  type="button"
+                  className={`form__form-group-button${showOldPassword ? ' active' : ''}`}
+                  onClick={() => this.setState({ showOldPassword: !showOldPassword })}
+                >
+                  <EyeIcon/>
+                </button>
+              </div>
+              {
+                reqHandlerOldPassword.touched
+                  ? (
+                    <span style={{color: '#D32F2F'}}>
+                      {reqHandlerOldPassword.error}
+                    </span>
+                  )
+                  : null
+              }
             </Col>
-          </Row>
-          <Row className="pt-2">
-            <Col md={12} className="text-left">
-              <span>
+            <Col md={12} className="text-left pt-2 form__form-group">
+              <span className="pt-2">
                 <Trans>New Password</Trans>
               </span>
-              <TField
-                input={
-                  {
-                    onChange: this.handleInputChange,
-                    name: 'newPassword',
-                    value: newPassword
-                  }
+              <div className="form__form-group-field">
+                <input
+                  name="newPassword"
+                  type={showNewPassword ? 'text' : 'password'}
+                  placeholder="Enter New Password"
+                  value={newPassword}
+                  onChange={this.handleInputChange}
+                />
+                <button
+                  type="button"
+                  className={`form__form-group-button${showNewPassword ? ' active' : ''}`}
+                  onClick={() => this.setState({ showNewPassword: !showNewPassword })}
+                >
+                  <EyeIcon/>
+                </button>
+              </div>
+              {
+                reqHandlerNewPassword.touched
+                  ? (
+                    <span style={{color: '#D32F2F'}}>
+                      {reqHandlerNewPassword.error}
+                    </span>
+                  )
+                  : null
                 }
-                type="password"
-                autoComplete="none"
-                placeholder="Enter New Password"
-                meta={reqHandlerNewPassword}
-              />
             </Col>
-          </Row>
-          <Row className="pt-2">
-            <Col md={12} className="text-left">
-              <span>
+            <Col md={12} className="text-left pt-2 form__form-group">
+              <span className="pt-2">
                 <Trans>Confirm Password</Trans>
               </span>
-              <TField
-                input={
-                  {
-                    onChange: this.handleInputChange,
-                    name: 'passwordConfirmation',
-                    value: passwordConfirmation
-                  }
-                }
-                type="password"
-                autoComplete="none"
-                placeholder="Confirm New Password"
-                meta={reqHandlerPasswordConfirmation}
-              />
+              <div className="form__form-group-field">
+                <input
+                  name="passwordConfirmation"
+                  type={showConfirmationPassword ? 'text' : 'password'}
+                  placeholder="Enter Current Password"
+                  value={passwordConfirmation}
+                  onChange={this.handleInputChange}
+                />
+                <button
+                  type="button"
+                  className={`form__form-group-button${showConfirmationPassword ? ' active' : ''}`}
+                  onClick={() => this.setState({
+                    showConfirmationPassword: !showConfirmationPassword
+                  })}
+                >
+                  <EyeIcon/>
+                </button>
+              </div>
+              {
+                reqHandlerPasswordConfirmation.touched
+                  ? (
+                    <span style={{color: '#D32F2F'}}>
+                      {reqHandlerPasswordConfirmation.error}
+                    </span>
+                  )
+                  : null
+              }
             </Col>
-          </Row>
-          <Row style={{paddingTop: 32}}>
-            <Col md={12} className="text-right">
+            <Col md={12} className="pt-4 text-right">
               <Button onClick={() => {
                 this.toggle();
                 this.setState({
@@ -900,7 +939,7 @@ class UserSettings extends Component {
         </Row>
         <Row className="mt-4 line-separator">
           <Col md={2} className="pt-4">
-            <Button onClick={this.toggle}><Trans>Reset Password</Trans></Button>
+            <Button onClick={this.toggle}><Trans>Change Password</Trans></Button>
           </Col>
         </Row>
         <Row>
