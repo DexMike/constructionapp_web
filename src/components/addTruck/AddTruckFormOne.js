@@ -10,6 +10,7 @@ import {
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Storage } from 'aws-amplify';
+import Resizer from 'react-image-file-resizer';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
@@ -24,6 +25,7 @@ import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import TFileUploadSingle from '../common/TFileUploadSingle';
 import StringGenerator from '../../utils/StringGenerator';
 import TSpinner from '../common/TSpinner';
+
 
 // import validate from '../common/validate ';
 
@@ -41,6 +43,7 @@ class AddTruckFormOne extends PureComponent {
       truckTypes: [],
       files: [],
       image: '',
+      prevImage: '',
       maxCapacity: '',
       // maxCapacityTouched: false,
       description: '',
@@ -493,8 +496,31 @@ class AddTruckFormOne extends PureComponent {
   async handleImageUpload(filesToUpload) {
     this.setState({ files: filesToUpload });
     const files = filesToUpload;
+
+    console.log('>>GOT IMAGE:');
+    console.log(files[0]);
+
     if (files.length > 0) {
       const file = files[0];
+
+      /*
+      Resizer.imageFileResizer(
+        file, // is the file of the new image that can now be uploaded...
+        400, // is the maxWidth of the  new image
+        400, // is the maxHeight of the  new image
+        'JPEG',
+        100,
+        0,
+        uri => {
+          console.log(uri)
+        },
+        'base64'
+      );
+
+      console.log('>>NEW IMAGE:');
+      console.log(file);
+      */
+
       const year = moment().format('YYYY');
       const month = moment().format('MM');
       const fileName = StringGenerator.makeId(6);
