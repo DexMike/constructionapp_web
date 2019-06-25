@@ -538,7 +538,7 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
-    if (isValid && (!job.selectedStartAddressId || job.selectedStartAddressId === 0)) {
+    if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
       const geoResponseStart = await this.getStartCoords();
       if (geoResponseStart.features.length < 1 || geoResponseStart.features[0].relevance < 0.75) {
         this.setState({
@@ -620,7 +620,7 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
-    if (isValid && (!job.selectedEndAddressId || job.selectedEndAddressId === 0)) {
+    if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
       const geoResponseEnd = await this.getEndCoords();
       if (geoResponseEnd.features.length < 1 || geoResponseEnd.features[0].relevance < 0.75) {
         this.setState({
