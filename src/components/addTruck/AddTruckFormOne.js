@@ -24,10 +24,13 @@ import './AddTruck.css';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import TFileUploadSingle from '../common/TFileUploadSingle';
 import StringGenerator from '../../utils/StringGenerator';
+import FileGenerator from '../../utils/FileGenerator';
 import TSpinner from '../common/TSpinner';
 
-
-// import validate from '../common/validate ';
+const maxWidth = 1200;
+const maxHeight = 800;
+const compressFormat = 'JPEG';
+const quality = 98;
 
 class AddTruckFormOne extends PureComponent {
   constructor(props) {
@@ -493,44 +496,43 @@ class AddTruckFormOne extends PureComponent {
     // let's cache this info, in case we want to go back
   }
 
-  async handleImageUpload(filesToUpload) {
+  async sendImage(file, name) {
+    const year = moment().format('YYYY');
+    const month = moment().format('MM');
+    const fileName = StringGenerator.makeId(6);
+    const fileNamePieces = name.split(/[\s.]+/);
+    const fileExtension = fileNamePieces[fileNamePieces.length - 1];
+    // try {
+    this.setState({ imageUploading: true });
+    const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
+    this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
+    this.setState({ imageUploading: false });
+  }
+
+  handleImageUpload(filesToUpload) {
     this.setState({ files: filesToUpload });
     const files = filesToUpload;
-
-    console.log('>>GOT IMAGE:');
-    console.log(files[0]);
 
     if (files.length > 0) {
       const file = files[0];
 
-      /*
+      /**/
+      const that = this;
       Resizer.imageFileResizer(
         file, // is the file of the new image that can now be uploaded...
-        400, // is the maxWidth of the  new image
-        400, // is the maxHeight of the  new image
-        'JPEG',
-        100,
+        maxWidth, // is the maxWidth of the  new image
+        maxHeight, // is the maxHeight of the  new image
+        compressFormat,
+        quality,
         0,
         uri => {
-          console.log(uri)
+          that.sendImage(
+            FileGenerator.getBlob(uri),
+            file.name
+          )
         },
         'base64'
       );
-
-      console.log('>>NEW IMAGE:');
-      console.log(file);
-      */
-
-      const year = moment().format('YYYY');
-      const month = moment().format('MM');
-      const fileName = StringGenerator.makeId(6);
-      const fileNamePieces = file.name.split(/[\s.]+/);
-      const fileExtension = fileNamePieces[fileNamePieces.length - 1];
-      // try {
-      this.setState({ imageUploading: true });
-      const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
-      this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
-      this.setState({ imageUploading: false });
     }
   }
 
