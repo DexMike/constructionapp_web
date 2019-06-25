@@ -38,6 +38,7 @@ class LoginPage extends SignIn {
       password: this.props.authData.password || '',
       user: null,
       btnSubmitting: false, // Used by TSubmitButton
+      userUnderReview: false,
       ip: null,
       browserVersion: null,
       screenSize: null
@@ -128,6 +129,16 @@ class LoginPage extends SignIn {
         });
         return;
       }
+
+      const user = await UserService.getUserByEmail(this.state.username);
+
+      if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
+        || user.userStatus === 'Rejected')) {
+        this.setState({userUnderReview: true});
+        return;
+        // user is under review
+      }
+
       const data = await Auth.signIn(this.state.username, this.state.password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
@@ -221,6 +232,15 @@ class LoginPage extends SignIn {
     this.setState({error: null});
   }
 
+  renderUserNotReviewed() {
+    return (
+      <h6> Thank you for checking back with us. Your account is still in review.
+        This normally takes 1-2 business days.
+        If you have not been contact you can email us at csr@trelar.net. Thank you.
+      </h6>
+    );
+  }
+
   renderLogInForm() {
     const {showPassword, btnSubmitting} = this.state;
     return (
@@ -238,12 +258,12 @@ class LoginPage extends SignIn {
           <p>
             User not confirmed.
             {this.state.errorCode === 'UserNotConfirmedException' && (
-            <button type="button"
-                    className="account__confirm"
-                    onClick={this.handleUserNotConfirmed}
-            >
-              Confirm: {this.state.confirmUsername}
-            </button>
+              <button type="button"
+                      className="account__confirm"
+                      onClick={this.handleUserNotConfirmed}
+              >
+                Confirm: {this.state.confirmUsername}
+              </button>
             )}
             &nbsp;
             {this.state.userConfirmError}
@@ -310,9 +330,9 @@ class LoginPage extends SignIn {
           bntText="Sign In"
           id="signinbutton"
         />
-        <button type="button" 
+        <button type="button"
           className="btn btn-outline-primary account__btn account__btn--small"
-          id = "createaccountbutton"      
+          id = "createaccountbutton"
           onClick={this.onSignUp}
         >
           Create Account
@@ -322,6 +342,8 @@ class LoginPage extends SignIn {
   }
 
   renderPage() {
+    const {userUnderReview} = this.state;
+
     return (
       <div className="theme-light">
         <div className="wrapper">
@@ -351,7 +373,8 @@ class LoginPage extends SignIn {
                       Changing how Construction Moves
                     </h4>
                   </div>
-                  {this.renderLogInForm()}
+                  {userUnderReview && this.renderUserNotReviewed()}
+                  {!userUnderReview && this.renderLogInForm()}
                   {/* <div className="account__or"> */}
                   {/* <p>Or Easily Using</p> */}
                   {/* </div> */}
