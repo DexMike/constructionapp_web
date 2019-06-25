@@ -134,15 +134,24 @@ class JobCustomerListPage extends Component {
 
     jobs = jobs.map((job) => {
       const newJob = job;
+      console.log('JOB: ', newJob);
 
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
+        /*
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
         newJob.newSize = `${newJob.rateEstimate} Hours`;
+        */
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = newJob.rateEstimate;
       }
       if (newJob.rateType === 'Ton') {
+        /*
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
         newJob.newSize = `${newJob.rateEstimate} Tons`;
+        */
+        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
+        newJob.newSize = newJob.rateEstimate;
       }
       newJob.newRate = `$${newJob.rate}`;
 
@@ -205,7 +214,8 @@ class JobCustomerListPage extends Component {
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size'
+                          displayName: 'Size',
+                          label: 'chido'
                         },
                         {
                           name: 'newStartDate',

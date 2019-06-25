@@ -51,6 +51,8 @@ class MatTableHead extends Component {
       onSelectAllClick
     } = this.props;
 
+    // console.log('>>COLUMN: ', columns);
+
     return (
       <TableHead>
         <TableRow>
@@ -104,7 +106,8 @@ MatTableHead.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
-      displayName: PropTypes.string
+      displayName: PropTypes.string,
+      label: PropTypes.string
     })
   ).isRequired
 };
