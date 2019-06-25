@@ -134,7 +134,6 @@ class JobCustomerListPage extends Component {
 
     jobs = jobs.map((job) => {
       const newJob = job;
-      console.log('JOB: ', newJob);
 
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
@@ -214,8 +213,7 @@ class JobCustomerListPage extends Component {
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size',
-                          label: 'chido'
+                          displayName: 'Size'
                         },
                         {
                           name: 'newStartDate',
@@ -225,11 +223,6 @@ class JobCustomerListPage extends Component {
                           name: 'zip',
                           displayName: 'Start Zip'
                         }
-                        // ,
-                        // {
-                        //   name: 'rateEstimate',
-                        //   displayName: 'Est Income'
-                        // }
                       ]
                     }
                     data={jobs}

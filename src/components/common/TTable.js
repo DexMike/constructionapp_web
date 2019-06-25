@@ -164,15 +164,6 @@ class TTable extends Component {
                 </TableCell>
               );
             }
-            if (key === 'label') {
-              return (
-                <TableCell key={key} className="material-table__cell"
-                           align="left"
-                >
-                  {shallowItem[key]} LABO
-                </TableCell>
-              );
-            }
             return (
               <TableCell key={key} className="material-table__cell"
                          align="left"

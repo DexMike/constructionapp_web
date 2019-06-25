@@ -51,8 +51,6 @@ class MatTableHead extends Component {
       onSelectAllClick
     } = this.props;
 
-    // console.log('>>COLUMN: ', columns);
-
     return (
       <TableHead>
         <TableRow>
