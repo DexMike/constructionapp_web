@@ -126,7 +126,11 @@ class TTable extends Component {
     const shallowItem = {};
     const { columns, handleIdClick } = this.props;
     columns.forEach((column) => {
-      shallowItem[column.name] = item[column.name];
+      if (typeof column.label !== 'undefined') {
+        shallowItem[column.name] = `${item[column.label]}`;
+      } else {
+        shallowItem[column.name] = item[column.name];
+      }
     });
     return (
       <React.Fragment>
@@ -215,7 +219,7 @@ class TTable extends Component {
                           // onClick={event => this.handleClick(event, d.id)}
                           aria-checked={isSelected}
                           tabIndex={-1}
-                          key={dataItem.id}
+                          key={`${dataItem.id}`}
                           selected={isSelected}
                         >
                           {this.renderItem(dataItem, isSelectable, isSelected)}
@@ -255,7 +259,8 @@ TTable.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
-      displayName: PropTypes.string
+      displayName: PropTypes.string,
+      label: PropTypes.string
     })
   ).isRequired,
   totalCount: PropTypes.number,

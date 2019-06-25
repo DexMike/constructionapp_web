@@ -246,6 +246,10 @@ class TFormat {
     }
     return materialsString;
   }
+
+  static getValue(formatted) {
+    return `${formatted.props.prefix}${formatted.props.value}${formatted.props.suffix}`;
+  }
 }
 
 export default TFormat;
