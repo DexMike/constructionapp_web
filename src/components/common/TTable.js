@@ -219,7 +219,7 @@ class TTable extends Component {
                           // onClick={event => this.handleClick(event, d.id)}
                           aria-checked={isSelected}
                           tabIndex={-1}
-                          key={`${dataItem.id} caca`}
+                          key={`${dataItem.id}`}
                           selected={isSelected}
                         >
                           {this.renderItem(dataItem, isSelectable, isSelected)}
