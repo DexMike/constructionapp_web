@@ -137,20 +137,12 @@ class JobCustomerListPage extends Component {
 
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
-        /*
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
         newJob.newSize = `${newJob.rateEstimate} Hours`;
-        */
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = newJob.rateEstimate;
       }
       if (newJob.rateType === 'Ton') {
-        /*
         newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
         newJob.newSize = `${newJob.rateEstimate} Tons`;
-        */
-        newJob.estimatedIncome = `$${tempRate * newJob.rateEstimate}`;
-        newJob.newSize = newJob.rateEstimate;
       }
       newJob.newRate = `$${newJob.rate}`;
 
