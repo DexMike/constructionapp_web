@@ -10,6 +10,7 @@ import {
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Storage } from 'aws-amplify';
+import Resizer from 'react-image-file-resizer';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
@@ -23,9 +24,13 @@ import './AddTruck.css';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import TFileUploadSingle from '../common/TFileUploadSingle';
 import StringGenerator from '../../utils/StringGenerator';
+import FileGenerator from '../../utils/FileGenerator';
 import TSpinner from '../common/TSpinner';
 
-// import validate from '../common/validate ';
+const maxWidth = 1200;
+const maxHeight = 800;
+const compressFormat = 'JPEG';
+const quality = 98;
 
 class AddTruckFormOne extends PureComponent {
   constructor(props) {
@@ -41,6 +46,7 @@ class AddTruckFormOne extends PureComponent {
       truckTypes: [],
       files: [],
       image: '',
+      prevImage: '',
       maxCapacity: '',
       // maxCapacityTouched: false,
       description: '',
@@ -490,21 +496,43 @@ class AddTruckFormOne extends PureComponent {
     // let's cache this info, in case we want to go back
   }
 
-  async handleImageUpload(filesToUpload) {
+  async sendImage(file, name) {
+    const year = moment().format('YYYY');
+    const month = moment().format('MM');
+    const fileName = StringGenerator.makeId(6);
+    const fileNamePieces = name.split(/[\s.]+/);
+    const fileExtension = fileNamePieces[fileNamePieces.length - 1];
+    // try {
+    this.setState({ imageUploading: true });
+    const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
+    this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
+    this.setState({ imageUploading: false });
+  }
+
+  handleImageUpload(filesToUpload) {
     this.setState({ files: filesToUpload });
     const files = filesToUpload;
+
     if (files.length > 0) {
       const file = files[0];
-      const year = moment().format('YYYY');
-      const month = moment().format('MM');
-      const fileName = StringGenerator.makeId(6);
-      const fileNamePieces = file.name.split(/[\s.]+/);
-      const fileExtension = fileNamePieces[fileNamePieces.length - 1];
-      // try {
-      this.setState({ imageUploading: true });
-      const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
-      this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
-      this.setState({ imageUploading: false });
+
+      /**/
+      const that = this;
+      Resizer.imageFileResizer(
+        file, // is the file of the new image that can now be uploaded...
+        maxWidth, // is the maxWidth of the  new image
+        maxHeight, // is the maxHeight of the  new image
+        compressFormat,
+        quality,
+        0,
+        uri => {
+          that.sendImage(
+            FileGenerator.getBlob(uri),
+            file.name
+          )
+        },
+        'base64'
+      );
     }
   }
 
