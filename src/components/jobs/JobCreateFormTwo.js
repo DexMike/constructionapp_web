@@ -6,8 +6,7 @@ import {
   Col,
   Button,
   ButtonToolbar,
-  Row,
-  Container
+  Row
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
@@ -187,6 +186,8 @@ class JobCreateFormTwo extends PureComponent {
         city: d.startLocationCity,
         state: d.startLocationState,
         zipCode: d.startLocationZip,
+        latitude: d.startLocationLatitude,
+        longitude: d.startLocationLongitude,
         createdBy: profile.userId,
         createdOn: moment()
           .unix() * 1000,
@@ -198,7 +199,6 @@ class JobCreateFormTwo extends PureComponent {
     } else {
       startAddress.id = d.selectedStartAddressId;
     }
-
     // end location
     let endAddress = {
       id: null
@@ -212,7 +212,9 @@ class JobCreateFormTwo extends PureComponent {
         address2: d.endLocationAddress2,
         city: d.endLocationCity,
         state: d.endLocationState,
-        zipCode: d.endLocationZip
+        zipCode: d.endLocationZip,
+        latitude: d.endLocationLatitude,
+        longitude: d.endLocationLongitude
       };
       endAddress = await AddressService.createAddress(address2);
     } else {
