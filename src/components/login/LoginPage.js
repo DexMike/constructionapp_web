@@ -54,7 +54,13 @@ class LoginPage extends SignIn {
   }
 
   async componentDidMount() {
-    const ip = await UtilsService.getUserIP();
+    let ip = '0.0.0.0';
+    try {
+      const ipAddress = await UtilsService.getUserIP();
+      ({ ip } = ipAddress);
+    } catch (e) {
+      // console.log(e);
+    }
     const browserVersion = await UtilsService.getBrowserVersion();
     const screenSize = await UtilsService.getScreenDimentions();
     this.setState({
@@ -104,7 +110,7 @@ class LoginPage extends SignIn {
     const log = {
       attemptedUsername: this.state.username,
       attemptedPassword: !state ? this.state.password : null,
-      ipAddress: this.state.ip.ip,
+      ipAddress: this.state.ip,
       browserType: this.state.browserVersion.name,
       browserVersion: this.state.browserVersion.version,
       screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
