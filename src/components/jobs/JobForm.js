@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
@@ -14,7 +14,7 @@ import LoadService from '../../api/LoadService';
 import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
-import ProfileService from "../../api/ProfileService";
+import ProfileService from '../../api/ProfileService';
 
 class JobForm extends Component {
   constructor(props) {
@@ -328,7 +328,7 @@ class JobForm extends Component {
   }
 
   renderLoads() {
-    const {loads, job} = {...this.state};
+    const { loads, job } = { ...this.state };
     return (
       <React.Fragment>
         <h3 className="subhead" style={{
@@ -339,7 +339,7 @@ class JobForm extends Component {
         >
           Run Information
         </h3>
-        <LoadsTable loads={loads} job={job}/>
+        {job && <LoadsTable loads={loads} job={job}/>}
       </React.Fragment>
     );
   }
@@ -531,7 +531,6 @@ class JobForm extends Component {
     }
 
 
-
     if (job.status === 'Job Completed') {
       return (
         <Container>
@@ -541,8 +540,11 @@ class JobForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
-              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
-                <div className="col-md-8" style={{padding: 0}}>
+              <Row style={{
+                paddingLeft: '10px',
+                paddingRight: '10px'
+              }}>
+                <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
                   {this.renderMBMap(origin, destination, overlayMapData, coords)}
                 </div>
@@ -594,8 +596,11 @@ class JobForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
-              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
-                <div className="col-md-8" style={{padding: 0}}>
+              <Row style={{
+                paddingLeft: '10px',
+                paddingRight: '10px'
+              }}>
+                <div className="col-md-8" style={{ padding: 0 }}>
                   {this.renderMBMap(origin, destination)}
                 </div>
                 <div className="col-md-4">
@@ -632,8 +637,11 @@ class JobForm extends Component {
               {this.renderJobTop(job)}
             </Row>
             <hr/>
-            <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
-              <div className="col-md-8" style={{padding: 0}}>
+            <Row style={{
+              paddingLeft: '10px',
+              paddingRight: '10px'
+            }}>
+              <div className="col-md-8" style={{ padding: 0 }}>
                 {this.renderMBMap(origin, destination)}
               </div>
               <div className="col-md-4">
