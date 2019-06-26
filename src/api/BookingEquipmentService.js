@@ -3,7 +3,7 @@ import AgentService from './AgentService';
 
 const PATH = '/bookingequipments';
 
-class BookingService extends AgentService {
+class BookingEquipmentService extends AgentService {
   static async getBookingEquipments() {
     const response = await super.get(PATH);
     return (response);
@@ -63,4 +63,4 @@ class BookingService extends AgentService {
   }
 }
 
-export default BookingService;
+export default BookingEquipmentService;
