@@ -433,16 +433,29 @@ class DashboardCustomerPage extends Component {
         completedJobCount += 1;
       }
       if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        // newSize is the size with its original value, so that it can be sorted
+        newJob.newSize = newJob.rateEstimate;
+        // newSizeFormated is the size as we want it to show
+        const formatted = TFormat.asHours(newJob.rateEstimate);
+        newJob.newSizeFormated = TFormat.getValue(formatted);
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
+
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
       if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        // newSize is the size with its original value, so that it can be sorted
+        newJob.newSize = newJob.rateEstimate;
+        // newSizeFormated is the size as we want it to show
+        const formatted = TFormat.asTons(newJob.rateEstimate);
+        newJob.newSizeFormated = TFormat.getValue(formatted);
+
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
+
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-      // newJob.newRate = `$${newJob.rate}`;
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
@@ -475,14 +488,14 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <TableLegend displayed={TFormat.asWholeNumber(jobs.length)} totalCount={TFormat.asWholeNumber(totalCount)} totalJobs={TFormat.asWholeNumber(totalJobs)} />
+                  <TableLegend
+                    displayed={TFormat.asWholeNumber(jobs.length)}
+                    totalCount={TFormat.asWholeNumber(totalCount)}
+                    totalJobs={TFormat.asWholeNumber(totalJobs)}
+                  />
                   <TTable
                     columns={
                       [
-                        // {
-                        //   name: 'id',
-                        //   displayName: 'Job Id'
-                        // },
                         {
                           name: 'name',
                           displayName: 'Job Name'
@@ -497,7 +510,8 @@ class DashboardCustomerPage extends Component {
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size'
+                          displayName: 'Size',
+                          label: 'newSizeFormated'
                         },
                         {
                           name: 'newStartDate',
@@ -509,12 +523,9 @@ class DashboardCustomerPage extends Component {
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate'
+                          displayName: 'Rate',
+                          label: 'newRateFormatted'
                         },
-                        // {
-                        //   name: 'estimatedIncome',
-                        //   displayName: 'Est. Income'
-                        // },
                         {
                           // the materials needs to come from the the JobMaterials Table
                           name: 'materials',
