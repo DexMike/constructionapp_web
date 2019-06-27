@@ -18,6 +18,7 @@ import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import MultiEquipmentsForm from './MultiEquipmentsForm';
 import '../addTruck/AddTruck.css';
+import './Equipment.css';
 
 class EquipmentListPage extends Component {
   constructor(props) {
@@ -189,9 +190,9 @@ class EquipmentListPage extends Component {
       <Modal
         isOpen={equipmentsModal}
         toggle={this.toggleAddMultiTrucksModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
-        <div className="modal__body" style={{ padding: '32px' }}>
+        <div className="modal__body">
           <MultiEquipmentsForm
             userId={userId}
             companyId={companyId}
