@@ -173,12 +173,15 @@ class EquipmentListPage extends Component {
         className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__body">
-          {/* Replaced AddTruck for EquipmentDetails */}
+          {/* Replaced AddTruckForm for EquipmentDetails */}
           <EquipmentDetails
             equipmentId={equipmentId}
             companyId={companyId}
             userId={userId}
             toggle={this.toggleAddTruckModal}
+            // incomingPage={tabShow}
+            // handlePageClick={() => {}}
+            // passedInfo={selectedItemData}
           />
         </div>
       </Modal>
@@ -245,10 +248,12 @@ class EquipmentListPage extends Component {
             <Row>
               <Col md={12}>
                 <Button
+                  // onClick={this.toggleAddTruckModalClear}
                   onClick={this.toggleAddMultiTrucksModal}
                   type="button"
                   className="primaryButton"
                 >
+                  {/* Add a Truck */}
                   Add Trucks
                 </Button>
                 {
