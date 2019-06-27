@@ -392,14 +392,19 @@ class DashboardCarrierPage extends Component {
       if (newJob.rateType === 'Hour') {
         newJob.newSize = TFormat.asHours(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.potentialIncome = TFormat.asMoney(
-          (tempRate * newJob.rateEstimate)
+
+        newJob.potentialIncome = tempRate * newJob.rateEstimate;
+        newJob.potentialIncomeF = TFormat.getValue(
+          TFormat.asMoney(
+            (tempRate * newJob.rateEstimate)
+          )
         );
       }
       if (newJob.rateType === 'Ton') {
         newJob.newSize = TFormat.asTons(newJob.rateEstimate);
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
         // Job's Potential Earnings
+        
         newJob.potentialIncome = TFormat.asMoney(
           (tempRate * newJob.rateEstimate)
         );
@@ -427,7 +432,11 @@ class DashboardCarrierPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                <TableLegend displayed={TFormat.asWholeNumber(jobs.length)} totalCount={TFormat.asWholeNumber(totalCount)} totalJobs={TFormat.asWholeNumber(totalJobs)} />
+                  <TableLegend
+                    displayed={TFormat.asWholeNumber(jobs.length)}
+                    totalCount={TFormat.asWholeNumber(totalCount)}
+                    totalJobs={TFormat.asWholeNumber(totalJobs)}
+                  />
                   <TTable
                     columns={
                       [
