@@ -54,7 +54,7 @@ class LoginPage extends SignIn {
   }
 
   async componentDidMount() {
-    let ip = '0.0.0.0';
+    let ip = '';
     try {
       const ipAddress = await UtilsService.getUserIP();
       ({ ip } = ipAddress);
