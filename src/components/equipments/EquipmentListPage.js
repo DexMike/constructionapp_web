@@ -16,6 +16,7 @@ import EquipmentService from '../../api/EquipmentService';
 // import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
+import EquipmentDetails from './EquipmentDetails';
 import MultiEquipmentsForm from './MultiEquipmentsForm';
 import '../addTruck/AddTruck.css';
 import './Equipment.css';
@@ -158,7 +159,8 @@ class EquipmentListPage extends Component {
       modal,
       selectedItemData,
       equipmentId,
-      companyId
+      companyId,
+      userId
     } = this.state;
     let tabShow = 1;
     if (totalTrucks > 0) {
@@ -168,16 +170,15 @@ class EquipmentListPage extends Component {
       <Modal
         isOpen={modal}
         toggle={this.toggleAddTruckModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
-        <div className="modal__body" style={{ padding: '0px' }}>
-          <AddTruckForm
+        <div className="modal__body">
+          {/* Replaced AddTruck for EquipmentDetails */}
+          <EquipmentDetails
             equipmentId={equipmentId}
             companyId={companyId}
-            incomingPage={tabShow}
-            handlePageClick={() => {}}
+            userId={userId}
             toggle={this.toggleAddTruckModal}
-            passedInfo={selectedItemData}
           />
         </div>
       </Modal>
@@ -250,13 +251,17 @@ class EquipmentListPage extends Component {
                 >
                   Add Trucks
                 </Button>
-                <Button
-                  onClick={this.toggleAddTruckModalClear}
-                  type="button"
-                  className="primaryButton"
-                >
-                  Add a Truck and Driver
-                </Button>
+                {
+                  /*
+                  <Button
+                    onClick={this.toggleAddTruckModalClear}
+                    type="button"
+                    className="primaryButton"
+                  >
+                    Add a Truck and Driver
+                  </Button>
+                  */
+                }
               </Col>
             </Row>
             <Row>

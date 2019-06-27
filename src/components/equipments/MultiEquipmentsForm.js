@@ -23,23 +23,19 @@ class MultiEquipmentsForm extends PureComponent {
       selectedMaterials: [],
       allMaterials: [],
       truckTypes: [],
-      maxCapacity: '',
+      maxCapacity: 0,
       numberOfTrucks: 1,
-      ratesCostPerTon: '',
-      ratesCostPerHour: '',
-      minOperatingTime: '',
-      minTons: '',
+      ratesCostPerTon: 0,
+      ratesCostPerHour: 0,
+      minOperatingTime: 0,
+      minTons: 0,
       maxDistanceToPickup: '',
       truckType: '',
-      isRatedHour: true,
+      isRatedHour: false,
       isRatedTon: false,
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerNumberOfTrucks: { touched: false, error: '' },
-      reqHandlerMinHourRate: { touched: false, error: '' },
-      reqHandlerMinHours: { touched: false, error: '' },
-      reqHandlerMinTonRate: { touched: false, error: '' },
-      reqHandlerMinTons: { touched: false, error: '' },
       loaded: false
     };
 
@@ -79,22 +75,14 @@ class MultiEquipmentsForm extends PureComponent {
       truckType,
       selectedMaterials,
       numberOfTrucks,
-      ratesCostPerHour,
-      minOperatingTime,
-      ratesCostPerTon,
-      minTons,
-      isRatedHour,
-      isRatedTon
+      maxCapacity
     } = this.state;
     let isValid = true;
 
     this.setState({
       reqHandlerTruckType: { touched: false },
       reqHandlerMaterials: { touched: false },
-      reqHandlerMinHourRate: { touched: false },
-      reqHandlerMinHours: { touched: false },
-      reqHandlerMinTonRate: { touched: false },
-      reqHandlerMinTons: { touched: false }
+      reqHandlerMaxCapacity: { touched: false }
     });
 
     if (truckType.length === 0) {
@@ -127,45 +115,11 @@ class MultiEquipmentsForm extends PureComponent {
       isValid = false;
     }
 
-    if ((ratesCostPerHour === 0 || ratesCostPerHour === '0'
-      || ratesCostPerHour.length === 0) && isRatedHour) {
+    if (maxCapacity === 0 || maxCapacity === '0') {
       this.setState({
-        reqHandlerMinHourRate: {
+        reqHandlerMaxCapacity: {
           touched: true,
-          error: 'Please enter cost per hour'
-        }
-      });
-      isValid = false;
-    }
-
-    if ((minOperatingTime === 0 || minOperatingTime === '0'
-     || minOperatingTime.length === 0) && isRatedHour) {
-      this.setState({
-        reqHandlerMinHours: {
-          touched: true,
-          error: 'Please enter minimum operating hours'
-        }
-      });
-      isValid = false;
-    }
-
-    if ((ratesCostPerTon === 0 || ratesCostPerTon === '0'
-      || ratesCostPerTon.length === 0) && isRatedTon) {
-      this.setState({
-        reqHandlerMinTonRate: {
-          touched: true,
-          error: 'Please enter cost per ton'
-        }
-      });
-      isValid = false;
-    }
-
-    if ((minTons === 0 || minTons === '0'
-     || minTons.length === 0) && isRatedTon) {
-      this.setState({
-        reqHandlerMinTons: {
-          touched: true,
-          error: 'Please enter minimum tonage'
+          error: 'Please enter trucks max capacity'
         }
       });
       isValid = false;
@@ -340,10 +294,7 @@ class MultiEquipmentsForm extends PureComponent {
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerNumberOfTrucks,
-      reqHandlerMinHourRate,
-      reqHandlerMinHours,
-      reqHandlerMinTonRate,
-      reqHandlerMinTons,
+      reqHandlerMaxCapacity,
       loaded
     } = this.state;
     const { toggle } = this.props;
@@ -357,7 +308,7 @@ class MultiEquipmentsForm extends PureComponent {
                   Tell us about your trucks
                 </h3>
               </Col>
-              <Col md={6}>
+              <Col md={4}>
                 <span>Truck Type</span>
                 <SelectField
                   input={
@@ -373,7 +324,23 @@ class MultiEquipmentsForm extends PureComponent {
                   placeholder="Truck Type"
                 />
               </Col>
-              <Col md={6}>
+              <Col md={4}>
+                <span>
+                  Maximum Capacity (Tons)
+                </span>
+                <TFieldNumber
+                  input={
+                    {
+                      onChange: this.handleInputChange,
+                      name: 'maxCapacity',
+                      value: maxCapacity
+                    }
+                  }
+                  placeholder="0"
+                  meta={reqHandlerMaxCapacity}
+                />
+              </Col>
+              <Col md={4}>
                 <span>Number of Trucks</span>
                 <TFieldNumber
                   input={{
@@ -420,8 +387,9 @@ class MultiEquipmentsForm extends PureComponent {
                 />
               </Col>
               <Col md={5}>
-                <span className="label">$ Cost / Hour</span>
+                <span className="label">Minimum cost per hour</span>
                 <TFieldNumber
+                  style={{textAlign: 'right'}}
                   input={
                     {
                       onChange: this.handleInputChange,
@@ -429,9 +397,9 @@ class MultiEquipmentsForm extends PureComponent {
                       value: ratesCostPerHour
                     }
                   }
-                  meta={reqHandlerMinHourRate}
                   placeholder="0"
                   decimal
+                  currency
                 />
               </Col>
               <Col md={5}>
@@ -444,7 +412,6 @@ class MultiEquipmentsForm extends PureComponent {
                       value: minOperatingTime
                     }
                   }
-                  meta={reqHandlerMinHours}
                   placeholder="0"
                 />
               </Col>
@@ -459,7 +426,7 @@ class MultiEquipmentsForm extends PureComponent {
                 />
               </Col>
               <Col md={5}>
-                <span className="label">$ Cost / Ton</span>
+                <span className="label">Minimum cost per ton</span>
                 <TFieldNumber
                   input={
                     {
@@ -468,9 +435,9 @@ class MultiEquipmentsForm extends PureComponent {
                       value: ratesCostPerTon
                     }
                   }
-                  meta={reqHandlerMinTonRate}
                   placeholder="0"
                   decimal
+                  currency
                 />
               </Col>
               <Col md={5}>
@@ -483,28 +450,12 @@ class MultiEquipmentsForm extends PureComponent {
                       value: minTons
                     }
                   }
-                  meta={reqHandlerMinTons}
                   placeholder="0"
                 />
               </Col>
             </Row>
             <Row className="col-12 pt-4">
-              <Col md={6}>
-                <span>
-                  Maximum Capacity (Tons)
-                </span>
-                <TFieldNumber
-                  input={
-                    {
-                      onChange: this.handleInputChange,
-                      name: 'maxCapacity',
-                      value: maxCapacity
-                    }
-                  }
-                  placeholder="0"
-                />
-              </Col>
-              <Col md={6}>
+              <Col md={12}>
                 <span>
                   Max Distance to Pickup (Miles)
                 </span>
