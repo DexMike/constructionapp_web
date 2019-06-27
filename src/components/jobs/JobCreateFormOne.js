@@ -273,8 +273,13 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip
     } = this.state;
     const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
-    const geoResponseStart = await GeoCodingService.getGeoCode(startString);
-    return geoResponseStart;
+    try {
+      const geoResponseStart = await GeoCodingService.getGeoCode(startString);
+      return geoResponseStart;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
   async getEndCoords() {
@@ -285,8 +290,13 @@ class CreateJobFormOne extends PureComponent {
       endLocationZip
     } = this.state;
     const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
-    const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
-    return geoResponseEnd;
+    try {
+      const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
+      return geoResponseEnd;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
   handleMaterialsChange(data) {
@@ -540,7 +550,8 @@ class CreateJobFormOne extends PureComponent {
 
     if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
       const geoResponseStart = await this.getStartCoords();
-      if (geoResponseStart.features.length < 1 || geoResponseStart.features[0].relevance < 0.75) {
+      if (!geoResponseStart || geoResponseStart.features.length < 1
+        || geoResponseStart.features[0].relevance < 0.75) {
         this.setState({
           reqHandlerStartAddress: {
             ...reqHandlerStartAddress,
@@ -622,7 +633,8 @@ class CreateJobFormOne extends PureComponent {
 
     if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
       const geoResponseEnd = await this.getEndCoords();
-      if (geoResponseEnd.features.length < 1 || geoResponseEnd.features[0].relevance < 0.75) {
+      if (!geoResponseEnd || geoResponseEnd.features.length < 1
+        || geoResponseEnd.features[0].relevance < 0.75) {
         this.setState({
           reqHandlerEndAddress: {
             ...reqHandlerEndAddress,
@@ -676,7 +688,8 @@ class CreateJobFormOne extends PureComponent {
   async saveTruck(e) {
     e.preventDefault();
     e.persist();
-    if (await !this.isFormValid()) {
+    const isValid = await this.isFormValid();
+    if (!isValid) {
       // this.setState({ maxCapacityTouched: true });
       return;
     }
