@@ -50,6 +50,7 @@ class CreateJobFormOne extends PureComponent {
       rateEstimate: 0,
       hourTrucksNumber: 1,
       rateTab: 1,
+      hourTon: 'ton',
       // location
       endLocationAddress1: '',
       endLocationAddress2: '',
@@ -132,6 +133,24 @@ class CreateJobFormOne extends PureComponent {
         error: ''
       },
       reqHandlerEndAddress: {
+        touched: false,
+        error: ''
+      },
+
+      // extra fields
+      reqHandlerTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstimatedTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerHours: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstimatedhours: {
         touched: false,
         error: ''
       },
@@ -375,7 +394,30 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleRateChange(e) {
-    this.setState({selectedRatedHourOrTon: e.value});
+    const {
+      selectedRatedHourOrTon
+    } = this.state;
+    let {
+      rateByTonValue,
+      estimatedTons,
+      rateByHourValue,
+      estimatedHours
+    } = this.state;
+
+    if (selectedRatedHourOrTon === 'ton') {
+      rateByHourValue = 0;
+      estimatedHours = 0;
+    } else if (selectedRatedHourOrTon === 'hour') {
+      rateByTonValue = 0;
+      estimatedTons = 0;
+    }
+    this.setState({
+      rateByHourValue,
+      estimatedHours,
+      rateByTonValue,
+      estimatedTons,
+      selectedRatedHourOrTon: e.value
+    });
   }
 
   handleSameAddresses() {
@@ -466,7 +508,17 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerTrucksEstimate,
-      reqHandlerDate
+      reqHandlerDate,
+
+      selectedRatedHourOrTon,
+      rateByTonValue,
+      rateByHourValue,
+      estimatedTons,
+      estimatedHours,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedhours
     } = this.state;
     let isValid = true;
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
@@ -481,12 +533,15 @@ class CreateJobFormOne extends PureComponent {
     }
 
     if (!job.truckType || job.truckType.length === 0) {
+      console.log('>>TRUCK TYPE');
       this.setState({
         reqHandlerTruckType: {
           ...reqHandlerTruckType,
           touched: true,
           error: 'Required input'
         }
+      }, function truckChecked() {
+        console.log(this.state);
       });
       isValid = false;
     }
@@ -571,14 +626,15 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      const coordinates = geoResponseStart.features[0].center;
-      const startLocationLatitude = coordinates[1];
-      const startLocationLongitude = coordinates[0];
-
-      this.setState({
-        startLocationLatitude,
-        startLocationLongitude
-      });
+      if (typeof geoResponseStart.features[0] !== 'undefined') {
+        const coordinates = geoResponseStart.features[0].center;
+        const startLocationLatitude = coordinates[1];
+        const startLocationLongitude = coordinates[0];
+        this.setState({
+          startLocationLatitude,
+          startLocationLongitude
+        });
+      }
     }
 
     if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
@@ -654,14 +710,15 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      const coordinates = geoResponseEnd.features[0].center;
-      const endLocationLatitude = coordinates[1];
-      const endLocationLongitude = coordinates[0];
-
-      this.setState({
-        endLocationLatitude,
-        endLocationLongitude
-      });
+      if (typeof geoResponseEnd.features[0] !== 'undefined') {
+        const coordinates = geoResponseEnd.features[0].center;
+        const endLocationLatitude = coordinates[1];
+        const endLocationLongitude = coordinates[0];
+        this.setState({
+          endLocationLatitude,
+          endLocationLongitude
+        });
+      }
     }
 
     if (job.hourTrucksNumber <= 0 && rateTab === 1) {
@@ -684,6 +741,53 @@ class CreateJobFormOne extends PureComponent {
         }
       });
       isValid = false;
+    }
+
+    // rates
+    console.log('>Check: ', selectedRatedHourOrTon);
+    if (selectedRatedHourOrTon === 'ton') {
+      if (rateByTonValue <= 0) {
+        this.setState({
+          reqHandlerTons: {
+            ...reqHandlerTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedTons <= 0) {
+        this.setState({
+          reqHandlerEstimatedTons: {
+            ...reqHandlerEstimatedTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    } else if (selectedRatedHourOrTon === 'hour') {
+      console.log(747, rateByHourValue);
+      if (rateByHourValue <= 0) {
+        this.setState({
+          reqHandlerHours: {
+            ...reqHandlerHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedHours <= 0) {
+        this.setState({
+          reqHandlerEstimatedhours: {
+            ...reqHandlerEstimatedhours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -713,11 +817,19 @@ class CreateJobFormOne extends PureComponent {
 
   handleInputChangeTonHour(e) {
     if (e.target.name === 'rateByTonValue') {
-      this.setState({rateByTonValue: e.target.value});
+      this.setState({
+        rateByTonValue: e.target.value,
+        reqHandlerTons: {
+          touched: true
+        }
+      });
     } else if (e.target.name === 'estimatedTons') {
       this.setState({
         rateEstimate: e.target.value,
-        estimatedTons: e.target.value
+        estimatedTons: e.target.value,
+        reqHandlerEstimatedTons: {
+          touched: true
+        }
       });
     } else if (e.target.name === 'rateByHourValue') {
       this.setState({rateByHourValue: e.target.value});
@@ -890,7 +1002,11 @@ class CreateJobFormOne extends PureComponent {
       rateByTonValue,
       rateByHourValue,
       estimatedTons,
-      estimatedHours
+      estimatedHours,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedhours
     } = this.state;
     if (hourTon === 'ton') {
       return (
@@ -907,7 +1023,7 @@ class CreateJobFormOne extends PureComponent {
               }
               placeholder="0"
               decimal
-              // meta={}
+              meta={reqHandlerTons}
             />
           </div>
           <div className="col-md-5 form__form-group">
@@ -922,7 +1038,7 @@ class CreateJobFormOne extends PureComponent {
               }
               placeholder="0"
               decimal
-              // meta={}
+              meta={reqHandlerEstimatedTons}
             />
           </div>
         </React.Fragment>
@@ -942,7 +1058,7 @@ class CreateJobFormOne extends PureComponent {
             }
             placeholder="0"
             decimal
-            // meta={}
+            meta={reqHandlerHours}
           />
         </div>
         <div className="col-md-5 form__form-group">
@@ -957,7 +1073,7 @@ class CreateJobFormOne extends PureComponent {
             }
             placeholder="0"
             decimal
-            // meta={}
+            meta={reqHandlerEstimatedhours}
           />
         </div>
       </React.Fragment>
