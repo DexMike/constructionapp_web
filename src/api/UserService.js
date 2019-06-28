@@ -23,13 +23,18 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getUserByEmail(email) {
+    const response = await this.get(`${PATH}/email/${email}`);
+    return (response);
+  }
+
   static async getUsersByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/users`);
     return (response);
   }
 
-  static async getDriversWithUserInfo() {
-    const response = await this.get('/driversinfo');
+  static async getDriversWithUserInfoByCompanyId(companyId) {
+    const response = await this.get(`/companies/${companyId}/drivers`);
     return (response);
   }
 

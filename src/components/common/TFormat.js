@@ -246,6 +246,13 @@ class TFormat {
     }
     return materialsString;
   }
+
+  static getValue(formatted) {
+    if (typeof formatted.props !== 'undefined') {
+      return `${formatted.props.prefix}${formatted.props.value}${formatted.props.suffix}`;
+    }
+    return '';
+  }
 }
 
 export default TFormat;

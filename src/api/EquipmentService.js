@@ -48,6 +48,15 @@ class EquipmentService extends AgentService {
     return (response);
   }
 
+  static async createEquipmentsBatch(equipments, equipmentMaterials) {
+    const params = {
+      equipments,
+      equipmentMaterials
+    };
+    const response = await super.post(`${PATH}/batch`, params);
+    return (response);
+  }
+
   static async updateEquipment(equipment) {
     const response = await this.put(PATH, equipment);
     return (response);

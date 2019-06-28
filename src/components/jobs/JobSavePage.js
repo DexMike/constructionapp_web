@@ -601,6 +601,7 @@ class JobSavePage extends Component {
       return (
         <JobForm
           job={job}
+          companyCarrier={companyCarrier}
           handlePageClick={this.handlePageClick}
         />
       );
@@ -608,7 +609,6 @@ class JobSavePage extends Component {
     return (
       <JobForm
         job={job}
-        companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
       />
     );
@@ -698,7 +698,7 @@ class JobSavePage extends Component {
         </div>
       );
     }
-    if ((job.status === 'Booked' || job.status === 'Allocated') && companyType === 'Carrier') {
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') && companyType === 'Carrier') {
       return (
         <TSubmitButton
           onClick={() => this.toggleAllocateDriversModal()}

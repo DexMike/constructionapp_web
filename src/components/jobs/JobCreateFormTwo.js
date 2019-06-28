@@ -6,8 +6,7 @@ import {
   Col,
   Button,
   ButtonToolbar,
-  Row,
-  Container
+  Row
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
@@ -187,6 +186,8 @@ class JobCreateFormTwo extends PureComponent {
         city: d.startLocationCity,
         state: d.startLocationState,
         zipCode: d.startLocationZip,
+        latitude: d.startLocationLatitude,
+        longitude: d.startLocationLongitude,
         createdBy: profile.userId,
         createdOn: moment()
           .unix() * 1000,
@@ -198,7 +199,6 @@ class JobCreateFormTwo extends PureComponent {
     } else {
       startAddress.id = d.selectedStartAddressId;
     }
-
     // end location
     let endAddress = {
       id: null
@@ -212,7 +212,9 @@ class JobCreateFormTwo extends PureComponent {
         address2: d.endLocationAddress2,
         city: d.endLocationCity,
         state: d.endLocationState,
-        zipCode: d.endLocationZip
+        zipCode: d.endLocationZip,
+        latitude: d.endLocationLatitude,
+        longitude: d.endLocationLongitude
       };
       endAddress = await AddressService.createAddress(address2);
     } else {
@@ -406,14 +408,15 @@ class JobCreateFormTwo extends PureComponent {
                 className="form form--horizontal addtruck__form"
               >
                 <Row className="col-md-12">
-                  <div className="row mt-1">
-                    <div className="col-md-12">
-                      <h3 className="subhead">
-                        Thanks for creating a new job! How do you want to send this?
-                      </h3>
-                    </div>
+                  <h3 className="subhead">
+                    Thanks for creating a new job! How do you want to send this?
+                  </h3>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="row">
                     <div
-                      className={showSendtoFavorites ? 'col-md-1 form__form-group mt-1' : 'hidden'}
+                      className={showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}
                     >
                       <TCheckBox
                         onChange={this.handleInputChange}
@@ -423,17 +426,17 @@ class JobCreateFormTwo extends PureComponent {
                       />
                     </div>
                     <div
-                      className={showSendtoFavorites ? 'col-md-11 form__form-group mt-1' : 'hidden'}
+                      className={showSendtoFavorites ? 'col-md-10 form__form-group' : 'hidden'}
                     >
                       <h3 className="subhead">
-                        Send to Favorites<br/>
+                        Send to Favorites
                       </h3>
                     </div>
                   </div>
                   <hr/>
                 </Row>
 
-                <Row className="col-md-12 mt-1">
+                <Row className="col-md-12">
                   <div className="row">
                     <div className="col-md-1 form__form-group">
                       <TCheckBox
@@ -444,34 +447,12 @@ class JobCreateFormTwo extends PureComponent {
                     </div>
                     <div
                       // className="col-md-6 form__form-group"
-                      className={showSendtoFavorites ? 'col-md-6 form__form-group' : 'col-md-11 form__form-group'}
+                      className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'col-md-11 form__form-group'}
                     >
                       <h3 className="subhead">
                         Send this job to the Trelar Marketplace
                       </h3>
                     </div>
-                    {/* {showSendtoFavorites ? ( // If there're no favorites, hide Hours input */}
-                    {/* <React.Fragment> */}
-                    {/* <div className="col-md-1 form__form-group"> */}
-                    {/* <h3 className="subhead"> */}
-                    {/* In */}
-                    {/* </h3> */}
-                    {/* </div> */}
-                    {/* <div className="col-md-2 form__form-group"> */}
-                    {/* <input */}
-                    {/* name="delay" */}
-                    {/* type="number" */}
-                    {/* placeholder="0" */}
-                    {/* className="slickinput" */}
-                    {/* /> */}
-                    {/* </div> */}
-                    {/* <div className="col-md-1 form__form-group"> */}
-                    {/* <h3 className="subhead"> */}
-                    {/* Hours */}
-                    {/* </h3> */}
-                    {/* </div> */}
-                    {/* </React.Fragment> */}
-                    {/* ) : null } */}
                   </div>
                   <br/>
                 </Row>

@@ -215,11 +215,6 @@ class JobCustomerListPage extends Component {
                           name: 'zip',
                           displayName: 'Start Zip'
                         }
-                        // ,
-                        // {
-                        //   name: 'rateEstimate',
-                        //   displayName: 'Est Income'
-                        // }
                       ]
                     }
                     data={jobs}

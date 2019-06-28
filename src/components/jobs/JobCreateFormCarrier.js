@@ -41,7 +41,7 @@ class JobCreateFormCarrier extends Component {
       endAddress: AddressService.getDefaultAddress(),
       /*
       bid: BidService.getDefaultBid(),
-      booking: BookingService.getDefaultBooking(),
+      booking: BookingEquipmentService.getDefaultBooking(),
       bookingEquipment: BookingEquipmentService.getDefaultBookingEquipment(),
       material: '',
       availableMaterials: [],

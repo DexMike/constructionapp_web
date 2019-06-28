@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
@@ -14,6 +14,7 @@ import LoadService from '../../api/LoadService';
 import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
+import ProfileService from '../../api/ProfileService';
 
 class JobForm extends Component {
   constructor(props) {
@@ -50,6 +51,9 @@ class JobForm extends Component {
   }
 
   async componentDidMount() {
+
+    const profile = await ProfileService.getProfile();
+
     const { job, companyCarrier } = this.props;
     let { loads, carrier, images } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
@@ -74,11 +78,13 @@ class JobForm extends Component {
 
     this.setState({
       images,
+      companyType: profile.companyType,
       carrier,
       loaded: true,
       loads,
       job
     });
+
   }
 
   componentWillReceiveProps(nextProps) {
@@ -179,7 +185,8 @@ class JobForm extends Component {
   }
 
   renderJobTop(job, carrier) {
-    const companyType = (carrier) ? 'Customer' : 'Carrier';
+    const { companyType } = this.state;
+
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
     const fee = estimatedCost * 0.1;
@@ -214,15 +221,15 @@ class JobForm extends Component {
           <br/>
           Created On: {TFormat.asDayWeek(job.createdOn)}
         </div>
-        {carrier && (
+        {companyType === 'Carrier' && (
           <div className="col-md-4">
             <h3 className="subhead">
-              Status: {job.status}
+              Job Status: {job.status}
             </h3>
             {
               job.status === 'Job Completed'
                 ? 'Total'
-                : 'Estimated'
+                : 'Potential'
             }
             &nbsp;Earnings:
             {
@@ -238,34 +245,34 @@ class JobForm extends Component {
             <br/>
             Rate: {TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Product: {this.materialsAsString(job.materials)}
+            Material: {this.materialsAsString(job.materials)}
           </div>
         )}
-        {!carrier && (
+        {companyType === 'Customer' && (
           <div className="col-md-4">
             <h3 className="subhead">
               Job Status: {displayStatus}
             </h3>
-            Estimated Cost:
+            Delivery Cost:&nbsp;
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }
             <br/>
-            Trelar Fee:
+            Trelar Fee:&nbsp;
             {
               TFormat.asMoney(fee)
             }
             <br/>
-            Total Cost:
+            Estimated Total Cost:&nbsp;
             {
               TFormat.asMoney(estimatedCost + fee)
             }
             <br/>
             Estimated Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
-            Rate: {TFormat.asMoney(job.rate)} / {job.rateType}
+            Rate:&nbsp;{TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Product: {this.materialsAsString(job.materials)}
+            Material: {this.materialsAsString(job.materials)}
           </div>
         )}
       </React.Fragment>
@@ -321,7 +328,7 @@ class JobForm extends Component {
   }
 
   renderLoads() {
-    const {loads, job} = {...this.state};
+    const { loads, job } = { ...this.state };
     return (
       <React.Fragment>
         <h3 className="subhead" style={{
@@ -332,7 +339,7 @@ class JobForm extends Component {
         >
           Run Information
         </h3>
-        <LoadsTable loads={loads} job={job}/>
+        {job && <LoadsTable loads={loads} job={job}/>}
       </React.Fragment>
     );
   }
@@ -523,6 +530,7 @@ class JobForm extends Component {
       endAddress = this.renderEndAddress(job.endAddress);
     }
 
+
     if (job.status === 'Job Completed') {
       return (
         <Container>
@@ -532,8 +540,11 @@ class JobForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
-              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
-                <div className="col-md-8" style={{padding: 0}}>
+              <Row style={{
+                paddingLeft: '10px',
+                paddingRight: '10px'
+              }}>
+                <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
                   {this.renderMBMap(origin, destination, overlayMapData, coords)}
                 </div>
@@ -585,8 +596,11 @@ class JobForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
-              <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
-                <div className="col-md-8" style={{padding: 0}}>
+              <Row style={{
+                paddingLeft: '10px',
+                paddingRight: '10px'
+              }}>
+                <div className="col-md-8" style={{ padding: 0 }}>
                   {this.renderMBMap(origin, destination)}
                 </div>
                 <div className="col-md-4">
@@ -623,8 +637,11 @@ class JobForm extends Component {
               {this.renderJobTop(job)}
             </Row>
             <hr/>
-            <Row style={{paddingLeft: '10px', paddingRight: '10px'}}>
-              <div className="col-md-8" style={{padding: 0}}>
+            <Row style={{
+              paddingLeft: '10px',
+              paddingRight: '10px'
+            }}>
+              <div className="col-md-8" style={{ padding: 0 }}>
                 {this.renderMBMap(origin, destination)}
               </div>
               <div className="col-md-4">
