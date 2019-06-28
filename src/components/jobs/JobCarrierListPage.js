@@ -125,17 +125,42 @@ class JobCarrierListPage extends Component {
       const newJob = job;
       const tempRate = newJob.rate;
       if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.newSize = newJob.rateEstimate;
+        newJob.newSizeF = TFormat.getValue(
+          TFormat.asHours(newJob.rateEstimate)
+        );
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateF = TFormat.getValue(
+          TFormat.asMoneyByHour(newJob.rate)
+        );
+
+        newJob.estimatedIncome = Math.round(tempRate * newJob.rateEstimate);
+        newJob.estimatedIncomeF = TFormat.getValue(
+          TFormat.asMoney(tempRate * newJob.rateEstimate)
+        );
       } else if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.newSize = newJob.rateEstimate;
+        newJob.newSizeF = TFormat.getValue(
+          TFormat.asTons(newJob.rateEstimate)
+        );
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateF = TFormat.getValue(
+          TFormat.asMoneyByTons(newJob.rate)
+        );
+
+        newJob.estimatedIncome = Math.round(tempRate * newJob.rateEstimate);
+        newJob.estimatedIncomeF = TFormat.getValue(
+          TFormat.asMoney(tempRate * newJob.rateEstimate)
+        );
       } else {
         newJob.newSize = 'Invalid Rate Type';
+        newJob.newSizeF = 'Invalid Rate Type';
         newJob.newRate = 'Invalid Rate Type';
+        newJob.newRateF = 'Invalid Rate Type';
         newJob.estimatedIncome = 'Invalid Rate Type';
+        newJob.estimatedIncomeF = 'Invalid Rate Type';
       }
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
@@ -195,15 +220,18 @@ class JobCarrierListPage extends Component {
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size'
+                          displayName: 'Size',
+                          label: 'newSizeF'
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate'
+                          displayName: 'Rate',
+                          label: 'newRateF'
                         },
                         {
                           name: 'estimatedIncome',
-                          displayName: 'Potential Earnings'
+                          displayName: 'Potential Earnings',
+                          label: 'estimatedIncomeF'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table

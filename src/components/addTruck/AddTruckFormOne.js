@@ -505,7 +505,9 @@ class AddTruckFormOne extends PureComponent {
     // try {
     this.setState({ imageUploading: true });
     const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
-    this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
+    this.setState({
+      image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}`
+    });
     this.setState({ imageUploading: false });
   }
 

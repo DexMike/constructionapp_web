@@ -56,7 +56,12 @@ class PaymentsCustomer extends Component {
     const payments = response.data.map((payment) => {
       const newPayment = {};
       newPayment.id = payment.id;
-      newPayment.amount = TFormat.asMoney(payment.amount);
+
+      newPayment.amount = payment.amount;
+      newPayment.amountF = TFormat.getValue(
+        TFormat.asMoney(payment.amount)
+      );
+
       newPayment.type = payment.type;
       newPayment.status = payment.status;
       newPayment.createdAt = TFormat.asDate(payment.createdAt);
@@ -120,7 +125,8 @@ class PaymentsCustomer extends Component {
                           displayName: 'Date'
                         }, {
                           name: 'amount',
-                          displayName: 'Amount'
+                          displayName: 'Amount',
+                          label: 'amountF'
                         }, {
                           name: 'status',
                           displayName: 'Status'
