@@ -16,7 +16,10 @@ import EquipmentService from '../../api/EquipmentService';
 // import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
+import EquipmentDetails from './EquipmentDetails';
+import MultiEquipmentsForm from './MultiEquipmentsForm';
 import '../addTruck/AddTruck.css';
+import './Equipment.css';
 
 class EquipmentListPage extends Component {
   constructor(props) {
@@ -26,12 +29,10 @@ class EquipmentListPage extends Component {
       loaded: false,
       activeTab: '1',
       equipments: [],
-      // goToDashboard: false,
-      // goToAddEquipment: false,
-      // goToUpdateEquipment: false,
       equipmentId: 0,
       companyId: 0,
       modal: false,
+      equipmentsModal: false,
       selectedItemData: {},
       page: 0,
       rows: 10,
@@ -43,13 +44,17 @@ class EquipmentListPage extends Component {
     this.toggle = this.toggle.bind(this);
     this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
     this.toggleAddTruckModalClear = this.toggleAddTruckModalClear.bind(this);
+    this.toggleAddMultiTrucksModal = this.toggleAddMultiTrucksModal.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
   }
 
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
-    this.setState({ companyId: profile.companyId });
+    this.setState({
+      companyId: profile.companyId,
+      userId: profile.userId
+    });
     this.loadEquipments();
   }
 
@@ -90,6 +95,13 @@ class EquipmentListPage extends Component {
       equipmentId: 0, // reset equipmentID, not companyID
       selectedItemData: {},
       modal: !modal
+    }, this.loadEquipments);
+  }
+
+  toggleAddMultiTrucksModal() {
+    const { equipmentsModal } = this.state;
+    this.setState({
+      equipmentsModal: !equipmentsModal
     }, this.loadEquipments);
   }
 
@@ -147,7 +159,8 @@ class EquipmentListPage extends Component {
       modal,
       selectedItemData,
       equipmentId,
-      companyId
+      companyId,
+      userId
     } = this.state;
     let tabShow = 1;
     if (totalTrucks > 0) {
@@ -157,16 +170,37 @@ class EquipmentListPage extends Component {
       <Modal
         isOpen={modal}
         toggle={this.toggleAddTruckModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
-        <div className="modal__body" style={{ padding: '0px' }}>
-          <AddTruckForm
+        <div className="modal__body">
+          {/* Replaced AddTruckForm for EquipmentDetails */}
+          <EquipmentDetails
             equipmentId={equipmentId}
             companyId={companyId}
-            incomingPage={tabShow}
-            handlePageClick={() => {}}
+            userId={userId}
             toggle={this.toggleAddTruckModal}
-            passedInfo={selectedItemData}
+            // incomingPage={tabShow}
+            // handlePageClick={() => {}}
+            // passedInfo={selectedItemData}
+          />
+        </div>
+      </Modal>
+    );
+  }
+
+  renderEquipmentsModal() {
+    const { equipmentsModal, userId, companyId } = this.state;
+    return (
+      <Modal
+        isOpen={equipmentsModal}
+        toggle={this.toggleAddMultiTrucksModal}
+        className="equipments-modal modal-dialog--primary modal-dialog--header"
+      >
+        <div className="modal__body">
+          <MultiEquipmentsForm
+            userId={userId}
+            companyId={companyId}
+            toggle={this.toggleAddMultiTrucksModal}
           />
         </div>
       </Modal>
@@ -204,6 +238,7 @@ class EquipmentListPage extends Component {
       return (
         <React.Fragment>
           { this.renderModal() }
+          { this.renderEquipmentsModal() }
           <Container className="dashboard">
             <Row>
               <Col md={12}>
@@ -213,12 +248,25 @@ class EquipmentListPage extends Component {
             <Row>
               <Col md={12}>
                 <Button
-                  onClick={this.toggleAddTruckModalClear}
+                  // onClick={this.toggleAddTruckModalClear}
+                  onClick={this.toggleAddMultiTrucksModal}
                   type="button"
                   className="primaryButton"
                 >
-                  Add a Truck
+                  {/* Add a Truck */}
+                  Add Trucks
                 </Button>
+                {
+                  /*
+                  <Button
+                    onClick={this.toggleAddTruckModalClear}
+                    type="button"
+                    className="primaryButton"
+                  >
+                    Add a Truck and Driver
+                  </Button>
+                  */
+                }
               </Col>
             </Row>
             <Row>
