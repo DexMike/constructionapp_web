@@ -50,7 +50,7 @@ class JobSavePage extends Component {
       booking: null,
       favoriteCompany: [],
       profile: {},
-      companyCarrier: 0,
+      companyCarrier: null,
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null,
@@ -75,7 +75,8 @@ class JobSavePage extends Component {
       booking,
       profile,
       favoriteCompany,
-      selectedDrivers
+      selectedDrivers,
+      companyCarrier
     } = this.state;
 
     try {
@@ -123,6 +124,7 @@ class JobSavePage extends Component {
           } else { // There is just one bid
             [bid] = bids;
           }
+          companyCarrier = bid.companyCarrierId;
         }
         const bookings = await BookingService.getBookingsByJobId(job.id);
         if (bookings && bookings.length > 0) {
@@ -145,7 +147,6 @@ class JobSavePage extends Component {
         }
 
         const drivers = await UserService.getUsersByCompanyId(profile.companyId);
-        const companyCarrier = bid.companyCarrierId;
 
         this.setState({
           job,
@@ -227,13 +228,13 @@ class JobSavePage extends Component {
       if (!bookings || bookings.length <= 0) {
         // TODO create a booking
         booking = {};
-        booking.bidId = bid.id;
-        booking.rateType = bid.rateType;
-        booking.startTime = job.startTime;
-        booking.schedulersCompanyId = bid.companyCarrierId;
-        booking.sourceAddressId = job.startAddress.id;
-        booking.startAddressId = job.startAddress.id;
-        booking.endAddressId = job.endAddress.id;
+        booking.bidId = newBid.id;
+        booking.rateType = newBid.rateType;
+        booking.startTime = newJob.startTime;
+        booking.schedulersCompanyId = newBid.companyCarrierId;
+        booking.sourceAddressId = newJob.startAddress.id;
+        booking.startAddressId = newJob.startAddress.id;
+        booking.endAddressId = newJob.endAddress.id;
         booking.bookingStatus = 'New';
         booking.createdBy = profile.userId;
         booking.createdOn = moment().unix() * 1000;
@@ -259,10 +260,10 @@ class JobSavePage extends Component {
           // Ideally this should be the carrier/driver's truck
           bookingEquipment = {};
           bookingEquipment.bookingId = booking.id;
-          bookingEquipment.schedulerId = bid.userId;
+          bookingEquipment.schedulerId = newBid.userId;
           bookingEquipment.driverId = equipment.driversId;
           bookingEquipment.equipmentId = equipment.id;
-          bookingEquipment.rateType = bid.rateType;
+          bookingEquipment.rateType = newBid.rateType;
           bookingEquipment.rateActual = 0;
           bookingEquipment.startTime = booking.startTime;
           bookingEquipment.endTime = booking.endTime;
@@ -282,7 +283,7 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
+      const carrierAdmin = await UserService.getAdminByCompanyId(newBid.companyCarrierId);
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
           const notification = {
@@ -313,7 +314,7 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
+      const carrierAdmin = await UserService.getAdminByCompanyId(newBid.companyCarrierId);
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
           const notification = {
@@ -546,7 +547,7 @@ class JobSavePage extends Component {
 
   async handleAllocateDrivers() {
     try {
-      console.log('saving...');
+      // console.log('saving...');
       const { selectedDrivers, booking, profile } = this.state;
       const bookingEquipments = selectedDrivers.map(selectedDriver => ({
         bookingId: booking.id,
@@ -600,6 +601,7 @@ class JobSavePage extends Component {
       return (
         <JobForm
           job={job}
+          companyCarrier={companyCarrier}
           handlePageClick={this.handlePageClick}
         />
       );
@@ -607,7 +609,6 @@ class JobSavePage extends Component {
     return (
       <JobForm
         job={job}
-        companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
       />
     );
@@ -697,7 +698,7 @@ class JobSavePage extends Component {
         </div>
       );
     }
-    if ((job.status === 'Booked' || job.status === 'Allocated') && companyType === 'Carrier') {
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') && companyType === 'Carrier') {
       return (
         <TSubmitButton
           onClick={() => this.toggleAllocateDriversModal()}

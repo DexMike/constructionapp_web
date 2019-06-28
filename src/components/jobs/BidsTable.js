@@ -54,7 +54,10 @@ class BidsTable extends Component {
     bids = bids.map((bid) => {
       const newBid = bid;
 
-      newBid.date = TFormat.asDate(bid.createdOn);
+      newBid.date = bid.createdOn;
+      newBid.dateF = TFormat.getValue(
+        TFormat.asDate(bid.createdOn)
+      );
 
       if (newBid.status === 'Pending') {
         newBid.status = 'Requested';
@@ -331,7 +334,8 @@ class BidsTable extends Component {
                   },
                   {
                     name: 'date',
-                    displayName: 'Date Requested'
+                    displayName: 'Date Requested',
+                    label: 'dateF'
                   }
                 ]
               }

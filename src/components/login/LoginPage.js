@@ -38,6 +38,7 @@ class LoginPage extends SignIn {
       password: this.props.authData.password || '',
       user: null,
       btnSubmitting: false, // Used by TSubmitButton
+      userUnderReview: false,
       ip: null,
       browserVersion: null,
       screenSize: null
@@ -53,7 +54,13 @@ class LoginPage extends SignIn {
   }
 
   async componentDidMount() {
-    const ip = await UtilsService.getUserIP();
+    let ip = '';
+    try {
+      const ipAddress = await UtilsService.getUserIP();
+      ({ ip } = ipAddress);
+    } catch (e) {
+      // console.log(e);
+    }
     const browserVersion = await UtilsService.getBrowserVersion();
     const screenSize = await UtilsService.getScreenDimentions();
     this.setState({
@@ -93,7 +100,9 @@ class LoginPage extends SignIn {
   }
 
   async setLogging(username) {
-    const user = await UserService.getUserByUsername(username);
+    const userCheck = {email: username};
+    const user = await UserService.getUserByEmail(userCheck);
+
     user.lastLogin = moment().unix() * 1000;
     user.loginCount += 1;
     await UserService.updateUser(user);
@@ -103,7 +112,7 @@ class LoginPage extends SignIn {
     const log = {
       attemptedUsername: this.state.username,
       attemptedPassword: !state ? this.state.password : null,
-      ipAddress: this.state.ip.ip,
+      ipAddress: this.state.ip,
       browserType: this.state.browserVersion.name,
       browserVersion: this.state.browserVersion.version,
       screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
@@ -128,6 +137,17 @@ class LoginPage extends SignIn {
         });
         return;
       }
+
+      const userCheck = {email: this.state.username}
+      const user = await UserService.getUserByEmail(userCheck);
+
+      if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
+        || user.userStatus === 'Rejected')) {
+        this.setState({userUnderReview: true});
+        return;
+        // user is under review
+      }
+
       const data = await Auth.signIn(this.state.username, this.state.password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
@@ -221,6 +241,15 @@ class LoginPage extends SignIn {
     this.setState({error: null});
   }
 
+  renderUserNotReviewed() {
+    return (
+      <h6> Thank you for checking back with us. Your account is still in review.
+        This normally takes 1-2 business days.
+        If you have not been contact you can email us at csr@trelar.net. Thank you.
+      </h6>
+    );
+  }
+
   renderLogInForm() {
     const {showPassword, btnSubmitting} = this.state;
     return (
@@ -238,12 +267,12 @@ class LoginPage extends SignIn {
           <p>
             User not confirmed.
             {this.state.errorCode === 'UserNotConfirmedException' && (
-            <button type="button"
-                    className="account__confirm"
-                    onClick={this.handleUserNotConfirmed}
-            >
-              Confirm: {this.state.confirmUsername}
-            </button>
+              <button type="button"
+                      className="account__confirm"
+                      onClick={this.handleUserNotConfirmed}
+              >
+                Confirm: {this.state.confirmUsername}
+              </button>
             )}
             &nbsp;
             {this.state.userConfirmError}
@@ -310,18 +339,20 @@ class LoginPage extends SignIn {
           bntText="Sign In"
           id="signinbutton"
         />
-        <button type="button" 
-          className="btn btn-outline-primary account__btn account__btn--small"
-          id = "createaccountbutton"      
-          onClick={this.onSignUp}
-        >
-          Create Account
-        </button>
+        {/* <button type="button" */}
+        {/* className="btn btn-outline-primary account__btn account__btn--small" */}
+        {/* id = "createaccountbutton" */}
+        {/* onClick={this.onSignUp} */}
+        {/* > */}
+        {/* Create Account */}
+        {/* </button> */}
       </div>
     );
   }
 
   renderPage() {
+    const {userUnderReview} = this.state;
+
     return (
       <div className="theme-light">
         <div className="wrapper">
@@ -351,7 +382,8 @@ class LoginPage extends SignIn {
                       Changing how Construction Moves
                     </h4>
                   </div>
-                  {this.renderLogInForm()}
+                  {userUnderReview && this.renderUserNotReviewed()}
+                  {!userUnderReview && this.renderLogInForm()}
                   {/* <div className="account__or"> */}
                   {/* <p>Or Easily Using</p> */}
                   {/* </div> */}

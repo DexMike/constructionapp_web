@@ -28,6 +28,7 @@ class LoadsTable extends Component {
 
   render() {
     const {loads, job} = {...this.state};
+    // debugger;
     return (
       <Paper>
         <Table>
