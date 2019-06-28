@@ -21,6 +21,9 @@ import SignUpPage from './signUp/SignUpPage';
 import ConfirmSignUpPage from './signUp/ConfirmSignUpPage';
 import ForgotPasswordPage from './forgotPassword/ForgotPasswordPage';
 import RequireNewPasswordPage from './forgotPassword/RequireNewPasswordPage';
+import ProfileService from "../api/ProfileService";
+import UserService from "../api/UserService";
+import i18n from "i18next";
 
 Amplify.configure({
   Auth: {
@@ -65,7 +68,22 @@ class App extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    const user = await UserService.getUserById(profile.userId);
+
+    switch (user.preferredLanguage) {
+      case 'English':
+        if (i18n.language === 'es') {
+          i18n.changeLanguage('us');
+        }
+        break;
+      default:
+        if (i18n.language === 'us') {
+          i18n.changeLanguage('es');
+        }
+    }
+
     window.addEventListener('load', () => {
       this.setState({ loading: false });
       setTimeout(() => this.setState({ loaded: true }), 500);

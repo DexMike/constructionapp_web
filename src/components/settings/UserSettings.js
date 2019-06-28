@@ -21,6 +21,8 @@ import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
 import './Settings.css';
+import ProfileService from "../../api/ProfileService";
+import i18n from "i18next";
 
 
 class UserSettings extends Component {
@@ -301,7 +303,7 @@ class UserSettings extends Component {
     });
   }
 
-  handlePreferredLangChange(e) {
+  async handlePreferredLangChange(e) {
     const reqHandler = 'reqHandlerLanguage';
     this.setState({
       [reqHandler]: Object.assign({}, reqHandler, {
@@ -439,18 +441,36 @@ class UserSettings extends Component {
     if (!this.isFormValid()) {
       return;
     }
-
+    // const profile = await ProfileService.getProfile();
+    // const user = await UserService.getUserById(profile.userId);
+    // user.preferredLanguage = e.value;
+    // await UserService.updateUser(user);
     const user = this.setUserInfo();
+
     const address = this.setAddressInfo();
     if (user && user.id) {
       user.modifiedOn = moment()
         .unix() * 1000;
       try {
         await UserService.updateUser(user);
+        const {preferredLanguage} = this.state;
+        switch (preferredLanguage) {
+          case 'English':
+            if (i18n.language === 'es') {
+              i18n.changeLanguage('us');
+              this.setState({preferredLanguage});
+            }
+            break;
+          default:
+            if (i18n.language === 'us') {
+              i18n.changeLanguage('es');
+              this.setState({preferredLanguage});
+            }
+        }
         await AddressService.updateAddress(address);
         // console.log('Updated');
       } catch (err) {
-        // console.log(err);
+        console.log(err);
       }
     }
   }

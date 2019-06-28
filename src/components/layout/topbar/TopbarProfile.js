@@ -15,7 +15,7 @@ import AddressService from '../../../api/AddressService';
 // const Ava = `${process.env.PUBLIC_URL}/img/ava.png`;
 
 function ToggleLanguage({handle}) {
-  let toggle_message = (i18n.language === "us") ? "Spanish" : ("English");
+  let toggle_message = (i18n.language === 'us') ? 'Spanish' : ('English');
   return (
     <Link className="topbar__link" to={window.location.pathname} onClick={handle}>
       <span className={`topbar__link-icon lnr lnr-earth`}/>
@@ -29,8 +29,7 @@ class TopbarProfile extends PureComponent {
     super(props);
     this.state = {
       collapse: false,
-      email: '',
-      lang: 'English'
+      email: ''
     };
     this.toggle = this.toggle.bind(this);
     this.changeLang = this.changeLang.bind(this);
@@ -45,14 +44,14 @@ class TopbarProfile extends PureComponent {
     if (company.adminId === user.id) {
       isAdmin = true;
     }
-    this.setState({ 
+    this.setState({
       email: currentSession.idToken.payload.email,
       isAdmin
     });
   }
 
   changeLang() {
-    if (i18n.language == 'es') {
+    if (i18n.language === 'es') {
       i18n.changeLanguage('us');
       this.setState({lang: 'English'});
     } else {
