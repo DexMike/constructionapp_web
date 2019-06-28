@@ -390,10 +390,17 @@ class DashboardCarrierPage extends Component {
         completedJobCount += 1;
       }
       if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        newJob.newSize = newJob.rateEstimate;
+        newJob.newSizeF = TFormat.getValue(
+          TFormat.asHours(newJob.rateEstimate)
+        );
 
-        newJob.potentialIncome = tempRate * newJob.rateEstimate;
+        newJob.newRate = newJob.rate;
+        newJob.newRateF = TFormat.getValue(
+          TFormat.asMoneyByHour(newJob.rate)
+        );
+
+        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
         newJob.potentialIncomeF = TFormat.getValue(
           TFormat.asMoney(
             (tempRate * newJob.rateEstimate)
@@ -401,12 +408,21 @@ class DashboardCarrierPage extends Component {
         );
       }
       if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        // Job's Potential Earnings
-        
-        newJob.potentialIncome = TFormat.asMoney(
-          (tempRate * newJob.rateEstimate)
+        newJob.newSize = newJob.rateEstimate;
+        newJob.newSizeF = TFormat.getValue(
+          TFormat.asTons(newJob.rateEstimate)
+        );
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateF = TFormat.getValue(
+          TFormat.asMoneyByTons(newJob.rate)
+        );
+
+        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+        newJob.potentialIncomeF = TFormat.getValue(
+          TFormat.asMoney(
+            (tempRate * newJob.rateEstimate)
+          )
         );
       }
 
@@ -422,7 +438,9 @@ class DashboardCarrierPage extends Component {
     });
 
     // jobsCompleted = onOfferJobCount * 20;
-    potentialIncome = TFormat.asMoney(potentialIncome);
+    potentialIncome = TFormat.asMoney(
+      TFormat.asMoney(potentialIncome)
+    );
 
     if (loaded) {
       const { filters, totalCount, totalJobs} = this.state;
@@ -466,15 +484,18 @@ class DashboardCarrierPage extends Component {
                         },
                         {
                           name: 'potentialIncome',
-                          displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings'
+                          displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings',
+                          label: 'potentialIncomeF'
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate'
+                          displayName: 'Rate',
+                          label: 'newRateF'
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size'
+                          displayName: 'Size',
+                          label: 'newSizeF'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table

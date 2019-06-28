@@ -193,9 +193,23 @@ class EquipmentListPage extends Component {
       // const tempHourRate = newEquipment.hourRate;
       // const tempTonRate = newEquipment.tonRate;
 
-      newEquipment.newMaxCapacity = TFormat.asTons(newEquipment.maxCapacity);
-      newEquipment.newHourRate = TFormat.asMoneyByHour(newEquipment.hourRate);
-      newEquipment.newTonRate = TFormat.asMoneyByTons(newEquipment.tonRate);
+      newEquipment.newMaxCapacity = newEquipment.maxCapacity;
+      newEquipment.newMaxCapacityF = TFormat.getValue(
+        TFormat.asTons(newEquipment.maxCapacity)
+      );
+
+      newEquipment.newHourRate = newEquipment.hourRate;
+      newEquipment.newHourRateF = TFormat.getValue(
+        TFormat.asMoneyByHour(newEquipment.hourRate)
+      );
+
+      if (newEquipment.tonRate === null) {
+        newEquipment.tonRate = 0;
+      }
+      newEquipment.newTonRate = newEquipment.tonRate;
+      newEquipment.newTonRateF = TFormat.getValue(
+        TFormat.asMoneyByTons(newEquipment.tonRate)
+      );
 
       return newEquipment;
     });
@@ -251,15 +265,18 @@ class EquipmentListPage extends Component {
                               },
                               {
                                 name: 'newMaxCapacity',
-                                displayName: 'Capacity'
+                                displayName: 'Capacity',
+                                label: 'newMaxCapacityF'
                               },
                               {
                                 name: 'newHourRate',
-                                displayName: 'Rate per Hour'
+                                displayName: 'Rate per Hour',
+                                label: 'newHourRateF'
                               },
                               {
                                 name: 'newTonRate',
-                                displayName: 'Rate per Ton'
+                                displayName: 'Rate per Ton',
+                                label: 'newTonRateF'
                               },
                               {
                                 name: 'materials',

@@ -248,7 +248,10 @@ class TFormat {
   }
 
   static getValue(formatted) {
-    return `${formatted.props.prefix}${formatted.props.value}${formatted.props.suffix}`;
+    if (typeof formatted.props !== 'undefined') {
+      return `${formatted.props.prefix}${formatted.props.value}${formatted.props.suffix}`;
+    }
+    return '';
   }
 }
 
