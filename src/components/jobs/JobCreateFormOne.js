@@ -306,7 +306,7 @@ class CreateJobFormOne extends PureComponent {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return null;
     }
   }
@@ -323,7 +323,7 @@ class CreateJobFormOne extends PureComponent {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return null;
     }
   }
@@ -533,15 +533,12 @@ class CreateJobFormOne extends PureComponent {
     }
 
     if (!job.truckType || job.truckType.length === 0) {
-      console.log('>>TRUCK TYPE');
       this.setState({
         reqHandlerTruckType: {
           ...reqHandlerTruckType,
           touched: true,
           error: 'Required input'
         }
-      }, function truckChecked() {
-        console.log(this.state);
       });
       isValid = false;
     }
@@ -744,7 +741,6 @@ class CreateJobFormOne extends PureComponent {
     }
 
     // rates
-    console.log('>Check: ', selectedRatedHourOrTon);
     if (selectedRatedHourOrTon === 'ton') {
       if (rateByTonValue <= 0) {
         this.setState({
@@ -767,7 +763,6 @@ class CreateJobFormOne extends PureComponent {
         isValid = false;
       }
     } else if (selectedRatedHourOrTon === 'hour') {
-      console.log(747, rateByHourValue);
       if (rateByHourValue <= 0) {
         this.setState({
           reqHandlerHours: {
