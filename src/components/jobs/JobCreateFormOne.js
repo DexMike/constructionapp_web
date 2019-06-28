@@ -287,7 +287,7 @@ class CreateJobFormOne extends PureComponent {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return null;
     }
   }
@@ -304,7 +304,7 @@ class CreateJobFormOne extends PureComponent {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return null;
     }
   }
@@ -494,8 +494,9 @@ class CreateJobFormOne extends PureComponent {
     const currDate = new Date();
 
     if (job.jobDate) {
-      currDate.setHours(0, 0, 0, 0);
-      job.jobDate.setHours(0, 0, 0, 0);
+      // what's this for?
+      // currDate.setHours(0, 0, 0, 0);
+      // job.jobDate.setHours(0, 0, 0, 0);
     }
 
     if (!job.jobDate || job.jobDate.getTime() < currDate.getTime()) {
@@ -742,11 +743,11 @@ class CreateJobFormOne extends PureComponent {
   jobDateChange(data) {
     const {reqHandlerDate} = this.state;
     this.setState({
+      jobDate: data,
       reqHandlerDate: Object.assign({}, reqHandlerDate, {
         touched: false
       })
     });
-    this.setState({jobDate: data});
   }
 
   handleStartAddressIdChange(data) {
@@ -1041,7 +1042,7 @@ class CreateJobFormOne extends PureComponent {
                         }
                       }
                       onChange={this.jobDateChange}
-                      dateFormat="MMMM-dd-yyyy h:mm aa"
+                      dateFormat="YYYY-MM-dd hh:mm"
                       showTime
                       meta={reqHandlerDate}
                     />
