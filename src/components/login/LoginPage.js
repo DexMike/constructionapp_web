@@ -194,7 +194,6 @@ class LoginPage extends SignIn {
           errorCode: err.code,
           confirmUsername: null
         });
-
       }
     }
   }
@@ -336,13 +335,13 @@ class LoginPage extends SignIn {
           bntText="Sign In"
           id="signinbutton"
         />
-        {/* <button type="button" */}
-        {/* className="btn btn-outline-primary account__btn account__btn--small" */}
-        {/* id = "createaccountbutton" */}
-        {/* onClick={this.onSignUp} */}
-        {/* > */}
-        {/* Create Account */}
-        {/* </button> */}
+        <button type="button"
+         className="btn btn-outline-primary account__btn account__btn--small"
+         id="createaccountbutton"
+         onClick={this.onSignUp}
+        >
+         Create Account
+        </button>
       </div>
     );
   }
