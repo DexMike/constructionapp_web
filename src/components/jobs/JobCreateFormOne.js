@@ -168,13 +168,23 @@ class CreateJobFormOne extends PureComponent {
 
     // should load all addresses even if already set
     const response = await AddressService.getAddresses();
+
+    const newItem = {
+      id: 0,
+      name: 'NEW ADDRESS',
+      address1: '',
+      city: '',
+      zipCode: ''
+    };
+
+    response.data.unshift(newItem);
+
     const allAddresses = response.data.map(address => ({
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
-    this.setState({
-      allAddresses
-    });
+
+    this.setState({ allAddresses });
 
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
@@ -551,7 +561,7 @@ class CreateJobFormOne extends PureComponent {
     if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
       const geoResponseStart = await this.getStartCoords();
       if (!geoResponseStart || geoResponseStart.features.length < 1
-        || geoResponseStart.features[0].relevance < 0.75) {
+        || geoResponseStart.features[0].relevance < 0.90) {
         this.setState({
           reqHandlerStartAddress: {
             ...reqHandlerStartAddress,
@@ -634,7 +644,7 @@ class CreateJobFormOne extends PureComponent {
     if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
       const geoResponseEnd = await this.getEndCoords();
       if (!geoResponseEnd || geoResponseEnd.features.length < 1
-        || geoResponseEnd.features[0].relevance < 0.75) {
+        || geoResponseEnd.features[0].relevance < 0.90) {
         this.setState({
           reqHandlerEndAddress: {
             ...reqHandlerEndAddress,
@@ -741,7 +751,7 @@ class CreateJobFormOne extends PureComponent {
 
   handleStartAddressIdChange(data) {
     this.handleSameAddresses();
-    if (data.value !== 0) {
+    if (Number(data.value) !== 0) {
       this.setState({
         startLocationAddress1: '',
         startLocationAddress2: '',
@@ -762,16 +772,28 @@ class CreateJobFormOne extends PureComponent {
           touched: false
         }
       });
-    } else {
+    } else if (Number(data.value) === 0) {
       this.setState({
-        selectedStartAddressId: data.value
+        selectedStartAddressId: Number(data.value),
+        reqHandlerStartAddress: {
+          touched: true
+        },
+        reqHandlerStartCity: {
+          touched: true
+        },
+        reqHandlerStartState: {
+          touched: true
+        },
+        reqHandlerStartZip: {
+          touched: true
+        }
       });
     }
   }
 
   handleEndAddressIdChange(data) {
     this.handleSameAddresses();
-    if (data.value !== 0) {
+    if (Number(data.value) !== 0) {
       this.setState({
         endLocationAddress1: '',
         endLocationAddress2: '',
@@ -792,9 +814,21 @@ class CreateJobFormOne extends PureComponent {
           touched: false
         }
       });
-    } else {
+    } else if (Number(data.value) === 0) {
       this.setState({
-        selectedEndAddressId: data.value
+        selectedEndAddressId: Number(data.value),
+        reqHandlerEndAddress: {
+          touched: true
+        },
+        reqHandlerEndCity: {
+          touched: true
+        },
+        reqHandlerEndState: {
+          touched: true
+        },
+        reqHandlerEndZip: {
+          touched: true
+        }
       });
     }
   }

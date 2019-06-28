@@ -46,8 +46,14 @@ class PaymentsCarrier extends Component {
     payments = payments.map((payment) => {
       const newPayment = payment;
       newPayment.id = payment.clientPaymentId;
-      newPayment.amount = TFormat.asMoney(payment.amount);
+
+      newPayment.amount = payment.amount;
+      newPayment.amountF = TFormat.getValue(
+        TFormat.asMoney(payment.amount)
+      );
+
       newPayment.createdOn = TFormat.asDate(payment.createdOn);
+
       return newPayment;
     });
 
@@ -112,7 +118,8 @@ class PaymentsCarrier extends Component {
                         },
                         {
                           name: 'amount',
-                          displayName: 'Amount'
+                          displayName: 'Amount',
+                          label: 'amountF'
                         }
                       ]
                     }

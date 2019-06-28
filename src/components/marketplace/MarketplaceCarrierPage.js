@@ -177,25 +177,48 @@ class MarketplaceCarrierPage extends Component {
 
         const tempRate = newJob.rate;
         if (newJob.rateType === 'Hour') {
-          newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-          newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+          newJob.newSize = newJob.rateEstimate;
+          newJob.newSizeF = TFormat.getValue(
+            TFormat.asHours(newJob.rateEstimate)
+          );
+
+          newJob.newRate = newJob.rate;
+          newJob.newRateF = TFormat.getValue(
+            TFormat.asMoneyByHour(newJob.rate)
+          );
           // Job's Potential Earnings
           // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
-          newJob.potentialIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate)
+          newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+          newJob.potentialIncomeF = TFormat.getValue(
+            TFormat.asMoney(
+              (tempRate * newJob.rateEstimate)
+            )
           );
         }
         if (newJob.rateType === 'Ton') {
-          newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-          newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+          newJob.newSize = newJob.rateEstimate;
+          newJob.newSizeF = TFormat.getValue(
+            TFormat.asTons(newJob.rateEstimate)
+          );
+
+          newJob.newRate = newJob.rate;
+          newJob.newRateF = TFormat.getValue(
+            TFormat.asMoneyByTons(newJob.rate)
+          );
           // Job's Potential Earnings
           // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
-          newJob.potentialIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate)
+          newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+          newJob.potentialIncomeF = TFormat.getValue(
+            TFormat.asMoney(
+              (tempRate * newJob.rateEstimate)
+            )
           );
         }
 
-        newJob.newStartDate = TFormat.asDate(job.startTime);
+        newJob.newStartDate = job.startTime;
+        newJob.newStartDateF = TFormat.getValue(
+          TFormat.asDate(job.startTime)
+        );
 
         if (typeof job.distance === 'number') {
           newJob.distance = newJob.distance.toFixed(2);
@@ -232,15 +255,18 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'potentialIncome',
-                        displayName: 'Potential Earnings'
+                        displayName: 'Potential Earnings',
+                        label: 'potentialIncomeF'
                       },
                       {
                         name: 'newRate',
-                        displayName: 'Hourly Rate'
+                        displayName: 'Hourly Rate',
+                        label: 'newRateF'
                       },
                       {
                         name: 'newSize',
-                        displayName: 'Min Hours'
+                        displayName: 'Min Hours',
+                        label: 'newSizeF'
                       },
                       {
                         name: 'distance',

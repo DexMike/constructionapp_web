@@ -100,7 +100,9 @@ class LoginPage extends SignIn {
   }
 
   async setLogging(username) {
-    const user = await UserService.getUserByUsername(username);
+    const userCheck = {email: username};
+    const user = await UserService.getUserByEmail(userCheck);
+
     user.lastLogin = moment().unix() * 1000;
     user.loginCount += 1;
     await UserService.updateUser(user);
@@ -136,7 +138,8 @@ class LoginPage extends SignIn {
         return;
       }
 
-      const user = await UserService.getUserByEmail(this.state.username);
+      const userCheck = {email: this.state.username}
+      const user = await UserService.getUserByEmail(userCheck);
 
       if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
         || user.userStatus === 'Rejected')) {
