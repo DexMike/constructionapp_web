@@ -561,7 +561,7 @@ class CreateJobFormOne extends PureComponent {
     if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
       const geoResponseStart = await this.getStartCoords();
       if (!geoResponseStart || geoResponseStart.features.length < 1
-        || geoResponseStart.features[0].relevance < 0.75) {
+        || geoResponseStart.features[0].relevance < 0.90) {
         this.setState({
           reqHandlerStartAddress: {
             ...reqHandlerStartAddress,
@@ -644,7 +644,7 @@ class CreateJobFormOne extends PureComponent {
     if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
       const geoResponseEnd = await this.getEndCoords();
       if (!geoResponseEnd || geoResponseEnd.features.length < 1
-        || geoResponseEnd.features[0].relevance < 0.75) {
+        || geoResponseEnd.features[0].relevance < 0.90) {
         this.setState({
           reqHandlerEndAddress: {
             ...reqHandlerEndAddress,
