@@ -89,8 +89,8 @@ class TopbarProfile extends PureComponent {
             <TopbarMenuLink title="User Settings" icon="user" path="/settings"/>
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Toggle Theme" icon="layers" path="/"/>
-            <div className="topbar__menu-divider"/>
-            <ToggleLanguage handle={this.changeLang}/>
+            {/*<div className="topbar__menu-divider"/>*/}
+            {/*<ToggleLanguage handle={this.changeLang}/>*/}
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Log Out" icon="exit" path="/"/>
           </div>
