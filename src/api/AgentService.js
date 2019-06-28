@@ -10,12 +10,18 @@ const { API_ENDPOINT } = process.env;
 
 class AgentService {
   static async getHeaders() {
-    const currentSession = await Auth.currentSession();
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${currentSession.accessToken.jwtToken}`,
-      'Id-Token': currentSession.idToken.jwtToken
-    };
+    try {
+      const currentSession = await Auth.currentSession();
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${currentSession.accessToken.jwtToken}`,
+        'Id-Token': currentSession.idToken.jwtToken
+      };
+    } catch (err) {
+      return {
+        'Content-Type': 'application/json'
+      };
+    }
   }
 
   static async get(path) {

@@ -17,6 +17,7 @@ import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
+import GeoCodingService from '../../api/GeoCodingService';
 
 // import USstates from '../../utils/usStates';
 
@@ -55,11 +56,15 @@ class CreateJobFormOne extends PureComponent {
       endLocationCity: '',
       endLocationState: '',
       endLocationZip: '',
+      endLocationLatitude: 0,
+      endLocationLongitude: 0,
       startLocationAddress1: '',
       startLocationAddress2: '',
       startLocationCity: '',
       startLocationState: '',
       startLocationZip: '',
+      startLocationLatitude: 0,
+      startLocationLongitude: 0,
       // date
       jobDate: new Date(),
       // job properties
@@ -154,6 +159,8 @@ class CreateJobFormOne extends PureComponent {
     this.handleSameAddresses = this.handleSameAddresses.bind(this);
     this.handleRateChange = this.handleRateChange.bind(this);
     this.handleInputChangeTonHour = this.handleInputChangeTonHour.bind(this);
+    this.getStartCoords = this.getStartCoords.bind(this);
+    this.getEndCoords = this.getEndCoords.bind(this);
   }
 
   async componentDidMount() {
@@ -161,13 +168,23 @@ class CreateJobFormOne extends PureComponent {
 
     // should load all addresses even if already set
     const response = await AddressService.getAddresses();
+
+    const newItem = {
+      id: 0,
+      name: 'NEW ADDRESS',
+      address1: '',
+      city: '',
+      zipCode: ''
+    };
+
+    response.data.unshift(newItem);
+
     const allAddresses = response.data.map(address => ({
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
-    this.setState({
-      allAddresses
-    });
+
+    this.setState({ allAddresses });
 
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
@@ -195,6 +212,10 @@ class CreateJobFormOne extends PureComponent {
         endLocationCity: p.endLocationCity,
         endLocationState: p.endLocationState,
         endLocationZip: p.endLocationZip,
+        endLocationLatitude: p.endLocationLatitude,
+        endLocationLongitude: p.endLocationLongitude,
+        startLocationLatitude: p.startLocationLatitude,
+        startLocationLongitude: p.startLocationLongitude,
         selectedStartAddressId: p.selectedStartAddressId,
         startLocationAddress1: p.startLocationAddress1,
         startLocationAddress2: p.startLocationAddress2,
@@ -248,9 +269,43 @@ class CreateJobFormOne extends PureComponent {
     this.setState({allUSstates: states, loaded: true});
   }
 
-  componentWillReceiveProps(nextProps) {
+  async componentWillReceiveProps(nextProps) {
     if (nextProps.validateOnTabClick) {
-      this.goToSecondFromFirst();
+      await this.goToSecondFromFirst();
+    }
+  }
+
+  async getStartCoords() {
+    const {
+      startLocationAddress1,
+      startLocationCity,
+      startLocationState,
+      startLocationZip
+    } = this.state;
+    const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
+    try {
+      const geoResponseStart = await GeoCodingService.getGeoCode(startString);
+      return geoResponseStart;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  }
+
+  async getEndCoords() {
+    const {
+      endLocationAddress1,
+      endLocationCity,
+      endLocationState,
+      endLocationZip
+    } = this.state;
+    const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
+    try {
+      const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
+      return geoResponseEnd;
+    } catch (err) {
+      console.log(err);
+      return null;
     }
   }
 
@@ -320,7 +375,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleRateChange(e) {
-    this.setState({ selectedRatedHourOrTon: e.value });
+    this.setState({selectedRatedHourOrTon: e.value});
   }
 
   handleSameAddresses() {
@@ -394,7 +449,7 @@ class CreateJobFormOne extends PureComponent {
     this.setState({truckType: data.value});
   }
 
-  isFormValid() {
+  async isFormValid() {
     const job = this.state;
     const {rateTab} = this.state;
     const {
@@ -503,6 +558,29 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
+    if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
+      const geoResponseStart = await this.getStartCoords();
+      if (!geoResponseStart || geoResponseStart.features.length < 1
+        || geoResponseStart.features[0].relevance < 0.90) {
+        this.setState({
+          reqHandlerStartAddress: {
+            ...reqHandlerStartAddress,
+            touched: true,
+            error: 'Start address not found.'
+          }
+        });
+        isValid = false;
+      }
+      const coordinates = geoResponseStart.features[0].center;
+      const startLocationLatitude = coordinates[1];
+      const startLocationLongitude = coordinates[0];
+
+      this.setState({
+        startLocationLatitude,
+        startLocationLongitude
+      });
+    }
+
     if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
       && job.selectedStartAddressId === job.selectedEndAddressId) {
       this.setState({
@@ -563,6 +641,29 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
+    if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
+      const geoResponseEnd = await this.getEndCoords();
+      if (!geoResponseEnd || geoResponseEnd.features.length < 1
+        || geoResponseEnd.features[0].relevance < 0.90) {
+        this.setState({
+          reqHandlerEndAddress: {
+            ...reqHandlerEndAddress,
+            touched: true,
+            error: 'End address not found.'
+          }
+        });
+        isValid = false;
+      }
+      const coordinates = geoResponseEnd.features[0].center;
+      const endLocationLatitude = coordinates[1];
+      const endLocationLongitude = coordinates[0];
+
+      this.setState({
+        endLocationLatitude,
+        endLocationLongitude
+      });
+    }
+
     if (job.hourTrucksNumber <= 0 && rateTab === 1) {
       this.setState({
         reqHandlerTrucksEstimate: {
@@ -584,7 +685,6 @@ class CreateJobFormOne extends PureComponent {
       });
       isValid = false;
     }
-    // }
 
     return isValid;
   }
@@ -598,7 +698,8 @@ class CreateJobFormOne extends PureComponent {
   async saveTruck(e) {
     e.preventDefault();
     e.persist();
-    if (!this.isFormValid()) {
+    const isValid = await this.isFormValid();
+    if (!isValid) {
       // this.setState({ maxCapacityTouched: true });
       return;
     }
@@ -612,14 +713,14 @@ class CreateJobFormOne extends PureComponent {
 
   handleInputChangeTonHour(e) {
     if (e.target.name === 'rateByTonValue') {
-      this.setState({ rateByTonValue: e.target.value });
+      this.setState({rateByTonValue: e.target.value});
     } else if (e.target.name === 'estimatedTons') {
       this.setState({
         rateEstimate: e.target.value,
         estimatedTons: e.target.value
       });
     } else if (e.target.name === 'rateByHourValue') {
-      this.setState({ rateByHourValue: e.target.value });
+      this.setState({rateByHourValue: e.target.value});
     } else if (e.target.name === 'estimatedHours') {
       this.setState({
         rateEstimate: e.target.value,
@@ -650,7 +751,7 @@ class CreateJobFormOne extends PureComponent {
 
   handleStartAddressIdChange(data) {
     this.handleSameAddresses();
-    if (data.value !== 0) {
+    if (Number(data.value) !== 0) {
       this.setState({
         startLocationAddress1: '',
         startLocationAddress2: '',
@@ -671,16 +772,28 @@ class CreateJobFormOne extends PureComponent {
           touched: false
         }
       });
-    } else {
+    } else if (Number(data.value) === 0) {
       this.setState({
-        selectedStartAddressId: data.value
+        selectedStartAddressId: Number(data.value),
+        reqHandlerStartAddress: {
+          touched: true
+        },
+        reqHandlerStartCity: {
+          touched: true
+        },
+        reqHandlerStartState: {
+          touched: true
+        },
+        reqHandlerStartZip: {
+          touched: true
+        }
       });
     }
   }
 
   handleEndAddressIdChange(data) {
     this.handleSameAddresses();
-    if (data.value !== 0) {
+    if (Number(data.value) !== 0) {
       this.setState({
         endLocationAddress1: '',
         endLocationAddress2: '',
@@ -701,9 +814,21 @@ class CreateJobFormOne extends PureComponent {
           touched: false
         }
       });
-    } else {
+    } else if (Number(data.value) === 0) {
       this.setState({
-        selectedEndAddressId: data.value
+        selectedEndAddressId: Number(data.value),
+        reqHandlerEndAddress: {
+          touched: true
+        },
+        reqHandlerEndCity: {
+          touched: true
+        },
+        reqHandlerEndState: {
+          touched: true
+        },
+        reqHandlerEndZip: {
+          touched: true
+        }
       });
     }
   }
@@ -736,9 +861,11 @@ class CreateJobFormOne extends PureComponent {
     this.setState({rateTab: 2});
   }
 
-  goToSecondFromFirst() {
+  async goToSecondFromFirst() {
     const {validateRes} = this.props;
-    if (!this.isFormValid()) {
+    const isValid = await this.isFormValid();
+
+    if (!isValid) {
       // Add this back before merging SG-170 back into the design.
       // validateRes(false);
       // // TODO display error message

@@ -48,14 +48,21 @@ class TFieldNumber extends PureComponent {
       placeholder,
       meta: { touched, error },
       negative,
-      decimal
+      decimal,
+      currency
     } = this.props;
     let step = 1;
     const min = !negative ? 0 : null;
     step = decimal ? 0.1 : null;
     return (
       <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+        {
+          currency ? (
+            <span style={{position: 'absolute', paddingLeft: 16, paddingTop: 8}}>$</span>
+          ) : null
+        }
         <input
+          style={{textAlign: 'right'}}
           {...input}
           placeholder={placeholder}
           type="number"

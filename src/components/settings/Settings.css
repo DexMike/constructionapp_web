@@ -231,3 +231,12 @@ table.table > tbody > tr > td, .item-row {
     border-radius: 5px;
     border: 1px solid #CCCCCC;
   }
+
+  .password-reset-modal .modal-content {
+    border-radius: 3px !important;
+    padding: 32px !important;
+  }
+
+  .password-reset-modal .modal-content .btn {
+    margin-bottom: 0px !important;
+  }

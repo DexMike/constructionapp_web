@@ -104,7 +104,8 @@ MatTableHead.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
-      displayName: PropTypes.string
+      displayName: PropTypes.string,
+      label: PropTypes.string
     })
   ).isRequired
 };
