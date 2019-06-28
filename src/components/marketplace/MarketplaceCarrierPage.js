@@ -215,7 +215,7 @@ class MarketplaceCarrierPage extends Component {
           );
         }
 
-        newJob.newStartDate = job.startTime;
+        newJob.newStartDate = TFormat.asDate(job.startTime);
         newJob.newStartDateF = TFormat.getValue(
           TFormat.asDate(job.startTime)
         );
