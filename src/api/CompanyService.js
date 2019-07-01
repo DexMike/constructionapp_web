@@ -18,6 +18,11 @@ class CompanyService extends AgentService {
     return (response);
   }
 
+  static async getCarriersByFiltersV2(filters) {
+    const response = await super.post('/carriers/search', filters);
+    return (response);
+  }
+
   static async getCarriersTrucks(companyId) {
     const response = await super.get(`${PATH}/${companyId}/truck`);
     return (response);

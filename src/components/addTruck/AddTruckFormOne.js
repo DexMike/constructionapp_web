@@ -504,10 +504,14 @@ class AddTruckFormOne extends PureComponent {
     const fileExtension = fileNamePieces[fileNamePieces.length - 1];
     // try {
     this.setState({ imageUploading: true });
-    const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
-    this.setState({
-      image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}`
-    });
+    const s3Key = `${year}/${month}/${fileName}.${fileExtension}`;
+    const storageConfig = {
+      contentType: 'image/jpeg', // resizer will always use jpeg file
+      progressCallback: () => {}, // we are not keeping track of the progress
+      level: 'public'
+    };
+    const result = await Storage.put(s3Key, file, storageConfig);
+    this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
     this.setState({ imageUploading: false });
   }
 
