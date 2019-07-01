@@ -133,7 +133,7 @@ class DriverForm extends Component {
       this.setState({ btnSubmitting: false });
       return;
     }
-    const { 
+    const {
       firstName,
       lastName, email, mobilePhone, userStatus, selectedUser, updateNewDriver } = this.state;
     const user = selectedUser;
@@ -374,21 +374,21 @@ class DriverForm extends Component {
             meta={reqHandlerLName}
           />
         </Col>
-        <Col md={6} className="pt-2">
-          <span>
-            Email
-          </span>
-          <TField
-            input={{
-              onChange: this.handleInputChange,
-              name: 'email',
-              value: email
-            }}
-            placeholder="Email"
-            type="text"
-            meta={reqHandlerEmail}
-          />
-        </Col>
+        {/* <Col md={6} className="pt-2"> */}
+        {/* <span> */}
+        {/* Email */}
+        {/* </span> */}
+        {/* <TField */}
+        {/* input={{ */}
+        {/* onChange: this.handleInputChange, */}
+        {/* name: 'email', */}
+        {/* value: email */}
+        {/* }} */}
+        {/* placeholder="Email" */}
+        {/* type="text" */}
+        {/* meta={reqHandlerEmail} */}
+        {/* /> */}
+        {/* </Col> */}
         <Col md={6} className="pt-2">
           <span>
             Mobile Phone
@@ -427,7 +427,7 @@ class DriverForm extends Component {
                 : null
             }
         </Col>
-        <Col md={12} className="text-right pt-4">
+        <Col md={6} className="text-right pt-4">
           <Button key="2"
             onClick={toggle}
             className="secondaryButton"
