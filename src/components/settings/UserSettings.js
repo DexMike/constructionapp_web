@@ -441,12 +441,7 @@ class UserSettings extends Component {
     if (!this.isFormValid()) {
       return;
     }
-    // const profile = await ProfileService.getProfile();
-    // const user = await UserService.getUserById(profile.userId);
-    // user.preferredLanguage = e.value;
-    // await UserService.updateUser(user);
     const user = this.setUserInfo();
-
     const address = this.setAddressInfo();
     if (user && user.id) {
       user.modifiedOn = moment()
