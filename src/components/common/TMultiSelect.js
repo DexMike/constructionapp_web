@@ -52,7 +52,7 @@ const renderMultiSelectField = function renderMultiSelectField(
             style={{color: '#666666', fontSize: 18, position: 'absolute', left: 0, top: 32}}
             onClick={() => {
               var selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
-              selector.scrollLeft -= 10;
+              selector.scrollLeft -= 20;
               var container = document.getElementById(id).getElementsByClassName('Select-multi-value-wrapper')[0];
               container.scrollTop = 0;
               
@@ -65,7 +65,7 @@ const renderMultiSelectField = function renderMultiSelectField(
               style={{color: '#666666', fontSize: 18, position: 'absolute', right: 0, top: 32}}
               onClick={() => {
                 var selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
-                selector.scrollLeft += 10;
+                selector.scrollLeft += 20;
                 var container = document.getElementById(id).getElementsByClassName('Select-multi-value-wrapper')[0];
                 container.scrollTop = 0;               
               }}
