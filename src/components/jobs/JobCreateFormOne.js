@@ -1153,7 +1153,7 @@ class CreateJobFormOne extends PureComponent {
                         }
                       }
                       onChange={this.jobDateChange}
-                      dateFormat="YYYY-MM-dd hh:mm"
+                      dateFormat="yyyy-MM-dd hh:mm"
                       showTime
                       meta={reqHandlerDate}
                     />
