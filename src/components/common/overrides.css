@@ -3,9 +3,12 @@
 }
 
 .Select--multi .Select-multi-value-wrapper {
-    height: 100%;
-    width: 100% !important;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    width: 100% !important;
+    height: 50px !important;
+    width: 500px !important;
+    /*overflow-y: scroll;*/
+    overflow-x: scroll;
+}
+
+.select-navigator:hover {
+    cursor: pointer;
 }
