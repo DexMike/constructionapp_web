@@ -32,7 +32,6 @@ class TopbarProfile extends PureComponent {
       email: ''
     };
     this.toggle = this.toggle.bind(this);
-    this.changeLang = this.changeLang.bind(this);
   }
 
   async componentDidMount() {
@@ -48,16 +47,6 @@ class TopbarProfile extends PureComponent {
       email: currentSession.idToken.payload.email,
       isAdmin
     });
-  }
-
-  changeLang() {
-    if (i18n.language === 'es') {
-      i18n.changeLanguage('us');
-      this.setState({lang: 'English'});
-    } else {
-      i18n.changeLanguage('es');
-      this.setState({lang: 'Spanish'});
-    }
   }
 
   toggle() {
@@ -89,8 +78,6 @@ class TopbarProfile extends PureComponent {
             <TopbarMenuLink title="User Settings" icon="user" path="/settings"/>
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Toggle Theme" icon="layers" path="/"/>
-            {/*<div className="topbar__menu-divider"/>*/}
-            {/*<ToggleLanguage handle={this.changeLang}/>*/}
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Log Out" icon="exit" path="/"/>
           </div>

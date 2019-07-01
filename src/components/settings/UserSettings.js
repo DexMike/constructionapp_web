@@ -454,19 +454,8 @@ class UserSettings extends Component {
       try {
         await UserService.updateUser(user);
         const {preferredLanguage} = this.state;
-        switch (preferredLanguage) {
-          case 'English':
-            if (i18n.language === 'es') {
-              i18n.changeLanguage('us');
-              this.setState({preferredLanguage});
-            }
-            break;
-          default:
-            if (i18n.language === 'us') {
-              i18n.changeLanguage('es');
-              this.setState({preferredLanguage});
-            }
-        }
+        i18n.changeLanguage(preferredLanguage);
+        this.setState({preferredLanguage});
         await AddressService.updateAddress(address);
         // console.log('Updated');
       } catch (err) {

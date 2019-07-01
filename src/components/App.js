@@ -71,19 +71,7 @@ class App extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     const user = await UserService.getUserById(profile.userId);
-
-    switch (user.preferredLanguage) {
-      case 'English':
-        if (i18n.language === 'es') {
-          i18n.changeLanguage('us');
-        }
-        break;
-      default:
-        if (i18n.language === 'us') {
-          i18n.changeLanguage('es');
-        }
-    }
-
+    i18n.changeLanguage(user.preferredLanguage);
     window.addEventListener('load', () => {
       this.setState({ loading: false });
       setTimeout(() => this.setState({ loaded: true }), 500);
