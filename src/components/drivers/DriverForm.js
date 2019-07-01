@@ -36,7 +36,8 @@ class DriverForm extends Component {
       step: 1,
       updateNewDriver: false,
       inviteStatus: false,
-      inviteMessage: ''
+      inviteMessage: '',
+      sendingSMS: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -96,8 +97,6 @@ class DriverForm extends Component {
   async sendDriverInvite(user) {
     let { inviteStatus, inviteMessage } = this.state;
     const { currentUser } = this.props;
-    console.log('currentUser ');
-    console.log(currentUser);
 
     try {
       // Sending SMS to Truck's company
@@ -109,10 +108,8 @@ class DriverForm extends Component {
           body: `Hi, you’ve been invited by ${currentUser.firstName} ${currentUser.lastName} to join Trelar. 
             Please click www.trelar.net/driver to join Trelar</a>.`
         };
-        console.log('notification');
-        console.log(notification);
 
-        await TwilioService.createSms(notification);
+        await TwilioService.createInviteSms(notification);
 
         inviteStatus = true;
         inviteMessage = `
@@ -127,6 +124,7 @@ class DriverForm extends Component {
         to phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
     }
     this.setState({
+      sendingSMS: false,
       inviteStatus,
       inviteMessage
     });
@@ -153,12 +151,13 @@ class DriverForm extends Component {
       user.modifiedOn = moment().unix() * 1000;
       await UserService.updateUser(user);
       if (updateNewDriver || userStatus === 'Driver Invited') {
+        this.setState({step: 2, sendingSMS: true});
         this.sendDriverInvite(user);
-        this.setState({step: 2});
       } else {
         toggle();
       }
     } else {
+      user.email = `referredBy${currentUser.email}`;
       user.companyId = currentUser.companyId;
       user.isBanned = 0;
       user.preferredLanguage = 'English';
@@ -280,8 +279,19 @@ class DriverForm extends Component {
   }
 
   renderDriverInvite() {
-    const { inviteStatus, inviteMessage, selectedUser } = this.state;
+    const { inviteStatus, inviteMessage, selectedUser, sendingSMS } = this.state;
     const { toggle } = this.props;
+    if (sendingSMS) {
+      return (
+        <Row>
+          <Col md={12} className="text-center">
+            <div className="spinner-border text-success" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </Col>
+        </Row>
+      );
+    }
     return (
       <Row>
         <Col md={12}>
@@ -435,7 +445,7 @@ class DriverForm extends Component {
                 : null
             }
         </Col>
-        <Col md={6} className="text-right pt-4">
+        <Col md={12} className="text-right pt-4">
           <Button key="2"
             onClick={toggle}
             className="secondaryButton"
