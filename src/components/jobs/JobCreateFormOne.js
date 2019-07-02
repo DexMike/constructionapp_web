@@ -76,6 +76,10 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
+      reqHandlerJobName: {
+        touched: false,
+        error: ''
+      },
       /*
       reqHandlerTonnage: {
         touched: false,
@@ -203,7 +207,7 @@ class CreateJobFormOne extends PureComponent {
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
 
-    this.setState({ allAddresses });
+    this.setState({allAddresses});
 
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
@@ -496,6 +500,7 @@ class CreateJobFormOne extends PureComponent {
     const {rateTab} = this.state;
     const {
       // reqHandlerTonnage,
+      reqHandlerJobName,
       reqHandlerEndAddress,
       reqHandlerEndState,
       reqHandlerEndCity,
@@ -527,6 +532,17 @@ class CreateJobFormOne extends PureComponent {
           ...reqHandlerMaterials,
           touched: true,
           error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    if (job.name === '' || job.name === null) {
+      this.setState({
+        reqHandlerJobName: {
+          ...reqHandlerJobName,
+          touched: true,
+          error: 'Please enter a name for your job'
         }
       });
       isValid = false;
@@ -807,19 +823,21 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    const {value} = e.target;
-    this.setState({[e.target.name]: value});
-  }
-
-  handleInputChangeTonHour(e) {
-    if (e.target.name === 'rateByTonValue') {
+    if (e.target.name === 'name') {
       this.setState({
-        rateByTonValue: e.target.value,
-        reqHandlerTons: {
+        name: e.target.value,
+        reqHandlerJobName: {
           touched: true
         }
       });
-    } else if (e.target.name === 'estimatedTons') {
+    } else {
+      const {value} = e.target;
+      this.setState({[e.target.name]: value});
+    }
+  }
+
+  handleInputChangeTonHour(e) {
+    if (e.target.name === 'estimatedTons') {
       this.setState({
         rateEstimate: e.target.value,
         estimatedTons: e.target.value,
@@ -829,6 +847,8 @@ class CreateJobFormOne extends PureComponent {
       });
     } else if (e.target.name === 'rateByHourValue') {
       this.setState({rateByHourValue: e.target.value});
+    } else if (e.target.name === 'rateByTonValue') {
+      this.setState({rateByTonValue: e.target.value});
     } else if (e.target.name === 'estimatedHours') {
       this.setState({
         rateEstimate: e.target.value,
@@ -974,10 +994,6 @@ class CreateJobFormOne extends PureComponent {
     const isValid = await this.isFormValid();
 
     if (!isValid) {
-      // Add this back before merging SG-170 back into the design.
-      // validateRes(false);
-      // // TODO display error message
-      // // console.error('didnt put all the required fields.');
       return;
     }
     validateRes(true);
@@ -1100,6 +1116,7 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip,
       name,
       instructions,
+      reqHandlerJobName,
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerTrucksEstimate,
@@ -1133,12 +1150,29 @@ class CreateJobFormOne extends PureComponent {
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
                     <span className="form__form-group-label">Job Name</span>
-                    <input
+                    {
+                      /*
+                      <input
                       name="name"
                       type="text"
                       value={name}
                       onChange={this.handleInputChange}
                       placeholder="Job Name"
+                      meta={reqHandlerJobName}
+                    />
+                      */
+                    }
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'name',
+                          value: name
+                        }
+                      }
+                      placeholder="Job Name"
+                      type="text"
+                      meta={reqHandlerJobName}
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
