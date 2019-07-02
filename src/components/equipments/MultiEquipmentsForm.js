@@ -105,7 +105,7 @@ class MultiEquipmentsForm extends PureComponent {
       isValid = false;
     }
 
-    if (numberOfTrucks === 0 || numberOfTrucks === '0') {
+    if (Number(numberOfTrucks) === 0 || Number(numberOfTrucks) === '0' || Number(numberOfTrucks) === null) {
       this.setState({
         reqHandlerNumberOfTrucks: {
           touched: true,
