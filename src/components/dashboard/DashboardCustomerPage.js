@@ -35,6 +35,7 @@ function AddJobButton({handle}) {
       onClick={handle}
       type="button"
       className="primaryButton"
+      id="addJobButton"
     >
       {t('ADD A JOB')}
     </Button>
