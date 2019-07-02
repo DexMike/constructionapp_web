@@ -54,20 +54,7 @@ class LoginPage extends SignIn {
   }
 
   async componentDidMount() {
-    let ip = '';
-    try {
-      const ipAddress = await UtilsService.getUserIP();
-      ({ ip } = ipAddress);
-    } catch (e) {
-      // console.log(e);
-    }
-    const browserVersion = await UtilsService.getBrowserVersion();
-    const screenSize = await UtilsService.getScreenDimentions();
-    this.setState({
-      ip,
-      browserVersion,
-      screenSize
-    });
+    // console.log(mounted);
   }
 
   showPassword(e) {
@@ -149,6 +136,22 @@ class LoginPage extends SignIn {
       }
 
       const data = await Auth.signIn(this.state.username, this.state.password);
+
+      let ip = '';
+      try {
+        const ipAddress = await UtilsService.getUserIP();
+        ({ ip } = ipAddress);
+      } catch (e) {
+        // console.log(e);
+      }
+      const browserVersion = await UtilsService.getBrowserVersion();
+      const screenSize = await UtilsService.getScreenDimentions();
+      this.setState({
+        settingsLoaded: true,
+        ip,
+        browserVersion,
+        screenSize
+      });
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated

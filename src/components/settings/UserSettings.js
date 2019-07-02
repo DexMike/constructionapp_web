@@ -21,6 +21,8 @@ import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
 import './Settings.css';
+import ProfileService from "../../api/ProfileService";
+import i18n from "i18next";
 
 
 class UserSettings extends Component {
@@ -301,7 +303,7 @@ class UserSettings extends Component {
     });
   }
 
-  handlePreferredLangChange(e) {
+  async handlePreferredLangChange(e) {
     const reqHandler = 'reqHandlerLanguage';
     this.setState({
       [reqHandler]: Object.assign({}, reqHandler, {
@@ -439,7 +441,6 @@ class UserSettings extends Component {
     if (!this.isFormValid()) {
       return;
     }
-
     const user = this.setUserInfo();
     const address = this.setAddressInfo();
     if (user && user.id) {
@@ -447,10 +448,13 @@ class UserSettings extends Component {
         .unix() * 1000;
       try {
         await UserService.updateUser(user);
+        const {preferredLanguage} = this.state;
+        i18n.changeLanguage(preferredLanguage);
+        this.setState({preferredLanguage});
         await AddressService.updateAddress(address);
         // console.log('Updated');
       } catch (err) {
-        // console.log(err);
+        console.log(err);
       }
     }
   }
