@@ -207,7 +207,7 @@ class CreateJobFormOne extends PureComponent {
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
 
-    this.setState({ allAddresses });
+    this.setState({allAddresses});
 
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
@@ -847,6 +847,8 @@ class CreateJobFormOne extends PureComponent {
       });
     } else if (e.target.name === 'rateByHourValue') {
       this.setState({rateByHourValue: e.target.value});
+    } else if (e.target.name === 'rateByTonValue') {
+      this.setState({rateByTonValue: e.target.value});
     } else if (e.target.name === 'estimatedHours') {
       this.setState({
         rateEstimate: e.target.value,
