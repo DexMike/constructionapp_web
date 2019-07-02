@@ -457,7 +457,7 @@ class MultiEquipmentsForm extends PureComponent {
             <Row className="col-12 pt-4">
               <Col md={12}>
                 <span>
-                  Max Distance to Pickup (Miles)
+                  Max Distance to Pickup (Miles, optional)
                 </span>
                 <TFieldNumber
                   input={{

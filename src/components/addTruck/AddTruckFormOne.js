@@ -668,7 +668,7 @@ class AddTruckFormOne extends PureComponent {
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
                     <h3 className="subhead">
-                      Truck Rates
+                      Truck Rates (optional)
                     </h3>
                   </div>
                 </Row>
@@ -784,7 +784,7 @@ class AddTruckFormOne extends PureComponent {
                       meta={reqHandlerMaxCapacity}
                     />
                     <span className="form__form-group-label mt-8">
-                      Max Distance to Pickup (Miles)
+                      Max Distance to Pickup (Miles, optional)
                     </span>
                     <TFieldNumber
                       input={
