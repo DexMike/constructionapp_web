@@ -714,7 +714,7 @@ class CarriersCustomerPage extends Component {
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
                 <Col lg={12}>
                   <Row lg={12} id="filter-input-row">
-                    <Col md="4">
+                    <Col md="4" id="materialTypeSelect">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -742,9 +742,12 @@ class CarriersCustomerPage extends Component {
                         }
                         // placeholder="Materials"
                         placeholder={materialTypeList[0]}
+                        id="materialTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.materialType.length}
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="2" id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -771,6 +774,9 @@ class CarriersCustomerPage extends Component {
                           }))
                         }
                         placeholder="Any"
+                        id="truckTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.equipmentType.length}
                       />
                     </Col>
                     <Col md="2">
