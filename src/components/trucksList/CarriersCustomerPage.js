@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {Redirect} from 'react-router-dom';
+import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -128,7 +128,14 @@ class CarriersCustomerPage extends Component {
       }
     }
 
-    this.setState({companyZipCode, lastZipCode, company, address, profile, loaded: true});
+    this.setState({
+      companyZipCode,
+      lastZipCode,
+      company,
+      address,
+      profile,
+      loaded: true
+    });
     await this.fetchCarriers();
     await this.fetchFilterLists();
   }
@@ -152,7 +159,7 @@ class CarriersCustomerPage extends Component {
       name: '',
       numEquipments: 0
     };
-    this.setState({filters}, async function search() {
+    this.setState({ filters }, async function search() {
       await this.fetchCarriers();
     });
   }
@@ -162,12 +169,12 @@ class CarriersCustomerPage extends Component {
   }
 
   retrieveAllMaterials() {
-    const {materialTypeList} = this.state;
+    const { materialTypeList } = this.state;
     return materialTypeList;
   }
 
   async fetchFilterLists() {
-    const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
@@ -212,6 +219,12 @@ class CarriersCustomerPage extends Component {
     // we get all groups.companyId that have name 'Favorite'
     const groupsFavorites = await GroupListService.getGroupListsFavorites();
 
+    carriers.map((carrier) => {
+      const newCarrier = carrier;
+      newCarrier.favorite = false;
+      return newCarrier;
+    });
+
     if (groupsFavorites) {
       // if we find the equipment's companyId in
       // groupsFavorites we favorite it
@@ -219,17 +232,81 @@ class CarriersCustomerPage extends Component {
         const newCarrier = carrier;
         if (groupsFavorites.includes(newCarrier.id)) {
           newCarrier.favorite = true;
-        } else {
-          newCarrier.favorite = false;
         }
         return newCarrier;
       });
-      this.setState({carriers});
     }
+
+    this.setState({ carriers });
+  }
+
+  convertCarrierEquipmentsToCarrierItems(carrierEquipmentResults) {
+    const carriers2 = new Map();
+    carrierEquipmentResults.forEach((item) => {
+      const key = item.carrierId;
+      const collection = carriers2.get(key);
+      if (!collection) {
+        carriers2.set(key, [item]);
+      } else {
+        collection.push(item);
+      }
+    });
+    const carriers3 = [];
+    carriers2.forEach((carriers2item) => {
+      console.log(carriers2item);
+      const carrierItem = {
+        id: carriers2item[0].carrierId,
+        legalName: carriers2item[0].legalName,
+        distance: carriers2item[0].distance,
+        carrierMaterials: [],
+        equipmentTypes: []
+      };
+      carriers2item.forEach((carrierEquipment) => {
+        const { equipmentType, equipmentMaterial } = carrierEquipment;
+
+        if (carrierItem.equipmentTypes.length <= 0) {
+          carrierItem.equipmentTypes.push({
+            equipmentType,
+            count: 1
+          });
+        } else {
+          let equipmentTypeMatch = false;
+          carrierItem.equipmentTypes = carrierItem.equipmentTypes.map((equipmentTypeItem) => {
+            const newEquipmentTypeItem = {...equipmentTypeItem};
+            if (newEquipmentTypeItem.equipmentType === equipmentType) {
+              equipmentTypeMatch = true;
+              newEquipmentTypeItem.count += 1;
+            }
+            return newEquipmentTypeItem;
+          });
+          if (!equipmentTypeMatch) {
+            carrierItem.equipmentTypes.push({
+              equipmentType,
+              count: 1
+            });
+          }
+        }
+
+        let materialMatch = false;
+        carrierItem.carrierMaterials.forEach((carrierMaterialItem) => {
+          if (carrierMaterialItem === equipmentMaterial) {
+            materialMatch = true;
+          }
+        }, materialMatch);
+        if (!materialMatch) {
+          carrierItem.carrierMaterials.push(equipmentMaterial);
+        }
+      });
+      // for (let i = 0; i < carriers2item.length; i += 1) {
+      // }
+      carriers3.push(carrierItem);
+    });
+    console.log(carriers3);
+    return carriers3;
   }
 
   async fetchCarriers() {
-    const {lastZipCode, companyZipCode, filters, reqHandlerZip} = this.state;
+    const { lastZipCode, companyZipCode, filters, reqHandlerZip } = this.state;
     let { company, address, profile } = this.state;
     // const carriers = await CarrierService.getCarrierByFiltersCarrier(filters);
 
@@ -274,13 +351,13 @@ class CarriersCustomerPage extends Component {
       }
     }
 
-    const carriers = await CompanyService.getCarriersByFilters(filters);
-
+    const carrierEquipmentResults = await CompanyService.getCarriersByFiltersV2(filters);
+    const carriers = this.convertCarrierEquipmentsToCarrierItems(carrierEquipmentResults);
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
       // Promise.all(
 
-      this.fetchFavoriteCarriers(carriers); // we fetch what carriers are favorite
+      await this.fetchFavoriteCarriers(carriers); // we fetch what carriers are favorite
       // this.fetchCarrierMaterials(carriers);
 
       carriers.map((equipment) => {
@@ -291,21 +368,21 @@ class CarriersCustomerPage extends Component {
           .format();
         return newCarrier;
       });
-      this.setState({carriers});
+      // this.setState({ carriers });
     }
-    this.setState({lastZipCode: filters.zipCode});
+    this.setState({ lastZipCode: filters.zipCode });
   }
 
   async handleSelectFilterChange(option) {
-    const {value, name} = option;
-    const {filters} = this.state;
+    const { value, name } = option;
+    const { filters } = this.state;
     filters[name] = value;
-    this.setState({filters});
+    this.setState({ filters });
     await this.fetchCarriers();
   }
 
   handleMultiChange(data) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.materialType = data;
     this.setState({
       filters
@@ -315,7 +392,7 @@ class CarriersCustomerPage extends Component {
   }
 
   handleMultiTruckChange(data) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.equipmentType = data;
     this.setState({
       filters
@@ -326,12 +403,12 @@ class CarriersCustomerPage extends Component {
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({[`goTo${menuItem}`]: true});
+      this.setState({ [`goTo${menuItem}`]: true });
     }
   }
 
   async handleSetFavorite(companyId) {
-    const {carriers} = this.state;
+    const { carriers } = this.state;
 
     try {
       const group = await GroupListService.getGroupListsByCompanyId(companyId);
@@ -360,7 +437,7 @@ class CarriersCustomerPage extends Component {
       }
       this.fetchFavoriteCarriers(carriers);
     } catch (error) {
-      this.setState({carriers});
+      this.setState({ carriers });
     }
   }
 
@@ -373,25 +450,25 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleStartDateChange(e) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.startAvailability = e;
     await this.fetchCarriers();
-    this.setState({filters});
+    this.setState({ filters });
   }
 
   async handleEndDateChange(e) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.endAvailability = e;
     await this.fetchCarriers();
-    this.setState({filters});
+    this.setState({ filters });
   }
 
   async handleIntervalInputChange(e) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.startAvailability = e.start;
     filters.endAvailability = e.end;
     await this.fetchCarriers();
-    this.setState({filters});
+    this.setState({ filters });
   }
 
   handleFilterChangeDelayed(e) {
@@ -401,8 +478,8 @@ class CarriersCustomerPage extends Component {
       await this.fetchCarriers();
     }); */
     const self = this;
-    const {value} = e.target;
-    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const { value } = e.target;
+    const { filters, reqHandlerZip, reqHandlerRange } = this.state;
     const filter = e.target.name;
     let invalidZip = false;
     let invalidRange = false;
@@ -455,24 +532,24 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleFilterChange(e) {
-    const {value} = e.target;
-    const {filters} = this.state;
+    const { value } = e.target;
+    const { filters } = this.state;
     filters[e.target.name] = value;
-    this.setState({filters});
+    this.setState({ filters });
     await this.fetchCarriers();
   }
 
   handleNumChange(e) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.numEquipments = e.target.value;
-    this.setState({filters}, async function search() {
+    this.setState({ filters }, async function search() {
       await this.fetchCarriers();
     });
     // this.setState({filters});
   }
 
   toggleAddJobModal() {
-    const {modal, filters} = this.state;
+    const { modal, filters } = this.state;
     if (modal) {
       filters.materialType = [];
       this.setState({
@@ -485,19 +562,19 @@ class CarriersCustomerPage extends Component {
   }
 
   toggleSelectMaterialsModal() {
-    const {modalSelectMaterials} = this.state;
+    const { modalSelectMaterials } = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
     });
   }
 
   returnSelectedMaterials() {
-    const {filters} = this.state;
+    const { filters } = this.state;
     return filters.materialType;
   }
 
   preventModal() {
-    this.setState({modal: false});
+    this.setState({ modal: false });
   }
 
   renderGoTo() {
@@ -536,7 +613,7 @@ class CarriersCustomerPage extends Component {
             Select material
           </h4>
         </div>
-        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           Please select a material type for this job
         </div>
 
@@ -589,7 +666,7 @@ class CarriersCustomerPage extends Component {
           />
           <div className="bold-text modal__title">Job Request</div>
         </div>
-        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
+        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
           <JobCreateFormCarrier
             selectedCarrierId={selectedCarrier}
             closeModal={this.toggleAddJobModal}
@@ -836,7 +913,7 @@ class CarriersCustomerPage extends Component {
       carriers
     } = this.state;
 
-    
+
     return (
       <Container>
         <Card>
@@ -890,6 +967,8 @@ class CarriersCustomerPage extends Component {
                   carrierId={c.id}
                   carrierName={c.legalName}
                   favorite={c.favorite}
+                  equipmentTypes={c.equipmentTypes}
+                  materials={c.carrierMaterials}
                   setFavorite={() => this.handleSetFavorite(c.id)}
                   requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
@@ -903,7 +982,7 @@ class CarriersCustomerPage extends Component {
   }
 
   render() {
-    const {loaded} = this.state;
+    const { loaded } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
