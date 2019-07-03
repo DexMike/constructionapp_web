@@ -64,7 +64,7 @@ class JobForm extends Component {
       const response = await GeoCodingService
         .getDistance(startPoint.longitude, startPoint.latitude,
           endPoint.longitude, endPoint.latitude);
-      distance = response.waypoints[1].distance;
+      distance = response.routes[0].distance;
     } catch (e) {
       // console.log(e)
     }
@@ -330,7 +330,7 @@ class JobForm extends Component {
           <Col>
             <div>
               <div>
-                {TFormat.asNumber(distance * 0.621371)} miles (one way)
+                {TFormat.asMetersToMiles(distance)}
               </div>
             </div>
             <br/>

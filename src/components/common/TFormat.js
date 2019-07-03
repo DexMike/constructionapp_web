@@ -2,6 +2,9 @@ import React, { /* Component */ } from 'react';
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
 
+const toMil = 0.62137119;
+const toKm = 1.609344;
+
 class TFormat {
   static asMoney(inputValue) {
     return (
@@ -227,6 +230,56 @@ class TFormat {
         thousandSeparator
         prefix=""
         suffix=" mi"
+      />
+    );
+  }
+
+  static asMetersToMi(inputValue) {
+    // Added this one since mapbox response returns the value in
+    // meters when getting the distance between locations
+    const miles = inputValue * toMil / 1000;
+    return (
+      <NumberFormat
+        value={miles}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={2}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=" miles (one way)"
+      />
+    );
+  }
+
+  static asKilometersToMiles(inputValue) {
+    const miles = inputValue * toMil;
+    return (
+      <NumberFormat
+        value={miles}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={2}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=" miles"
+      />
+    );
+  }
+
+  static asMilesToKilometers(inputValue) {
+    const km = inputValue * toKm;
+    return (
+      <NumberFormat
+        value={km}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={2}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=" km"
       />
     );
   }
