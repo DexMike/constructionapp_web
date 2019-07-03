@@ -154,7 +154,7 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
-      reqHandlerEstimatedhours: {
+      reqHandlerEstimatedHours: {
         touched: false,
         error: ''
       },
@@ -523,7 +523,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
-      reqHandlerEstimatedhours
+      reqHandlerEstimatedHours
     } = this.state;
     let isValid = true;
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
@@ -792,8 +792,8 @@ class CreateJobFormOne extends PureComponent {
       }
       if (estimatedHours <= 0) {
         this.setState({
-          reqHandlerEstimatedhours: {
-            ...reqHandlerEstimatedhours,
+          reqHandlerEstimatedHours: {
+            ...reqHandlerEstimatedHours,
             touched: true,
             error: 'Required input'
           }
@@ -846,13 +846,26 @@ class CreateJobFormOne extends PureComponent {
         }
       });
     } else if (e.target.name === 'rateByHourValue') {
-      this.setState({rateByHourValue: e.target.value});
+      this.setState({
+        rateByHourValue: e.target.value,
+        reqHandlerHours: {
+          touched: true
+        }
+      });
     } else if (e.target.name === 'rateByTonValue') {
-      this.setState({rateByTonValue: e.target.value});
+      this.setState({
+        rateByTonValue: e.target.value,
+        reqHandlerTons: {
+          touched: true
+        }
+      });
     } else if (e.target.name === 'estimatedHours') {
       this.setState({
         rateEstimate: e.target.value,
-        estimatedHours: e.target.value
+        estimatedHours: e.target.value,
+        reqHandlerEstimatedHours: {
+          touched: true
+        }
       });
     }
   }
@@ -1018,7 +1031,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
-      reqHandlerEstimatedhours
+      reqHandlerEstimatedHours
     } = this.state;
     if (hourTon === 'ton') {
       return (
@@ -1085,7 +1098,7 @@ class CreateJobFormOne extends PureComponent {
             }
             placeholder="0"
             decimal
-            meta={reqHandlerEstimatedhours}
+            meta={reqHandlerEstimatedHours}
           />
         </div>
       </React.Fragment>
