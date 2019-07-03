@@ -15,6 +15,7 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class JobForm extends Component {
   constructor(props) {
@@ -44,19 +45,29 @@ class JobForm extends Component {
       carrier: null,
       coords: null,
       loads: [],
-      loaded: false
+      loaded: false,
+      distance: 0
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   async componentDidMount() {
-
     const profile = await ProfileService.getProfile();
-
     const { job, companyCarrier } = this.props;
     let { loads, carrier, images } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
+    const startPoint = job.startAddress;
+    const endPoint = job.endAddress;
+    let distance = 0;
+    try {
+      const response = await GeoCodingService
+        .getDistance(startPoint.longitude, startPoint.latitude,
+          endPoint.longitude, endPoint.latitude);
+      distance = response.waypoints[1].distance;
+    } catch (e) {
+      // console.log(e)
+    }
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
@@ -82,7 +93,8 @@ class JobForm extends Component {
       carrier,
       loaded: true,
       loads,
-      job
+      job,
+      distance
     });
 
   }
@@ -308,8 +320,22 @@ class JobForm extends Component {
   }
 
   renderJobBottom(job) {
+    const { distance } = this.state;
     return (
       <React.Fragment>
+        <h3 className="subhead">
+          Distance
+        </h3>
+        <Row>
+          <Col>
+            <div>
+              <div>
+                {TFormat.asNumber(distance * 0.621371)} miles (one way)
+              </div>
+            </div>
+            <br/>
+          </Col>
+        </Row>
         <h3 className="subhead">
           Comments
         </h3>
@@ -559,7 +585,6 @@ class JobForm extends Component {
                       {endAddress}
                     </div>
                   </div>
-                  <hr/>
                   <div className="row mt-1">
                     <div className="col-md-12">
                       {this.renderJobBottom(job)}
@@ -614,7 +639,6 @@ class JobForm extends Component {
                       {endAddress}
                     </div>
                   </div>
-                  <hr/>
                   <div className="row mt-1">
                     <div className="col-md-12">
                       {this.renderJobBottom(job)}
@@ -655,7 +679,6 @@ class JobForm extends Component {
                     {endAddress}
                   </div>
                 </div>
-                <hr/>
                 <div className="row  mt-1">
                   <div className="col-md-12">
                     {this.renderJobBottom(job)}

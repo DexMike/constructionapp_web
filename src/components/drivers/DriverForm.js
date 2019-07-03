@@ -36,7 +36,8 @@ class DriverForm extends Component {
       step: 1,
       updateNewDriver: false,
       inviteStatus: false,
-      inviteMessage: ''
+      inviteMessage: '',
+      sendingSMS: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -96,6 +97,7 @@ class DriverForm extends Component {
   async sendDriverInvite(user) {
     let { inviteStatus, inviteMessage } = this.state;
     const { currentUser } = this.props;
+
     try {
       // Sending SMS to Truck's company
       const chars = {'(': '', ')': '', '-': '', ' ': ''};
@@ -103,24 +105,26 @@ class DriverForm extends Component {
       if (this.checkPhoneFormat(mobilePhone)) {
         const notification = {
           to: this.phoneToNumberFormat(mobilePhone),
-          body: `Hello. You’ve been invited by your friend ${currentUser.firstName} ${currentUser.lastName} to drive with Trelar. 
-            Please click www.trelar.net/driver to join Trelar.net</a>.`
+          body: `Hi, you’ve been invited by ${currentUser.firstName} ${currentUser.lastName} to join Trelar. 
+            Please click www.trelar.net/driver to join Trelar</a>.`
         };
-        await TwilioService.createSms(notification);
+
+        await TwilioService.createInviteSms(notification);
 
         inviteStatus = true;
-        inviteMessage = `Invite Sent!.
-        Your invite to ${user.firstName} ${user.lastName} at phone number ${user.mobilePhone} was sent.`;
+        inviteMessage = `
+        Your invitation to ${user.firstName} ${user.lastName}, sent to phone number ${user.mobilePhone}, was Successful.`;
       } else {
         inviteStatus = false;
         inviteMessage = `Mobile phone format ${user.mobilePhone} is invalid. Try editing it ...`;
       }
     } catch (err) {
       inviteStatus = false;
-      inviteMessage = `Error. Your invite to ${user.firstName} ${user.lastName}
-        at phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
+      inviteMessage = `Error. Your invitation to ${user.firstName} ${user.lastName}
+        to phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
     }
     this.setState({
+      sendingSMS: false,
       inviteStatus,
       inviteMessage
     });
@@ -133,7 +137,7 @@ class DriverForm extends Component {
       this.setState({ btnSubmitting: false });
       return;
     }
-    const { 
+    const {
       firstName,
       lastName, email, mobilePhone, userStatus, selectedUser, updateNewDriver } = this.state;
     const user = selectedUser;
@@ -147,12 +151,13 @@ class DriverForm extends Component {
       user.modifiedOn = moment().unix() * 1000;
       await UserService.updateUser(user);
       if (updateNewDriver || userStatus === 'Driver Invited') {
+        this.setState({step: 2, sendingSMS: true});
         this.sendDriverInvite(user);
-        this.setState({step: 2});
       } else {
         toggle();
       }
     } else {
+      user.email = `referredBy${currentUser.email}`;
       user.companyId = currentUser.companyId;
       user.isBanned = 0;
       user.preferredLanguage = 'English';
@@ -202,15 +207,15 @@ class DriverForm extends Component {
       isValid = false;
     }
 
-    if (email === null || email.length === 0) {
-      this.setState({
-        reqHandlerEmail: {
-          touched: true,
-          error: 'Please enter drivers email'
-        }
-      });
-      isValid = false;
-    }
+    // if (email === null || email.length === 0) {
+    //   this.setState({
+    //     reqHandlerEmail: {
+    //       touched: true,
+    //       error: 'Please enter drivers email'
+    //     }
+    //   });
+    //   isValid = false;
+    // }
 
     if (mobilePhone === null || mobilePhone.length === 0) {
       this.setState({
@@ -237,9 +242,11 @@ class DriverForm extends Component {
       reqHandler = 'reqHandlerFName';
     } else if (e.target.name === 'lastName') {
       reqHandler = 'reqHandlerLName';
-    } else if (e.target.name === 'email') {
-      reqHandler = 'reqHandlerEmail';
-    } else if (e.target.name === 'mobilePhone') {
+    } else
+    //   if (e.target.name === 'email') {
+    //   reqHandler = 'reqHandlerEmail';
+    // } else
+    if (e.target.name === 'mobilePhone') {
       reqHandler = 'reqHandlerPhone';
     }
     this.setState({
@@ -272,12 +279,23 @@ class DriverForm extends Component {
   }
 
   renderDriverInvite() {
-    const { inviteStatus, inviteMessage, selectedUser } = this.state;
+    const { inviteStatus, inviteMessage, selectedUser, sendingSMS } = this.state;
     const { toggle } = this.props;
+    if (sendingSMS) {
+      return (
+        <Row>
+          <Col md={12} className="text-center">
+            <div className="spinner-border text-success" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </Col>
+        </Row>
+      );
+    }
     return (
       <Row>
         <Col md={12}>
-          <span>Invite a Driver</span>
+          {/* <span>Invite a Driver</span> */}
           <br/>
           <h3>{inviteStatus ? 'Success!' : 'Warning'}</h3>
           <p>
@@ -374,21 +392,21 @@ class DriverForm extends Component {
             meta={reqHandlerLName}
           />
         </Col>
-        <Col md={6} className="pt-2">
-          <span>
-            Email
-          </span>
-          <TField
-            input={{
-              onChange: this.handleInputChange,
-              name: 'email',
-              value: email
-            }}
-            placeholder="Email"
-            type="text"
-            meta={reqHandlerEmail}
-          />
-        </Col>
+        {/* <Col md={6} className="pt-2"> */}
+        {/* <span> */}
+        {/* Email */}
+        {/* </span> */}
+        {/* <TField */}
+        {/* input={{ */}
+        {/* onChange: this.handleInputChange, */}
+        {/* name: 'email', */}
+        {/* value: email */}
+        {/* }} */}
+        {/* placeholder="Email" */}
+        {/* type="text" */}
+        {/* meta={reqHandlerEmail} */}
+        {/* /> */}
+        {/* </Col> */}
         <Col md={6} className="pt-2">
           <span>
             Mobile Phone
