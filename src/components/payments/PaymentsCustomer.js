@@ -15,11 +15,14 @@ class PaymentsCustomer extends Component {
       loaded: false,
       id: 0,
       goToPaymentDetails: false,
-      payments: []
+      payments: [],
+      page: 0,
+      rows: 10,
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handlePaymentId = this.handlePaymentId.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
   }
 
   async componentDidMount() {
@@ -34,6 +37,14 @@ class PaymentsCustomer extends Component {
     });
   }
 
+  handlePageChange(page) {
+    this.setState({ page });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows });
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
@@ -45,7 +56,12 @@ class PaymentsCustomer extends Component {
     const payments = response.data.map((payment) => {
       const newPayment = {};
       newPayment.id = payment.id;
-      newPayment.amount = TFormat.asMoney(payment.amount);
+
+      newPayment.amount = payment.amount;
+      newPayment.amountF = TFormat.getValue(
+        TFormat.asMoney(payment.amount)
+      );
+
       newPayment.type = payment.type;
       newPayment.status = payment.status;
       newPayment.createdAt = TFormat.asDate(payment.createdAt);
@@ -67,8 +83,22 @@ class PaymentsCustomer extends Component {
     return false;
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
-    // const payments = [{ date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88' }];
+    /* const payments = [{
+      date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88'
+    }]; */
     const { loaded, payments } = this.state;
     if (loaded) {
       return (
@@ -76,7 +106,7 @@ class PaymentsCustomer extends Component {
           {this.renderGoTo()}
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Customer Payments</h3>
+              <h3 className="page-title">Customer Charges</h3>
             </Col>
           </Row>
           <Row>
@@ -86,32 +116,27 @@ class PaymentsCustomer extends Component {
                   <TTable
                     columns={
                       [
+                        // {
+                        //   name: 'id',
+                        //   displayName: 'ID'
+                        // },
                         {
-                          name: 'id',
-                          displayName: 'ID'
+                          name: 'createdAt',
+                          displayName: 'Date'
                         }, {
                           name: 'amount',
-                          displayName: 'Amount'
-                        }, {
-                          name: 'createdAt',
-                          displayName: 'Added'
-                        }, {
-                          name: 'type',
-                          displayName: 'Type'
+                          displayName: 'Amount',
+                          label: 'amountF'
                         }, {
                           name: 'status',
                           displayName: 'Status'
-                        }, {
-                          name: 'company',
-                          displayName: 'Customer'
-                        }, {
-                          name: 'paymentMethod',
-                          displayName: 'Payment Method'
                         }
                       ]
                     }
                     data={payments}
                     handleIdClick={this.handlePaymentId}
+                    handlePageChange={this.handlePageChange}
+                    handleRowsChange={this.handleRowsPerPage}
                   />
                 </CardBody>
               </Card>
@@ -121,17 +146,13 @@ class PaymentsCustomer extends Component {
       );
     }
     return (
-      <Container className="dashboard">
+      <Container className="container">
         <Row>
           <Col md={12}>
             <h3 className="page-title">Customer Payments</h3>
           </Col>
         </Row>
-        <Row>
-          <Col md={12}>
-            Loading ...
-          </Col>
-        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import { Container, Card, CardBody, Col, Row, Button } from 'reactstrap';
+import { Container, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 // import NumberFormat from 'react-number-format';
@@ -20,10 +20,11 @@ import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
 import TMapBoxOriginDestination
   from '../common/TMapBoxOriginDestination';
-import GPSTrackingService from '../../api/GPSTrackingService';
+// import GPSTrackingService from '../../api/GPSTrackingService';
 import TSubmitButton from '../common/TSubmitButton';
+import TSpinner from '../common/TSpinner';
 
-const MAPBOX_MAX = 23;
+// const MAPBOX_MAX = 23;
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -39,7 +40,7 @@ class JobViewForm extends Component {
       booking: null,
       bookingEquipment: null,
       ...job,
-      bid: null,
+      bid: [],
       loaded: false,
       favoriteCompany: [],
       profile: [],
@@ -52,7 +53,6 @@ class JobViewForm extends Component {
   async componentDidMount() {
     let {
       job,
-      bid,
       company,
       companyName,
       bidExists,
@@ -64,7 +64,9 @@ class JobViewForm extends Component {
       favoriteCompany
     } = this.state;
     const { jobId } = this.props;
-    const gps = [];
+    let bid = [];
+    let bids = [];
+    // const gps = [];
     profile = await ProfileService.getProfile();
 
     job = await JobService.getJobById(jobId);
@@ -77,7 +79,7 @@ class JobViewForm extends Component {
         endAddress = await AddressService.getAddressById(job.endAddress);
       }
       const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-      const bids = await BidService.getBidsByJobId(job.id);
+      bids = await BidService.getBidsByJobId(job.id);
 
       if (company) {
         companyName = company.legalName;
@@ -95,15 +97,19 @@ class JobViewForm extends Component {
         job.materials = materials.map(material => material.value);
       }
 
+
       if (bids.length) { // we have a bid record
-        // we search for a bid that is assigned to the carrier (a favorite)
-        bid = bids.filter((filteredBid) => {
+        bids = bids.filter((filteredBid) => {
           if (filteredBid.hasCustomerAccepted === 1
-            // && filteredBid.hasSchedulerAccepted === 1
-            && filteredBid.companyCarrierId === profile.companyId) {
+            && filteredBid.hasSchedulerAccepted === 0
+            && filteredBid.companyCarrierId === profile.companyId) { // "Marketplace" bid
+            bid = filteredBid;
+          } else if (filteredBid.companyCarrierId === profile.companyId
+            && filteredBid.hasSchedulerAccepted === 1
+            && filteredBid.status === 'Pending') { // "Requested" bid
+            bid = filteredBid;
             return filteredBid;
           }
-          bid = bids[0];
           return bid;
         });
       }
@@ -118,42 +124,42 @@ class JobViewForm extends Component {
       }
 
       // get overlay data
-      let gpsData = [];
-      if (bookings.length > 0) {
-        gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-          bookings[0].id // booking.id
-        );
-      }
+      // let gpsData = [];
+      // if (bookings.length > 0) {
+      //   gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
+      //     bookings[0].id // booking.id
+      //   );
+      // }
 
       // prepare the waypoints in an appropiate format for MB (GEOJson point)
-      if (gpsData.length > 0) {
-        for (const datum in gpsData) {
-          if (gpsData[datum][0]) {
-            const loc = {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [
-                  gpsData[datum][1],
-                  gpsData[datum][0]
-                ]
-              },
-              properties: {
-                title: 'Actual route',
-                icon: 'car'
-              }
-            };
-            // reduce the total of results to a maximum of 23
-            // Mapbox's limit is 25 points plus an origin and destination
-            const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
-            const reducer = datum / steps;
-            const remainder = (reducer % 1);
-            if (remainder === 0) {
-              gps.push(loc);
-            }
-          }
-        }
-      }
+      // if (gpsData.length > 0) {
+      //   for (const datum in gpsData) {
+      //     if (gpsData[datum][0]) {
+      //       const loc = {
+      //         type: 'Feature',
+      //         geometry: {
+      //           type: 'Point',
+      //           coordinates: [
+      //             gpsData[datum][1],
+      //             gpsData[datum][0]
+      //           ]
+      //         },
+      //         properties: {
+      //           title: 'Actual route',
+      //           icon: 'car'
+      //         }
+      //       };
+      //       // reduce the total of results to a maximum of 23
+      //       // Mapbox's limit is 25 points plus an origin and destination
+      //       const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
+      //       const reducer = datum / steps;
+      //       const remainder = (reducer % 1);
+      //       if (remainder === 0) {
+      //         gps.push(loc);
+      //       }
+      //     }
+      //   }
+      // }
     }
 
     // Check if carrier is favorite for this job's customer
@@ -214,7 +220,7 @@ class JobViewForm extends Component {
       await JobService.updateJob(newJob);
 
       // Since the Job was sent to all favorites there's a bid, update existing bid
-      const newBid = CloneDeep(bid[0]);
+      const newBid = CloneDeep(bid);
       newBid.companyCarrierId = profile.companyId;
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
@@ -283,7 +289,7 @@ class JobViewForm extends Component {
           bookingEquipment.modifiedBy = equipment.driversId;
           bookingEquipment.modifiedOn = moment().unix() * 1000;
           bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipments(
+          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
             bookingEquipment
           );
         }
@@ -310,7 +316,7 @@ class JobViewForm extends Component {
       const newJob = CloneDeep(job);
 
       // Updating the Job
-      newJob.status = 'Requested';
+      // newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
@@ -320,24 +326,36 @@ class JobViewForm extends Component {
       await JobService.updateJob(newJob);
 
       // CREATING BID
-      bid = {};
-      bid.jobId = newJob.id;
-      bid.userId = profile.userId;
-      bid.companyCarrierId = profile.companyId;
-      bid.hasCustomerAccepted = 0;
-      bid.hasSchedulerAccepted = 1;
-      bid.status = 'Pending';
-      bid.rateType = newJob.rateType;
-      bid.rate = newJob.rate;
-      bid.rateEstimate = newJob.rateEstimate;
-      bid.notes = newJob.notes;
-      bid.createdBy = profile.userId;
-      bid.modifiedBy = profile.userId;
-      bid.modifiedOn = moment()
-        .unix() * 1000;
-      bid.createdOn = moment()
-        .unix() * 1000;
-      bid = await BidService.createBid(bid);
+      if (bid.length > 0) {
+        const newBid = CloneDeep(bid);
+        newBid.companyCarrierId = profile.companyId;
+        bid.hasCustomerAccepted = 0;
+        bid.hasSchedulerAccepted = 1;
+        newBid.status = 'Pending';
+        newBid.modifiedBy = profile.userId;
+        newBid.modifiedOn = moment()
+          .unix() * 1000;
+        bid = await BidService.updateBid(newBid);
+      } else {
+        bid = {};
+        bid.jobId = newJob.id;
+        bid.userId = profile.userId;
+        bid.companyCarrierId = profile.companyId;
+        bid.hasCustomerAccepted = 0;
+        bid.hasSchedulerAccepted = 1;
+        bid.status = 'Pending';
+        bid.rateType = newJob.rateType;
+        bid.rate = newJob.rate;
+        bid.rateEstimate = newJob.rateEstimate;
+        bid.notes = newJob.notes;
+        bid.createdBy = profile.userId;
+        bid.createdOn = moment()
+          .unix() * 1000;
+        bid.modifiedBy = profile.userId;
+        bid.modifiedOn = moment()
+          .unix() * 1000;
+        bid = await BidService.createBid(bid);
+      }
 
       // Let's make a call to Twilio to send an SMS
       // Sending SMS to customer who created Job
@@ -398,6 +416,7 @@ class JobViewForm extends Component {
 
   renderJobTop(job) {
     const {
+      bid,
       companyName,
       favoriteCompany,
       btnSubmitting
@@ -424,7 +443,7 @@ class JobViewForm extends Component {
         />
       );
     // Job was 'Published' to the Marketplace
-    } else if (jobStatus === 'Published') {
+    } else if (jobStatus === 'Published' && bid.status !== 'Pending') {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -722,9 +741,13 @@ class JobViewForm extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }

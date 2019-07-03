@@ -34,6 +34,11 @@ class BidService extends AgentService {
     return (response);
   }
 
+  static async getBidsInfoByJobId(jobId) {
+    const response = await this.get(`/jobs/${jobId}${PATH}/info`);
+    return (response);
+  }
+
   static getDefaultBid() {
     return {
       jobId: 0,

@@ -10,20 +10,27 @@ import {
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Storage } from 'aws-amplify';
+import Resizer from 'react-image-file-resizer';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
 // import TField from '../common/TField';
 import TCheckBox from '../common/TCheckBox';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import LookupsService from '../../api/LookupsService';
 // import DriverService from '../../api/DriverService';
 import './AddTruck.css';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import TFileUploadSingle from '../common/TFileUploadSingle';
 import StringGenerator from '../../utils/StringGenerator';
+import FileGenerator from '../../utils/FileGenerator';
+import TSpinner from '../common/TSpinner';
 
-// import validate from '../common/validate ';
+const maxWidth = 1200;
+const maxHeight = 800;
+const compressFormat = 'JPEG';
+const quality = 98;
 
 class AddTruckFormOne extends PureComponent {
   constructor(props) {
@@ -39,26 +46,30 @@ class AddTruckFormOne extends PureComponent {
       truckTypes: [],
       files: [],
       image: '',
+      prevImage: '',
       maxCapacity: '',
       // maxCapacityTouched: false,
       description: '',
       vin: '',
       licensePlate: '',
-      ratesByBoth: false, // this only tracks the select
       ratesByHour: false,
-      ratesByTon: false,
+      // ratesByTon: false,
       ratesCostPerTon: '',
       ratesCostPerHour: '',
       minOperatingTime: '',
+      minTons: '',
       maxDistanceToPickup: '',
       truckType: '',
+      isRatedHour: true,
+      isRatedTon: false,
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerMinRate: { touched: false, error: '' },
       reqHandlerMinTime: { touched: false, error: '' },
-      reqHandlerCostTon: { touched: false, error: '' },
-      reqHandlerChecks: { touched: false, error: '' },
-      reqHandlerMaxCapacity: { touched: false, error: '' }
+      // reqHandlerCostTon: { touched: false, error: '' },
+      // reqHandlerChecks: { touched: false, error: '' },
+      reqHandlerMaxCapacity: { touched: false, error: '' },
+      loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -70,6 +81,7 @@ class AddTruckFormOne extends PureComponent {
 
   async componentDidMount() {
     await this.fetchMaterials();
+    this.setState({loaded: true});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -128,7 +140,7 @@ class AddTruckFormOne extends PureComponent {
       reqHandlerMinRate: { touched: false },
       reqHandlerMinTime: { touched: false },
       // reqHandlerCostTon: { touched: false },
-      reqHandlerChecks: { touched: false },
+      // reqHandlerChecks: { touched: false },
       reqHandlerMaxCapacity: { touched: false }
     });
 
@@ -234,61 +246,26 @@ class AddTruckFormOne extends PureComponent {
       description,
       vin,
       licensePlate,
-      ratesByBoth,
-      ratesByHour,
-      ratesByTon,
+      isRatedHour,
+      isRatedTon,
       ratesCostPerHour,
       ratesCostPerTon,
       minOperatingTime,
+      minTons,
       maxDistanceToPickup
     } = this.state;
     let {saveValues} = this.state;
     const { onTruckFullInfo } = this.props;
 
-    // set states for checkboxes
-    let chargeBy = '';
-    if (ratesByBoth) {
-      chargeBy = 'Both';
-    } else {
-      if (ratesByHour) {
-        chargeBy = 'Hour';
-      }
-      if (ratesByTon) {
-        chargeBy = 'Tons';
-      }
-    }
-
     // map the values with the ones on equipment
     const shortDesc = description.substring(0, 45);
-    let start = new Date();
-    let end = new Date();
-    // let available = false;
 
     // dates if preloaded
     const {
       getTruckFullInfo,
-      // getAvailiabilityFullInfo,
       equipmentId
     } = this.props;
     const preloaded = getTruckFullInfo();
-    // const preloadedAvailability = getAvailiabilityFullInfo();
-
-    // load info from cached (if coming back from next tabs)
-    // if (typeof preloaded.info !== 'undefined') {
-    //   if (Object.keys(preloaded.info).length > 0) {
-    //     start = preloaded.info.startAvailability;
-    //     end = preloaded.info.endAvailability;
-    //     available = preloadedAvailability.info.isAvailable;
-    //   }
-    // }
-    // // however, if there is already saved dates, we'll use that one
-    // if (typeof preloadedAvailability.info !== 'undefined') {
-    //   if (Object.keys(preloadedAvailability.info).length > 0) {
-    //     start = preloadedAvailability.info.startDate;
-    //     end = preloadedAvailability.info.endDate;
-    //     available = preloadedAvailability.info.isAvailable;
-    //   }
-    // }
 
     // TODO-> Ask which params are required
     saveValues = {
@@ -300,6 +277,7 @@ class AddTruckFormOne extends PureComponent {
       maxCapacity, // This is a shorthand of (maxCapacity: maxCapacity)
       minCapacity: 0, // unasigned
       minHours: minOperatingTime,
+      minTons,
       maxDistance: maxDistanceToPickup,
       description,
       licensePlate,
@@ -308,12 +286,11 @@ class AddTruckFormOne extends PureComponent {
       // currentAvailability: available, // unasigned
       // startAvailability: start, // careful here, it's date unless it exists
       // endAvailability: end,
-      ratesByBoth, // keeping here in order to track it
-      ratesByHour, // keeping here in order to track it
-      ratesByTon, // keeping here in order to track it
+      isRatedHour,
+      isRatedTon,
       hourRate: ratesCostPerHour,
       tonRate: ratesCostPerTon,
-      rateType: chargeBy, // PENDING
+      // rateType: chargeBy, // PENDING
       equipmentId,
       defaultDriverId, // unasigned
       driverEquipmentsId: 0, // unasigned
@@ -353,47 +330,31 @@ class AddTruckFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    let { value } = e.target;
+    const { value } = e.target;
     let reqHandler = '';
-    if (e.target.name === 'ratesByBoth') {
-      value = e.target.checked ? Number(1) : Number(0);
-      if (e.target.checked) {
-        this.setState({
-          ratesByHour: 1,
-          ratesByTon: 1
-        });
-      } else {
-        this.setState({
-          ratesByHour: 0,
-          ratesByTon: 0
-        });
-      }
-    }
+
     if (e.target.name === 'ratesByHour' && e.target.checked) {
-      this.setState({ ratesByTon: 0 });
+      this.setState({ isRatedHour: true });
+    } else if (e.target.name === 'ratesByHour' && !e.target.checked) {
+      this.setState({ isRatedHour: false });
     }
+
     if (e.target.name === 'ratesByTon' && e.target.checked) {
-      this.setState({ ratesByHour: 0 });
+      this.setState({ isRatedTon: true });
+    } else if (e.target.name === 'ratesByTon' && !e.target.checked) {
+      this.setState({ isRatedTon: false });
     }
+
     if (e.target.name === 'maxCapacity') {
       // this.RenderField('renderField', 'coman', 'number', 'Throw error');
     }
 
-    // We take the input name prop to set the respective requiredHandler
     if (e.target.name === 'ratesCostPerHour') {
       reqHandler = 'reqHandlerMinRate';
     } else if (e.target.name === 'minOperatingTime') {
       reqHandler = 'reqHandlerMinTime';
-    } else if (e.target.name === 'ratesCostPerTon') {
-      reqHandler = 'reqHandlerCostTon';
     } else if (e.target.name === 'maxCapacity') {
       reqHandler = 'reqHandlerMaxCapacity';
-    } else if (
-      e.target.name === 'ratesByTon'
-      || e.target.name === 'ratesByHour'
-      || e.target.name === 'ratesByBoth'
-    ) {
-      reqHandler = 'reqHandlerChecks';
     }
     // Then we set the touched prop to false, hiding the error label
     this.setState({
@@ -476,7 +437,10 @@ class AddTruckFormOne extends PureComponent {
         ratesCostPerTon: Number(passedTruckFullInfo.tonRate),
         ratesCostPerHour: passedTruckFullInfo.hourRate,
         truckType: passedTruckFullInfo.type,
-        selectedMaterials: truckMaterials
+        selectedMaterials: truckMaterials,
+        isRatedHour: passedTruckFullInfo.isRatedHour,
+        isRatedTon: passedTruckFullInfo.isRatedTon,
+        minTons: passedTruckFullInfo.minTons
       });
       // set booleans
       if (passedTruckFullInfo.rateType === 'Both') {
@@ -511,7 +475,7 @@ class AddTruckFormOne extends PureComponent {
         licensePlate: preloaded.info.licensePlate,
         ratesByBoth: preloaded.info.ratesByBoth,
         ratesByHour: preloaded.info.ratesByHour,
-        ratesByTon: preloaded.info.ratesByTon,
+        // ratesByTon: preloaded.info.ratesByTon,
         minOperatingTime: preloaded.info.minHours,
         maxDistanceToPickup: preloaded.info.maxDistance,
         // ratesCostPerTon: preloaded.info.tonRate,
@@ -519,7 +483,11 @@ class AddTruckFormOne extends PureComponent {
         truckType: preloaded.info.type,
         selectedMaterials: preloaded.info.selectedMaterials,
         image: preloaded.info.image,
-        files
+        files,
+        isRatedHour: preloaded.info.isRatedHour,
+        isRatedTon: preloaded.info.isRatedTon,
+        minTons: preloaded.info.minTons,
+        ratesCostPerTon: Number(preloaded.info.tonRate)
       });
       // Materials Hauled is missing
     }
@@ -528,21 +496,49 @@ class AddTruckFormOne extends PureComponent {
     // let's cache this info, in case we want to go back
   }
 
-  async handleImageUpload(filesToUpload) {
+  async sendImage(file, name) {
+    const year = moment().format('YYYY');
+    const month = moment().format('MM');
+    const fileName = StringGenerator.makeId(6);
+    const fileNamePieces = name.split(/[\s.]+/);
+    const fileExtension = fileNamePieces[fileNamePieces.length - 1];
+    // try {
+    this.setState({ imageUploading: true });
+    const s3Key = `${year}/${month}/${fileName}.${fileExtension}`;
+    const storageConfig = {
+      contentType: 'image/jpeg', // resizer will always use jpeg file
+      progressCallback: () => {}, // we are not keeping track of the progress
+      level: 'public'
+    };
+    const result = await Storage.put(s3Key, file, storageConfig);
+    this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
+    this.setState({ imageUploading: false });
+  }
+
+  handleImageUpload(filesToUpload) {
     this.setState({ files: filesToUpload });
     const files = filesToUpload;
+
     if (files.length > 0) {
       const file = files[0];
-      const year = moment().format('YYYY');
-      const month = moment().format('MM');
-      const fileName = StringGenerator.makeId(6);
-      const fileNamePieces = file.name.split(/[\s.]+/);
-      const fileExtension = fileNamePieces[fileNamePieces.length - 1];
-      // try {
-      this.setState({ imageUploading: true });
-      const result = await Storage.put(`${year}/${month}/${fileName}.${fileExtension}`, file);
-      this.setState({ image: `${process.env.AWS_UPLOADS_ENDPOINT}/public/${result.key}` });
-      this.setState({ imageUploading: false });
+
+      /**/
+      const that = this;
+      Resizer.imageFileResizer(
+        file, // is the file of the new image that can now be uploaded...
+        maxWidth, // is the maxWidth of the  new image
+        maxHeight, // is the maxHeight of the  new image
+        compressFormat,
+        quality,
+        0,
+        uri => {
+          that.sendImage(
+            FileGenerator.getBlob(uri),
+            file.name
+          )
+        },
+        'base64'
+      );
     }
   }
 
@@ -563,283 +559,287 @@ class AddTruckFormOne extends PureComponent {
       // descriptionTouched,
       vin,
       licensePlate,
-      ratesByBoth,
-      ratesByHour,
       ratesCostPerHour,
-      ratesByTon,
+      isRatedHour,
+      isRatedTon,
       ratesCostPerTon,
       minOperatingTime,
+      minTons,
       maxDistanceToPickup,
       truckTypes,
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerMinRate,
       reqHandlerMinTime,
-      reqHandlerCostTon,
       imageUploading,
-      reqHandlerChecks,
-      reqHandlerMaxCapacity
+      reqHandlerMaxCapacity,
+      loaded
     } = this.state;
     const { p, onClose } = this.props;
-    return (
-      <Col md={12} lg={12}>
-        <Card>
-          <CardBody>
-            {/*
-            <div className="card__title">
-              <h5 className="bold-text">
-                Welcome to Trelar, Lets add a truck so customers can find you
-              </h5>
-            </div>
-            */}
+    if (loaded) {
+      return (
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
 
-            {/* this.handleSubmit  */}
-            <form
-              className="form form--horizontal addtruck__form"
-              onSubmit={e => this.saveTruck(e)}
-            >
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Tell us about your truck
-                  </h3>
-                </div>
-                <div className="col-md-6">
-                  <span className="form__form-group-label">Truck description</span>
-                  <input
-                    name="description"
-                    type="text"
-                    value={description}
-                    onChange={this.handleInputChange}
-                  />
-                  <input type="hidden" val={p}/>
-                  <input type="hidden" val={id}/>
-                  <input type="hidden" val={defaultDriverId}/>
-                  <input type="hidden" val={driversId}/>
-                </div>
-                <div className="col-md-6">
-                  <span className="form__form-group-label">Truck Type</span>
-                  <SelectField
-                    input={
-                      {
-                        onChange: this.selectChange,
-                        name: 'Truck Type',
-                        value: truckType
+              {/* this.handleSubmit  */}
+              <form
+                className="form form--horizontal addtruck__form"
+                onSubmit={e => this.saveTruck(e)}
+              >
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Tell us about your truck
+                    </h3>
+                  </div>
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">Truck description</span>
+                    <input
+                      name="description"
+                      type="text"
+                      value={description}
+                      onChange={this.handleInputChange}
+                    />
+                    <input type="hidden" val={p}/>
+                    <input type="hidden" val={id}/>
+                    <input type="hidden" val={defaultDriverId}/>
+                    <input type="hidden" val={driversId}/>
+                  </div>
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">Truck Type</span>
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.selectChange,
+                          name: 'Truck Type',
+                          value: truckType
+                        }
                       }
-                    }
-                    meta={reqHandlerTruckType}
-                    value={truckType}
-                    options={truckTypes}
-                    placeholder="Truck Type"
-                  />
-                </div>
-              </Row>
+                      meta={reqHandlerTruckType}
+                      value={truckType}
+                      options={truckTypes}
+                      placeholder="Truck Type"
+                    />
+                  </div>
+                </Row>
 
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <span className="form__form-group-label mt-8">
-                    Materials Hauled
-                  </span>
-                  <MultiSelect
-                    input={
-                      {
-                        onChange: this.handleMultiChange,
-                        name: 'materials',
-                        value: selectedMaterials
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <span className="form__form-group-label mt-8">
+                      Materials Hauled
+                    </span>
+                    <MultiSelect
+                      input={
+                        {
+                          onChange: this.handleMultiChange,
+                          name: 'materials',
+                          value: selectedMaterials
+                        }
                       }
-                    }
-                    meta={reqHandlerMaterials}
-                    options={allMaterials}
-                    placeholder="Materials"
-                  />
-                </div>
-              </Row>
+                      meta={reqHandlerMaterials}
+                      options={allMaterials}
+                      placeholder="Materials"
+                    />
+                  </div>
+                </Row>
 
-              <Row className="col-md-12">
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">Vin #</span>
-                  <input
-                    name="vin"
-                    type="text"
-                    value={vin}
-                    onChange={this.handleInputChange}
-                  />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <span className="form__form-group-label">License Plate</span>
-                  <input
-                    name="licensePlate"
-                    type="text"
-                    value={licensePlate}
-                    onChange={this.handleInputChange}
-                  />
-                </div>
-              </Row>
+                <Row className="col-md-12">
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">Vin #</span>
+                    <input
+                      name="vin"
+                      type="text"
+                      value={vin}
+                      onChange={this.handleInputChange}
+                    />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <span className="form__form-group-label">License Plate</span>
+                    <input
+                      name="licensePlate"
+                      type="text"
+                      value={licensePlate}
+                      onChange={this.handleInputChange}
+                    />
+                  </div>
+                </Row>
 
-              <Row className="col-md-12">
-                <hr />
-              </Row>
+                <Row className="col-md-12">
+                  <hr />
+                </Row>
 
-              <Row className="col-md-12">
-                <div className="col-md-12 form__form-group">
-                  <h3 className="subhead">
-                    Truck Rates
-                  </h3>
-                </div>
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Truck Rates (optional)
+                    </h3>
+                  </div>
+                </Row>
 
-                {/* FIRST ROW */}
-
-                <div className="col-md-12 form__form-group">
-                  <TCheckBox
-                    onChange={this.handleInputChange}
-                    name="ratesByBoth"
-                    value={!!ratesByBoth}
-                    label="By Both"
-                    meta={reqHandlerChecks}
-                  />
-                </div>
-
-                <div className="col-md-4 form__form-group">
-                  <TCheckBox
-                    type="hidden"
-                    onChange={this.handleInputChange}
-                    name="ratesByHour"
-                    // value={!!ratesByHour}
-                    value="on"
-                    label="By Hour"
-                  />
-                </div>
-                <div className="col-md-4 form__form-group">
-                  <span className="label">$ Cost / Hour</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'ratesCostPerHour',
-                        value: ratesCostPerHour
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerMinRate}
-                  />
-                </div>
-                <div className="col-md-4 form__form-group">
-                  <span className="label">Minimum hours</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'minOperatingTime',
-                        value: minOperatingTime
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerMinTime}
-                  />
-                </div>
-              </Row>
-
-
-              <Row className="col-md-12">
-                <div className="col-md-3 form__form-group">
-                  <TCheckBox onChange={this.handleInputChange} name="ratesByTon"
-                             value={!!ratesByTon} label="By Ton"
-                  />
-                </div>
-                {/*
-                <div className="col-md-3 form__form-group">
-                  <span className="label">Cost per Ton $</span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'ratesCostPerTon',
-                        value: ratesCostPerTon
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerCostTon}
-                  />
-                </div>
-                */}
-              </Row>
-
-              <Row className="col-md-12">
-                <hr/>
-              </Row>
-
-              <Row className="col-md-12">
-                <div className="col-md-6">
-                  <span className="form__form-group-label">
-                    Maximum Capacity (Tons)
-                  </span>
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleInputChange,
-                        name: 'maxCapacity',
-                        value: maxCapacity
-                      }
-                    }
-                    placeholder="0"
-                    type="number"
-                    meta={reqHandlerMaxCapacity}
-                  />
-                  <span className="form__form-group-label mt-8">
-                    Max Distance to Pickup (Miles)
-                  </span>
-                  <input
-                    name="maxDistanceToPickup"
-                    type="number"
-                    value={maxDistanceToPickup}
-                    onChange={this.handleInputChange}
-                    placeholder="How far will you travel per job"
-                  />
-                </div>
-                <div className="col-md-6 form__form-group">
-                  <h4 className="subhead">
-                    Upload a picture of your Truck (Optional)
-                  </h4>
-                  <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
-                  {imageUploading && <span>Uploading Image...</span>}
-                </div>
-              </Row>
-              {/*
-              <Row>
-                <DropZoneMultipleField
-                  input={
-                    {
-                      onChange: this.handleImg,
-                      name: 'materials',
-                      value: { maxDistanceToPickup }
-                    }
-                  }
-                />
-              </Row>
-              */}
-              <Row className="col-md-12">
-                <hr />
-              </Row>
-
-              <Row className="col-md-12">
-                <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button className="tertiaryButton" type="button"
-                          onClick={onClose} disabled={imageUploading}
+                {/* BY THE HOUR */}
+                <Row className="col-md-12">
+                  <div className="col-md-2 form__form-group pt-20">
+                    <TCheckBox
+                      onChange={this.handleInputChange}
+                      name="ratesByHour"
+                      value={isRatedHour}
+                      label="By Hour"
+                    />
+                  </div>
+                  <div
+                    className="col-md-5 form__form-group"
                   >
-                    Cancel
-                  </Button>
-                </ButtonToolbar>
-                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button type="button" disabled className="secondaryButton">Back</Button>
-                  <Button type="submit" className="primaryButton" disabled={imageUploading}>
-                    Next
-                  </Button>
-                </ButtonToolbar>
-              </Row>
-            </form>
+                    <span className="label">$ Cost / Hour</span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'ratesCostPerHour',
+                          value: ratesCostPerHour
+                        }
+                      }
+                      placeholder="0"
+                      decimal
+                      meta={reqHandlerMinRate}
+                    />
+                  </div>
+                  <div
+                    className="col-md-5 form__form-group"
+                  >
+                    <span className="label">Minimum Hours</span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'minOperatingTime',
+                          value: minOperatingTime
+                        }
+                      }
+                      placeholder="0"
+                      meta={reqHandlerMinTime}
+                    />
+                  </div>
+                </Row>
+
+                {/* BY THE TON */}
+                <Row className="col-md-12">
+                  <div className="col-md-2 form__form-group pt-20">
+                    <TCheckBox
+                      onChange={this.handleInputChange}
+                      name="ratesByTon"
+                      value={isRatedTon}
+                      label="By Ton"
+                    />
+                  </div>
+                  <div
+                    className="col-md-5 form__form-group"
+                  >
+                    <span className="label">$ Cost / Ton</span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'ratesCostPerTon',
+                          value: ratesCostPerTon
+                        }
+                      }
+                      placeholder="0"
+                      decimal
+                      // meta={reqHandlerMinRate}
+                    />
+                  </div>
+                  <div
+                    className="col-md-5 form__form-group"
+                  >
+                    <span className="label">Minimum Tons</span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'minTons',
+                          value: minTons
+                        }
+                      }
+                      placeholder="0"
+                      // meta={reqHandlerMinTime}
+                    />
+                  </div>
+                </Row>
+
+                <Row className="col-md-12">
+                  <hr/>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-6">
+                    <span className="form__form-group-label">
+                      Maximum Capacity (Tons)
+                    </span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'maxCapacity',
+                          value: maxCapacity
+                        }
+                      }
+                      placeholder="0"
+                      meta={reqHandlerMaxCapacity}
+                    />
+                    <span className="form__form-group-label mt-8">
+                      Max Distance to Pickup (Miles, optional)
+                    </span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'maxDistanceToPickup',
+                          value: maxDistanceToPickup
+                        }
+                      }
+                      placeholder="How far will you travel per job"
+                      // meta={}
+                    />
+                  </div>
+                  <div className="col-md-6 form__form-group">
+                    <h4 className="subhead">
+                      Upload a picture of your Truck (Optional)
+                    </h4>
+                    <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload}/>
+                    {imageUploading && <span>Uploading Image...</span>}
+                  </div>
+                </Row>
+                <Row className="col-md-12">
+                  <hr />
+                </Row>
+
+                <Row className="col-md-12">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button className="tertiaryButton" type="button"
+                            onClick={onClose} disabled={imageUploading}
+                    >
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    <Button type="button" disabled className="secondaryButton">Back</Button>
+                    <Button type="submit" className="primaryButton" disabled={imageUploading}>
+                      Next
+                    </Button>
+                  </ButtonToolbar>
+                </Row>
+              </form>
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
+    return (
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
           </CardBody>
         </Card>
       </Col>
@@ -850,9 +850,7 @@ class AddTruckFormOne extends PureComponent {
 AddTruckFormOne.propTypes = {
   p: PropTypes.number,
   equipmentId: PropTypes.number,
-  // companyId: PropTypes.number,
   getTruckFullInfo: PropTypes.func.isRequired,
-  // getAvailiabilityFullInfo: PropTypes.func.isRequired,
   onTruckFullInfo: PropTypes.func.isRequired,
   passedTruckFullInfo: PropTypes.shape({
     info: PropTypes.object
@@ -865,7 +863,6 @@ AddTruckFormOne.propTypes = {
 AddTruckFormOne.defaultProps = {
   p: null,
   equipmentId: null,
-  // companyId: null,
   passedTruckFullInfo: null,
   validateResOne: null,
   validateOnTabOneClick: null

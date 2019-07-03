@@ -11,6 +11,8 @@ import KeyVariantIcon from 'mdi-react/KeyVariantIcon';
 import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
+import UtilsService from '../../api/UtilsService';
+import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 
@@ -35,7 +37,11 @@ class LoginPage extends SignIn {
       username: this.props.authData.username || '',
       password: this.props.authData.password || '',
       user: null,
-      btnSubmitting: false // Used by TSubmitButton
+      btnSubmitting: false, // Used by TSubmitButton
+      userUnderReview: false,
+      ip: null,
+      browserVersion: null,
+      screenSize: null
     };
     this.showPassword = this.showPassword.bind(this);
     this.onSignIn = this.onSignIn.bind(this);
@@ -45,6 +51,10 @@ class LoginPage extends SignIn {
     this.onDismiss = this.onDismiss.bind(this);
     this.handleUserNotConfirmed = this.handleUserNotConfirmed.bind(this);
     this.changeState = this.changeState.bind(this);
+  }
+
+  async componentDidMount() {
+    // console.log(mounted);
   }
 
   showPassword(e) {
@@ -77,10 +87,28 @@ class LoginPage extends SignIn {
   }
 
   async setLogging(username) {
-    const user = await UserService.getUserByUsername(username);
+    const userCheck = {email: username};
+    const user = await UserService.getUserByEmail(userCheck);
+
     user.lastLogin = moment().unix() * 1000;
     user.loginCount += 1;
     await UserService.updateUser(user);
+  }
+
+  async createLoginLog(state) {
+    const log = {
+      attemptedUsername: this.state.username,
+      attemptedPassword: !state ? this.state.password : null,
+      ipAddress: this.state.ip,
+      browserType: this.state.browserVersion.name,
+      browserVersion: this.state.browserVersion.version,
+      screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
+      createdBy: 1,
+      createdOn: moment().unix() * 1000,
+      modifiedBy: 1,
+      modifiedOn: moment().unix() * 1000
+    };
+    await LoginLogService.createLoginLog(log);
   }
 
   async onSignIn() {
@@ -88,14 +116,42 @@ class LoginPage extends SignIn {
     try {
       if (!this.state.username || this.state.username.length <= 0
         || !this.state.password || this.state.password.length <= 0) {
+        await this.createLoginLog(false);
         this.setState({
-          error: 'Incorrect username or password.',
+          error: 'Invalid username or password.',
           btnSubmitting: false,
           loading: false
         });
         return;
       }
+
+      const userCheck = {email: this.state.username}
+      const user = await UserService.getUserByEmail(userCheck);
+
+      if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
+        || user.userStatus === 'Rejected')) {
+        this.setState({userUnderReview: true});
+        return;
+        // user is under review
+      }
+
       const data = await Auth.signIn(this.state.username, this.state.password);
+
+      let ip = '';
+      try {
+        const ipAddress = await UtilsService.getUserIP();
+        ({ ip } = ipAddress);
+      } catch (e) {
+        // console.log(e);
+      }
+      const browserVersion = await UtilsService.getBrowserVersion();
+      const screenSize = await UtilsService.getScreenDimentions();
+      this.setState({
+        settingsLoaded: true,
+        ip,
+        browserVersion,
+        screenSize
+      });
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
@@ -103,6 +159,7 @@ class LoginPage extends SignIn {
         if (this.props.onStateChange) {
           this.props.onStateChange('authenticated', data);
         }
+        await this.createLoginLog(true);
         // window.location = '/';
         this.setLogging(this.state.username);
         this.loginRouting();
@@ -115,6 +172,7 @@ class LoginPage extends SignIn {
         this.setState({
           user: data,
           loading: false,
+          btnSubmitting: false,
           modalShowing: true
         });
       }
@@ -125,19 +183,24 @@ class LoginPage extends SignIn {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
       if (err.code === 'UserNotConfirmedException') {
         const {username} = this.state;
+        await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
+          btnSubmitting: false,
           errorCode: err.code,
           confirmUsername: username
         });
       } else {
+        await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
+          btnSubmitting: false,
           errorCode: err.code,
           confirmUsername: null
         });
+
       }
     }
   }
@@ -181,6 +244,15 @@ class LoginPage extends SignIn {
     this.setState({error: null});
   }
 
+  renderUserNotReviewed() {
+    return (
+      <h6> Thank you for checking back with us. Your account is still in review.
+        This normally takes 1-2 business days.
+        If you have not been contact you can email us at csr@trelar.net. Thank you.
+      </h6>
+    );
+  }
+
   renderLogInForm() {
     const {showPassword, btnSubmitting} = this.state;
     return (
@@ -198,12 +270,12 @@ class LoginPage extends SignIn {
           <p>
             User not confirmed.
             {this.state.errorCode === 'UserNotConfirmedException' && (
-            <button type="button"
-                    className="account__confirm"
-                    onClick={this.handleUserNotConfirmed}
-            >
-              Confirm: {this.state.confirmUsername}
-            </button>
+              <button type="button"
+                      className="account__confirm"
+                      onClick={this.handleUserNotConfirmed}
+              >
+                Confirm: {this.state.confirmUsername}
+              </button>
             )}
             &nbsp;
             {this.state.userConfirmError}
@@ -268,17 +340,22 @@ class LoginPage extends SignIn {
           loading={btnSubmitting}
           loaderSize={10}
           bntText="Sign In"
+          id="signinbutton"
         />
-        <button type="button" className="btn btn-outline-primary account__btn account__btn--small"
-                onClick={this.onSignUp}
-        >
-          Create Account
-        </button>
+        {/* <button type="button" */}
+        {/* className="btn btn-outline-primary account__btn account__btn--small" */}
+        {/* id = "createaccountbutton" */}
+        {/* onClick={this.onSignUp} */}
+        {/* > */}
+        {/* Create Account */}
+        {/* </button> */}
       </div>
     );
   }
 
   renderPage() {
+    const {userUnderReview} = this.state;
+
     return (
       <div className="theme-light">
         <div className="wrapper">
@@ -308,7 +385,8 @@ class LoginPage extends SignIn {
                       Changing how Construction Moves
                     </h4>
                   </div>
-                  {this.renderLogInForm()}
+                  {userUnderReview && this.renderUserNotReviewed()}
+                  {!userUnderReview && this.renderLogInForm()}
                   {/* <div className="account__or"> */}
                   {/* <p>Or Easily Using</p> */}
                   {/* </div> */}

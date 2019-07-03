@@ -216,6 +216,21 @@ class TFormat {
     );
   }
 
+  static asDistance(inputValue) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        displayType="text"
+        decimalSeparator="."
+        decimalScale={2}
+        fixedDecimalScale
+        thousandSeparator
+        prefix=""
+        suffix=" mi"
+      />
+    );
+  }
+
   materialsAsString(materials) {
     let materialsString = '';
     if (materials) {
@@ -230,6 +245,13 @@ class TFormat {
       }
     }
     return materialsString;
+  }
+
+  static getValue(formatted) {
+    if (typeof formatted.props !== 'undefined') {
+      return `${formatted.props.prefix}${formatted.props.value}${formatted.props.suffix}`;
+    }
+    return '';
   }
 }
 

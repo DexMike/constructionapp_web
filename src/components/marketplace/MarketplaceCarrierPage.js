@@ -177,22 +177,52 @@ class MarketplaceCarrierPage extends Component {
 
         const tempRate = newJob.rate;
         if (newJob.rateType === 'Hour') {
-          newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-          newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-          newJob.estimatedIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate) * 0.95
+          newJob.newSize = newJob.rateEstimate;
+          newJob.newSizeF = TFormat.getValue(
+            TFormat.asHours(newJob.rateEstimate)
+          );
+
+          newJob.newRate = newJob.rate;
+          newJob.newRateF = TFormat.getValue(
+            TFormat.asMoneyByHour(newJob.rate)
+          );
+          // Job's Potential Earnings
+          // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
+          newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+          newJob.potentialIncomeF = TFormat.getValue(
+            TFormat.asMoney(
+              (tempRate * newJob.rateEstimate)
+            )
           );
         }
         if (newJob.rateType === 'Ton') {
-          newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-          newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-          // Job's Potencial Earnings
-          newJob.estimatedIncome = TFormat.asMoney(
-            (tempRate * newJob.rateEstimate) * 0.95
+          newJob.newSize = newJob.rateEstimate;
+          newJob.newSizeF = TFormat.getValue(
+            TFormat.asTons(newJob.rateEstimate)
+          );
+
+          newJob.newRate = newJob.rate;
+          newJob.newRateF = TFormat.getValue(
+            TFormat.asMoneyByTons(newJob.rate)
+          );
+          // Job's Potential Earnings
+          // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
+          newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+          newJob.potentialIncomeF = TFormat.getValue(
+            TFormat.asMoney(
+              (tempRate * newJob.rateEstimate)
+            )
           );
         }
 
         newJob.newStartDate = TFormat.asDate(job.startTime);
+        newJob.newStartDateF = TFormat.getValue(
+          TFormat.asDate(job.startTime)
+        );
+
+        if (typeof job.distance === 'number') {
+          newJob.distance = newJob.distance.toFixed(2);
+        }
 
         return newJob;
       });
@@ -224,20 +254,23 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Start Date'
                       },
                       {
-                        name: 'estimatedIncome',
-                        displayName: 'Potential Earnings'
+                        name: 'potentialIncome',
+                        displayName: 'Potential Earnings',
+                        label: 'potentialIncomeF'
                       },
                       {
                         name: 'newRate',
-                        displayName: 'Hourly Rate'
+                        displayName: 'Hourly Rate',
+                        label: 'newRateF'
                       },
                       {
                         name: 'newSize',
-                        displayName: 'Min Hours'
+                        displayName: 'Min Hours',
+                        label: 'newSizeF'
                       },
                       {
-                        name: 'zipCode',
-                        displayName: 'Zip Code'
+                        name: 'distance',
+                        displayName: 'Distance (mi)'
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
@@ -269,6 +302,18 @@ class MarketplaceCarrierPage extends Component {
     );
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const { loaded, page, rows } = this.state;
     if (loaded) {
@@ -288,7 +333,12 @@ class MarketplaceCarrierPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Find A Job</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

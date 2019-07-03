@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import { Container } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Col,
+  Row
+} from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import NumberFormat from 'react-number-format';
@@ -14,12 +19,14 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TwilioService from '../../api/TwilioService';
 import SelectField from '../common/TSelect';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
+import TSpinner from '../common/TSpinner';
 
 class JobCreateForm extends Component {
   constructor(props) {
@@ -111,7 +118,6 @@ class JobCreateForm extends Component {
   }
 
   async componentDidMount() {
-    // debugger;
     const profile = await ProfileService.getProfile();
     const { job, startAddress, endAddress, bid, booking, bookingEquipment } = this.state;
     let { availableMaterials } = this.state;
@@ -503,7 +509,7 @@ class JobCreateForm extends Component {
       .unix() * 1000;
     bookingEquipment.createdOn = moment()
       .unix() * 1000;
-    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
+    await BookingEquipmentService.createBookingEquipment(bookingEquipment);
 
     // Let's make a call to Twilio to send an SMS
     // We need to get the phone number from the carrier co
@@ -720,6 +726,8 @@ class JobCreateForm extends Component {
       imageTruck = `${window.location.origin}/${truckImage}`;
     }
 
+    const { rateType } = selectedEquipment.rateType;
+
     // if ANY is selected, let's show all material
     if (availableMaterials.length > 0) {
       for (const mat in availableMaterials) {
@@ -746,8 +754,8 @@ class JobCreateForm extends Component {
         <h3 className="subhead">{selectedEquipment.name}</h3>
         <div className="row">
           <div className="col-sm-3">
-            <img width="100" height="85" src={imageTruck} alt=""
-                 style={{ width: '100px' }}
+            <img src={imageTruck} alt=""
+                 style={{ width: '100%', height: 'auto' }}
             />
           </div>
           <div className="col-sm-3">
@@ -771,7 +779,7 @@ class JobCreateForm extends Component {
                     fixedDecimalScale
                     thousandSeparator
                     prefix=" "
-                    suffix=" Tons"
+                    suffix={` ${rateType}s`}
                   />
                 </span>
               </div>
@@ -903,7 +911,7 @@ class JobCreateForm extends Component {
                       value={job.rateEstimate}
                       onChange={this.handleJobInputChange}
                 /> */}
-                <TField
+                <TFieldNumber
                   input={
                     {
                       onChange: this.handleJobInputChange,
@@ -912,7 +920,7 @@ class JobCreateForm extends Component {
                     }
                   }
                   placeholder="0"
-                  type="number"
+                  decimal
                   meta={reqHandlerEstHours}
                 />
               </div>
@@ -1045,7 +1053,7 @@ class JobCreateForm extends Component {
               </div>
               <div className="col-sm-12">
                 <div className="form__form-group">
-                  <TField
+                  <TFieldNumber
                     input={
                       {
                         onChange: this.handleStartAddressInputChange,
@@ -1054,7 +1062,6 @@ class JobCreateForm extends Component {
                       }
                     }
                     placeholder="Zip Code"
-                    type="number"
                     meta={reqHandlerSZip}
                   />
                 </div>
@@ -1182,7 +1189,7 @@ class JobCreateForm extends Component {
               </div>
               <div className="col-sm-12">
                 <div className="form__form-group">
-                  <TField
+                  <TFieldNumber
                     input={
                       {
                         onChange: this.handleEndAddressInputChange,
@@ -1191,7 +1198,6 @@ class JobCreateForm extends Component {
                       }
                     }
                     placeholder="Zip Code"
-                    type="number"
                     meta={reqHandlerEZip}
                   />
                 </div>
@@ -1267,9 +1273,13 @@ class JobCreateForm extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }

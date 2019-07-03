@@ -5,7 +5,8 @@ import {
   Col,
   Button,
   Container,
-  ButtonToolbar
+  ButtonToolbar,
+  Row
 } from 'reactstrap';
 import PropTypes, { object } from 'prop-types';
 import TFormat from '../common/TFormat';
@@ -17,6 +18,7 @@ import EquipmentService from '../../api/EquipmentService';
 import EquipmentMaterialsService from '../../api/EquipmentMaterialsService';
 import defaultTruckImage from '../../img/default_truck.png';
 import TSubmitButton from '../common/TSubmitButton';
+import TSpinner from '../common/TSpinner';
 
 class AddTruckFormFour extends PureComponent {
   constructor(props) {
@@ -24,7 +26,8 @@ class AddTruckFormFour extends PureComponent {
     this.state = {
       // showPassword: false
       userInfo: {},
-      btnSubmitting: false
+      btnSubmitting: false,
+      loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.saveInfo = this.saveInfo.bind(this);
@@ -38,7 +41,7 @@ class AddTruckFormFour extends PureComponent {
     const driver = await DriverService.getDriverById(userFullInfo.info.id);
     const user = await UserService.getUserById(driver.usersId);
     this.setState({
-      userInfo: user
+      userInfo: user, loaded: true
     });
   }
 
@@ -86,43 +89,6 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.modifiedBy = profile.userId;
       await EquipmentService.updateEquipment(truckFullInfo.info);
-      // return;
-
-      // now let's save the user ..
-      /*
-      if (userFullInfo.info.id === 0) {
-
-        // ID SHOULD NOT BE 0, SINCE THERE'S ALWAYS
-        // SOMEONE ALREADY SELECTED
-
-        // let's not save a new driver for now
-        /*
-        // setup info for user
-        delete userFullInfo.info.redir;
-        delete userFullInfo.info.id;
-        userFullInfo.info.companyId = companyId;
-        // userFullInfo.info.equipmentId = 1; // setting as 1 since I don't have the ID yet
-        userFullInfo.info.preferredLanguage = 'English';
-        userFullInfo.info.isBanned = 0;
-        userFullInfo.info.userStatus = 'New';
-        const newUser = await UserService.createUser(userFullInfo.info);
-        userFullInfo.info.id = newUser.id;
-
-        const driver = {
-          id: truckFullInfo.info.driversId,
-          usersId: newUser.id,
-          driverLicenseId: 1 // THIS IS A FK
-        };
-        await DriverService.updateDriver(driver);
-        // return false;
-      } else {
-        userFullInfo.info.companyId = companyId;
-        userFullInfo.info.isBanned = 0; // TODO read from current profile
-        userFullInfo.info.preferredLanguage = 'English'; // TODO read from current profile
-        userFullInfo.info.userStatus = 'Active'; // TODO read from current - profile
-        await UserService.updateUser(userFullInfo.info);
-      }
-      */
 
       // save materials
       await EquipmentMaterialsService.createAllEquipmentMaterials(
@@ -140,16 +106,6 @@ class AddTruckFormFour extends PureComponent {
       userFullInfo.info.preferredLanguage = 'English';
       userFullInfo.info.isBanned = 0;
       userFullInfo.info.userStatus = 'New';
-      // do not create a new user for now
-      // const newUser = await UserService.createUser(userFullInfo.info);
-      // return false;
-
-      // const driver = {
-      //   // usersId: newUser.id,
-      //   usersId: userFullInfo.info.id,
-      //   driverLicenseId: 1 // THIS IS A FK
-      // };
-      // const newDriver = await DriverService.createDriver(driver);
 
       truckFullInfo.info.driversId = userFullInfo.info.id;
       truckFullInfo.info.companyId = companyId;
@@ -162,6 +118,7 @@ class AddTruckFormFour extends PureComponent {
       truckFullInfo.info.currentAvailability = (available === true) ? 1 : 0;
       truckFullInfo.info.startAvailability = availabilityFullInfo.info.startDate;
       truckFullInfo.info.endAvailability = availabilityFullInfo.info.endDate;
+      truckFullInfo.info.rateType = truckFullInfo.info.isRatedHour ? 'Hour' : 'Ton';
       // remove unnecesary info
       delete truckFullInfo.info.id;
       delete truckFullInfo.info.redir;
@@ -192,6 +149,64 @@ class AddTruckFormFour extends PureComponent {
     return isAvailable ? 'secondary' : 'minimal';
   }
 
+  renderHourOrTon(ratedHour, ratedTon, info) {
+    if (ratedHour && !ratedTon) {
+      return (
+        <React.Fragment>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per hour: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.hourRate)}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+    if (ratedTon && !ratedHour) {
+      return (
+        <React.Fragment>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per ton: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.tonRate)}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+    if (ratedTon && ratedHour) {
+      return (
+        <React.Fragment>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per ton: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.tonRate)}
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-4">
+              <strong>Rate per hour: </strong>
+            </div>
+            <div className="col-md-8">
+              {TFormat.asMoneyByHour(info.hourRate)}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+        Loading...
+      </React.Fragment>
+    );
+  }
+
   render() {
     const {
       availabilityFullInfo,
@@ -203,180 +218,190 @@ class AddTruckFormFour extends PureComponent {
       getUserFullInfo,
       onClose
     } = this.props;
-    const { userInfo, btnSubmitting } = this.state;
+    const { userInfo, btnSubmitting, loaded } = this.state;
     let allMaterials = '';
     for (const material of getTruckFullInfo().info.selectedMaterials) {
       allMaterials += `${material.label}, `;
     }
     allMaterials = allMaterials.substring(0, allMaterials.length - 2);
     // do we  have info? otherwise don't let the user continue
-    if (Object.keys(getAvailiabilityFullInfo().info).length > 0
-      && Object.keys(getTruckFullInfo().info).length > 0
-      && Object.keys(getUserFullInfo().info).length > 0) {
-      const available = availabilityFullInfo.info.isAvailable;
-      const availableText = (available === true) ? 'Available' : 'Unavailable';
-      const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
-      const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
-      return (
-        <Col md={12} lg={12}>
-          <Card>
-            <CardBody className="profile__card">
-              <div className="">
+    if (loaded) {
+      if (Object.keys(getAvailiabilityFullInfo().info).length > 0
+        && Object.keys(getTruckFullInfo().info).length > 0
+        && Object.keys(getUserFullInfo().info).length > 0) {
+        const available = availabilityFullInfo.info.isAvailable;
+        const availableText = (available === true) ? 'Available' : 'Unavailable';
+        const printedStartDate = availabilityFullInfo.info.startDate.toISOString().slice(0, 10).replace(/-/g, '-');
+        const printedEndDate = availabilityFullInfo.info.endDate.toISOString().slice(0, 10).replace(/-/g, '-');
+        return (
+          <Col md={12} lg={12}>
+            <Card>
+              <CardBody className="profile__card">
                 <div className="">
-                  <div className="row">
-                    <div className="col-md-4 truck-profile">
-                      { truckFullInfo.info.image
-                        ? <img src={truckFullInfo.info.image} alt="avatar"/>
-                        : <img src={defaultTruckImage} alt="avatar"/>
-                      }
-                    </div>
-                    <div className="col-md-8">
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Truck Name: </strong>
+                  <div className="">
+                    <div className="row">
+                      <div className="col-md-4 truck-profile">
+                        { truckFullInfo.info.image
+                          ? <img src={truckFullInfo.info.image} alt="avatar"/>
+                          : <img src={defaultTruckImage} alt="avatar"/>
+                        }
+                      </div>
+                      <div className="col-md-8">
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Truck Name: </strong>
+                          </div>
+                          <div className="col-md-6">
+                            {truckFullInfo.info.description}
+                          </div>
                         </div>
-                        <div className="col-md-6">
-                          {truckFullInfo.info.description}
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Type: </strong>
+                          </div>
+                          <div className="col-md-6">
+                            {truckFullInfo.info.type}
+                          </div>
+                        </div>
+                        <br />
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Name: </strong>
+                          </div>
+                          <div className="col-md-6">
+                            {userInfo.firstName} {userInfo.lastName}
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Email: </strong>
+                          </div>
+                          <div className="col-md-6">
+                            <a href="mailto: {userInfo.email}"> {userInfo.email}</a>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Mobile phone: </strong>
+                          </div>
+                          <div className="col-md-6">
+                            <a href="tel: {userInfo.mobilePhone}"> {userInfo.mobilePhone}</a>
+                          </div>
+                        </div>
+                        <br />
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Available from:</strong>
+                          </div>
+                          <div className="col-md-6">
+                            {printedStartDate}
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Available until:</strong>
+                          </div>
+                          <div className="col-md-6">
+                            {printedEndDate}
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-md-6">
+                            <strong>Availability:</strong>
+                          </div>
+                          <div className="col-md-6">
+                            {availableText}
+                          </div>
                         </div>
                       </div>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Type: </strong>
-                        </div>
-                        <div className="col-md-6">
-                          {truckFullInfo.info.type}
-                        </div>
+                    </div>
+                    <hr/>
+                    <div className="row">
+                      <div className="col-md-4">
+                        <strong>Materials hauled: </strong>
                       </div>
-                      <br />
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Name: </strong>
-                        </div>
-                        <div className="col-md-6">
-                          {userInfo.firstName} {userInfo.lastName}
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Email: </strong>
-                        </div>
-                        <div className="col-md-6">
-                          <a href="mailto: {userInfo.email}"> {userInfo.email}</a>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Mobile phone: </strong>
-                        </div>
-                        <div className="col-md-6">
-                          <a href="tel: {userInfo.mobilePhone}"> {userInfo.mobilePhone}</a>
-                        </div>
-                      </div>
-                      <br />
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Available from:</strong>
-                        </div>
-                        <div className="col-md-6">
-                          {printedStartDate}
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Available until:</strong>
-                        </div>
-                        <div className="col-md-6">
-                          {printedEndDate}
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <strong>Availability:</strong>
-                        </div>
-                        <div className="col-md-6">
-                          {availableText}
-                        </div>
+                      <div className="col-md-8">
+                        {allMaterials}
                       </div>
                     </div>
-                  </div>
-                  <hr/>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>Materials hauled: </strong>
+                    <div className="row">
+                      <div className="col-md-4">
+                        <strong>Maximum capacity: </strong>
+                      </div>
+                      <div className="col-md-8">
+                        {truckFullInfo.info.maxCapacity} Tons
+                      </div>
                     </div>
-                    <div className="col-md-8">
-                      {allMaterials}
+                    <div className="row">
+                      <div className="col-md-4">
+                        <strong>VIN: </strong>
+                      </div>
+                      <div className="col-md-8">
+                        {truckFullInfo.info.vin}
+                      </div>
                     </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>Maximum capacity: </strong>
+                    <div className="row">
+                      <div className="col-md-4">
+                        <strong>License plate: </strong>
+                      </div>
+                      <div className="col-md-8">
+                        {truckFullInfo.info.licensePlate}
+                      </div>
                     </div>
-                    <div className="col-md-8">
-                      {truckFullInfo.info.maxCapacity} Tons
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>VIN: </strong>
-                    </div>
-                    <div className="col-md-8">
-                      {truckFullInfo.info.vin}
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>License plate: </strong>
-                    </div>
-                    <div className="col-md-8">
-                      {truckFullInfo.info.licensePlate}
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>Rate per hour: </strong>
-                    </div>
-                    <div className="col-md-8">
-                      {TFormat.asMoneyByHour(truckFullInfo.info.hourRate)}
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-4">
-                      <strong>Maximum distance pickup: </strong>
-                    </div>
-                    <div className="col-md-8">
-                      {truckFullInfo.info.maxDistance} Miles
+                    {
+                      this.renderHourOrTon(
+                        truckFullInfo.info.isRatedHour,
+                        truckFullInfo.info.isRatedTon,
+                        truckFullInfo.info
+                      )
+                    }
+                    <div className="row">
+                      <div className="col-md-4">
+                        <strong>Maximum distance pickup: </strong>
+                      </div>
+                      <div className="col-md-8">
+                        {truckFullInfo.info.maxDistance} Miles
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <hr />
-              <div className="profile__stats">
-                <ButtonToolbar className="col-md-6 wizard__toolbar">
-                  <Button type="button" className="tertiaryButton" onClick={onClose}>
-                    Cancel
-                  </Button>
-                </ButtonToolbar>
-                <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                  <Button type="button" className="secondaryButton" onClick={previousPage}>Go back</Button>
-                  <TSubmitButton
-                    onClick={this.saveInfo}
-                    className="primaryButton"
-                    loading={btnSubmitting}
-                    loaderSize={10}
-                    bntText="Save now"
-                  />
-                </ButtonToolbar>
-              </div>
-            </CardBody>
-          </Card>
-        </Col>
+                <hr />
+                <div className="profile__stats">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button type="button" className="tertiaryButton" onClick={onClose}>
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    <Button type="button" className="secondaryButton" onClick={previousPage}>Go back</Button>
+                    <TSubmitButton
+                      onClick={this.saveInfo}
+                      className="primaryButton"
+                      loading={btnSubmitting}
+                      loaderSize={10}
+                      bntText="Save now"
+                    />
+                  </ButtonToolbar>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+        );
+      }
+      return (
+        <Container className="dashboard">
+          It seems that you haven&#39;t entered any info, please go back and add some.
+        </Container>
       );
     }
     return (
-      <Container className="dashboard">
-        It seems that you haven&#39;t entered any info, please go back and add some.
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }

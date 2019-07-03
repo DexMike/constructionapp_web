@@ -6,8 +6,7 @@ import {
   Col,
   Button,
   ButtonToolbar,
-  Row,
-  Container
+  Row
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
@@ -56,12 +55,18 @@ class JobCreateFormTwo extends PureComponent {
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
     // get only those that match criteria
+    if (d.selectedRatedHourOrTon === 'ton') {
+      d.rateTab = 2;
+    } else {
+      d.rateTab = 1;
+    }
     const filters = {
       tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
-      hourEstimatedHours: d.hourEstimatedHours,
+      rateEstimate: d.rateEstimate,
       hourTrucksNumber: d.hourTrucksNumber
     };
+
     favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
       profile.userId,
       filters
@@ -164,6 +169,7 @@ class JobCreateFormTwo extends PureComponent {
       nonFavoriteAdminTels
     } = this.state;
     const d = firstTabData();
+
     const profile = await ProfileService.getProfile();
     let status = 'Published';
 
@@ -175,12 +181,14 @@ class JobCreateFormTwo extends PureComponent {
       const address1 = {
         type: 'Delivery',
         name: 'Delivery Start Location',
-        companyId: 19, // 'this should change',
+        companyId: profile.companyId,
         address1: d.startLocationAddress1,
         address2: d.startLocationAddress2,
         city: d.startLocationCity,
         state: d.startLocationState,
         zipCode: d.startLocationZip,
+        latitude: d.startLocationLatitude,
+        longitude: d.startLocationLongitude,
         createdBy: profile.userId,
         createdOn: moment()
           .unix() * 1000,
@@ -192,7 +200,6 @@ class JobCreateFormTwo extends PureComponent {
     } else {
       startAddress.id = d.selectedStartAddressId;
     }
-
     // end location
     let endAddress = {
       id: null
@@ -201,12 +208,14 @@ class JobCreateFormTwo extends PureComponent {
       const address2 = {
         type: 'Delivery',
         name: 'Delivery End Location',
-        companyId: 19, // 'this should change',
+        companyId: profile.companyId,
         address1: d.endLocationAddress1,
         address2: d.endLocationAddress2,
         city: d.endLocationCity,
         state: d.endLocationState,
-        zipCode: d.endLocationZip
+        zipCode: d.endLocationZip,
+        latitude: d.endLocationLatitude,
+        longitude: d.endLocationLongitude
       };
       endAddress = await AddressService.createAddress(address2);
     } else {
@@ -219,9 +228,14 @@ class JobCreateFormTwo extends PureComponent {
       isFavorited = 1;
     }
 
-    let rateType = 'Hour';
-    if (d.rateByTon) {
+    let rateType = '';
+    let rate = 0;
+    if (d.selectedRatedHourOrTon === 'ton') {
       rateType = 'Ton';
+      rate = Number(d.rateByTonValue);
+    } else {
+      rateType = 'Hour';
+      rate = Number(d.rateByHourValue);
     }
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
@@ -236,6 +250,9 @@ class JobCreateFormTwo extends PureComponent {
       status = 'Published';
     }
 
+    const calcTotal = d.rateEstimate * rate;
+    const rateTotal = Math.round(calcTotal * 100) / 100;
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
@@ -247,9 +264,9 @@ class JobCreateFormTwo extends PureComponent {
       equipmentType: d.truckType.value,
       numEquipments: d.hourTrucksNumber,
       rateType,
-      rate: d.rate,
-      rateEstimate: d.hourEstimatedHours,
-      rateTotal: 0,
+      rate,
+      rateEstimate: d.rateEstimate,
+      rateTotal,
       notes: d.instructions,
       createdBy: profile.userId,
       createdOn: moment()
@@ -282,7 +299,7 @@ class JobCreateFormTwo extends PureComponent {
           status: 'New',
           rateType,
           rate: 0,
-          rateEstimate: d.hourEstimatedHours,
+          rateEstimate: d.rateEstimate,
           notes: d.instructions,
           createdBy: profile.userId,
           createdOn: moment()
@@ -392,14 +409,15 @@ class JobCreateFormTwo extends PureComponent {
                 className="form form--horizontal addtruck__form"
               >
                 <Row className="col-md-12">
-                  <div className="row mt-1">
-                    <div className="col-md-12">
-                      <h3 className="subhead">
-                        Thanks for creating a new job! How do you want to send this?
-                      </h3>
-                    </div>
+                  <h3 className="subhead">
+                    Thanks for creating a new job! How do you want to send this?
+                  </h3>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="row">
                     <div
-                      className={showSendtoFavorites ? 'col-md-1 form__form-group mt-1' : 'hidden'}
+                      className={showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}
                     >
                       <TCheckBox
                         onChange={this.handleInputChange}
@@ -409,17 +427,17 @@ class JobCreateFormTwo extends PureComponent {
                       />
                     </div>
                     <div
-                      className={showSendtoFavorites ? 'col-md-11 form__form-group mt-1' : 'hidden'}
+                      className={showSendtoFavorites ? 'col-md-10 form__form-group' : 'hidden'}
                     >
                       <h3 className="subhead">
-                        Send to Favorites<br/>
+                        Send to Favorites
                       </h3>
                     </div>
                   </div>
                   <hr/>
                 </Row>
 
-                <Row className="col-md-12 mt-1">
+                <Row className="col-md-12">
                   <div className="row">
                     <div className="col-md-1 form__form-group">
                       <TCheckBox
@@ -430,48 +448,19 @@ class JobCreateFormTwo extends PureComponent {
                     </div>
                     <div
                       // className="col-md-6 form__form-group"
-                      className={showSendtoFavorites ? 'col-md-6 form__form-group' : 'col-md-11 form__form-group'}
+                      className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'col-md-11 form__form-group'}
                     >
                       <h3 className="subhead">
                         Send this job to the Trelar Marketplace
                       </h3>
                     </div>
-                    {showSendtoFavorites ? ( // If there're no favorites, hide Hours input
-                      <React.Fragment>
-                        <div className="col-md-1 form__form-group">
-                          <h3 className="subhead">
-                            In
-                          </h3>
-                        </div>
-                        <div className="col-md-2 form__form-group">
-                          <input
-                            name="delay"
-                            type="number"
-                            placeholder="0"
-                            className="slickinput"
-                          />
-                        </div>
-                        <div className="col-md-1 form__form-group">
-                          <h3 className="subhead">
-                            Hours
-                          </h3>
-                        </div>
-                      </React.Fragment>
-                    ) : null }
                   </div>
                   <br/>
-                  {/*<div className="row mt-1">*/}
-                  {/*  <div className="col-md-12 form__form-group">*/}
-                  {/*    <div className="sendjob">* Note - This job will be sent to all Trelar Partners*/}
-                  {/*      for review*/}
-                  {/*    </div>*/}
-                  {/*  </div>*/}
-                  {/*</div>*/}
                 </Row>
+
                 <Row className="col-md-12">
                   <hr/>
                 </Row>
-
 
                 <Row className="col-md-12 ">
                   <ButtonToolbar className="col-md-6 wizard__toolbar">
@@ -502,9 +491,13 @@ class JobCreateFormTwo extends PureComponent {
       );
     }
     return (
-      <Container>
-        <TSpinner loading/>
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }

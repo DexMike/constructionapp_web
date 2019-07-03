@@ -16,6 +16,7 @@ class TSelectField extends PureComponent {
           options={options}
           clearable={false}
           className="form__form-group-select"
+          style={{borderRadius: 0}}
         />
         {touched && error && <span className="form__form-group-error">{error}</span>}
       </div>

@@ -9,7 +9,6 @@ class MultiSelectField extends PureComponent {
   }
 
   handleChange(value) {
-    // console.log(value);
     const { onChange } = this.props;
     onChange(value);
   }
@@ -18,7 +17,6 @@ class MultiSelectField extends PureComponent {
     const {
       value, name, placeholder, options
     } = this.props;
-
     return (
       <Select
         multi
@@ -37,10 +35,47 @@ class MultiSelectField extends PureComponent {
 }
 
 const renderMultiSelectField = function renderMultiSelectField(
-  { input, options, placeholder, meta: { touched, error } }
+  { input, options, placeholder, id, horizontalScroll, selectedItems, 
+    meta: { touched, error }
+  }
 ) {
+  function slideTo(direction) {
+    const selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
+    if (direction) {
+      const maxDistance = 40 * selectedItems * 1.5;
+      if (selector.scrollLeft < maxDistance) {
+        selector.scrollLeft += 20;
+      }
+    } else {
+      selector.scrollLeft -= 20;
+    }
+    const container = document.getElementById(id).getElementsByClassName('Select-multi-value-wrapper')[0];
+    container.scrollTop = 0;
+  }
+
   return (
     <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+      {
+        horizontalScroll === 'true' && selectedItems >= 3 ? (
+          <React.Fragment>
+            <i
+            className="material-icons select-navigator"
+            style={{color: '#666666', fontSize: 18, position: 'absolute', left: 0, top: 32}}
+            onClick={() => slideTo(false)}
+            >
+              navigate_before
+            </i>
+            <i
+              className="material-icons select-navigator"
+              style={{color: '#666666', fontSize: 18, position: 'absolute', right: 0, top: 32}}
+              onClick={() => slideTo(true)}
+            >
+              navigate_next
+            </i>
+          </React.Fragment>
+        )
+          : null
+      }
       <MultiSelectField
         {...input}
         options={options}

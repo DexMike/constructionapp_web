@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import TField from '../common/TField';
+import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
@@ -15,6 +16,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
   constructor(props) {
@@ -40,7 +42,11 @@ class JobFilter extends Component {
         startInterval: startDate,
         endInterval: endDate
       },
+      address: {},
+      company: {},
       profile: {},
+      companyZipCode: '',
+      lastZipCode: '',
       // Rate Type Button toggle
       // isAvailable: true,
 
@@ -56,19 +62,29 @@ class JobFilter extends Component {
         minHours: '',
         minCapacity: '',
         userId: '',
-        equipmentType: '',
         numEquipments: '',
         zipCode: '',
+        range: 50,
         materialType: [],
+        equipmentType: [],
         sortBy: sortByList[0],
         page: 0,
         rows: 5
+      },
+      reqHandlerZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerRange: {
+        touched: false,
+        error: ''
       }
     };
 
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
@@ -80,17 +96,28 @@ class JobFilter extends Component {
       intervals,
       filters
     } = this.state;
+    let { companyZipCode, lastZipCode, address, company } = this.state;
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
+
     const startAv = new Date(intervals.startInterval);
     const endAv = new Date(intervals.endInterval);
     filters.startAvailability = this.getUTCStartInterval(startAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
-    this.setState(
-      {
-        filters
+
+    if (profile.companyId) {
+      company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        address = await AddressService.getAddressById(company.addressId);
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
+        companyZipCode = address.zipCode ? address.zipCode : 'Any'; // 'default' zipCode
+        lastZipCode = address.zipCode ? address.zipCode : 'Any'; // used for comparing while changing the zip code
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
       }
-    );
+    }
+
+    this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -150,15 +177,6 @@ class JobFilter extends Component {
 
   async fetchFilterLists() {
     const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
-    const profile = await ProfileService.getProfile();
-
-    if (profile.companyId) {
-      const company = await CompanyService.getCompanyById(profile.companyId);
-      if (company.addressId) {
-        const address = await AddressService.getAddressById(company.addressId);
-        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
-      }
-    }
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
@@ -166,7 +184,7 @@ class JobFilter extends Component {
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
     Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        equipmentTypeList.push(itm.val1);
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
       });
 
     const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
@@ -181,7 +199,6 @@ class JobFilter extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.equipmentType] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -193,10 +210,20 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const { filters } = this.state;
-    const profile = await ProfileService.getProfile();
+    const { lastZipCode, companyZipCode, filters, reqHandlerZip } = this.state;
+    let { company, address, profile } = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
+
+    if (!profile) {
+      profile = await ProfileService.getProfile();
+      if (!company) {
+        company = await CompanyService.getCompanyById(profile.companyId);
+        if (!address) {
+          address = await AddressService.getAddressById(company.addressId);
+        }
+      }
+    }
 
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
@@ -208,22 +235,86 @@ class JobFilter extends Component {
       filters.isFavorited = 0;
     }
 
+    // if we are changing the zip code
+    // or we don't have any coordinates on our db
+    if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
+      if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
+        try { // Search for that new zip code's coordinates with MapBox API
+          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+          filters.companyLatitude = geoLocation.features[0].center[1];
+          filters.companyLongitude = geoLocation.features[0].center[0];
+        } catch (e) {
+          this.setState({
+            reqHandlerZip: {
+              ...reqHandlerZip,
+              error: 'Invalid US Zip Code',
+              touched: true
+            }
+          });
+        }
+      } else {
+        // if the zipCode filter is empty, or it is the same as the initial code,
+        // default the coordinates to user's address
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            touched: false
+          }
+        });
+      }
+    }
+
     const result = await JobService.getJobDashboardByFilters(filters);
     const jobs = result.data;
     const { metadata } = result;
     const {returnJobs} = this.props;
 
     returnJobs(jobs, filters, metadata);
+    this.setState({lastZipCode: filters.zipCode});
     return jobs;
   }
 
-  handleFilterChangeDelayed(e) {
+  async handleFilterChangeDelayed(e) {
     const self = this;
     const {value} = e.target;
-    const {filters} = this.state;
+    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const filter = e.target.name;
+    let invalidZip = false;
+    let invalidRange = false;
 
     if (self.state.typingTimeout) {
       clearTimeout(self.state.typingTimeout);
+    }
+
+    if (filter === 'zipCode') {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          touched: false
+        }
+      });
+      invalidZip = false;
+    }
+
+    if (filter === 'range' && (value.length > 3 || value < 0)) {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          error: 'Range can not be more than 999 and less than 0',
+          touched: true
+        }
+      });
+      invalidRange = true;
+    } else {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          touched: false
+        }
+      });
+      invalidRange = false;
     }
 
     filters[e.target.name] = value;
@@ -231,7 +322,9 @@ class JobFilter extends Component {
     self.setState({
       typing: false,
       typingTimeout: setTimeout(async () => {
-        await this.fetchJobs();
+        if (!invalidZip && !invalidRange) {
+          await this.fetchJobs();
+        }
       }, 1000),
       filters
     });
@@ -256,6 +349,16 @@ class JobFilter extends Component {
   handleMultiChange(data) {
     const {filters} = this.state;
     filters.materialType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchJobs();
+    });
+  }
+
+  handleMultiTruckChange(data) {
+    const {filters} = this.state;
+    filters.equipmentType = data;
     this.setState({
       filters
     }, async function changed() {
@@ -302,8 +405,10 @@ class JobFilter extends Component {
       rateTypeList,
       intervals,
       // filters
-      filters
-
+      companyZipCode,
+      filters,
+      reqHandlerZip,
+      reqHandlerRange
     } = this.state;
     // let start = filters.startAvailability;
     return (
@@ -359,7 +464,7 @@ class JobFilter extends Component {
                       <div className="filter-item-title">
                         Min Rate
                       </div>
-                      <TField
+                      <TFieldNumber
                         input={
                           {
                             onChange: this.handleFilterChangeDelayed,
@@ -367,16 +472,16 @@ class JobFilter extends Component {
                             value: filters.rate
                           }
                         }
+                        decimal
                         className="filter-text"
                         placeholder="Any"
-                        type="number"
                       />
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
-                      <TField
+                      <TFieldNumber
                         input={
                           {
                             onChange: this.handleFilterChangeDelayed,
@@ -386,17 +491,17 @@ class JobFilter extends Component {
                         }
                         className="filter-text"
                         placeholder="# of tons"
-                        type="number"
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="2" id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'equipmentType',
                             value: filters.equipmentType
                           }
@@ -407,22 +512,25 @@ class JobFilter extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
                             name: 'equipmentType',
-                            value: equipmentType,
-                            label: equipmentType
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
                           }))
                         }
-                        placeholder={equipmentTypeList[0]}
+                        // placeholder="Materials"
+                        placeholder="Any"
+                        id="truckTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.equipmentType.length}
                       />
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
-                      <TField
+                      <TFieldNumber
                         input={
                           {
                             onChange: this.handleFilterChangeDelayed,
@@ -432,22 +540,45 @@ class JobFilter extends Component {
                         }
                         className="filter-text"
                         placeholder="Any"
-                        type="number"
                       />
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
                         Zip Code
                       </div>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder={companyZipCode}
+                        type="number"
                       />
                     </Col>
-                    <Col md="3">
+                    <Col md="1">
+                      <div className="filter-item-title">
+                        Range (mi)
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </Col>
+                    <Col md="2" id="materialTypeSelect">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -475,6 +606,9 @@ class JobFilter extends Component {
                         }
                         // placeholder="Materials"
                         placeholder={materialTypeList[0]}
+                        id="materialTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.materialType.length}
                       />
                     </Col>
                   </Row>

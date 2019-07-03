@@ -3,15 +3,20 @@ import AgentService from './AgentService';
 
 const PATH = '/bookingequipments';
 
-class BookingService extends AgentService {
+class BookingEquipmentService extends AgentService {
   static async getBookingEquipments() {
     const response = await super.get(PATH);
     return (response);
   }
 
-  static async createBookingEquipments(bookingEquipment) {
+  static async createBookingEquipment(bookingEquipment) {
     const response = await super.post(PATH, bookingEquipment);
     return (response);
+  }
+
+  static async allocateDrivers(bookingEquipments, bookingId) {
+    const response = await super.post(`/bookings/${bookingId}${PATH}/allocate`, bookingEquipments);
+    return response;
   }
 
   static async updateBookingEquipment(bookingEquipment) {
@@ -26,6 +31,11 @@ class BookingService extends AgentService {
 
   static async getBookingEquipmentById(id) {
     const response = await this.get(`${PATH}/${id}`);
+    return (response);
+  }
+
+  static async getBookingEquipmentsByBookingId(bookingId) {
+    const response = await this.get(`/bookings/${bookingId}${PATH}`);
     return (response);
   }
 
@@ -53,4 +63,4 @@ class BookingService extends AgentService {
   }
 }
 
-export default BookingService;
+export default BookingEquipmentService;

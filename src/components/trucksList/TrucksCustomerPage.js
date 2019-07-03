@@ -23,14 +23,15 @@ import truckImage from '../../img/default_truck.png';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
-// import JobMaterialsService from '../../api/JobMaterialsService';
-// import JobsService from '../../api/JobsService';
-// import AgentService from '../../api/AgentService';
 import MultiSelect from '../common/TMultiSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
+import EquipmentRow from './EquipmentRow';
+import TFieldNumber from '../common/TFieldNumber';
+import TField from '../common/TField';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -66,14 +67,24 @@ class TrucksCustomerPage extends Component {
         endAvailability: null,
         searchType: 'Customer Truck',
         userId: '',
-        equipmentType: '',
+        equipmentType: [],
         minCapacity: '',
         // materialType: '',
         materialType: [],
         zipCode: '',
+        range: 50,
         rateType: '',
         currentAvailability: 1,
         sortBy: sortByList[0]
+      },
+
+      reqHandlerZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerRange: {
+        touched: false,
+        error: ''
       }
     };
 
@@ -87,15 +98,28 @@ class TrucksCustomerPage extends Component {
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.handleEndDateChange = this.handleEndDateChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
   }
 
   async componentDidMount() {
     const { filters } = this.state;
+    let { address, company } = this.state;
     // await this.fetchJobs();
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
+
+    if (profile.companyId) {
+      company = await CompanyService.getCompanyById(profile.companyId);
+      if (company.addressId) {
+        address = await AddressService.getAddressById(company.addressId);
+        filters.zipCode = address.zipCode ? address.zipCode : filters.zipCode;
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
+      }
+    }
+
     await this.fetchEquipments();
     await this.fetchFilterLists();
     this.setState({loaded: true});
@@ -124,7 +148,7 @@ class TrucksCustomerPage extends Component {
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
     Object.values(lookupEquipmentList)
       .forEach((itm) => {
-        equipmentTypeList.push(itm.val1);
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
       });
 
     const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
@@ -139,7 +163,7 @@ class TrucksCustomerPage extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    [filters.equipmentType] = equipmentTypeList;
+    [filters.equipments] = equipmentTypeList;
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
@@ -171,7 +195,49 @@ class TrucksCustomerPage extends Component {
   }
 
   async fetchEquipments() {
-    const {filters} = this.state;
+    const { filters, reqHandlerZip} = this.state;
+    let { company, address, profile } = this.state;
+
+    if (!profile) {
+      profile = await ProfileService.getProfile();
+      if (!company) {
+        company = await CompanyService.getCompanyById(profile.companyId);
+        if (!address) {
+          address = await AddressService.getAddressById(company.addressId);
+        }
+      }
+    }
+
+    // if the filter zip code is not the same as the initial zip code (company's
+    // zip code) or we don't have any coordinates on our db
+    // we search for that zip code coordinates with MapBox API
+    if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
+      if (filters.zipCode.length > 0) {
+        try {
+          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
+          filters.companyLatitude = geoLocation.features[0].center[1];
+          filters.companyLongitude = geoLocation.features[0].center[0];
+        } catch (e) {
+          this.setState({
+            reqHandlerZip: {
+              ...reqHandlerZip,
+              error: 'Invalid US Zip Code',
+              touched: true
+            }
+          });
+        }
+      } else { // if the zipCode filter is empty, default the coordinates to user's address
+        filters.companyLatitude = address.latitude;
+        filters.companyLongitude = address.longitude;
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            touched: false
+          }
+        });
+      }
+    }
+
     const equipments = await EquipmentService.getEquipmentByFilters(filters);
 
     if (equipments) {
@@ -183,16 +249,6 @@ class TrucksCustomerPage extends Component {
 
       equipments.map((equipment) => {
         const newEquipment = equipment;
-        //     const company = await CompanyService.getCompanyById(newEquipment.companyId);
-        //     newEquipment.companyName = company.legalName;
-        // console.log(companyName);
-        // console.log(job.companyName)
-        // const materialsList = await EquipmentMaterialsService
-        // .getEquipmentMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
         newEquipment.modifiedOn = moment(equipment.modifiedOn)
           .format();
         newEquipment.createdOn = moment(equipment.createdOn)
@@ -204,11 +260,67 @@ class TrucksCustomerPage extends Component {
   }
 
   async handleFilterChange(e) {
+    const self = this;
     const {value} = e.target;
-    const {filters} = this.state;
+    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const filter = e.target.name;
+    let invalidZip = false;
+    let invalidRange = false;
+
+    if (self.state.typingTimeout) {
+      clearTimeout(self.state.typingTimeout);
+    }
+
+    if (filter === 'zipCode' && (value.length !== 5)) {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          error: 'Please enter a valid 5-digit Zip Code',
+          touched: true
+        }
+      });
+      invalidZip = true;
+    } else {
+      this.setState({
+        reqHandlerZip: {
+          ...reqHandlerZip,
+          touched: false
+        }
+      });
+      invalidZip = false;
+    }
+
+    if (filter === 'range' && (value.length > 3 || value < 0)) {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          error: 'Range can not be more than 999 and less than 0',
+          touched: true
+        }
+      });
+      invalidRange = true;
+    } else {
+      this.setState({
+        reqHandlerRange: {
+          ...reqHandlerRange,
+          touched: false
+        }
+      });
+      invalidRange = false;
+    }
+
     filters[e.target.name] = value;
-    this.setState({filters});
-    await this.fetchEquipments();
+
+    self.setState({
+      typing: false,
+      typingTimeout: setTimeout(async () => {
+        if (!invalidZip && !invalidRange) {
+          await this.fetchEquipments();
+        }
+      }, 1000),
+      filters
+    });
+    // await this.fetchEquipments();
   }
 
   async handleSelectFilterChange(option) {
@@ -229,6 +341,16 @@ class TrucksCustomerPage extends Component {
     });
   }
 
+  handleMultiTruckChange(data) {
+    const {filters} = this.state;
+    filters.equipmentType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchEquipments();
+    });
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({[`goTo${menuItem}`]: true});
@@ -239,7 +361,7 @@ class TrucksCustomerPage extends Component {
     const {equipments} = this.state;
 
     try {
-      const group = await GroupListService.getGroupListsByCompanyId(companyId);
+      const group = await GroupListService.getGroupListsByCompanyIdName(companyId);
       const profile = await ProfileService.getProfile();
 
       // we get check for groups.companyId = companyId that have name 'Favorite'
@@ -294,6 +416,7 @@ class TrucksCustomerPage extends Component {
       // alert('Please select a some materials');
       // return false;
     }
+
     this.setState({
       selectedEquipment,
       modal: true
@@ -423,7 +546,6 @@ class TrucksCustomerPage extends Component {
     const mats = this.returnSelectedMaterials();
 
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
-      // console.log(367);
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       this.preventModal();
@@ -475,7 +597,10 @@ class TrucksCustomerPage extends Component {
       endDate,
 
       // filters
-      filters
+      filters,
+
+      reqHandlerZip,
+      reqHandlerRange
 
     } = this.state;
 
@@ -499,14 +624,15 @@ class TrucksCustomerPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="2" id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
-                      <TSelect
+                      <MultiSelect
                         input={
                           {
-                            onChange: this.handleSelectFilterChange,
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
                             name: 'equipmentType',
                             value: filters.equipmentType
                           }
@@ -517,15 +643,18 @@ class TrucksCustomerPage extends Component {
                             error: 'Unable to select'
                           }
                         }
-                        value={filters.equipmentType}
                         options={
                           equipmentTypeList.map(equipmentType => ({
                             name: 'equipmentType',
-                            value: equipmentType,
-                            label: equipmentType
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
                           }))
                         }
-                        placeholder={equipmentTypeList[0]}
+                        // placeholder="Materials"
+                        placeholder="Any"
+                        id="truckTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.equipmentType.length}
                       />
                     </Col>
                     <Col md="2">
@@ -561,15 +690,21 @@ class TrucksCustomerPage extends Component {
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
-                      <input name="minCapacity"
-                             className="filter-text"
-                             type="number"
-                             placeholder="# of tons"
-                             value={filters.minCapacity}
-                             onChange={this.handleFilterChange}
+                      <TFieldNumber
+                        className="filter-text"
+                        input={
+                          {
+                            onChange: this.handleFilterChange,
+                            name: 'minCapacity',
+                            value: filters.minCapacity
+                          }
+                        }
+                        placeholder="# of tons"
+                        decimal
+                        // meta={reqHandlerMinRate}
                       />
                     </Col>
-                    <Col md="4">
+                    <Col md="3" id="materialTypeSelect">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -597,18 +732,45 @@ class TrucksCustomerPage extends Component {
                         }
                         // placeholder="Materials"
                         placeholder={materialTypeList[0]}
+                        id="materialTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.materialType.length}
                       />
                     </Col>
                     <Col md="1">
                       <div className="filter-item-title">
                         Zip Code
                       </div>
-                      <input name="zipCode"
-                             className="filter-text"
-                             type="text"
-                             placeholder="Zip Code"
-                             value={filters.zipCode}
-                             onChange={this.handleFilterChange}
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChange,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </Col>
+                    <Col md="1">
+                      <div className="filter-item-title">
+                        Range (mi)
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChange,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
                       />
                     </Col>
                   </Row>
@@ -619,158 +781,6 @@ class TrucksCustomerPage extends Component {
           </Card>
         </Col>
       </Row>
-    );
-  }
-
-  renderEquipmentRow(equipment) {
-    let imageTruck = '';
-    // checking if there's an image for the truck
-    if ((equipment.image).trim()) { // use of trim removes whitespace from img url
-      imageTruck = equipment.image;
-    } else {
-      imageTruck = `${window.location.origin}/${truckImage}`;
-    }
-
-    const materials = equipment.materials.split(', ');
-    return (
-      <React.Fragment>
-        <Row className="truck-card truck-details">
-          <div className="col-md-12">
-            <div className="row">
-              <div className="col-md-3">
-                <img width="100%" src={imageTruck} alt=""
-                     styles="background-size:contain;"
-                />
-              </div>
-              <div className="col-md-9">
-                <div className="row truck-card">
-                  <div className="col-md-9">
-                    <h3 className="subhead">
-                      {equipment.name} | {equipment.type} | <NumberFormat
-                      value={equipment.maxCapacity}
-                      displayType="text"
-                      decimalSeparator="."
-                      decimalScale={0}
-                      fixedDecimalScale
-                      thousandSeparator
-                      prefix=" "
-                      suffix=" Tons"
-                      />
-                    </h3>
-                  </div>
-                  <div className="col-md-3 button-card">
-                    <Button
-                      onClick={() => this.handleEquipmentEdit(equipment.id)}
-                      className="btn btn-primary"
-                      styles="margin:0px !important"
-                    >
-                      Request
-                    </Button>
-                    <Button
-                      color="link"
-                      onClick={() => this.handleSetFavorite(equipment.companyId)}
-                      className="material-icons favoriteIcon"
-                    >
-                      {equipment.favorite ? 'favorite' : 'favorite_border'}
-                    </Button>
-                  </div>
-                </div>
-                <div className="row truck-card">
-                  <div className="col-md-6">
-                    <h3 className="subhead">Rates</h3>
-                    <Row>
-                      {(equipment.rateType === 'Both' || equipment.rateType === 'Hour') && (
-                        <React.Fragment>
-                          <div className="col-md-6">
-                            Hourly Rate:
-                          </div>
-                          <div className="col-md-6">
-                            <NumberFormat
-                              value={equipment.hourRate}
-                              displayType="text"
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              thousandSeparator
-                              prefix="$ "
-                              suffix=" / Hour"
-                            />
-                          </div>
-                        </React.Fragment>
-                      )}
-                    </Row>
-                    <Row>
-                      <div className="col-md-6">
-                        Hourly Minimum:
-                      </div>
-                      <div className="col-md-6">
-                        <NumberFormat
-                          value={equipment.minHours}
-                          displayType="text"
-                          decimalSeparator="."
-                          decimalScale={2}
-                          fixedDecimalScale
-                          thousandSeparator
-                          suffix=" hours min"
-                        />
-                      </div>
-                    </Row>
-                    {(equipment.rateType === 'Both' || equipment.rateType === 'Ton') && (
-                      <React.Fragment>
-                        <div className="row">
-                          <div className="col-md-6">
-                            Rate per Ton:
-                          </div>
-                          <div className="col-md-6">
-                            <NumberFormat
-                              value={equipment.tonRate}
-                              displayType="text"
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              thousandSeparator
-                              prefix="$ "
-                              suffix=" / Ton"
-                            />
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="col-md-6">
-                            Minimum Tonnage Capacity:
-                          </div>
-                          <div className="col-md-6">
-                            <NumberFormat
-                              value={equipment.minCapacity}
-                              displayType="text"
-                              decimalSeparator="."
-                              decimalScale={2}
-                              fixedDecimalScale
-                              thousandSeparator
-                              suffix=" tons min"
-                            />
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    )}
-                  </div>
-                  <div className="col-md-6">
-                    <h3 className="subhead">
-                      Materials
-                    </h3>
-                    {materials.map(material => (
-                      <span key={material} className="badge badge-success" style={{borderRadius: '15px', padding: '6px 20px', margin: '2px'}}>
-                        {material}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Row>
-        <hr/>
-      </React.Fragment>
-
     );
   }
 
@@ -827,14 +837,42 @@ class TrucksCustomerPage extends Component {
             </Row>
             {
               equipments.map(equipment => (
-                <React.Fragment key={equipment.id}>
-                  {this.renderEquipmentRow(equipment)}
-                </React.Fragment>
+                <EquipmentRow
+                  id={equipment.id}
+                  companyId={equipment.companyId}
+                  favorite={equipment.favorite}
+                  rateType={equipment.rateType}
+                  hourRate={equipment.hourRate}
+                  minHours={equipment.minHours}
+                  minCapacity={equipment.minCapacity}
+                  image={equipment.image}
+                  maxCapacity={equipment.maxCapacity}
+                  type={equipment.type}
+                  key={equipment.id}
+                  tonRate={equipment.tonRate}
+                  name={equipment.name}
+                  materials={equipment.materials}
+                  setFavorite={() => this.handleSetFavorite(equipment.companyId)}
+                  requestEquipment={() => this.handleEquipmentEdit(equipment.id)}
+                  distance={equipment.distance}
+                />
               ))
             }
           </CardBody>
         </Card>
       </Container>
+    );
+  }
+
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
     );
   }
 
@@ -855,9 +893,14 @@ class TrucksCustomerPage extends Component {
       );
     }
     return (
-      <div>
-        Loading...
-      </div>
+      <Container className="container">
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Truck Search</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
+      </Container>
     );
   }
 }

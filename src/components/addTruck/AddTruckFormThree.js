@@ -17,6 +17,7 @@ import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import ProfileService from '../../api/ProfileService';
 import SelectField from '../common/TSelect';
+import TSpinner from '../common/TSpinner';
 
 class AddTruckFormThree extends PureComponent {
   constructor(props) {
@@ -74,8 +75,7 @@ class AddTruckFormThree extends PureComponent {
       });
     } else {
       this.setState({
-        allDrivers,
-        loaded: true
+        allDrivers
       });
     }
 
@@ -88,6 +88,8 @@ class AddTruckFormThree extends PureComponent {
     if (editDriverId) {
       this.getAndSetExistingUser(editDriverId);
     }
+
+    this.setState({loaded: true});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -452,9 +454,13 @@ class AddTruckFormThree extends PureComponent {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <Col md={12}>
+        <Card style={{paddingBottom: 0}}>
+          <CardBody>
+            <Row className="col-md-12"><TSpinner loading/></Row>
+          </CardBody>
+        </Card>
+      </Col>
     );
   }
 }

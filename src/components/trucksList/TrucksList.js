@@ -46,17 +46,14 @@ class TrucksList extends Component {
     */
     // DO NOT LAUNCH THE MODAL AT THIS TIME
     // this.toggleAddTruckModal();
-    // console.log(materials.length);
     this.setState({
       // companyId: profile.companyId,
       // totalTrucks: equipments.length,
       loaded: true
     });
   }
-  /**/
 
   renderTrucksFromCompanyType() {
-    // console.log(56);
     const { companyType } = this.state;
     return (
       <React.Fragment>
@@ -65,6 +62,19 @@ class TrucksList extends Component {
       </React.Fragment>
     );
   }
+
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+  
 
   render() {
     const { companyType, loaded } = this.state;
@@ -79,9 +89,9 @@ class TrucksList extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <React.Fragment>
+        {this.renderLoader()}
+      </React.Fragment>
     );
   }
 }

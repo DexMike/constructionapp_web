@@ -24,11 +24,7 @@ import JobFilter from '../filters/JobFilter';
 function PageTitle() {
   const {t} = useTranslation();
   return (
-    <Row>
-      <Col md={12}>
-        <h3 className="page-title">{t('Jobs')}</h3>
-      </Col>
-    </Row>
+    <h3 className="page-title">{t('Job Dashboard')}</h3>
   );
 }
 
@@ -39,9 +35,28 @@ function AddJobButton({handle}) {
       onClick={handle}
       type="button"
       className="primaryButton"
+      id="addJobButton"
     >
       {t('ADD A JOB')}
     </Button>
+  );
+}
+
+function DashboardLoading () {
+  const {t} = useTranslation();
+  return (
+    <Container className="dashboard">
+        {t('Loading...')}
+    </Container>
+  );
+}
+
+function TableLegend({displayed, totalCount, totalJobs}) {
+  const {t} = useTranslation();
+  return(
+    <div className="ml-4 mt-4">
+      {t('Displaying')} {displayed} {t('out of')} {totalCount} {t('filtered jobs')} ({totalJobs} {t('total jobs')})
+    </div>
   );
 }
 
@@ -235,7 +250,7 @@ class DashboardCustomerPage extends Component {
     return (
       <Row>
         <Col md={10}>
-          <h3 className="page-title">Job Dashboard</h3>
+          <PageTitle />
         </Col>
         <Col md={2}>
           <AddJobButton handle={this.toggleNewJobModal}/>
@@ -276,6 +291,7 @@ class DashboardCustomerPage extends Component {
         }
         if (newJob.status === 'Published And Offered') {
           // publishedJobCount += 1;
+          onOfferJobCount += newJob.countJobs;
           publishedJobCount += newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
@@ -377,9 +393,7 @@ class DashboardCustomerPage extends Component {
       );
     }
     return (
-      <Container className="dashboard">
-        Loading...
-      </Container>
+      <DashboardLoading  />
     );
   }
 
@@ -420,19 +434,36 @@ class DashboardCustomerPage extends Component {
         completedJobCount += 1;
       }
       if (newJob.rateType === 'Hour') {
-        newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
+        // newSize is the size with its original value, so that it can be sorted
+        newJob.newSize = newJob.rateEstimate;
+        // newSizeFormated is the size as we want it to show
+        const formatted = TFormat.asHours(newJob.rateEstimate);
+        newJob.newSizeFormated = TFormat.getValue(formatted);
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
+
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
       if (newJob.rateType === 'Ton') {
-        newJob.newSize = TFormat.asTons(newJob.rateEstimate);
+        // newSize is the size with its original value, so that it can be sorted
+        newJob.newSize = newJob.rateEstimate;
+        // newSizeFormated is the size as we want it to show
+        const formatted = TFormat.asTons(newJob.rateEstimate);
+        newJob.newSizeFormated = TFormat.getValue(formatted);
+
         newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
+
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
-      // newJob.newRate = `$${newJob.rate}`;
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
+
+      if (typeof job.distance === 'number') {
+        newJob.distance = newJob.distance.toFixed(2);
+      }
 
       potentialIncome += tempRate * newJob.rateEstimate;
 
@@ -458,16 +489,14 @@ class DashboardCustomerPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <div className="ml-4 mt-4">
-                    Displaying {jobs.length} out of {totalCount} filtered jobs ({totalJobs} total jobs)
-                  </div>
+                  <TableLegend
+                    displayed={TFormat.asWholeNumber(jobs.length)}
+                    totalCount={TFormat.asWholeNumber(totalCount)}
+                    totalJobs={TFormat.asWholeNumber(totalJobs)}
+                  />
                   <TTable
                     columns={
                       [
-                        // {
-                        //   name: 'id',
-                        //   displayName: 'Job Id'
-                        // },
                         {
                           name: 'name',
                           displayName: 'Job Name'
@@ -482,24 +511,22 @@ class DashboardCustomerPage extends Component {
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size'
+                          displayName: 'Size',
+                          label: 'newSizeFormated'
                         },
                         {
                           name: 'newStartDate',
                           displayName: 'Start Date'
                         },
                         {
-                          name: 'zipCode',
-                          displayName: 'Start Zip'
+                          name: 'distance',
+                          displayName: 'Distance (mi)'
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate'
+                          displayName: 'Rate',
+                          label: 'newRateFormatted'
                         },
-                        // {
-                        //   name: 'estimatedIncome',
-                        //   displayName: 'Est. Income'
-                        // },
                         {
                           // the materials needs to come from the the JobMaterials Table
                           name: 'materials',
@@ -527,6 +554,18 @@ class DashboardCustomerPage extends Component {
     );
   }
 
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const {loaded, page, rows} = this.state;
     if (loaded) {
@@ -550,7 +589,12 @@ class DashboardCustomerPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        {<Row>
+          <Col md={12}>
+            <PageTitle />
+          </Col>
+        </Row>}
+        {this.renderLoader()}
       </Container>
     );
   }

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 // import UserSavePage from "./UserSavePage";
 import { Redirect } from 'react-router-dom';
 import {
+  Button,
   Card,
   CardBody,
   Col,
@@ -13,9 +14,11 @@ import {
 // import ExampleCard from "../ExampleCard";
 import TTable from '../common/TTable';
 import UserService from '../../api/UserService';
+import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
-
+import DriverForm from './DriverForm';
 // import moment from "moment";
+import './Driver.css';
 
 class DriverListPage extends Component {
   constructor(props) {
@@ -24,23 +27,22 @@ class DriverListPage extends Component {
     this.state = {
       loaded: false,
       drivers: [],
-      activeTab: '3',
+      currentUser: {},
       goToDashboard: false,
       goToAddDriver: false,
       goToUpdateDriver: false,
       driverId: 0,
-      userId: 0,
-      equipmentId: 0,
-      companyId: 0,
       modal: false,
-      selectedItemData: {}
+      page: 0,
+      rows: 10,
+      totalCount: 10
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.toggle = this.toggle.bind(this);
     this.handleDriverEdit = this.handleDriverEdit.bind(this);
-    this.toggleAddTruckModal = this.toggleAddTruckModal.bind(this);
-    this.toggleAddTruckModalClear = this.toggleAddTruckModalClear.bind(this);
+    this.toggleAddDriverModal = this.toggleAddDriverModal.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
   }
 
   async componentDidMount() {
@@ -49,7 +51,9 @@ class DriverListPage extends Component {
   }
 
   async fetchDrivers() {
-    const drivers = await UserService.getDriversWithUserInfo();
+    const profile = await ProfileService.getProfile();
+    const currentUser = await UserService.getUserById(profile.userId);
+    const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
     let driversWithInfo = [];
 
     if (drivers) {
@@ -60,17 +64,42 @@ class DriverListPage extends Component {
             firstName: driver.firstName,
             lastName: driver.lastName,
             mobilePhone: driver.mobilePhone,
+            userStatus: driver.userStatus,
             email: driver.email,
             userId: driver.id
           };
+          // Do not know what other user statuses we would consider enabled??
+          // Should we have an actual driver driver status???
+          // IF we add a driver status we will need to change this 
+          if (newDriver.userStatus === 'New' || newDriver.userStatus === 'First Login') {
+            newDriver.userStatus = 'Enabled';
+          }
           return newDriver;
         } catch (error) {
           const newDriver = driver;
           return newDriver;
         }
+
       });
     }
-    this.setState({ drivers: driversWithInfo });
+    this.setState({
+      drivers: driversWithInfo,
+      currentUser
+    });
+  }
+
+  handlePageChange(page) {
+    this.setState({ page },
+      function wait() {
+        this.fetchDrivers();
+      });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows },
+      function wait() {
+        this.fetchDrivers();
+      });
   }
 
   handlePageClick(menuItem) {
@@ -81,34 +110,17 @@ class DriverListPage extends Component {
 
   handleDriverEdit(id) {
     this.setState({
-      goToUpdateDriver: true,
-      userId: id
-    });
-  }
-
-  toggle(tab) {
-    const { activeTab } = this.state;
-    if (activeTab !== tab) {
-      this.setState({
-        activeTab: tab
-      });
-    }
-  }
-
-  async toggleAddTruckModal() {
-    const { modal } = this.state;
-    this.setState({ modal: !modal });
-    await this.fetchDrivers();
-  }
-
-  async toggleAddTruckModalClear(id) {
-    const { modal } = this.state;
-    this.setState({
-      equipmentId: 0, // reset equipmentID, not companyID
-      selectedItemData: {},
-      modal: !modal,
+      modal: true,
       driverId: id
     });
+  }
+
+  toggleAddDriverModal() {
+    const { modal } = this.state;
+    if (modal === true) {
+      this.fetchDrivers();
+    }
+    this.setState({ modal: !modal });
   }
 
   renderGoTo() {
@@ -127,36 +139,33 @@ class DriverListPage extends Component {
   }
 
   renderModal() {
-    const {
-      totalTrucks,
-      modal,
-      selectedItemData,
-      equipmentId,
-      companyId,
-      driverId
-    } = this.state;
-    let tabShow = 3;
-    if (totalTrucks > 0) {
-      tabShow = 3;
-    }
+    const { modal, driverId, currentUser } = this.state;
     return (
       <Modal
         isOpen={modal}
-        toggle={this.toggleAddTruckModal}
-        className="modal-dialog--primary modal-dialog--header"
+        toggle={this.toggleAddDriverModal}
+        className="driver-modal modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__body" style={{ padding: '0px' }}>
-          <AddTruckForm
-            equipmentId={equipmentId}
-            companyId={companyId}
-            incomingPage={tabShow}
-            handlePageClick={() => {}}
-            toggle={this.toggleAddTruckModal}
-            passedInfo={selectedItemData}
-            editDriverId={driverId}
+          <DriverForm
+            toggle={this.toggleAddDriverModal}
+            driverId={driverId}
+            currentUser={currentUser}
           />
         </div>
       </Modal>
+    );
+  }
+
+  renderLoader() {
+    return (
+      <div className="load loaded inside-page">
+        <div className="load__icon-wrap">
+          <svg className="load__icon">
+            <path fill="rgb(0, 111, 83)" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+          </svg>
+        </div>
+      </div>
     );
   }
 
@@ -170,6 +179,13 @@ class DriverListPage extends Component {
           <Row>
             <Col md={12}>
               <h3 className="page-title">Drivers</h3>
+              <Button
+                className="mt-4"
+                color="primary"
+                onClick={() => this.setState({ modal: true, driverId: 0 })}
+              >
+                Add a Driver
+              </Button>
             </Col>
           </Row>
           <Row>
@@ -195,13 +211,18 @@ class DriverListPage extends Component {
                         displayName: 'Mobile Phone'
                       },
                       {
+                        name: 'userStatus',
+                        displayName: 'Driver Status'
+                      },
+                      {
                         name: 'email',
                         displayName: 'Email'
                       }
                     ]}
                     data={drivers}
-                    // handleIdClick={this.toggleAddTruckModalClear}
                     handleIdClick={this.handleDriverEdit}
+                    handleRowsChange={this.handleRowsPerPage}
+                    handlePageChange={this.handlePageChange}
                   />
                 </CardBody>
               </Card>
@@ -212,7 +233,12 @@ class DriverListPage extends Component {
     }
     return (
       <Container className="dashboard">
-        Loading...
+        <Row>
+          <Col md={12}>
+            <h3 className="page-title">Drivers</h3>
+          </Col>
+        </Row>
+        {this.renderLoader()}
       </Container>
     );
   }

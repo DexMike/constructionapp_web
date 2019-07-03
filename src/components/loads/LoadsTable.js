@@ -13,7 +13,8 @@ class LoadsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loads: props.loads
+      loads: props.loads,
+      job: props.job
     };
     this.toggle = this.toggle.bind(this);
   }
@@ -26,24 +27,29 @@ class LoadsTable extends Component {
   }
 
   render() {
-    const {loads} = {...this.state};
+    const {loads, job} = {...this.state};
+    // debugger;
     return (
       <Paper>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 16}}>View Details</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 16}}>Load</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 16}}>Driver Name</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 16}}>Start Time</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 16}}>End Time</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 16}}>Status</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Details</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Load</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Driver Name</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Start Time</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>End Time</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Tons Moved</TableCell>
+              {job.rateType === 'Hour' && <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Hours Worked</TableCell>}
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Rate</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Total Cost</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Status</TableCell>
             </TableRow>
           </TableHead>
           {loads && (
             <TableBody>
               {loads.map((load, index) => (
-                <LoadsExpandableRow key={load.id} load={load} index={index}/>
+                <LoadsExpandableRow key={load.id} load={load} index={index} job={job}/>
               ))}
             </TableBody>
           )
@@ -56,7 +62,9 @@ class LoadsTable extends Component {
 
 LoadsTable.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
-  loads: PropTypes.array.isRequired
+  loads: PropTypes.array.isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  job: PropTypes.object.isRequired
 };
 
 LoadsTable.defaultProps = {};

@@ -13,13 +13,33 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getUsersByCompanyId(companyId, pageSize, pageNumber) {
+    let response;
+    if (pageSize) {
+      response = await this.get(`/companies/${companyId}${PATH}?pageSize=${pageSize}&pageNumber=${pageNumber}`);
+    } else {
+      response = await this.get(`/companies/${companyId}${PATH}`);
+    }
+    return (response);
+  }
+
+  // static async getUserByEmail(email) {
+  //   const response = await this.get(`${PATH}/email/${email}`);
+  //   return (response);
+  // }
+
+  static async getUserByEmail(user) {
+    const response = await this.post(`${PATH}/email`, user);
+    return (response);
+  }
+
   static async getUsersByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/users`);
     return (response);
   }
 
-  static async getDriversWithUserInfo() {
-    const response = await this.get('/driversinfo');
+  static async getDriversWithUserInfoByCompanyId(companyId) {
+    const response = await this.get(`/companies/${companyId}/drivers`);
     return (response);
   }
 

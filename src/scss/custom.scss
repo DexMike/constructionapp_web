@@ -111,12 +111,14 @@
 .truck-details  {
   font-size: 14px;
   font-weight: 400;
-  text-transform: capitalize;
   h1 {
     font-size: 26px;
   }
   h2 {
     font-size: 14px;
+  }
+  .distance {
+    margin-top: 25px;
   }
 }
 // ---- TUI Trucks List
@@ -301,7 +303,7 @@ $spacer: 30px;
 
 hr {
   margin: 20px 0px !important;
-  border: .5px solid #cccccc !important;
+  border: 0.5px solid #cccccc !important;
 }
 
 .mt-0 {

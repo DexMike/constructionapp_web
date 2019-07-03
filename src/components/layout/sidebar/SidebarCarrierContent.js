@@ -70,10 +70,6 @@ class SidebarCarrierContent extends Component {
                      icon="ic_timeline"
                      route="/Reports"
                      onClick={this.hideSidebar}/>
-        <SideElement title="Settings"
-                     icon="ic_settings"
-                     route="/Settings"
-                     onClick={this.hideSidebar}/>
       </div>
     );
   }
