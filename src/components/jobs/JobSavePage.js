@@ -141,8 +141,8 @@ class JobSavePage extends Component {
 
         // If the customer is Carrier, check if it's a favorite
         if (profile.companyType === 'Carrier') {
-          favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
-            profile.companyId
+          favoriteCompany = await GroupListService.getGroupListByUserName(
+            job.createdBy
           );
         }
 
