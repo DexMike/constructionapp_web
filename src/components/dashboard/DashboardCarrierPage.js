@@ -439,7 +439,7 @@ class DashboardCarrierPage extends Component {
 
     // jobsCompleted = onOfferJobCount * 20;
     potentialIncome = TFormat.asMoney(
-      TFormat.asMoney(potentialIncome)
+      potentialIncome
     );
 
     if (loaded) {

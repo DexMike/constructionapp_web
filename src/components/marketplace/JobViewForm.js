@@ -160,12 +160,14 @@ class JobViewForm extends Component {
       //     }
       //   }
       // }
-    }
+    
 
-    // Check if carrier is favorite for this job's customer
-    favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
-      profile.companyId
-    );
+      // Check if carrier is favorite for this job's customer
+      favoriteCompany = await GroupListService.getGroupListByUserName(
+        job.createdBy
+      );
+
+    }
 
     this.setState({
       job,
@@ -419,6 +421,7 @@ class JobViewForm extends Component {
       bid,
       companyName,
       favoriteCompany,
+      profile,
       btnSubmitting
     } = this.state;
     let showModalButton;
@@ -432,7 +435,7 @@ class JobViewForm extends Component {
     }
 
     // Job was 'Published' to the Marketplace, Carrier is a favorite
-    if (jobStatus === 'Published' && favoriteCompany.length > 0) {
+    if (jobStatus === 'Published' && favoriteCompany.length > 0 && favoriteCompany.includes(profile.companyId)) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
