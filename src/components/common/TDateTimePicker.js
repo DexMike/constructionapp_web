@@ -81,7 +81,8 @@ class TDateTimePickerField extends PureComponent {
       meta: { touched, error },
       showTime,
       timeFormat,
-      disabled
+      disabled,
+      id
     } = this.props;
     return (
       <div className="date-picker">
