@@ -445,7 +445,9 @@ class JobForm extends Component {
               <br/>
               <span>Avg Tons / Load:&nbsp;
                 <span>
-                  {parseFloat((total / loads.length).toFixed(2))}
+                  {
+                    loads.length ? parseFloat((total / loads.length).toFixed(2)) : 0
+                  }
                 </span>
               </span>
               <br/>
