@@ -4,6 +4,7 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import MinusIcon from 'mdi-react/MinusIcon';
 import PropTypes from 'prop-types';
+import './overrides.css';
 
 class IntervalDatePickerField extends PureComponent {
   constructor(props) {
@@ -54,7 +55,7 @@ class IntervalDatePickerField extends PureComponent {
     const { startDate, endDate } = this.state;
     const { name, dateFormat } = this.props;
     return (
-      <div className="date-picker date-picker--interval">
+      <div className="date-picker date-picker--interval" style={{backgroundColor: 'transparent'}}>
         <DatePicker
           name={name}
           selected={startDate}

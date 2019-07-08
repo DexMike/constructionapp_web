@@ -50,6 +50,7 @@ class CreateJobFormOne extends PureComponent {
       rateEstimate: 0,
       hourTrucksNumber: 1,
       rateTab: 1,
+      hourTon: 'ton',
       // location
       endLocationAddress1: '',
       endLocationAddress2: '',
@@ -72,6 +73,10 @@ class CreateJobFormOne extends PureComponent {
       instructions: '',
       // Request Handlers
       reqHandlerSameAddresses: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerJobName: {
         touched: false,
         error: ''
       },
@@ -135,6 +140,24 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
+
+      // extra fields
+      reqHandlerTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstimatedTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerHours: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstimatedHours: {
+        touched: false,
+        error: ''
+      },
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -184,7 +207,7 @@ class CreateJobFormOne extends PureComponent {
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
 
-    this.setState({ allAddresses });
+    this.setState({allAddresses});
 
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
@@ -287,7 +310,7 @@ class CreateJobFormOne extends PureComponent {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return null;
     }
   }
@@ -304,7 +327,7 @@ class CreateJobFormOne extends PureComponent {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return null;
     }
   }
@@ -375,7 +398,30 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleRateChange(e) {
-    this.setState({selectedRatedHourOrTon: e.value});
+    const {
+      selectedRatedHourOrTon
+    } = this.state;
+    let {
+      rateByTonValue,
+      estimatedTons,
+      rateByHourValue,
+      estimatedHours
+    } = this.state;
+
+    if (selectedRatedHourOrTon === 'ton') {
+      rateByHourValue = 0;
+      estimatedHours = 0;
+    } else if (selectedRatedHourOrTon === 'hour') {
+      rateByTonValue = 0;
+      estimatedTons = 0;
+    }
+    this.setState({
+      rateByHourValue,
+      estimatedHours,
+      rateByTonValue,
+      estimatedTons,
+      selectedRatedHourOrTon: e.value
+    });
   }
 
   handleSameAddresses() {
@@ -454,6 +500,7 @@ class CreateJobFormOne extends PureComponent {
     const {rateTab} = this.state;
     const {
       // reqHandlerTonnage,
+      reqHandlerJobName,
       reqHandlerEndAddress,
       reqHandlerEndState,
       reqHandlerEndCity,
@@ -466,7 +513,17 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerTrucksEstimate,
-      reqHandlerDate
+      reqHandlerDate,
+
+      selectedRatedHourOrTon,
+      rateByTonValue,
+      rateByHourValue,
+      estimatedTons,
+      estimatedHours,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours
     } = this.state;
     let isValid = true;
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
@@ -475,6 +532,17 @@ class CreateJobFormOne extends PureComponent {
           ...reqHandlerMaterials,
           touched: true,
           error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    if (job.name === '' || job.name === null) {
+      this.setState({
+        reqHandlerJobName: {
+          ...reqHandlerJobName,
+          touched: true,
+          error: 'Please enter a name for your job'
         }
       });
       isValid = false;
@@ -494,8 +562,9 @@ class CreateJobFormOne extends PureComponent {
     const currDate = new Date();
 
     if (job.jobDate) {
-      currDate.setHours(0, 0, 0, 0);
-      job.jobDate.setHours(0, 0, 0, 0);
+      // what's this for?
+      // currDate.setHours(0, 0, 0, 0);
+      // job.jobDate.setHours(0, 0, 0, 0);
     }
 
     if (!job.jobDate || job.jobDate.getTime() < currDate.getTime()) {
@@ -571,14 +640,15 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      const coordinates = geoResponseStart.features[0].center;
-      const startLocationLatitude = coordinates[1];
-      const startLocationLongitude = coordinates[0];
-
-      this.setState({
-        startLocationLatitude,
-        startLocationLongitude
-      });
+      if (typeof geoResponseStart.features[0] !== 'undefined') {
+        const coordinates = geoResponseStart.features[0].center;
+        const startLocationLatitude = coordinates[1];
+        const startLocationLongitude = coordinates[0];
+        this.setState({
+          startLocationLatitude,
+          startLocationLongitude
+        });
+      }
     }
 
     if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
@@ -654,14 +724,15 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      const coordinates = geoResponseEnd.features[0].center;
-      const endLocationLatitude = coordinates[1];
-      const endLocationLongitude = coordinates[0];
-
-      this.setState({
-        endLocationLatitude,
-        endLocationLongitude
-      });
+      if (typeof geoResponseEnd.features[0] !== 'undefined') {
+        const coordinates = geoResponseEnd.features[0].center;
+        const endLocationLatitude = coordinates[1];
+        const endLocationLongitude = coordinates[0];
+        this.setState({
+          endLocationLatitude,
+          endLocationLongitude
+        });
+      }
     }
 
     if (job.hourTrucksNumber <= 0 && rateTab === 1) {
@@ -684,6 +755,51 @@ class CreateJobFormOne extends PureComponent {
         }
       });
       isValid = false;
+    }
+
+    // rates
+    if (selectedRatedHourOrTon === 'ton') {
+      if (rateByTonValue <= 0) {
+        this.setState({
+          reqHandlerTons: {
+            ...reqHandlerTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedTons <= 0) {
+        this.setState({
+          reqHandlerEstimatedTons: {
+            ...reqHandlerEstimatedTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    } else if (selectedRatedHourOrTon === 'hour') {
+      if (rateByHourValue <= 0) {
+        this.setState({
+          reqHandlerHours: {
+            ...reqHandlerHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedHours <= 0) {
+        this.setState({
+          reqHandlerEstimatedHours: {
+            ...reqHandlerEstimatedHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -707,24 +823,49 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleInputChange(e) {
-    const {value} = e.target;
-    this.setState({[e.target.name]: value});
+    if (e.target.name === 'name') {
+      this.setState({
+        name: e.target.value,
+        reqHandlerJobName: {
+          touched: true
+        }
+      });
+    } else {
+      const {value} = e.target;
+      this.setState({[e.target.name]: value});
+    }
   }
 
   handleInputChangeTonHour(e) {
-    if (e.target.name === 'rateByTonValue') {
-      this.setState({rateByTonValue: e.target.value});
-    } else if (e.target.name === 'estimatedTons') {
+    if (e.target.name === 'estimatedTons') {
       this.setState({
         rateEstimate: e.target.value,
-        estimatedTons: e.target.value
+        estimatedTons: e.target.value,
+        reqHandlerEstimatedTons: {
+          touched: true
+        }
       });
     } else if (e.target.name === 'rateByHourValue') {
-      this.setState({rateByHourValue: e.target.value});
+      this.setState({
+        rateByHourValue: e.target.value,
+        reqHandlerHours: {
+          touched: true
+        }
+      });
+    } else if (e.target.name === 'rateByTonValue') {
+      this.setState({
+        rateByTonValue: e.target.value,
+        reqHandlerTons: {
+          touched: true
+        }
+      });
     } else if (e.target.name === 'estimatedHours') {
       this.setState({
         rateEstimate: e.target.value,
-        estimatedHours: e.target.value
+        estimatedHours: e.target.value,
+        reqHandlerEstimatedHours: {
+          touched: true
+        }
       });
     }
   }
@@ -742,11 +883,11 @@ class CreateJobFormOne extends PureComponent {
   jobDateChange(data) {
     const {reqHandlerDate} = this.state;
     this.setState({
+      jobDate: data,
       reqHandlerDate: Object.assign({}, reqHandlerDate, {
         touched: false
       })
     });
-    this.setState({jobDate: data});
   }
 
   handleStartAddressIdChange(data) {
@@ -866,10 +1007,6 @@ class CreateJobFormOne extends PureComponent {
     const isValid = await this.isFormValid();
 
     if (!isValid) {
-      // Add this back before merging SG-170 back into the design.
-      // validateRes(false);
-      // // TODO display error message
-      // // console.error('didnt put all the required fields.');
       return;
     }
     validateRes(true);
@@ -890,7 +1027,11 @@ class CreateJobFormOne extends PureComponent {
       rateByTonValue,
       rateByHourValue,
       estimatedTons,
-      estimatedHours
+      estimatedHours,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours
     } = this.state;
     if (hourTon === 'ton') {
       return (
@@ -907,7 +1048,7 @@ class CreateJobFormOne extends PureComponent {
               }
               placeholder="0"
               decimal
-              // meta={}
+              meta={reqHandlerTons}
             />
           </div>
           <div className="col-md-5 form__form-group">
@@ -922,7 +1063,7 @@ class CreateJobFormOne extends PureComponent {
               }
               placeholder="0"
               decimal
-              // meta={}
+              meta={reqHandlerEstimatedTons}
             />
           </div>
         </React.Fragment>
@@ -942,7 +1083,7 @@ class CreateJobFormOne extends PureComponent {
             }
             placeholder="0"
             decimal
-            // meta={}
+            meta={reqHandlerHours}
           />
         </div>
         <div className="col-md-5 form__form-group">
@@ -957,7 +1098,7 @@ class CreateJobFormOne extends PureComponent {
             }
             placeholder="0"
             decimal
-            // meta={}
+            meta={reqHandlerEstimatedHours}
           />
         </div>
       </React.Fragment>
@@ -988,6 +1129,7 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip,
       name,
       instructions,
+      reqHandlerJobName,
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerTrucksEstimate,
@@ -1021,12 +1163,30 @@ class CreateJobFormOne extends PureComponent {
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
                     <span className="form__form-group-label">Job Name</span>
-                    <input
+                    {
+                      /*
+                      <input
                       name="name"
                       type="text"
                       value={name}
                       onChange={this.handleInputChange}
                       placeholder="Job Name"
+                      meta={reqHandlerJobName}
+                    />
+                      */
+                    }
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'name',
+                          value: name
+                        }
+                      }
+                      placeholder="Job Name"
+                      type="text"
+                      meta={reqHandlerJobName}
+                      id='jobname'
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
@@ -1041,7 +1201,7 @@ class CreateJobFormOne extends PureComponent {
                         }
                       }
                       onChange={this.jobDateChange}
-                      dateFormat="MMMM-dd-yyyy h:mm aa"
+                      dateFormat="yyyy-MM-dd hh:mm"
                       showTime
                       meta={reqHandlerDate}
                     />

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 class TField extends PureComponent {
   render() {
     const {
-      input, placeholder, type, meta: { touched, error }
+      input, placeholder, type, meta: { touched, error }, id
     } = this.props;
 
     return (
@@ -14,6 +14,7 @@ class TField extends PureComponent {
           {...input}
           placeholder={placeholder}
           type={type}
+          id={id}
         />
         {touched && error && <span className="form__form-group-error">{error}</span>}
       </div>

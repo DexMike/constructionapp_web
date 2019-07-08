@@ -15,6 +15,7 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class JobForm extends Component {
   constructor(props) {
@@ -44,19 +45,29 @@ class JobForm extends Component {
       carrier: null,
       coords: null,
       loads: [],
-      loaded: false
+      loaded: false,
+      distance: 0
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   async componentDidMount() {
-
     const profile = await ProfileService.getProfile();
-
     const { job, companyCarrier } = this.props;
     let { loads, carrier, images } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
+    const startPoint = job.startAddress;
+    const endPoint = job.endAddress;
+    let distance = 0;
+    try {
+      const response = await GeoCodingService
+        .getDistance(startPoint.longitude, startPoint.latitude,
+          endPoint.longitude, endPoint.latitude);
+      distance = response.routes[0].distance;
+    } catch (e) {
+      // console.log(e)
+    }
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
@@ -82,7 +93,8 @@ class JobForm extends Component {
       carrier,
       loaded: true,
       loads,
-      job
+      job,
+      distance
     });
 
   }
@@ -308,8 +320,22 @@ class JobForm extends Component {
   }
 
   renderJobBottom(job) {
+    const { distance } = this.state;
     return (
       <React.Fragment>
+        <h3 className="subhead">
+          Distance
+        </h3>
+        <Row>
+          <Col>
+            <div>
+              <div>
+                {TFormat.asMetersToMiles(distance)}
+              </div>
+            </div>
+            <br/>
+          </Col>
+        </Row>
         <h3 className="subhead">
           Comments
         </h3>
@@ -337,7 +363,7 @@ class JobForm extends Component {
           fontSize: 22
         }}
         >
-          Run Information
+          Load Information
         </h3>
         {job && <LoadsTable loads={loads} job={job}/>}
       </React.Fragment>
@@ -345,19 +371,17 @@ class JobForm extends Component {
   }
 
   renderJobTons() {
-    const { loads } = this.state;
-    const total = loads.length;
-    let delivered = 0;
-    let completed = 0;
+    const { loads, job } = this.state;
+    const total = job.rateEstimate;
+    let tonsDelivered = 0;
+    let hoursDelivered = 0;
     if (loads.length > 0) {
       for (const i in loads) {
         if (loads[i].loadStatus === 'Submitted') {
-          delivered += 1;
+          tonsDelivered += loads[i].tonsEntered;
+          hoursDelivered += loads[i].hoursEntered;
         }
       }
-    }
-    if (total) {
-      completed = parseFloat((delivered * 100 / total).toFixed(2));
     }
     return (
       <React.Fragment>
@@ -366,16 +390,31 @@ class JobForm extends Component {
             <h3 className="subhead">
               Delivery Metrics
             </h3>
-            <div>
-              <span>Total Tons:  <span>{total}</span></span>
-              <br/>
-              <span>Load Tonnage Delivered: <span>{delivered}</span></span>
-              <br/>
-              <span>Tons Remaining: <span>{total - delivered}</span></span>
-              <br/>
-              <span>% Completed: <span>{completed}%</span></span>
-              <br/>
-            </div>
+            {
+              job.rateType === 'Ton' ? (
+                <div>
+                  <span>Total Tons:  <span>{total} {job.rateType}(s)</span></span>
+                  <br/>
+                  <span>Load Tonnage Delivered: <span>{tonsDelivered}</span></span>
+                  <br/>
+                  <span>Tons Remaining: <span>{total - tonsDelivered}</span></span>
+                  <br/>
+                  <span>% Completed: <span>{parseFloat((tonsDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <br/>
+                </div>
+              ) : (
+                <div>
+                  <span>Total Hours:  <span>{total} {job.rateType}(s)</span></span>
+                  <br/>
+                  <span>Hours Completed: <span>{hoursDelivered}</span></span>
+                  <br/>
+                  <span>Hours Remaining: <span>{total - hoursDelivered}</span></span>
+                  <br/>
+                  <span>% Completed: <span>{parseFloat((hoursDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <br/>
+                </div>
+              )
+            }
             <br/>
           </Col>
         </Row>
@@ -392,11 +431,7 @@ class JobForm extends Component {
               Load Information
             </h3>
             <div>
-              <span>Est # of Loads:  <span>42</span></span>
-              <br/>
               <span>Loads Completed: <span>35</span></span>
-              <br/>
-              <span>Loads Remaining: <span>8.5</span></span>
               <br/>
               <span>Avg Tons / Load: <span>10 Tons</span></span>
               <br/>
@@ -540,6 +575,18 @@ class JobForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
+              <div className="row">
+                <div className="col-md-4">
+                  {this.renderJobTons(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderJobLoads(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderRunSummary(job)}
+                </div>
+              </div>
+              <hr/>
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
@@ -559,7 +606,6 @@ class JobForm extends Component {
                       {endAddress}
                     </div>
                   </div>
-                  <hr/>
                   <div className="row mt-1">
                     <div className="col-md-12">
                       {this.renderJobBottom(job)}
@@ -570,18 +616,6 @@ class JobForm extends Component {
               <hr/>
               {this.renderLoads()}
               {this.renderUploadedPhotos(images)}
-              <hr/>
-              <div className="row">
-                <div className="col-md-4">
-                  {this.renderJobTons(job)}
-                </div>
-                <div className="col-md-4">
-                  {this.renderJobLoads(job)}
-                </div>
-                <div className="col-md-4">
-                  {this.renderRunSummary(job)}
-                </div>
-              </div>
             </CardBody>
           </Card>
         </Container>
@@ -614,7 +648,6 @@ class JobForm extends Component {
                       {endAddress}
                     </div>
                   </div>
-                  <hr/>
                   <div className="row mt-1">
                     <div className="col-md-12">
                       {this.renderJobBottom(job)}
@@ -655,7 +688,6 @@ class JobForm extends Component {
                     {endAddress}
                   </div>
                 </div>
-                <hr/>
                 <div className="row  mt-1">
                   <div className="col-md-12">
                     {this.renderJobBottom(job)}

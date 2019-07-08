@@ -1,16 +1,16 @@
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import translationUS from './translations/us/translation.json';
-import translationES from './translations/es/translation.json';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import translationEnglish from './translations/us/translation.json';
+import translationSpanish from './translations/es/translation.json';
 
 // the translations
 // move them in a JSON file and import them eventually
 const resources = {
-  us: {
-    translation: translationUS
+  English: {
+    translation: translationEnglish
   },
-  es: {
-    translation: translationES
+  Spanish: {
+    translation: translationSpanish
   }
 };
 
@@ -18,8 +18,8 @@ i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     resources,
-    lng: "us",
-    fallbackLng: "us",
+    lng: 'English',
+    fallbackLng: 'English',
 
     keySeparator: false, // we do not use keys in form messages.welcome
 

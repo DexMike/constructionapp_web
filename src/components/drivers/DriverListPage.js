@@ -64,14 +64,22 @@ class DriverListPage extends Component {
             firstName: driver.firstName,
             lastName: driver.lastName,
             mobilePhone: driver.mobilePhone,
+            userStatus: driver.userStatus,
             email: driver.email,
             userId: driver.id
           };
+          // Do not know what other user statuses we would consider enabled??
+          // Should we have an actual driver driver status???
+          // IF we add a driver status we will need to change this 
+          if (newDriver.userStatus === 'New' || newDriver.userStatus === 'First Login') {
+            newDriver.userStatus = 'Enabled';
+          }
           return newDriver;
         } catch (error) {
           const newDriver = driver;
           return newDriver;
         }
+
       });
     }
     this.setState({
@@ -201,6 +209,10 @@ class DriverListPage extends Component {
                       {
                         name: 'mobilePhone',
                         displayName: 'Mobile Phone'
+                      },
+                      {
+                        name: 'userStatus',
+                        displayName: 'Driver Status'
                       },
                       {
                         name: 'email',

@@ -39,9 +39,9 @@ class LoginPage extends SignIn {
       user: null,
       btnSubmitting: false, // Used by TSubmitButton
       userUnderReview: false,
-      ip: null,
-      browserVersion: null,
-      screenSize: null
+      ip: '',
+      browserVersion: [],
+      screenSize: []
     };
     this.showPassword = this.showPassword.bind(this);
     this.onSignIn = this.onSignIn.bind(this);
@@ -54,20 +54,7 @@ class LoginPage extends SignIn {
   }
 
   async componentDidMount() {
-    let ip = '';
-    try {
-      const ipAddress = await UtilsService.getUserIP();
-      ({ ip } = ipAddress);
-    } catch (e) {
-      // console.log(e);
-    }
-    const browserVersion = await UtilsService.getBrowserVersion();
-    const screenSize = await UtilsService.getScreenDimentions();
-    this.setState({
-      ip,
-      browserVersion,
-      screenSize
-    });
+    // console.log(mounted);
   }
 
   showPassword(e) {
@@ -147,6 +134,23 @@ class LoginPage extends SignIn {
         return;
         // user is under review
       }
+
+      let ip = '';
+      try {
+        const ipAddress = await UtilsService.getUserIP();
+        ({ ip } = ipAddress);
+      } catch (e) {
+        // console.log(e);
+      }
+      const browserVersion = await UtilsService.getBrowserVersion();
+      const screenSize = await UtilsService.getScreenDimentions();
+      
+      this.setState({
+        //  settingsLoaded: true,
+        ip,
+        browserVersion,
+        screenSize
+      });
 
       const data = await Auth.signIn(this.state.username, this.state.password);
 

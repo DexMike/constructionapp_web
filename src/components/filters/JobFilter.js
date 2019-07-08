@@ -493,7 +493,7 @@ class JobFilter extends Component {
                         placeholder="# of tons"
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="2" id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -521,6 +521,9 @@ class JobFilter extends Component {
                         }
                         // placeholder="Materials"
                         placeholder="Any"
+                        id="truckTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.equipmentType.length}
                       />
                     </Col>
                     <Col md="1">
@@ -575,7 +578,7 @@ class JobFilter extends Component {
                         type="number"
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="2" id="materialTypeSelect">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -603,6 +606,9 @@ class JobFilter extends Component {
                         }
                         // placeholder="Materials"
                         placeholder={materialTypeList[0]}
+                        id="materialTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.materialType.length}
                       />
                     </Col>
                   </Row>

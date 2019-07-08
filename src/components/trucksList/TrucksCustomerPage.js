@@ -624,7 +624,7 @@ class TrucksCustomerPage extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="2" id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -652,6 +652,9 @@ class TrucksCustomerPage extends Component {
                         }
                         // placeholder="Materials"
                         placeholder="Any"
+                        id="truckTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.equipmentType.length}
                       />
                     </Col>
                     <Col md="2">
@@ -701,7 +704,7 @@ class TrucksCustomerPage extends Component {
                         // meta={reqHandlerMinRate}
                       />
                     </Col>
-                    <Col md="3">
+                    <Col md="3" id="materialTypeSelect">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -729,6 +732,9 @@ class TrucksCustomerPage extends Component {
                         }
                         // placeholder="Materials"
                         placeholder={materialTypeList[0]}
+                        id="materialTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.materialType.length}
                       />
                     </Col>
                     <Col md="1">

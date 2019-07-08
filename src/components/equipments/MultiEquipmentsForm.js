@@ -105,7 +105,7 @@ class MultiEquipmentsForm extends PureComponent {
       isValid = false;
     }
 
-    if (numberOfTrucks === 0 || numberOfTrucks === '0') {
+    if (Number(numberOfTrucks) === 0 || Number(numberOfTrucks) === '0' || Number(numberOfTrucks) === null) {
       this.setState({
         reqHandlerNumberOfTrucks: {
           touched: true,
@@ -457,7 +457,7 @@ class MultiEquipmentsForm extends PureComponent {
             <Row className="col-12 pt-4">
               <Col md={12}>
                 <span>
-                  Max Distance to Pickup (Miles)
+                  Max Distance to Pickup (Miles, optional)
                 </span>
                 <TFieldNumber
                   input={{
