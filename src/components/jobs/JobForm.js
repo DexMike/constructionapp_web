@@ -423,6 +423,16 @@ class JobForm extends Component {
   }
 
   renderJobLoads() {
+    const { loads, job } = this.state;
+    let completedLoads = 0;
+    const total = job.rateEstimate;
+    if (loads.length > 0) {
+      for (const i in loads) {
+        if (loads[i].loadStatus === 'Submitted') {
+          completedLoads += 1;
+        }
+      }
+    }
     return (
       <React.Fragment>
         <Row>
@@ -431,9 +441,13 @@ class JobForm extends Component {
               Load Information
             </h3>
             <div>
-              <span>Loads Completed: <span>35</span></span>
+              <span>Loads Completed: <span>{completedLoads}</span></span>
               <br/>
-              <span>Avg Tons / Load: <span>10 Tons</span></span>
+              <span>Avg Tons / Load:&nbsp;
+                <span>
+                  {parseFloat((total / loads.length).toFixed(2))}
+                </span>
+              </span>
               <br/>
             </div>
             <br/>
