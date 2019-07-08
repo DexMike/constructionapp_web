@@ -141,8 +141,8 @@ class JobSavePage extends Component {
 
         // If the customer is Carrier, check if it's a favorite
         if (profile.companyType === 'Carrier') {
-          favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
-            profile.companyId
+          favoriteCompany = await GroupListService.getGroupListByUserName(
+            job.createdBy
           );
         }
 
@@ -339,7 +339,7 @@ class JobSavePage extends Component {
       profile
     } = this.state;
     let { bid } = this.state;
-    let { booking, bookingEquipment } = this.state;
+    let { booking } = this.state;
     let notification;
 
     // A favorite Carrier "accepts" the job
@@ -393,7 +393,7 @@ class JobSavePage extends Component {
 
       // Create Booking Equipment
       // Check if we have a booking equipment first
-      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+      /* let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
           return bookingEq;
@@ -427,7 +427,7 @@ class JobSavePage extends Component {
             bookingEquipment
           );
         }
-      }
+      } */
 
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
@@ -653,7 +653,10 @@ class JobSavePage extends Component {
       );
     }
     // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
-    if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
+    if ((job.status === 'On Offer' || job.status === 'Published And Offered')
+      && companyType === 'Carrier' && bid.status !== 'Declined'
+      && favoriteCompany.length > 0
+    ) {
       return (
         <div>
           <TSubmitButton

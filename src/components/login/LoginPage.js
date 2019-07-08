@@ -39,9 +39,9 @@ class LoginPage extends SignIn {
       user: null,
       btnSubmitting: false, // Used by TSubmitButton
       userUnderReview: false,
-      ip: null,
-      browserVersion: null,
-      screenSize: null
+      ip: '',
+      browserVersion: [],
+      screenSize: []
     };
     this.showPassword = this.showPassword.bind(this);
     this.onSignIn = this.onSignIn.bind(this);
@@ -135,8 +135,6 @@ class LoginPage extends SignIn {
         // user is under review
       }
 
-      const data = await Auth.signIn(this.state.username, this.state.password);
-
       let ip = '';
       try {
         const ipAddress = await UtilsService.getUserIP();
@@ -146,12 +144,15 @@ class LoginPage extends SignIn {
       }
       const browserVersion = await UtilsService.getBrowserVersion();
       const screenSize = await UtilsService.getScreenDimentions();
+      
       this.setState({
-        settingsLoaded: true,
+        //  settingsLoaded: true,
         ip,
         browserVersion,
         screenSize
       });
+
+      const data = await Auth.signIn(this.state.username, this.state.password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
