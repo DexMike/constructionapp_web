@@ -14,7 +14,7 @@ class TDateTimePickerField extends PureComponent {
   // componentDidMount was added in order to prepopulate
   // datePicker date from a fixed date passed from other component.
   componentDidMount() {
-    const { input } = this.props;
+    const { input  } = this.props;
     let dueDate = 0;
     // startDate and EndDate were added for common datepicker values
     if (input.value.startDate) {
@@ -94,6 +94,7 @@ class TDateTimePickerField extends PureComponent {
             onChange={this.handleChange}
             dateFormat={dateFormat}
             disabled={disabled}
+            id={id}
           />
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>
