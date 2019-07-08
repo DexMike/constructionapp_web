@@ -30,7 +30,7 @@ class LoadsTable extends Component {
     const {loads, job} = {...this.state};
     // debugger;
     return (
-      <Paper>
+      <Paper style={{overflowX: 'auto'}}>
         <Table>
           <TableHead>
             <TableRow>
