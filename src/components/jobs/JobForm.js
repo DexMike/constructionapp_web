@@ -363,7 +363,7 @@ class JobForm extends Component {
           fontSize: 22
         }}
         >
-          Run Information
+          Load Information
         </h3>
         {job && <LoadsTable loads={loads} job={job}/>}
       </React.Fragment>
@@ -371,19 +371,17 @@ class JobForm extends Component {
   }
 
   renderJobTons() {
-    const { loads } = this.state;
-    const total = loads.length;
-    let delivered = 0;
-    let completed = 0;
+    const { loads, job } = this.state;
+    const total = job.rateEstimate;
+    let tonsDelivered = 0;
+    let hoursDelivered = 0;
     if (loads.length > 0) {
       for (const i in loads) {
         if (loads[i].loadStatus === 'Submitted') {
-          delivered += 1;
+          tonsDelivered += loads[i].tonsEntered;
+          hoursDelivered += loads[i].hoursEntered;
         }
       }
-    }
-    if (total) {
-      completed = parseFloat((delivered * 100 / total).toFixed(2));
     }
     return (
       <React.Fragment>
@@ -392,16 +390,31 @@ class JobForm extends Component {
             <h3 className="subhead">
               Delivery Metrics
             </h3>
-            <div>
-              <span>Total Tons:  <span>{total}</span></span>
-              <br/>
-              <span>Load Tonnage Delivered: <span>{delivered}</span></span>
-              <br/>
-              <span>Tons Remaining: <span>{total - delivered}</span></span>
-              <br/>
-              <span>% Completed: <span>{completed}%</span></span>
-              <br/>
-            </div>
+            {
+              job.rateType === 'Ton' ? (
+                <div>
+                  <span>Total Tons:  <span>{total} {job.rateType}(s)</span></span>
+                  <br/>
+                  <span>Load Tonnage Delivered: <span>{tonsDelivered}</span></span>
+                  <br/>
+                  <span>Tons Remaining: <span>{total - tonsDelivered}</span></span>
+                  <br/>
+                  <span>% Completed: <span>{parseFloat((tonsDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <br/>
+                </div>
+              ) : (
+                <div>
+                  <span>Total Hours:  <span>{total} {job.rateType}(s)</span></span>
+                  <br/>
+                  <span>Hours Completed: <span>{hoursDelivered}</span></span>
+                  <br/>
+                  <span>Hours Remaining: <span>{total - hoursDelivered}</span></span>
+                  <br/>
+                  <span>% Completed: <span>{parseFloat((hoursDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <br/>
+                </div>
+              )
+            }
             <br/>
           </Col>
         </Row>
@@ -418,11 +431,7 @@ class JobForm extends Component {
               Load Information
             </h3>
             <div>
-              <span>Est # of Loads:  <span>42</span></span>
-              <br/>
               <span>Loads Completed: <span>35</span></span>
-              <br/>
-              <span>Loads Remaining: <span>8.5</span></span>
               <br/>
               <span>Avg Tons / Load: <span>10 Tons</span></span>
               <br/>
@@ -566,6 +575,18 @@ class JobForm extends Component {
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
+              <div className="row">
+                <div className="col-md-4">
+                  {this.renderJobTons(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderJobLoads(job)}
+                </div>
+                <div className="col-md-4">
+                  {this.renderRunSummary(job)}
+                </div>
+              </div>
+              <hr/>
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
@@ -595,18 +616,6 @@ class JobForm extends Component {
               <hr/>
               {this.renderLoads()}
               {this.renderUploadedPhotos(images)}
-              <hr/>
-              <div className="row">
-                <div className="col-md-4">
-                  {this.renderJobTons(job)}
-                </div>
-                <div className="col-md-4">
-                  {this.renderJobLoads(job)}
-                </div>
-                <div className="col-md-4">
-                  {this.renderRunSummary(job)}
-                </div>
-              </div>
             </CardBody>
           </Card>
         </Container>
