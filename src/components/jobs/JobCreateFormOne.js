@@ -1186,6 +1186,7 @@ class CreateJobFormOne extends PureComponent {
                       placeholder="Job Name"
                       type="text"
                       meta={reqHandlerJobName}
+                      id='jobname'
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
