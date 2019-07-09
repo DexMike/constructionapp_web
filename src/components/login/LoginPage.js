@@ -182,7 +182,16 @@ class LoginPage extends SignIn {
       throw new Error('Invalid response from server');
     } catch (err) {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
-      if (err.code === 'UserNotConfirmedException') {
+      if (err.code === 'UserNotFoundException') {
+        await this.createLoginLog(false);
+        this.setState({
+          error: 'Invalid username or password.',
+          loading: false,
+          btnSubmitting: false,
+          errorCode: err.code,
+          confirmUsername: null
+        });
+      } else if (err.code === 'UserNotConfirmedException') {
         const {username} = this.state;
         await this.createLoginLog(false);
         this.setState({
