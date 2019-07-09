@@ -740,8 +740,8 @@ class CarriersCustomerPage extends Component {
                             label: materialType.trim()
                           }))
                         }
-                        placeholder="Any"
-                        // placeholder={materialTypeList[0]}
+                        // placeholder="Materials"
+                        placeholder={materialTypeList[0]}
                         id="materialTypeSelect"
                         horizontalScroll="true"
                         selectedItems={filters.materialType.length}
