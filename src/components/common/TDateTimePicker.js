@@ -95,6 +95,7 @@ class TDateTimePickerField extends PureComponent {
             onChange={this.handleChange}
             dateFormat={dateFormat}
             disabled={disabled}
+            id={id}
           />
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>
