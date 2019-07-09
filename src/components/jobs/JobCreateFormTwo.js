@@ -233,9 +233,11 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedRatedHourOrTon === 'ton') {
       rateType = 'Ton';
       rate = Number(d.rateByTonValue);
+      d.rateEstimate = d.estimatedTons;
     } else {
       rateType = 'Hour';
       rate = Number(d.rateByHourValue);
+      d.rateEstimate = d.estimatedHours;
     }
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
