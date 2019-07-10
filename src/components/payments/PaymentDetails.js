@@ -114,7 +114,7 @@ class PaymentDetails extends Component {
                   <br/>
                   <div className="row">
                     <div className="col-12 text-right">
-                      <Link to="/payments">
+                      <Link to="/invoices">
                         <Button>
                         Back
                         </Button>

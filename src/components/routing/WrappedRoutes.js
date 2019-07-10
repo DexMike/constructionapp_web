@@ -77,13 +77,13 @@ class WrappedRoutes extends PureComponent {
 
           <Route
             exact
-            path="/payments"
+            path="/invoices"
             component={PaymentsPage}
           />
 
           <Route
             exact
-            path="/payments/:id"
+            path="/invoices/:id"
             component={PaymentDetails}
           />
 

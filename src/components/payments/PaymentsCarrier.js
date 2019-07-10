@@ -6,6 +6,7 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import PaymentsService from '../../api/PaymentsService';
+import PaymentsFilter from './PaymentsFilter';
 
 class PaymentsCarrier extends Component {
   constructor(props) {
@@ -45,7 +46,7 @@ class PaymentsCarrier extends Component {
 
     payments = payments.map((payment) => {
       const newPayment = payment;
-      newPayment.id = payment.clientPaymentId;
+      newPayment.id = payment.token;
 
       newPayment.amount = payment.amount;
       newPayment.amountF = TFormat.getValue(
@@ -63,7 +64,7 @@ class PaymentsCarrier extends Component {
   renderGoTo() {
     const {goToPaymentDetails, id} = this.state;
     if (goToPaymentDetails) {
-      return <Redirect push to={`/payments/${id}`}/>;
+      return <Redirect push to={`/invoices/${id}`}/>;
     }
     return false;
   }
@@ -81,6 +82,7 @@ class PaymentsCarrier extends Component {
   }
 
   render() {
+    const title = 'Carrier Invoices';
     /* const payments = [{
       date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88'
     }]; */
@@ -91,13 +93,14 @@ class PaymentsCarrier extends Component {
           {this.renderGoTo()}
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Carrier Payments</h3>
+              <h3 className="page-title">{title}</h3>
             </Col>
           </Row>
+          <PaymentsFilter />
           <Row>
             <Col md={12}>
               <h5>For detailed information on your payments, please log into your &nbsp;
-                <a href="https://hyperwallet.com/" target="_blank">https://hyperwallet.com</a>&nbsp;account.
+                <a href="https://hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://hyperwallet.com</a>&nbsp;account.
               </h5>
             </Col>
           </Row>
@@ -113,7 +116,7 @@ class PaymentsCarrier extends Component {
                           displayName: 'Date'
                         },
                         {
-                          name: 'clientPaymentId',
+                          name: 'token',
                           displayName: 'ID'
                         },
                         {
@@ -125,6 +128,8 @@ class PaymentsCarrier extends Component {
                     }
                     data={payments}
                     handleIdClick={this.handlePaymentId}
+                    handlePageChange={() => {}}
+                    handleRowsChange={() => {}}
                   />
                 </CardBody>
               </Card>
@@ -137,7 +142,7 @@ class PaymentsCarrier extends Component {
       <Container className="container">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Carrier Payments</h3>
+            <h3 className="page-title">{title}</h3>
           </Col>
         </Row>
         {this.renderLoader()}

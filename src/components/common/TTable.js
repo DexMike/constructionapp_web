@@ -269,7 +269,10 @@ TTable.propTypes = {
   handleRowsChange: PropTypes.func.isRequired,
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number
+      id: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number
+      ])
     })
   ).isRequired,
   onSelect: PropTypes.func,
