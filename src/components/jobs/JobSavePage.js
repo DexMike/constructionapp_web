@@ -453,7 +453,7 @@ class JobSavePage extends Component {
       const newJob = CloneDeep(job);
 
       // Updating the Job
-      newJob.status = 'Requested';
+      // newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
@@ -686,7 +686,7 @@ class JobSavePage extends Component {
       );
     }
     // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
-    if ((job.status === 'Requested' && companyType === 'Customer')
+    /* if (companyType === 'Customer'
       && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
       && bid.status !== 'Declined') {
       // console.log('We are a customer and we have a Carrier's job request');
@@ -709,9 +709,8 @@ class JobSavePage extends Component {
           />
         </div>
       );
-    }
-    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress')
-      && companyType === 'Carrier') {
+    } */
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') && companyType === 'Carrier') {
       return (
         <TSubmitButton
           onClick={() => this.toggleAllocateDriversModal()}

@@ -262,7 +262,7 @@ class JobViewForm extends Component {
 
       // Create Booking Equipment
       // Check if we have a booking equipment first
-      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+      /* let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
           return bookingEq;
@@ -295,7 +295,7 @@ class JobViewForm extends Component {
             bookingEquipment
           );
         }
-      }
+      } */
 
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
