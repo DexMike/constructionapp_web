@@ -4,3 +4,19 @@
     padding-top: 32px !important;
     padding-bottom: 16px !important;
 }
+
+.map-container {
+    width: 100%;
+    height: 600px !important;
+}
+.circle-marker {
+    background-color: red;
+    color: purple;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+.instructions {
+    font-weight: bold;
+    font-size: 12px;
+}
