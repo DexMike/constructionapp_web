@@ -1204,6 +1204,7 @@ class CreateJobFormOne extends PureComponent {
                       dateFormat="yyyy-MM-dd hh:mm"
                       showTime
                       meta={reqHandlerDate}
+                      id="jobstartdatetime"
                     />
                   </div>
                 </Row>
