@@ -216,8 +216,10 @@ class CarriersCustomerPage extends Component {
   }
 
   async fetchFavoriteCarriers(carriers) {
+    const { profile } = this.state;
+
     // we get all groups.companyId that have name 'Favorite'
-    const groupsFavorites = await GroupListService.getGroupListsFavorites();
+    const groupsFavorites = await GroupListService.getGroupListsFavorites(profile.companyId);
 
     carriers.map((carrier) => {
       const newCarrier = carrier;
@@ -408,11 +410,10 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleSetFavorite(companyId) {
-    const { carriers } = this.state;
+    const { carriers, profile } = this.state;
 
     try {
-      const group = await GroupListService.getGroupListsByCompanyId(companyId);
-      const profile = await ProfileService.getProfile();
+      const group = await GroupListService.getGroupListsByCompanyId(companyId, profile.companyId);
 
       // we get check for groups.companyId = companyId that have name 'Favorite'
       group.map((item) => {
@@ -425,9 +426,9 @@ class CarriersCustomerPage extends Component {
       // if we got a group with companyId
       if (group.length > 0) { // delete
         // first we delete the Group List
-        await GroupListService.deleteGroupListById(group[0].id);
+        await GroupListService.deleteGroupListById(group[0][0]);
         // then the Group
-        await GroupService.deleteGroupById(group[0].groupId);
+        await GroupService.deleteGroupById(group[0][2]);
       } else { // create "Favorite" Group record
         const groupData = {
           createdBy: profile.userId,
