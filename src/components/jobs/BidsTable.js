@@ -208,7 +208,7 @@ class BidsTable extends Component {
       booking = await BookingService.createBooking(booking);
 
       // Create Booking Equipment
-      const response = await EquipmentService.getEquipments();
+      /* const response = await EquipmentService.getEquipments();
       const equipments = response.data;
       if (equipments && equipments.length > 0) {
         const equipment = equipments[0]; // temporary for now.
@@ -232,6 +232,19 @@ class BidsTable extends Component {
         bookingEquipment = await BookingEquipmentService.createBookingEquipments(
           bookingEquipment
         );
+      } */
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // We tell the customer that the job has been accepted
+      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'Your job request has been accepted.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
     } else {
       // Decline Bid
