@@ -55,9 +55,7 @@ class BidsTable extends Component {
       const newBid = bid;
 
       newBid.date = bid.createdOn;
-      newBid.dateF = TFormat.getValue(
-        TFormat.asDate(bid.createdOn)
-      );
+      newBid.dateF = TFormat.asDate(bid.createdOn);
 
       if (newBid.status === 'Pending') {
         newBid.status = 'Requested';
@@ -260,6 +258,12 @@ class BidsTable extends Component {
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
+    allBids.map((bid) => {
+      newBid = bid;
+      newBid.date = bid.createdOn;
+      newBid.dateF = TFormat.asDate(bid.createdOn);
+      return newBid;
+    });
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
@@ -333,9 +337,9 @@ class BidsTable extends Component {
                     displayName: 'Loads Completed'
                   },
                   {
-                    name: 'date',
+                    name: 'dateF',
                     displayName: 'Date Requested',
-                    label: 'dateF'
+                    // label: 'dateF'
                   }
                 ]
               }
