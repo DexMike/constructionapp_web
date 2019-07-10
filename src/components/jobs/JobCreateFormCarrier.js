@@ -832,11 +832,11 @@ class JobCreateFormCarrier extends Component {
                   options={
                     [
                       {
-                        value: 'hour',
+                        value: 'Hour',
                         label: 'Hour'
                       },
                       {
-                        value: 'ton',
+                        value: 'Ton',
                         label: 'Ton'
                       }
                     ]
