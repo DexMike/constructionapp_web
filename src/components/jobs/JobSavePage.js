@@ -632,13 +632,22 @@ class JobSavePage extends Component {
       // If the carrier is a favorite
       if (favoriteCompany.length > 0) {
         return (
-          <TSubmitButton
-            onClick={() => this.handleConfirmRequestCarrier('Accept')}
-            className="primaryButton"
-            loading={btnSubmitting}
-            loaderSize={10}
-            bntText="Accept Job"
-          />
+          <div>
+            <TSubmitButton
+              onClick={() => this.handleConfirmRequestCarrier('Decline')}
+              className="secondaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Decline Job"
+            />
+            <TSubmitButton
+              onClick={() => this.handleConfirmRequestCarrier('Accept')}
+              className="primaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Accept Job"
+            />
+          </div>
         );
       }
       // the carrier is not a favorite

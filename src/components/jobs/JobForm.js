@@ -399,7 +399,11 @@ class JobForm extends Component {
                   <br/>
                   <span>Tons Remaining: <span>{total - tonsDelivered}</span></span>
                   <br/>
-                  <span>% Completed: <span>{parseFloat((tonsDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <span>% Completed:&nbsp;
+                    <span>
+                      {parseFloat((tonsDelivered * 100 / total).toFixed(2))}%
+                    </span>
+                  </span>
                   <br/>
                 </div>
               ) : (
@@ -410,7 +414,11 @@ class JobForm extends Component {
                   <br/>
                   <span>Hours Remaining: <span>{total - hoursDelivered}</span></span>
                   <br/>
-                  <span>% Completed: <span>{parseFloat((hoursDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <span>% Completed:&nbsp;
+                    <span>
+                      {parseFloat((hoursDelivered * 100 / total).toFixed(2))}%
+                    </span>
+                  </span>
                   <br/>
                 </div>
               )
@@ -423,6 +431,25 @@ class JobForm extends Component {
   }
 
   renderJobLoads() {
+    const { loads, job } = this.state;
+    let completedLoads = 0;
+    const total = job.rateEstimate;
+    let tonsDelivered = 0;
+    if (loads.length > 0) {
+      for (const i in loads) {
+        if (loads[i].loadStatus === 'Submitted') {
+          completedLoads += 1;
+        }
+        tonsDelivered += loads[i].tonsEntered;
+      }
+    }
+    let tonnage = 0;
+    if (job.rateType === 'Ton' && loads.length > 0) {
+      tonnage = parseFloat((total / loads.length).toFixed(2));
+    }
+    if (job.rateType === 'Hour' && loads.length > 0) {
+      tonnage = parseFloat((tonsDelivered / loads.length).toFixed(2));
+    }
     return (
       <React.Fragment>
         <Row>
@@ -431,9 +458,15 @@ class JobForm extends Component {
               Load Information
             </h3>
             <div>
-              <span>Loads Completed: <span>35</span></span>
+              <span>Loads Completed: <span>{completedLoads}</span></span>
               <br/>
-              <span>Avg Tons / Load: <span>10 Tons</span></span>
+              <span>Avg Tons / Load:&nbsp;
+                <span>
+                  {
+                    tonnage
+                  }
+                </span>
+              </span>
               <br/>
             </div>
             <br/>
