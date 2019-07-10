@@ -743,9 +743,6 @@ class JobSavePage extends Component {
       }, {
         displayName: 'Status',
         name: 'userStatus'
-      }, {
-        displayName: 'Invited',
-        name: 'invited'
       }
     ];
     return (
@@ -766,7 +763,19 @@ class JobSavePage extends Component {
                   >
                     Allocate Drivers
                   </h1>
+
                   <div className="row">
+
+                    <TTable
+                    handleRowsChange={() => {}}
+                    data={driverData}
+                    columns={driverColumns}
+                    handlePageChange={() => {}}
+                    handleIdClick={() => {}}
+                    isSelectable
+                    onSelect={selected => this.setState({ selectedDrivers: selected })}
+                    selected={selectedDrivers}
+                    />
                     <div className="col-md-8"/>
                     <div className="col-md-4">
                       <TSubmitButton
@@ -784,17 +793,6 @@ class JobSavePage extends Component {
                       </Button>
                     </div>
                   </div>
-
-                  <TTable
-                    handleRowsChange={() => {}}
-                    data={driverData}
-                    columns={driverColumns}
-                    handlePageChange={() => {}}
-                    handleIdClick={() => {}}
-                    isSelectable
-                    onSelect={selected => this.setState({ selectedDrivers: selected })}
-                    selected={selectedDrivers}
-                  />
                 </Card>
               </Col>
             </Row>
