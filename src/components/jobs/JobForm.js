@@ -100,7 +100,6 @@ class JobForm extends Component {
       distance,
       time
     });
-
   }
 
   componentWillReceiveProps(nextProps) {
@@ -200,16 +199,35 @@ class JobForm extends Component {
     return true;
   }
 
+  renderPhone(formatedPhone) {
+    if (formatedPhone) {
+      return (
+        <React.Fragment>
+          <br/>
+          Telephone: {formatedPhone}
+        </React.Fragment>
+      );
+    }
+    return false;
+  }
+
   renderJobTop(job, carrier) {
     const { companyType } = this.state;
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
     const fee = estimatedCost * 0.1;
+    let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
     if (job.status === 'Published And Offered' && companyType === 'Carrier') {
       displayStatus = 'On Offer';
+    }
+    if (job.status === 'Booked' || job.status === 'Allocated'
+      || job.status === 'In Progress' || job.status === 'Job Complete'
+    ) {
+      // showPhone = `Telephone: ${TFormat.asPhoneText(job.company.phone)}`;
+      showPhone = TFormat.asPhoneText(job.company.phone);
     }
     return (
       <React.Fragment>
@@ -218,11 +236,7 @@ class JobForm extends Component {
             Job: {job.name}
           </h3>
           {companyType}: {job.company.legalName}
-          <br/>
-          Phone #:&nbsp;
-          <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>
-            {TFormat.asPhoneText(job.company.phone)}
-          </a>
+          {this.renderPhone(showPhone)}
           <br/>
           Number of Trucks: {job.numEquipments}
           <br/>
@@ -640,7 +654,8 @@ class JobForm extends Component {
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
-              }}>
+              }}
+              >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
                   {this.renderMBMap(origin, destination, overlayMapData, coords)}
@@ -683,7 +698,8 @@ class JobForm extends Component {
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
-              }}>
+              }}
+              >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {this.renderMBMap(origin, destination)}
                 </div>
@@ -723,7 +739,8 @@ class JobForm extends Component {
             <Row style={{
               paddingLeft: '10px',
               paddingRight: '10px'
-            }}>
+            }}
+            >
               <div className="col-md-8" style={{ padding: 0 }}>
                 {this.renderMBMap(origin, destination)}
               </div>
