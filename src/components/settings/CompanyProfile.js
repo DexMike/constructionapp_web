@@ -374,6 +374,7 @@ class CompanyProfile extends Component {
       state,
       // country,
       zipCode,
+      dotNumber,
       reqHandlerLegalName,
       reqHandlerPhone,
       reqHandlerAddress,
@@ -389,13 +390,10 @@ class CompanyProfile extends Component {
     return (
       <Container>
         <Row className="tab-content-header">
-          <Col md={6}>
+          <Col md={12}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
               {legalName}
             </span>
-          </Col>
-          <Col md={6} className="text-right">
-            <strong>Website:</strong> {url}
           </Col>
         </Row>
         <Row className="pt-2">
@@ -458,6 +456,19 @@ class CompanyProfile extends Component {
                 value: fax
               }}
               placeholder="Fax"
+              type="text"
+            />
+          </Col>
+        </Row>
+        <Row className="pt-2">
+          <Col md={6}>
+            <span>DOT Number:</span>
+            <TField
+              input={{
+                value: dotNumber,
+                readOnly: true,
+                disabled: true
+              }}
               type="text"
             />
           </Col>

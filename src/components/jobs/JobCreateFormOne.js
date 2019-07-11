@@ -48,7 +48,7 @@ class CreateJobFormOne extends PureComponent {
       selectedRatedHourOrTon: 'ton',
       tonnage: 0, // estimated amount of tonnage
       rateEstimate: 0,
-      hourTrucksNumber: 1,
+      hourTrucksNumber: '',
       rateTab: 1,
       hourTon: 'ton',
       // location
@@ -435,24 +435,24 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleHourDetails(e) {
-    let reqHandler = '';
-    switch (e.target.name) {
-      /*
-      case 'rateEstimate':
-        reqHandler = 'reqHandlerHoursEstimate';
-        break;
-      */
-      case 'hourTrucksNumber':
-        reqHandler = 'reqHandlerTrucksEstimate';
-        break;
-      default:
-    }
-    this.setState({
-      [reqHandler]: {
-        ...reqHandler,
-        touched: false
-      }
-    });
+    // let reqHandler = '';
+    // switch (e.target.name) {
+    //   /*
+    //   case 'rateEstimate':
+    //     reqHandler = 'reqHandlerHoursEstimate';
+    //     break;
+    //   */
+    //   case 'hourTrucksNumber':
+    //     reqHandler = 'reqHandlerTrucksEstimate';
+    //     break;
+    //   default:
+    // }
+    // this.setState({
+    //   [reqHandler]: {
+    //     ...reqHandler,
+    //     touched: false
+    //   }
+    // });
     this.setState({[e.target.name]: e.target.value});
   }
 
@@ -735,27 +735,27 @@ class CreateJobFormOne extends PureComponent {
       }
     }
 
-    if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-      this.setState({
-        reqHandlerTrucksEstimate: {
-          ...reqHandlerTrucksEstimate,
-          touched: true,
-          error: 'Required input'
-        }
-      });
-      isValid = false;
-    }
-
-    if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-      this.setState({
-        reqHandlerTrucksEstimate: {
-          ...reqHandlerTrucksEstimate,
-          touched: true,
-          error: 'Required input'
-        }
-      });
-      isValid = false;
-    }
+    // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
+    //   this.setState({
+    //     reqHandlerTrucksEstimate: {
+    //       ...reqHandlerTrucksEstimate,
+    //       touched: true,
+    //       error: 'Required input'
+    //     }
+    //   });
+    //   isValid = false;
+    // }
+// 
+    // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
+    //   this.setState({
+    //     reqHandlerTrucksEstimate: {
+    //       ...reqHandlerTrucksEstimate,
+    //       touched: true,
+    //       error: 'Required input'
+    //     }
+    //   });
+    //   isValid = false;
+    // }
 
     // rates
     if (selectedRatedHourOrTon === 'ton') {
@@ -997,7 +997,7 @@ class CreateJobFormOne extends PureComponent {
       // rateByHour: false,
       // rateByTon: true,
       rateEstimate: 0,
-      hourTrucksNumber: 0
+      hourTrucksNumber: ''
     });
     this.setState({rateTab: 2});
   }
@@ -1186,6 +1186,7 @@ class CreateJobFormOne extends PureComponent {
                       placeholder="Job Name"
                       type="text"
                       meta={reqHandlerJobName}
+                      id='jobname'
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
@@ -1203,6 +1204,7 @@ class CreateJobFormOne extends PureComponent {
                       dateFormat="yyyy-MM-dd hh:mm"
                       showTime
                       meta={reqHandlerDate}
+                      id="jobstartdatetime"
                     />
                   </div>
                 </Row>
@@ -1220,7 +1222,9 @@ class CreateJobFormOne extends PureComponent {
                           value: hourTrucksNumber
                         }
                       }
-                      meta={reqHandlerTrucksEstimate}
+                      placeholder="Any"
+                      allowUndefined={true}
+                      // meta={reqHandlerTrucksEstimate}
                     />
                   </div>
                   <div className="col-md-4">

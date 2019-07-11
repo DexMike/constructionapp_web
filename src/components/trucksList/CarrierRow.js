@@ -38,15 +38,15 @@ class CarrierRow extends Component {
         </tr>
         </thead>
         <tbody>
-        {
-          materials.map((value, i) => {
-            return (
-              <tr key={`li_${i}`}>
-                <td>{value}</td>
-              </tr>
-            );
-          })
-        }
+          {
+            materials.map((value, i) => {
+              return (
+                <tr key={`li_${i}`}>
+                  <td>{value}</td>
+                </tr>
+              );
+            })
+          }
         </tbody>
       </table>
     );
@@ -119,9 +119,9 @@ class CarrierRow extends Component {
                     <Button
                       color="link"
                       onClick={() => this.sendFavorite(carrierId)}
-                      className="material-icons favoriteIcon"
+                      className={favorite ? 'material-icons favoriteIcon' : 'material-icons-outlined favoriteIcon'}
                     >
-                      {favorite ? 'favorite' : 'favorite_border'}
+                      thumb_up
                     </Button>
                   </div>
                 </div>
