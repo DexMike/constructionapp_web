@@ -26,12 +26,10 @@ class TFieldNumber extends PureComponent {
       }
       if (!decimal && key === '.') {
         e.preventDefault();
-        return;
       }
       if (negative) {
         if (negativeString && key === '-') {
           e.preventDefault();
-          return;
         }
       }
       if (!negative && key === '-') {

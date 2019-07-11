@@ -13,15 +13,14 @@
     cursor: pointer;
 }
 
-/*Remove arrows from type number*/
+/*Remove arrows from input type number*/
 
 .input-number input::-webkit-outer-spin-button,
 .input-number input::-webkit-inner-spin-button {
-    /* display: none; <- Crashes Chrome on hover */
     -webkit-appearance: none;
-    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    margin: 0;
 }
 
 .input-number input[type=number] {
-    -moz-appearance:textfield; /* Firefox */
+    -moz-appearance:textfield;
 }
