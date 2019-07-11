@@ -46,7 +46,8 @@ class JobForm extends Component {
       coords: null,
       loads: [],
       loaded: false,
-      distance: 0
+      distance: 0,
+      time: 0
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -60,11 +61,13 @@ class JobForm extends Component {
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
     let distance = 0;
+    let time = 0;
     try {
       const response = await GeoCodingService
         .getDistance(startPoint.longitude, startPoint.latitude,
           endPoint.longitude, endPoint.latitude);
       distance = response.routes[0].distance;
+      time = response.routes[0].duration;
     } catch (e) {
       // console.log(e)
     }
@@ -94,7 +97,8 @@ class JobForm extends Component {
       loaded: true,
       loads,
       job,
-      distance
+      distance,
+      time
     });
 
   }
@@ -320,7 +324,7 @@ class JobForm extends Component {
   }
 
   renderJobBottom(job) {
-    const { distance } = this.state;
+    const { distance, time } = this.state;
     return (
       <React.Fragment>
         <h3 className="subhead">
@@ -331,6 +335,19 @@ class JobForm extends Component {
             <div>
               <div>
                 {TFormat.asMetersToMiles(distance)}
+              </div>
+            </div>
+            <br/>
+          </Col>
+        </Row>
+        <h3 className="subhead">
+          Avg Travel Time
+        </h3>
+        <Row>
+          <Col>
+            <div>
+              <div>
+                {TFormat.asSecondsToHms(time)}
               </div>
             </div>
             <br/>
