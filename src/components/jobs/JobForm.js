@@ -205,10 +205,18 @@ class JobForm extends Component {
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
     const fee = estimatedCost * 0.1;
+    let showPhone = '';
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
     if (job.status === 'Published And Offered' && companyType === 'Carrier') {
       displayStatus = 'On Offer';
+    }
+    if (job.status === 'Booked' || job.status === 'Allocated'
+      || job.status === 'In Progress' || job.status === 'Job Complete'
+    ) {
+      showPhone = TFormat.asPhoneText(job.company.phone);
+      console.log('showPhone');
+      console.log(showPhone);
     }
     return (
       <React.Fragment>
@@ -217,19 +225,8 @@ class JobForm extends Component {
             Job: {job.name}
           </h3>
           {companyType}: {job.company.legalName}
-          <br/>
           {
-            job.status === 'Booked' || job.status === 'Allocated'
-            || job.status === 'In Progress' || job.status === 'Job Complete'
-
-              ? TFormat.asPhoneText(job.company.phone)
-              : ''
-
-            // Phone #:&nbsp;
-          // <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>
-          //   {TFormat.asPhoneText(job.company.phone)}
-          // </a>
-
+            showPhone
           }
           <br/>
           Number of Trucks: {job.numEquipments}
