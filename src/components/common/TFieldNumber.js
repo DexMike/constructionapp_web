@@ -5,6 +5,7 @@ class TFieldNumber extends PureComponent {
   constructor(props) {
     super(props);
     this.handleKeypress = this.handleKeypress.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
 
   handleKeypress(e) {
@@ -39,7 +40,13 @@ class TFieldNumber extends PureComponent {
   }
 
   handleBlur(e) {
-    e.currentTarget.value = Number(e.currentTarget.value);
+    const { allowUndefined } = this.props;
+    const value = Number(e.currentTarget.value);
+    if (allowUndefined && value === 0) {
+      e.currentTarget.value = '';
+    } else {
+      e.currentTarget.value = value;
+    }
   }
 
   render() {
@@ -49,7 +56,8 @@ class TFieldNumber extends PureComponent {
       meta: { touched, error },
       negative,
       decimal,
-      currency
+      currency,
+      allowUndefined
     } = this.props;
     let step = 1;
     const min = !negative ? 0 : null;
