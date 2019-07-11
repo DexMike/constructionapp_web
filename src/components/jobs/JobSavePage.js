@@ -778,6 +778,12 @@ class JobSavePage extends Component {
                     />
                     <div className="col-md-8"/>
                     <div className="col-md-4">
+                      <Button type="button" className="tertiaryButton" onClick={() => {
+                        this.toggleAllocateDriversModal();
+                      }}
+                      >
+                        Cancel
+                      </Button>
                       <TSubmitButton
                         onClick={this.handleAllocateDrivers}
                         className="primaryButton"
@@ -785,12 +791,6 @@ class JobSavePage extends Component {
                         loaderSize={10}
                         bntText="Save"
                       />
-                      <Button type="button" className="tertiaryButton" onClick={() => {
-                        this.toggleAllocateDriversModal();
-                      }}
-                      >
-                        Cancel
-                      </Button>
                     </div>
                   </div>
                 </Card>
