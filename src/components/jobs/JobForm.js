@@ -100,7 +100,6 @@ class JobForm extends Component {
       distance,
       time
     });
-
   }
 
   componentWillReceiveProps(nextProps) {
@@ -219,10 +218,19 @@ class JobForm extends Component {
           </h3>
           {companyType}: {job.company.legalName}
           <br/>
-          Phone #:&nbsp;
-          <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>
-            {TFormat.asPhoneText(job.company.phone)}
-          </a>
+          {
+            job.status === 'Booked' || job.status === 'Allocated'
+            || job.status === 'In Progress' || job.status === 'Job Complete'
+
+              ? TFormat.asPhoneText(job.company.phone)
+              : ''
+
+            // Phone #:&nbsp;
+          // <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>
+          //   {TFormat.asPhoneText(job.company.phone)}
+          // </a>
+
+          }
           <br/>
           Number of Trucks: {job.numEquipments}
           <br/>
@@ -640,7 +648,8 @@ class JobForm extends Component {
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
-              }}>
+              }}
+              >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
                   {this.renderMBMap(origin, destination, overlayMapData, coords)}
@@ -683,7 +692,8 @@ class JobForm extends Component {
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
-              }}>
+              }}
+              >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {this.renderMBMap(origin, destination)}
                 </div>
@@ -723,7 +733,8 @@ class JobForm extends Component {
             <Row style={{
               paddingLeft: '10px',
               paddingRight: '10px'
-            }}>
+            }}
+            >
               <div className="col-md-8" style={{ padding: 0 }}>
                 {this.renderMBMap(origin, destination)}
               </div>
