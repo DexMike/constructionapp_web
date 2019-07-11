@@ -15,6 +15,7 @@ import UtilsService from '../../api/UtilsService';
 import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
+import ProfileService from '../../api/ProfileService';
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -76,8 +77,12 @@ class LoginPage extends SignIn {
     });
   }
 
-  loginRouting() {
-    window.location = '/'; // go to the equipments listing as the customer needs to create a job.
+  loginRouting(companyType, loginCount) {
+    if (companyType === 'Carrier' && loginCount === 0) {
+      window.location = '/settings/2';
+    } else {
+      window.location = '/';
+    }
   }
 
   handleUserNotConfirmed() {
@@ -163,7 +168,11 @@ class LoginPage extends SignIn {
         await this.createLoginLog(true);
         // window.location = '/';
         this.setLogging(this.state.username);
-        this.loginRouting();
+
+        // are you a carrier and is it your first login?
+        const profile = await ProfileService.getProfile();
+        this.loginRouting(profile.companyType, user.loginCount);
+        //
         return;
       }
 

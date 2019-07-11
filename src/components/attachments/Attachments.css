@@ -1,0 +1,13 @@
+.modal-dialog {
+    max-width: 1024px !important;
+}
+
+.modal-content {
+    width: 800px !important;
+    margin: 0 auto !important;
+    padding: 0px !important;
+}
+
+.modal-content img {
+    width: 100%;
+}

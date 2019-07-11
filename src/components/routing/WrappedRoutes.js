@@ -176,7 +176,7 @@ class WrappedRoutes extends PureComponent {
 
           <Route
             exact
-            path="/settings/"
+            path="/settings/:id?"
             component={SettingsPage}
           />
 

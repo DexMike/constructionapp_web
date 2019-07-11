@@ -39,7 +39,7 @@ class TFieldNumber extends PureComponent {
   }
 
   handleBlur(e) {
-    const { decimal, input } = this.props;
+    const { allowUndefined, decimal, input } = this.props;
     const { value } = e.currentTarget;
     if (decimal) {
       e.currentTarget.value = parseFloat(value).toFixed(2);
@@ -47,6 +47,9 @@ class TFieldNumber extends PureComponent {
     } else {
       e.currentTarget.value = parseInt(value, 10);
       input.onChange(e);
+    }
+    if (allowUndefined && Number(value) === 0) {
+      e.currentTarget.value = '';
     }
   }
 
@@ -57,7 +60,8 @@ class TFieldNumber extends PureComponent {
       meta: { touched, error },
       negative,
       decimal,
-      currency
+      currency,
+      allowUndefined
     } = this.props;
     let step = 1;
     const min = !negative ? 0 : null;
