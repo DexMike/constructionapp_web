@@ -176,7 +176,7 @@ class JobCreateFormCarrier extends Component {
       jobStartDateTime,
       jobTruckType,
       jobTrucksNeeded,
-      material
+      selectedMaterials
     } = this.state;
 
     const { selectedCarrierId } = this.props;
@@ -281,7 +281,7 @@ class JobCreateFormCarrier extends Component {
       }
       */
       // one material only
-      this.saveJobMaterials(createdJob.id, material);
+      this.saveJobMaterials(createdJob.id, selectedMaterials.value);
     }
 
     const bid = {};
