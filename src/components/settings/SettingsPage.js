@@ -66,7 +66,6 @@ class SettingsPage extends Component {
 
     const { match } = this.props;
 
-    console.log('>>>>USER:', user);
     if (match.params.id !== undefined) {
       this.setState({
         activeTab: match.params.id
@@ -75,8 +74,6 @@ class SettingsPage extends Component {
       if (user.loginCount === 1) {
         this.setState({
           modal: true
-        }, function modo() {
-          console.log('>>MODO:', this.state);
         });
       }
     }

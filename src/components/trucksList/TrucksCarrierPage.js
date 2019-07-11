@@ -221,7 +221,7 @@ class TrucksCarrierPage extends Component {
           <div className="col-12 col-md-2 col-lg-2">
             <div className="card">
               <div className="dashboard__card-widget card-body">
-                <h5 className="card__title bold-text"><center>New Offers.</center></h5>
+                <h5 className="card__title bold-text"><center>New Offers</center></h5>
                 <span><center><h4>{newJobCount}</h4></center></span>
               </div>
             </div>

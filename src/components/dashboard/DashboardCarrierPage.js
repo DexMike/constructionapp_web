@@ -74,9 +74,6 @@ class DashboardCarrierPage extends Component {
   async componentDidMount() {
     await this.fetchJobsInfo();
     this.setState({ loaded: true });
-
-    // check number of trucks
-    
   }
 
   async fetchJobsInfo() {
