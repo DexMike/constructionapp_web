@@ -81,7 +81,8 @@ class TDateTimePickerField extends PureComponent {
       meta: { touched, error },
       showTime,
       timeFormat,
-      disabled
+      disabled,
+      id
     } = this.props;
     return (
       <div className="date-picker">
@@ -94,6 +95,7 @@ class TDateTimePickerField extends PureComponent {
             onChange={this.handleChange}
             dateFormat={dateFormat}
             disabled={disabled}
+            id={id}
           />
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>

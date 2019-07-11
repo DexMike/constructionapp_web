@@ -141,8 +141,8 @@ class JobSavePage extends Component {
 
         // If the customer is Carrier, check if it's a favorite
         if (profile.companyType === 'Carrier') {
-          favoriteCompany = await GroupListService.getGroupListByFavoriteAndCompanyId(
-            profile.companyId
+          favoriteCompany = await GroupListService.getGroupListByUserName(
+            job.createdBy
           );
         }
 
@@ -339,7 +339,7 @@ class JobSavePage extends Component {
       profile
     } = this.state;
     let { bid } = this.state;
-    let { booking, bookingEquipment } = this.state;
+    let { booking } = this.state;
     let notification;
 
     // A favorite Carrier "accepts" the job
@@ -393,7 +393,7 @@ class JobSavePage extends Component {
 
       // Create Booking Equipment
       // Check if we have a booking equipment first
-      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
+      /* let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
       bookingEquipments = bookingEquipments.filter((bookingEq) => {
         if (bookingEq.bookingId === booking.id) {
           return bookingEq;
@@ -427,7 +427,7 @@ class JobSavePage extends Component {
             bookingEquipment
           );
         }
-      }
+      } */
 
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
@@ -453,7 +453,7 @@ class JobSavePage extends Component {
       const newJob = CloneDeep(job);
 
       // Updating the Job
-      newJob.status = 'Requested';
+      // newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
@@ -632,13 +632,22 @@ class JobSavePage extends Component {
       // If the carrier is a favorite
       if (favoriteCompany.length > 0) {
         return (
-          <TSubmitButton
-            onClick={() => this.handleConfirmRequestCarrier('Accept')}
-            className="primaryButton"
-            loading={btnSubmitting}
-            loaderSize={10}
-            bntText="Accept Job"
-          />
+          <div>
+            <TSubmitButton
+              onClick={() => this.handleConfirmRequestCarrier('Decline')}
+              className="secondaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Decline Job"
+            />
+            <TSubmitButton
+              onClick={() => this.handleConfirmRequestCarrier('Accept')}
+              className="primaryButton"
+              loading={btnSubmitting}
+              loaderSize={10}
+              bntText="Accept Job"
+            />
+          </div>
         );
       }
       // the carrier is not a favorite
@@ -653,7 +662,10 @@ class JobSavePage extends Component {
       );
     }
     // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
-    if ((job.status === 'On Offer') && companyType === 'Carrier' && bid.status !== 'Declined') {
+    if ((job.status === 'On Offer' || job.status === 'Published And Offered')
+      && companyType === 'Carrier' && bid.status !== 'Declined'
+      && favoriteCompany.length > 0
+    ) {
       return (
         <div>
           <TSubmitButton
@@ -674,7 +686,7 @@ class JobSavePage extends Component {
       );
     }
     // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
-    if ((job.status === 'Requested' && companyType === 'Customer')
+    /* if (companyType === 'Customer'
       && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
       && bid.status !== 'Declined') {
       // console.log('We are a customer and we have a Carrier's job request');
@@ -697,7 +709,7 @@ class JobSavePage extends Component {
           />
         </div>
       );
-    }
+    } */
     if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') && companyType === 'Carrier') {
       return (
         <TSubmitButton
@@ -731,9 +743,6 @@ class JobSavePage extends Component {
       }, {
         displayName: 'Status',
         name: 'userStatus'
-      }, {
-        displayName: 'Invited',
-        name: 'invited'
       }
     ];
     return (
@@ -754,26 +763,10 @@ class JobSavePage extends Component {
                   >
                     Allocate Drivers
                   </h1>
-                  <div className="row">
-                    <div className="col-md-8"/>
-                    <div className="col-md-4">
-                      <TSubmitButton
-                        onClick={this.handleAllocateDrivers}
-                        className="primaryButton"
-                        loading={btnSubmitting}
-                        loaderSize={10}
-                        bntText="Save"
-                      />
-                      <Button type="button" className="tertiaryButton" onClick={() => {
-                        this.toggleAllocateDriversModal();
-                      }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
 
-                  <TTable
+                  <div className="row">
+
+                    <TTable
                     handleRowsChange={() => {}}
                     data={driverData}
                     columns={driverColumns}
@@ -782,7 +775,24 @@ class JobSavePage extends Component {
                     isSelectable
                     onSelect={selected => this.setState({ selectedDrivers: selected })}
                     selected={selectedDrivers}
-                  />
+                    />
+                    <div className="col-md-8"/>
+                    <div className="col-md-4">
+                      <Button type="button" className="tertiaryButton" onClick={() => {
+                        this.toggleAllocateDriversModal();
+                      }}
+                      >
+                        Cancel
+                      </Button>
+                      <TSubmitButton
+                        onClick={this.handleAllocateDrivers}
+                        className="primaryButton"
+                        loading={btnSubmitting}
+                        loaderSize={10}
+                        bntText="Save"
+                      />
+                    </div>
+                  </div>
                 </Card>
               </Col>
             </Row>

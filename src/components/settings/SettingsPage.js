@@ -7,8 +7,11 @@ import {
   TabPane,
   Nav,
   NavItem,
-  NavLink
+  NavLink,
+  Modal,
+  Button
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import './Settings.css';
 import { Trans } from 'react-i18next';
@@ -34,7 +37,8 @@ class SettingsPage extends Component {
       address: [],
       activeTab: '1',
       title: 'Profile',
-      isAdmin: false
+      isAdmin: false,
+      modal: false
     };
 
     this.toggle = this.toggle.bind(this);
@@ -58,6 +62,28 @@ class SettingsPage extends Component {
       address,
       isAdmin,
       loaded: true
+    });
+
+    const { match } = this.props;
+
+    if (match.params.id !== undefined) {
+      this.setState({
+        activeTab: match.params.id
+      });
+      // is this your first login?
+      if (user.loginCount === 1) {
+        this.setState({
+          modal: true
+        });
+      }
+    }
+    this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+  }
+
+  toggleAddJobModal() {
+    const {modal} = this.state;
+    this.setState({
+      modal: !modal
     });
   }
 
@@ -86,6 +112,47 @@ class SettingsPage extends Component {
         title
       });
     }
+  }
+
+  renderModal() {
+    const {
+      modal
+      // equipments
+    } = this.state;
+
+    return (
+      <Modal
+        isOpen={modal}
+        toggle={this.toggleAddJobModal}
+        className="modal-dialog--primary modal-dialog--header form"
+      >
+        <div className="modal__header">
+          <h5 style={{color: 'white'}}>
+            Welcome and thank you for joining Trelar
+          </h5>
+        </div>
+        <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
+          To start you should first set your notification settings.
+          <br/><br/>
+          Once that&#39;s done you&#39;ll want to add a truck.
+        </div>
+        <Row className="col-md-12">
+          <div className="col-md-6">
+            &nbsp;
+          </div>
+          <div className="col-md-6">
+            <Button
+              color="primary"
+              onClick={() => this.toggleAddJobModal()}
+              type="button"
+              className="next float-right"
+            >
+              Close
+            </Button>
+          </div>
+        </Row>
+      </Modal>
+    );
   }
 
   renderAdminTabs(activeTab) {
@@ -214,6 +281,7 @@ class SettingsPage extends Component {
               </Col>
             </Row>
           </Container>
+          {this.renderModal()}
         </Container>
       );
     }
@@ -229,5 +297,19 @@ class SettingsPage extends Component {
     );
   }
 }
+
+SettingsPage.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string
+    })
+  })
+};
+
+SettingsPage.defaultProps = {
+  match: {
+    params: {}
+  }
+};
 
 export default SettingsPage;
