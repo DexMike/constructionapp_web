@@ -5,6 +5,7 @@ class TFieldNumber extends PureComponent {
   constructor(props) {
     super(props);
     this.handleKeypress = this.handleKeypress.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
 
   handleKeypress(e) {
@@ -17,8 +18,7 @@ class TFieldNumber extends PureComponent {
 
     const decimalString = e.currentTarget.value.includes('.');
     const negativeString = e.currentTarget.value.includes('-');
-
-    if ((key >= 0 && key <= 9) || key === '.' || key === '-') {
+    if (key === '.' || key === '-') {
       if (decimal) {
         if (decimalString && key === '.') {
           e.preventDefault();
@@ -26,10 +26,12 @@ class TFieldNumber extends PureComponent {
       }
       if (!decimal && key === '.') {
         e.preventDefault();
+        return;
       }
       if (negative) {
         if (negativeString && key === '-') {
           e.preventDefault();
+          return;
         }
       }
       if (!negative && key === '-') {
@@ -39,7 +41,15 @@ class TFieldNumber extends PureComponent {
   }
 
   handleBlur(e) {
-    e.currentTarget.value = Number(e.currentTarget.value);
+    const { decimal, input } = this.props;
+    const { value } = e.currentTarget;
+    if (decimal) {
+      e.currentTarget.value = parseFloat(value).toFixed(2);
+      input.onChange(e);
+    } else {
+      e.currentTarget.value = parseInt(value, 10);
+      input.onChange(e);
+    }
   }
 
   render() {
@@ -53,9 +63,9 @@ class TFieldNumber extends PureComponent {
     } = this.props;
     let step = 1;
     const min = !negative ? 0 : null;
-    step = decimal ? 0.1 : null;
+    step = decimal ? 0.01 : null;
     return (
-      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above input-number">
         {
           currency ? (
             <span style={{position: 'absolute', paddingLeft: 16, paddingTop: 8}}>$</span>
