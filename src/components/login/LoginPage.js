@@ -79,7 +79,6 @@ class LoginPage extends SignIn {
 
   loginRouting(companyType, loginCount) {
     if (companyType === 'Carrier' && loginCount === 0) {
-      console.log('FIRST LOGIN!');
       window.location = '/settings/2';
     } else {
       window.location = '/';
