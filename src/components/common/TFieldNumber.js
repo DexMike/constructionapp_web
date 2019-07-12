@@ -18,8 +18,7 @@ class TFieldNumber extends PureComponent {
 
     const decimalString = e.currentTarget.value.includes('.');
     const negativeString = e.currentTarget.value.includes('-');
-
-    if ((key >= 0 && key <= 9) || key === '.' || key === '-') {
+    if (key === '.' || key === '-') {
       if (decimal) {
         if (decimalString && key === '.') {
           e.preventDefault();
@@ -40,12 +39,17 @@ class TFieldNumber extends PureComponent {
   }
 
   handleBlur(e) {
-    const { allowUndefined } = this.props;
-    const value = Number(e.currentTarget.value);
-    if (allowUndefined && value === 0) {
-      e.currentTarget.value = '';
+    const { allowUndefined, decimal, input } = this.props;
+    const { value } = e.currentTarget;
+    if (decimal) {
+      e.currentTarget.value = parseFloat(value).toFixed(2);
+      input.onChange(e);
     } else {
-      e.currentTarget.value = value;
+      e.currentTarget.value = parseInt(value, 10);
+      input.onChange(e);
+    }
+    if (allowUndefined && Number(value) === 0) {
+      e.currentTarget.value = '';
     }
   }
 
@@ -61,9 +65,9 @@ class TFieldNumber extends PureComponent {
     } = this.props;
     let step = 1;
     const min = !negative ? 0 : null;
-    step = decimal ? 0.1 : null;
+    step = decimal ? 0.01 : null;
     return (
-      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
+      <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above input-number">
         {
           currency ? (
             <span style={{position: 'absolute', paddingLeft: 16, paddingTop: 8}}>$</span>
