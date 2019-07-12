@@ -142,7 +142,7 @@ class TFormat {
     return (
       <NumberFormat
         value={textValue}
-        displayType={"text"}
+        displayType="text"
         format="(###) ###-####"
         mask=""
       />
