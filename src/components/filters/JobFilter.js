@@ -122,7 +122,7 @@ class JobFilter extends Component {
     if (localStorage.getItem('filters') !== null) {
       const value = localStorage.getItem('filters');
       const savedFilters = JSON.parse(value);
-      console.log('>>GOT SAVED FILTERS:', savedFilters);
+      // console.log('>>GOT SAVED FILTERS:', savedFilters);
       this.setState({ filters: savedFilters });
     }
 
