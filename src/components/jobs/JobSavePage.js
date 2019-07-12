@@ -104,29 +104,33 @@ class JobSavePage extends Component {
         const bids = await BidService.getBidsByJobId(job.id);
         if (bids && bids.length > 0) { // check if there's a bid
           // If there's more than one bid
-          if (bids.length > 1) {
-            // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
-            // and is assigned to the carrier (a favorite)
-            bid = bids.filter((filteredBid) => {
-              if (profile.companyType === 'Carrier') {
-                if (filteredBid.hasCustomerAccepted === 1
-                  // && filteredBid.hasSchedulerAccepted === 1
-                  && filteredBid.companyCarrierId === profile.companyId) {
-                  return filteredBid;
-                }
-                [bid] = bids;
-                // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
-              } else if (filteredBid.hasSchedulerAccepted === 1) {
-                return filteredBid;
+          // if (bids.length > 1) {
+          // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
+          // and is assigned to the carrier (a favorite)
+          bids.filter((filteredBid) => {
+            if (profile.companyType === 'Carrier') {
+              if (filteredBid.hasCustomerAccepted === 1
+                // && filteredBid.hasSchedulerAccepted === 1
+                && filteredBid.companyCarrierId === profile.companyId) {
+                bid = filteredBid;
+                companyCarrier = bid.companyCarrierId;
               }
-              [bid] = bids;
-              return bid;
-            });
-          } else { // There is just one bid
+              // [bid] = bids;
+              // For the Customer, we search for the 'winning' bid (if there's already one)
+            } else if (filteredBid.hasSchedulerAccepted === 1
+              && filteredBid.hasCustomerAccepted === 1) {
+              bid = filteredBid;
+              companyCarrier = bid.companyCarrierId;
+            }
+            // [bid] = bids;
+            return bid;
+          });
+          // companyCarrier = bid.companyCarrierId;
+          /* } else { // There is just one bid
             [bid] = bids;
-          }
-          companyCarrier = bid.companyCarrierId;
+          } */
         }
+
         const bookings = await BookingService.getBookingsByJobId(job.id);
         if (bookings && bookings.length > 0) {
           [booking] = bookings;
@@ -541,6 +545,7 @@ class JobSavePage extends Component {
           await TwilioService.createSms(notification);
         }
       }
+      this.setState({ bid });
 
       // eslint-disable-next-line no-alert
       // alert('Your request has been sent.');
@@ -651,9 +656,9 @@ class JobSavePage extends Component {
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
     const { profile } = this.state;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
-    if ((job.status === 'Published') && companyType === 'Carrier') {
+    if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       // If the carrier is a favorite
-      if (favoriteCompany.length > 0) {
+      if (favoriteCompany.length > 0 && (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
         return (
           <div>
             <TSubmitButton
@@ -674,7 +679,7 @@ class JobSavePage extends Component {
         );
       }
       // the carrier is not a favorite
-      if (bid.status !== 'Pending') {
+      if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
         return (
           <TSubmitButton
             onClick={() => this.handleConfirmRequestCarrier('Request')}
@@ -683,6 +688,19 @@ class JobSavePage extends Component {
             loaderSize={10}
             bntText="Request Job"
           />
+        );
+      }
+
+      // the carrier is not a favorite
+      if (bid && bid.status === 'Declined') {
+        return (
+          <h3 style={{
+            marginTop: 20,
+            marginLeft: 15,
+            marginBottom: 20
+          }}
+          >You have declined this job.
+          </h3>
         );
       }
 

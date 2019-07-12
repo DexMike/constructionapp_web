@@ -211,8 +211,8 @@ class JobForm extends Component {
     return false;
   }
 
-  renderJobTop(job, carrier) {
-    const { companyType } = this.state;
+  renderJobTop(job) {
+    const { companyType, carrier } = this.state;
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
@@ -235,7 +235,13 @@ class JobForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {companyType}: {job.company.legalName}
+          {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
+            <React.Fragment>
+              Carrier: {carrier.legalName}
+            </React.Fragment>
+          )}
+          <br/>
+          Producer: {job.company.legalName}
           {this.renderPhone(showPhone)}
           <br/>
           Number of Trucks: {job.numEquipments}
