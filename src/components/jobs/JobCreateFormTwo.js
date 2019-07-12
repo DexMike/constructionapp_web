@@ -241,12 +241,13 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
-    if (
-      (sendToMkt === true || sendToMkt === 1)
+    if (showSendtoFavorites
+      && (sendToMkt === true || sendToMkt === 1)
       && (sendToFavorites === true || sendToFavorites === 1)
     ) {
       status = 'Published And Offered';
-    } else if (sendToFavorites === true || sendToFavorites === 1) { // sending to All Favorites only
+    } else if (showSendtoFavorites
+      && (sendToFavorites === true || sendToFavorites === 1)) { // sending to All Favorites only
       status = 'On Offer';
     } else { // default
       status = 'Published';

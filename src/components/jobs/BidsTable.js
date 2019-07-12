@@ -55,9 +55,7 @@ class BidsTable extends Component {
       const newBid = bid;
 
       newBid.date = bid.createdOn;
-      newBid.dateF = TFormat.getValue(
-        TFormat.asDate(bid.createdOn)
-      );
+      newBid.dateF = TFormat.asDate(bid.createdOn);
 
       if (newBid.status === 'Pending') {
         newBid.status = 'Requested';
@@ -81,7 +79,8 @@ class BidsTable extends Component {
 
       if (selectedBid.status === 'Declined'
         || selectedBid.status === 'Ignored'
-        || selectedBid.status === 'Accepted') {
+        || selectedBid.status === 'Accepted'
+        || selectedBid.status === 'New') {
         modalAcceptBid = true; // this prevents the modal from opening
       }
     }
@@ -101,6 +100,7 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
+    const { updateJob } = this.props;
     const {
       selectedBid, profile
     } = this.state;
@@ -273,6 +273,15 @@ class BidsTable extends Component {
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
+    allBids.map((bid) => {
+      newBid = bid;
+      newBid.date = bid.createdOn;
+      newBid.dateF = TFormat.asDate(bid.createdOn);
+      return newBid;
+    });
+
+    // updating parent component JobSavePage
+    updateJob(newJob);
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
@@ -346,9 +355,9 @@ class BidsTable extends Component {
                     displayName: 'Loads Completed'
                   },
                   {
-                    name: 'date',
+                    name: 'dateF',
                     displayName: 'Date Requested',
-                    label: 'dateF'
+                    // label: 'dateF'
                   }
                 ]
               }
@@ -468,7 +477,8 @@ class BidsTable extends Component {
 BidsTable.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
-  })
+  }),
+  updateJob: PropTypes.func.isRequired
 };
 
 BidsTable.defaultProps = {

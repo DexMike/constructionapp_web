@@ -442,7 +442,6 @@ class DashboardCustomerPage extends Component {
 
         newJob.newRate = newJob.rate;
         newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
-
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
       if (newJob.rateType === 'Ton') {
@@ -452,9 +451,8 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asTons(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-        newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
+        newJob.newRate = newJob.rate;
         newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
-
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
 
