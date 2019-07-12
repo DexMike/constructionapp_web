@@ -572,7 +572,7 @@ class CreateJobFormOne extends PureComponent {
         reqHandlerDate: {
           ...reqHandlerDate,
           touched: true,
-          error: 'Required input'
+          error: "The date of the job can not be set in the past or as the current date and time"
         }
       });
       isValid = false;
