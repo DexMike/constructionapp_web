@@ -160,13 +160,15 @@ class JobViewForm extends Component {
       //     }
       //   }
       // }
-    
 
       // Check if carrier is favorite for this job's customer
-      favoriteCompany = await GroupListService.getGroupListByUserName(
-        job.createdBy
-      );
-
+      if (profile.companyType === 'Carrier') {
+        // check if Carrier Company [profile.companyId]
+        // is Customer's Company favorite [job.companiesId]
+        favoriteCompany = await GroupListService.getGroupListsByCompanyId(
+          profile.companyId, job.companiesId
+        );
+      }
     }
 
     this.setState({
@@ -435,7 +437,7 @@ class JobViewForm extends Component {
     }
 
     // Job was 'Published' to the Marketplace, Carrier is a favorite
-    if (jobStatus === 'Published' && favoriteCompany.length > 0 && favoriteCompany.includes(profile.companyId)) {
+    if (jobStatus === 'Published' && favoriteCompany.length > 0) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -446,7 +448,7 @@ class JobViewForm extends Component {
         />
       );
     // Job was 'Published' to the Marketplace
-    } else if (jobStatus === 'Published' && bid.status !== 'Pending') {
+    } else if (jobStatus === 'Published' && bid.status !== 'Pending' && favoriteCompany.length === 0) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -456,6 +458,9 @@ class JobViewForm extends Component {
           bntText="Request Job"
         />
       );
+    // Job "Requested" by the carrier
+    } else if (jobStatus === 'Published' && bid.status === 'Pending') {
+      showModalButton = 'You have requested this job';
     }
 
     return (
