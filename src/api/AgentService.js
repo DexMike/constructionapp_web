@@ -32,6 +32,9 @@ class AgentService {
       headers
     };
     const response = await fetch(input, init);
+    if (response.status === 403) {
+      throw new Error('Access Forbidden');
+    }
     return response.json();
   }
 
