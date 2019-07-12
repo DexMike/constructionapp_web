@@ -545,6 +545,8 @@ class JobSavePage extends Component {
       // eslint-disable-next-line no-alert
       // alert('Your request has been sent.');
     }
+
+    this.setState({ btnSubmitting: false });
   }
 
   // remove non numeric
@@ -647,8 +649,9 @@ class JobSavePage extends Component {
   }
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
+    const { profile } = this.state;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
-    if (job.status === 'Published' && companyType === 'Carrier') {
+    if ((job.status === 'Published') && companyType === 'Carrier') {
       // If the carrier is a favorite
       if (favoriteCompany.length > 0) {
         return (
@@ -695,8 +698,10 @@ class JobSavePage extends Component {
     }
     // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
     if ((job.status === 'On Offer' || job.status === 'Published And Offered')
-      && companyType === 'Carrier' && bid.status !== 'Declined'
-      && favoriteCompany.length > 0
+      && companyType === 'Carrier'
+      && bid.status !== 'Declined'
+      // Check if the carrier is a favorite OR the Customer is 'Requesting' this particular Carrier
+      && (favoriteCompany.length > 0 || (bid.status === 'Pending' && bid.companyCarrierId === profile.companyId))
     ) {
       return (
         <div>
