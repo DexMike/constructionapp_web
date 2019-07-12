@@ -66,6 +66,7 @@ class JobSavePage extends Component {
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
+    this.updateJob = this.updateJob.bind(this);
   }
 
   async componentDidMount() {
@@ -139,10 +140,12 @@ class JobSavePage extends Component {
           // );
         }
 
-        // If the customer is Carrier, check if it's a favorite
+        // Check if carrier is favorite for this job's customer
         if (profile.companyType === 'Carrier') {
-          favoriteCompany = await GroupListService.getGroupListByUserName(
-            job.createdBy
+          // check if Carrier Company [profile.companyId]
+          // is Customer's Company favorite [job.companiesId]
+          favoriteCompany = await GroupListService.getGroupListsByCompanyId(
+            profile.companyId, job.companiesId
           );
         }
 
@@ -169,6 +172,22 @@ class JobSavePage extends Component {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  async updateJob(newJob) {
+    const job = newJob;
+    const company = await CompanyService.getCompanyById(job.companiesId);
+    const startAddress = await AddressService.getAddressById(job.startAddress);
+    let endAddress = null;
+    if (job.endAddress) {
+      endAddress = await AddressService.getAddressById(job.endAddress);
+    }
+    const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    job.company = company;
+    job.startAddress = startAddress;
+    job.endAddress = endAddress;
+    job.materials = materials.map(material => material.value);
+    this.setState({job});
   }
 
   toggleAllocateDriversModal() {
@@ -620,6 +639,7 @@ class JobSavePage extends Component {
       return (
         <BidsTable
           job={job}
+          updateJob={this.updateJob}
         />
       );
     }
@@ -651,14 +671,26 @@ class JobSavePage extends Component {
         );
       }
       // the carrier is not a favorite
+      if (bid.status !== 'Pending') {
+        return (
+          <TSubmitButton
+            onClick={() => this.handleConfirmRequestCarrier('Request')}
+            className="primaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Request Job"
+          />
+        );
+      }
+
       return (
-        <TSubmitButton
-          onClick={() => this.handleConfirmRequestCarrier('Request')}
-          className="primaryButton"
-          loading={btnSubmitting}
-          loaderSize={10}
-          bntText="Request Job"
-        />
+        <h3 style={{
+          marginTop: 20,
+          marginLeft: 15,
+          marginBottom: 20
+        }}
+        >You have requested this job.
+        </h3>
       );
     }
     // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it

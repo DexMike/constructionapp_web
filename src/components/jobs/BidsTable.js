@@ -79,7 +79,8 @@ class BidsTable extends Component {
 
       if (selectedBid.status === 'Declined'
         || selectedBid.status === 'Ignored'
-        || selectedBid.status === 'Accepted') {
+        || selectedBid.status === 'Accepted'
+        || selectedBid.status === 'New') {
         modalAcceptBid = true; // this prevents the modal from opening
       }
     }
@@ -99,6 +100,7 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
+    const { updateJob } = this.props;
     const {
       selectedBid, profile
     } = this.state;
@@ -277,6 +279,9 @@ class BidsTable extends Component {
       newBid.dateF = TFormat.asDate(bid.createdOn);
       return newBid;
     });
+
+    // updating parent component JobSavePage
+    updateJob(newJob);
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
@@ -472,7 +477,8 @@ class BidsTable extends Component {
 BidsTable.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
-  })
+  }),
+  updateJob: PropTypes.func.isRequired
 };
 
 BidsTable.defaultProps = {
