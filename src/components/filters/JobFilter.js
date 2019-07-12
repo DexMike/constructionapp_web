@@ -118,6 +118,14 @@ class JobFilter extends Component {
     }
 
     this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
+
+    if (localStorage.getItem('filters') !== null) {
+      const value = localStorage.getItem('filters');
+      const savedFilters = JSON.parse(value);
+      console.log('>>GOT SAVED FILTERS:', savedFilters);
+      this.setState({ filters: savedFilters });
+    }
+
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -173,6 +181,11 @@ class JobFilter extends Component {
       }
     }
     return endDate;
+  }
+
+  saveFilters() {
+    const { filters } = this.state;
+    localStorage.setItem('filters', JSON.stringify(filters));
   }
 
   async fetchFilterLists() {
@@ -327,6 +340,8 @@ class JobFilter extends Component {
         }
       }, 1000),
       filters
+    }, function saved() {
+      this.saveFilters();
     });
   }
 
@@ -335,14 +350,18 @@ class JobFilter extends Component {
     const {filters} = this.state;
     filters[e.target.name] = value;
     await this.fetchJobs();
-    this.setState({filters});
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
   }
 
   async handleSelectFilterChange(option) {
     const {value, name} = option;
     const {filters} = this.state;
     filters[name] = value;
-    this.setState({filters});
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
     await this.fetchJobs();
   }
 
@@ -353,6 +372,7 @@ class JobFilter extends Component {
       filters
     }, async function changed() {
       await this.fetchJobs();
+      this.saveFilters();
     });
   }
 
@@ -363,6 +383,7 @@ class JobFilter extends Component {
       filters
     }, async function changed() {
       await this.fetchJobs();
+      this.saveFilters();
     });
   }
 
@@ -378,6 +399,7 @@ class JobFilter extends Component {
     }
     filters.startAvailability = this.getUTCStartInterval(sAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
+
     const {start} = e;
     const {end} = e;
     if (start) {
@@ -388,7 +410,10 @@ class JobFilter extends Component {
     }
     intervals.startInterval = start;
     intervals.endInterval = end;
-    this.setState({intervals, filters});
+    this.setState({intervals, filters}, function saved() {
+      this.saveFilters();
+    });
+
     await this.fetchJobs();
   }
 

@@ -100,7 +100,6 @@ class JobForm extends Component {
       distance,
       time
     });
-
   }
 
   componentWillReceiveProps(nextProps) {
