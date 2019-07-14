@@ -14,9 +14,30 @@ class LoadsTable extends Component {
     super(props);
     this.state = {
       loads: props.loads,
-      job: props.job
+      job: props.job,
+      expandedLoad: 0 // saving just to relay to grandparent
     };
     this.toggle = this.toggle.bind(this);
+    this.onRowExpanded = this.onRowExpanded.bind(this);
+  }
+
+  onRowExpanded(rowId, isExpanded) {
+    console.log('>>>ES: ', rowId, isExpanded);
+    const { expandedRow } = this.props;
+    if (!isExpanded) {
+      this.setState({
+        expandedLoad: 0
+      }, function loaded() {
+        expandedRow(0);
+      });
+    } else {
+      this.setState({
+        expandedLoad: rowId
+      }, function loaded() {
+        expandedRow(rowId);
+      });
+    }
+    this.contractAll();
   }
 
   toggle() {
@@ -25,12 +46,25 @@ class LoadsTable extends Component {
       expanded: !expanded
     });
   }
+  /**/
+
+  contractAll(butId) {
+    const { loads } = this.state;
+    for (const load in loads) {
+      if (load) {
+        console.log('>>CONTRACTING', load);
+      }
+    }
+  }
+
+  //AQUI ME QUEDO, FALTA CERRAR TODOS Y EL MAP PRINCIPAL NO RENDEREA
 
   render() {
-    const {loads, job} = {...this.state};
+    const {loads, job, expandedLoad} = {...this.state};
     // debugger;
     return (
       <Paper style={{overflowX: 'auto'}}>
+        EXPANDED: {expandedLoad}
         <Table>
           <TableHead>
             <TableRow>
@@ -49,7 +83,13 @@ class LoadsTable extends Component {
           {loads && (
             <TableBody>
               {loads.map((load, index) => (
-                <LoadsExpandableRow key={load.id} load={load} index={index} job={job}/>
+                <LoadsExpandableRow
+                  key={load.id}
+                  load={load}
+                  index={index}
+                  job={job}
+                  onRowExpanded={this.onRowExpanded}
+                />
               ))}
             </TableBody>
           )
@@ -64,9 +104,12 @@ LoadsTable.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   loads: PropTypes.array.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  job: PropTypes.object.isRequired
+  job: PropTypes.object.isRequired,
+  expandedRow: PropTypes.func
 };
 
-LoadsTable.defaultProps = {};
+LoadsTable.defaultProps = {
+  expandedRow: null
+};
 
 export default LoadsTable;

@@ -30,7 +30,8 @@ class LoadsExpandableRow extends Component {
       gpsTrackings: null,
       loadInvoices: [],
       disputeEmail: null,
-      profile: null
+      profile: null,
+      toggledId: 0
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
@@ -71,9 +72,13 @@ class LoadsExpandableRow extends Component {
   }
 
   toggle() {
-    const {expanded} = {...this.state};
+    let { expanded } = this.state;
+    const { load } = {...this.state};
+    const { onRowExpanded } = this.props;
+    expanded = !expanded;
+    onRowExpanded(load.id, expanded);
     this.setState({
-      expanded: !expanded
+      expanded
     });
   }
 
@@ -168,6 +173,7 @@ class LoadsExpandableRow extends Component {
       const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
+          ES: {expanded.toString()}
           {this.renderModal()}
           <TableRow key={load.id}>
             <TableCell component="th" scope="row" align="left">
@@ -294,9 +300,12 @@ LoadsExpandableRow.propTypes = {
   load: PropTypes.object.isRequired,
   // eslint-disable-next-line react/forbid-prop-types,react/no-unused-prop-types
   job: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  onRowExpanded: PropTypes.func
 };
 
-LoadsExpandableRow.defaultProps = {};
+LoadsExpandableRow.defaultProps = {
+  onRowExpanded: null
+};
 
 export default LoadsExpandableRow;
