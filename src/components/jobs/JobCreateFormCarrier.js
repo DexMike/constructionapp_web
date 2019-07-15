@@ -5,7 +5,7 @@ import {
   CardBody,
   Col,
   Row,
-  Button, 
+  Button,
   ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
@@ -17,7 +17,7 @@ import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
-import BookingEquipmentService from '../../api/BookingEquipmentService';
+// import BookingEquipmentService from '../../api/BookingEquipmentService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
@@ -302,7 +302,8 @@ class JobCreateFormCarrier extends Component {
   async saveJob() {
     this.setState({ btnSubmitting: true });
 
-    if (!this.isFormValid()) {
+    const isValid = await this.isFormValid();
+    if (!isValid) {
       this.setState({ btnSubmitting: false });
       return;
     }
@@ -1016,10 +1017,30 @@ class JobCreateFormCarrier extends Component {
   }
 
   async isFormValid() {
-    const job = this.state;
-    const {rateTab} = this.state;
+    // const job = this.state;
     const {
-      // reqHandlerTonnage,
+      startLocationAddress1,
+      startLocationCity,
+      startLocationState,
+      startLocationZip,
+
+      // address 1
+      endLocationAddress1,
+      endLocationCity,
+      endLocationState,
+      endLocationZip,
+
+      selectedStartAddressId,
+      selectedEndAddressId,
+      selectedRatedHourOrTon,
+      rateByTonValue,
+      rateByHourValue,
+      name,
+      jobStartDateTime,
+      truckType,
+      selectedMaterials
+    } = this.state;
+    const {
       reqHandlerJobName,
       reqHandlerEndAddress,
       reqHandlerEndState,
@@ -1032,21 +1053,18 @@ class JobCreateFormCarrier extends Component {
       reqHandlerStartZip,
       reqHandlerTruckType,
       reqHandlerMaterials,
-      reqHandlerTrucksEstimate,
       reqHandlerDate,
 
-      selectedRatedHourOrTon,
-      rateByTonValue,
-      rateByHourValue,
-      estimatedTons,
       estimatedHours,
+      estimatedTons,
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
       reqHandlerEstimatedHours
     } = this.state;
     let isValid = true;
-    if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
+
+    if (!selectedMaterials || selectedMaterials.length === 0) {
       this.setState({
         reqHandlerMaterials: {
           ...reqHandlerMaterials,
@@ -1057,7 +1075,7 @@ class JobCreateFormCarrier extends Component {
       isValid = false;
     }
 
-    if (job.name === '' || job.name === null) {
+    if (name === '' || name === null) {
       this.setState({
         reqHandlerJobName: {
           ...reqHandlerJobName,
@@ -1068,7 +1086,7 @@ class JobCreateFormCarrier extends Component {
       isValid = false;
     }
 
-    if (!job.truckType || job.truckType.length === 0) {
+    if (!truckType || truckType.length === 0) {
       this.setState({
         reqHandlerTruckType: {
           ...reqHandlerTruckType,
@@ -1081,13 +1099,7 @@ class JobCreateFormCarrier extends Component {
 
     const currDate = new Date();
 
-    if (job.jobDate) {
-      // what's this for?
-      // currDate.setHours(0, 0, 0, 0);
-      // job.jobDate.setHours(0, 0, 0, 0);
-    }
-
-    if (!job.jobDate || job.jobDate.getTime() < currDate.getTime()) {
+    if (!jobStartDateTime || jobStartDateTime.getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
@@ -1100,8 +1112,8 @@ class JobCreateFormCarrier extends Component {
 
     // START ADDRESS VALIDATION
 
-    if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
-      if (job.startLocationAddress1.length === 0) {
+    if (!selectedStartAddressId || selectedStartAddressId === 0) {
+      if (startLocationAddress1.length === 0) {
         this.setState({
           reqHandlerStartAddress: {
             ...reqHandlerStartAddress,
@@ -1112,7 +1124,7 @@ class JobCreateFormCarrier extends Component {
         isValid = false;
       }
 
-      if (job.startLocationCity.length === 0) {
+      if (startLocationCity.length === 0) {
         this.setState({
           reqHandlerStartCity: {
             ...reqHandlerStartCity,
@@ -1123,7 +1135,7 @@ class JobCreateFormCarrier extends Component {
         isValid = false;
       }
 
-      if (job.startLocationZip.length === 0) {
+      if (startLocationZip.length === 0) {
         this.setState({
           reqHandlerStartZip: {
             ...reqHandlerStartZip,
@@ -1135,7 +1147,7 @@ class JobCreateFormCarrier extends Component {
       }
 
       // only work if tab is 1
-      if (job.startLocationState.length === 0) {
+      if (startLocationState.length === 0) {
         this.setState({
           reqHandlerStartState: {
             ...reqHandlerStartState,
@@ -1147,7 +1159,7 @@ class JobCreateFormCarrier extends Component {
       }
     }
 
-    if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
+    if (!selectedStartAddressId || selectedStartAddressId === 0) {
       const geoResponseStart = await this.getStartCoords();
       if (!geoResponseStart || geoResponseStart.features.length < 1
         || geoResponseStart.features[0].relevance < 0.90) {
@@ -1171,8 +1183,8 @@ class JobCreateFormCarrier extends Component {
       }
     }
 
-    if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
-      && job.selectedStartAddressId === job.selectedEndAddressId) {
+    if (selectedEndAddressId > 0 && selectedStartAddressId > 0
+      && selectedStartAddressId === selectedEndAddressId) {
       this.setState({
         reqHandlerSameAddresses: {
           ...reqHandlerSameAddresses,
@@ -1185,8 +1197,8 @@ class JobCreateFormCarrier extends Component {
 
     // END ADDRESS VALIDATION
 
-    if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
-      if (job.endLocationAddress1.length === 0) {
+    if (!selectedEndAddressId || selectedEndAddressId === 0) {
+      if (endLocationAddress1.length === 0) {
         this.setState({
           reqHandlerEndAddress: {
             ...reqHandlerEndAddress,
@@ -1197,7 +1209,7 @@ class JobCreateFormCarrier extends Component {
         isValid = false;
       }
 
-      if (job.endLocationCity.length === 0) {
+      if (endLocationCity.length === 0) {
         this.setState({
           reqHandlerEndCity: {
             ...reqHandlerEndCity,
@@ -1208,7 +1220,7 @@ class JobCreateFormCarrier extends Component {
         isValid = false;
       }
 
-      if (job.endLocationState.length === 0) {
+      if (endLocationState.length === 0) {
         this.setState({
           reqHandlerEndState: {
             ...reqHandlerEndState,
@@ -1219,7 +1231,7 @@ class JobCreateFormCarrier extends Component {
         isValid = false;
       }
 
-      if (job.endLocationZip.length === 0) {
+      if (endLocationZip.length === 0) {
         this.setState({
           reqHandlerEndZip: {
             ...reqHandlerEndZip,
@@ -1231,7 +1243,7 @@ class JobCreateFormCarrier extends Component {
       }
     }
 
-    if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
+    if (!selectedEndAddressId || selectedEndAddressId === 0) {
       const geoResponseEnd = await this.getEndCoords();
       if (!geoResponseEnd || geoResponseEnd.features.length < 1
         || geoResponseEnd.features[0].relevance < 0.90) {
@@ -1254,28 +1266,6 @@ class JobCreateFormCarrier extends Component {
         });
       }
     }
-
-    // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-    //   this.setState({
-    //     reqHandlerTrucksEstimate: {
-    //       ...reqHandlerTrucksEstimate,
-    //       touched: true,
-    //       error: 'Required input'
-    //     }
-    //   });
-    //   isValid = false;
-    // }
-// 
-    // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-    //   this.setState({
-    //     reqHandlerTrucksEstimate: {
-    //       ...reqHandlerTrucksEstimate,
-    //       touched: true,
-    //       error: 'Required input'
-    //     }
-    //   });
-    //   isValid = false;
-    // }
 
     // rates
     if (selectedRatedHourOrTon === 'ton') {

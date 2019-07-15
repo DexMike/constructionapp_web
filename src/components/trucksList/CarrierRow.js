@@ -33,9 +33,9 @@ class CarrierRow extends Component {
     return (
       <table>
         <thead>
-        <tr>
-          <th>Materials Hauled</th>
-        </tr>
+          <tr>
+            <th>Materials Hauled</th>
+          </tr>
         </thead>
         <tbody>
           {
@@ -56,22 +56,22 @@ class CarrierRow extends Component {
     return (
       <table>
         <thead>
-        <tr>
-          <th>Type of Trucks</th>
-          <th># of Trucks</th>
-        </tr>
+          <tr>
+            <th>Type of Trucks</th>
+            <th># of Trucks</th>
+          </tr>
         </thead>
         <tbody>
-        {
-          equipmentTypes.map((value, i) => {
-            return (
-              <tr key={`tru_${i}`}>
-                <td>{value.equipmentType}</td>
-                <td style={{ textAlign: 'center' }}>{value.count}</td>
-              </tr>
-            );
-          })
-        }
+          {
+            equipmentTypes.map((value, i) => {
+              return (
+                <tr key={`tru_${i}`}>
+                  <td>{value.equipmentType}</td>
+                  <td style={{ textAlign: 'center' }}>{value.count}</td>
+                </tr>
+              );
+            })
+          }
         </tbody>
       </table>
     );
