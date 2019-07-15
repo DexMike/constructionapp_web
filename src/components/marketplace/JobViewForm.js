@@ -187,7 +187,7 @@ class JobViewForm extends Component {
       job,
       company,
       companyName,
-      bid: bid[0],
+      bid,
       bidExists,
       currentBidCarrier,
       booking,
@@ -364,7 +364,7 @@ class JobViewForm extends Component {
       await JobService.updateJob(newJob);
 
       // CREATING BID
-      if (bid.length > 0) {
+      if (bid && bid.length > 0) {
         const newBid = CloneDeep(bid);
         newBid.companyCarrierId = profile.companyId;
         bid.hasCustomerAccepted = 0;
@@ -470,8 +470,9 @@ class JobViewForm extends Component {
       jobStatus = job.status;
     }
 
-    // Job was 'Published' to the Marketplace, Carrier is a favorite
-    if (jobStatus === 'Published' && favoriteCompany.length > 0) {
+    // Job was 'Published' to the Marketplace,
+    // Carrier is a favorite OR Customer has requested this particular Carrier
+    if (jobStatus === 'Published' && (favoriteCompany.length > 0 || (bid && bid.hasCustomerAccepted === 1))) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
