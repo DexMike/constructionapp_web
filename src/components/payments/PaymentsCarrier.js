@@ -96,7 +96,7 @@ class PaymentsCarrier extends Component {
               <h3 className="page-title">{title}</h3>
             </Col>
           </Row>
-          <PaymentsFilter />
+          <PaymentsFilter isCarrier />
           <Row>
             <Col md={12}>
               <h5>For detailed information on your payments, please log into your &nbsp;
@@ -127,7 +127,7 @@ class PaymentsCarrier extends Component {
                       ]
                     }
                     data={payments}
-                    handleIdClick={this.handlePaymentId}
+                    handleIdClick={() => {}}
                     handlePageChange={() => {}}
                     handleRowsChange={() => {}}
                   />
