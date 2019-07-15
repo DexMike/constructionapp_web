@@ -24,13 +24,14 @@ class LoadsExpandableRow extends Component {
       job: props.job,
       loaded: false, // if page is loading
       index: props.index,
-      expanded: false,
+      // expanded: false,
       modal: false,
       driver: null,
       gpsTrackings: null,
       loadInvoices: [],
       disputeEmail: null,
-      profile: null
+      profile: null,
+      toggledId: 0
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
@@ -71,10 +72,15 @@ class LoadsExpandableRow extends Component {
   }
 
   toggle() {
-    const {expanded} = {...this.state};
-    this.setState({
-      expanded: !expanded
-    });
+    let { isExpanded } = this.props;
+    const { load } = {...this.state};
+    const { onRowExpanded } = this.props;
+    isExpanded = !isExpanded;
+    if (isExpanded) {
+      onRowExpanded(load.id, isExpanded);
+    } else {
+      onRowExpanded(0, isExpanded);
+    }
   }
 
   async handleApproveLoad() {
@@ -145,7 +151,17 @@ class LoadsExpandableRow extends Component {
   render() {
     const {loaded} = {...this.state};
     if (loaded) {
-      const {load, loadStatus, index, expanded, driver, gpsTrackings, loadInvoices, profile, job} = {...this.state};
+      const {
+        load,
+        loadStatus,
+        index,
+        driver,
+        gpsTrackings,
+        loadInvoices,
+        profile,
+        job
+      } = {...this.state};
+      const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
       let statusColor = '';
@@ -168,12 +184,13 @@ class LoadsExpandableRow extends Component {
       const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
+          ES: {isExpanded.toString()}
           {this.renderModal()}
           <TableRow key={load.id}>
             <TableCell component="th" scope="row" align="left">
               <IconButton onClick={this.toggle}
-                          style={{color: (!expanded ? '#006F53' : 'red')}}
-              >{!expanded ? '+' : '-'}
+                          style={{color: (!isExpanded ? '#006F53' : 'red')}}
+              >{!isExpanded ? '+' : '-'}
               </IconButton>
             </TableCell>
             <TableCell align="left">{index + 1}</TableCell>
@@ -189,7 +206,7 @@ class LoadsExpandableRow extends Component {
             <TableCell align="left">${job.rateType === 'Hour' ? job.rate * load.hoursEntered : job.rate * load.tonsEntered}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
-          {expanded && (
+          {isExpanded && (
             <TableRow>
               <TableCell colSpan="9" style={{padding: 20}}>
                 <Container style={{backgroundColor: '#ffffff', borderRadius: 3}}>
@@ -294,9 +311,14 @@ LoadsExpandableRow.propTypes = {
   load: PropTypes.object.isRequired,
   // eslint-disable-next-line react/forbid-prop-types,react/no-unused-prop-types
   job: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  onRowExpanded: PropTypes.func,
+  isExpanded: PropTypes.bool
 };
 
-LoadsExpandableRow.defaultProps = {};
+LoadsExpandableRow.defaultProps = {
+  onRowExpanded: null,
+  isExpanded: false
+};
 
 export default LoadsExpandableRow;
