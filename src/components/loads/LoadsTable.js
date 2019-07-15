@@ -19,10 +19,10 @@ class LoadsTable extends Component {
     };
     this.toggle = this.toggle.bind(this);
     this.onRowExpanded = this.onRowExpanded.bind(this);
+    // this.onRowContracted = this.onRowContracted.bind(this);
   }
 
   onRowExpanded(rowId, isExpanded) {
-    console.log('>>>ES: ', rowId, isExpanded);
     const { expandedRow } = this.props;
     if (!isExpanded) {
       this.setState({
@@ -37,7 +37,7 @@ class LoadsTable extends Component {
         expandedRow(rowId);
       });
     }
-    this.contractAll();
+    this.contractAll(rowId);
   }
 
   toggle() {
@@ -50,14 +50,19 @@ class LoadsTable extends Component {
 
   contractAll(butId) {
     const { loads } = this.state;
-    for (const load in loads) {
+    for (const load of loads) {
       if (load) {
-        console.log('>>CONTRACTING', load);
+        if (load.id !== butId) {
+          load.isExpanded = false;
+        } else {
+          load.isExpanded = true;
+        }
       }
     }
+    this.setState({
+      loads
+    });
   }
-
-  //AQUI ME QUEDO, FALTA CERRAR TODOS Y EL MAP PRINCIPAL NO RENDEREA
 
   render() {
     const {loads, job, expandedLoad} = {...this.state};
@@ -89,6 +94,7 @@ class LoadsTable extends Component {
                   index={index}
                   job={job}
                   onRowExpanded={this.onRowExpanded}
+                  isExpanded={load.isExpanded}
                 />
               ))}
             </TableBody>

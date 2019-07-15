@@ -36,7 +36,8 @@ class JobForm extends Component {
       modifiedOn: moment()
         .unix() * 1000,
       isArchived: 0,
-      overlayMapData: {}
+      overlayMapData: {},
+      isExpanded: false
     };
 
     this.state = {
@@ -99,7 +100,7 @@ class JobForm extends Component {
     }
     if (job.startAddress && !job.endAddress) {
       origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination =`${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
     }
     if (job.startAddress && job.endAddress) {
       origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
@@ -613,15 +614,14 @@ class JobForm extends Component {
 
   renderMBMap(gpsData, coords) {
     const { showMainMap, cachedDestination, cachedOrigin } = this.state;
-    console.log('>>', cachedOrigin, '>>', cachedDestination);
     if (showMainMap && cachedOrigin && cachedDestination) {
       return (
         <React.Fragment>
           <TMapBoxOriginDestinationWithOverlay
             input={
               {
-                cachedOrigin,
-                cachedDestination,
+                origin: cachedOrigin,
+                destination: cachedDestination,
                 gpsData,
                 coords
               }
