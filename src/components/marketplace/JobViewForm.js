@@ -44,7 +44,8 @@ class JobViewForm extends Component {
       loaded: false,
       favoriteCompany: [],
       profile: [],
-      btnSubmitting: false
+      btnSubmitting: false,
+      accessForbidden: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -68,9 +69,15 @@ class JobViewForm extends Component {
     let bids = [];
     // const gps = [];
     profile = await ProfileService.getProfile();
-
-    job = await JobService.getJobById(jobId);
-
+    try {
+      job = await JobService.getJobById(jobId);
+    } catch (e) {
+      if (e.message === 'Access Forbidden') {
+        // access 403
+        this.setState({accessForbidden: true});
+        return;
+      }
+    }
     if (job) {
       company = await CompanyService.getCompanyById(job.companiesId);
       const startAddress = await AddressService.getAddressById(job.startAddress);
@@ -730,7 +737,20 @@ class JobViewForm extends Component {
   }
 
   render() {
-    const { job, loaded } = this.state;
+    const { job, loaded, accessForbidden } = this.state;
+
+    if (accessForbidden) {
+      return (
+        <Col md={12}>
+          <Card style={{paddingBottom: 0}}>
+            <CardBody>
+              <Row className="col-md-12"><h1>Access Forbidden</h1></Row>
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
+
     if (loaded) {
       return (
         <React.Fragment>
