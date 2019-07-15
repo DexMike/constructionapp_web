@@ -78,7 +78,7 @@ class PaymentsCustomer extends Component {
   renderGoTo() {
     const {goToPaymentDetails, id} = this.state;
     if (goToPaymentDetails) {
-      return <Redirect push to={`/invoices/${id}`}/>;
+      return <Redirect push to={`/payments/${id}`}/>;
     }
     return false;
   }

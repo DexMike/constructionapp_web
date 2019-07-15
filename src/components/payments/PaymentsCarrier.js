@@ -64,7 +64,7 @@ class PaymentsCarrier extends Component {
   renderGoTo() {
     const {goToPaymentDetails, id} = this.state;
     if (goToPaymentDetails) {
-      return <Redirect push to={`/invoices/${id}`}/>;
+      return <Redirect push to={`/payments/${id}`}/>;
     }
     return false;
   }
@@ -82,7 +82,7 @@ class PaymentsCarrier extends Component {
   }
 
   render() {
-    const title = 'Carrier Invoices';
+    const title = 'Carrier Payments';
     /* const payments = [{
       date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88'
     }]; */

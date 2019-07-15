@@ -71,36 +71,7 @@ class PaymentsFilter extends Component {
                         dateFormat="MM/dd/yy"
                       />
                     </Col>
-                    <Col md="2">
-                      <div className="filter-item-title">
-                        Rate Type
-                      </div>
-                      <TSelect
-                        input={
-                          {
-                            onChange: () => {},
-                            name: 'rateType',
-                            value: filters.rateType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        placeholder="Any"
-                        value={filters.rateType}
-                        options={
-                          rateTypeList.map(rateType => ({
-                            name: 'rateType',
-                            value: rateType,
-                            label: rateType
-                          }))
-                        }
-                      />
-                    </Col>
-                    <Col md="3">
+                    <Col md="5">
                       <div className="filter-item-title">
                         Status Type
                       </div>
