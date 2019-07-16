@@ -26,6 +26,7 @@ class DriverForm extends Component {
       email: '',
       mobilePhone: '',
       userStatus: '',
+      driverStatus: '',
       selectedUser: {},
       btnSubmitting: false,
       reqHandlerFName: { touched: false, error: '' },
@@ -47,7 +48,7 @@ class DriverForm extends Component {
 
   async componentDidMount() {
     const { driverId } = this.props;
-    let { id, firstName, lastName, email, mobilePhone, userStatus, selectedUser } = this.state;
+    let { id, firstName, lastName, email, mobilePhone, userStatus, driverStatus, selectedUser } = this.state;
 
     if (driverId) {
       const driver = await DriverService.getDriverById(driverId);
@@ -60,6 +61,7 @@ class DriverForm extends Component {
       const chars = {'(': '', ')': '', '-': '', ' ': ''};
       mobilePhone = mobilePhone.replace(/[abc]/g, m => chars[m]);
       ({ userStatus } = selectedUser);
+      ({ driverStatus } = driver);
       this.setState({
         selectedUser,
         id,
@@ -68,6 +70,7 @@ class DriverForm extends Component {
         email,
         mobilePhone,
         userStatus,
+        driverStatus,
         loaded: true
       });
     }
@@ -141,7 +144,7 @@ class DriverForm extends Component {
     }
     const {
       firstName,
-      lastName, email, mobilePhone, userStatus, selectedUser, updateNewDriver } = this.state;
+      lastName, email, mobilePhone, userStatus, selectedUser, driverStatus, updateNewDriver } = this.state;
     const user = selectedUser;
     user.mobilePhone = `+1${mobilePhone}`;
     user.lastName = lastName;
@@ -152,7 +155,7 @@ class DriverForm extends Component {
       user.modifiedBy = currentUser.userId;
       user.modifiedOn = moment().unix() * 1000;
       await UserService.updateUser(user);
-      if (updateNewDriver || userStatus === 'Driver Invited') {
+      if (updateNewDriver || driverStatus === 'Invited') {
         this.setState({step: 2, sendingSMS: true});
         this.sendDriverInvite(user);
       } else {
@@ -163,7 +166,7 @@ class DriverForm extends Component {
       user.companyId = currentUser.companyId;
       user.isBanned = 0;
       user.preferredLanguage = 'English';
-      user.userStatus = 'Driver Invited';
+      user.userStatus = 'New';
       user.isEmailVerified = 0;
       user.isPhoneVerified = 0;
       user.createdBy = currentUser.id;
@@ -176,6 +179,7 @@ class DriverForm extends Component {
       const driver = {};
       driver.driverLicenseId = 1;
       driver.usersId = newUser.id;
+      driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
       driver.createdOn = moment().unix() * 1000;
 

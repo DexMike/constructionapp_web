@@ -211,7 +211,7 @@ class DriverListPage extends Component {
                         displayName: 'Mobile Phone'
                       },
                       {
-                        name: 'userStatus',
+                        name: 'driverStatus',
                         displayName: 'Driver Status'
                       },
                       {
