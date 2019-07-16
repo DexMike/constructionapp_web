@@ -461,8 +461,8 @@ class DashboardCustomerPage extends Component {
         newJob.distance = newJob.distance.toFixed(2);
       }
 
-      if (!job.legalName) {
-        newJob.legalName = 'Unassigned';
+      if (!job.companyCarrierLegalName) {
+        newJob.companyCarrierLegalName = 'Unassigned';
       }
 
       potentialIncome += tempRate * newJob.rateEstimate;
@@ -506,7 +506,7 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Job Status'
                         },
                         {
-                          name: 'legalName',
+                          name: 'companyCarrierLegalName',
                           displayName: 'Carrier'
                         },
                         {

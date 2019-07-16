@@ -475,7 +475,7 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Job Status'
                         },
                         {
-                          name: 'legalName',
+                          name: 'companyLegalName',
                           displayName: 'Customer'
                         },
                         {
