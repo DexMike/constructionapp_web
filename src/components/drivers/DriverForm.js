@@ -166,7 +166,7 @@ class DriverForm extends Component {
       user.companyId = currentUser.companyId;
       user.isBanned = 0;
       user.preferredLanguage = 'English';
-      user.userStatus = 'New';
+      user.userStatus = 'Driver Invited';
       user.isEmailVerified = 0;
       user.isPhoneVerified = 0;
       user.createdBy = currentUser.id;
