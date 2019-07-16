@@ -160,7 +160,7 @@ class JobSavePage extends Component {
             );
           }
 
-          const drivers = await UserService.getUsersByCompanyId(profile.companyId);
+          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
 
           this.setState({
             job,
@@ -775,7 +775,12 @@ class JobSavePage extends Component {
 
   renderAllocateDriversModal() {
     const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
-    const driverData = drivers.data;
+    const driverData = [];
+    Object.values(drivers).forEach((itm) => {
+      if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled') {
+        driverData.push(itm);
+      }
+    });
     const driverColumns = [
       {
         displayName: 'First Name',
