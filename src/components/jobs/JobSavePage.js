@@ -159,7 +159,6 @@ class JobSavePage extends Component {
             // );
           }
 
-
           // Check if carrier is favorite for this job's customer
           if (profile.companyType === 'Carrier') {
             // check if Carrier Company [profile.companyId]
@@ -674,8 +673,9 @@ class JobSavePage extends Component {
     const { profile } = this.state;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
     if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
-      // If the carrier is a favorite
-      if (favoriteCompany.length > 0 && (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
+      // If the carrier is a favorite OR the Customer has requested this particular Carrier
+      if ((favoriteCompany.length > 0 && (bid && (/* bid.status !== 'Pending' && */bid.status !== 'Declined')))
+      || (bid && bid.hasCustomerAccepted === 1 && bid.status !== 'Declined')) {
         return (
           <div>
             <TSubmitButton

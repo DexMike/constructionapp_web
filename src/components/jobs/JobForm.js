@@ -36,7 +36,8 @@ class JobForm extends Component {
       modifiedOn: moment()
         .unix() * 1000,
       isArchived: 0,
-      overlayMapData: {}
+      overlayMapData: {},
+      isExpanded: false
     };
 
     this.state = {
@@ -47,10 +48,15 @@ class JobForm extends Component {
       loads: [],
       loaded: false,
       distance: 0,
-      time: 0
+      time: 0,
+      showMainMap: true,
+      cachedOrigin: '',
+      cachedDestination: ''
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.onExpandedChanged = this.onExpandedChanged.bind(this);
+    this.renderMBMap = this.renderMBMap.bind(this);
   }
 
   async componentDidMount() {
@@ -84,6 +90,23 @@ class JobForm extends Component {
       }
     }
 
+    let origin;
+    let destination;
+
+    // set origin, destination
+    if (!job.startAddress && job.endAddress) {
+      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    }
+    if (job.startAddress && !job.endAddress) {
+      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+    }
+    if (job.startAddress && job.endAddress) {
+      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
+      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
+    }
+
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
@@ -98,7 +121,9 @@ class JobForm extends Component {
       loads,
       job,
       distance,
-      time
+      time,
+      cachedOrigin: origin,
+      cachedDestination: destination
     });
   }
 
@@ -119,19 +144,31 @@ class JobForm extends Component {
     }
   }
 
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+  onExpandedChanged(rowId) {
+    if (rowId !== 0) {
+      this.setState({
+        showMainMap: false
+      });
+    } else {
+      this.setState({
+        showMainMap: true
+      });
     }
   }
 
-  toggle(tab) {
-    const { activeTab } = this.state;
-    if (activeTab !== tab) {
-      this.setState({
-        activeTab: tab
-      });
-    }
+  isFormValid() {
+    const job = this.state;
+    return !!(
+      job.companiesId
+      && job.status
+      && job.startAddress
+      && job.endAddress
+      && job.rateType
+    );
+  }
+
+  handleInputChange(e) {
+    this.setState({ [e.target.name]: e.target.value });
   }
 
   async saveJob(e) {
@@ -157,19 +194,19 @@ class JobForm extends Component {
     }
   }
 
-  isFormValid() {
-    const job = this.state;
-    return !!(
-      job.companiesId
-      && job.status
-      && job.startAddress
-      && job.endAddress
-      && job.rateType
-    );
+  toggle(tab) {
+    const { activeTab } = this.state;
+    if (activeTab !== tab) {
+      this.setState({
+        activeTab: tab
+      });
+    }
   }
 
-  handleInputChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
+  handlePageClick(menuItem) {
+    if (menuItem) {
+      this.setState({ [`goTo${menuItem}`]: true });
+    }
   }
 
   materialsAsString(materials) {
@@ -402,7 +439,7 @@ class JobForm extends Component {
         >
           Load Information
         </h3>
-        {job && <LoadsTable loads={loads} job={job}/>}
+        {job && <LoadsTable loads={loads} job={job} expandedRow={this.onExpandedChanged} />}
       </React.Fragment>
     );
   }
@@ -558,12 +595,8 @@ class JobForm extends Component {
   renderStartAddress(address) {
     return (
       <React.Fragment>
-        <h3 className="subhead">Start Location
-          {/* <img */}
-          {/*  src={`${window.location.origin}/${pinAImage}`} */}
-          {/*  alt="avatar" */}
-          {/*  className="pinSize" */}
-          {/* /> */}
+        <h3 className="subhead">
+          Start Location
         </h3>
         {this.renderAddress(address)}
       </React.Fragment>
@@ -585,19 +618,27 @@ class JobForm extends Component {
     );
   }
 
-  renderMBMap(origin, destination, gpsData, coords) {
+  renderMBMap(gpsData, coords) {
+    const { showMainMap, cachedDestination, cachedOrigin } = this.state;
+    if (showMainMap && cachedOrigin && cachedDestination) {
+      return (
+        <React.Fragment>
+          <TMapBoxOriginDestinationWithOverlay
+            input={
+              {
+                origin: cachedOrigin,
+                destination: cachedDestination,
+                gpsData,
+                coords
+              }
+            }
+          />
+        </React.Fragment>
+      );
+    }
     return (
       <React.Fragment>
-        <TMapBoxOriginDestinationWithOverlay
-          input={
-            {
-              origin,
-              destination,
-              gpsData,
-              coords
-            }
-          }
-        />
+        &nbsp;
       </React.Fragment>
     );
   }
@@ -610,27 +651,11 @@ class JobForm extends Component {
       loads
     } = this.state;
     const { job } = this.props;
-    let origin = '';
-    let destination = '';
     let endAddress;
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
 
     if (job.endAddress) { // if there's endAddress, render it
       endAddress = this.renderEndAddress(job.endAddress);
     }
-
 
     if (job.status === 'Job Completed') {
       return (
@@ -664,7 +689,7 @@ class JobForm extends Component {
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
-                  {this.renderMBMap(origin, destination, overlayMapData, coords)}
+                  {this.renderMBMap(overlayMapData, coords)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -707,7 +732,7 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
-                  {this.renderMBMap(origin, destination)}
+                  {this.renderMBMap(null, null)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -734,6 +759,7 @@ class JobForm extends Component {
         </Container>
       );
     }
+
     return (
       <Container>
         <Card>
@@ -748,7 +774,7 @@ class JobForm extends Component {
             }}
             >
               <div className="col-md-8" style={{ padding: 0 }}>
-                {this.renderMBMap(origin, destination)}
+                {this.renderMBMap(null, null)}
               </div>
               <div className="col-md-4">
                 <div className="row">
