@@ -255,7 +255,7 @@ class CarriersCustomerPage extends Component {
     });
     const carriers3 = [];
     carriers2.forEach((carriers2item) => {
-      console.log(carriers2item);
+      // console.log(carriers2item);
       const carrierItem = {
         id: carriers2item[0].carrierId,
         legalName: carriers2item[0].legalName,
@@ -303,7 +303,7 @@ class CarriersCustomerPage extends Component {
       // }
       carriers3.push(carrierItem);
     });
-    console.log(carriers3);
+    // console.log(carriers3);
     return carriers3;
   }
 
@@ -552,7 +552,7 @@ class CarriersCustomerPage extends Component {
   toggleAddJobModal() {
     const { modal, filters } = this.state;
     if (modal) {
-      filters.materialType = [];
+      // filters.materialType = [];
       this.setState({
         filters
       });
@@ -650,7 +650,7 @@ class CarriersCustomerPage extends Component {
     if (mats.length < 1 && modal && materialTypeList.length > 0) {
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
-      this.preventModal();
+      // this.preventModal();
       return false;
       // alert('Please select a material type for this job');
     }

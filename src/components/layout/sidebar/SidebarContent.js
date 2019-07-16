@@ -11,6 +11,7 @@ class SidebarContent extends Component {
 
     this.state = {
       companyType: null,
+      isAdmin: false,
       loaded: false
     };
   }
@@ -19,18 +20,19 @@ class SidebarContent extends Component {
     const profile = await ProfileService.getProfile();
     this.setState({
       companyType: profile.companyType,
+      isAdmin: profile.isAdmin,
       loaded: true
     });
   }
 
   renderSidebarFromCompanyType() {
-    const { companyType, loaded } = this.state;
+    const { companyType, isAdmin, loaded } = this.state;
     const { onClick } = this.props;
     if (loaded) {
       return (
         <React.Fragment>
-          { companyType === 'Carrier' && <SidebarCarrierContent onClick={onClick}/>}
-          { companyType === 'Customer' && <SidebarCustomerContent onClick={onClick}/>}
+          { companyType === 'Carrier' && <SidebarCarrierContent onClick={onClick} isAdmin={isAdmin}/>}
+          { companyType === 'Customer' && <SidebarCustomerContent onClick={onClick} isAdmin={isAdmin}/>}
         </React.Fragment>
       );
     }
