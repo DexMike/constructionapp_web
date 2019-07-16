@@ -114,6 +114,7 @@ class JobSavePage extends Component {
           job.endAddress = endAddress;
           job.materials = materials.map(material => material.value);
 
+          // bids
           const bids = await BidService.getBidsByJobId(job.id);
           if (bids && bids.length > 0) { // check if there's a bid
             // If there's more than one bid
@@ -144,6 +145,7 @@ class JobSavePage extends Component {
             } */
           }
 
+          // bookings
           const bookings = await BookingService.getBookingsByJobId(job.id);
           if (bookings && bookings.length > 0) {
             [booking] = bookings;
