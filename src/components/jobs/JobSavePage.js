@@ -639,18 +639,10 @@ class JobSavePage extends Component {
   }
 
   renderJobForm(companyType, companyCarrier, job) {
-    if (companyType === 'Carrier') {
-      return (
-        <JobForm
-          job={job}
-          companyCarrier={companyCarrier}
-          handlePageClick={this.handlePageClick}
-        />
-      );
-    }
     return (
       <JobForm
         job={job}
+        companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
       />
     );
