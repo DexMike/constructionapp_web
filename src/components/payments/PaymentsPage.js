@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import { Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
 
 import PaymentsCarrier from './PaymentsCarrier';
@@ -12,14 +12,19 @@ class PaymentsPage extends Component {
 
     this.state = {
       loaded: false,
-      companyType: ''
+      companyType: '',
+      isAdmin: null
     };
   }
 
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     const { companyType } = profile;
-    this.setState({ companyType, loaded: true });
+    this.setState({
+      isAdmin: profile.isAdmin,
+      companyType,
+      loaded: true
+    });
   }
 
   renderLoader() {
@@ -35,7 +40,10 @@ class PaymentsPage extends Component {
   }
 
   render() {
-    const { companyType, loaded } = this.state;
+    const { companyType, loaded, isAdmin } = this.state;
+    if (isAdmin === false) {
+      return <Redirect push to="/" />;
+    }
     if (loaded) {
       return (
         <Container className="dashboard">
