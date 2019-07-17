@@ -168,8 +168,13 @@ class JobSavePage extends Component {
             );
           }
 
-          const drivers = await UserService.getUsersByCompanyId(profile.companyId);
-
+          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          const enabledDrivers = [];
+          Object.values(drivers).forEach((itm) => {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled') {
+              enabledDrivers.push(itm);
+            }
+          });
           this.setState({
             job,
             bid,
@@ -178,7 +183,7 @@ class JobSavePage extends Component {
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers
+            drivers: enabledDrivers
           });
         }
       }
@@ -790,7 +795,7 @@ class JobSavePage extends Component {
 
   renderAllocateDriversModal() {
     const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
-    const driverData = drivers.data;
+    const driverData = drivers;    
     const driverColumns = [
       {
         displayName: 'First Name',
