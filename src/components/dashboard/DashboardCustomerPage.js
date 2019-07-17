@@ -110,7 +110,6 @@ class DashboardCustomerPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
-
     this.setState({
       jobs,
       filters,
@@ -168,7 +167,6 @@ class DashboardCustomerPage extends Component {
   async fetchJobs() {
     const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-
     this.setState({jobs});
     return jobs;
   }
@@ -463,6 +461,10 @@ class DashboardCustomerPage extends Component {
         newJob.distance = newJob.distance.toFixed(2);
       }
 
+      if (!job.companyCarrierLegalName) {
+        newJob.companyCarrierLegalName = 'Unassigned';
+      }
+
       potentialIncome += tempRate * newJob.rateEstimate;
 
       return newJob;
@@ -504,8 +506,8 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Job Status'
                         },
                         {
-                          name: 'legalName',
-                          displayName: 'Customer'
+                          name: 'companyCarrierLegalName',
+                          displayName: 'Carrier'
                         },
                         {
                           name: 'newSize',
