@@ -241,7 +241,7 @@ class JobFilter extends Component {
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
     } else if (profile.companyType === 'Customer') { // Customer Job Dashboard
-      filters.createdBy = profile.userId;
+      filters.companiesId = profile.companyId;
     } else if (profile.companyType === 'Carrier' && url === marketplaceUrl) { // Marketplace
       filters.status = 'Published';
       filters.isMarketplaceView = true;
