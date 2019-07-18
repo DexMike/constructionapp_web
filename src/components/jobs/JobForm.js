@@ -250,7 +250,6 @@ class JobForm extends Component {
 
   renderJobTop(job) {
     const { companyType, carrier } = this.state;
-
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
     const fee = estimatedCost * 0.1;
@@ -274,7 +273,7 @@ class JobForm extends Component {
           </h3>
           {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
             <React.Fragment>
-              Carrier: {carrier.legalName}
+              Carrier: {carrier ? carrier.legalName : null}
             </React.Fragment>
           )}
           <br/>
