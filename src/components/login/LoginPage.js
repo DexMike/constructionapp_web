@@ -117,10 +117,13 @@ class LoginPage extends SignIn {
   }
 
   async onSignIn() {
+    let { username } = this.state;
+    const { password } = this.state;
+    username = username.toLowerCase(); // Workaround for mobile safari uppercasing the first letter
     this.setState({loading: true, btnSubmitting: true});
     try {
-      if (!this.state.username || this.state.username.length <= 0
-        || !this.state.password || this.state.password.length <= 0) {
+      if (!username || username.length <= 0
+        || !password || password.length <= 0) {
         await this.createLoginLog(false);
         this.setState({
           error: 'Invalid username or password.',
@@ -130,7 +133,7 @@ class LoginPage extends SignIn {
         return;
       }
 
-      const userCheck = {email: this.state.username}
+      const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
 
       if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
@@ -149,15 +152,14 @@ class LoginPage extends SignIn {
       }
       const browserVersion = await UtilsService.getBrowserVersion();
       const screenSize = await UtilsService.getScreenDimentions();
-      
+
       this.setState({
         //  settingsLoaded: true,
         ip,
         browserVersion,
         screenSize
       });
-
-      const data = await Auth.signIn(this.state.username, this.state.password);
+      const data = await Auth.signIn(username, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
@@ -167,7 +169,7 @@ class LoginPage extends SignIn {
         }
         await this.createLoginLog(true);
         // window.location = '/';
-        this.setLogging(this.state.username);
+        this.setLogging(username);
 
         // are you a carrier and is it your first login?
         const profile = await ProfileService.getProfile();
@@ -201,7 +203,6 @@ class LoginPage extends SignIn {
           confirmUsername: null
         });
       } else if (err.code === 'UserNotConfirmedException') {
-        const {username} = this.state;
         await this.createLoginLog(false);
         this.setState({
           error: err.message,
@@ -219,7 +220,6 @@ class LoginPage extends SignIn {
           errorCode: err.code,
           confirmUsername: null
         });
-
       }
     }
   }

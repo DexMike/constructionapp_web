@@ -38,6 +38,7 @@ class SidebarCustomerContent extends Component {
   }
 
   render() {
+    const { isAdmin } = this.props;
     return (
       <div className="sidebar__content">
         <SideElement title="Job Dashboard" icon="ic_assignment" route="/" handle={this.hideSidebar}/>
@@ -49,8 +50,11 @@ class SidebarCustomerContent extends Component {
           route="/carrierslist"
           handle={this.hideSidebar}
         />
-
-        <SideElement title="Charges" icon="ic_attach_money" route="/payments" handle={this.hideSidebar}/>
+        {
+          isAdmin ? (
+            <SideElement title="Charges" icon="ic_attach_money" route="/payments" handle={this.hideSidebar}/>
+          ) : null
+        }
         <SideElement title="Reporting" icon="ic_timeline" route="/Reports" handle={this.hideSidebar}/>
       </div>
     );
@@ -58,7 +62,12 @@ class SidebarCustomerContent extends Component {
 }
 
 SidebarCustomerContent.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  isAdmin: PropTypes.bool
+};
+
+SidebarCustomerContent.defaultProps = {
+  isAdmin: false
 };
 
 export default SidebarCustomerContent;
