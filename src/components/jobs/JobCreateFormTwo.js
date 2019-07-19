@@ -21,6 +21,7 @@ import GroupListService from '../../api/GroupListService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TSpinner from '../common/TSpinner';
 import TSubmitButton from '../common/TSubmitButton';
+import CompanyService from '../../api/CompanyService';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -47,10 +48,9 @@ class JobCreateFormTwo extends PureComponent {
 
   async componentDidMount() {
     const { firstTabData } = this.props;
+    let { showSendtoFavorites } = this.state;
     const d = firstTabData();
     let favoriteAdminTels = [];
-    let favoriteCompanies = [];
-    let allBidders = [];
     let nonFavoriteAdminTels = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
@@ -64,38 +64,49 @@ class JobCreateFormTwo extends PureComponent {
       tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
       rateEstimate: d.rateEstimate,
-      hourTrucksNumber: d.hourTrucksNumber
+      hourTrucksNumber: d.hourTrucksNumber,
+      material: d.selectedMaterials.value
     };
 
-    favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
+
+    const allCompanies = await CompanyService.getFavoritesNonFavoritesCompaniesByUserId(
       profile.userId,
       filters
     );
 
-    // now let's get the bidders that match criteria
-    allBidders = await GroupListService.getBiddersFiltered(
-      filters
-    );
+    // get favorite companies for this carrier
+    const favoriteCompanies = allCompanies.filter(x => x.isFavorite === 'Favorite');
 
-    const biddersIdsNotFavorites = allBidders.filter(x => !favoriteCompanies.includes(x));
+    // get non favorite companies for this carrier
+    const biddersIdsNotFavorites = allCompanies.filter(x => x.isFavorite === 'Non Favorite');
 
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
-      favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
-
-      if (biddersIdsNotFavorites.length > 0) {
-        nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
-      }
-
-      this.setState({
-        showSendtoFavorites: true,
-        favoriteCompanies,
-        favoriteAdminTels,
-        nonFavoriteAdminTels
-      });
+      favoriteAdminTels = favoriteCompanies.map(x => (x.adminPhone ? x.adminPhone : null));
+      // remove null values
+      Object.keys(favoriteAdminTels).forEach(
+        key => (favoriteAdminTels[key] === null) && delete favoriteAdminTels[key]
+      );
+      showSendtoFavorites = true;
     }
-    this.setState({ loaded: true });
+
+    if (biddersIdsNotFavorites.length > 0) {
+      // get the phone numbers from the admins
+      nonFavoriteAdminTels = biddersIdsNotFavorites.map(x => (x.adminPhone ? x.adminPhone : null));
+      // remove null values
+      Object.keys(nonFavoriteAdminTels).forEach(
+        key => (nonFavoriteAdminTels[key] === null) && delete nonFavoriteAdminTels[key]
+      );
+    }
+
+    this.setState({
+      showSendtoFavorites,
+      favoriteCompanies,
+      favoriteAdminTels,
+      nonFavoriteAdminTels,
+      loaded: true
+    });
   }
 
   isFormValid() {
@@ -291,12 +302,12 @@ class JobCreateFormTwo extends PureComponent {
     // create bids if this user has favorites:
     if (showSendtoFavorites && sendToFavorites && newJob) {
       const results = [];
-      for (const companyId of favoriteCompanies) {
+      for (const favCompany of favoriteCompanies) {
         // bid
         const bid = {
           jobId: newJob.id,
           userId: profile.userId,
-          companyCarrierId: companyId,
+          companyCarrierId: favCompany.id,
           hasCustomerAccepted: 1,
           hasSchedulerAccepted: 0,
           status: 'New',
@@ -318,7 +329,7 @@ class JobCreateFormTwo extends PureComponent {
       // now let's send them an SMS to all favorites
       const allSms = [];
       for (const adminIdTel of favoriteAdminTels) {
-        if (this.checkPhoneFormat(adminIdTel)) {
+        if (adminIdTel && this.checkPhoneFormat(adminIdTel)) {
           // console.log('>>Sending SMS to Jake...');
           const notification = {
             to: this.phoneToNumberFormat(adminIdTel),
@@ -334,7 +345,7 @@ class JobCreateFormTwo extends PureComponent {
     if (sendToMkt) {
       const allBiddersSms = [];
       for (const bidderTel of nonFavoriteAdminTels) {
-        if (this.checkPhoneFormat(bidderTel)) {
+        if (bidderTel && this.checkPhoneFormat(bidderTel)) {
           const notification = {
             to: this.phoneToNumberFormat(bidderTel),
             body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'

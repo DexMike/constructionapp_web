@@ -47,6 +47,12 @@ class CompanyService extends AgentService {
     const response = await this.delete(PATH, id);
     return (response);
   }
+
+  static async getFavoritesNonFavoritesCompaniesByUserId(userId, filters) {
+    const url = `/companies/user/${userId}/favoritesnonfavorites`;
+    const response = await this.post(url, filters);
+    return (response);
+  }
 }
 
 export default CompanyService;
