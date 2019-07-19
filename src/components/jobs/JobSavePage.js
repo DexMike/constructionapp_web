@@ -199,7 +199,7 @@ class JobSavePage extends Component {
     }
   }
 
-  async updateJob(newJob) {
+  async updateJob(newJob, companyCarrier) {
     const job = newJob;
     const company = await CompanyService.getCompanyById(job.companiesId);
     const startAddress = await AddressService.getAddressById(job.startAddress);
@@ -212,7 +212,7 @@ class JobSavePage extends Component {
     job.startAddress = startAddress;
     job.endAddress = endAddress;
     job.materials = materials.map(material => material.value);
-    this.setState({ job });
+    this.setState({ job, companyCarrier });
   }
 
   toggleAllocateDriversModal() {
@@ -342,7 +342,7 @@ class JobSavePage extends Component {
       // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
-      this.setState({ job });
+      this.setState({ job, companyCarrier: newBid.companyCarrierId });
     } else { // Customer is rejecting the job request
       const newBid = CloneDeep(bid);
 
