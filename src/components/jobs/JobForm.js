@@ -127,7 +127,7 @@ class JobForm extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
+  async componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
       const { job } = nextProps;
       Object.keys(job)
@@ -141,6 +141,15 @@ class JobForm extends Component {
         ...job,
         loaded: true
       });
+    }
+    if (nextProps.companyCarrier) {
+      let { carrier } = this.state;
+      if (!carrier) {
+        carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
+        this.setState({
+          carrier
+        });
+      }
     }
   }
 
@@ -274,7 +283,7 @@ class JobForm extends Component {
           </h3>
           {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
             <React.Fragment>
-              Carrier: {carrier ? carrier.legalName : null}
+              Carrier: {carrier ? carrier.legalName : ''}
             </React.Fragment>
           )}
           <br/>
