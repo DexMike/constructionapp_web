@@ -169,11 +169,17 @@ class JobSavePage extends Component {
           }
 
           const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-          const enabledDrivers = [];
+          let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
             if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled') {
               enabledDrivers.push(itm);
             }
+          });
+          // Setting id to driverId since is getting the userId and saving it as driverId
+          enabledDrivers = enabledDrivers.map((driver) => {
+            const newDriver = driver;
+            newDriver.id = newDriver.driverId;
+            return newDriver;
           });
           this.setState({
             job,
@@ -195,7 +201,7 @@ class JobSavePage extends Component {
         selectedDrivers
       });
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
   }
 
@@ -595,7 +601,7 @@ class JobSavePage extends Component {
   async handleAllocateDrivers() {
     try {
       // console.log('saving...');
-      const { selectedDrivers, booking, profile } = this.state;
+      const { selectedDrivers, booking, job, profile } = this.state;
       const bookingEquipments = selectedDrivers.map(selectedDriver => ({
         bookingId: booking.id,
         schedulerId: profile.userId,
@@ -605,8 +611,8 @@ class JobSavePage extends Component {
         rateActual: 0,
         startTime: new Date(),
         endTime: new Date(),
-        startAddressId: 0,
-        endAddressId: 0,
+        startAddressId: job.startAddress.id,
+        endAddressId: job.endAddress.id,
         notes: '',
         createdBy: profile.userId,
         createdOn: new Date(),
@@ -615,7 +621,7 @@ class JobSavePage extends Component {
       }));
       await BookingEquipmentService.allocateDrivers(bookingEquipments, booking.id);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
     this.toggleAllocateDriversModal();
   }
