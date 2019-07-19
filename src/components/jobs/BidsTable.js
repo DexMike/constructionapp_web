@@ -246,6 +246,9 @@ class BidsTable extends Component {
           await TwilioService.createSms(notification);
         }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob, newBid.companyCarrierId);
     } else {
       // Decline Bid
       newBid = CloneDeep(selectedBid);
@@ -270,6 +273,9 @@ class BidsTable extends Component {
           await TwilioService.createSms(notification);
         }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob);
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
@@ -279,9 +285,6 @@ class BidsTable extends Component {
       newBid.dateF = TFormat.asDate(bid.createdOn);
       return newBid;
     });
-
-    // updating parent component JobSavePage
-    updateJob(newJob);
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
