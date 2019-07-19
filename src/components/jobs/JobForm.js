@@ -274,7 +274,7 @@ class JobForm extends Component {
           </h3>
           {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
             <React.Fragment>
-              Carrier: {carrier.legalName}
+              Carrier: {carrier ? carrier.legalName : null}
             </React.Fragment>
           )}
           <br/>
