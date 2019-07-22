@@ -515,7 +515,7 @@ class JobFilter extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="# of tons"
+                        placeholder="#"
                       />
                     </Col>
                     <Col md="2" id="truckTypeSelect">
