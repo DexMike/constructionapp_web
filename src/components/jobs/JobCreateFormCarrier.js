@@ -1037,6 +1037,7 @@ class JobCreateFormCarrier extends Component {
       rateByHourValue,
       name,
       jobStartDateTime,
+      jobDate,
       truckType,
       selectedMaterials
     } = this.state;
@@ -1099,12 +1100,12 @@ class JobCreateFormCarrier extends Component {
 
     const currDate = new Date();
 
-    if (!jobStartDateTime || jobStartDateTime.getTime() < currDate.getTime()) {
+    if (!jobDate || jobDate.getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
           touched: true,
-          error: 'Required input'
+          error: "The date of the job can not be set in the past or as the current date and time"
         }
       });
       isValid = false;
@@ -1498,8 +1499,8 @@ class JobCreateFormCarrier extends Component {
                         {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
-                          value: {jobDate},
-                          givenDate: currentDate
+                          value: jobDate,
+                          // givenDate: currentDate
                         }
                       }
                       onChange={this.jobDateChange}
