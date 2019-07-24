@@ -119,7 +119,6 @@ class JobFilter extends Component {
       }
     }
 
-    console.log(filters);
     this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
 
     /* if (localStorage.getItem('filters') !== null) {
@@ -285,16 +284,23 @@ class JobFilter extends Component {
     }
 
     let result = [];
-    if (filters.isMarketplaceView) {
-      // console.log('marketplace');
-      result = await JobService.getMarketplaceJobsByFilters(filters);
-    } else {
-      // console.log('not marketplace');
-      if (profile.companyType === 'Carrier') {
-        result = await JobService.getJobCarrierDashboardByFilters(filters);
+
+    try {
+      // TODO: Change to switch cases
+      if (filters.isMarketplaceView) {
+        // console.log('marketplace');
+        result = await JobService.getMarketplaceJobsByFilters(filters);
       } else {
-        result = await JobService.getJobDashboardByFilters(filters);
+        // console.log('not marketplace');
+        if (profile.companyType === 'Carrier') {
+          result = await JobService.getJobCarrierDashboardByFilters(filters);
+        } else {
+          result = await JobService.getJobDashboardByFilters(filters);
+        }
       }
+    } catch (err) {
+      // console.log(err);
+      return null;
     }
 
     const jobs = result.data;
