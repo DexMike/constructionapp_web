@@ -67,6 +67,8 @@ class JobFilter extends Component {
         range: 50,
         materialType: [],
         equipmentType: [],
+        isMarketplaceView: false,
+        status: '',
         sortBy: sortByList[0],
         page: 0,
         rows: 5
@@ -119,12 +121,12 @@ class JobFilter extends Component {
 
     this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
 
-    if (localStorage.getItem('filters') !== null) {
+    /* if (localStorage.getItem('filters') !== null) {
       const value = localStorage.getItem('filters');
       const savedFilters = JSON.parse(value);
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
       this.setState({ filters: savedFilters });
-    }
+    } */
 
     await this.fetchJobs();
     this.fetchFilterLists();
@@ -240,10 +242,12 @@ class JobFilter extends Component {
 
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
+      filters.isMarketplaceView = false;
     } else if (profile.companyType === 'Customer') { // Customer Job Dashboard
       filters.companiesId = profile.companyId;
+      filters.isMarketplaceView = false;
     } else if (profile.companyType === 'Carrier' && url === marketplaceUrl) { // Marketplace
-      filters.status = 'Published';
+      filters.companyCarrierId = profile.companyId;
       filters.isMarketplaceView = true;
       filters.isFavorited = 0;
     }
@@ -279,7 +283,26 @@ class JobFilter extends Component {
       }
     }
 
-    const result = await JobService.getJobDashboardByFilters(filters);
+    let result = [];
+
+    try {
+      // TODO: Change to switch cases
+      if (filters.isMarketplaceView) {
+        // console.log('marketplace');
+        result = await JobService.getMarketplaceJobsByFilters(filters);
+      } else {
+        // console.log('not marketplace');
+        if (profile.companyType === 'Carrier') {
+          result = await JobService.getJobCarrierDashboardByFilters(filters);
+        } else {
+          result = await JobService.getJobDashboardByFilters(filters);
+        }
+      }
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+
     const jobs = result.data;
     const { metadata } = result;
     const {returnJobs} = this.props;

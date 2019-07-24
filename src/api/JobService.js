@@ -65,8 +65,18 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getMarketplaceJobsByFilters(filters) {
+    const response = await super.post(`${PATH}/marketplace/filters`, filters);
+    return (response);
+  }
+
   static async getJobDashboardByFilters(filters) {
     const response = await super.post(`${PATH}/dashboard/filters`, filters);
+    return (response);
+  }
+
+  static async getJobCarrierDashboardByFilters(filters) {
+    const response = await super.post(`${PATH}/dashboard/filters/carrier`, filters);
     return (response);
   }
 
