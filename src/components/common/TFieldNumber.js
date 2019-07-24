@@ -74,7 +74,7 @@ class TFieldNumber extends PureComponent {
           ) : null
         }
         <input
-          style={{textAlign: 'left'}}
+          style={{textAlign: 'left', height: '32px', maxHeight: '32px'}}
           {...input}
           placeholder={placeholder}
           type="number"

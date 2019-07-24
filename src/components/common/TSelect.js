@@ -16,7 +16,8 @@ class TSelectField extends PureComponent {
           options={options}
           clearable={false}
           className="form__form-group-select"
-          style={{borderRadius: 0}}
+          optionClassName="react-select-options"
+          style={{borderRadius: 0, minHeight:'32px'}}
         />
         {touched && error && <span className="form__form-group-error">{error}</span>}
       </div>
