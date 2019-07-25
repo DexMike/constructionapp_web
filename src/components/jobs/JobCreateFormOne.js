@@ -52,6 +52,8 @@ class CreateJobFormOne extends PureComponent {
       rateTab: 1,
       hourTon: 'ton',
       // location
+      startLocationAddressName: '',
+      endLocationAddressName: '',
       endLocationAddress1: '',
       endLocationAddress2: '',
       endLocationCity: '',
@@ -158,6 +160,14 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
+      reqHandlerStartAddressName: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndAddressName: {
+        touched: false,
+        error: ''
+      },
       loaded: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -245,6 +255,8 @@ class CreateJobFormOne extends PureComponent {
         startLocationCity: p.startLocationCity,
         startLocationState: p.startLocationState,
         startLocationZip: p.startLocationZip,
+        startLocationAddressName: p.startLocationAddressName,
+        endLocationAddressName: p.endLocationAddressName,
         // date
         jobDate: p.jobDate,
         // job properties
@@ -372,6 +384,9 @@ class CreateJobFormOne extends PureComponent {
     this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
+      case 'endLocationAddressName':
+        reqHandler = 'reqHandlerEndAddressName';
+        break;
       case 'endLocationAddress1':
         reqHandler = 'reqHandlerEndAddress';
         break;
@@ -460,6 +475,9 @@ class CreateJobFormOne extends PureComponent {
     this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
+      case 'startLocationAddressName':
+        reqHandler = 'reqHandlerStartAddressName';
+        break;
       case 'startLocationAddress1':
         reqHandler = 'reqHandlerStartAddress';
         break;
@@ -523,7 +541,9 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
-      reqHandlerEstimatedHours
+      reqHandlerEstimatedHours,
+      reqHandlerStartAddressName,
+      reqHandlerEndAddressName
     } = this.state;
     let isValid = true;
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
@@ -581,6 +601,16 @@ class CreateJobFormOne extends PureComponent {
     // START ADDRESS VALIDATION
 
     if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
+      if (job.startLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerStartAddressName: {
+            touched: true,
+            error: 'Missing starting address name'
+          }
+        });
+        isValid = false;
+      }
+
       if (job.startLocationAddress1.length === 0) {
         this.setState({
           reqHandlerStartAddress: {
@@ -666,6 +696,16 @@ class CreateJobFormOne extends PureComponent {
     // END ADDRESS VALIDATION
 
     if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
+      if (job.endLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerEndAddressName: {
+            touched: true,
+            error: 'Missing ending address name'
+          }
+        });
+        isValid = false;
+      }
+
       if (job.endLocationAddress1.length === 0) {
         this.setState({
           reqHandlerEndAddress: {
@@ -1144,6 +1184,10 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerSameAddresses,
       reqHandlerDate,
       selectedRatedHourOrTon,
+      startLocationAddressName,
+      reqHandlerStartAddressName,
+      endLocationAddressName,
+      reqHandlerEndAddressName,
       loaded
     } = this.state;
     const today = new Date();
@@ -1341,6 +1385,20 @@ class CreateJobFormOne extends PureComponent {
                           input={
                             {
                               onChange: this.handleStartAddressChange,
+                              name: 'startLocationAddressName',
+                              value: startLocationAddressName
+                            }
+                          }
+                          placeholder="Address Name"
+                          type="text"
+                          meta={reqHandlerStartAddressName}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleStartAddressChange,
                               name: 'startLocationAddress1',
                               value: startLocationAddress1
                             }
@@ -1448,6 +1506,20 @@ class CreateJobFormOne extends PureComponent {
                           input={
                             {
                               onChange: this.handleEndAddressChange,
+                              name: 'endLocationAddressName',
+                              value: endLocationAddressName
+                            }
+                          }
+                          placeholder="Address Name"
+                          type="text"
+                          meta={reqHandlerEndAddressName}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleEndAddressChange,
                               name: 'endLocationAddress1',
                               value: endLocationAddress1
                             }
@@ -1457,7 +1529,6 @@ class CreateJobFormOne extends PureComponent {
                           meta={reqHandlerEndAddress}
                         />
                       </div>
-
                       <div className="form__form-group">
                         <input
                           name="endLocationAddress2"
