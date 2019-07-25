@@ -191,7 +191,7 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedStartAddressId === 0) {
       const address1 = {
         type: 'Delivery',
-        name: 'Delivery Start Location',
+        name: d.startLocationAddressName,
         companyId: profile.companyId,
         address1: d.startLocationAddress1,
         address2: d.startLocationAddress2,
@@ -218,7 +218,7 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
-        name: 'Delivery End Location',
+        name: d.endLocationAddressName,
         companyId: profile.companyId,
         address1: d.endLocationAddress1,
         address2: d.endLocationAddress2,
