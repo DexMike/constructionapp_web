@@ -522,6 +522,9 @@ class AddTruckFormOne extends PureComponent {
     if (files.length > 0) {
       const file = files[0];
 
+      console.log('>>>525 FILE');
+      console.log(file);
+
       /**/
       const that = this;
       Resizer.imageFileResizer(

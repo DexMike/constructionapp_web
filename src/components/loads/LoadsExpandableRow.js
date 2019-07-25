@@ -43,7 +43,10 @@ class LoadsExpandableRow extends Component {
     let {gpsTrackings, loadInvoices, disputeEmail} = {...this.state};
     gpsTrackings = await this.fetchGPSPoints(load.id);
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
-    const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+
+    // const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+    const driver = {};
+
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
     const date = new Date();

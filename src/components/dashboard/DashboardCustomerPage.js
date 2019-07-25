@@ -438,22 +438,8 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asHours(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-<<<<<<< HEAD
-        if (typeof newJob.newRate === 'object') {
-          newJob.newRate = newJob.rate.props.value;
-        } else {
-          newJob.newRate = newJob.rate;
-        }
-        newJob.newRateFormatted = TFormat.getValue(
-          TFormat.asMoneyByHour(newJob.rate)
-        );
-        console.log('>NR', newJob.newRate, typeof newJob.newRate);
-        console.log('>NRF', newJob.newRateFormatted);
-
-=======
         newJob.newRate = newJob.rate;
         newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
->>>>>>> dev
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
       if (newJob.rateType === 'Ton') {
@@ -463,22 +449,8 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asTons(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-<<<<<<< HEAD
-        if (typeof newJob.newRate === 'object') {
-          newJob.newRate = newJob.rate.props.value;
-        } else {
-          newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        }
-        newJob.newRateFormatted = TFormat.getValue(
-          TFormat.asMoneyByTons(newJob.rate)
-        );
-        console.log('>NR', newJob.newRate, typeof newJob.newRate);
-        console.log('>NRF', newJob.newRateFormatted);
-
-=======
         newJob.newRate = newJob.rate;
         newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
->>>>>>> dev
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
 

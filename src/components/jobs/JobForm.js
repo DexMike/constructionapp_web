@@ -4,6 +4,7 @@ import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
+import HEREMap, { RouteLine } from 'here-maps-react';
 import TFormat from '../common/TFormat';
 import TMapBoxOriginDestinationWithOverlay
   from '../common/TMapBoxOriginDestinationWithOverlay';
@@ -16,6 +17,21 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
 import GeoCodingService from '../../api/GeoCodingService';
+
+/*
+RouteFeatureWeightType
+-3) strictExclude The routing engine guarantees that the route does not contain strictly excluded features.
+ If the condition cannot be fulfilled no route is returned.
+-2) softExclude The routing engine does not consider links containing the corresponding feature.
+  If no route can be found because of these limitations the condition is weakened.
+-1) avoid The routing engine assigns penalties for links containing the corresponding feature.
+0)  normal The routing engine does not alter the ranking of links containing the corresponding feature.
+*/
+const routeFeatureWeightType = 0;
+const center = {
+  lat: 30.252606,
+  lng: -97.754209
+};
 
 class JobForm extends Component {
   constructor(props) {
@@ -49,14 +65,19 @@ class JobForm extends Component {
       loaded: false,
       distance: 0,
       time: 0,
-      showMainMap: true,
+      showMainMap: false,
       cachedOrigin: '',
-      cachedDestination: ''
+      cachedDestination: '',
+      shape: {},
+      timeAndDistance: '',
+      instructions: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
-    this.renderMBMap = this.renderMBMap.bind(this);
+    this.renderHereMap = this.renderHereMap.bind(this);
+    this.onError = this.onError.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -68,6 +89,37 @@ class JobForm extends Component {
     const endPoint = job.endAddress;
     let distance = 0;
     let time = 0;
+
+    // HERE MAP
+    const platform = new H.service.Platform({
+      app_id: 'FlTEFFbhzrFwU1InxRgH',
+      app_code: 'gTgJkC9u0YWzXzvjMadDzQ'
+    });
+
+    const routeRequestParams = {
+      mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
+      representation: 'display',
+      routeattributes: 'waypoints,summary,shape,legs,incidents',
+      maneuverattributes: 'direction,action',
+      waypoint0: '30.349027,-97.740831',
+      waypoint1: '30.260708,-97.751145',
+      /*
+      waypoint0: '30.284608,-97.775877',
+      waypoint1: '30.252606,-97.722753',
+      */
+      truckType: 'tractorTruck',
+      limitedWeight: 700,
+      metricSystem: 'imperial',
+      language: 'en-us' // en-us|es-es|de-de
+    };
+
+    const router = platform.getRoutingService();
+    router.calculateRoute(
+      routeRequestParams,
+      this.onSuccess,
+      this.onError
+    );
+
     try {
       const response = await GeoCodingService
         .getDistance(startPoint.longitude, startPoint.latitude,
@@ -90,6 +142,7 @@ class JobForm extends Component {
       }
     }
 
+    /*
     let origin;
     let destination;
 
@@ -106,6 +159,7 @@ class JobForm extends Component {
       origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
       destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
     }
+    */
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
@@ -121,9 +175,9 @@ class JobForm extends Component {
       loads,
       job,
       distance,
-      time,
-      cachedOrigin: origin,
-      cachedDestination: destination
+      time //
+      // cachedOrigin: origin,
+      // cachedDestination: destination
     });
   }
 
@@ -151,6 +205,22 @@ class JobForm extends Component {
         });
       }
     }
+  }
+
+  onError(error) {
+    console.log('>>ERROR : ', error);
+  }
+
+  onSuccess(result) {
+    const route = result.response.route[0];
+    console.log(result.response);
+    this.setState({
+      showMainMap: true,
+      shape: route.shape,
+      timeAndDistance: `Travel time and distance: ${route.summary.text}`,
+      instructions: route.leg[0]
+    });
+    // ... etc.
   }
 
   onExpandedChanged(rowId) {
@@ -627,27 +697,46 @@ class JobForm extends Component {
     );
   }
 
-  renderMBMap(gpsData, coords) {
-    const { showMainMap, cachedDestination, cachedOrigin } = this.state;
-    if (showMainMap && cachedOrigin && cachedDestination) {
+  renderHereMap() {
+    const {
+      showMainMap,
+      shape
+    } = this.state;
+
+    const opts = {
+      layer: 'traffic',
+      mapType: 'normal'
+    };
+
+    if (showMainMap) {
       return (
-        <React.Fragment>
-          <TMapBoxOriginDestinationWithOverlay
-            input={
-              {
-                origin: cachedOrigin,
-                destination: cachedDestination,
-                gpsData,
-                coords
-              }
-            }
+        <HEREMap
+          style={{height: '200px', background: 'gray' }}
+          appId="FlTEFFbhzrFwU1InxRgH"
+          appCode="gTgJkC9u0YWzXzvjMadDzQ"
+          center={center}
+          zoom={14}
+          setLayer={opts}
+          hidpi={false}
+          interactive
+        >
+          {/*
+          <Marker {...center}>
+            <div className="circle-marker" />
+          </Marker>
+          */}
+          <RouteLine
+            shape={shape}
+            strokeColor="purple"
+            lineWidth="4"
           />
-        </React.Fragment>
+        </HEREMap>
       );
     }
+    console.log('>>>', 739);
     return (
       <React.Fragment>
-        &nbsp;
+        &nbsp; NO
       </React.Fragment>
     );
   }
@@ -661,6 +750,8 @@ class JobForm extends Component {
     } = this.state;
     const { job } = this.props;
     let endAddress;
+
+    console.log('>> JOB: ', job.status);
 
     if (job.endAddress) { // if there's endAddress, render it
       endAddress = this.renderEndAddress(job.endAddress);
@@ -698,7 +789,7 @@ class JobForm extends Component {
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
-                  {this.renderMBMap(overlayMapData, coords)}
+                  {this.renderHereMap(overlayMapData, coords)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -741,7 +832,7 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
-                  {this.renderMBMap(null, null)}
+                  {this.renderHereMap(null, null)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -783,7 +874,7 @@ class JobForm extends Component {
             }}
             >
               <div className="col-md-8" style={{ padding: 0 }}>
-                {this.renderMBMap(null, null)}
+                {this.renderHereMap(null, null)}
               </div>
               <div className="col-md-4">
                 <div className="row">
@@ -829,7 +920,7 @@ class JobForm extends Component {
       return (
         <Container className="dashboard">
           <div className="col-md-9">
-            <h3 className="page-title">Job Details</h3>
+            <h3 className="page-title">Job Details 832</h3>
           </div>
           {this.renderEverything()}
         </Container>
