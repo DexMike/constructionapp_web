@@ -21,6 +21,7 @@ import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
+import AttachmentsListPage from '../attachments/AttachmentsListPage';
 
 class CompanySettingsPage extends Component {
   constructor(props) {
@@ -77,6 +78,9 @@ class CompanySettingsPage extends Component {
         break;
       case '3':
         title = 'Payment Method';
+        break;
+      case '4':
+        title = 'Attachments';
         break;
       default:
         break;
@@ -155,6 +159,14 @@ class CompanySettingsPage extends Component {
               Payment Method
             </NavLink>
           </NavItem>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '4' }, 'tab')}
+              onClick={() => { this.toggle('4'); }}
+            >
+              Attachments
+            </NavLink>
+          </NavItem>
         </Nav>
         <TabContent
           activeTab={activeTab}
@@ -188,6 +200,11 @@ class CompanySettingsPage extends Component {
             {
               company.type === 'Carrier' ? this.renderCarrierPayment() : null
             }
+          </TabPane>
+          <TabPane tabId="4">
+            <AttachmentsListPage
+              companyId={company.id}
+            />
           </TabPane>
         </TabContent>
       </div>

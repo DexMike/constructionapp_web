@@ -26,6 +26,7 @@ class DriverForm extends Component {
       email: '',
       mobilePhone: '',
       userStatus: '',
+      driverStatus: '',
       selectedUser: {},
       btnSubmitting: false,
       reqHandlerFName: { touched: false, error: '' },
@@ -47,7 +48,7 @@ class DriverForm extends Component {
 
   async componentDidMount() {
     const { driverId } = this.props;
-    let { id, firstName, lastName, email, mobilePhone, userStatus, selectedUser } = this.state;
+    let { id, firstName, lastName, email, mobilePhone, userStatus, driverStatus, selectedUser } = this.state;
 
     if (driverId) {
       const driver = await DriverService.getDriverById(driverId);
@@ -56,8 +57,11 @@ class DriverForm extends Component {
       ({ firstName } = selectedUser);
       ({ lastName } = selectedUser);
       ({ email } = selectedUser);
-      ({ mobilePhone } = selectedUser);
+      mobilePhone = selectedUser.mobilePhone.replace('+1', '');
+      const chars = {'(': '', ')': '', '-': '', ' ': ''};
+      mobilePhone = mobilePhone.replace(/[abc]/g, m => chars[m]);
       ({ userStatus } = selectedUser);
+      ({ driverStatus } = driver);
       this.setState({
         selectedUser,
         id,
@@ -66,6 +70,7 @@ class DriverForm extends Component {
         email,
         mobilePhone,
         userStatus,
+        driverStatus,
         loaded: true
       });
     }
@@ -106,7 +111,7 @@ class DriverForm extends Component {
         const notification = {
           to: this.phoneToNumberFormat(mobilePhone),
           body: `Hi, you’ve been invited by ${currentUser.firstName} ${currentUser.lastName} to join Trelar. 
-            Please click www.trelar.net/driver to join Trelar</a>.`
+            Please click www.trelar.com/drivers-app/ to join Trelar.`
         };
 
         await TwilioService.createInviteSms(notification);
@@ -139,9 +144,9 @@ class DriverForm extends Component {
     }
     const {
       firstName,
-      lastName, email, mobilePhone, userStatus, selectedUser, updateNewDriver } = this.state;
+      lastName, email, mobilePhone, userStatus, selectedUser, driverStatus, updateNewDriver } = this.state;
     const user = selectedUser;
-    user.mobilePhone = mobilePhone;
+    user.mobilePhone = `+1${mobilePhone}`;
     user.lastName = lastName;
     user.email = email;
     user.firstName = firstName;
@@ -150,7 +155,7 @@ class DriverForm extends Component {
       user.modifiedBy = currentUser.userId;
       user.modifiedOn = moment().unix() * 1000;
       await UserService.updateUser(user);
-      if (updateNewDriver || userStatus === 'Driver Invited') {
+      if (updateNewDriver || driverStatus === 'Invited') {
         this.setState({step: 2, sendingSMS: true});
         this.sendDriverInvite(user);
       } else {
@@ -174,6 +179,7 @@ class DriverForm extends Component {
       const driver = {};
       driver.driverLicenseId = 1;
       driver.usersId = newUser.id;
+      driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
       driver.createdOn = moment().unix() * 1000;
 
@@ -293,7 +299,7 @@ class DriverForm extends Component {
       );
     }
     return (
-      <Row>
+      <Row className="p-4">
         <Col md={12}>
           {/* <span>Invite a Driver</span> */}
           <br/>
@@ -358,107 +364,114 @@ class DriverForm extends Component {
       <Row className="form">
         {this.renderGoTo()}
         <Col md={12}>
-          <h3 className="page-title">
+          <h3
+            className="page-title pl-4 pr-4 pt-2 pb-2"
+            style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
+          >
             { driverId ? 'Edit Driver' : 'Add Driver'}
           </h3>
         </Col>
-        <Col md={6} className="pt-2">
-          <span>
-            First Name
-          </span>
-          <TField
-            input={{
-              onChange: this.handleInputChange,
-              name: 'firstName',
-              value: firstName
-            }}
-            placeholder="First Name"
-            type="text"
-            meta={reqHandlerFName}
-          />
-        </Col>
-        <Col md={6} className="pt-2">
-          <span>
-            Last Name
-          </span>
-          <TField
-            input={{
-              onChange: this.handleInputChange,
-              name: 'lastName',
-              value: lastName
-            }}
-            placeholder="Last Name"
-            type="text"
-            meta={reqHandlerLName}
-          />
-        </Col>
-        {/* <Col md={6} className="pt-2"> */}
-        {/* <span> */}
-        {/* Email */}
-        {/* </span> */}
-        {/* <TField */}
-        {/* input={{ */}
-        {/* onChange: this.handleInputChange, */}
-        {/* name: 'email', */}
-        {/* value: email */}
-        {/* }} */}
-        {/* placeholder="Email" */}
-        {/* type="text" */}
-        {/* meta={reqHandlerEmail} */}
-        {/* /> */}
-        {/* </Col> */}
-        <Col md={6} className="pt-2">
-          <span>
-            Mobile Phone
-          </span>
-          {
-            /*
-            <TField
-              input={{
-                onChange: this.handleInputChange,
-                name: 'mobilePhone',
-                value: mobilePhone
-              }}
-              placeholder="Mobile Phone"
-              type="text"
-              meta={reqHandlerPhone}
-            />
-            */
-          }
-          <NumberFormat
-            name="mobilePhone"
-            placeholder="Mobile Phone"
-            type="text"
-            format="(###) ###-####"
-            mask="_"
-            value={mobilePhone}
-            onChange={this.handleInputChange}
-            meta={reqHandlerPhone}
-          />
-          {
-              reqHandlerPhone.touched
-                ? (
-                  <span style={{color: '#D32F2F'}}>
-                    {reqHandlerPhone.error}
-                  </span>
-                )
-                : null
-            }
-        </Col>
-        <Col md={12} className="text-right pt-4">
-          <Button key="2"
-            onClick={toggle}
-            className="secondaryButton"
-          >
-            Cancel
-          </Button>
-          <TSubmitButton
-            onClick={this.saveUser}
-            className="primaryButton"
-            // loading={btnSubmitting}
-            // loaderSize={10}
-            bntText={driverId && userStatus !== 'Driver Invited' ? 'Update' : 'Send Invite'}
-          />
+        <Col md={12}>
+          <Row className="pl-4 pr-4">
+            <Col md={6} className="pt-2">
+              <span>
+                First Name
+              </span>
+              <TField
+                input={{
+                  onChange: this.handleInputChange,
+                  name: 'firstName',
+                  value: firstName
+                }}
+                placeholder="First Name"
+                type="text"
+                meta={reqHandlerFName}
+              />
+            </Col>
+            <Col md={6} className="pt-2">
+              <span>
+                Last Name
+              </span>
+              <TField
+                input={{
+                  onChange: this.handleInputChange,
+                  name: 'lastName',
+                  value: lastName
+                }}
+                placeholder="Last Name"
+                type="text"
+                meta={reqHandlerLName}
+              />
+            </Col>
+            {/* <Col md={6} className="pt-2"> */}
+            {/* <span> */}
+            {/* Email */}
+            {/* </span> */}
+            {/* <TField */}
+            {/* input={{ */}
+            {/* onChange: this.handleInputChange, */}
+            {/* name: 'email', */}
+            {/* value: email */}
+            {/* }} */}
+            {/* placeholder="Email" */}
+            {/* type="text" */}
+            {/* meta={reqHandlerEmail} */}
+            {/* /> */}
+            {/* </Col> */}
+            <Col md={6} className="pt-2">
+              <span>
+                Mobile Phone
+              </span>
+              {
+                /*
+                <TField
+                  input={{
+                    onChange: this.handleInputChange,
+                    name: 'mobilePhone',
+                    value: mobilePhone
+                  }}
+                  placeholder="Mobile Phone"
+                  type="text"
+                  meta={reqHandlerPhone}
+                />
+                */
+              }
+              <NumberFormat
+                name="mobilePhone"
+                placeholder="Mobile Phone"
+                type="text"
+                format="##########"
+                // mask="_"
+                value={mobilePhone}
+                onChange={this.handleInputChange}
+                meta={reqHandlerPhone}
+              />
+              {
+                  reqHandlerPhone.touched
+                    ? (
+                      <span style={{color: '#D32F2F'}}>
+                        {reqHandlerPhone.error}
+                      </span>
+                    )
+                    : null
+                }
+            </Col>
+            <Col md={12} className="text-right pt-4">
+              <Button key="2"
+                onClick={toggle}
+                className="secondaryButton"
+              >
+                Cancel
+              </Button>
+              <TSubmitButton
+                onClick={this.saveUser}
+                className="primaryButton"
+                // loading={btnSubmitting}
+                // loaderSize={10}
+                bntText={driverId && userStatus !== 'Driver Invited' ? 'Update' : 'Send Invite'}
+              />
+            </Col>
+          </Row>
         </Col>
       </Row>
     );

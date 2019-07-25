@@ -14,9 +14,30 @@ class LoadsTable extends Component {
     super(props);
     this.state = {
       loads: props.loads,
-      job: props.job
+      job: props.job,
+      expandedLoad: 0 // saving just to relay to grandparent
     };
     this.toggle = this.toggle.bind(this);
+    this.onRowExpanded = this.onRowExpanded.bind(this);
+    // this.onRowContracted = this.onRowContracted.bind(this);
+  }
+
+  onRowExpanded(rowId, isExpanded) {
+    const { expandedRow } = this.props;
+    if (!isExpanded) {
+      this.setState({
+        expandedLoad: 0
+      }, function loaded() {
+        expandedRow(0);
+      });
+    } else {
+      this.setState({
+        expandedLoad: rowId
+      }, function loaded() {
+        expandedRow(rowId);
+      });
+    }
+    this.contractAll(rowId);
   }
 
   toggle() {
@@ -25,12 +46,30 @@ class LoadsTable extends Component {
       expanded: !expanded
     });
   }
+  /**/
+
+  contractAll(butId) {
+    const { loads } = this.state;
+    for (const load of loads) {
+      if (load) {
+        if (load.id !== butId) {
+          load.isExpanded = false;
+        } else {
+          load.isExpanded = true;
+        }
+      }
+    }
+    this.setState({
+      loads
+    });
+  }
 
   render() {
-    const {loads, job} = {...this.state};
+    const {loads, job, expandedLoad} = {...this.state};
     // debugger;
     return (
-      <Paper>
+      <Paper style={{overflowX: 'auto'}}>
+        EXPANDED: {expandedLoad}
         <Table>
           <TableHead>
             <TableRow>
@@ -49,7 +88,14 @@ class LoadsTable extends Component {
           {loads && (
             <TableBody>
               {loads.map((load, index) => (
-                <LoadsExpandableRow key={load.id} load={load} index={index} job={job}/>
+                <LoadsExpandableRow
+                  key={load.id}
+                  load={load}
+                  index={index}
+                  job={job}
+                  onRowExpanded={this.onRowExpanded}
+                  isExpanded={load.isExpanded}
+                />
               ))}
             </TableBody>
           )
@@ -64,9 +110,12 @@ LoadsTable.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   loads: PropTypes.array.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  job: PropTypes.object.isRequired
+  job: PropTypes.object.isRequired,
+  expandedRow: PropTypes.func
 };
 
-LoadsTable.defaultProps = {};
+LoadsTable.defaultProps = {
+  expandedRow: null
+};
 
 export default LoadsTable;

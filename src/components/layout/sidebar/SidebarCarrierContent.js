@@ -34,6 +34,7 @@ class SidebarCarrierContent extends Component {
   }
 
   render() {
+    const { isAdmin } = this.props;
     return (
       <div className="sidebar__content">
         <SideElement title="Job Dashboard"
@@ -62,10 +63,15 @@ class SidebarCarrierContent extends Component {
                      icon="ic_airline_seat_recline_normal"
                      route="/drivers"
                      onClick={this.hideSidebar}/>
-        <SideElement title="Payments"
+        {
+          isAdmin ? (
+            <SideElement title="Payments"
                      icon="ic_attach_money"
                      route="/payments"
-                     onClick={this.hideSidebar}/>
+                     onClick={this.hideSidebar}
+            />
+          ) : null
+        }
         <SideElement title="Reports"
                      icon="ic_timeline"
                      route="/Reports"
@@ -76,7 +82,12 @@ class SidebarCarrierContent extends Component {
 }
 
 SidebarCarrierContent.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  isAdmin: PropTypes.bool
+};
+
+SidebarCarrierContent.defaultProps = {
+  isAdmin: false
 };
 
 export default SidebarCarrierContent;

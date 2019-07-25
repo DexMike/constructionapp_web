@@ -124,7 +124,7 @@ class TTable extends Component {
 
   renderItem(item, isSelectable, isSelected) {
     const shallowItem = {};
-    const { columns, handleIdClick } = this.props;
+    const { columns, handleIdClick, handleItemPreview } = this.props;
     columns.forEach((column) => {
       if (typeof column.label !== 'undefined') {
         shallowItem[column.name] = `${item[column.label]}`;
@@ -161,6 +161,19 @@ class TTable extends Component {
                   {shallowItem[key] && shallowItem[key].trim().length <= 0 && <img src={`${window.location.origin}/${truckImage}`} alt="" style={{ width: '160px', height: 'auto' }}/>}
                   {shallowItem[key] && shallowItem[key].trim().length > 0 && <img src={shallowItem[key]} alt="" style={{ width: '160px', height: 'auto' }}/>}
                   {!shallowItem[key] && <img src={`${window.location.origin}/${truckImage}`} alt="" style={{ width: '160px', height: 'auto' }}/>}
+                </TableCell>
+              );
+            }
+            if (key === 'imgPreview') {
+              return (
+                <TableCell
+                  style={{width: 30, borderBottom: 0}}
+                  key="preview"
+                  onClick={() => {
+                    handleItemPreview(shallowItem[key]);
+                  }}
+                >
+                  <span style={{fontSize: 26, zIndex: 5 }} className="lnr lnr-picture"/>
                 </TableCell>
               );
             }
@@ -269,7 +282,10 @@ TTable.propTypes = {
   handleRowsChange: PropTypes.func.isRequired,
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number
+      id: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number
+      ])
     })
   ).isRequired,
   onSelect: PropTypes.func,

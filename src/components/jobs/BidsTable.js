@@ -55,9 +55,7 @@ class BidsTable extends Component {
       const newBid = bid;
 
       newBid.date = bid.createdOn;
-      newBid.dateF = TFormat.getValue(
-        TFormat.asDate(bid.createdOn)
-      );
+      newBid.dateF = TFormat.asDate(bid.createdOn);
 
       if (newBid.status === 'Pending') {
         newBid.status = 'Requested';
@@ -81,7 +79,8 @@ class BidsTable extends Component {
 
       if (selectedBid.status === 'Declined'
         || selectedBid.status === 'Ignored'
-        || selectedBid.status === 'Accepted') {
+        || selectedBid.status === 'Accepted'
+        || selectedBid.status === 'New') {
         modalAcceptBid = true; // this prevents the modal from opening
       }
     }
@@ -101,6 +100,7 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
+    const { updateJob } = this.props;
     const {
       selectedBid, profile
     } = this.state;
@@ -208,7 +208,7 @@ class BidsTable extends Component {
       booking = await BookingService.createBooking(booking);
 
       // Create Booking Equipment
-      const response = await EquipmentService.getEquipments();
+      /* const response = await EquipmentService.getEquipments();
       const equipments = response.data;
       if (equipments && equipments.length > 0) {
         const equipment = equipments[0]; // temporary for now.
@@ -232,7 +232,23 @@ class BidsTable extends Component {
         bookingEquipment = await BookingEquipmentService.createBookingEquipments(
           bookingEquipment
         );
+      } */
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // We tell the customer that the job has been accepted
+      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'Your job request has been accepted.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob, newBid.companyCarrierId);
     } else {
       // Decline Bid
       newBid = CloneDeep(selectedBid);
@@ -257,9 +273,18 @@ class BidsTable extends Component {
           await TwilioService.createSms(notification);
         }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob);
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
+    allBids.map((bid) => {
+      newBid = bid;
+      newBid.date = bid.createdOn;
+      newBid.dateF = TFormat.asDate(bid.createdOn);
+      return newBid;
+    });
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
@@ -333,9 +358,9 @@ class BidsTable extends Component {
                     displayName: 'Loads Completed'
                   },
                   {
-                    name: 'date',
+                    name: 'dateF',
                     displayName: 'Date Requested',
-                    label: 'dateF'
+                    // label: 'dateF'
                   }
                 ]
               }
@@ -455,7 +480,8 @@ class BidsTable extends Component {
 BidsTable.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
-  })
+  }),
+  updateJob: PropTypes.func.isRequired
 };
 
 BidsTable.defaultProps = {

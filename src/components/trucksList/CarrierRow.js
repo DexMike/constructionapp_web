@@ -33,20 +33,18 @@ class CarrierRow extends Component {
     return (
       <table>
         <thead>
-        <tr>
-          <th>Materials Hauled</th>
-        </tr>
+          <tr>
+            <th>Materials Hauled</th>
+          </tr>
         </thead>
         <tbody>
-        {
-          materials.map((value, i) => {
-            return (
+          {
+            materials.map((value, i) => (
               <tr key={`li_${i}`}>
                 <td>{value}</td>
               </tr>
-            );
-          })
-        }
+            ))
+          }
         </tbody>
       </table>
     );
@@ -56,22 +54,20 @@ class CarrierRow extends Component {
     return (
       <table>
         <thead>
-        <tr>
-          <th>Type of Trucks</th>
-          <th># of Trucks</th>
-        </tr>
+          <tr>
+            <th>Type of Trucks</th>
+            <th># of Trucks</th>
+          </tr>
         </thead>
         <tbody>
-        {
-          equipmentTypes.map((value, i) => {
-            return (
+          {
+            equipmentTypes.map((value, i) => (
               <tr key={`tru_${i}`}>
                 <td>{value.equipmentType}</td>
                 <td style={{ textAlign: 'center' }}>{value.count}</td>
               </tr>
-            );
-          })
-        }
+            ))
+          }
         </tbody>
       </table>
     );
@@ -102,26 +98,26 @@ class CarrierRow extends Component {
               </div>
               <div className="col-md-9">
                 <div className="row truck-card">
-                  <div className="col-md-7">
+                  <div className="col-md-6">
                     {this.renderTotals(equipmentTypes)}
                   </div>
                   <div className="col-md-3">
                     {this.renderMaterials(materials)}
                   </div>
-                  <div className="col-md-2 button-card">
+                  <div className="col-md-3 button-card">
                     <Button
                       onClick={() => this.editEquipment(5)}
                       className="btn btn-primary"
                       styles="margin:0px !important"
                     >
-                      Request
+                      Request Job
                     </Button>
                     <Button
                       color="link"
                       onClick={() => this.sendFavorite(carrierId)}
-                      className="material-icons favoriteIcon"
+                      className={favorite ? 'material-icons favoriteIcon' : 'material-icons-outlined favoriteIcon'}
                     >
-                      {favorite ? 'favorite' : 'favorite_border'}
+                      thumb_up
                     </Button>
                   </div>
                 </div>

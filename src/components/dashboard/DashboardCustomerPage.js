@@ -110,7 +110,6 @@ class DashboardCustomerPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
-
     this.setState({
       jobs,
       filters,
@@ -168,7 +167,6 @@ class DashboardCustomerPage extends Component {
   async fetchJobs() {
     const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-
     this.setState({jobs});
     return jobs;
   }
@@ -440,6 +438,7 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asHours(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
+<<<<<<< HEAD
         if (typeof newJob.newRate === 'object') {
           newJob.newRate = newJob.rate.props.value;
         } else {
@@ -451,6 +450,10 @@ class DashboardCustomerPage extends Component {
         console.log('>NR', newJob.newRate, typeof newJob.newRate);
         console.log('>NRF', newJob.newRateFormatted);
 
+=======
+        newJob.newRate = newJob.rate;
+        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
+>>>>>>> dev
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
       if (newJob.rateType === 'Ton') {
@@ -460,6 +463,7 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asTons(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
+<<<<<<< HEAD
         if (typeof newJob.newRate === 'object') {
           newJob.newRate = newJob.rate.props.value;
         } else {
@@ -471,6 +475,10 @@ class DashboardCustomerPage extends Component {
         console.log('>NR', newJob.newRate, typeof newJob.newRate);
         console.log('>NRF', newJob.newRateFormatted);
 
+=======
+        newJob.newRate = newJob.rate;
+        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
+>>>>>>> dev
         newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
       }
 
@@ -479,6 +487,10 @@ class DashboardCustomerPage extends Component {
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
+      }
+
+      if (!job.companyCarrierLegalName) {
+        newJob.companyCarrierLegalName = 'Unassigned';
       }
 
       potentialIncome += tempRate * newJob.rateEstimate;
@@ -522,8 +534,8 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Job Status'
                         },
                         {
-                          name: 'legalName',
-                          displayName: 'Customer'
+                          name: 'companyCarrierLegalName',
+                          displayName: 'Carrier'
                         },
                         {
                           name: 'newSize',

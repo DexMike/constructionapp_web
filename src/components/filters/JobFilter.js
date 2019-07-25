@@ -67,6 +67,8 @@ class JobFilter extends Component {
         range: 50,
         materialType: [],
         equipmentType: [],
+        isMarketplaceView: false,
+        status: '',
         sortBy: sortByList[0],
         page: 0,
         rows: 5
@@ -118,6 +120,14 @@ class JobFilter extends Component {
     }
 
     this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
+
+    /* if (localStorage.getItem('filters') !== null) {
+      const value = localStorage.getItem('filters');
+      const savedFilters = JSON.parse(value);
+      // console.log('>>GOT SAVED FILTERS:', savedFilters);
+      this.setState({ filters: savedFilters });
+    } */
+
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -175,6 +185,11 @@ class JobFilter extends Component {
     return endDate;
   }
 
+  saveFilters() {
+    const { filters } = this.state;
+    localStorage.setItem('filters', JSON.stringify(filters));
+  }
+
   async fetchFilterLists() {
     const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
 
@@ -227,10 +242,12 @@ class JobFilter extends Component {
 
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
+      filters.isMarketplaceView = false;
     } else if (profile.companyType === 'Customer') { // Customer Job Dashboard
-      filters.createdBy = profile.userId;
+      filters.companiesId = profile.companyId;
+      filters.isMarketplaceView = false;
     } else if (profile.companyType === 'Carrier' && url === marketplaceUrl) { // Marketplace
-      filters.status = 'Published';
+      filters.companyCarrierId = profile.companyId;
       filters.isMarketplaceView = true;
       filters.isFavorited = 0;
     }
@@ -266,7 +283,26 @@ class JobFilter extends Component {
       }
     }
 
-    const result = await JobService.getJobDashboardByFilters(filters);
+    let result = [];
+
+    try {
+      // TODO: Change to switch cases
+      if (filters.isMarketplaceView) {
+        // console.log('marketplace');
+        result = await JobService.getMarketplaceJobsByFilters(filters);
+      } else {
+        // console.log('not marketplace');
+        if (profile.companyType === 'Carrier') {
+          result = await JobService.getJobCarrierDashboardByFilters(filters);
+        } else {
+          result = await JobService.getJobDashboardByFilters(filters);
+        }
+      }
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+
     const jobs = result.data;
     const { metadata } = result;
     const {returnJobs} = this.props;
@@ -327,6 +363,8 @@ class JobFilter extends Component {
         }
       }, 1000),
       filters
+    }, function saved() {
+      this.saveFilters();
     });
   }
 
@@ -335,14 +373,18 @@ class JobFilter extends Component {
     const {filters} = this.state;
     filters[e.target.name] = value;
     await this.fetchJobs();
-    this.setState({filters});
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
   }
 
   async handleSelectFilterChange(option) {
     const {value, name} = option;
     const {filters} = this.state;
     filters[name] = value;
-    this.setState({filters});
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
     await this.fetchJobs();
   }
 
@@ -353,6 +395,7 @@ class JobFilter extends Component {
       filters
     }, async function changed() {
       await this.fetchJobs();
+      this.saveFilters();
     });
   }
 
@@ -363,6 +406,7 @@ class JobFilter extends Component {
       filters
     }, async function changed() {
       await this.fetchJobs();
+      this.saveFilters();
     });
   }
 
@@ -378,6 +422,7 @@ class JobFilter extends Component {
     }
     filters.startAvailability = this.getUTCStartInterval(sAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
+
     const {start} = e;
     const {end} = e;
     if (start) {
@@ -388,7 +433,10 @@ class JobFilter extends Component {
     }
     intervals.startInterval = start;
     intervals.endInterval = end;
-    this.setState({intervals, filters});
+    this.setState({intervals, filters}, function saved() {
+      this.saveFilters();
+    });
+
     await this.fetchJobs();
   }
 
@@ -490,7 +538,7 @@ class JobFilter extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="# of tons"
+                        placeholder="#"
                       />
                     </Col>
                     <Col md="2" id="truckTypeSelect">
@@ -604,8 +652,8 @@ class JobFilter extends Component {
                             label: materialType.trim()
                           }))
                         }
-                        // placeholder="Materials"
-                        placeholder={materialTypeList[0]}
+                        placeholder="Any"
+                        // placeholder={materialTypeList[0]}
                         id="materialTypeSelect"
                         horizontalScroll="true"
                         selectedItems={filters.materialType.length}
