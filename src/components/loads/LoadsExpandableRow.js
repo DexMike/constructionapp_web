@@ -44,6 +44,7 @@ class LoadsExpandableRow extends Component {
     gpsTrackings = await this.fetchGPSPoints(load.id);
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
+    // This throws an error
     // const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
     const driver = {};
 
