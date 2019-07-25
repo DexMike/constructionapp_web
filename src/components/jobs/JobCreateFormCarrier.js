@@ -70,6 +70,8 @@ class JobCreateFormCarrier extends Component {
       rateTab: 1,
       hourTon: 'ton',
       // location
+      startLocationAddressName: '',
+      endLocationAddressName: '',
       endLocationAddress1: '',
       endLocationAddress2: '',
       endLocationCity: '',
@@ -183,7 +185,15 @@ class JobCreateFormCarrier extends Component {
       reqHandlerEstimatedHours: {
         touched: false,
         error: ''
-      }
+      },
+      reqHandlerStartAddressName: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndAddressName: {
+        touched: false,
+        error: ''
+      },
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
@@ -198,6 +208,8 @@ class JobCreateFormCarrier extends Component {
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
     this.jobDateChange = this.jobDateChange.bind(this);
+    this.handleStartAddressChange = this.handleStartAddressChange.bind(this);
+    this.handleEndAddressChange = this.handleEndAddressChange.bind(this);
     this.handleEndLocationChange = this.handleEndLocationChange.bind(this);
     this.handleStartLocationChange = this.handleStartLocationChange.bind(this);
     this.handleStartAddressIdChange = this.handleStartAddressIdChange.bind(this);
@@ -312,6 +324,7 @@ class JobCreateFormCarrier extends Component {
 
     // consts
     const {
+      startLocationAddressName,
       startLocationAddress1,
       startLocationAddress2,
       startLocationCity,
@@ -319,6 +332,7 @@ class JobCreateFormCarrier extends Component {
       startLocationZip,
 
       // address 1
+      endLocationAddressName,
       endLocationAddress1,
       endLocationAddress2,
       endLocationCity,
@@ -349,7 +363,7 @@ class JobCreateFormCarrier extends Component {
     if (selectedStartAddressId === 0) {
       const address1 = {
         type: 'Delivery',
-        name: 'Delivery Start Location',
+        name: startLocationAddressName,
         companyId: profile.companyId,
         address1: startLocationAddress1,
         address2: startLocationAddress2,
@@ -375,7 +389,7 @@ class JobCreateFormCarrier extends Component {
     if (selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
-        name: 'Delivery End Location',
+        name: endLocationAddressName,
         companyId: profile.companyId,
         address1: endLocationAddress1,
         address2: endLocationAddress2,
@@ -581,6 +595,9 @@ class JobCreateFormCarrier extends Component {
     this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
+      case 'endLocationAddressName':
+        reqHandler = 'reqHandlerEndAddressName';
+        break;
       case 'endLocationAddress1':
         reqHandler = 'reqHandlerEndAddress';
         break;
@@ -779,6 +796,9 @@ class JobCreateFormCarrier extends Component {
     this.handleSameAddresses();
     let reqHandler = '';
     switch (e.target.name) {
+      case 'startLocationAddressName':
+        reqHandler = 'reqHandlerStartAddressName';
+        break;
       case 'startLocationAddress1':
         reqHandler = 'reqHandlerStartAddress';
         break;
@@ -1039,7 +1059,9 @@ class JobCreateFormCarrier extends Component {
       jobStartDateTime,
       jobDate,
       truckType,
-      selectedMaterials
+      selectedMaterials,
+      startLocationAddressName,
+      endLocationAddressName,
     } = this.state;
     const {
       reqHandlerJobName,
@@ -1061,7 +1083,9 @@ class JobCreateFormCarrier extends Component {
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
-      reqHandlerEstimatedHours
+      reqHandlerEstimatedHours,
+      reqHandlerStartAddressName,
+      reqHandlerEndAddressName
     } = this.state;
     let isValid = true;
 
@@ -1114,6 +1138,16 @@ class JobCreateFormCarrier extends Component {
     // START ADDRESS VALIDATION
 
     if (!selectedStartAddressId || selectedStartAddressId === 0) {
+      if (startLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerStartAddressName: {
+            touched: true,
+            error: 'Missing starting address name'
+          }
+        });
+        isValid = false;
+      }
+
       if (startLocationAddress1.length === 0) {
         this.setState({
           reqHandlerStartAddress: {
@@ -1199,6 +1233,16 @@ class JobCreateFormCarrier extends Component {
     // END ADDRESS VALIDATION
 
     if (!selectedEndAddressId || selectedEndAddressId === 0) {
+      if (endLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerEndAddressName: {
+            touched: true,
+            error: 'Missing ending address name'
+          }
+        });
+        isValid = false;
+      }
+
       if (endLocationAddress1.length === 0) {
         this.setState({
           reqHandlerEndAddress: {
@@ -1448,6 +1492,10 @@ class JobCreateFormCarrier extends Component {
       reqHandlerEndCity,
       reqHandlerSameAddresses,
       reqHandlerDate,
+      startLocationAddressName,
+      reqHandlerStartAddressName,
+      endLocationAddressName,
+      reqHandlerEndAddressName,
       loaded
     } = this.state;
     const today = new Date();
@@ -1644,6 +1692,20 @@ class JobCreateFormCarrier extends Component {
                           input={
                             {
                               onChange: this.handleStartAddressChange,
+                              name: 'startLocationAddressName',
+                              value: startLocationAddressName
+                            }
+                          }
+                          placeholder="Address Name"
+                          type="text"
+                          meta={reqHandlerStartAddressName}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleStartAddressChange,
                               name: 'startLocationAddress1',
                               value: startLocationAddress1
                             }
@@ -1746,6 +1808,20 @@ class JobCreateFormCarrier extends Component {
                       onKeyPress={this.handleKeyPress}
                       onClick={this.toggleNewEndAddress}
                     >
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleEndAddressChange,
+                              name: 'endLocationAddressName',
+                              value: endLocationAddressName
+                            }
+                          }
+                          placeholder="Address Name"
+                          type="text"
+                          meta={reqHandlerEndAddressName}
+                        />
+                      </div>
                       <div className="form__form-group">
                         <TField
                           input={
