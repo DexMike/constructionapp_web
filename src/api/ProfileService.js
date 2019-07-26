@@ -12,7 +12,9 @@ class ProfileService extends AgentService {
     return {
       companyType: 'Customer',
       companyId: 0,
-      userId: 0
+      userId: 0,
+      driverId: 0,
+      isAdmin: 0
     };
   }
 }
