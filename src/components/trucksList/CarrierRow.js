@@ -92,8 +92,8 @@ class CarrierRow extends Component {
                 <h5>
                   {carrierName} {distance ? `[Distance: ${distance.toFixed(2)} mi]` : ''}
                 </h5>
-                <img width="100%" src={truckImage} alt=""
-                     styles="background-size:contain;"
+                <br/>
+                <img src={truckImage} alt="" style={{width: 'auto', display: 'block', margin: '0 auto'}}
                 />
               </div>
               <div className="col-md-9">
