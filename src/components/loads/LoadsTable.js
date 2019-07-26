@@ -69,7 +69,7 @@ class LoadsTable extends Component {
     // debugger;
     return (
       <Paper style={{overflowX: 'auto'}}>
-        EXPANDED: {expandedLoad}
+        {/* EXPANDED: {expandedLoad} */}
         <Table>
           <TableHead>
             <TableRow>
