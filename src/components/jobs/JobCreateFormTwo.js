@@ -342,7 +342,7 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     // if sending to mktplace, let's send SMS to everybody
-    if (sendToMkt) {
+    /* if (sendToMkt) {
       const allBiddersSms = [];
       for (const bidderTel of nonFavoriteAdminTels) {
         if (bidderTel && this.checkPhoneFormat(bidderTel)) {
@@ -353,7 +353,7 @@ class JobCreateFormTwo extends PureComponent {
           allBiddersSms.push(TwilioService.createSms(notification));
         }
       }
-    }
+    } */
 
     const { onClose } = this.props;
     onClose();
