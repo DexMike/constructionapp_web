@@ -342,13 +342,13 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     // if sending to mktplace, let's send SMS to everybody
-    if (sendToMkt) {
+     if (sendToMkt) {
       const allBiddersSms = [];
       for (const bidderTel of nonFavoriteAdminTels) {
         if (bidderTel && this.checkPhoneFormat(bidderTel)) {
           const notification = {
             to: this.phoneToNumberFormat(bidderTel),
-            body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'
+            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.net'
           };
           allBiddersSms.push(TwilioService.createSms(notification));
         }
