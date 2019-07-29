@@ -33,6 +33,9 @@ const center = {
   lng: -97.754209
 };
 
+const hereMapsId = process.env.HERE_MAPS_APP_ID;
+const hereMapsCode = process.env.HERE_MAPS_APP_CODE;
+
 class JobForm extends Component {
   constructor(props) {
     super(props);
@@ -91,9 +94,10 @@ class JobForm extends Component {
     let time = 0;
 
     // HERE MAP
+    // console.log('>>>>>KEYS', hereMapsCode, hereMapsId);
     const platform = new H.service.Platform({
-      app_id: 'FlTEFFbhzrFwU1InxRgH',
-      app_code: 'gTgJkC9u0YWzXzvjMadDzQ'
+      app_id: hereMapsId,
+      app_code: hereMapsCode
     });
 
     const routeRequestParams = {
@@ -213,7 +217,6 @@ class JobForm extends Component {
 
   onSuccess(result) {
     const route = result.response.route[0];
-    console.log(result.response);
     this.setState({
       showMainMap: true,
       shape: route.shape,
@@ -733,10 +736,9 @@ class JobForm extends Component {
         </HEREMap>
       );
     }
-    console.log('>>>', 739);
     return (
       <React.Fragment>
-        &nbsp; NO
+        &nbsp; Map not available
       </React.Fragment>
     );
   }
@@ -750,8 +752,6 @@ class JobForm extends Component {
     } = this.state;
     const { job } = this.props;
     let endAddress;
-
-    console.log('>> JOB: ', job.status);
 
     if (job.endAddress) { // if there's endAddress, render it
       endAddress = this.renderEndAddress(job.endAddress);
