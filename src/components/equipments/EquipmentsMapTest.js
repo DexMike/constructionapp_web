@@ -73,12 +73,12 @@ class EquipmentsMapTest extends Component {
   }
 
   onError(error) {
-    console.log('>>ERROR : ', error);
+    // console.log('>>ERROR : ', error);
   }
 
   onSuccess(result) {
     const route = result.response.route[0];
-    console.log(result.response);
+    // console.log(result.response);
     this.setState({
       loaded: true,
       shape: route.shape,
@@ -89,7 +89,7 @@ class EquipmentsMapTest extends Component {
   }
 
   renderInstructions(instructions) {
-    console.log(typeof instructions, instructions);
+    // console.log(typeof instructions, instructions);
     const allInstructions = instructions.map((item, key) => (
       <li
         key={item.id}

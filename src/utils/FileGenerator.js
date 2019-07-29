@@ -1,7 +1,5 @@
 class FileGenerator {
   static getBlob(b64Data) {
-    console.log('>>>3 FILE');
-      console.log(b64Data);
     const contentType = '';
     const sliceSize = 512;
 
