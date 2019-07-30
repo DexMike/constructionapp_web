@@ -118,26 +118,27 @@ class DashboardCarrierPage extends Component {
   }
 
   async handleFilterStatusChange({value, name}) {
-    const { filters } = this.state;
+    const { filters } = { ...this.state};
     if (filters[name] === value) {
       filters[name] = '';
     } else {
       filters[name] = value;
     }
-    // Deleting filter fields for general jobs based on Status (Top cards)
+    // clearing filter fields for general jobs based on Status (Top cards)
     filters.equipmentType = [];
-    delete filters.startAvailability;
-    delete filters.endAvailability;
+    filters.startAvailability = '';
+    filters.endAvailability = '';
     delete filters.rateType;
     filters.rate = '';
-    delete filters.minTons;
-    delete filters.minHours;
-    delete filters.minCapacity;
-    delete filters.numEquipments;
-    delete filters.zipCode;
-    delete filters.range;
+    filters.minTons = '';
+    filters.minHours = '';
+    filters.minCapacity = '';
+    filters.numEquipments = '';
+    filters.zipCode = '';
+    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
+      filters,
       page: 0
     });
   }

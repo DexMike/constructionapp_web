@@ -102,7 +102,7 @@ class DashboardCustomerPage extends Component {
 
   async fetchJobsInfo() {
     const profile = await ProfileService.getProfile();
-    const response = await JobService.getCustomerJobsInfo(profile.userId);
+    const response = await JobService.getCustomerJobsInfo(profile.companyId);
     const jobsInfo = response.data;
     const { totalJobs } = response;
     this.setState({ totalJobs, jobsInfo });
@@ -124,20 +124,21 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
-    // Deleting filter fields for general jobs based on Status (Top cards)
-    // delete filters.equipmentType;
-    // delete filters.startAvailability;
-    // delete filters.endAvailability;
-    // delete filters.rateType;
-    // delete filters.rate;
-    // delete filters.minTons;
-    // delete filters.minHours;
-    // delete filters.minCapacity;
-    // delete filters.equipmentType;
-    // delete filters.numEquipments;
-    // delete filters.zipCode;
+    // clearing filter fields for general jobs based on Status (Top cards)
+    filters.equipmentType = [];
+    filters.startAvailability = '';
+    filters.endAvailability = '';
+    delete filters.rateType;
+    filters.rate = '';
+    filters.minTons = '';
+    filters.minHours = '';
+    filters.minCapacity = '';
+    filters.numEquipments = '';
+    filters.zipCode = '';
+    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
+      filters,
       page: 0
     });
   }
