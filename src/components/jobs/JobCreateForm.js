@@ -348,11 +348,9 @@ class JobCreateForm extends Component {
         jobsId: jobId,
         value: material,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       /* eslint-disable no-await-in-loop */
       await JobMaterialsService.createJobMaterials(newMaterial);
@@ -385,10 +383,8 @@ class JobCreateForm extends Component {
       this.setState({ btnSubmitting: false });
       return;
     }
-    startAddress.modifiedOn = moment()
-      .unix() * 1000;
-    startAddress.createdOn = moment()
-      .unix() * 1000;
+    startAddress.modifiedOn = moment.utc().format();
+    startAddress.createdOn = moment.utc().format();
 
     // start address
     let newStartAddress;
@@ -403,10 +399,8 @@ class JobCreateForm extends Component {
     // newJob.startAddress = newStartAddress.id;
     newJob.status = 'On Offer';
 
-    endAddress.modifiedOn = moment()
-      .unix() * 1000;
-    endAddress.createdOn = moment()
-      .unix() * 1000;
+    endAddress.modifiedOn = moment.utc().format();
+    endAddress.createdOn = moment.utc().format();
 
     // end address
     let newEndAddress;
@@ -418,10 +412,8 @@ class JobCreateForm extends Component {
     }
 
     newJob.rate = selectedEquipment.hourRate;
-    newJob.modifiedOn = moment()
-      .unix() * 1000;
-    newJob.createdOn = moment()
-      .unix() * 1000;
+    newJob.modifiedOn = moment.utc().format();
+    newJob.createdOn = moment.utc().format();
     newJob.equipmentType = selectedEquipment.type;
     // In this scenario we are not letting a customer create a job with
     // more than 1 truck so here we set the numEquipments to 1
@@ -445,14 +437,10 @@ class JobCreateForm extends Component {
     bid.rateEstimate = createdJob.rateEstimate;
     bid.hasCustomerAccepted = 1;
     bid.status = 'Pending';
-    bid.modifiedOn = moment()
-      .unix() * 1000;
-    bid.createdOn = moment()
-      .unix() * 1000;
-    booking.modifiedOn = moment()
-      .unix() * 1000;
-    booking.createdOn = moment()
-      .unix() * 1000;
+    bid.modifiedOn = moment.utc().format();
+    bid.createdOn = moment.utc().format();
+    booking.modifiedOn = moment.utc().format();
+    booking.createdOn = moment.utc().format();
     const createdBid = await BidService.createBid(bid);
 
     // Now we need to create a Booking
@@ -505,10 +493,8 @@ class JobCreateForm extends Component {
     // this needs to be createdBid.carrierCompanyId.adminId
     bookingEquipment.createdBy = selectedEquipment.driversId;
     bookingEquipment.modifiedBy = selectedEquipment.driversId;
-    bookingEquipment.modifiedOn = moment()
-      .unix() * 1000;
-    bookingEquipment.createdOn = moment()
-      .unix() * 1000;
+    bookingEquipment.modifiedOn = moment.utc().format();
+    bookingEquipment.createdOn = moment.utc().format();
     await BookingEquipmentService.createBookingEquipment(bookingEquipment);
 
     // Let's make a call to Twilio to send an SMS

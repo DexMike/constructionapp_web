@@ -52,11 +52,9 @@ class BidService extends AgentService {
       rateEstimate: '',
       notes: '',
       createdBy: [],
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: [],
-      modifiedOn: moment()
-        .unix() * 1000,
+      modifiedOn: moment.utc().format(),
       isArchived: 0
     };
   }

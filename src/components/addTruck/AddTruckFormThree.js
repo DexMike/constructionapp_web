@@ -114,8 +114,7 @@ class AddTruckFormThree extends PureComponent {
     delete user.reqHandlerFName;
     delete user.reqHandlerLName;
     delete user.reqHandlerPhone;
-    user.modifiedOn = moment()
-      .unix() * 1000;
+    user.modifiedOn = moment.utc().format();
     await UserService.updateUser(user);
     onClose();
   }

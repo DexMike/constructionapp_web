@@ -196,9 +196,9 @@ class CompanyNotifications extends Component {
         companyId: company.id,
         key: 'materialType',
         value: companyMaterials[i],
-        createdOn: moment().unix() * 1000,
+        createdOn: moment.utc().format(),
         createdBy: userId,
-        modifiedOn: moment().unix() * 1000,
+        modifiedOn: moment.utc().format(),
         modifiedBy: userId
       };
       newSettings.push(newItem);
@@ -209,9 +209,9 @@ class CompanyNotifications extends Component {
         companyId: company.id,
         key: 'equipmentType',
         value: companyEquipments[i],
-        createdOn: moment().unix() * 1000,
+        createdOn: moment.utc().format(),
         createdBy: userId,
-        modifiedOn: moment().unix() * 1000,
+        modifiedOn: moment.utc().format(),
         modifiedBy: userId
       };
       newSettings.push(newItem);
