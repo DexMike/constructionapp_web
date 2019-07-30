@@ -136,8 +136,7 @@ class LoginPage extends SignIn {
       const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
 
-      if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
-        || user.userStatus === 'Rejected')) {
+      if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled') {
         this.setState({userUnderReview: true});
         return;
         // user is under review
