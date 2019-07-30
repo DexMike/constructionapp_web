@@ -49,11 +49,9 @@ class JobForm extends Component {
       rate: 0,
       notes: '',
       createdBy: 0,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 0,
-      modifiedOn: moment()
-        .unix() * 1000,
+      modifiedOn: moment.utc().format(),
       isArchived: 0,
       overlayMapData: {},
       isExpanded: false
@@ -71,6 +69,7 @@ class JobForm extends Component {
       showMainMap: false,
       cachedOrigin: '',
       cachedDestination: '',
+      profile: [],
       shape: {},
       timeAndDistance: '',
       instructions: []
@@ -179,9 +178,10 @@ class JobForm extends Component {
       loads,
       job,
       distance,
-      time //
+      time,
       // cachedOrigin: origin,
-      // cachedDestination: destination
+      // cachedDestination: destination,
+      profile
     });
   }
 
@@ -265,8 +265,7 @@ class JobForm extends Component {
     if (job && job.id) {
       // then we are updating the record
       jobForm.isArchived = jobForm.isArchived === 'on' ? 1 : 0;
-      jobForm.modifiedOn = moment()
-        .unix() * 1000;
+      jobForm.modifiedOn = moment.utc().format();
       await JobService.updateJob(jobForm);
       handlePageClick('Job');
     } else {
@@ -331,7 +330,7 @@ class JobForm extends Component {
   }
 
   renderJobTop(job) {
-    const { companyType, carrier } = this.state;
+    const { profile, companyType, carrier } = this.state;
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
@@ -372,9 +371,9 @@ class JobForm extends Component {
           <h3 className="subhead">
             Dates:
           </h3>
-          Start Date: {TFormat.asDayWeek(job.startTime)}
+          Start Date: {TFormat.asDayWeek(job.startTime, profile.timeZone)}
           <br/>
-          Created On: {TFormat.asDayWeek(job.createdOn)}
+          Created On: {TFormat.asDayWeek(job.createdOn, profile.timeZone)}
         </div>
         {companyType === 'Carrier' && (
           <div className="col-md-4">

@@ -26,8 +26,8 @@ class FileUploadPage extends Component {
     const { files } = this.state;
     e.preventDefault();
     const file = files[0];
-    const year = moment().format('YYYY');
-    const month = moment().format('MM');
+    const year = moment.utc().format('YYYY');
+    const month = moment.utc().format('MM');
     const fileName = StringGenerator.makeId(6);
     const fileNamePieces = file.name.split(/[\s.]+/);
     const fileExtension = fileNamePieces[fileNamePieces.length - 1];

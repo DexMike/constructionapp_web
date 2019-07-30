@@ -95,7 +95,7 @@ class LoginPage extends SignIn {
     const userCheck = {email: username};
     const user = await UserService.getUserByEmail(userCheck);
 
-    user.lastLogin = moment().unix() * 1000;
+    user.lastLogin = moment.utc().format();
     user.loginCount += 1;
     await UserService.updateUser(user);
   }
@@ -109,9 +109,9 @@ class LoginPage extends SignIn {
       browserVersion: this.state.browserVersion.version,
       screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
       createdBy: 1,
-      createdOn: moment().unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 1,
-      modifiedOn: moment().unix() * 1000
+      modifiedOn: moment.utc().format()
     };
     await LoginLogService.createLoginLog(log);
   }
