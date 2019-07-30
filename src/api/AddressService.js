@@ -60,11 +60,9 @@ class AddressService extends AgentService {
       latitude: 0.0,
       longitude: 0.0,
       createdBy: 1,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 0,
-      modifiedOn: moment()
-        .unix() * 1000,
+      modifiedOn: moment.utc().format(),
       isArchived: 0
     };
   }

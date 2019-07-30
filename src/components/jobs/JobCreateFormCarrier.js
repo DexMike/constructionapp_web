@@ -371,11 +371,9 @@ class JobCreateFormCarrier extends Component {
         state: startLocationState,
         zipCode: startLocationZip,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       startAddress = await AddressService.createAddress(address1);
     } else {
@@ -438,11 +436,9 @@ class JobCreateFormCarrier extends Component {
       rateTotal,
       notes: instructions,
       createdBy: profile.userId,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
-      modifiedOn: moment()
-        .unix() * 1000
+      modifiedOn: moment.utc().format()
     };
 
     const createdJob = await JobService.createJob(job);
@@ -477,11 +473,9 @@ class JobCreateFormCarrier extends Component {
     bid.status = 'Pending';
     bid.notes = createdJob.notes;
     bid.createdBy = profile.userId;
-    bid.createdOn = moment()
-      .unix() * 1000;
+    bid.createdOn = moment.utc().format();
     bid.modifiedBy = profile.userId;
-    bid.modifiedOn = moment()
-      .unix() * 1000;
+    bid.modifiedOn = moment.utc().format();
     const createdBid = await BidService.createBid(bid);
 
     // Now we need to create a Booking
@@ -777,11 +771,9 @@ class JobCreateFormCarrier extends Component {
         jobsId: jobId,
         value: material,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       /* eslint-disable no-await-in-loop */
       await JobMaterialsService.createJobMaterials(newMaterial);

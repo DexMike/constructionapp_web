@@ -72,12 +72,14 @@ class DashboardCarrierPage extends Component {
   }
 
   async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ profile });
     await this.fetchJobsInfo();
     this.setState({ loaded: true });
   }
 
   async fetchJobsInfo() {
-    const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     const response = await JobService.getCarrierJobsInfo(profile.companyId);
     const jobsInfo = response.data;
     const { totalJobs } = response;
@@ -357,7 +359,7 @@ class DashboardCarrierPage extends Component {
   }
 
   renderJobList() {
-    const { loaded } = this.state;
+    const { profile, loaded } = this.state;
     let { jobs } = this.state;
 
     let onOfferJobCount = 0;
@@ -426,7 +428,7 @@ class DashboardCarrierPage extends Component {
         );
       }
 
-      newJob.newStartDate = TFormat.asDate(job.startTime);
+      newJob.newStartDate = TFormat.asDate(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
