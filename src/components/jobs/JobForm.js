@@ -145,25 +145,6 @@ class JobForm extends Component {
       }
     }
 
-    /*
-    let origin;
-    let destination;
-
-    // set origin, destination
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    */
-
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
@@ -919,7 +900,7 @@ class JobForm extends Component {
       return (
         <Container className="dashboard">
           <div className="col-md-9">
-            <h3 className="page-title">Job Details 832</h3>
+            <h3 className="page-title">Job Details</h3>
           </div>
           {this.renderEverything()}
         </Container>
