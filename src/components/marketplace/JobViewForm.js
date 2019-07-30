@@ -230,8 +230,7 @@ class JobViewForm extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -245,8 +244,7 @@ class JobViewForm extends Component {
         newBid.rateEstimate = newJob.rateEstimate;
         newBid.notes = newJob.notes;
         newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment()
-          .unix() * 1000;
+        newBid.modifiedOn = moment.utc().format();
         bid = {};
         bid = await BidService.updateBid(newBid);
       } else {
@@ -262,11 +260,9 @@ class JobViewForm extends Component {
         bid.rateEstimate = newJob.rateEstimate;
         bid.notes = newJob.notes;
         bid.createdBy = profile.userId;
-        bid.createdOn = moment()
-          .unix() * 1000;
+        bid.createdOn = moment.utc().format();
         bid.modifiedBy = profile.userId;
-        bid.modifiedOn = moment()
-          .unix() * 1000;
+        bid.modifiedOn = moment.utc().format();
         bid = await BidService.createBid(bid);
       }
 
@@ -290,8 +286,8 @@ class JobViewForm extends Component {
         booking.sourceAddressId = job.startAddress.id;
         booking.notes = '';
         booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
+        booking.createdOn = moment.utc().format();
+        booking.modifiedOn = moment.utc().format()
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
@@ -358,8 +354,7 @@ class JobViewForm extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -371,8 +366,7 @@ class JobViewForm extends Component {
         bid.hasSchedulerAccepted = 1;
         newBid.status = 'Pending';
         newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment()
-          .unix() * 1000;
+        newBid.modifiedOn = moment.utc().format();
         bid = await BidService.updateBid(newBid);
       } else {
         bid = {};
@@ -387,11 +381,9 @@ class JobViewForm extends Component {
         bid.rateEstimate = newJob.rateEstimate;
         bid.notes = newJob.notes;
         bid.createdBy = profile.userId;
-        bid.createdOn = moment()
-          .unix() * 1000;
+        bid.createdOn = moment.utc().format();
         bid.modifiedBy = profile.userId;
-        bid.modifiedOn = moment()
-          .unix() * 1000;
+        bid.modifiedOn = moment.utc().format();
         bid = await BidService.createBid(bid);
       }
 

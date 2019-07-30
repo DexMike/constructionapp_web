@@ -185,9 +185,9 @@ class MultiEquipmentsForm extends PureComponent {
         hourRate: rateType === 'Hour' || rateType === 'Any' ? ratesCostPerHour : null,
         minCapacity: rateType === 'Tonage' || rateType === 'Any' ? minTons : null,
         minHours: rateType === 'Hour' || rateType === 'Any' ? minOperatingTime : null,
-        createdOn: moment().unix() * 1000,
+        createdOn: moment.utc().format(),
         createdBy: userId,
-        modifiedOn: moment().unix() * 1000,
+        modifiedOn: moment.utc().format(),
         modifiedBy: userId
       };
       equipments.push(newEquipment);
@@ -197,9 +197,9 @@ class MultiEquipmentsForm extends PureComponent {
       const newMaterial = {
         equipmentsId: 0,
         value: selectedMaterials[i].label,
-        createdOn: moment().unix() * 1000,
+        createdOn: moment.utc().format(),
         createdBy: userId,
-        modifiedOn: moment().unix() * 1000,
+        modifiedOn: moment.utc().format(),
         modifiedBy: userId
       };
       materials.push(newMaterial);

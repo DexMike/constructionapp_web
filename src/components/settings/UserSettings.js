@@ -22,6 +22,7 @@ import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
 import './Settings.css';
 import ProfileService from "../../api/ProfileService";
+import UserSettingsService from '../../api/UserSettingsService';
 import i18n from "i18next";
 
 
@@ -61,6 +62,7 @@ class UserSettings extends Component {
       state: '',
       country: '',
       timeZone: '',
+      profile: [],
       reqHandlerFName: {
         touched: false,
         error: ''
@@ -125,9 +127,43 @@ class UserSettings extends Component {
 
   async componentDidMount() {
     const { user, address } = this.props;
+    const timeZones = [];
+    let selectedTimeZone = '';
+    const profile = await ProfileService.getProfile();
+    const {timeZone} = profile;
+    if (timeZone === null || timeZone.length === 0) {
+      selectedTimeZone = 'Auto';
+      timeZones.push({
+        label: `Automatic: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
+        value: 'Auto'
+      });
+    } else {
+      selectedTimeZone = timeZone;
+      timeZones.push({
+        label: `Automatic: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
+        value: 'Auto'
+      });
+    }
+
+    // List of IANA Time Zones that start with 'America/'
+    // IANA Time Zones handle transitions such as DST and leap seconds
+    // ref: https://en.wikipedia.org/wiki/Tz_database
+    const allTimeZones = moment.tz.names();
+    Object.values(allTimeZones).forEach((itmtz) => {
+      if (itmtz.startsWith('America/')) {
+        const inside = {
+          label: itmtz,
+          value: itmtz
+        };
+        timeZones.push(inside);
+      }
+    });
+
     await this.setUser(user);
     await this.setAddress(address);
     await this.fetchLookupsValues();
+
+    this.setState({ timeZones, timeZone: selectedTimeZone, profile });
   }
 
   async setUser(userProps) {
@@ -441,13 +477,32 @@ class UserSettings extends Component {
     if (!this.isFormValid()) {
       return;
     }
+    const {profile, timeZone} = this.state;
+
+    let selectedTimeZone = '';
+    if (timeZone === 'Auto') {
+      selectedTimeZone = '';
+    } else {
+      selectedTimeZone = timeZone;
+    }
+
     const user = this.setUserInfo();
     const address = this.setAddressInfo();
     if (user && user.id) {
-      user.modifiedOn = moment()
-        .unix() * 1000;
+      user.modifiedOn = moment.utc().format();
       try {
         await UserService.updateUser(user);
+        const newTimeZone = {
+          userId: profile.userId,
+          key: 'timeZone',
+          value: selectedTimeZone,
+          createdOn: moment.utc().format(),
+          createdBy: profile.userId,
+          modifiedOn: moment.utc().format(),
+          modifiedBy: profile.userId
+        };
+        await UserSettingsService.updateUserTimeZone(newTimeZone);
+
         const {preferredLanguage} = this.state;
         i18n.changeLanguage(preferredLanguage);
         this.setState({preferredLanguage});
@@ -745,7 +800,7 @@ class UserSettings extends Component {
           </Col>
           <Col md={6}>
             <span>
-            <Trans>Last Name</Trans>
+              <Trans>Last Name</Trans>
             </span>
             <TField
               input={{
@@ -762,7 +817,7 @@ class UserSettings extends Component {
         <Row className="pt-2">
           <Col md={6}>
             <span>
-            <Trans>Mobile Phone</Trans>
+              <Trans>Mobile Phone</Trans>
             </span>
             <TField
               input={{
@@ -777,7 +832,7 @@ class UserSettings extends Component {
           </Col>
           <Col md={6}>
             <span>
-            <Trans>Work Phone</Trans>
+              <Trans>Work Phone</Trans>
             </span>
             <TField
               input={{
@@ -787,6 +842,23 @@ class UserSettings extends Component {
               }}
               placeholder="Work Phone"
               type="text"
+            />
+          </Col>
+          <Col md={6}>
+            <span>
+              <Trans>Time Zone</Trans>
+            </span>
+            <TSelect
+              input={
+                {
+                  onChange: this.handleTimeZoneChange,
+                  name: 'timeZone',
+                  value: timeZone || `Automatic: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+                  // disabled: !admin
+                }
+              }
+              // meta={}
+              options={timeZones}
             />
           </Col>
         </Row>
@@ -902,24 +974,6 @@ class UserSettings extends Component {
           </Col>
           <Col md={6} className="pt-4">
             <Row>
-              <Col md={12}>
-                <span>
-                  <Trans>Time Zone</Trans>
-                </span>
-                <TSelect
-                  input={
-                    {
-                      onChange: this.handleTimeZoneChange,
-                      name: 'timeZone',
-                      value: timeZone,
-                      disabled: !admin
-                    }
-                  }
-                  // meta={}
-                  options={timeZones}
-                  placeholder="Select a Time Zone"
-                />
-              </Col>
               <Col md={12} className="pt-2">
                 <span >
                   <Trans>Primary Language</Trans>
