@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 import {
   Card,
@@ -1244,7 +1245,14 @@ class CreateJobFormOne extends PureComponent {
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Date of Job</span>
+                    <span className="form__form-group-label">Date of Job&nbsp;
+                      <span className="form-small-label">Your current time zone is set to&nbsp;
+                        {profile.timeZone
+                          ? moment().tz(profile.timeZone).format('z')
+                          : moment().tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('z')
+                        }. Your timezone can be changed in <Link to="/settings"><span>User Settings</span></Link>.
+                      </span>
+                    </span>
                     <TDateTimePicker
                       input={
                         {
@@ -1260,11 +1268,6 @@ class CreateJobFormOne extends PureComponent {
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
                     />
-                    <span className="job-form__group-description">
-                      Your current time zone is set to&nbsp;
-                      {profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone}.&nbsp;
-                      You can change this setting in the User Settings screen.
-                    </span>
                   </div>
                 </Row>
 
