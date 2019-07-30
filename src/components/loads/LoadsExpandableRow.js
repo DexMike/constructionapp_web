@@ -5,7 +5,8 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
-import UserService from '../../api/UserService';
+// import UserService from '../../api/UserService';
+import HEREMap, { RouteLine } from 'here-maps-react';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -14,6 +15,20 @@ import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
 import TMapBoxPath
   from '../common/TMapBoxPath';
+
+const routeFeatureWeightType = 0;
+const center = {
+  lat: 30.252606,
+  lng: -97.754209
+};
+
+const opts = {
+  layer: 'traffic',
+  mapType: 'normal'
+};
+
+const { HERE_MAPS_APP_ID } = process.env;
+const { HERE_MAPS_APP_CODE } = process.env;
 
 class LoadsExpandableRow extends Component {
   constructor(props) {
@@ -31,10 +46,13 @@ class LoadsExpandableRow extends Component {
       loadInvoices: [],
       disputeEmail: null,
       profile: null,
-      toggledId: 0
+      toggledId: 0,
+      shape: {}
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.onError = this.onError.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -42,8 +60,13 @@ class LoadsExpandableRow extends Component {
     const {load} = this.state;
     let {gpsTrackings, loadInvoices, disputeEmail} = {...this.state};
     gpsTrackings = await this.fetchGPSPoints(load.id);
+    // return false;
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
-    const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+
+    // This throws an error
+    // const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+    const driver = {};
+
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
     const date = new Date();
@@ -60,11 +83,78 @@ class LoadsExpandableRow extends Component {
         {name: 'CSR', email: 'csr@trelar.net'}
       ],
       attachments: []
+    };
+
+    // here
+    const platform = new H.service.Platform({
+      app_id: HERE_MAPS_APP_ID,
+      app_code: HERE_MAPS_APP_CODE
+    });
+
+    if (Object.keys(gpsTrackings).length > 0) {
+      let origin = '';
+      let destination = '';
+
+      // console.log('>>GPS:', gpsTrackings, typeof gpsTrackings);
+      if (gpsTrackings[0] && gpsTrackings[1]) {
+        origin = `${gpsTrackings[0][1]},${gpsTrackings[0][0]}`;
+        destination = `${gpsTrackings[1][1]},${gpsTrackings[1][0]}`;
+      } else if (gpsTrackings[0] && !gpsTrackings[1]) {
+        origin = `${gpsTrackings[0][1]},${gpsTrackings[0][0]}`;
+        destination = `${gpsTrackings[0][1]},${gpsTrackings[0][0]}`;
+      } else if (!gpsTrackings[0] && gpsTrackings[1]) {
+        origin = `${gpsTrackings[1][1]},${gpsTrackings[1][0]}`;
+        destination = `${gpsTrackings[1][1]},${gpsTrackings[1][0]}`;
+      }
+
+      // console.log('Origin, destination:', origin, destination);
+      const routeRequestParams = {
+        mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
+        representation: 'display',
+        routeattributes: 'waypoints,summary,shape,legs,incidents',
+        maneuverattributes: 'direction,action',
+        waypoint0: origin,
+        waypoint1: destination,
+        truckType: 'tractorTruck',
+        limitedWeight: 700,
+        metricSystem: 'imperial',
+        language: 'en-us' // en-us|es-es|de-de
+      };
+
+      const router = platform.getRoutingService();
+      router.calculateRoute(
+        routeRequestParams,
+        this.onSuccess,
+        this.onError
+      );
     }
+    // here
+
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
-    this.setState({gpsTrackings, loadInvoices, disputeEmail, profile});
+    this.setState({
+      // gpsTrackings,
+      loadInvoices,
+      disputeEmail,
+      profile
+    });
+  }
+
+  onError(error) {
+    console.log('>>ERROR : ', error);
+  }
+
+  onSuccess(result) {
+    const route = result.response.route[0];
+    // console.log(result.response);
+    this.setState({
+      // showMainMap: true,
+      shape: route.shape,
+      timeAndDistance: `Travel time and distance: ${route.summary.text}`
+      // instructions: route.leg[0]
+    });
+    // ... etc.
   }
 
   async fetchGPSPoints(loadId) {
@@ -94,7 +184,7 @@ class LoadsExpandableRow extends Component {
     const {load, disputeEmail} = {...this.state};
     load.loadStatus = 'Disputed';
     await LoadService.updateLoad(load.id, load);
-    await EmailService.sendEmail(disputeEmail)
+    await EmailService.sendEmail(disputeEmail);
     this.setState({load, loadStatus: 'Disputed'});
     this.toggleDisputeModal();
   }
@@ -147,6 +237,33 @@ class LoadsExpandableRow extends Component {
     );
   }
 
+  renderMap(shape) {
+    if (Object.keys(shape).length > 0) {
+      return (
+        <HEREMap
+          style={{height: '200px', background: 'gray' }}
+          appId="FlTEFFbhzrFwU1InxRgH"
+          appCode="gTgJkC9u0YWzXzvjMadDzQ"
+          center={center}
+          zoom={14}
+          setLayer={opts}
+          hidpi={false}
+          interactive
+        >
+          <RouteLine
+            shape={shape}
+            strokeColor="purple"
+            lineWidth="4"
+          />
+        </HEREMap>
+      );
+    }
+    return (
+      <React.Fragment>
+        No map available
+      </React.Fragment>
+    );
+  }
 
   render() {
     const {loaded} = {...this.state};
@@ -156,11 +273,13 @@ class LoadsExpandableRow extends Component {
         loadStatus,
         index,
         driver,
-        gpsTrackings,
+        // gpsTrackings,
         loadInvoices,
         profile,
-        job
+        job,
+        shape
       } = {...this.state};
+
       const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
       const endTime = (!load.endTime ? null : moment(new Date(load.endTime)).format('lll'));
@@ -184,7 +303,6 @@ class LoadsExpandableRow extends Component {
       const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
-          ES: {isExpanded.toString()}
           {this.renderModal()}
           <TableRow key={load.id}>
             <TableCell component="th" scope="row" align="left">
@@ -226,7 +344,7 @@ class LoadsExpandableRow extends Component {
                   <hr/>
                   {loadStatus === 'Submitted' && profile.companyType === 'Customer' && (
                     <Row justify="between">
-                      <Col md={8}/>
+                      <Col md={4}/>
                       <Col md={4}>
                         <Button
                           onClick={this.toggleDisputeModal}
@@ -248,7 +366,7 @@ class LoadsExpandableRow extends Component {
                   )
                   }
                   <Row style={{paddingTop: 0}}>
-                    <Col md={6}>
+                    <Col md={4}>
                       <h3 className="subhead" style={{
                         paddingTop: 30,
                         color: '#006F53',
@@ -258,7 +376,7 @@ class LoadsExpandableRow extends Component {
                         Route
                       </h3>
                     </Col>
-                    <Col md={6}>
+                    <Col md={4}>
                       <h3 className="subhead" style={{
                         paddingTop: 30,
                         color: '#006F53',
@@ -270,19 +388,19 @@ class LoadsExpandableRow extends Component {
                     </Col>
                   </Row>
                   <Row>
-                    <Col md={6}>
-                      <React.Fragment>
-                        <TMapBoxPath gpsTrackings={gpsTrackings} loadId={load.id}/>
-                        <p style={{fontSize: 15, color: 'black', paddingLeft: 10}}>
-                          {profile.companyType === 'Customer' ? '' : `${driverName}`}
-                        </p>
-                      </React.Fragment>
+                    <Col md={4}>
+                      {this.renderMap(shape)}
                     </Col>
-                    <Col md={6}>
+                    <Col md={4}>
                       {loadInvoices.map(item => (
-                        <Col md={12} key={`img-${item}`}>
-                          <img key={item} src={`${item[2]}`} alt={`${item[2]}`}/>
-                        </Col>
+                        <img
+                          key={item}
+                          src={`${item[2]}`}
+                          alt={`${item[2]}`}
+                          style={{
+                            width: '100%'
+                          }}
+                        />
                         // <Col className="col-md-3 pt-3" key={`img-${item}`}>
                         //   <img key={item} src={`${item[2]}`} alt={`${item}`}/>
                         // </Col>
