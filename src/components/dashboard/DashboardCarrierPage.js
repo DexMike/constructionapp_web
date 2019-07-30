@@ -125,18 +125,17 @@ class DashboardCarrierPage extends Component {
       filters[name] = value;
     }
     // Deleting filter fields for general jobs based on Status (Top cards)
-    // delete filters.equipmentType;
-    // delete filters.startAvailability;
-    // delete filters.endAvailability;
-    // delete filters.rateType;
-    // delete filters.rate;
-    // delete filters.minTons;
-    // delete filters.minHours;
-    // delete filters.minCapacity;
-    // delete filters.equipmentType;
-    // delete filters.numEquipments;
-    // delete filters.zipCode;
-    // filters.materialType = [];
+    filters.equipmentType = [];
+    delete filters.startAvailability;
+    delete filters.endAvailability;
+    delete filters.rateType;
+    filters.rate = '';
+    delete filters.minTons;
+    delete filters.minHours;
+    delete filters.minCapacity;
+    delete filters.numEquipments;
+    delete filters.zipCode;
+    delete filters.range;
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       page: 0
