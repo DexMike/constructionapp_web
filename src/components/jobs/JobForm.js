@@ -6,8 +6,6 @@ import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
 import HEREMap, { RouteLine } from 'here-maps-react';
 import TFormat from '../common/TFormat';
-import TMapBoxOriginDestinationWithOverlay
-  from '../common/TMapBoxOriginDestinationWithOverlay';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
