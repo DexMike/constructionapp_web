@@ -4,6 +4,7 @@ import { Container, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 // import NumberFormat from 'react-number-format';
+import HEREMap, { RouteLine } from 'here-maps-react';
 import JobService from '../../api/JobService';
 // import truckImage from '../../img/default_truck.png';
 import AddressService from '../../api/AddressService';
@@ -15,16 +16,26 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import TFormat from '../common/TFormat';
 import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
-import EquipmentService from '../../api/EquipmentService';
+// import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
-import TMapBoxOriginDestination
-  from '../common/TMapBoxOriginDestination';
 // import GPSTrackingService from '../../api/GPSTrackingService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
 
-// const MAPBOX_MAX = 23;
+const routeFeatureWeightType = 0;
+const center = {
+  lat: 30.252606,
+  lng: -97.754209
+};
+
+const opts = {
+  layer: 'traffic',
+  mapType: 'normal'
+};
+
+const { HERE_MAPS_APP_ID } = process.env;
+const { HERE_MAPS_APP_CODE } = process.env;
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -34,11 +45,7 @@ class JobViewForm extends Component {
     this.state = {
       company: [],
       companyName: '',
-      customerAccepted: 0,
-      bidExists: false,
-      currentBidCarrier: 0,
       booking: null,
-      bookingEquipment: null,
       ...job,
       bid: [],
       loaded: false,
@@ -46,10 +53,13 @@ class JobViewForm extends Component {
       profile: [],
       btnSubmitting: false,
       selectedDrivers: [],
-      accessForbidden: false
+      accessForbidden: false,
+      shape: {}
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
+    this.onError = this.onError.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -57,16 +67,16 @@ class JobViewForm extends Component {
       job,
       company,
       companyName,
-      bidExists,
-      currentBidCarrier,
       booking,
-      bookingEquipment,
-      customerAccepted,
       profile,
       favoriteCompany,
       selectedDrivers
     } = this.state;
     const { jobId } = this.props;
+
+    let startAddress = {};
+    let endAddress = {};
+
     let bid = [];
     let bids = [];
     // const gps = [];
@@ -82,8 +92,8 @@ class JobViewForm extends Component {
     }
     if (job) {
       company = await CompanyService.getCompanyById(job.companiesId);
-      const startAddress = await AddressService.getAddressById(job.startAddress);
-      let endAddress = null;
+      startAddress = await AddressService.getAddressById(job.startAddress);
+      endAddress = null;
       if (job.endAddress) {
         endAddress = await AddressService.getAddressById(job.endAddress);
       }
@@ -123,55 +133,12 @@ class JobViewForm extends Component {
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
       if (bookings && bookings.length > 0) {
-        /* booking = bookings[0];
-        const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-        bookingEquipment = bookingEquipments.find(
-          bookEq => bookEq.bookingId === booking.id, booking
-        ); */
         [booking] = bookings;
         const bookingEquipments = await BookingEquipmentService
           .getBookingEquipmentsByBookingId(booking.id);
         selectedDrivers = bookingEquipments
           .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
       }
-
-      // get overlay data
-      // let gpsData = [];
-      // if (bookings.length > 0) {
-      //   gpsData = await GPSTrackingService.getGPSTrackingByBookingEquipmentId(
-      //     bookings[0].id // booking.id
-      //   );
-      // }
-
-      // prepare the waypoints in an appropiate format for MB (GEOJson point)
-      // if (gpsData.length > 0) {
-      //   for (const datum in gpsData) {
-      //     if (gpsData[datum][0]) {
-      //       const loc = {
-      //         type: 'Feature',
-      //         geometry: {
-      //           type: 'Point',
-      //           coordinates: [
-      //             gpsData[datum][1],
-      //             gpsData[datum][0]
-      //           ]
-      //         },
-      //         properties: {
-      //           title: 'Actual route',
-      //           icon: 'car'
-      //         }
-      //       };
-      //       // reduce the total of results to a maximum of 23
-      //       // Mapbox's limit is 25 points plus an origin and destination
-      //       const steps = Math.ceil(gpsData.length / MAPBOX_MAX);
-      //       const reducer = datum / steps;
-      //       const remainder = (reducer % 1);
-      //       if (remainder === 0) {
-      //         gps.push(loc);
-      //       }
-      //     }
-      //   }
-      // }
 
       // Check if carrier is favorite for this job's customer
       if (profile.companyType === 'Carrier') {
@@ -188,27 +155,66 @@ class JobViewForm extends Component {
       company,
       companyName,
       bid,
-      bidExists,
-      currentBidCarrier,
       booking,
-      bookingEquipment,
-      customerAccepted,
       profile,
       favoriteCompany,
-      selectedDrivers,
-      loaded: true
+      selectedDrivers
     });
 
-    // const { selectedJob, selectedMaterials } = this.props;
+    // here
+    /**/
+    const platform = new H.service.Platform({
+      app_id: HERE_MAPS_APP_ID,
+      app_code: HERE_MAPS_APP_CODE
+    });
 
-    // await this.fetchForeignValues();
+    if (startAddress.latitude
+      && startAddress.longitude
+      && endAddress.latitude
+      && endAddress.longitude) {
+      const origin = `${startAddress.latitude},${startAddress.longitude}`;
+      const destination = `${endAddress.latitude},${endAddress.longitude}`;
+
+      const routeRequestParams = {
+        mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
+        representation: 'display',
+        routeattributes: 'waypoints,summary,shape,legs,incidents',
+        maneuverattributes: 'direction,action',
+        waypoint0: origin,
+        waypoint1: destination,
+        truckType: 'tractorTruck',
+        limitedWeight: 700,
+        metricSystem: 'imperial',
+        language: 'en-us' // en-us|es-es|de-de
+      };
+
+      const router = platform.getRoutingService();
+      router.calculateRoute(
+        routeRequestParams,
+        this.onSuccess,
+        this.onError
+      );
+    } else {
+      this.setState({ loaded: true });
+    }
+  }
+
+  onError(error) {
+    // console.log('>>ERROR : ', error);
+  }
+
+  onSuccess(result) {
+    const route = result.response.route[0];
+    this.setState({
+      shape: route.shape,
+      loaded: true
+    });
+    // ... etc.
   }
 
   // save after the user has checked the info
   async saveJob() {
     this.setState({ btnSubmitting: true });
-    // console.log('saveJob ');
-    // save new or update?
     const {
       job,
       favoriteCompany,
@@ -287,47 +293,10 @@ class JobViewForm extends Component {
         booking.notes = '';
         booking.createdBy = profile.userId;
         booking.createdOn = moment.utc().format();
-        booking.modifiedOn = moment.utc().format()
+        booking.modifiedOn = moment.utc().format();
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
-
-      // Create Booking Equipment
-      // Check if we have a booking equipment first
-      /* let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-      bookingEquipments = bookingEquipments.filter((bookingEq) => {
-        if (bookingEq.bookingId === booking.id) {
-          return bookingEq;
-        }
-        return null;
-      });
-      if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const response = await EquipmentService.getEquipments();
-        const equipments = response.data;
-        if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now.
-          // Ideally this should be the carrier/driver's truck
-          bookingEquipment = {};
-          bookingEquipment.bookingId = booking.id;
-          bookingEquipment.schedulerId = bid.userId;
-          bookingEquipment.driverId = equipment.driversId;
-          bookingEquipment.equipmentId = equipment.id;
-          bookingEquipment.rateType = bid.rateType;
-          bookingEquipment.rateActual = 0;
-          bookingEquipment.startTime = booking.startTime;
-          bookingEquipment.endTime = booking.endTime;
-          bookingEquipment.startAddressId = booking.startAddressId;
-          bookingEquipment.endAddressId = booking.endAddressId;
-          bookingEquipment.notes = '';
-          bookingEquipment.createdBy = equipment.driversId;
-          bookingEquipment.modifiedBy = equipment.driversId;
-          bookingEquipment.modifiedOn = moment().unix() * 1000;
-          bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
-            bookingEquipment
-          );
-        }
-      } */
 
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
@@ -537,36 +506,38 @@ class JobViewForm extends Component {
     );
   }
 
-  renderMBMap(origin, destination) {
+  renderMap() {
+    const { shape } = this.state;
+    if (Object.keys(shape).length > 0) {
+      return (
+        <React.Fragment>
+          <HEREMap
+            style={{height: '200px', background: 'gray' }}
+            appId="FlTEFFbhzrFwU1InxRgH"
+            appCode="gTgJkC9u0YWzXzvjMadDzQ"
+            center={center}
+            zoom={14}
+            setLayer={opts}
+            hidpi={false}
+            interactive
+          >
+            <RouteLine
+              shape={shape}
+              strokeColor="purple"
+              lineWidth="4"
+            />
+          </HEREMap>
+        </React.Fragment>
+      );
+    }
     return (
       <React.Fragment>
-        <TMapBoxOriginDestination
-          input={
-            {
-              origin,
-              destination
-            }
-          }
-        />
+        No map available
       </React.Fragment>
     );
   }
 
   renderJobAddresses(job) {
-    let origin = '';
-    let destination = '';
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
     return (
       <Container>
         <Row>
@@ -578,7 +549,7 @@ class JobViewForm extends Component {
           </span>
         </Row>
         <span className="col-md-12 mapbox-jobViewForm">
-          {this.renderMBMap(origin, destination)}
+          {this.renderMap()}
         </span>
       </Container>
     );
@@ -663,91 +634,6 @@ class JobViewForm extends Component {
       </React.Fragment>
     );
   }
-
-  /* renderSelectedJob() {
-    const { job } = this.state;
-    console.log(job);
-    return (
-      <React.Fragment>
-        <h4 style={{
-          borderBottom: '3px solid #ccc',
-          marginBottom: '20px'
-        }}
-        >
-          Customer Status: {job.status}
-          &nbsp;-&nbsp;
-          Job: {job.name}
-        </h4>
-        <Row>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Start Date</span>
-              <div className="form__form-group-field">
-                <span>
-                  {moment(job.startTime)
-                    .format('MM/DD/YY')}
-                </span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Estimated Amount</span>
-              <div className="form__form-group-field">
-                <span>{job.rateEstimate} {job.rateType}(s)</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Company Name</span>
-              <div className="form__form-group-field">
-                  <span>{ job.company.legalName }</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Materials</span>
-              <div className="form__form-group-field">
-                <span>{ this.materialsAsString(job.materials) }</span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Rate</span>
-              <div className="form__form-group-field">
-                ${job.rate} / {job.rateType}
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Potential Cost</span>
-              <div className="form__form-group-field">
-                <span>{
-                  TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-                }
-                </span>
-              </div>
-            </div>
-          </Col>
-          <Col xl={3} lg={4} md={6} sm={12}>
-            <div className="form__form-group">
-              <span className="form__form-group-label">Created On</span>
-              <div className="form__form-group-field">
-                <span>
-                  {moment(job.createdOn)
-                    .format('MM/DD/YY')}
-                </span>
-              </div>
-            </div>
-          </Col>
-        </Row>
-      </React.Fragment>
-    );
-  } */
 
   renderJobFormButtons() {
     return (
