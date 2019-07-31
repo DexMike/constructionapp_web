@@ -148,16 +148,52 @@ class UserSettings extends Component {
     // List of IANA Time Zones that start with 'America/'
     // IANA Time Zones handle transitions such as DST and leap seconds
     // ref: https://en.wikipedia.org/wiki/Tz_database
-    const allTimeZones = moment.tz.names();
+    /* const allTimeZones = moment.tz.names();
     Object.values(allTimeZones).forEach((itmtz) => {
       if (itmtz.startsWith('America/')) {
         const inside = {
-          label: itmtz,
+          label: `${itmtz} - ${moment().tz(itmtz).format('z')}`,
           value: itmtz
         };
         timeZones.push(inside);
       }
-    });
+    }); */
+
+    // Each one of the following time zones have one or more IANA time
+    // zone identifiers which work in the same way as each other, we
+    // will be saving the first/most important one to the database.
+    // Ref for Easter Time: https://time.is/en/ET
+    // TODO: move to Lookups table
+    const easternTime = {
+      label: `Eastern Time - ${moment().tz('America/Detroit').format('z')}`,
+      value: 'America/Detroit'
+    };
+    timeZones.push(easternTime);
+    const centralTime = {
+      label: `Central Time - ${moment().tz('America/Chicago').format('z')}`,
+      value: 'America/Chicago'
+    };
+    timeZones.push(centralTime);
+    const mountainTime = {
+      label: `Mountain Time - ${moment().tz('America/Denver').format('z')}`,
+      value: 'America/Denver'
+    };
+    timeZones.push(mountainTime);
+    const pacificTime = {
+      label: `Pacific Time - ${moment().tz('America/Los_Angeles').format('z')}`,
+      value: 'America/Los_Angeles'
+    };
+    timeZones.push(pacificTime);
+    const alaskaTime = {
+      label: `Alaska Time - ${moment().tz('America/Juneau').format('z')}`,
+      value: 'America/Juneau'
+    };
+    timeZones.push(alaskaTime);
+    const hawaiiTime = {
+      label: `Hawaii Time - ${moment().tz('Pacific/Honolulu').format('z')}`,
+      value: 'Pacific/Honolulu'
+    };
+    timeZones.push(hawaiiTime);
 
     await this.setUser(user);
     await this.setAddress(address);
@@ -844,6 +880,8 @@ class UserSettings extends Component {
               type="text"
             />
           </Col>
+        </Row>
+        <Row className="pt-2">
           <Col md={6}>
             <span>
               <Trans>Time Zone</Trans>
