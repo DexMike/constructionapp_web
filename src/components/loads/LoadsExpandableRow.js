@@ -86,7 +86,8 @@ class LoadsExpandableRow extends Component {
     // here
     const platform = new H.service.Platform({
       app_id: HERE_MAPS_APP_ID,
-      app_code: HERE_MAPS_APP_CODE
+      app_code: HERE_MAPS_APP_CODE,
+      useHTTPS: true
     });
 
     if (Object.keys(gpsTrackings).length > 0) {

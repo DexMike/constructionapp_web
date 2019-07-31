@@ -43,7 +43,8 @@ class EquipmentsMapTest extends Component {
     // this.setState({ loaded: true });
     const platform = new H.service.Platform({
       app_id: 'FlTEFFbhzrFwU1InxRgH',
-      app_code: 'gTgJkC9u0YWzXzvjMadDzQ'
+      app_code: 'gTgJkC9u0YWzXzvjMadDzQ',
+      useHTTPS: true
     });
 
     const routeRequestParams = {
