@@ -33,6 +33,11 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getDriverByUserId(id) {
+    const response = await this.get(`/users/${id}/driver`);
+    return (response);
+  }
+
   static async getUsersByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/users`);
     return (response);
