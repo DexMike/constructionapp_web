@@ -13,8 +13,6 @@ import LoadInvoiceService from '../../api/LoadInvoiceService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
-import TMapBoxPath
-  from '../common/TMapBoxPath';
 
 const routeFeatureWeightType = 0;
 const center = {

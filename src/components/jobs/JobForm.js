@@ -6,8 +6,6 @@ import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
 import HEREMap, { RouteLine } from 'here-maps-react';
 import TFormat from '../common/TFormat';
-import TMapBoxOriginDestinationWithOverlay
-  from '../common/TMapBoxOriginDestinationWithOverlay';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
@@ -144,25 +142,6 @@ class JobForm extends Component {
         );
       }
     }
-
-    /*
-    let origin;
-    let destination;
-
-    // set origin, destination
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    */
 
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
@@ -919,7 +898,7 @@ class JobForm extends Component {
       return (
         <Container className="dashboard">
           <div className="col-md-9">
-            <h3 className="page-title">Job Details 832</h3>
+            <h3 className="page-title">Job Details</h3>
           </div>
           {this.renderEverything()}
         </Container>
