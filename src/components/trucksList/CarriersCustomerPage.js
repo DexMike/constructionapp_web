@@ -25,7 +25,7 @@ import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import CarrierRow from './CarrierRow';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -420,6 +420,8 @@ class CarriersCustomerPage extends Component {
     // or we don't have any coordinates on our db
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
+        // TODO -> do this without MapBox
+        /*
         try { // Search for that new zip code's coordinates with MapBox API
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
@@ -433,6 +435,14 @@ class CarriersCustomerPage extends Component {
             }
           });
         }
+        */
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            error: 'Invalid US Zip Code',
+            touched: true
+          }
+        });
       } else {
         // if the zipCode filter is empty, or it is the same as the initial code,
         // default the coordinates to user's address

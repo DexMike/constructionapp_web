@@ -14,7 +14,7 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 /*
 RouteFeatureWeightType
@@ -117,11 +117,14 @@ class JobForm extends Component {
     );
 
     try {
+      // TODO -> do this without MapBox
+      /*
       const response = await GeoCodingService
         .getDistance(startPoint.longitude, startPoint.latitude,
           endPoint.longitude, endPoint.latitude);
       distance = response.routes[0].distance;
       time = response.routes[0].duration;
+      */
     } catch (e) {
       // console.log(e)
     }
