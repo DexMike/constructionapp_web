@@ -44,7 +44,9 @@ class JobViewForm extends Component {
       loaded: false,
       favoriteCompany: [],
       profile: [],
-      btnSubmitting: false
+      btnSubmitting: false,
+      selectedDrivers: [],
+      accessForbidden: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -61,16 +63,23 @@ class JobViewForm extends Component {
       bookingEquipment,
       customerAccepted,
       profile,
-      favoriteCompany
+      favoriteCompany,
+      selectedDrivers
     } = this.state;
     const { jobId } = this.props;
     let bid = [];
     let bids = [];
     // const gps = [];
     profile = await ProfileService.getProfile();
-
-    job = await JobService.getJobById(jobId);
-
+    try {
+      job = await JobService.getJobById(jobId);
+    } catch (e) {
+      if (e.message === 'Access Forbidden') {
+        // access 403
+        this.setState({accessForbidden: true});
+        return;
+      }
+    }
     if (job) {
       company = await CompanyService.getCompanyById(job.companiesId);
       const startAddress = await AddressService.getAddressById(job.startAddress);
@@ -79,7 +88,6 @@ class JobViewForm extends Component {
         endAddress = await AddressService.getAddressById(job.endAddress);
       }
       const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-      bids = await BidService.getBidsByJobId(job.id);
 
       if (company) {
         companyName = company.legalName;
@@ -97,9 +105,9 @@ class JobViewForm extends Component {
         job.materials = materials.map(material => material.value);
       }
 
-
+      bids = await BidService.getBidsByJobId(job.id);
       if (bids.length) { // we have a bid record
-        bids = bids.filter((filteredBid) => {
+        bids.filter((filteredBid) => {
           if (filteredBid.hasCustomerAccepted === 1
             && filteredBid.hasSchedulerAccepted === 0
             && filteredBid.companyCarrierId === profile.companyId) { // "Marketplace" bid
@@ -108,7 +116,6 @@ class JobViewForm extends Component {
             && filteredBid.hasSchedulerAccepted === 1
             && filteredBid.status === 'Pending') { // "Requested" bid
             bid = filteredBid;
-            return filteredBid;
           }
           return bid;
         });
@@ -116,11 +123,16 @@ class JobViewForm extends Component {
 
       const bookings = await BookingService.getBookingsByJobId(job.id);
       if (bookings && bookings.length > 0) {
-        booking = bookings[0];
+        /* booking = bookings[0];
         const bookingEquipments = await BookingEquipmentService.getBookingEquipments();
         bookingEquipment = bookingEquipments.find(
           bookEq => bookEq.bookingId === booking.id, booking
-        );
+        ); */
+        [booking] = bookings;
+        const bookingEquipments = await BookingEquipmentService
+          .getBookingEquipmentsByBookingId(booking.id);
+        selectedDrivers = bookingEquipments
+          .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
       }
 
       // get overlay data
@@ -183,6 +195,7 @@ class JobViewForm extends Component {
       customerAccepted,
       profile,
       favoriteCompany,
+      selectedDrivers,
       loaded: true
     });
 
@@ -203,8 +216,7 @@ class JobViewForm extends Component {
     } = this.state;
     let {
       bid,
-      booking,
-      bookingEquipment
+      booking
     } = this.state;
     let notification;
 
@@ -218,23 +230,41 @@ class JobViewForm extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
-      // Since the Job was sent to all favorites there's a bid, update existing bid
-      const newBid = CloneDeep(bid);
-      newBid.companyCarrierId = profile.companyId;
-      newBid.hasSchedulerAccepted = 1;
-      newBid.status = 'Accepted';
-      newBid.rateEstimate = newJob.rateEstimate;
-      newBid.notes = newJob.notes;
-      newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
-      bid = {};
-      bid = await BidService.updateBid(newBid);
+      // If The Job was sent to both marketplace and favorites, update bid
+      // If the Job was sent to marketplace but a favorite carrier is accepting it, create a bid
+      if (bid && bid.length > 0) {
+        const newBid = CloneDeep(bid);
+        newBid.companyCarrierId = profile.companyId;
+        newBid.hasSchedulerAccepted = 1;
+        newBid.status = 'Accepted';
+        newBid.rateEstimate = newJob.rateEstimate;
+        newBid.notes = newJob.notes;
+        newBid.modifiedBy = profile.userId;
+        newBid.modifiedOn = moment.utc().format();
+        bid = {};
+        bid = await BidService.updateBid(newBid);
+      } else {
+        bid = {};
+        bid.jobId = newJob.id;
+        bid.userId = profile.userId;
+        bid.companyCarrierId = profile.companyId;
+        bid.hasCustomerAccepted = 1;
+        bid.hasSchedulerAccepted = 1;
+        bid.status = 'Accepted';
+        bid.rateType = newJob.rateType;
+        bid.rate = newJob.rate;
+        bid.rateEstimate = newJob.rateEstimate;
+        bid.notes = newJob.notes;
+        bid.createdBy = profile.userId;
+        bid.createdOn = moment.utc().format();
+        bid.modifiedBy = profile.userId;
+        bid.modifiedOn = moment.utc().format();
+        bid = await BidService.createBid(bid);
+      }
 
       // Create a Booking
       // Check if we have a booking first
@@ -256,8 +286,8 @@ class JobViewForm extends Component {
         booking.sourceAddressId = job.startAddress.id;
         booking.notes = '';
         booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
+        booking.createdOn = moment.utc().format();
+        booking.modifiedOn = moment.utc().format()
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
@@ -324,21 +354,19 @@ class JobViewForm extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
       // CREATING BID
-      if (bid.length > 0) {
+      if (bid && bid.length > 0) {
         const newBid = CloneDeep(bid);
         newBid.companyCarrierId = profile.companyId;
         bid.hasCustomerAccepted = 0;
         bid.hasSchedulerAccepted = 1;
         newBid.status = 'Pending';
         newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment()
-          .unix() * 1000;
+        newBid.modifiedOn = moment.utc().format();
         bid = await BidService.updateBid(newBid);
       } else {
         bid = {};
@@ -353,11 +381,9 @@ class JobViewForm extends Component {
         bid.rateEstimate = newJob.rateEstimate;
         bid.notes = newJob.notes;
         bid.createdBy = profile.userId;
-        bid.createdOn = moment()
-          .unix() * 1000;
+        bid.createdOn = moment.utc().format();
         bid.modifiedBy = profile.userId;
-        bid.modifiedOn = moment()
-          .unix() * 1000;
+        bid.modifiedOn = moment.utc().format();
         bid = await BidService.createBid(bid);
       }
 
@@ -436,8 +462,9 @@ class JobViewForm extends Component {
       jobStatus = job.status;
     }
 
-    // Job was 'Published' to the Marketplace, Carrier is a favorite
-    if (jobStatus === 'Published' && favoriteCompany.length > 0) {
+    // Job was 'Published' to the Marketplace,
+    // Carrier is a favorite OR Customer has requested this particular Carrier
+    if (jobStatus === 'Published' && (favoriteCompany.length > 0 || (bid && bid.hasCustomerAccepted === 1))) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -448,7 +475,18 @@ class JobViewForm extends Component {
         />
       );
     // Job was 'Published' to the Marketplace
-    } else if (jobStatus === 'Published' && bid.status !== 'Pending' && favoriteCompany.length === 0) {
+    } else if (jobStatus === 'Published' && !bid && favoriteCompany.length === 0) {
+      showModalButton = (
+        <TSubmitButton
+          onClick={this.saveJob}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Request Job"
+        />
+      );
+    // Job was 'Published And Offered', there's a bid
+    } else if (jobStatus === 'Published' && (bid && bid.status !== 'Pending' && bid.status !== 'Declined') && favoriteCompany.length === 0) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -459,8 +497,11 @@ class JobViewForm extends Component {
         />
       );
     // Job "Requested" by the carrier
-    } else if (jobStatus === 'Published' && bid.status === 'Pending') {
+    } else if (jobStatus === 'Published' && (bid && bid.status === 'Pending')) {
       showModalButton = 'You have requested this job';
+    // Job "Declined" by the customer
+    } else if (jobStatus === 'Published' && (bid && bid.status === 'Declined')) {
+      showModalButton = 'Your request for this job has been declined.';
     }
 
     return (
@@ -730,7 +771,20 @@ class JobViewForm extends Component {
   }
 
   render() {
-    const { job, loaded } = this.state;
+    const { job, loaded, accessForbidden } = this.state;
+
+    if (accessForbidden) {
+      return (
+        <Col md={12}>
+          <Card style={{paddingBottom: 0}}>
+            <CardBody>
+              <Row className="col-md-12"><h1>Access Forbidden</h1></Row>
+            </CardBody>
+          </Card>
+        </Col>
+      );
+    }
+
     if (loaded) {
       return (
         <React.Fragment>

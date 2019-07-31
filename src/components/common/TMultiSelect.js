@@ -29,6 +29,9 @@ class MultiSelectField extends PureComponent {
         closeOnSelect={false}
         // removeSelected={false}
         placeholder={placeholder}
+        classNamePrefix="react-select"
+        optionClassName="react-select-options"
+        style={{borderRadius: 0, minHeight:'32px'}}
       />
     );
   }

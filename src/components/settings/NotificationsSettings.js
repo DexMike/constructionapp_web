@@ -55,7 +55,7 @@ class NotificationsSettings extends Component {
       if (newSettings[i].key === type) {
         newSettings[i].enabled = value;
         newSettings[i].modifiedBy = user.id;
-        newSettings[i].modifiedOn = moment().unix() * 1000;
+        newSettings[i].modifiedOn = moment.utc().format();
         notificationsToUpdate.push(newSettings[i]);
       }
     }
@@ -73,7 +73,7 @@ class NotificationsSettings extends Component {
     const enabled = notification.enabled ? 0 : 1;
     notification.enabled = enabled;
     notification.modifiedBy = user.id;
-    notification.modifiedOn = moment().unix() * 1000;
+    notification.modifiedOn = moment.utc().format();
     try {
       await UserNotificationsService.updateUserNotification(notification);
       const index = settings.findIndex(x => x.id === notificationId);
@@ -109,7 +109,7 @@ class NotificationsSettings extends Component {
       if (newSettings[i].key === key) {
         newSettings[i][method] = value;
         newSettings[i].modifiedBy = user.id;
-        newSettings[i].modifiedOn = moment().unix() * 1000;
+        newSettings[i].modifiedOn = moment.utc().format();
         notificationsToUpdate.push(newSettings[i]);
       }
     }
@@ -127,7 +127,7 @@ class NotificationsSettings extends Component {
     const enabled = notification[key] ? 0 : 1;
     notification[key] = enabled;
     notification.modifiedBy = user.id;
-    notification.modifiedOn = moment().unix() * 1000;
+    notification.modifiedOn = moment.utc().format();
     try {
       await UserNotificationsService.updateUserNotification(notification);
       const index = settings.findIndex(x => x.id === notificationId);

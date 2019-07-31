@@ -27,28 +27,8 @@ import FileUploadPage from '../FileUploadPage';
 import ReportsPage from '../reports/ReportsPage';
 import PaymentsPage from '../payments/PaymentsPage';
 import PaymentDetails from '../payments/PaymentDetails';
-// import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
 
-// No longer using TableRoutes
-// import TableRoutes from './TableRoutes';
-
-// import CompanyListPage from '../companies/CompanyListPage';
-// import CompanySavePage from '../companies/CompanySavePage';
-// import AddressListPage from '../addresses/AddressListPage';
-// import AddressSavePage from '../addresses/AddressSavePage';
-// import UserListPage from '../users/UserListPage';
-// import UserSavePage from '../users/UserSavePage';
-// import BookingListPage from '../bookings/BookingListPage';
-// import BookingSavePage from '../bookings/BookingSavePage';
-// import EquipmentListCustomerPage from '../equipments/EquipmentListCustomerPage';
-// import LookupListPage from '../lookups/LookupListPage';
-// import LookupSavePage from '../lookups/LookupSavePage';
-// import BidListPage from '../bids/BidListPage';
-// import BidSavePage from '../bids/BidSavePage';
-
-// removing use of external file for TableRoutes
-// <div className="container__wrap">
-//           {/*<Route path="/tables" component={TableRoutes}/>*/}
+import EquipmentsMapTest from '../equipments/EquipmentsMapTest';
 
 class WrappedRoutes extends PureComponent {
   render() {
@@ -79,6 +59,12 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/payments"
             component={PaymentsPage}
+          />
+
+          <Route
+            exact
+            path="/heremaps"
+            component={EquipmentsMapTest}
           />
 
           <Route

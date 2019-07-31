@@ -118,8 +118,7 @@ class BidsTable extends Component {
       newJob = CloneDeep(job);
       newJob.status = 'Booked';
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       await JobService.updateJob(newJob);
 
       // For all of the Bids that are going to be 'Ignored'
@@ -152,8 +151,7 @@ class BidsTable extends Component {
           ignoredBid.rate = newJob.rate;
           ignoredBid.notes = newJob.notes;
           ignoredBid.modifiedBy = profile.userId;
-          ignoredBid.modifiedOn = moment()
-            .unix() * 1000;
+          ignoredBid.modifiedOn = moment.utc().format();
           // console.log(ignoredBid);
           ignoredBidsList.push(BidService.updateBid(ignoredBid));
         }
@@ -187,8 +185,7 @@ class BidsTable extends Component {
       newBid.rateEstimate = newJob.rateEstimate;
       newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       newBid = await BidService.updateBid(newBid);
 
       // Create a Booking
@@ -202,8 +199,8 @@ class BidsTable extends Component {
       booking.endAddressId = newJob.endAddress;
       booking.bookingStatus = 'New';
       booking.createdBy = profile.userId;
-      booking.createdOn = moment().unix() * 1000;
-      booking.modifiedOn = moment().unix() * 1000;
+      booking.createdOn = moment.utc().format();
+      booking.modifiedOn = moment.utc().format();
       booking.modifiedBy = profile.userId;
       booking = await BookingService.createBooking(booking);
 
@@ -246,14 +243,16 @@ class BidsTable extends Component {
           await TwilioService.createSms(notification);
         }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob, newBid.companyCarrierId);
     } else {
       // Decline Bid
       newBid = CloneDeep(selectedBid);
       newBid.status = 'Declined';
       newBid.hasCustomerAccepted = 0;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       newBid = await BidService.updateBid(newBid);
 
       // Notify Carrier company's admin that the job request was declined
@@ -270,6 +269,9 @@ class BidsTable extends Component {
           await TwilioService.createSms(notification);
         }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob);
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
@@ -279,9 +281,6 @@ class BidsTable extends Component {
       newBid.dateF = TFormat.asDate(bid.createdOn);
       return newBid;
     });
-
-    // updating parent component JobSavePage
-    updateJob(newJob);
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();

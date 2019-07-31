@@ -96,12 +96,14 @@ class DashboardCustomerPage extends Component {
   }
 
   async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ profile });
     await this.fetchJobsInfo();
     this.setState({ loaded: true });
   }
 
   async fetchJobsInfo() {
-    const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     const response = await JobService.getCustomerJobsInfo(profile.userId);
     const jobsInfo = response.data;
     const { totalJobs } = response;
@@ -110,7 +112,6 @@ class DashboardCustomerPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
-
     this.setState({
       jobs,
       filters,
@@ -168,7 +169,6 @@ class DashboardCustomerPage extends Component {
   async fetchJobs() {
     const {filters} = this.state;
     const jobs = await JobService.getJobDashboardByFilters(filters);
-
     this.setState({jobs});
     return jobs;
   }
@@ -398,7 +398,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {loaded, totalJobs, totalCount} = this.state;
+    const {profile, loaded, totalJobs, totalCount} = this.state;
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -457,10 +457,14 @@ class DashboardCustomerPage extends Component {
       }
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
-      newJob.newStartDate = TFormat.asDate(job.startTime);
+      newJob.newStartDate = TFormat.asDate(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
+      }
+
+      if (!job.companyCarrierLegalName) {
+        newJob.companyCarrierLegalName = 'Unassigned';
       }
 
       potentialIncome += tempRate * newJob.rateEstimate;
@@ -504,8 +508,8 @@ class DashboardCustomerPage extends Component {
                           displayName: 'Job Status'
                         },
                         {
-                          name: 'legalName',
-                          displayName: 'Customer'
+                          name: 'companyCarrierLegalName',
+                          displayName: 'Carrier'
                         },
                         {
                           name: 'newSize',

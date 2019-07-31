@@ -57,7 +57,8 @@ class JobSavePage extends Component {
       btnSubmitting: false,
       allocateDriversModal: false,
       drivers: [],
-      selectedDrivers: []
+      selectedDrivers: [],
+      accessForbidden: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -72,6 +73,7 @@ class JobSavePage extends Component {
   async componentDidMount() {
     const { match } = this.props;
     let {
+      job,
       bid,
       booking,
       profile,
@@ -84,83 +86,112 @@ class JobSavePage extends Component {
       profile = await ProfileService.getProfile();
 
       if (match.params.id) {
-        const job = await JobService.getJobById(match.params.id);
-        // company
-        const company = await CompanyService.getCompanyById(job.companiesId);
-        // start address
-        const startAddress = await AddressService.getAddressById(job.startAddress);
-        // end address
-        let endAddress = null;
-        if (job.endAddress) {
-          endAddress = await AddressService.getAddressById(job.endAddress);
+        try {
+          job = await JobService.getJobById(match.params.id);
+        } catch (e) {
+          if (e.message === 'Access Forbidden') {
+            // access 403
+            this.setState({ accessForbidden: true });
+            return;
+          }
         }
-        // materials
-        const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        job.company = company;
-        job.startAddress = startAddress;
-        job.endAddress = endAddress;
-        job.materials = materials.map(material => material.value);
 
-        const bids = await BidService.getBidsByJobId(job.id);
-        if (bids && bids.length > 0) { // check if there's a bid
-          // If there's more than one bid
-          if (bids.length > 1) {
+        if (job) {
+          // company
+          const company = await CompanyService.getCompanyById(job.companiesId);
+          // start address
+          const startAddress = await AddressService.getAddressById(job.startAddress);
+          // end address
+          let endAddress = null;
+          if (job.endAddress) {
+            endAddress = await AddressService.getAddressById(job.endAddress);
+          }
+
+          // materials
+          const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+          job.company = company;
+          job.startAddress = startAddress;
+          job.endAddress = endAddress;
+          job.materials = materials.map(material => material.value);
+
+          // bids
+          const bids = await BidService.getBidsByJobId(job.id);
+          if (bids && bids.length > 0) { // check if there's a bid
+            // If there's more than one bid
+            // if (bids.length > 1) {
             // For the Carrier, we search for a bid that has hasCustomerAccepted flag on
             // and is assigned to the carrier (a favorite)
-            bid = bids.filter((filteredBid) => {
+            bids.filter((filteredBid) => {
               if (profile.companyType === 'Carrier') {
                 if (filteredBid.hasCustomerAccepted === 1
                   // && filteredBid.hasSchedulerAccepted === 1
                   && filteredBid.companyCarrierId === profile.companyId) {
-                  return filteredBid;
+                  bid = filteredBid;
+                  companyCarrier = bid.companyCarrierId;
                 }
-                [bid] = bids;
-                // For the Customer, we search for a bid that has hasSchedulerAccepted flag on
-              } else if (filteredBid.hasSchedulerAccepted === 1) {
-                return filteredBid;
+                // [bid] = bids;
+                // For the Customer, we search for the 'winning' bid (if there's already one)
+              } else if (filteredBid.hasSchedulerAccepted === 1
+                && filteredBid.hasCustomerAccepted === 1) {
+                bid = filteredBid;
+                companyCarrier = bid.companyCarrierId;
               }
-              [bid] = bids;
+              // [bid] = bids;
               return bid;
             });
-          } else { // There is just one bid
-            [bid] = bids;
+            // companyCarrier = bid.companyCarrierId;
+            /* } else { // There is just one bid
+              [bid] = bids;
+            } */
           }
-          companyCarrier = bid.companyCarrierId;
-        }
-        const bookings = await BookingService.getBookingsByJobId(job.id);
-        if (bookings && bookings.length > 0) {
-          [booking] = bookings;
-          const bookingEquipments = await BookingEquipmentService
-            .getBookingEquipmentsByBookingId(booking.id);
-          selectedDrivers = bookingEquipments
-            .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
-          // bookingEquipment = bookingEquipments.find(
-          //   bookingEq => bookingEq.bookingId === booking.id,
-          //   booking
-          // );
-        }
 
-        // Check if carrier is favorite for this job's customer
-        if (profile.companyType === 'Carrier') {
-          // check if Carrier Company [profile.companyId]
-          // is Customer's Company favorite [job.companiesId]
-          favoriteCompany = await GroupListService.getGroupListsByCompanyId(
-            profile.companyId, job.companiesId
-          );
+          // bookings
+          const bookings = await BookingService.getBookingsByJobId(job.id);
+          if (bookings && bookings.length > 0) {
+            [booking] = bookings;
+            const bookingEquipments = await BookingEquipmentService
+              .getBookingEquipmentsByBookingId(booking.id);
+            selectedDrivers = bookingEquipments
+              .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
+            // bookingEquipment = bookingEquipments.find(
+            //   bookingEq => bookingEq.bookingId === booking.id,
+            //   booking
+            // );
+          }
+
+          // Check if carrier is favorite for this job's customer
+          if (profile.companyType === 'Carrier') {
+            // check if Carrier Company [profile.companyId]
+            // is Customer's Company favorite [job.companiesId]
+            favoriteCompany = await GroupListService.getGroupListsByCompanyId(
+              profile.companyId, job.companiesId
+            );
+          }
+
+          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          let enabledDrivers = [];
+          Object.values(drivers).forEach((itm) => {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled') {
+              enabledDrivers.push(itm);
+            }
+          });
+          // Setting id to driverId since is getting the userId and saving it as driverId
+          enabledDrivers = enabledDrivers.map((driver) => {
+            const newDriver = driver;
+            newDriver.id = newDriver.driverId;
+            return newDriver;
+          });
+          this.setState({
+            job,
+            bid,
+            companyCarrier,
+            booking,
+            profile,
+            companyType: profile.companyType,
+            favoriteCompany,
+            drivers: enabledDrivers
+          });
         }
-
-        const drivers = await UserService.getUsersByCompanyId(profile.companyId);
-
-        this.setState({
-          job,
-          bid,
-          companyCarrier,
-          booking,
-          profile,
-          companyType: profile.companyType,
-          favoriteCompany,
-          drivers
-        });
       }
 
       // moved the loader to the mount function
@@ -170,11 +201,11 @@ class JobSavePage extends Component {
         selectedDrivers
       });
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
   }
 
-  async updateJob(newJob) {
+  async updateJob(newJob, companyCarrier) {
     const job = newJob;
     const company = await CompanyService.getCompanyById(job.companiesId);
     const startAddress = await AddressService.getAddressById(job.startAddress);
@@ -187,7 +218,7 @@ class JobSavePage extends Component {
     job.startAddress = startAddress;
     job.endAddress = endAddress;
     job.materials = materials.map(material => material.value);
-    this.setState({job});
+    this.setState({ job, companyCarrier });
   }
 
   toggleAllocateDriversModal() {
@@ -227,8 +258,7 @@ class JobSavePage extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -237,8 +267,7 @@ class JobSavePage extends Component {
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       await BidService.updateBid(newBid);
 
       // CREATING BOOKING
@@ -256,8 +285,8 @@ class JobSavePage extends Component {
         booking.endAddressId = newJob.endAddress.id;
         booking.bookingStatus = 'New';
         booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
+        booking.createdOn = moment.utc().format();
+        booking.modifiedOn = moment.utc().format();
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
@@ -291,8 +320,8 @@ class JobSavePage extends Component {
           bookingEquipment.notes = '';
           bookingEquipment.createdBy = equipment.driversId;
           bookingEquipment.modifiedBy = equipment.driversId;
-          bookingEquipment.modifiedOn = moment().unix() * 1000;
-          bookingEquipment.createdOn = moment().unix() * 1000;
+          bookingEquipment.modifiedOn = moment.utc().format();
+          bookingEquipment.createdOn = moment.utc().format();
           bookingEquipment = await BookingEquipmentService.createBookingEquipment(
             bookingEquipment
           );
@@ -317,7 +346,7 @@ class JobSavePage extends Component {
       // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
-      this.setState({ job });
+      this.setState({ job, companyCarrier: newBid.companyCarrierId });
     } else { // Customer is rejecting the job request
       const newBid = CloneDeep(bid);
 
@@ -326,8 +355,7 @@ class JobSavePage extends Component {
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Declined';
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       await BidService.updateBid(newBid);
 
       // Let's make a call to Twilio to send an SMS
@@ -372,8 +400,7 @@ class JobSavePage extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -386,8 +413,7 @@ class JobSavePage extends Component {
       newBid.rateEstimate = newJob.rateEstimate;
       newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       bid = await BidService.updateBid(newBid);
 
       // Create a Booking
@@ -404,8 +430,8 @@ class JobSavePage extends Component {
         booking.endAddressId = job.endAddress.id;
         booking.bookingStatus = 'New';
         booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
+        booking.createdOn = moment.utc().format();
+        booking.modifiedOn = moment.utc().format();
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
@@ -476,8 +502,7 @@ class JobSavePage extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -495,10 +520,8 @@ class JobSavePage extends Component {
       bid.notes = job.notes;
       bid.createdBy = profile.userId;
       bid.modifiedBy = profile.userId;
-      bid.modifiedOn = moment()
-        .unix() * 1000;
-      bid.createdOn = moment()
-        .unix() * 1000;
+      bid.modifiedOn = moment.utc().format();
+      bid.createdOn = moment.utc().format();
       await BidService.createBid(bid);
 
       // Sending SMS to customer's Admin from the company who created the Job
@@ -525,8 +548,7 @@ class JobSavePage extends Component {
       newBid.hasSchedulerAccepted = 0;
       newBid.status = 'Declined';
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       bid = {};
       bid = await BidService.updateBid(newBid);
 
@@ -541,10 +563,13 @@ class JobSavePage extends Component {
           await TwilioService.createSms(notification);
         }
       }
+      this.setState({ bid });
 
       // eslint-disable-next-line no-alert
       // alert('Your request has been sent.');
     }
+
+    this.setState({ btnSubmitting: false });
   }
 
   // remove non numeric
@@ -567,7 +592,7 @@ class JobSavePage extends Component {
   async handleAllocateDrivers() {
     try {
       // console.log('saving...');
-      const { selectedDrivers, booking, profile } = this.state;
+      const { selectedDrivers, booking, job, profile } = this.state;
       const bookingEquipments = selectedDrivers.map(selectedDriver => ({
         bookingId: booking.id,
         schedulerId: profile.userId,
@@ -577,8 +602,8 @@ class JobSavePage extends Component {
         rateActual: 0,
         startTime: new Date(),
         endTime: new Date(),
-        startAddressId: 0,
-        endAddressId: 0,
+        startAddressId: job.startAddress.id,
+        endAddressId: job.endAddress.id,
         notes: '',
         createdBy: profile.userId,
         createdOn: new Date(),
@@ -587,7 +612,7 @@ class JobSavePage extends Component {
       }));
       await BookingEquipmentService.allocateDrivers(bookingEquipments, booking.id);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
     this.toggleAllocateDriversModal();
   }
@@ -616,18 +641,10 @@ class JobSavePage extends Component {
   }
 
   renderJobForm(companyType, companyCarrier, job) {
-    if (companyType === 'Carrier') {
-      return (
-        <JobForm
-          job={job}
-          companyCarrier={companyCarrier}
-          handlePageClick={this.handlePageClick}
-        />
-      );
-    }
     return (
       <JobForm
         job={job}
+        companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
       />
     );
@@ -647,10 +664,12 @@ class JobSavePage extends Component {
   }
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
+    const { profile } = this.state;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
-    if (job.status === 'Published' && companyType === 'Carrier') {
-      // If the carrier is a favorite
-      if (favoriteCompany.length > 0) {
+    if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
+      // If the carrier is a favorite OR the Customer has requested this particular Carrier
+      if ((favoriteCompany.length > 0 && (bid && (/* bid.status !== 'Pending' && */bid.status !== 'Declined')))
+      || (bid && bid.hasCustomerAccepted === 1 && bid.status !== 'Declined')) {
         return (
           <div>
             <TSubmitButton
@@ -671,7 +690,7 @@ class JobSavePage extends Component {
         );
       }
       // the carrier is not a favorite
-      if (bid.status !== 'Pending') {
+      if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
         return (
           <TSubmitButton
             onClick={() => this.handleConfirmRequestCarrier('Request')}
@@ -680,6 +699,19 @@ class JobSavePage extends Component {
             loaderSize={10}
             bntText="Request Job"
           />
+        );
+      }
+
+      // the carrier is not a favorite
+      if (bid && bid.status === 'Declined') {
+        return (
+          <h3 style={{
+            marginTop: 20,
+            marginLeft: 15,
+            marginBottom: 20
+          }}
+          >You have declined this job.
+          </h3>
         );
       }
 
@@ -695,8 +727,10 @@ class JobSavePage extends Component {
     }
     // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
     if ((job.status === 'On Offer' || job.status === 'Published And Offered')
-      && companyType === 'Carrier' && bid.status !== 'Declined'
-      && favoriteCompany.length > 0
+      && companyType === 'Carrier'
+      && bid.status !== 'Declined'
+      // Check if the carrier is a favorite OR the Customer is 'Requesting' this particular Carrier
+      && (favoriteCompany.length > 0 || (bid.status === 'Pending' && bid.companyCarrierId === profile.companyId))
     ) {
       return (
         <div>
@@ -758,7 +792,7 @@ class JobSavePage extends Component {
 
   renderAllocateDriversModal() {
     const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
-    const driverData = drivers.data;
+    const driverData = drivers;    
     const driverColumns = [
       {
         displayName: 'First Name',
@@ -799,14 +833,17 @@ class JobSavePage extends Component {
                   <div className="row">
 
                     <TTable
-                    handleRowsChange={() => {}}
-                    data={driverData}
-                    columns={driverColumns}
-                    handlePageChange={() => {}}
-                    handleIdClick={() => {}}
-                    isSelectable
-                    onSelect={selected => this.setState({ selectedDrivers: selected })}
-                    selected={selectedDrivers}
+                      handleRowsChange={() => {
+                      }}
+                      data={driverData}
+                      columns={driverColumns}
+                      handlePageChange={() => {
+                      }}
+                      handleIdClick={() => {
+                      }}
+                      isSelectable
+                      onSelect={selected => this.setState({ selectedDrivers: selected })}
+                      selected={selectedDrivers}
                     />
                     <div className="col-md-8"/>
                     <div className="col-md-4">
@@ -843,8 +880,21 @@ class JobSavePage extends Component {
       loaded,
       btnSubmitting,
       companyCarrier,
-      profile
+      profile,
+      accessForbidden
     } = this.state;
+    if (accessForbidden) {
+      return (
+        <Container className="container">
+          <Row>
+            <Col md={12}>
+              <h3 className="page-title">Job Details</h3>
+            </Col>
+          </Row>
+          <h1>Access Forbidden</h1>
+        </Container>
+      );
+    }
 
     if (loaded) {
       if (companyType !== null && job !== null) {
