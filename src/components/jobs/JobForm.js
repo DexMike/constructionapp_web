@@ -90,11 +90,10 @@ class JobForm extends Component {
     let distance = 0;
     let time = 0;
 
-    // HERE MAP
-    // console.log('>>>>>KEYS', hereMapsCode, hereMapsId);
     const platform = new H.service.Platform({
       app_id: hereMapsId,
-      app_code: hereMapsCode
+      app_code: hereMapsCode,
+      useHTTPS: true
     });
 
     const routeRequestParams = {
@@ -102,12 +101,8 @@ class JobForm extends Component {
       representation: 'display',
       routeattributes: 'waypoints,summary,shape,legs,incidents',
       maneuverattributes: 'direction,action',
-      waypoint0: '30.349027,-97.740831',
-      waypoint1: '30.260708,-97.751145',
-      /*
-      waypoint0: '30.284608,-97.775877',
-      waypoint1: '30.252606,-97.722753',
-      */
+      waypoint0: `${startPoint.latitude},${startPoint.longitude}`,
+      waypoint1: `${endPoint.latitude},${endPoint.longitude}`,
       truckType: 'tractorTruck',
       limitedWeight: 700,
       metricSystem: 'imperial',
