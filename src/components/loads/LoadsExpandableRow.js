@@ -348,14 +348,14 @@ class LoadsExpandableRow extends Component {
                           onClick={this.toggleDisputeModal}
                           // name="DISPUTE"
                           type="button"
-                          className="primaryButton"
+                          className="secondaryButton"
                         >
                           DISPUTE
                         </Button>
                         <Button
                           onClick={this.handleApproveLoad}
                           type="button"
-                          className="secondaryButton"
+                          className="PrimaryButton"
                         >
                           APPROVE
                         </Button>
