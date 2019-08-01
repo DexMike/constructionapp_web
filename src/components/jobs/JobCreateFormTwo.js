@@ -274,10 +274,6 @@ class JobCreateFormTwo extends PureComponent {
       isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      /* startTime: moment.utc(d.jobDate).tz(
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).format(), */
-      // startTime: moment.utc(d.jobDate).format(),
       startTime: moment.tz(
         d.jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
