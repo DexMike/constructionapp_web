@@ -128,6 +128,11 @@ class JobSavePage extends Component {
                   && filteredBid.companyCarrierId === profile.companyId) {
                   bid = filteredBid;
                   companyCarrier = bid.companyCarrierId;
+                } else if (filteredBid.hasCustomerAccepted === 0
+                  && filteredBid.hasSchedulerAccepted === 1
+                  && filteredBid.companyCarrierId === profile.companyId) {
+                  bid = filteredBid;
+                  companyCarrier = bid.companyCarrierId;
                 }
                 // [bid] = bids;
                 // For the Customer, we search for the 'winning' bid (if there's already one)
@@ -388,7 +393,6 @@ class JobSavePage extends Component {
     let { bid } = this.state;
     let { booking } = this.state;
     let notification;
-
     // A favorite Carrier "accepts" the job
     if (action === 'Accept') {
       // console.log('accepting');
@@ -496,7 +500,6 @@ class JobSavePage extends Component {
     } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
-
       // Updating the Job
       // newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
@@ -539,7 +542,7 @@ class JobSavePage extends Component {
       // eslint-disable-next-line no-alert
       // alert('Your request has been sent.');
       job.status = newJob.status;
-      this.setState({ job });
+      this.setState({ job, bid });
     } else if (action === 'Decline') { // A Carrier "declines" a job request
       // Update existing bid
       const newBid = CloneDeep(bid);
