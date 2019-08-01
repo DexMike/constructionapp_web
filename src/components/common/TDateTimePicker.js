@@ -44,7 +44,9 @@ class TDateTimePickerField extends PureComponent {
       startDate = parsedDate;
     }
 
-    const timeZonedStartDate = new Date(moment(startDate).tz(profile.timeZone).format('YYYY-MM-DD HH:mm:ss'));
+    const timeZonedStartDate = new Date(moment(startDate).tz(
+      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+    ).format('YYYY-MM-DD HH:mm:ss'));
     this.setState({ startDate: timeZonedStartDate });
     // this.setState({ startDate: new Date() });
   }
