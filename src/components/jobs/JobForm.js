@@ -872,8 +872,14 @@ class JobForm extends Component {
                 </div>
               </div>
             </Row>
-            <hr/>
-            {this.renderLoads(loads, job)}
+            {
+              job.status !== 'Published And Offered' && (
+                <React.Fragment>
+                  <hr/>
+                  {this.renderLoads(loads, job)}
+                </React.Fragment>
+              )
+            }
           </CardBody>
         </Card>
       </Container>
