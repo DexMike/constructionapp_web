@@ -19,7 +19,7 @@ import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 import ProfileService from '../../api/ProfileService';
 
 // import USstates from '../../utils/usStates';
@@ -327,6 +327,8 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip
     } = this.state;
     const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
@@ -334,6 +336,8 @@ class CreateJobFormOne extends PureComponent {
       // console.log(err);
       return null;
     }
+    */
+    return null;
   }
 
   async getEndCoords() {
@@ -344,6 +348,8 @@ class CreateJobFormOne extends PureComponent {
       endLocationZip
     } = this.state;
     const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
@@ -351,6 +357,8 @@ class CreateJobFormOne extends PureComponent {
       // console.log(err);
       return null;
     }
+    */
+    return null;
   }
 
   handleMaterialsChange(data) {

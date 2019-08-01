@@ -19,7 +19,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
   constructor(props) {
@@ -269,9 +269,12 @@ class JobFilter extends Component {
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
         try { // Search for that new zip code's coordinates with MapBox API
+          // TODO -> do this without MapBox
+          /*
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
           filters.companyLongitude = geoLocation.features[0].center[0];
+          */
         } catch (e) {
           this.setState({
             reqHandlerZip: {

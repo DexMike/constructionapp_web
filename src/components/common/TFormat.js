@@ -250,8 +250,6 @@ class TFormat {
   }
 
   static asMetersToMiles(inputValue) {
-    // Added this one since mapbox response returns the value in
-    // meters when getting the distance between locations
     const miles = inputValue * toMil / 1000;
     return (
       <NumberFormat

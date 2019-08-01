@@ -26,7 +26,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class JobCreateFormCarrier extends Component {
   constructor(props) {
@@ -284,6 +284,8 @@ class JobCreateFormCarrier extends Component {
       startLocationZip
     } = this.state;
     const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
@@ -291,6 +293,7 @@ class JobCreateFormCarrier extends Component {
       // console.log(err);
       return null;
     }
+    */
   }
 
   async getEndCoords() {
@@ -301,6 +304,8 @@ class JobCreateFormCarrier extends Component {
       endLocationZip
     } = this.state;
     const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
@@ -308,6 +313,8 @@ class JobCreateFormCarrier extends Component {
       // console.log(err);
       return null;
     }
+    */
+    return null;
   }
 
   // save begins ///////////////////////////////////////////////////////
