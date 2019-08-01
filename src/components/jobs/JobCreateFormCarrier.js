@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import * as PropTypes from 'prop-types';
 import {
   Card,
@@ -26,7 +27,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class JobCreateFormCarrier extends Component {
   constructor(props) {
@@ -43,6 +44,7 @@ class JobCreateFormCarrier extends Component {
       material: '',
       availableMaterials: [],
       */
+      profile: null,
 
       // truck properties
       truckType: '',
@@ -227,6 +229,7 @@ class JobCreateFormCarrier extends Component {
   }
 
   async componentDidMount() {
+    const profile = await ProfileService.getProfile();
     let allMaterials = await LookupsService.getLookupsByType('MaterialType');
     const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
     const allTruckTypes = [];
@@ -272,6 +275,7 @@ class JobCreateFormCarrier extends Component {
       allUSstates: states,
       allMaterials,
       allTruckTypes,
+      profile,
       loaded: true
     });
   }
@@ -284,6 +288,8 @@ class JobCreateFormCarrier extends Component {
       startLocationZip
     } = this.state;
     const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
@@ -291,6 +297,7 @@ class JobCreateFormCarrier extends Component {
       // console.log(err);
       return null;
     }
+    */
   }
 
   async getEndCoords() {
@@ -301,6 +308,8 @@ class JobCreateFormCarrier extends Component {
       endLocationZip
     } = this.state;
     const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
@@ -308,6 +317,8 @@ class JobCreateFormCarrier extends Component {
       // console.log(err);
       return null;
     }
+    */
+    return null;
   }
 
   // save begins ///////////////////////////////////////////////////////
@@ -320,10 +331,10 @@ class JobCreateFormCarrier extends Component {
       return;
     }
 
-    const profile = await ProfileService.getProfile();
-
     // consts
     const {
+      profile,
+
       startLocationAddressName,
       startLocationAddress1,
       startLocationAddress2,
@@ -347,12 +358,12 @@ class JobCreateFormCarrier extends Component {
       rateEstimate,
       name,
       instructions,
-      jobStartDateTime,
       jobTruckType,
       truckType,
       jobTrucksNeeded,
       selectedMaterials
     } = this.state;
+    let { jobStartDateTime } = this.state;
 
     const { selectedCarrierId } = this.props;
 
@@ -420,6 +431,8 @@ class JobCreateFormCarrier extends Component {
     const calcTotal = rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
+    jobStartDateTime = moment(jobStartDateTime).format('YYYY-MM-DD HH:mm');
+
     const job = {
       companiesId: profile.companyId,
       name,
@@ -427,7 +440,10 @@ class JobCreateFormCarrier extends Component {
       isFavorited: false,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: new Date(jobStartDateTime),
+      startTime: moment.tz(
+        jobStartDateTime,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
       equipmentType: truckType.value,
       numEquipments: jobTrucksNeeded,
       rateType,
@@ -483,7 +499,7 @@ class JobCreateFormCarrier extends Component {
     booking.schedulersCompanyId = selectedCarrierId.companyId;
     booking.rateType = createdJob.rateType;
     booking.schedulersCompanyId = selectedCarrierId;
-    booking.startTime = new Date(jobStartDateTime);
+    booking.startTime = createdJob.startTime;
 
     // if the startaddress is the actual ID
     if (Number.isInteger(createdJob.startAddress)) {
@@ -765,7 +781,7 @@ class JobCreateFormCarrier extends Component {
   }
 
   async saveJobMaterials(jobId, material) {
-    const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     if (profile && material) {
       const newMaterial = {
         jobsId: jobId,
@@ -1021,7 +1037,7 @@ class JobCreateFormCarrier extends Component {
   jobDateChange(data) {
     const {reqHandlerDate} = this.state;
     this.setState({
-      jobDate: data,
+      jobStartDateTime: data,
       reqHandlerDate: Object.assign({}, reqHandlerDate, {
         touched: false
       })
@@ -1116,7 +1132,7 @@ class JobCreateFormCarrier extends Component {
 
     const currDate = new Date();
 
-    if (!jobDate || jobDate.getTime() < currDate.getTime()) {
+    if (!jobStartDateTime || jobStartDateTime.getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
@@ -1488,6 +1504,7 @@ class JobCreateFormCarrier extends Component {
       reqHandlerStartAddressName,
       endLocationAddressName,
       reqHandlerEndAddressName,
+      profile,
       loaded
     } = this.state;
     const today = new Date();
@@ -1533,13 +1550,20 @@ class JobCreateFormCarrier extends Component {
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Date of Job</span>
+                    <span className="form__form-group-label">Date of Job&nbsp;
+                      <span className="form-small-label">Your current time zone is set to&nbsp;
+                        {profile.timeZone
+                          ? moment().tz(profile.timeZone).format('z')
+                          : moment().tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('z')
+                        }. Your timezone can be changed in <Link to="/settings"><span>User Settings</span></Link>.
+                      </span>
+                    </span>
                     <TDateTimePicker
                       input={
                         {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
-                          value: jobDate,
+                          value: jobStartDateTime
                           // givenDate: currentDate
                         }
                       }

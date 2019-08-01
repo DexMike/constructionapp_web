@@ -31,7 +31,7 @@ import GroupListService from '../../api/GroupListService';
 import EquipmentRow from './EquipmentRow';
 import TFieldNumber from '../common/TFieldNumber';
 import TField from '../common/TField';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class TrucksCustomerPage extends Component {
   constructor(props) {
@@ -213,6 +213,7 @@ class TrucksCustomerPage extends Component {
     // we search for that zip code coordinates with MapBox API
     if ((address.zipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0) {
+        /*
         try {
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
@@ -226,6 +227,14 @@ class TrucksCustomerPage extends Component {
             }
           });
         }
+        */
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            error: 'Invalid US Zip Code',
+            touched: true
+          }
+        });
       } else { // if the zipCode filter is empty, default the coordinates to user's address
         filters.companyLatitude = address.latitude;
         filters.companyLongitude = address.longitude;
