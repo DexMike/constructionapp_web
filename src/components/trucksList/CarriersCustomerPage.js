@@ -741,13 +741,13 @@ class CarriersCustomerPage extends Component {
 
     const mats = this.returnSelectedMaterials();
 
-    if (mats.length < 1 && modal && materialTypeList.length > 0) {
+    /* if (mats.length < 1 && modal && materialTypeList.length > 0) {
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
       // this.preventModal();
       return false;
       // alert('Please select a material type for this job');
-    }
+    } */
 
     return (
       <Modal

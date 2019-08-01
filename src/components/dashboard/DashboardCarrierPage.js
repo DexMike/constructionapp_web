@@ -427,7 +427,7 @@ class DashboardCarrierPage extends Component {
         );
       }
 
-      newJob.newStartDate = TFormat.asDate(job.startTime, profile.timeZone);
+      newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
