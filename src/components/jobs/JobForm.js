@@ -14,7 +14,7 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 /*
 RouteFeatureWeightType
@@ -90,11 +90,10 @@ class JobForm extends Component {
     let distance = 0;
     let time = 0;
 
-    // HERE MAP
-    // console.log('>>>>>KEYS', hereMapsCode, hereMapsId);
     const platform = new H.service.Platform({
       app_id: hereMapsId,
-      app_code: hereMapsCode
+      app_code: hereMapsCode,
+      useHTTPS: true
     });
 
     const routeRequestParams = {
@@ -102,12 +101,8 @@ class JobForm extends Component {
       representation: 'display',
       routeattributes: 'waypoints,summary,shape,legs,incidents',
       maneuverattributes: 'direction,action',
-      waypoint0: '30.349027,-97.740831',
-      waypoint1: '30.260708,-97.751145',
-      /*
-      waypoint0: '30.284608,-97.775877',
-      waypoint1: '30.252606,-97.722753',
-      */
+      waypoint0: `${startPoint.latitude},${startPoint.longitude}`,
+      waypoint1: `${endPoint.latitude},${endPoint.longitude}`,
       truckType: 'tractorTruck',
       limitedWeight: 700,
       metricSystem: 'imperial',
@@ -122,11 +117,14 @@ class JobForm extends Component {
     );
 
     try {
+      // TODO -> do this without MapBox
+      /*
       const response = await GeoCodingService
         .getDistance(startPoint.longitude, startPoint.latitude,
           endPoint.longitude, endPoint.latitude);
       distance = response.routes[0].distance;
       time = response.routes[0].duration;
+      */
     } catch (e) {
       // console.log(e)
     }
@@ -872,8 +870,14 @@ class JobForm extends Component {
                 </div>
               </div>
             </Row>
-            <hr/>
-            {this.renderLoads(loads, job)}
+            {
+              job.status !== 'Published And Offered' && (
+                <React.Fragment>
+                  <hr/>
+                  {this.renderLoads(loads, job)}
+                </React.Fragment>
+              )
+            }
           </CardBody>
         </Card>
       </Container>

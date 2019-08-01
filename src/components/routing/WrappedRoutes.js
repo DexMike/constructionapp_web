@@ -28,8 +28,6 @@ import ReportsPage from '../reports/ReportsPage';
 import PaymentsPage from '../payments/PaymentsPage';
 import PaymentDetails from '../payments/PaymentDetails';
 
-import EquipmentsMapTest from '../equipments/EquipmentsMapTest';
-
 class WrappedRoutes extends PureComponent {
   render() {
     return (
@@ -59,12 +57,6 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/payments"
             component={PaymentsPage}
-          />
-
-          <Route
-            exact
-            path="/heremaps"
-            component={EquipmentsMapTest}
           />
 
           <Route

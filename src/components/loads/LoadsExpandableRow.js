@@ -86,7 +86,8 @@ class LoadsExpandableRow extends Component {
     // here
     const platform = new H.service.Platform({
       app_id: HERE_MAPS_APP_ID,
-      app_code: HERE_MAPS_APP_CODE
+      app_code: HERE_MAPS_APP_CODE,
+      useHTTPS: true
     });
 
     if (Object.keys(gpsTrackings).length > 0) {
@@ -348,14 +349,14 @@ class LoadsExpandableRow extends Component {
                           onClick={this.toggleDisputeModal}
                           // name="DISPUTE"
                           type="button"
-                          className="primaryButton"
+                          className="secondaryButton"
                         >
                           DISPUTE
                         </Button>
                         <Button
                           onClick={this.handleApproveLoad}
                           type="button"
-                          className="secondaryButton"
+                          className="PrimaryButton"
                         >
                           APPROVE
                         </Button>

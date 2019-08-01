@@ -19,7 +19,7 @@ import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 import ProfileService from '../../api/ProfileService';
 
 // import USstates from '../../utils/usStates';
@@ -293,7 +293,13 @@ class CreateJobFormOne extends PureComponent {
           };
           allTruckTypes.push(inside);
         });
+
+      const jobDate = moment().tz(
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).valueOf();
+
       this.setState({
+        jobDate,
         allMaterials,
         allTruckTypes
       });
@@ -306,11 +312,7 @@ class CreateJobFormOne extends PureComponent {
       label: state.val1
     }));
 
-    const jobDate = moment().tz(
-      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-    ).valueOf();
-
-    this.setState({jobDate, allUSstates: states, profile, loaded: true});
+    this.setState({allUSstates: states, profile, loaded: true});
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -327,6 +329,8 @@ class CreateJobFormOne extends PureComponent {
       startLocationZip
     } = this.state;
     const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
@@ -334,6 +338,8 @@ class CreateJobFormOne extends PureComponent {
       // console.log(err);
       return null;
     }
+    */
+    return null;
   }
 
   async getEndCoords() {
@@ -344,6 +350,8 @@ class CreateJobFormOne extends PureComponent {
       endLocationZip
     } = this.state;
     const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
     try {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
@@ -351,6 +359,8 @@ class CreateJobFormOne extends PureComponent {
       // console.log(err);
       return null;
     }
+    */
+    return null;
   }
 
   handleMaterialsChange(data) {
@@ -1171,7 +1181,6 @@ class CreateJobFormOne extends PureComponent {
       endLocationCity,
       endLocationState,
       endLocationZip,
-      jobDate,
       startLocationAddress1,
       startLocationAddress2,
       startLocationCity,
@@ -1200,7 +1209,8 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndAddressName,
       loaded
     } = this.state;
-    const currentDate = moment().tz(
+    let { jobDate } = this.state;
+    jobDate = moment(jobDate).tz(
       profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
     ).valueOf();
     const {onClose} = this.props;
@@ -1259,7 +1269,7 @@ class CreateJobFormOne extends PureComponent {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
                           value: {jobDate},
-                          givenDate: currentDate
+                          givenDate: jobDate
                         }
                       }
                       onChange={this.jobDateChange}

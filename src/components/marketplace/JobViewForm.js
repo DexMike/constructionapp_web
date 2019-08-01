@@ -165,7 +165,8 @@ class JobViewForm extends Component {
     /**/
     const platform = new H.service.Platform({
       app_id: HERE_MAPS_APP_ID,
-      app_code: HERE_MAPS_APP_CODE
+      app_code: HERE_MAPS_APP_CODE,
+      useHTTPS: true
     });
 
     if (startAddress.latitude
@@ -548,7 +549,7 @@ class JobViewForm extends Component {
             {this.renderAddress(job.endAddress, 'end')}
           </span>
         </Row>
-        <span className="col-md-12 mapbox-jobViewForm">
+        <span className="col-md-12">
           {this.renderMap()}
         </span>
       </Container>

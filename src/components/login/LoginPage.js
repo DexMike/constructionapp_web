@@ -136,12 +136,19 @@ class LoginPage extends SignIn {
       const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
 
-      if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled') {
+      if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
         return;
         // user is under review
       }
-
+      if (user.id && user.userStatus === 'Driver Created') {
+        const driver = await UserService.getDriverByUserId(user.id);
+        if (driver.id === null || driver.driverStatus !== 'Enabled') {
+          await this.createLoginLog(true);
+          this.setState({userUnderReview: true});
+          return;
+        }
+      }
       let ip = '';
       try {
         const ipAddress = await UtilsService.getUserIP();
