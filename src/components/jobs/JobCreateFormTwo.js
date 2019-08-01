@@ -35,6 +35,7 @@ class JobCreateFormTwo extends PureComponent {
       nonFavoriteAdminTels: [],
       loaded: false,
       btnSubmitting: false,
+      profile: null,
       reqCheckABox: {
         touched: false,
         error: ''
@@ -67,7 +68,6 @@ class JobCreateFormTwo extends PureComponent {
       hourTrucksNumber: d.hourTrucksNumber,
       material: d.selectedMaterials.value
     };
-
 
     const allCompanies = await CompanyService.getFavoritesNonFavoritesCompaniesByUserId(
       profile.userId,
@@ -105,6 +105,7 @@ class JobCreateFormTwo extends PureComponent {
       favoriteCompanies,
       favoriteAdminTels,
       nonFavoriteAdminTels,
+      profile,
       loaded: true
     });
   }
@@ -146,17 +147,16 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   async saveJobMaterials(jobId, material) {
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     if (profile && material) {
       const newMaterial = {
         jobsId: jobId,
         value: material,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       /* eslint-disable no-await-in-loop */
       await JobMaterialsService.createJobMaterials(newMaterial);
@@ -177,11 +177,11 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites,
       sendToMkt,
       favoriteAdminTels,
-      nonFavoriteAdminTels
+      nonFavoriteAdminTels,
+      profile
     } = this.state;
     const d = firstTabData();
 
-    const profile = await ProfileService.getProfile();
     let status = 'Published';
 
     // start location
@@ -201,11 +201,9 @@ class JobCreateFormTwo extends PureComponent {
         latitude: d.startLocationLatitude,
         longitude: d.startLocationLongitude,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       startAddress = await AddressService.createAddress(address1);
     } else {
@@ -267,6 +265,8 @@ class JobCreateFormTwo extends PureComponent {
     const calcTotal = d.rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
+    d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
@@ -274,7 +274,10 @@ class JobCreateFormTwo extends PureComponent {
       isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: new Date(d.jobDate),
+      startTime: moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
       equipmentType: d.truckType.value,
       numEquipments: d.hourTrucksNumber,
       rateType,
@@ -283,11 +286,9 @@ class JobCreateFormTwo extends PureComponent {
       rateTotal,
       notes: d.instructions,
       createdBy: profile.userId,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
-      modifiedOn: moment()
-        .unix() * 1000
+      modifiedOn: moment.utc().format()
     };
     const newJob = await JobService.createJob(job);
     // return false;
@@ -316,11 +317,9 @@ class JobCreateFormTwo extends PureComponent {
           rateEstimate: d.rateEstimate,
           notes: d.instructions,
           createdBy: profile.userId,
-          createdOn: moment()
-            .unix() * 1000,
+          createdOn: moment.utc().format(),
           modifiedBy: profile.userId,
-          modifiedOn: moment()
-            .unix() * 1000
+          modifiedOn: moment.utc().format()
         };
         results.push(BidService.createBid(bid));
       }
@@ -342,7 +341,7 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     // if sending to mktplace, let's send SMS to everybody
-     if (sendToMkt) {
+    if (sendToMkt) {
       const allBiddersSms = [];
       for (const bidderTel of nonFavoriteAdminTels) {
         if (bidderTel && this.checkPhoneFormat(bidderTel)) {

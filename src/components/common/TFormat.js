@@ -1,5 +1,5 @@
 import React, { /* Component */ } from 'react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import NumberFormat from 'react-number-format';
 
 const toMil = 0.62137119;
@@ -150,16 +150,31 @@ class TFormat {
   }
 
 
-  static asDate(inputValue) {
-    return moment(inputValue).format('MM/DD/YYYY');
+  // Some refs regarding Intl object, which returns the locale from
+  // the browser if the user doesn't have a timeZone setting
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat/resolvedOptions
+  // https://stackoverflow.com/questions/37798404/getting-timezone-using-intl-api-doesnt-work-in-firefox
+  // http://kangax.github.io/compat-table/esintl/#test-DateTimeFormat_resolvedOptions().timeZone_defaults_to_the_host_environment
+
+  static asDate(inputValue, userTimeZone) {
+    if (userTimeZone && userTimeZone.length > 0) {
+      return moment.utc(inputValue).tz(userTimeZone).format('MM/DD/YYYY');
+    }
+    return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY');
   }
 
-  static asDateTime(inputValue) {
-    return moment(inputValue).format('MM/DD/YYYY hh:mm');
+  static asDateTime(inputValue, userTimeZone) {
+    if (userTimeZone && userTimeZone.length > 0) {
+      return moment.utc(inputValue).tz(userTimeZone).format('MM/DD/YYYY hh:mm a');
+    }
+    return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY hh:mm a');
   }
 
-  static asDayWeek(inputValue) {
-    return moment(inputValue).format('LLLL');
+  static asDayWeek(inputValue, userTimeZone) {
+    if (userTimeZone && userTimeZone.length > 0) {
+      return moment.utc(inputValue).tz(userTimeZone).format('LLLL');
+    }
+    return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('LLLL');
   }
 
   static asZip5(inputValue) {
@@ -235,8 +250,6 @@ class TFormat {
   }
 
   static asMetersToMiles(inputValue) {
-    // Added this one since mapbox response returns the value in
-    // meters when getting the distance between locations
     const miles = inputValue * toMil / 1000;
     return (
       <NumberFormat

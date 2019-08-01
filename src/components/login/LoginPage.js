@@ -95,7 +95,7 @@ class LoginPage extends SignIn {
     const userCheck = {email: username};
     const user = await UserService.getUserByEmail(userCheck);
 
-    user.lastLogin = moment().unix() * 1000;
+    user.lastLogin = moment.utc().format();
     user.loginCount += 1;
     await UserService.updateUser(user);
   }
@@ -109,9 +109,9 @@ class LoginPage extends SignIn {
       browserVersion: this.state.browserVersion.version,
       screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
       createdBy: 1,
-      createdOn: moment().unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 1,
-      modifiedOn: moment().unix() * 1000
+      modifiedOn: moment.utc().format()
     };
     await LoginLogService.createLoginLog(log);
   }
@@ -136,13 +136,19 @@ class LoginPage extends SignIn {
       const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
 
-      if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
-        || user.userStatus === 'Rejected')) {
+      if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
         return;
         // user is under review
       }
-
+      if (user.id && user.userStatus === 'Driver Created') {
+        const driver = await UserService.getDriverByUserId(user.id);
+        if (driver.id === null || driver.driverStatus !== 'Enabled') {
+          await this.createLoginLog(true);
+          this.setState({userUnderReview: true});
+          return;
+        }
+      }
       let ip = '';
       try {
         const ipAddress = await UtilsService.getUserIP();

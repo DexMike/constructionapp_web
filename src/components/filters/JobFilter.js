@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import {
+  Button,
+  ButtonToolbar,
   Card,
   CardBody,
   Col,
   Row
 } from 'reactstrap';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
+import moment from 'moment';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
@@ -16,7 +19,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
   constructor(props) {
@@ -27,11 +30,22 @@ class JobFilter extends Component {
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
 
-    const startDate = new Date();
-    startDate.setHours(0, 0, 0);
-    const endDate = new Date();
-    endDate.setHours(23, 59, 59); // 23:59:59
-    endDate.setDate(endDate.getDate() + 14);
+    // the sunday from last week
+    const startDate = moment()
+      .startOf('week')
+      .add(-1, 'weeks')
+      .hours(0)
+      .minutes(0)
+      .seconds(0)
+      .toDate();
+    // the saturday from next week
+    const endDate = moment()
+      .endOf('week')
+      .add(1, 'weeks')
+      .hours(23)
+      .minutes(59)
+      .seconds(59)
+      .toDate();
     // Comment
     this.state = {
       // Look up lists
@@ -51,7 +65,7 @@ class JobFilter extends Component {
       // isAvailable: true,
 
       // TODO: Refactor to a single filter object
-      // Filter values
+      // Filter defaults
       filters: {
         rateType: '',
         searchType: 'Carrier Job',
@@ -91,14 +105,12 @@ class JobFilter extends Component {
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
     this.getUTCEndInterval = this.getUTCEndInterval.bind(this);
+    this.handleResetFilters = this.handleResetFilters.bind(this);
   }
 
   async componentDidMount() {
-    const {
-      intervals,
-      filters
-    } = this.state;
-    let { companyZipCode, lastZipCode, address, company } = this.state;
+    const { intervals } = {...this.state};
+    let { companyZipCode, lastZipCode, address, company, filters } = {...this.state};
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
 
@@ -119,14 +131,12 @@ class JobFilter extends Component {
       }
     }
 
-    this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
-
-    /* if (localStorage.getItem('filters') !== null) {
-      const value = localStorage.getItem('filters');
-      const savedFilters = JSON.parse(value);
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
-      this.setState({ filters: savedFilters });
-    } */
+    }
+
+    this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
 
     await this.fetchJobs();
     this.fetchFilterLists();
@@ -186,7 +196,9 @@ class JobFilter extends Component {
   }
 
   saveFilters() {
-    const { filters } = this.state;
+    const { filters } = {...this.state};
+    // don't save status
+    delete filters.status;
     localStorage.setItem('filters', JSON.stringify(filters));
   }
 
@@ -257,9 +269,12 @@ class JobFilter extends Component {
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
         try { // Search for that new zip code's coordinates with MapBox API
+          // TODO -> do this without MapBox
+          /*
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
           filters.companyLongitude = geoLocation.features[0].center[0];
+          */
         } catch (e) {
           this.setState({
             reqHandlerZip: {
@@ -443,6 +458,18 @@ class JobFilter extends Component {
   async filterWithStatus(filters) {
     this.state = {filters};
     await this.fetchJobs();
+  }
+
+  async handleResetFilters() {
+    // set values to default or last saved filter
+    if (localStorage.getItem('filters')) {
+      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
+        async () => this.fetchJobs());
+    } else {
+      // defaults
+      this.saveFilters();
+      await this.fetchJobs();
+    }
   }
 
   render() {
@@ -661,7 +688,21 @@ class JobFilter extends Component {
                     </Col>
                   </Row>
                 </Col>
-                <br/>
+                <Col lg={12} style={{background: '#F9F9F7'}}>
+                  <Row>
+                    <Col lg={9} />
+                    <Col lg={3}>
+                      <ButtonToolbar className="wizard__toolbar right-buttons">
+                        <Button className="btn btn-secondary"
+                                type="button"
+                                onClick={this.handleResetFilters}
+                        >
+                          Reset
+                        </Button>
+                      </ButtonToolbar>
+                    </Col>
+                  </Row>
+                </Col>
               </form>
             </CardBody>
           </Card>

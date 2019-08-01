@@ -128,6 +128,11 @@ class JobSavePage extends Component {
                   && filteredBid.companyCarrierId === profile.companyId) {
                   bid = filteredBid;
                   companyCarrier = bid.companyCarrierId;
+                } else if (filteredBid.hasCustomerAccepted === 0
+                  && filteredBid.hasSchedulerAccepted === 1
+                  && filteredBid.companyCarrierId === profile.companyId) {
+                  bid = filteredBid;
+                  companyCarrier = bid.companyCarrierId;
                 }
                 // [bid] = bids;
                 // For the Customer, we search for the 'winning' bid (if there's already one)
@@ -258,8 +263,7 @@ class JobSavePage extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -268,8 +272,7 @@ class JobSavePage extends Component {
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Accepted';
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       await BidService.updateBid(newBid);
 
       // CREATING BOOKING
@@ -287,8 +290,8 @@ class JobSavePage extends Component {
         booking.endAddressId = newJob.endAddress.id;
         booking.bookingStatus = 'New';
         booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
+        booking.createdOn = moment.utc().format();
+        booking.modifiedOn = moment.utc().format();
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
@@ -322,8 +325,8 @@ class JobSavePage extends Component {
           bookingEquipment.notes = '';
           bookingEquipment.createdBy = equipment.driversId;
           bookingEquipment.modifiedBy = equipment.driversId;
-          bookingEquipment.modifiedOn = moment().unix() * 1000;
-          bookingEquipment.createdOn = moment().unix() * 1000;
+          bookingEquipment.modifiedOn = moment.utc().format();
+          bookingEquipment.createdOn = moment.utc().format();
           bookingEquipment = await BookingEquipmentService.createBookingEquipment(
             bookingEquipment
           );
@@ -357,8 +360,7 @@ class JobSavePage extends Component {
       newBid.hasSchedulerAccepted = 1;
       newBid.status = 'Declined';
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       await BidService.updateBid(newBid);
 
       // Let's make a call to Twilio to send an SMS
@@ -391,7 +393,6 @@ class JobSavePage extends Component {
     let { bid } = this.state;
     let { booking } = this.state;
     let notification;
-
     // A favorite Carrier "accepts" the job
     if (action === 'Accept') {
       // console.log('accepting');
@@ -403,8 +404,7 @@ class JobSavePage extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -417,8 +417,7 @@ class JobSavePage extends Component {
       newBid.rateEstimate = newJob.rateEstimate;
       newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       bid = await BidService.updateBid(newBid);
 
       // Create a Booking
@@ -435,8 +434,8 @@ class JobSavePage extends Component {
         booking.endAddressId = job.endAddress.id;
         booking.bookingStatus = 'New';
         booking.createdBy = profile.userId;
-        booking.createdOn = moment().unix() * 1000;
-        booking.modifiedOn = moment().unix() * 1000;
+        booking.createdOn = moment.utc().format();
+        booking.modifiedOn = moment.utc().format();
         booking.modifiedBy = profile.userId;
         booking = await BookingService.createBooking(booking);
       }
@@ -501,14 +500,12 @@ class JobSavePage extends Component {
     } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
-
       // Updating the Job
       // newJob.status = 'Requested';
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       delete newJob.materials;
       await JobService.updateJob(newJob);
 
@@ -526,10 +523,8 @@ class JobSavePage extends Component {
       bid.notes = job.notes;
       bid.createdBy = profile.userId;
       bid.modifiedBy = profile.userId;
-      bid.modifiedOn = moment()
-        .unix() * 1000;
-      bid.createdOn = moment()
-        .unix() * 1000;
+      bid.modifiedOn = moment.utc().format();
+      bid.createdOn = moment.utc().format();
       await BidService.createBid(bid);
 
       // Sending SMS to customer's Admin from the company who created the Job
@@ -547,7 +542,7 @@ class JobSavePage extends Component {
       // eslint-disable-next-line no-alert
       // alert('Your request has been sent.');
       job.status = newJob.status;
-      this.setState({ job });
+      this.setState({ job, bid });
     } else if (action === 'Decline') { // A Carrier "declines" a job request
       // Update existing bid
       const newBid = CloneDeep(bid);
@@ -556,8 +551,7 @@ class JobSavePage extends Component {
       newBid.hasSchedulerAccepted = 0;
       newBid.status = 'Declined';
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       bid = {};
       bid = await BidService.updateBid(newBid);
 

@@ -96,13 +96,16 @@ class DashboardCustomerPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchJobsInfo();
-    this.setState({ loaded: true });
+    const profile = await ProfileService.getProfile();
+    await this.fetchJobsInfo(profile);
+    this.setState({
+      profile,
+      loaded: true
+    });
   }
 
-  async fetchJobsInfo() {
-    const profile = await ProfileService.getProfile();
-    const response = await JobService.getCustomerJobsInfo(profile.userId);
+  async fetchJobsInfo(profile) {
+    const response = await JobService.getCustomerJobsInfo(profile.companyId);
     const jobsInfo = response.data;
     const { totalJobs } = response;
     this.setState({ totalJobs, jobsInfo });
@@ -124,20 +127,21 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
-    // Deleting filter fields for general jobs based on Status (Top cards)
-    // delete filters.equipmentType;
-    // delete filters.startAvailability;
-    // delete filters.endAvailability;
-    // delete filters.rateType;
-    // delete filters.rate;
-    // delete filters.minTons;
-    // delete filters.minHours;
-    // delete filters.minCapacity;
-    // delete filters.equipmentType;
-    // delete filters.numEquipments;
-    // delete filters.zipCode;
+    // clearing filter fields for general jobs based on Status (Top cards)
+    filters.equipmentType = [];
+    filters.startAvailability = '';
+    filters.endAvailability = '';
+    delete filters.rateType;
+    filters.rate = '';
+    filters.minTons = '';
+    filters.minHours = '';
+    filters.minCapacity = '';
+    filters.numEquipments = '';
+    filters.zipCode = '';
+    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
+      filters,
       page: 0
     });
   }
@@ -396,7 +400,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {loaded, totalJobs, totalCount} = this.state;
+    const {profile, loaded, totalJobs, totalCount} = this.state;
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -455,7 +459,7 @@ class DashboardCustomerPage extends Component {
       }
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
-      newJob.newStartDate = TFormat.asDate(job.startTime);
+      newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);

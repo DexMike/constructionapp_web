@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 import {
   Container,
   Col,
@@ -29,10 +29,10 @@ class DriverForm extends Component {
       driverStatus: '',
       selectedUser: {},
       btnSubmitting: false,
-      reqHandlerFName: { touched: false, error: '' },
-      reqHandlerLName: { touched: false, error: '' },
-      reqHandlerEmail: { touched: false, error: '' },
-      reqHandlerPhone: { touched: false, error: '' },
+      reqHandlerFName: {touched: false, error: ''},
+      reqHandlerLName: {touched: false, error: ''},
+      reqHandlerEmail: {touched: false, error: ''},
+      reqHandlerPhone: {touched: false, error: ''},
       loaded: false,
       step: 1,
       updateNewDriver: false,
@@ -47,21 +47,21 @@ class DriverForm extends Component {
   }
 
   async componentDidMount() {
-    const { driverId } = this.props;
-    let { id, firstName, lastName, email, mobilePhone, userStatus, driverStatus, selectedUser } = this.state;
+    const {driverId} = this.props;
+    let {id, firstName, lastName, email, mobilePhone, userStatus, driverStatus, selectedUser} = this.state;
 
     if (driverId) {
       const driver = await DriverService.getDriverById(driverId);
       selectedUser = await UserService.getUserById(driver.usersId);
       id = driver.usersId;
-      ({ firstName } = selectedUser);
-      ({ lastName } = selectedUser);
-      ({ email } = selectedUser);
+      ({firstName} = selectedUser);
+      ({lastName} = selectedUser);
+      ({email} = selectedUser);
       mobilePhone = selectedUser.mobilePhone.replace('+1', '');
       const chars = {'(': '', ')': '', '-': '', ' ': ''};
       mobilePhone = mobilePhone.replace(/[abc]/g, m => chars[m]);
-      ({ userStatus } = selectedUser);
-      ({ driverStatus } = driver);
+      ({userStatus} = selectedUser);
+      ({driverStatus} = driver);
       this.setState({
         selectedUser,
         id,
@@ -75,12 +75,12 @@ class DriverForm extends Component {
       });
     }
 
-    this.setState({ loaded: true });
+    this.setState({loaded: true});
   }
 
   handlePageClick(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -100,8 +100,8 @@ class DriverForm extends Component {
   }
 
   async sendDriverInvite(user) {
-    let { inviteStatus, inviteMessage } = this.state;
-    const { currentUser } = this.props;
+    let {inviteStatus, inviteMessage} = this.state;
+    const {currentUser} = this.props;
 
     try {
       // Sending SMS to Truck's company
@@ -136,15 +136,16 @@ class DriverForm extends Component {
   }
 
   async saveUser() {
-    const { toggle, currentUser } = this.props;
-    this.setState({ btnSubmitting: true });
+    const {toggle, currentUser} = this.props;
+    this.setState({btnSubmitting: true});
     if (!this.isFormValid()) {
-      this.setState({ btnSubmitting: false });
+      this.setState({btnSubmitting: false});
       return;
     }
     const {
       firstName,
-      lastName, email, mobilePhone, userStatus, selectedUser, driverStatus, updateNewDriver } = this.state;
+      lastName, email, mobilePhone, userStatus, selectedUser, driverStatus, updateNewDriver
+    } = this.state;
     const user = selectedUser;
     user.mobilePhone = `+1${mobilePhone}`;
     user.lastName = lastName;
@@ -153,7 +154,7 @@ class DriverForm extends Component {
 
     if (user && user.id) {
       user.modifiedBy = currentUser.userId;
-      user.modifiedOn = moment().unix() * 1000;
+      user.modifiedOn = moment.utc().format();
       await UserService.updateUser(user);
       if (updateNewDriver || driverStatus === 'Invited') {
         this.setState({step: 2, sendingSMS: true});
@@ -170,9 +171,9 @@ class DriverForm extends Component {
       user.isEmailVerified = 0;
       user.isPhoneVerified = 0;
       user.createdBy = currentUser.id;
-      user.createdOn = moment().unix() * 1000;
+      user.createdOn = moment.utc().format();
       user.modifiedBy = currentUser.id;
-      user.modifiedOn = moment().unix() * 1000;
+      user.modifiedOn = moment.utc().format();
       const newUser = await UserService.createUser(user);
       user.id = newUser.id;
 
@@ -181,16 +182,16 @@ class DriverForm extends Component {
       driver.usersId = newUser.id;
       driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
-      driver.createdOn = moment().unix() * 1000;
+      driver.createdOn = moment.utc().format();
 
       await DriverService.createDriver(driver);
       this.sendDriverInvite(user);
-      this.setState({ step: 2, selectedUser: user });
+      this.setState({step: 2, selectedUser: user});
     }
   }
 
   isFormValid() {
-    const { firstName, lastName, email, mobilePhone } = this.state;
+    const {firstName, lastName, email, mobilePhone} = this.state;
     let isValid = true;
 
     if (firstName === null || firstName.length === 0) {
@@ -223,7 +224,9 @@ class DriverForm extends Component {
     //   isValid = false;
     // }
 
-    if (mobilePhone === null || mobilePhone.length === 0) {
+    if (mobilePhone === null || mobilePhone.replace(/\D/g, '').length === 0 || mobilePhone.replace(/\D/g, '').length < 10) {
+      console.log(mobilePhone.length);
+      console.log(mobilePhone);
       this.setState({
         reqHandlerPhone: {
           touched: true,
@@ -233,39 +236,35 @@ class DriverForm extends Component {
       isValid = false;
     }
 
-    if (isValid) {
-      return true;
-    }
-
-    return false;
+    return isValid;
   }
 
   handleInputChange(e) {
-    const { value } = e.target;
+    let {value} = e.target;
     let reqHandler = '';
-
-    if (e.target.name === 'firstName') {
+    if (e.target.name === 'mobilePhone') {
+      reqHandler = 'reqHandlerPhone';
+      value = value.replace(/\D/g, '');
+      if (value.length > 10) {
+        return;
+      }
+    } else if (e.target.name === 'firstName') {
       reqHandler = 'reqHandlerFName';
     } else if (e.target.name === 'lastName') {
       reqHandler = 'reqHandlerLName';
-    } else
-    //   if (e.target.name === 'email') {
-    //   reqHandler = 'reqHandlerEmail';
-    // } else
-    if (e.target.name === 'mobilePhone') {
-      reqHandler = 'reqHandlerPhone';
     }
     this.setState({
       [reqHandler]: Object.assign({}, reqHandler, {
         touched: false
       })
     });
-    this.setState({ [e.target.name]: value });
+    this.setState({[e.target.name]: value});
   }
+
 
   handleSubmit(menuItem) {
     if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+      this.setState({[`goTo${menuItem}`]: true});
     }
   }
 
@@ -274,7 +273,7 @@ class DriverForm extends Component {
   }
 
   renderGoTo() {
-    const { goToDashboard, goToDrivers } = this.state;
+    const {goToDashboard, goToDrivers} = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
@@ -285,8 +284,8 @@ class DriverForm extends Component {
   }
 
   renderDriverInvite() {
-    const { inviteStatus, inviteMessage, selectedUser, sendingSMS } = this.state;
-    const { toggle } = this.props;
+    const {inviteStatus, inviteMessage, selectedUser, sendingSMS} = this.state;
+    const {toggle} = this.props;
     if (sendingSMS) {
       return (
         <Row>
@@ -328,7 +327,7 @@ class DriverForm extends Component {
           inviteStatus === false ? (
             <Col md={12} className="text-right pt-4">
               <Button
-                onClick={() => this.setState({ step: 1, updateNewDriver: true })}
+                onClick={() => this.setState({step: 1, updateNewDriver: true})}
                 className="secondaryButton"
               >
                 Edit
@@ -359,7 +358,7 @@ class DriverForm extends Component {
       reqHandlerPhone,
       userStatus
     } = this.state;
-    const { driverId, toggle } = this.props;
+    const {driverId, toggle} = this.props;
     return (
       <Row className="form">
         {this.renderGoTo()}
@@ -368,7 +367,7 @@ class DriverForm extends Component {
             className="page-title pl-4 pr-4 pt-2 pb-2"
             style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
           >
-            { driverId ? 'Edit Driver' : 'Add Driver'}
+            {driverId ? 'Edit Driver' : 'Add Driver'}
           </h3>
         </Col>
         <Col md={12}>
@@ -447,19 +446,19 @@ class DriverForm extends Component {
                 meta={reqHandlerPhone}
               />
               {
-                  reqHandlerPhone.touched
-                    ? (
-                      <span style={{color: '#D32F2F'}}>
+                reqHandlerPhone.touched
+                  ? (
+                    <span style={{color: '#D32F2F'}}>
                         {reqHandlerPhone.error}
                       </span>
-                    )
-                    : null
-                }
+                  )
+                  : null
+              }
             </Col>
             <Col md={12} className="text-right pt-4">
               <Button key="2"
-                onClick={toggle}
-                className="secondaryButton"
+                      onClick={toggle}
+                      className="secondaryButton"
               >
                 Cancel
               </Button>
@@ -498,8 +497,8 @@ class DriverForm extends Component {
       return (
         <React.Fragment>
           {this.renderGoTo()}
-          {step === 1 ? this.renderForm() : null }
-          {step === 2 ? this.renderDriverInvite() : null }
+          {step === 1 ? this.renderForm() : null}
+          {step === 2 ? this.renderDriverInvite() : null}
         </React.Fragment>
       );
     }

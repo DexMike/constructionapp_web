@@ -164,8 +164,7 @@ class UserForm extends Component {
     delete user.userStatuses;
     if (user && user.id) {
       // then we are updating the record
-      user.modifiedOn = moment()
-        .unix() * 1000;
+      user.modifiedOn = moment.utc().format();
       await UserService.updateUser(user);
       handlePageClick('User');
     } else {

@@ -55,8 +55,8 @@ class JobService extends AgentService {
     return (response);
   }
 
-  static async getCustomerJobsInfo(userId) {
-    const response = await super.get(`/dashboard/customer/${userId}/jobs`);
+  static async getCustomerJobsInfo(companyId) {
+    const response = await super.get(`/dashboard/customer/${companyId}/jobs`);
     return (response);
   }
 
@@ -123,11 +123,9 @@ class JobService extends AgentService {
       rate: 0,
       notes: '',
       createdBy: 0,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 0,
-      modifiedOn: moment()
-        .unix() * 1000,
+      modifiedOn: moment.utc().format(),
       isArchived: 0
     };
   }
