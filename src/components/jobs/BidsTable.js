@@ -413,11 +413,11 @@ class BidsTable extends Component {
                       className="form form--horizontal addtruck__form"
                     >
                       <Row className="col-md-12">
-                        Do you want to assign this job to {selectedBidCompany.legalName}
+                      Do you want to book {selectedBidCompany.legalName} for this job now?
                       </Row>
                       <hr/>
                       <Row className="col-md-12">
-                        <ButtonToolbar className="col-md-6 wizard__toolbar">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
                           <Button color="minimal" className="btn btn-outline-secondary"
                                   type="button"
                                   onClick={this.toggleBidModal}
@@ -425,20 +425,20 @@ class BidsTable extends Component {
                             Cancel
                           </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
                           <TSubmitButton
                             onClick={() => this.saveBid('decline')}
                             className="secondaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-                            bntText="Decline Job"
+                            bntText="No, decline this Request"
                           />
                           <TSubmitButton
                             onClick={() => this.saveBid('accept')}
                             className="primaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-                            bntText="Accept Job"
+                            bntText="Yes, book this Request"
                           />
                         </ButtonToolbar>
                       </Row>
