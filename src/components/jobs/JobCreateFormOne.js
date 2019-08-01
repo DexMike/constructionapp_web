@@ -293,7 +293,13 @@ class CreateJobFormOne extends PureComponent {
           };
           allTruckTypes.push(inside);
         });
+
+      const jobDate = moment().tz(
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).valueOf();
+
       this.setState({
+        jobDate,
         allMaterials,
         allTruckTypes
       });
@@ -306,11 +312,7 @@ class CreateJobFormOne extends PureComponent {
       label: state.val1
     }));
 
-    const jobDate = moment().tz(
-      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-    ).valueOf();
-
-    this.setState({jobDate, allUSstates: states, profile, loaded: true});
+    this.setState({allUSstates: states, profile, loaded: true});
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -1179,7 +1181,6 @@ class CreateJobFormOne extends PureComponent {
       endLocationCity,
       endLocationState,
       endLocationZip,
-      jobDate,
       startLocationAddress1,
       startLocationAddress2,
       startLocationCity,
@@ -1208,7 +1209,8 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndAddressName,
       loaded
     } = this.state;
-    const currentDate = moment().tz(
+    let { jobDate } = this.state;
+    jobDate = moment(jobDate).tz(
       profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
     ).valueOf();
     const {onClose} = this.props;
@@ -1267,7 +1269,7 @@ class CreateJobFormOne extends PureComponent {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
                           value: {jobDate},
-                          givenDate: currentDate
+                          givenDate: jobDate
                         }
                       }
                       onChange={this.jobDateChange}

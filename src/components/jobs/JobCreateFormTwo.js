@@ -35,6 +35,7 @@ class JobCreateFormTwo extends PureComponent {
       nonFavoriteAdminTels: [],
       loaded: false,
       btnSubmitting: false,
+      profile: null,
       reqCheckABox: {
         touched: false,
         error: ''
@@ -67,7 +68,6 @@ class JobCreateFormTwo extends PureComponent {
       hourTrucksNumber: d.hourTrucksNumber,
       material: d.selectedMaterials.value
     };
-
 
     const allCompanies = await CompanyService.getFavoritesNonFavoritesCompaniesByUserId(
       profile.userId,
@@ -105,6 +105,7 @@ class JobCreateFormTwo extends PureComponent {
       favoriteCompanies,
       favoriteAdminTels,
       nonFavoriteAdminTels,
+      profile,
       loaded: true
     });
   }
@@ -146,7 +147,8 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   async saveJobMaterials(jobId, material) {
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     if (profile && material) {
       const newMaterial = {
         jobsId: jobId,
@@ -175,11 +177,11 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites,
       sendToMkt,
       favoriteAdminTels,
-      nonFavoriteAdminTels
+      nonFavoriteAdminTels,
+      profile
     } = this.state;
     const d = firstTabData();
 
-    const profile = await ProfileService.getProfile();
     let status = 'Published';
 
     // start location
@@ -263,6 +265,8 @@ class JobCreateFormTwo extends PureComponent {
     const calcTotal = d.rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
+    d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
@@ -270,9 +274,10 @@ class JobCreateFormTwo extends PureComponent {
       isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: moment.utc(d.jobDate).tz(
+      startTime: moment.tz(
+        d.jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).format(),
+      ).utc().format(),
       equipmentType: d.truckType.value,
       numEquipments: d.hourTrucksNumber,
       rateType,
