@@ -27,7 +27,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
-// import GeoCodingService from '../../api/GeoCodingService';
+import GeoCodingService from '../../api/GeoCodingService';
 
 class JobCreateFormCarrier extends Component {
   constructor(props) {
@@ -289,7 +289,6 @@ class JobCreateFormCarrier extends Component {
     } = this.state;
     const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
     // TODO -> do this without MapBox
-    /*
     try {
       const geoResponseStart = await GeoCodingService.getGeoCode(startString);
       return geoResponseStart;
@@ -297,7 +296,6 @@ class JobCreateFormCarrier extends Component {
       // console.log(err);
       return null;
     }
-    */
   }
 
   async getEndCoords() {
@@ -309,7 +307,6 @@ class JobCreateFormCarrier extends Component {
     } = this.state;
     const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
     // TODO -> do this without MapBox
-    /*
     try {
       const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
       return geoResponseEnd;
@@ -317,7 +314,6 @@ class JobCreateFormCarrier extends Component {
       // console.log(err);
       return null;
     }
-    */
     return null;
   }
 
@@ -341,6 +337,8 @@ class JobCreateFormCarrier extends Component {
       startLocationCity,
       startLocationState,
       startLocationZip,
+      startLocationLatitude,
+      startLocationLongitude,
 
       // address 1
       endLocationAddressName,
@@ -349,6 +347,8 @@ class JobCreateFormCarrier extends Component {
       endLocationCity,
       endLocationState,
       endLocationZip,
+      endLocationLatitude,
+      endLocationLongitude,
 
       selectedStartAddressId,
       selectedEndAddressId,
@@ -378,6 +378,8 @@ class JobCreateFormCarrier extends Component {
         companyId: profile.companyId,
         address1: startLocationAddress1,
         address2: startLocationAddress2,
+        latitude: startLocationLatitude,
+        longitude: startLocationLongitude,
         city: startLocationCity,
         state: startLocationState,
         zipCode: startLocationZip,
@@ -402,6 +404,8 @@ class JobCreateFormCarrier extends Component {
         companyId: profile.companyId,
         address1: endLocationAddress1,
         address2: endLocationAddress2,
+        latitude: endLocationLatitude,
+        longitude: endLocationLongitude,
         city: endLocationCity,
         state: endLocationState,
         zipCode: endLocationZip
@@ -410,7 +414,6 @@ class JobCreateFormCarrier extends Component {
     } else {
       endAddress.id = selectedEndAddressId;
     }
-
     /*
     let isFavorited = 0;
     if (showSendtoFavorites) {
