@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import {
+  Button,
+  ButtonToolbar,
   Card,
   CardBody,
   Col,
   Row
 } from 'reactstrap';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
+import moment from 'moment';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
@@ -16,7 +19,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
   constructor(props) {
@@ -27,11 +30,22 @@ class JobFilter extends Component {
     const sortByList = ['Hourly ascending', 'Hourly descending',
       'Tonnage ascending', 'Tonnage descending'];
 
-    const startDate = new Date();
-    startDate.setHours(0, 0, 0);
-    const endDate = new Date();
-    endDate.setHours(23, 59, 59); // 23:59:59
-    endDate.setDate(endDate.getDate() + 14);
+    // the sunday from last week
+    const startDate = moment()
+      .startOf('week')
+      .add(-1, 'weeks')
+      .hours(0)
+      .minutes(0)
+      .seconds(0)
+      .toDate();
+    // the saturday from next week
+    const endDate = moment()
+      .endOf('week')
+      .add(1, 'weeks')
+      .hours(23)
+      .minutes(59)
+      .seconds(59)
+      .toDate();
     // Comment
     this.state = {
       // Look up lists
@@ -51,7 +65,7 @@ class JobFilter extends Component {
       // isAvailable: true,
 
       // TODO: Refactor to a single filter object
-      // Filter values
+      // Filter defaults
       filters: {
         rateType: '',
         searchType: 'Carrier Job',
@@ -67,6 +81,8 @@ class JobFilter extends Component {
         range: 50,
         materialType: [],
         equipmentType: [],
+        isMarketplaceView: false,
+        status: '',
         sortBy: sortByList[0],
         page: 0,
         rows: 5
@@ -89,14 +105,12 @@ class JobFilter extends Component {
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
     this.getUTCEndInterval = this.getUTCEndInterval.bind(this);
+    this.handleResetFilters = this.handleResetFilters.bind(this);
   }
 
   async componentDidMount() {
-    const {
-      intervals,
-      filters
-    } = this.state;
-    let { companyZipCode, lastZipCode, address, company } = this.state;
+    const { intervals } = {...this.state};
+    let { companyZipCode, lastZipCode, address, company, filters } = {...this.state};
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
 
@@ -117,7 +131,13 @@ class JobFilter extends Component {
       }
     }
 
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
+      // console.log('>>GOT SAVED FILTERS:', savedFilters);
+    }
+
     this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
+
     await this.fetchJobs();
     this.fetchFilterLists();
   }
@@ -175,6 +195,13 @@ class JobFilter extends Component {
     return endDate;
   }
 
+  saveFilters() {
+    const { filters } = {...this.state};
+    // don't save status
+    delete filters.status;
+    localStorage.setItem('filters', JSON.stringify(filters));
+  }
+
   async fetchFilterLists() {
     const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
 
@@ -227,10 +254,12 @@ class JobFilter extends Component {
 
     if (profile.companyType === 'Carrier' && url !== marketplaceUrl) { // Carrier Job Dashboard
       filters.companyCarrierId = profile.companyId;
+      filters.isMarketplaceView = false;
     } else if (profile.companyType === 'Customer') { // Customer Job Dashboard
-      filters.createdBy = profile.userId;
+      filters.companiesId = profile.companyId;
+      filters.isMarketplaceView = false;
     } else if (profile.companyType === 'Carrier' && url === marketplaceUrl) { // Marketplace
-      filters.status = 'Published';
+      filters.companyCarrierId = profile.companyId;
       filters.isMarketplaceView = true;
       filters.isFavorited = 0;
     }
@@ -240,9 +269,12 @@ class JobFilter extends Component {
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
         try { // Search for that new zip code's coordinates with MapBox API
+          // TODO -> do this without MapBox
+          /*
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
           filters.companyLongitude = geoLocation.features[0].center[0];
+          */
         } catch (e) {
           this.setState({
             reqHandlerZip: {
@@ -266,7 +298,26 @@ class JobFilter extends Component {
       }
     }
 
-    const result = await JobService.getJobDashboardByFilters(filters);
+    let result = [];
+
+    try {
+      // TODO: Change to switch cases
+      if (filters.isMarketplaceView) {
+        // console.log('marketplace');
+        result = await JobService.getMarketplaceJobsByFilters(filters);
+      } else {
+        // console.log('not marketplace');
+        if (profile.companyType === 'Carrier') {
+          result = await JobService.getJobCarrierDashboardByFilters(filters);
+        } else {
+          result = await JobService.getJobDashboardByFilters(filters);
+        }
+      }
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+
     const jobs = result.data;
     const { metadata } = result;
     const {returnJobs} = this.props;
@@ -327,6 +378,8 @@ class JobFilter extends Component {
         }
       }, 1000),
       filters
+    }, function saved() {
+      this.saveFilters();
     });
   }
 
@@ -335,14 +388,18 @@ class JobFilter extends Component {
     const {filters} = this.state;
     filters[e.target.name] = value;
     await this.fetchJobs();
-    this.setState({filters});
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
   }
 
   async handleSelectFilterChange(option) {
     const {value, name} = option;
     const {filters} = this.state;
     filters[name] = value;
-    this.setState({filters});
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
     await this.fetchJobs();
   }
 
@@ -353,6 +410,7 @@ class JobFilter extends Component {
       filters
     }, async function changed() {
       await this.fetchJobs();
+      this.saveFilters();
     });
   }
 
@@ -363,6 +421,7 @@ class JobFilter extends Component {
       filters
     }, async function changed() {
       await this.fetchJobs();
+      this.saveFilters();
     });
   }
 
@@ -378,6 +437,7 @@ class JobFilter extends Component {
     }
     filters.startAvailability = this.getUTCStartInterval(sAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
+
     const {start} = e;
     const {end} = e;
     if (start) {
@@ -388,13 +448,28 @@ class JobFilter extends Component {
     }
     intervals.startInterval = start;
     intervals.endInterval = end;
-    this.setState({intervals, filters});
+    this.setState({intervals, filters}, function saved() {
+      this.saveFilters();
+    });
+
     await this.fetchJobs();
   }
 
   async filterWithStatus(filters) {
     this.state = {filters};
     await this.fetchJobs();
+  }
+
+  async handleResetFilters() {
+    // set values to default or last saved filter
+    if (localStorage.getItem('filters')) {
+      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
+        async () => this.fetchJobs());
+    } else {
+      // defaults
+      this.saveFilters();
+      await this.fetchJobs();
+    }
   }
 
   render() {
@@ -490,7 +565,7 @@ class JobFilter extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="# of tons"
+                        placeholder="#"
                       />
                     </Col>
                     <Col md="2" id="truckTypeSelect">
@@ -604,8 +679,8 @@ class JobFilter extends Component {
                             label: materialType.trim()
                           }))
                         }
-                        // placeholder="Materials"
-                        placeholder={materialTypeList[0]}
+                        placeholder="Any"
+                        // placeholder={materialTypeList[0]}
                         id="materialTypeSelect"
                         horizontalScroll="true"
                         selectedItems={filters.materialType.length}
@@ -613,7 +688,21 @@ class JobFilter extends Component {
                     </Col>
                   </Row>
                 </Col>
-                <br/>
+                <Col lg={12} style={{background: '#F9F9F7'}}>
+                  <Row>
+                    <Col lg={9} />
+                    <Col lg={3}>
+                      <ButtonToolbar className="wizard__toolbar right-buttons">
+                        <Button className="btn btn-secondary"
+                                type="button"
+                                onClick={this.handleResetFilters}
+                        >
+                          Reset
+                        </Button>
+                      </ButtonToolbar>
+                    </Col>
+                  </Row>
+                </Col>
               </form>
             </CardBody>
           </Card>

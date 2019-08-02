@@ -55,9 +55,7 @@ class BidsTable extends Component {
       const newBid = bid;
 
       newBid.date = bid.createdOn;
-      newBid.dateF = TFormat.getValue(
-        TFormat.asDate(bid.createdOn)
-      );
+      newBid.dateF = TFormat.asDate(bid.createdOn);
 
       if (newBid.status === 'Pending') {
         newBid.status = 'Requested';
@@ -81,7 +79,8 @@ class BidsTable extends Component {
 
       if (selectedBid.status === 'Declined'
         || selectedBid.status === 'Ignored'
-        || selectedBid.status === 'Accepted') {
+        || selectedBid.status === 'Accepted'
+        || selectedBid.status === 'New') {
         modalAcceptBid = true; // this prevents the modal from opening
       }
     }
@@ -101,6 +100,7 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
+    const { updateJob } = this.props;
     const {
       selectedBid, profile
     } = this.state;
@@ -118,8 +118,7 @@ class BidsTable extends Component {
       newJob = CloneDeep(job);
       newJob.status = 'Booked';
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       await JobService.updateJob(newJob);
 
       // For all of the Bids that are going to be 'Ignored'
@@ -152,8 +151,7 @@ class BidsTable extends Component {
           ignoredBid.rate = newJob.rate;
           ignoredBid.notes = newJob.notes;
           ignoredBid.modifiedBy = profile.userId;
-          ignoredBid.modifiedOn = moment()
-            .unix() * 1000;
+          ignoredBid.modifiedOn = moment.utc().format();
           // console.log(ignoredBid);
           ignoredBidsList.push(BidService.updateBid(ignoredBid));
         }
@@ -187,8 +185,7 @@ class BidsTable extends Component {
       newBid.rateEstimate = newJob.rateEstimate;
       newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       newBid = await BidService.updateBid(newBid);
 
       // Create a Booking
@@ -202,13 +199,13 @@ class BidsTable extends Component {
       booking.endAddressId = newJob.endAddress;
       booking.bookingStatus = 'New';
       booking.createdBy = profile.userId;
-      booking.createdOn = moment().unix() * 1000;
-      booking.modifiedOn = moment().unix() * 1000;
+      booking.createdOn = moment.utc().format();
+      booking.modifiedOn = moment.utc().format();
       booking.modifiedBy = profile.userId;
       booking = await BookingService.createBooking(booking);
 
       // Create Booking Equipment
-      const response = await EquipmentService.getEquipments();
+      /* const response = await EquipmentService.getEquipments();
       const equipments = response.data;
       if (equipments && equipments.length > 0) {
         const equipment = equipments[0]; // temporary for now.
@@ -232,15 +229,30 @@ class BidsTable extends Component {
         bookingEquipment = await BookingEquipmentService.createBookingEquipments(
           bookingEquipment
         );
+      } */
+      // Let's make a call to Twilio to send an SMS
+      // We need to change later get the body from the lookups table
+      // We tell the customer that the job has been accepted
+      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
+      if (customerAdmin.length > 0) { // check if we get a result
+        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            body: 'Your job request has been accepted.'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob, newBid.companyCarrierId);
     } else {
       // Decline Bid
       newBid = CloneDeep(selectedBid);
       newBid.status = 'Declined';
       newBid.hasCustomerAccepted = 0;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       newBid = await BidService.updateBid(newBid);
 
       // Notify Carrier company's admin that the job request was declined
@@ -257,9 +269,18 @@ class BidsTable extends Component {
           await TwilioService.createSms(notification);
         }
       }
+
+      // updating parent component JobSavePage
+      updateJob(newJob);
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
+    allBids.map((bid) => {
+      newBid = bid;
+      newBid.date = bid.createdOn;
+      newBid.dateF = TFormat.asDate(bid.createdOn);
+      return newBid;
+    });
 
     this.setState({ newJob, bids: allBids, btnSubmitting: false });
     this.toggleBidModal();
@@ -333,9 +354,9 @@ class BidsTable extends Component {
                     displayName: 'Loads Completed'
                   },
                   {
-                    name: 'date',
+                    name: 'dateF',
                     displayName: 'Date Requested',
-                    label: 'dateF'
+                    // label: 'dateF'
                   }
                 ]
               }
@@ -392,11 +413,11 @@ class BidsTable extends Component {
                       className="form form--horizontal addtruck__form"
                     >
                       <Row className="col-md-12">
-                        Do you want to assign this job to {selectedBidCompany.legalName}
+                      Do you want to book {selectedBidCompany.legalName} for this job now?
                       </Row>
                       <hr/>
                       <Row className="col-md-12">
-                        <ButtonToolbar className="col-md-6 wizard__toolbar">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
                           <Button color="minimal" className="btn btn-outline-secondary"
                                   type="button"
                                   onClick={this.toggleBidModal}
@@ -404,20 +425,20 @@ class BidsTable extends Component {
                             Cancel
                           </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
                           <TSubmitButton
                             onClick={() => this.saveBid('decline')}
                             className="secondaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-                            bntText="Decline Job"
+                            bntText="No, decline this Request"
                           />
                           <TSubmitButton
                             onClick={() => this.saveBid('accept')}
                             className="primaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-                            bntText="Accept Job"
+                            bntText="Yes, book this Request"
                           />
                         </ButtonToolbar>
                       </Row>
@@ -455,7 +476,8 @@ class BidsTable extends Component {
 BidsTable.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
-  })
+  }),
+  updateJob: PropTypes.func.isRequired
 };
 
 BidsTable.defaultProps = {

@@ -4,9 +4,8 @@ import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
+import HEREMap, { RouteLine } from 'here-maps-react';
 import TFormat from '../common/TFormat';
-import TMapBoxOriginDestinationWithOverlay
-  from '../common/TMapBoxOriginDestinationWithOverlay';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingInvoiceService from '../../api/BookingInvoiceService';
@@ -15,7 +14,25 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
+
+/*
+RouteFeatureWeightType
+-3) strictExclude The routing engine guarantees that the route does not contain strictly excluded features.
+ If the condition cannot be fulfilled no route is returned.
+-2) softExclude The routing engine does not consider links containing the corresponding feature.
+  If no route can be found because of these limitations the condition is weakened.
+-1) avoid The routing engine assigns penalties for links containing the corresponding feature.
+0)  normal The routing engine does not alter the ranking of links containing the corresponding feature.
+*/
+const routeFeatureWeightType = 0;
+const center = {
+  lat: 30.252606,
+  lng: -97.754209
+};
+
+const hereMapsId = process.env.HERE_MAPS_APP_ID;
+const hereMapsCode = process.env.HERE_MAPS_APP_CODE;
 
 class JobForm extends Component {
   constructor(props) {
@@ -30,13 +47,12 @@ class JobForm extends Component {
       rate: 0,
       notes: '',
       createdBy: 0,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 0,
-      modifiedOn: moment()
-        .unix() * 1000,
+      modifiedOn: moment.utc().format(),
       isArchived: 0,
-      overlayMapData: {}
+      overlayMapData: {},
+      isExpanded: false
     };
 
     this.state = {
@@ -46,10 +62,22 @@ class JobForm extends Component {
       coords: null,
       loads: [],
       loaded: false,
-      distance: 0
+      distance: 0,
+      time: 0,
+      showMainMap: false,
+      cachedOrigin: '',
+      cachedDestination: '',
+      profile: [],
+      shape: {},
+      timeAndDistance: '',
+      instructions: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.onExpandedChanged = this.onExpandedChanged.bind(this);
+    this.renderHereMap = this.renderHereMap.bind(this);
+    this.onError = this.onError.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -60,11 +88,43 @@ class JobForm extends Component {
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
     let distance = 0;
+    let time = 0;
+
+    const platform = new H.service.Platform({
+      app_id: hereMapsId,
+      app_code: hereMapsCode,
+      useHTTPS: true
+    });
+
+    const routeRequestParams = {
+      mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
+      representation: 'display',
+      routeattributes: 'waypoints,summary,shape,legs,incidents',
+      maneuverattributes: 'direction,action',
+      waypoint0: `${startPoint.latitude},${startPoint.longitude}`,
+      waypoint1: `${endPoint.latitude},${endPoint.longitude}`,
+      truckType: 'tractorTruck',
+      limitedWeight: 700,
+      metricSystem: 'imperial',
+      language: 'en-us' // en-us|es-es|de-de
+    };
+
+    const router = platform.getRoutingService();
+    router.calculateRoute(
+      routeRequestParams,
+      this.onSuccess,
+      this.onError
+    );
+
     try {
+      // TODO -> do this without MapBox
+      /*
       const response = await GeoCodingService
         .getDistance(startPoint.longitude, startPoint.latitude,
           endPoint.longitude, endPoint.latitude);
       distance = response.routes[0].distance;
+      time = response.routes[0].duration;
+      */
     } catch (e) {
       // console.log(e)
     }
@@ -94,12 +154,15 @@ class JobForm extends Component {
       loaded: true,
       loads,
       job,
-      distance
+      distance,
+      time,
+      // cachedOrigin: origin,
+      // cachedDestination: destination,
+      profile
     });
-
   }
 
-  componentWillReceiveProps(nextProps) {
+  async componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
       const { job } = nextProps;
       Object.keys(job)
@@ -114,43 +177,41 @@ class JobForm extends Component {
         loaded: true
       });
     }
-  }
-
-  handlePageClick(menuItem) {
-    if (menuItem) {
-      this.setState({ [`goTo${menuItem}`]: true });
+    if (nextProps.companyCarrier) {
+      let { carrier } = this.state;
+      if (!carrier) {
+        carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
+        this.setState({
+          carrier
+        });
+      }
     }
   }
 
-  toggle(tab) {
-    const { activeTab } = this.state;
-    if (activeTab !== tab) {
+  onError(error) {
+    console.log('>>ERROR : ', error);
+  }
+
+  onSuccess(result) {
+    const route = result.response.route[0];
+    this.setState({
+      showMainMap: true,
+      shape: route.shape,
+      timeAndDistance: `Travel time and distance: ${route.summary.text}`,
+      instructions: route.leg[0]
+    });
+    // ... etc.
+  }
+
+  onExpandedChanged(rowId) {
+    if (rowId !== 0) {
       this.setState({
-        activeTab: tab
+        showMainMap: false
       });
-    }
-  }
-
-  async saveJob(e) {
-    e.preventDefault();
-    const { job, handlePageClick } = this.props;
-    if (!this.isFormValid()) {
-      // TODO display error message
-      // console.error('didnt put all the required fields.');
-      return;
-    }
-    const jobForm = this.state;
-    if (job && job.id) {
-      // then we are updating the record
-      jobForm.isArchived = jobForm.isArchived === 'on' ? 1 : 0;
-      jobForm.modifiedOn = moment()
-        .unix() * 1000;
-      await JobService.updateJob(jobForm);
-      handlePageClick('Job');
     } else {
-      // create
-      await JobService.createJob(jobForm);
-      handlePageClick('Job');
+      this.setState({
+        showMainMap: true
+      });
     }
   }
 
@@ -167,6 +228,43 @@ class JobForm extends Component {
 
   handleInputChange(e) {
     this.setState({ [e.target.name]: e.target.value });
+  }
+
+  async saveJob(e) {
+    e.preventDefault();
+    const { job, handlePageClick } = this.props;
+    if (!this.isFormValid()) {
+      // TODO display error message
+      // console.error('didnt put all the required fields.');
+      return;
+    }
+    const jobForm = this.state;
+    if (job && job.id) {
+      // then we are updating the record
+      jobForm.isArchived = jobForm.isArchived === 'on' ? 1 : 0;
+      jobForm.modifiedOn = moment.utc().format();
+      await JobService.updateJob(jobForm);
+      handlePageClick('Job');
+    } else {
+      // create
+      await JobService.createJob(jobForm);
+      handlePageClick('Job');
+    }
+  }
+
+  toggle(tab) {
+    const { activeTab } = this.state;
+    if (activeTab !== tab) {
+      this.setState({
+        activeTab: tab
+      });
+    }
+  }
+
+  handlePageClick(menuItem) {
+    if (menuItem) {
+      this.setState({ [`goTo${menuItem}`]: true });
+    }
   }
 
   materialsAsString(materials) {
@@ -196,16 +294,35 @@ class JobForm extends Component {
     return true;
   }
 
-  renderJobTop(job, carrier) {
-    const { companyType } = this.state;
+  renderPhone(formatedPhone) {
+    if (formatedPhone) {
+      return (
+        <React.Fragment>
+          <br/>
+          Telephone: {formatedPhone}
+        </React.Fragment>
+      );
+    }
+    return false;
+  }
+
+  renderJobTop(job) {
+    const { profile, companyType, carrier } = this.state;
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props.value;
     const fee = estimatedCost * 0.1;
+    let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
     if (job.status === 'Published And Offered' && companyType === 'Carrier') {
       displayStatus = 'On Offer';
+    }
+    if (job.status === 'Booked' || job.status === 'Allocated'
+      || job.status === 'In Progress' || job.status === 'Job Complete'
+    ) {
+      // showPhone = `Telephone: ${TFormat.asPhoneText(job.company.phone)}`;
+      showPhone = TFormat.asPhoneText(job.company.phone);
     }
     return (
       <React.Fragment>
@@ -213,12 +330,14 @@ class JobForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {companyType}: {job.company.legalName}
+          {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
+            <React.Fragment>
+              Carrier: {carrier ? carrier.legalName : ''}
+            </React.Fragment>
+          )}
           <br/>
-          Phone #:&nbsp;
-          <a href={`tel:${TFormat.asPhoneText(job.company.phone)}`}>
-            {TFormat.asPhoneText(job.company.phone)}
-          </a>
+          Producer: {job.company.legalName}
+          {this.renderPhone(showPhone)}
           <br/>
           Number of Trucks: {job.numEquipments}
           <br/>
@@ -229,9 +348,9 @@ class JobForm extends Component {
           <h3 className="subhead">
             Dates:
           </h3>
-          Start Date: {TFormat.asDayWeek(job.startTime)}
+          Start Date: {TFormat.asDayWeek(job.startTime, profile.timeZone)}
           <br/>
-          Created On: {TFormat.asDayWeek(job.createdOn)}
+          Created On: {TFormat.asDayWeek(job.createdOn, profile.timeZone)}
         </div>
         {companyType === 'Carrier' && (
           <div className="col-md-4">
@@ -320,7 +439,7 @@ class JobForm extends Component {
   }
 
   renderJobBottom(job) {
-    const { distance } = this.state;
+    const { distance, time } = this.state;
     return (
       <React.Fragment>
         <h3 className="subhead">
@@ -331,6 +450,19 @@ class JobForm extends Component {
             <div>
               <div>
                 {TFormat.asMetersToMiles(distance)}
+              </div>
+            </div>
+            <br/>
+          </Col>
+        </Row>
+        <h3 className="subhead">
+          Avg Travel Time
+        </h3>
+        <Row>
+          <Col>
+            <div>
+              <div>
+                {TFormat.asSecondsToHms(time)}
               </div>
             </div>
             <br/>
@@ -365,7 +497,7 @@ class JobForm extends Component {
         >
           Load Information
         </h3>
-        {job && <LoadsTable loads={loads} job={job}/>}
+        {job && <LoadsTable loads={loads} job={job} expandedRow={this.onExpandedChanged} />}
       </React.Fragment>
     );
   }
@@ -399,7 +531,11 @@ class JobForm extends Component {
                   <br/>
                   <span>Tons Remaining: <span>{total - tonsDelivered}</span></span>
                   <br/>
-                  <span>% Completed: <span>{parseFloat((tonsDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <span>% Completed:&nbsp;
+                    <span>
+                      {parseFloat((tonsDelivered * 100 / total).toFixed(2))}%
+                    </span>
+                  </span>
                   <br/>
                 </div>
               ) : (
@@ -410,7 +546,13 @@ class JobForm extends Component {
                   <br/>
                   <span>Hours Remaining: <span>{total - hoursDelivered}</span></span>
                   <br/>
-                  <span>% Completed: <span>{parseFloat((hoursDelivered * 100 / total).toFixed(2))}%</span></span>
+                  <span>Tons Delivered: <span>{tonsDelivered}</span></span>
+                  <br/>
+                  <span>% Completed:&nbsp;
+                    <span>
+                      {parseFloat((hoursDelivered * 100 / total).toFixed(2))}%
+                    </span>
+                  </span>
                   <br/>
                 </div>
               )
@@ -423,6 +565,19 @@ class JobForm extends Component {
   }
 
   renderJobLoads() {
+    const { loads } = this.state;
+    let completedLoads = 0;
+    let tonsDelivered = 0;
+    if (loads.length > 0) {
+      for (const i in loads) {
+        if (loads[i].loadStatus === 'Submitted') {
+          completedLoads += 1;
+          tonsDelivered += loads[i].tonsEntered;
+        }
+      }
+    }
+    let tonnage = 0;
+    tonnage = parseFloat((tonsDelivered / loads.length).toFixed(2));
     return (
       <React.Fragment>
         <Row>
@@ -431,9 +586,15 @@ class JobForm extends Component {
               Load Information
             </h3>
             <div>
-              <span>Loads Completed: <span>35</span></span>
+              <span>Loads Completed: <span>{completedLoads}</span></span>
               <br/>
-              <span>Avg Tons / Load: <span>10 Tons</span></span>
+              <span>Avg Tons / Load:&nbsp;
+                <span>
+                  {
+                    tonnage ? tonnage : 0
+                  }
+                </span>
+              </span>
               <br/>
             </div>
             <br/>
@@ -492,12 +653,8 @@ class JobForm extends Component {
   renderStartAddress(address) {
     return (
       <React.Fragment>
-        <h3 className="subhead">Start Location
-          {/* <img */}
-          {/*  src={`${window.location.origin}/${pinAImage}`} */}
-          {/*  alt="avatar" */}
-          {/*  className="pinSize" */}
-          {/* /> */}
+        <h3 className="subhead">
+          Start Location
         </h3>
         {this.renderAddress(address)}
       </React.Fragment>
@@ -519,19 +676,45 @@ class JobForm extends Component {
     );
   }
 
-  renderMBMap(origin, destination, gpsData, coords) {
+  renderHereMap() {
+    const {
+      showMainMap,
+      shape
+    } = this.state;
+
+    const opts = {
+      layer: 'traffic',
+      mapType: 'normal'
+    };
+
+    if (showMainMap) {
+      return (
+        <HEREMap
+          style={{height: '200px', background: 'gray' }}
+          appId="FlTEFFbhzrFwU1InxRgH"
+          appCode="gTgJkC9u0YWzXzvjMadDzQ"
+          center={center}
+          zoom={14}
+          setLayer={opts}
+          hidpi={false}
+          interactive
+        >
+          {/*
+          <Marker {...center}>
+            <div className="circle-marker" />
+          </Marker>
+          */}
+          <RouteLine
+            shape={shape}
+            strokeColor="purple"
+            lineWidth="4"
+          />
+        </HEREMap>
+      );
+    }
     return (
       <React.Fragment>
-        <TMapBoxOriginDestinationWithOverlay
-          input={
-            {
-              origin,
-              destination,
-              gpsData,
-              coords
-            }
-          }
-        />
+        &nbsp; Map not available
       </React.Fragment>
     );
   }
@@ -544,27 +727,11 @@ class JobForm extends Component {
       loads
     } = this.state;
     const { job } = this.props;
-    let origin = '';
-    let destination = '';
     let endAddress;
-
-    if (!job.startAddress && job.endAddress) {
-      origin = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
-    if (job.startAddress && !job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-    }
-    if (job.startAddress && job.endAddress) {
-      origin = `${job.startAddress.address1} ${job.startAddress.city} ${job.startAddress.state} ${job.startAddress.zipCode}`;
-      destination = `${job.endAddress.address1} ${job.endAddress.city} ${job.endAddress.state} ${job.endAddress.zipCode}`;
-    }
 
     if (job.endAddress) { // if there's endAddress, render it
       endAddress = this.renderEndAddress(job.endAddress);
     }
-
 
     if (job.status === 'Job Completed') {
       return (
@@ -582,18 +749,23 @@ class JobForm extends Component {
                 <div className="col-md-4">
                   {this.renderJobLoads(job)}
                 </div>
-                <div className="col-md-4">
-                  {this.renderRunSummary(job)}
-                </div>
+                {
+                  /*
+                  <div className="col-md-4">
+                    {this.renderRunSummary(job)}
+                  </div>
+                  */
+                }
               </div>
               <hr/>
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
-              }}>
+              }}
+              >
                 <div className="col-md-8" style={{ padding: 0 }}>
                   {/* NOTE seems like we dont need overlayMapData or coords */}
-                  {this.renderMBMap(origin, destination, overlayMapData, coords)}
+                  {this.renderHereMap(overlayMapData, coords)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -633,9 +805,10 @@ class JobForm extends Component {
               <Row style={{
                 paddingLeft: '10px',
                 paddingRight: '10px'
-              }}>
+              }}
+              >
                 <div className="col-md-8" style={{ padding: 0 }}>
-                  {this.renderMBMap(origin, destination)}
+                  {this.renderHereMap(null, null)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -662,6 +835,7 @@ class JobForm extends Component {
         </Container>
       );
     }
+
     return (
       <Container>
         <Card>
@@ -673,9 +847,10 @@ class JobForm extends Component {
             <Row style={{
               paddingLeft: '10px',
               paddingRight: '10px'
-            }}>
+            }}
+            >
               <div className="col-md-8" style={{ padding: 0 }}>
-                {this.renderMBMap(origin, destination)}
+                {this.renderHereMap(null, null)}
               </div>
               <div className="col-md-4">
                 <div className="row">
@@ -695,8 +870,14 @@ class JobForm extends Component {
                 </div>
               </div>
             </Row>
-            <hr/>
-            {this.renderLoads(loads, job)}
+            {
+              job.status !== 'Published And Offered' && (
+                <React.Fragment>
+                  <hr/>
+                  {this.renderLoads(loads, job)}
+                </React.Fragment>
+              )
+            }
           </CardBody>
         </Card>
       </Container>

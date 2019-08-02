@@ -15,6 +15,7 @@ import UtilsService from '../../api/UtilsService';
 import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
+import ProfileService from '../../api/ProfileService';
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -76,8 +77,12 @@ class LoginPage extends SignIn {
     });
   }
 
-  loginRouting() {
-    window.location = '/'; // go to the equipments listing as the customer needs to create a job.
+  loginRouting(companyType, loginCount) {
+    if (companyType === 'Carrier' && loginCount === 0) {
+      window.location = '/settings/2';
+    } else {
+      window.location = '/';
+    }
   }
 
   handleUserNotConfirmed() {
@@ -90,7 +95,7 @@ class LoginPage extends SignIn {
     const userCheck = {email: username};
     const user = await UserService.getUserByEmail(userCheck);
 
-    user.lastLogin = moment().unix() * 1000;
+    user.lastLogin = moment.utc().format();
     user.loginCount += 1;
     await UserService.updateUser(user);
   }
@@ -104,18 +109,21 @@ class LoginPage extends SignIn {
       browserVersion: this.state.browserVersion.version,
       screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
       createdBy: 1,
-      createdOn: moment().unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: 1,
-      modifiedOn: moment().unix() * 1000
+      modifiedOn: moment.utc().format()
     };
     await LoginLogService.createLoginLog(log);
   }
 
   async onSignIn() {
+    let { username } = this.state;
+    const { password } = this.state;
+    username = username.toLowerCase(); // Workaround for mobile safari uppercasing the first letter
     this.setState({loading: true, btnSubmitting: true});
     try {
-      if (!this.state.username || this.state.username.length <= 0
-        || !this.state.password || this.state.password.length <= 0) {
+      if (!username || username.length <= 0
+        || !password || password.length <= 0) {
         await this.createLoginLog(false);
         this.setState({
           error: 'Invalid username or password.',
@@ -125,16 +133,22 @@ class LoginPage extends SignIn {
         return;
       }
 
-      const userCheck = {email: this.state.username}
+      const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
 
-      if (user.id && (user.userStatus === 'Pending Review' || user.userStatus === 'Need Info'
-        || user.userStatus === 'Rejected')) {
+      if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
         return;
         // user is under review
       }
-
+      if (user.id && user.userStatus === 'Driver Created') {
+        const driver = await UserService.getDriverByUserId(user.id);
+        if (driver.id === null || driver.driverStatus !== 'Enabled') {
+          await this.createLoginLog(true);
+          this.setState({userUnderReview: true});
+          return;
+        }
+      }
       let ip = '';
       try {
         const ipAddress = await UtilsService.getUserIP();
@@ -144,15 +158,14 @@ class LoginPage extends SignIn {
       }
       const browserVersion = await UtilsService.getBrowserVersion();
       const screenSize = await UtilsService.getScreenDimentions();
-      
+
       this.setState({
         //  settingsLoaded: true,
         ip,
         browserVersion,
         screenSize
       });
-
-      const data = await Auth.signIn(this.state.username, this.state.password);
+      const data = await Auth.signIn(username, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
@@ -162,8 +175,12 @@ class LoginPage extends SignIn {
         }
         await this.createLoginLog(true);
         // window.location = '/';
-        this.setLogging(this.state.username);
-        this.loginRouting();
+        this.setLogging(username);
+
+        // are you a carrier and is it your first login?
+        const profile = await ProfileService.getProfile();
+        this.loginRouting(profile.companyType, user.loginCount);
+        //
         return;
       }
 
@@ -182,8 +199,16 @@ class LoginPage extends SignIn {
       throw new Error('Invalid response from server');
     } catch (err) {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
-      if (err.code === 'UserNotConfirmedException') {
-        const {username} = this.state;
+      if (err.code === 'UserNotFoundException') {
+        await this.createLoginLog(false);
+        this.setState({
+          error: 'Invalid username or password.',
+          loading: false,
+          btnSubmitting: false,
+          errorCode: err.code,
+          confirmUsername: null
+        });
+      } else if (err.code === 'UserNotConfirmedException') {
         await this.createLoginLog(false);
         this.setState({
           error: err.message,
@@ -201,7 +226,6 @@ class LoginPage extends SignIn {
           errorCode: err.code,
           confirmUsername: null
         });
-
       }
     }
   }

@@ -33,6 +33,11 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getDriverByUserId(id) {
+    const response = await this.get(`/users/${id}/driver`);
+    return (response);
+  }
+
   static async getUsersByCompanyIdAndType(companyId, type) {
     const response = await this.get(`/company/${companyId}/type/${type}/users`);
     return (response);
@@ -75,6 +80,11 @@ class UserService extends AgentService {
 
   static async getDriverByBookingId(bookingId) {
     const response = await this.get(`/booking_equipments/${bookingId}/drivers/users`);
+    return (response);
+  }
+
+  static async getDriverByBookingEquipmentId(id) {
+    const response = await this.get(`/booking_equipments/${id}/driver`);
     return (response);
   }
 }

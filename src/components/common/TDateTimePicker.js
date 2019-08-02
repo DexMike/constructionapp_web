@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
+import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import PropTypes from 'prop-types';
+import ProfileService from '../../api/ProfileService';
 
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
@@ -13,31 +15,40 @@ class TDateTimePickerField extends PureComponent {
 
   // componentDidMount was added in order to prepopulate
   // datePicker date from a fixed date passed from other component.
-  componentDidMount() {
+  async componentDidMount() {
     const { input } = this.props;
+    let { startDate } = this.state;
     let dueDate = 0;
+    const profile = await ProfileService.getProfile();
+
     // startDate and EndDate were added for common datepicker values
     if (input.value.startDate) {
       dueDate = input.value.startDate.getTime();
       const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
+      startDate = parsedDate;
     }
     if (input.value.endDate) {
       dueDate = input.value.endDate.getTime();
       const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
+      startDate = parsedDate;
     }
     // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
     if (input.value.startDateComp) {
       dueDate = input.value.startDateComp.getTime();
       const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
+      startDate = parsedDate;
     }
     if (input.value.endDateComp) {
       dueDate = input.value.endDateComp.getTime();
       const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
+      startDate = parsedDate;
     }
+
+    const timeZonedStartDate = new Date(moment(startDate).tz(
+      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+    ).format('YYYY-MM-DD HH:mm:ss'));
+    this.setState({ startDate: timeZonedStartDate });
+    // this.setState({ startDate: new Date() });
   }
 
   // ComponentWillReceiveProps was added in order to change the
@@ -81,7 +92,8 @@ class TDateTimePickerField extends PureComponent {
       meta: { touched, error },
       showTime,
       timeFormat,
-      disabled
+      disabled,
+      id
     } = this.props;
     return (
       <div className="date-picker">
@@ -94,6 +106,7 @@ class TDateTimePickerField extends PureComponent {
             onChange={this.handleChange}
             dateFormat={dateFormat}
             disabled={disabled}
+            id={id}
           />
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>

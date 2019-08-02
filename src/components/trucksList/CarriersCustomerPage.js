@@ -20,12 +20,12 @@ import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import ProfileService from '../../api/ProfileService';
 import MultiSelect from '../common/TMultiSelect';
-import TIntervalDatePicker from '../common/TIntervalDatePicker';
+// import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import './Truck.css';
 import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import CarrierRow from './CarrierRow';
-import GeoCodingService from '../../api/GeoCodingService';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -51,8 +51,8 @@ class CarriersCustomerPage extends Component {
 
       modal: false,
       goToDashboard: false,
-      startDate: null,
-      endDate: null,
+      // startDate: null,
+      // endDate: null,
 
       company: {},
       profile: {},
@@ -78,7 +78,7 @@ class CarriersCustomerPage extends Component {
         sortBy: sortByList[0],
         // carriers custom page
         name: '',
-        numEquipments: 0
+        numEquipments: ''
       },
       reqHandlerZip: {
         touched: false,
@@ -216,8 +216,10 @@ class CarriersCustomerPage extends Component {
   }
 
   async fetchFavoriteCarriers(carriers) {
+    const { profile } = this.state;
+
     // we get all groups.companyId that have name 'Favorite'
-    const groupsFavorites = await GroupListService.getGroupListsFavorites();
+    const groupsFavorites = await GroupListService.getGroupListsFavorites(profile.companyId);
 
     carriers.map((carrier) => {
       const newCarrier = carrier;
@@ -253,7 +255,7 @@ class CarriersCustomerPage extends Component {
     });
     const carriers3 = [];
     carriers2.forEach((carriers2item) => {
-      console.log(carriers2item);
+      // console.log(carriers2item);
       const carrierItem = {
         id: carriers2item[0].carrierId,
         legalName: carriers2item[0].legalName,
@@ -301,7 +303,101 @@ class CarriersCustomerPage extends Component {
       // }
       carriers3.push(carrierItem);
     });
-    console.log(carriers3);
+    // console.log(carriers3);
+    return carriers3;
+  }
+
+  convertCarrierEquipmentsToCarrierItemsV2(carrierEquipmentResults) {
+    const { filters } = this.state;
+    const carriers2 = new Map();
+    const carriers3 = [];
+    const carriers4 = [];
+
+    carrierEquipmentResults.forEach((item) => {
+      const key = item.carrierId;
+      const collection = carriers2.get(key);
+      if (!collection) {
+        carriers2.set(key, [item]);
+      } else {
+        collection.push(item);
+      }
+    });
+
+    carriers2.forEach((carriers2item) => {
+      const carrierItem = {
+        id: carriers2item[0].carrierId,
+        legalName: carriers2item[0].legalName,
+        distance: carriers2item[0].distance,
+        carrierMaterials: [],
+        equipmentTypes: []
+      };
+
+      carriers2item.forEach((carrierEquipment) => {
+        const { equipmentType, equipmentMaterial, legalName } = carrierEquipment;
+
+        // equipments
+        if (carrierItem.equipmentTypes.length <= 0) {
+          carrierItem.equipmentTypes.push({
+            legalName,
+            equipmentType,
+            count: 1
+          });
+        } else {
+          let equipmentTypeMatch = false;
+          carrierItem.equipmentTypes = carrierItem.equipmentTypes.map((equipmentTypeItem) => {
+            const newEquipmentTypeItem = {...equipmentTypeItem};
+            if (newEquipmentTypeItem.equipmentType === equipmentType) {
+              equipmentTypeMatch = true;
+              newEquipmentTypeItem.count += 1;
+            }
+            return newEquipmentTypeItem;
+          });
+          if (!equipmentTypeMatch) {
+            carrierItem.equipmentTypes.push({
+              legalName,
+              equipmentType,
+              count: 1
+            });
+          }
+        }
+
+        // materials
+        carrierItem.carrierMaterials.push(equipmentMaterial);
+        // remove duplicates
+        carrierItem.carrierMaterials = carrierItem.carrierMaterials.reduce(
+          (a, b) => { if (a.indexOf(b) < 0)a.push(b); return a; }, []
+        );
+      });
+
+      // Join all of the equipment materials for the carrier and make it an array
+      const carrierMaterials = carrierItem.carrierMaterials.join(', ').split(', ');
+      // remove duplicates
+      carrierItem.carrierMaterials = carrierMaterials.filter(
+        (item, pos) => carrierMaterials.indexOf(item) === pos
+      );
+
+      carriers3.push(carrierItem);
+    });
+
+    if (filters.materialType.length > 0) { // if filtering by materials
+      carriers3.filter((carrier) => {
+        let materialsFoundCount = 0;
+        filters.materialType.forEach((material) => {
+          carrier.carrierMaterials.forEach((carrierMaterial) => {
+            if (material.value === carrierMaterial) {
+              materialsFoundCount += 1;
+            }
+            return false;
+          });
+        });
+        if (materialsFoundCount === filters.materialType.length) {
+          carriers4.push(carrier);
+        }
+        return false;
+      });
+      return carriers4;
+    }
+
     return carriers3;
   }
 
@@ -324,6 +420,8 @@ class CarriersCustomerPage extends Component {
     // or we don't have any coordinates on our db
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
+        // TODO -> do this without MapBox
+        /*
         try { // Search for that new zip code's coordinates with MapBox API
           const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
           filters.companyLatitude = geoLocation.features[0].center[1];
@@ -337,6 +435,14 @@ class CarriersCustomerPage extends Component {
             }
           });
         }
+        */
+        this.setState({
+          reqHandlerZip: {
+            ...reqHandlerZip,
+            error: 'Invalid US Zip Code',
+            touched: true
+          }
+        });
       } else {
         // if the zipCode filter is empty, or it is the same as the initial code,
         // default the coordinates to user's address
@@ -352,7 +458,7 @@ class CarriersCustomerPage extends Component {
     }
 
     const carrierEquipmentResults = await CompanyService.getCarriersByFiltersV2(filters);
-    const carriers = this.convertCarrierEquipmentsToCarrierItems(carrierEquipmentResults);
+    const carriers = this.convertCarrierEquipmentsToCarrierItemsV2(carrierEquipmentResults);
     if (carriers) {
       // NOTE let's try not to use Promise.all and use full api calls
       // Promise.all(
@@ -408,11 +514,10 @@ class CarriersCustomerPage extends Component {
   }
 
   async handleSetFavorite(companyId) {
-    const { carriers } = this.state;
+    const { carriers, profile } = this.state;
 
     try {
-      const group = await GroupListService.getGroupListsByCompanyId(companyId);
-      const profile = await ProfileService.getProfile();
+      const group = await GroupListService.getGroupListsByCompanyId(companyId, profile.companyId);
 
       // we get check for groups.companyId = companyId that have name 'Favorite'
       group.map((item) => {
@@ -425,9 +530,9 @@ class CarriersCustomerPage extends Component {
       // if we got a group with companyId
       if (group.length > 0) { // delete
         // first we delete the Group List
-        await GroupListService.deleteGroupListById(group[0].id);
+        await GroupListService.deleteGroupListById(group[0][0]);
         // then the Group
-        await GroupService.deleteGroupById(group[0].groupId);
+        await GroupService.deleteGroupById(group[0][2]);
       } else { // create "Favorite" Group record
         const groupData = {
           createdBy: profile.userId,
@@ -551,7 +656,7 @@ class CarriersCustomerPage extends Component {
   toggleAddJobModal() {
     const { modal, filters } = this.state;
     if (modal) {
-      filters.materialType = [];
+      // filters.materialType = [];
       this.setState({
         filters
       });
@@ -646,13 +751,13 @@ class CarriersCustomerPage extends Component {
 
     const mats = this.returnSelectedMaterials();
 
-    if (mats.length < 1 && modal && materialTypeList.length > 0) {
+    /* if (mats.length < 1 && modal && materialTypeList.length > 0) {
       // this.toggleSelectMaterialsModal();
       // modalSelectMaterials = !modalSelectMaterials;
-      this.preventModal();
+      // this.preventModal();
       return false;
       // alert('Please select a material type for this job');
-    }
+    } */
 
     return (
       <Modal
@@ -694,8 +799,8 @@ class CarriersCustomerPage extends Component {
       equipmentTypeList,
       materialTypeList,
       rateTypeList,
-      startDate,
-      endDate,
+      // startDate,
+      // endDate,
 
       // filters
       companyZipCode,
@@ -740,14 +845,15 @@ class CarriersCustomerPage extends Component {
                             label: materialType.trim()
                           }))
                         }
-                        // placeholder="Materials"
-                        placeholder={materialTypeList[0]}
+                        placeholder="Any"
+                        // placeholder={materialTypeList[0]}
                         id="materialTypeSelect"
                         horizontalScroll="true"
                         selectedItems={filters.materialType.length}
                       />
                     </Col>
-                    <Col md="2" id="truckTypeSelect">
+                    <Col md="3" id="truckTypeSelect">
+                      {/* TODO: There will be changes for Truck Type and Number of trucks */}
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -786,12 +892,12 @@ class CarriersCustomerPage extends Component {
                       <input
                         name="numEquipments"
                         type="number"
-                        placeholder="#"
+                        placeholder="Any"
                         value={filters.numEquipments}
                         onChange={this.handleNumChange}
                       />
                     </Col>
-                    <Col md="2">
+                    <Col md="3">
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -817,43 +923,7 @@ class CarriersCustomerPage extends Component {
                             label: rateType
                           }))
                         }
-                        placeholder="Select materials"
-                      />
-                    </Col>
-                    <Col md="1">
-                      <div className="filter-item-title">
-                        Zip Code
-                      </div>
-                      <TField
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'zipCode',
-                            value: filters.zipCode
-                          }
-                        }
-                        meta={reqHandlerZip}
-                        className="filter-text"
-                        placeholder={companyZipCode}
-                        type="number"
-                      />
-                    </Col>
-                    <Col md="1">
-                      <div className="filter-item-title">
-                        Range (mi)
-                      </div>
-                      <TField
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'range',
-                            value: filters.range
-                          }
-                        }
-                        meta={reqHandlerRange}
-                        className="filter-text"
                         placeholder="Any"
-                        type="number"
                       />
                     </Col>
                   </Row>
@@ -874,7 +944,43 @@ class CarriersCustomerPage extends Component {
                         onChange={this.handleFilterChangeDelayed}
                       />
                     </Col>
-                    <Col md="4">
+                    <Col md="2">
+                      <div className="filter-item-title">
+                        Zip Code
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder={companyZipCode}
+                        type="number"
+                      />
+                    </Col>
+                    <Col md="2">
+                      <div className="filter-item-title">
+                        Range (mi)
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </Col>
+                    {/* <Col md="4">
                       <div className="filter-item-title">
                         Availability
                       </div>
@@ -885,7 +991,7 @@ class CarriersCustomerPage extends Component {
                         onChange={this.handleIntervalInputChange}
                         dateFormat="MM/dd/yy"
                       />
-                    </Col>
+                    </Col> */}
                     <Col md="4" className="">
                       <Button
                         onClick={() => this.clear()}

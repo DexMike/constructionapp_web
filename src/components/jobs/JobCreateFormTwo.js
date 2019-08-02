@@ -21,6 +21,7 @@ import GroupListService from '../../api/GroupListService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TSpinner from '../common/TSpinner';
 import TSubmitButton from '../common/TSubmitButton';
+import CompanyService from '../../api/CompanyService';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -34,6 +35,7 @@ class JobCreateFormTwo extends PureComponent {
       nonFavoriteAdminTels: [],
       loaded: false,
       btnSubmitting: false,
+      profile: null,
       reqCheckABox: {
         touched: false,
         error: ''
@@ -47,10 +49,9 @@ class JobCreateFormTwo extends PureComponent {
 
   async componentDidMount() {
     const { firstTabData } = this.props;
+    let { showSendtoFavorites } = this.state;
     const d = firstTabData();
     let favoriteAdminTels = [];
-    let favoriteCompanies = [];
-    let allBidders = [];
     let nonFavoriteAdminTels = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
@@ -64,38 +65,49 @@ class JobCreateFormTwo extends PureComponent {
       tonnage: Number(d.tonnage),
       rateTab: d.rateTab,
       rateEstimate: d.rateEstimate,
-      hourTrucksNumber: d.hourTrucksNumber
+      hourTrucksNumber: d.hourTrucksNumber,
+      material: d.selectedMaterials.value
     };
 
-    favoriteCompanies = await GroupListService.getGroupListByUserNameFiltered(
+    const allCompanies = await CompanyService.getFavoritesNonFavoritesCompaniesByUserId(
       profile.userId,
       filters
     );
 
-    // now let's get the bidders that match criteria
-    allBidders = await GroupListService.getBiddersFiltered(
-      filters
-    );
+    // get favorite companies for this carrier
+    const favoriteCompanies = allCompanies.filter(x => x.isFavorite === 'Favorite');
 
-    const biddersIdsNotFavorites = allBidders.filter(x => !favoriteCompanies.includes(x));
+    // get non favorite companies for this carrier
+    const biddersIdsNotFavorites = allCompanies.filter(x => x.isFavorite === 'Non Favorite');
 
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
-      favoriteAdminTels = await GroupService.getGroupAdminsTels(favoriteCompanies);
-
-      if (biddersIdsNotFavorites.length > 0) {
-        nonFavoriteAdminTels = await GroupService.getGroupAdminsTels(biddersIdsNotFavorites);
-      }
-
-      this.setState({
-        showSendtoFavorites: true,
-        favoriteCompanies,
-        favoriteAdminTels,
-        nonFavoriteAdminTels
-      });
+      favoriteAdminTels = favoriteCompanies.map(x => (x.adminPhone ? x.adminPhone : null));
+      // remove null values
+      Object.keys(favoriteAdminTels).forEach(
+        key => (favoriteAdminTels[key] === null) && delete favoriteAdminTels[key]
+      );
+      showSendtoFavorites = true;
     }
-    this.setState({ loaded: true });
+
+    if (biddersIdsNotFavorites.length > 0) {
+      // get the phone numbers from the admins
+      nonFavoriteAdminTels = biddersIdsNotFavorites.map(x => (x.adminPhone ? x.adminPhone : null));
+      // remove null values
+      Object.keys(nonFavoriteAdminTels).forEach(
+        key => (nonFavoriteAdminTels[key] === null) && delete nonFavoriteAdminTels[key]
+      );
+    }
+
+    this.setState({
+      showSendtoFavorites,
+      favoriteCompanies,
+      favoriteAdminTels,
+      nonFavoriteAdminTels,
+      profile,
+      loaded: true
+    });
   }
 
   isFormValid() {
@@ -135,17 +147,16 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   async saveJobMaterials(jobId, material) {
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     if (profile && material) {
       const newMaterial = {
         jobsId: jobId,
         value: material,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       /* eslint-disable no-await-in-loop */
       await JobMaterialsService.createJobMaterials(newMaterial);
@@ -166,11 +177,11 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites,
       sendToMkt,
       favoriteAdminTels,
-      nonFavoriteAdminTels
+      nonFavoriteAdminTels,
+      profile
     } = this.state;
     const d = firstTabData();
 
-    const profile = await ProfileService.getProfile();
     let status = 'Published';
 
     // start location
@@ -180,7 +191,7 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedStartAddressId === 0) {
       const address1 = {
         type: 'Delivery',
-        name: 'Delivery Start Location',
+        name: d.startLocationAddressName,
         companyId: profile.companyId,
         address1: d.startLocationAddress1,
         address2: d.startLocationAddress2,
@@ -190,11 +201,9 @@ class JobCreateFormTwo extends PureComponent {
         latitude: d.startLocationLatitude,
         longitude: d.startLocationLongitude,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       startAddress = await AddressService.createAddress(address1);
     } else {
@@ -207,7 +216,7 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
-        name: 'Delivery End Location',
+        name: d.endLocationAddressName,
         companyId: profile.companyId,
         address1: d.endLocationAddress1,
         address2: d.endLocationAddress2,
@@ -233,18 +242,21 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedRatedHourOrTon === 'ton') {
       rateType = 'Ton';
       rate = Number(d.rateByTonValue);
+      d.rateEstimate = d.estimatedTons;
     } else {
       rateType = 'Hour';
       rate = Number(d.rateByHourValue);
+      d.rateEstimate = d.estimatedHours;
     }
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
-    if (
-      (sendToMkt === true || sendToMkt === 1)
+    if (showSendtoFavorites
+      && (sendToMkt === true || sendToMkt === 1)
       && (sendToFavorites === true || sendToFavorites === 1)
     ) {
       status = 'Published And Offered';
-    } else if (sendToFavorites === true || sendToFavorites === 1) { // sending to All Favorites only
+    } else if (showSendtoFavorites
+      && (sendToFavorites === true || sendToFavorites === 1)) { // sending to All Favorites only
       status = 'On Offer';
     } else { // default
       status = 'Published';
@@ -253,6 +265,8 @@ class JobCreateFormTwo extends PureComponent {
     const calcTotal = d.rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
+    d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+
     const job = {
       companiesId: profile.companyId,
       name: d.name,
@@ -260,7 +274,10 @@ class JobCreateFormTwo extends PureComponent {
       isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: new Date(d.jobDate),
+      startTime: moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
       equipmentType: d.truckType.value,
       numEquipments: d.hourTrucksNumber,
       rateType,
@@ -269,11 +286,9 @@ class JobCreateFormTwo extends PureComponent {
       rateTotal,
       notes: d.instructions,
       createdBy: profile.userId,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
-      modifiedOn: moment()
-        .unix() * 1000
+      modifiedOn: moment.utc().format()
     };
     const newJob = await JobService.createJob(job);
     // return false;
@@ -288,12 +303,12 @@ class JobCreateFormTwo extends PureComponent {
     // create bids if this user has favorites:
     if (showSendtoFavorites && sendToFavorites && newJob) {
       const results = [];
-      for (const companyId of favoriteCompanies) {
+      for (const favCompany of favoriteCompanies) {
         // bid
         const bid = {
           jobId: newJob.id,
           userId: profile.userId,
-          companyCarrierId: companyId,
+          companyCarrierId: favCompany.id,
           hasCustomerAccepted: 1,
           hasSchedulerAccepted: 0,
           status: 'New',
@@ -302,11 +317,9 @@ class JobCreateFormTwo extends PureComponent {
           rateEstimate: d.rateEstimate,
           notes: d.instructions,
           createdBy: profile.userId,
-          createdOn: moment()
-            .unix() * 1000,
+          createdOn: moment.utc().format(),
           modifiedBy: profile.userId,
-          modifiedOn: moment()
-            .unix() * 1000
+          modifiedOn: moment.utc().format()
         };
         results.push(BidService.createBid(bid));
       }
@@ -315,7 +328,7 @@ class JobCreateFormTwo extends PureComponent {
       // now let's send them an SMS to all favorites
       const allSms = [];
       for (const adminIdTel of favoriteAdminTels) {
-        if (this.checkPhoneFormat(adminIdTel)) {
+        if (adminIdTel && this.checkPhoneFormat(adminIdTel)) {
           // console.log('>>Sending SMS to Jake...');
           const notification = {
             to: this.phoneToNumberFormat(adminIdTel),
@@ -331,10 +344,10 @@ class JobCreateFormTwo extends PureComponent {
     if (sendToMkt) {
       const allBiddersSms = [];
       for (const bidderTel of nonFavoriteAdminTels) {
-        if (this.checkPhoneFormat(bidderTel)) {
+        if (bidderTel && this.checkPhoneFormat(bidderTel)) {
           const notification = {
             to: this.phoneToNumberFormat(bidderTel),
-            body: '👷 You have a new Trelar Job Offer available. Log into your Trelar account to review and apply. www.trelar.net'
+            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.net'
           };
           allBiddersSms.push(TwilioService.createSms(notification));
         }

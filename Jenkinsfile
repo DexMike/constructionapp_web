@@ -113,7 +113,7 @@ npm run deployProd'''
           }
           steps {
             sh '''npm install
-npm run deployStaging'''
+npm --max_old_space_size=8192 run deployStaging'''
             slackSend botUser: true,
               channel: 'jenkins',
               color: 'good',

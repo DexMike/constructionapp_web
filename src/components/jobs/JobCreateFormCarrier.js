@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import * as PropTypes from 'prop-types';
 import {
   Card,
   CardBody,
   Col,
-  Row
+  Row,
+  Button,
+  ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
 import JobService from '../../api/JobService';
@@ -15,7 +18,7 @@ import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
-import BookingEquipmentService from '../../api/BookingEquipmentService';
+// import BookingEquipmentService from '../../api/BookingEquipmentService';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
@@ -24,6 +27,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import './jobs.css';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
+// import GeoCodingService from '../../api/GeoCodingService';
 
 class JobCreateFormCarrier extends Component {
   constructor(props) {
@@ -33,12 +37,6 @@ class JobCreateFormCarrier extends Component {
     delete job.endTime;
     // job.
     this.state = {
-      loaded: false,
-      btnSubmitting: false,
-      job,
-      states: [],
-      startAddress: AddressService.getDefaultAddress(),
-      endAddress: AddressService.getDefaultAddress(),
       /*
       bid: BidService.getDefaultBid(),
       booking: BookingEquipmentService.getDefaultBooking(),
@@ -46,6 +44,55 @@ class JobCreateFormCarrier extends Component {
       material: '',
       availableMaterials: [],
       */
+      profile: null,
+
+      // truck properties
+      truckType: '',
+      allTruckTypes: [],
+      capacity: 0,
+      allMaterials: [],
+      selectedMaterials: '',
+      allUSstates: [],
+      // addresses
+      allAddresses: [],
+      selectedStartAddressId: 0,
+      selectedEndAddressId: 0,
+      // rates
+      rate: 0,
+      ratebyBoth: false,
+      rateByTonValue: 0,
+      estimatedTons: 0,
+      rateByHourValue: 0,
+      estimatedHours: 0,
+      isRatedHour: true,
+      selectedRatedHourOrTon: 'ton',
+      tonnage: 0, // estimated amount of tonnage
+      rateEstimate: 0,
+      hourTrucksNumber: '',
+      rateTab: 1,
+      hourTon: 'ton',
+      // location
+      startLocationAddressName: '',
+      endLocationAddressName: '',
+      endLocationAddress1: '',
+      endLocationAddress2: '',
+      endLocationCity: '',
+      endLocationState: '',
+      endLocationZip: '',
+      endLocationLatitude: 0,
+      endLocationLongitude: 0,
+      startLocationAddress1: '',
+      startLocationAddress2: '',
+      startLocationCity: '',
+      startLocationState: '',
+      startLocationZip: '',
+      startLocationLatitude: 0,
+      startLocationLongitude: 0,
+      // date
+      jobDate: new Date(),
+      // job properties
+      name: '',
+      instructions: '',
 
       // jobOptions
       jobName: '',
@@ -53,32 +100,102 @@ class JobCreateFormCarrier extends Component {
       jobStartDateTime: new Date(),
       jobTruckType: '',
       jobTrucksNeeded: '',
-      // PUT back hour/ton
-      selectedRatedHourOrTon: 'ton',
-      rateByTonValue: 0,
-      rateByHourValue: 0,
-      estimatedTons: 0,
-      estimatedHours: 0,
-      rateEstimate: 0,
 
-      // addresses
-      allAddresses: [],
-      selectedStartAddressId: 0,
-      selectedEndAddressId: 0,
+      // Request Handlers
+      reqHandlerSameAddresses: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerJobName: {
+        touched: false,
+        error: ''
+      },
+      /*
+      reqHandlerTonnage: {
+        touched: false,
+        error: ''
+      },
+      */
+      reqHandlerDate: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerTruckType: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerMaterials: {
+        touched: false,
+        error: ''
+      },
+      /*
+      reqHandlerHoursEstimate: {
+        touched: false,
+        error: ''
+      },
+      */
+      reqHandleTrucksEstimate: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerStartAddress: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerStartCity: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerStartZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerStartState: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndCity: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndZip: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndState: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndAddress: {
+        touched: false,
+        error: ''
+      },
 
-      // address 1
-      startLocationAddress1: '',
-      startLocationAddress2: '',
-      startLocationCity: '',
-      startLocationState: '',
-      startLocationZip: '',
-
-      // address 1
-      endLocationAddress1: '',
-      endLocationAddress2: '',
-      endLocationCity: '',
-      endLocationState: '',
-      endLocationZip: ''
+      // extra fields
+      reqHandlerTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstimatedTons: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerHours: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEstimatedHours: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerStartAddressName: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerEndAddressName: {
+        touched: false,
+        error: ''
+      },
     };
     this.handleJobInputChange = this.handleJobInputChange.bind(this);
     this.handleStartAddressInputChange = this.handleStartAddressInputChange.bind(this);
@@ -92,6 +209,11 @@ class JobCreateFormCarrier extends Component {
     this.isFormValid = this.isFormValid.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
     this.selectChange = this.selectChange.bind(this);
+    this.jobDateChange = this.jobDateChange.bind(this);
+    this.handleStartAddressChange = this.handleStartAddressChange.bind(this);
+    this.handleEndAddressChange = this.handleEndAddressChange.bind(this);
+    this.handleEndLocationChange = this.handleEndLocationChange.bind(this);
+    this.handleStartLocationChange = this.handleStartLocationChange.bind(this);
     this.handleStartAddressIdChange = this.handleStartAddressIdChange.bind(this);
     this.handleEndAddressIdChange = this.handleEndAddressIdChange.bind(this);
     this.toggleNewStartAddress = this.toggleNewStartAddress.bind(this);
@@ -102,10 +224,12 @@ class JobCreateFormCarrier extends Component {
     this.handleTruckTypeChange = this.handleTruckTypeChange.bind(this);
     this.handleRateChange = this.handleRateChange.bind(this);
     this.handleHourDetails = this.handleHourDetails.bind(this);
+    this.getStartCoords = this.getStartCoords.bind(this);
+    this.getEndCoords = this.getEndCoords.bind(this);
   }
 
   async componentDidMount() {
-    // we don't have preloaded info, let's hit the server
+    const profile = await ProfileService.getProfile();
     let allMaterials = await LookupsService.getLookupsByType('MaterialType');
     const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
     const allTruckTypes = [];
@@ -122,37 +246,96 @@ class JobCreateFormCarrier extends Component {
         };
         allTruckTypes.push(inside);
       });
-    this.setState({
-      allMaterials,
-      allTruckTypes
-    });
+
+    // US states
+    let states = await LookupsService.getLookupsByType('States');
+    states = states.map(state => ({
+      value: String(state.val1),
+      label: state.val1
+    }));
 
     // should load all addresses even if already set
     const response = await AddressService.getAddresses();
+
+    const newItem = {
+      id: 0,
+      name: 'NEW ADDRESS',
+      address1: '',
+      city: '',
+      zipCode: ''
+    };
+
+    response.data.unshift(newItem);
     const allAddresses = response.data.map(address => ({
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
     this.setState({
-      allAddresses
+      allAddresses,
+      allUSstates: states,
+      allMaterials,
+      allTruckTypes,
+      profile,
+      loaded: true
     });
+  }
 
-    this.setState({ loaded: true });
+  async getStartCoords() {
+    const {
+      startLocationAddress1,
+      startLocationCity,
+      startLocationState,
+      startLocationZip
+    } = this.state;
+    const startString = `${startLocationAddress1}, ${startLocationCity}, ${startLocationState}, ${startLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
+    try {
+      const geoResponseStart = await GeoCodingService.getGeoCode(startString);
+      return geoResponseStart;
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+    */
+  }
+
+  async getEndCoords() {
+    const {
+      endLocationAddress1,
+      endLocationCity,
+      endLocationState,
+      endLocationZip
+    } = this.state;
+    const endString = `${endLocationAddress1}, ${endLocationCity}, ${endLocationState}, ${endLocationZip}`;
+    // TODO -> do this without MapBox
+    /*
+    try {
+      const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
+      return geoResponseEnd;
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+    */
+    return null;
   }
 
   // save begins ///////////////////////////////////////////////////////
   async saveJob() {
     this.setState({ btnSubmitting: true });
 
-    if (!this.isFormValid()) {
+    const isValid = await this.isFormValid();
+    if (!isValid) {
       this.setState({ btnSubmitting: false });
       return;
     }
 
-    const profile = await ProfileService.getProfile();
-
     // consts
     const {
+      profile,
+
+      startLocationAddressName,
       startLocationAddress1,
       startLocationAddress2,
       startLocationCity,
@@ -160,6 +343,7 @@ class JobCreateFormCarrier extends Component {
       startLocationZip,
 
       // address 1
+      endLocationAddressName,
       endLocationAddress1,
       endLocationAddress2,
       endLocationCity,
@@ -172,12 +356,14 @@ class JobCreateFormCarrier extends Component {
       rateByTonValue,
       rateByHourValue,
       rateEstimate,
-      jobName,
-      jobStartDateTime,
+      name,
+      instructions,
       jobTruckType,
+      truckType,
       jobTrucksNeeded,
-      material
+      selectedMaterials
     } = this.state;
+    let { jobStartDateTime } = this.state;
 
     const { selectedCarrierId } = this.props;
 
@@ -188,7 +374,7 @@ class JobCreateFormCarrier extends Component {
     if (selectedStartAddressId === 0) {
       const address1 = {
         type: 'Delivery',
-        name: 'Delivery Start Location',
+        name: startLocationAddressName,
         companyId: profile.companyId,
         address1: startLocationAddress1,
         address2: startLocationAddress2,
@@ -196,11 +382,9 @@ class JobCreateFormCarrier extends Component {
         state: startLocationState,
         zipCode: startLocationZip,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       startAddress = await AddressService.createAddress(address1);
     } else {
@@ -214,7 +398,7 @@ class JobCreateFormCarrier extends Component {
     if (selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
-        name: 'Delivery End Location',
+        name: endLocationAddressName,
         companyId: profile.companyId,
         address1: endLocationAddress1,
         address2: endLocationAddress2,
@@ -247,27 +431,30 @@ class JobCreateFormCarrier extends Component {
     const calcTotal = rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
+    jobStartDateTime = moment(jobStartDateTime).format('YYYY-MM-DD HH:mm');
+
     const job = {
       companiesId: profile.companyId,
-      name: jobName,
+      name,
       status: 'Published And Offered',
       isFavorited: false,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: new Date(jobStartDateTime),
-      equipmentType: jobTruckType.value,
+      startTime: moment.tz(
+        jobStartDateTime,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
+      equipmentType: truckType.value,
       numEquipments: jobTrucksNeeded,
-      rateType: selectedRatedHourOrTon,
+      rateType,
       rate,
       rateEstimate,
       rateTotal,
-      notes: '',
+      notes: instructions,
       createdBy: profile.userId,
-      createdOn: moment()
-        .unix() * 1000,
+      createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
-      modifiedOn: moment()
-        .unix() * 1000
+      modifiedOn: moment.utc().format()
     };
 
     const createdJob = await JobService.createJob(job);
@@ -281,31 +468,30 @@ class JobCreateFormCarrier extends Component {
       }
       */
       // one material only
-      this.saveJobMaterials(createdJob.id, material);
+      this.saveJobMaterials(createdJob.id, selectedMaterials.value);
     }
 
     const bid = {};
     const booking = {};
-    const bookingEquipment = {};
+    // const bookingEquipment = {};
 
     // final steps
     bid.jobId = createdJob.id;
+    bid.userId = profile.userId;
     // bid.startAddress = createdJob.startAddress;
     // bid.endAddress = createdJob.endAddress;
     bid.companyCarrierId = selectedCarrierId;
     bid.rate = createdJob.rate;
-    bid.rateType = createdJob.rateType;
+    bid.rateType = rateType;
     bid.rateEstimate = createdJob.rateEstimate;
     bid.hasCustomerAccepted = 1;
+    bid.hasSchedulerAccepted = 0;
     bid.status = 'Pending';
-    bid.modifiedOn = moment()
-      .unix() * 1000;
-    bid.createdOn = moment()
-      .unix() * 1000;
-    booking.modifiedOn = moment()
-      .unix() * 1000;
-    booking.createdOn = moment()
-      .unix() * 1000;
+    bid.notes = createdJob.notes;
+    bid.createdBy = profile.userId;
+    bid.createdOn = moment.utc().format();
+    bid.modifiedBy = profile.userId;
+    bid.modifiedOn = moment.utc().format();
     const createdBid = await BidService.createBid(bid);
 
     // Now we need to create a Booking
@@ -313,7 +499,7 @@ class JobCreateFormCarrier extends Component {
     booking.schedulersCompanyId = selectedCarrierId.companyId;
     booking.rateType = createdJob.rateType;
     booking.schedulersCompanyId = selectedCarrierId;
-    booking.startTime = new Date(jobStartDateTime);
+    booking.startTime = createdJob.startTime;
 
     // if the startaddress is the actual ID
     if (Number.isInteger(createdJob.startAddress)) {
@@ -385,12 +571,66 @@ class JobCreateFormCarrier extends Component {
 
     alert('Job Sent to carrier');
     const { closeModal } = this.props;
+    this.setState({ btnSubmitting: false });
     closeModal();
   }
   // save ends /////////////////////////////////////////////////////////
 
   handleTruckTypeChange(data) {
-    this.setState({jobTruckType: data});
+    const {reqHandlerTruckType} = this.state;
+    this.setState({
+      reqHandlerTruckType: {
+        ...reqHandlerTruckType,
+        touched: false
+      }
+    });
+    this.setState({truckType: data});
+  }
+
+  handleStartLocationChange(e) {
+    this.setState({
+      reqHandlerStartState: {touched: false}
+    });
+    this.setState({startLocationState: e.value});
+  }
+
+  handleEndLocationChange(e) {
+    this.setState({
+      reqHandlerEndState: {touched: false}
+    });
+    this.setState({endLocationState: e.value});
+  }
+
+  handleEndAddressChange(e) {
+    this.handleSameAddresses();
+    let reqHandler = '';
+    switch (e.target.name) {
+      case 'endLocationAddressName':
+        reqHandler = 'reqHandlerEndAddressName';
+        break;
+      case 'endLocationAddress1':
+        reqHandler = 'reqHandlerEndAddress';
+        break;
+      case 'endLocationCity':
+        reqHandler = 'reqHandlerEndCity';
+        break;
+      /*
+      case 'endLocationState':
+        reqHandler = 'reqHandlerEndState';
+        break;
+      */
+      case 'endLocationZip':
+        reqHandler = 'reqHandlerEndZip';
+        break;
+      default:
+    }
+    this.setState({
+      [reqHandler]: {
+        ...reqHandler,
+        touched: false
+      }
+    });
+    this.setState({[e.target.name]: e.target.value});
   }
 
   handleMaterialsChange(data) {
@@ -516,13 +756,14 @@ class JobCreateFormCarrier extends Component {
   }
 
   selectChange(data) {
-    // const { reqHandlerTruckType } = this.state;
-    /* this.setState({
-      reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
+    const {reqHandlerTruckType} = this.state;
+    this.setState({
+      reqHandlerTruckType: {
+        ...reqHandlerTruckType,
         touched: false
-      })
-    }); */
-    this.setState({ material: data.value });
+      }
+    });
+    this.setState({truckType: data.value});
   }
 
   toggleJobRateType() {
@@ -540,17 +781,15 @@ class JobCreateFormCarrier extends Component {
   }
 
   async saveJobMaterials(jobId, material) {
-    const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     if (profile && material) {
       const newMaterial = {
         jobsId: jobId,
         value: material,
         createdBy: profile.userId,
-        createdOn: moment()
-          .unix() * 1000,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
-        modifiedOn: moment()
-          .unix() * 1000
+        modifiedOn: moment.utc().format()
       };
       /* eslint-disable no-await-in-loop */
       await JobMaterialsService.createJobMaterials(newMaterial);
@@ -561,6 +800,36 @@ class JobCreateFormCarrier extends Component {
     this.setState({[e.target.name]: e.target.value});
   }
 
+  handleStartAddressChange(e) {
+    this.handleSameAddresses();
+    let reqHandler = '';
+    switch (e.target.name) {
+      case 'startLocationAddressName':
+        reqHandler = 'reqHandlerStartAddressName';
+        break;
+      case 'startLocationAddress1':
+        reqHandler = 'reqHandlerStartAddress';
+        break;
+      case 'startLocationCity':
+        reqHandler = 'reqHandlerStartCity';
+        break;
+      case 'startLocationState':
+        reqHandler = 'reqHandlerStartState';
+        break;
+      case 'startLocationZip':
+        reqHandler = 'reqHandlerStartZip';
+        break;
+      default:
+    }
+    this.setState({
+      [reqHandler]: {
+        ...reqHandler,
+        touched: false
+      }
+    });
+    this.setState({[e.target.name]: e.target.value});
+  }
+
   // remove non numeric
   phoneToNumberFormat(phone) {
     const num = Number(phone.replace(/\D/g, ''));
@@ -568,7 +837,40 @@ class JobCreateFormCarrier extends Component {
   }
 
   handleRateChange(e) {
-    this.setState({ selectedRatedHourOrTon: e.value });
+    const {
+      selectedRatedHourOrTon
+    } = this.state;
+    let {
+      rateByTonValue,
+      estimatedTons,
+      rateByHourValue,
+      estimatedHours
+    } = this.state;
+
+    if (selectedRatedHourOrTon === 'ton') {
+      rateByHourValue = 0;
+      estimatedHours = 0;
+    } else if (selectedRatedHourOrTon === 'hour') {
+      rateByTonValue = 0;
+      estimatedTons = 0;
+    }
+    this.setState({
+      rateByHourValue,
+      estimatedHours,
+      rateByTonValue,
+      estimatedTons,
+      selectedRatedHourOrTon: e.value
+    });
+  }
+
+  handleSameAddresses() {
+    const {reqHandlerSameAddresses} = this.state;
+    this.setState({
+      reqHandlerSameAddresses: {
+        ...reqHandlerSameAddresses,
+        touched: false
+      }
+    });
   }
 
   // check format ok
@@ -583,17 +885,87 @@ class JobCreateFormCarrier extends Component {
   }
 
   handleStartAddressIdChange(data) {
-    this.setState({
-      // startAddress: [],
-      selectedStartAddressId: data.value
-    });
+    this.handleSameAddresses();
+    if (Number(data.value) !== 0) {
+      this.setState({
+        startLocationAddress1: '',
+        startLocationAddress2: '',
+        startLocationCity: '',
+        startLocationState: '',
+        startLocationZip: '',
+        selectedStartAddressId: data.value,
+        reqHandlerStartAddress: {
+          touched: false
+        },
+        reqHandlerStartCity: {
+          touched: false
+        },
+        reqHandlerStartState: {
+          touched: false
+        },
+        reqHandlerStartZip: {
+          touched: false
+        }
+      });
+    } else if (Number(data.value) === 0) {
+      this.setState({
+        selectedStartAddressId: Number(data.value),
+        reqHandlerStartAddress: {
+          touched: true
+        },
+        reqHandlerStartCity: {
+          touched: true
+        },
+        reqHandlerStartState: {
+          touched: true
+        },
+        reqHandlerStartZip: {
+          touched: true
+        }
+      });
+    }
   }
 
   handleEndAddressIdChange(data) {
-    this.setState({
-      // endAddress: [],
-      selectedEndAddressId: data.value
-    });
+    this.handleSameAddresses();
+    if (Number(data.value) !== 0) {
+      this.setState({
+        endLocationAddress1: '',
+        endLocationAddress2: '',
+        endLocationCity: '',
+        endLocationState: '',
+        endLocationZip: '',
+        selectedEndAddressId: data.value,
+        reqHandlerEndAddress: {
+          touched: false
+        },
+        reqHandlerEndCity: {
+          touched: false
+        },
+        reqHandlerEndState: {
+          touched: false
+        },
+        reqHandlerEndZip: {
+          touched: false
+        }
+      });
+    } else if (Number(data.value) === 0) {
+      this.setState({
+        selectedEndAddressId: Number(data.value),
+        reqHandlerEndAddress: {
+          touched: true
+        },
+        reqHandlerEndCity: {
+          touched: true
+        },
+        reqHandlerEndState: {
+          touched: true
+        },
+        reqHandlerEndZip: {
+          touched: true
+        }
+      });
+    }
   }
 
   toggleNewStartAddress() {
@@ -605,276 +977,407 @@ class JobCreateFormCarrier extends Component {
   }
 
   handleInputChange(e) {
-    const {value} = e.target;
-    this.setState({[e.target.name]: value});
+    if (e.target.name === 'name') {
+      this.setState({
+        name: e.target.value,
+        reqHandlerJobName: {
+          touched: true
+        }
+      });
+    } else {
+      const {value} = e.target;
+      this.setState({[e.target.name]: value});
+    }
   }
 
   handleInputChangeTonHour(e) {
-    if (e.target.name === 'rateByTonValue') {
-      this.setState({ rateByTonValue: e.target.value });
-    } else if (e.target.name === 'estimatedTons') {
+    if (e.target.name === 'estimatedTons') {
       this.setState({
         rateEstimate: e.target.value,
-        estimatedTons: e.target.value
+        estimatedTons: e.target.value,
+        reqHandlerEstimatedTons: {
+          touched: true
+        }
       });
     } else if (e.target.name === 'rateByHourValue') {
-      this.setState({ rateByHourValue: e.target.value });
+      this.setState({
+        rateByHourValue: e.target.value,
+        reqHandlerHours: {
+          touched: true
+        }
+      });
+    } else if (e.target.name === 'rateByTonValue') {
+      this.setState({
+        rateByTonValue: e.target.value,
+        reqHandlerTons: {
+          touched: true
+        }
+      });
     } else if (e.target.name === 'estimatedHours') {
       this.setState({
         rateEstimate: e.target.value,
-        estimatedHours: e.target.value
+        estimatedHours: e.target.value,
+        reqHandlerEstimatedHours: {
+          touched: true
+        }
       });
     }
   }
 
-  isFormValid() {
-    return true;
+  // Pull materials
+  async fetchMaterials() {
+    this.saveTruckInfo(false);
+    // let's cache this info, in case we want to go back
   }
 
-  renderJobTop() {
-    const {
-      jobName,
-      reqHandlerName,
-      reqHandlerDate,
-      reqHandlerEstHours,
-      jobStartDateTime
-      /* ,
-      reqHandlerEstTons */
-    } = this.state;
-    const today = new Date();
-    const currentDate = today.getTime();
-    return (
-      <React.Fragment>
-        <div className="row">
-          <div className="col-md-3">
-            <div className="form__form-group">
-              <div className="">
-                { /* <input name="name"
-                      style={{ width: '100%' }}
-                      type="text"
-                      placeholder="Job # 242423"
-                      onChange={this.handleJobInputChange}
-                /> */}
-                <span className="form__form-group-label">Job Name</span>
-                <TField
-                  input={
-                    {
-                      onChange: this.handleInputChange,
-                      name: 'jobName',
-                      value: jobName
-                    }
-                  }
-                  placeholder="Job # 242423"
-                  type="text"
-                  // meta={reqHandlerName}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 form--horizontal">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Start Date</span>
-              <div className="">
-                <TDateTimePicker
-                  input={
-                    {
-                      onChange: this.handleStartTimeChange,
-                      name: 'startTime',
-                      value: jobStartDateTime,
-                      givenDate: currentDate
-                    }
-                  }
-                  onChange={this.handleStartTimeChange}
-                  dateFormat="MMMM-dd-yyyy h:mm aa"
-                  showTime
-                  meta={reqHandlerDate}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3 form--horizontal">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Estimated {job.rateType}s</span>
-              <div className="">
-                { /* <input name="rateEstimate"
-                      type="text"
-                      value={job.rateEstimate}
-                      onChange={this.handleJobInputChange}
-                /> */}
-                <TFieldNumber
-                  input={
-                    {
-                      onChange: this.handleJobInputChange,
-                      name: 'rateEstimate',
-                      value: job.rateEstimate
-                    }
-                  }
-                  placeholder="0"
-                  decimal
-                  meta={reqHandlerEstHours}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
-    );
+  handleImg(e) {
+    return e;
   }
 
+  jobDateChange(data) {
+    const {reqHandlerDate} = this.state;
+    this.setState({
+      jobStartDateTime: data,
+      reqHandlerDate: Object.assign({}, reqHandlerDate, {
+        touched: false
+      })
+    });
+  }
 
-  // /////////////////////////////////////////////////
-  renderOptions() {
+  async isFormValid() {
+    // const job = this.state;
     const {
-      jobName,
-      jobStartDateTime,
-      jobTruckType,
-      allTruckTypes,
-      jobTrucksNeeded,
+      startLocationAddress1,
+      startLocationCity,
+      startLocationState,
+      startLocationZip,
 
+      // address 1
+      endLocationAddress1,
+      endLocationCity,
+      endLocationState,
+      endLocationZip,
+
+      selectedStartAddressId,
+      selectedEndAddressId,
       selectedRatedHourOrTon,
-
-      // materials
-      allMaterials,
-      selectedMaterials
+      rateByTonValue,
+      rateByHourValue,
+      name,
+      jobStartDateTime,
+      jobDate,
+      truckType,
+      selectedMaterials,
+      startLocationAddressName,
+      endLocationAddressName,
     } = this.state;
-    const today = new Date();
-    const currentDate = today.getTime();
-    return (
-      <React.Fragment>
-        <div className="row">
-          <div className="col-md-4">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Job Name</span>
-              <input
-                name="jobName"
-                type="text"
-                value={jobName}
-                onChange={this.handleInputChange}
-                placeholder="Job Name"
-              />
-            </div>
-          </div>
-          <div className="col-md-4 form--horizontal">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Start Date</span>
-              <div className="">
-                <TDateTimePicker
-                  input={
-                    {
-                      onChange: this.handleStartTimeChange,
-                      name: 'startTime',
-                      value: jobStartDateTime,
-                      givenDate: currentDate
-                    }
-                  }
-                  onChange={this.handleStartTimeChange}
-                  dateFormat="MMMM-dd-yyyy h:mm aa"
-                  showTime
-                  // meta={reqHandlerDate}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4 form--horizontal">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Truck Type</span>
-              <SelectField
-                input={
-                  {
-                    onChange: this.handleTruckTypeChange,
-                    name: 'jobTruckType',
-                    value: jobTruckType
-                  }
-                }
-                // meta={reqHandlerTruckType}
-                value={jobTruckType}
-                options={allTruckTypes}
-                placeholder="Truck Type"
-              />
-            </div>
-          </div>
-        </div>
+    const {
+      reqHandlerJobName,
+      reqHandlerEndAddress,
+      reqHandlerEndState,
+      reqHandlerEndCity,
+      reqHandlerEndZip,
+      reqHandlerSameAddresses,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartState,
+      reqHandlerStartZip,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerDate,
 
-        {/* second row */}
-        <div className="row">
-          <div className="col-md-4">
-            <div className="form__form-group">
-              <span className="form__form-group-label">Material</span>
-              <SelectField
-                input={
-                  {
-                    onChange: this.handleMaterialsChange,
-                    name: 'materialType',
-                    value: selectedMaterials
-                  }
-                }
-                // meta={reqHandlerMaterials}
-                value={selectedMaterials}
-                options={allMaterials}
-                placeholder="Select material"
-              />
-            </div>
-          </div>
-          <div className="col-md-6 form--horizontal">
-            <Row className="col-md-12">
-              <div className="col-md-3 form__form-group">
-                <span className="form__form-group-label">Rate</span>
-                <SelectField
-                  input={
-                    {
-                      onChange: this.handleRateChange,
-                      name: 'materialType',
-                      value: selectedRatedHourOrTon
-                    }
-                  }
-                  // meta={reqHandlerMaterials}
-                  value={selectedRatedHourOrTon}
-                  options={
-                    [
-                      {
-                        value: 'hour',
-                        label: 'Hour'
-                      },
-                      {
-                        value: 'ton',
-                        label: 'Ton'
-                      }
-                    ]
-                  }
-                />
-              </div>
-              {this.renderHourOrTon(selectedRatedHourOrTon)}
-            </Row>
-          </div>
-          <div className="col-md-2 form--horizontal">
-            <div className="form__form-group">
-              <span className="form__form-group-label">
-                # of trucks
-              </span>
-              <TFieldNumber
-                input={
-                  {
-                    onChange: this.handleHourDetails,
-                    name: 'jobTrucksNeeded',
-                    value: jobTrucksNeeded
-                  }
-                }
-                // meta={reqHandlerTrucksEstimate}
-              />
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
-    );
+      estimatedHours,
+      estimatedTons,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours,
+      reqHandlerStartAddressName,
+      reqHandlerEndAddressName
+    } = this.state;
+    let isValid = true;
+
+    if (!selectedMaterials || selectedMaterials.length === 0) {
+      this.setState({
+        reqHandlerMaterials: {
+          ...reqHandlerMaterials,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    if (name === '' || name === null) {
+      this.setState({
+        reqHandlerJobName: {
+          ...reqHandlerJobName,
+          touched: true,
+          error: 'Please enter a name for your job'
+        }
+      });
+      isValid = false;
+    }
+
+    if (!truckType || truckType.length === 0) {
+      this.setState({
+        reqHandlerTruckType: {
+          ...reqHandlerTruckType,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    const currDate = new Date();
+
+    if (!jobStartDateTime || jobStartDateTime.getTime() < currDate.getTime()) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: "The date of the job can not be set in the past or as the current date and time"
+        }
+      });
+      isValid = false;
+    }
+
+    // START ADDRESS VALIDATION
+
+    if (!selectedStartAddressId || selectedStartAddressId === 0) {
+      if (startLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerStartAddressName: {
+            touched: true,
+            error: 'Missing starting address name'
+          }
+        });
+        isValid = false;
+      }
+
+      if (startLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerStartAddress: {
+            ...reqHandlerStartAddress,
+            touched: true,
+            error: 'Missing starting address field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (startLocationCity.length === 0) {
+        this.setState({
+          reqHandlerStartCity: {
+            ...reqHandlerStartCity,
+            touched: true,
+            error: 'Missing starting city field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (startLocationZip.length === 0) {
+        this.setState({
+          reqHandlerStartZip: {
+            ...reqHandlerStartZip,
+            touched: true,
+            error: 'Missing starting zip code field'
+          }
+        });
+        isValid = false;
+      }
+
+      // only work if tab is 1
+      if (startLocationState.length === 0) {
+        this.setState({
+          reqHandlerStartState: {
+            ...reqHandlerStartState,
+            touched: true,
+            error: 'Missing starting state field'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    if (!selectedStartAddressId || selectedStartAddressId === 0) {
+      const geoResponseStart = await this.getStartCoords();
+      if (!geoResponseStart || geoResponseStart.features.length < 1
+        || geoResponseStart.features[0].relevance < 0.90) {
+        this.setState({
+          reqHandlerStartAddress: {
+            ...reqHandlerStartAddress,
+            touched: true,
+            error: 'Start address not found.'
+          }
+        });
+        isValid = false;
+      }
+      if (typeof geoResponseStart.features[0] !== 'undefined') {
+        const coordinates = geoResponseStart.features[0].center;
+        const startLocationLatitude = coordinates[1];
+        const startLocationLongitude = coordinates[0];
+        this.setState({
+          startLocationLatitude,
+          startLocationLongitude
+        });
+      }
+    }
+
+    if (selectedEndAddressId > 0 && selectedStartAddressId > 0
+      && selectedStartAddressId === selectedEndAddressId) {
+      this.setState({
+        reqHandlerSameAddresses: {
+          ...reqHandlerSameAddresses,
+          touched: true,
+          error: "Can't have same start and end locations"
+        }
+      });
+      isValid = false;
+    }
+
+    // END ADDRESS VALIDATION
+
+    if (!selectedEndAddressId || selectedEndAddressId === 0) {
+      if (endLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerEndAddressName: {
+            touched: true,
+            error: 'Missing ending address name'
+          }
+        });
+        isValid = false;
+      }
+
+      if (endLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerEndAddress: {
+            ...reqHandlerEndAddress,
+            touched: true,
+            error: 'Missing ending address field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (endLocationCity.length === 0) {
+        this.setState({
+          reqHandlerEndCity: {
+            ...reqHandlerEndCity,
+            touched: true,
+            error: 'Missing ending city field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (endLocationState.length === 0) {
+        this.setState({
+          reqHandlerEndState: {
+            ...reqHandlerEndState,
+            touched: true,
+            error: 'Missing ending state field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (endLocationZip.length === 0) {
+        this.setState({
+          reqHandlerEndZip: {
+            ...reqHandlerEndZip,
+            touched: true,
+            error: 'Missing ending zip field'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    if (!selectedEndAddressId || selectedEndAddressId === 0) {
+      const geoResponseEnd = await this.getEndCoords();
+      if (!geoResponseEnd || geoResponseEnd.features.length < 1
+        || geoResponseEnd.features[0].relevance < 0.90) {
+        this.setState({
+          reqHandlerEndAddress: {
+            ...reqHandlerEndAddress,
+            touched: true,
+            error: 'End address not found.'
+          }
+        });
+        isValid = false;
+      }
+      if (typeof geoResponseEnd.features[0] !== 'undefined') {
+        const coordinates = geoResponseEnd.features[0].center;
+        const endLocationLatitude = coordinates[1];
+        const endLocationLongitude = coordinates[0];
+        this.setState({
+          endLocationLatitude,
+          endLocationLongitude
+        });
+      }
+    }
+
+    // rates
+    if (selectedRatedHourOrTon === 'ton') {
+      if (rateByTonValue <= 0) {
+        this.setState({
+          reqHandlerTons: {
+            ...reqHandlerTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedTons <= 0) {
+        this.setState({
+          reqHandlerEstimatedTons: {
+            ...reqHandlerEstimatedTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    } else if (selectedRatedHourOrTon === 'hour') {
+      if (rateByHourValue <= 0) {
+        this.setState({
+          reqHandlerHours: {
+            ...reqHandlerHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedHours <= 0) {
+        this.setState({
+          reqHandlerEstimatedHours: {
+            ...reqHandlerEstimatedHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    return isValid;
   }
-  // /////////////////////////////////////////////////
 
   renderHourOrTon(hourTon) {
     const {
       rateByTonValue,
       rateByHourValue,
       estimatedTons,
-      estimatedHours
+      estimatedHours,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours
     } = this.state;
     if (hourTon === 'ton') {
       return (
@@ -891,7 +1394,7 @@ class JobCreateFormCarrier extends Component {
               }
               placeholder="0"
               decimal
-              // meta={}
+              meta={reqHandlerTons}
             />
           </div>
           <div className="col-md-5 form__form-group">
@@ -906,7 +1409,7 @@ class JobCreateFormCarrier extends Component {
               }
               placeholder="0"
               decimal
-              // meta={}
+              meta={reqHandlerEstimatedTons}
             />
           </div>
         </React.Fragment>
@@ -926,11 +1429,11 @@ class JobCreateFormCarrier extends Component {
             }
             placeholder="0"
             decimal
-            // meta={}
+            meta={reqHandlerHours}
           />
         </div>
         <div className="col-md-5 form__form-group">
-          <span className="form__form-group-label">Estimated hrs.</span>
+          <span className="form__form-group-label">Estimated Hours</span>
           <TFieldNumber
             input={
               {
@@ -941,347 +1444,514 @@ class JobCreateFormCarrier extends Component {
             }
             placeholder="0"
             decimal
-            // meta={}
+            meta={reqHandlerEstimatedHours}
           />
         </div>
       </React.Fragment>
     );
   }
 
-  renderJobStartLocation() {
-    const {
-      states,
-      startAddress,
-      reqHandlerStartAddress,
-      reqHandlerSCity,
-      reqHandlerSState,
-      reqHandlerSZip,
-      allAddresses,
-      selectedStartAddressId
-    } = this.state;
-    return (
-      <React.Fragment>
-        <div className="col-md-6">
-
-          <h3 className="subhead">
-            Starting Location
-          </h3>
-          <small>
-            Select a starting address
-          </small>
-          <div
-            id="starting_id"
-          >
-            <SelectField
-              input={
-                {
-                  onChange: this.handleStartAddressIdChange,
-                  name: 'selectedStartAddress',
-                  value: selectedStartAddressId
-                }
-              }
-              // meta={reqHandlerMaterials}
-              // value={selectedStartAddressId}
-              options={allAddresses}
-              placeholder="Select a location"
-            />
-          </div>
-          <div>
-            &nbsp;
-          </div>
-          <small>
-            Or create a new one:
-          </small>
-
-          <div
-            id="starting"
-            className={`${selectedStartAddressId === 0 ? 'shown' : 'fifty'}`}
-            role="link"
-            tabIndex="0"
-            onKeyPress={this.handleKeyPress}
-            onClick={this.toggleNewStartAddress}
-          >
-            <div className="row">
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleStartAddressInputChange,
-                        name: 'address1',
-                        value: startAddress.address1
-                      }
-                    }
-                    placeholder="Address 1"
-                    type="text"
-                    meta={reqHandlerStartAddress}
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <input name="address2"
-                        type="text"
-                        placeholder="Address 2"
-                        value={startAddress.address2}
-                        onChange={this.handleStartAddressInputChange}
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleStartAddressInputChange,
-                        name: 'city',
-                        value: startAddress.city
-                      }
-                    }
-                    placeholder="City"
-                    type="text"
-                    meta={reqHandlerSCity}
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <SelectField
-                    input={
-                      {
-                        onChange: this.handleStartStateChange,
-                        name: 'state',
-                        value: startAddress.state
-                      }
-                    }
-                    meta={reqHandlerSState}
-                    value={startAddress.state}
-                    options={states}
-                    placeholder="State"
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <TFieldNumber
-                    input={
-                      {
-                        onChange: this.handleStartAddressInputChange,
-                        name: 'zipCode',
-                        value: startAddress.zipCode
-                      }
-                    }
-                    placeholder="Zip Code"
-                    meta={reqHandlerSZip}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </React.Fragment>
-    );
-  }
-
-  renderJobEndLocation() {
-    const {
-      states,
-      endAddress,
-      reqHandlerEAddress,
-      reqHandlerECity,
-      reqHandlerEState,
-      reqHandlerEZip,
-      selectedEndAddressId,
-      allAddresses
-    } = this.state;
-    return (
-      <React.Fragment>
-        <div className="col-md-6">
-
-          <h3 className="subhead">
-            End Location
-          </h3>
-          <small>
-            Select a ending address:
-          </small>
-          <div
-            id="ending_id"
-          >
-            <SelectField
-              input={
-                {
-                  onChange: this.handleEndAddressIdChange,
-                  name: 'selectedEndAddress',
-                  value: selectedEndAddressId
-                }
-              }
-              // meta={reqHandlerMaterials}
-              // value={selectedEndAddressId}
-              options={allAddresses}
-              placeholder="Select a location"
-            />
-          </div>
-          <div>
-            &nbsp;
-          </div>
-          <small>
-            Or create a new one:
-          </small>
-
-          <div
-            id="ending"
-            className={`${selectedEndAddressId === 0 ? 'shown' : 'fifty'}`}
-            role="link"
-            tabIndex="0"
-            onKeyPress={this.handleKeyPress}
-            onClick={this.toggleNewEndAddress}
-          >
-            <div className="row">
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleEndAddressInputChange,
-                        name: 'address1',
-                        value: endAddress.address1
-                      }
-                    }
-                    placeholder="Address #1"
-                    type="text"
-                    meta={reqHandlerEAddress}
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <input name="address2"
-                        type="text"
-                        placeholder="Address #2"
-                        value={endAddress.address2}
-                        onChange={this.handleEndAddressInputChange}
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleEndAddressInputChange,
-                        name: 'city',
-                        value: endAddress.city
-                      }
-                    }
-                    placeholder="City"
-                    type="text"
-                    meta={reqHandlerECity}
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <SelectField
-                    input={
-                      {
-                        onChange: this.handleEndStateChange,
-                        name: 'state',
-                        value: endAddress.state
-                      }
-                    }
-                    meta={reqHandlerEState}
-                    value={endAddress.state}
-                    options={states}
-                    placeholder="State"
-                  />
-                </div>
-              </div>
-              <div className="col-sm-12">
-                <div className="form__form-group">
-                  <TFieldNumber
-                    input={
-                      {
-                        onChange: this.handleEndAddressInputChange,
-                        name: 'zipCode',
-                        value: endAddress.zipCode
-                      }
-                    }
-                    placeholder="Zip Code"
-                    meta={reqHandlerEZip}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
-    );
-  }
-
-  renderJobBottom() {
-    const { job } = this.state;
-    return (
-      <div className="">
-        <div className="form__form-group">
-          <h3 className="subhead">Comments</h3>
-          <div className="">
-            <textarea name="notes" value={job.notes} onChange={this.handleJobInputChange}/>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  renderJobFormButtons() {
-    const { closeModal } = this.props;
-    const { btnSubmitting } = this.state;
-
-    return (
-      <div className="row float-right">
-        <div className="row">
-          <div className="col-sm-4">
-            <button type="button" className="btn btn-secondary" onClick={() => closeModal()}>
-              Cancel
-            </button>
-          </div>
-          <div className="col-sm-2">
-            &nbsp;
-          </div>
-          <div className="col-sm-6">
-            <TSubmitButton
-              onClick={this.saveJob}
-              className="primaryButton"
-              loading={btnSubmitting}
-              loaderSize={10}
-              bntText="Request"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   render() {
-    const { loaded } = this.state;
+    const { closeModal } = this.props;
+    const {
+      btnSubmitting,
+      jobName,
+      jobStartDateTime,
+      jobTruckType,
+      allTruckTypes,
+      jobTrucksNeeded,
+
+      selectedRatedHourOrTon,
+
+      // materials
+      allMaterials,
+      selectedMaterials,
+
+      truckType,
+      allUSstates,
+      allAddresses,
+      selectedStartAddressId,
+      selectedEndAddressId,
+      hourTrucksNumber,
+      endLocationAddress1,
+      endLocationAddress2,
+      endLocationCity,
+      endLocationState,
+      endLocationZip,
+      jobDate,
+      startLocationAddress1,
+      startLocationAddress2,
+      startLocationCity,
+      startLocationState,
+      startLocationZip,
+      name,
+      instructions,
+      reqHandlerJobName,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerTrucksEstimate,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartZip,
+      reqHandlerStartState,
+      reqHandlerEndAddress,
+      reqHandlerEndState,
+      reqHandlerEndZip,
+      reqHandlerEndCity,
+      reqHandlerSameAddresses,
+      reqHandlerDate,
+      startLocationAddressName,
+      reqHandlerStartAddressName,
+      endLocationAddressName,
+      reqHandlerEndAddressName,
+      profile,
+      loaded
+    } = this.state;
+    const today = new Date();
+    const currentDate = today.getTime();
     if (loaded) {
       return (
-        <form id="job-request">
-          {this.renderOptions()}
-          <div className="cl-md-12">
-            <hr />
-          </div>
-          <div className="row">
-            {this.renderJobStartLocation()}
-            {/* this.isRateTypeTon(job.rateType) && this.renderJobEndLocation() */}
-            {this.renderJobEndLocation()}
-          </div>
-          {this.renderJobBottom()}
-          <div className="cl-md-12">
-            <hr />
-          </div>
-          {this.renderJobFormButtons()}
-        </form>
+        <Col md={12} lg={12}>
+          <Card>
+            <CardBody>
+              {/* this.handleSubmit  */}
+              <form
+                className="form form--horizontal addtruck__form"
+                // onSubmit={e => this.saveJob(e)}
+                autoComplete="off"
+              >
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <span className="form__form-group-label">Job Name</span>
+                    {
+                      /*
+                      <input
+                      name="name"
+                      type="text"
+                      value={name}
+                      onChange={this.handleInputChange}
+                      placeholder="Job Name"
+                      meta={reqHandlerJobName}
+                    />
+                      */
+                    }
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleInputChange,
+                          name: 'name',
+                          value: name
+                        }
+                      }
+                      placeholder="Job Name"
+                      type="text"
+                      meta={reqHandlerJobName}
+                      id="jobname"
+                    />
+                  </div>
+                  <div className="col-md-12 form__form-group">
+                    <span className="form__form-group-label">Date of Job&nbsp;
+                      <span className="form-small-label">Your current time zone is set to&nbsp;
+                        {profile.timeZone
+                          ? moment().tz(profile.timeZone).format('z')
+                          : moment().tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('z')
+                        }. Your timezone can be changed in <Link to="/settings"><span>User Settings</span></Link>.
+                      </span>
+                    </span>
+                    <TDateTimePicker
+                      input={
+                        {
+                          onChange: this.jobDateChange,
+                          name: 'jobDate',
+                          value: jobStartDateTime
+                          // givenDate: currentDate
+                        }
+                      }
+                      onChange={this.jobDateChange}
+                      dateFormat="yyyy-MM-dd hh:mm"
+                      showTime
+                      meta={reqHandlerDate}
+                      id="jobstartdatetime"
+                    />
+                  </div>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-3 form__form-group">
+                    <span className="form__form-group-label">
+                      Number of trucks
+                    </span>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleHourDetails,
+                          name: 'hourTrucksNumber',
+                          value: hourTrucksNumber
+                        }
+                      }
+                      placeholder="Any"
+                      allowUndefined={true}
+                      // meta={reqHandlerTrucksEstimate}
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <span className="form__form-group-label">Truck Type</span>
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.handleTruckTypeChange,
+                          name: 'truckType',
+                          value: truckType
+                        }
+                      }
+                      meta={reqHandlerTruckType}
+                      value={truckType}
+                      options={allTruckTypes}
+                      placeholder="Truck Type"
+                    />
+                  </div>
+                  <div className="col-md-5 form__form-group">
+                    <span className="form__form-group-label">Material</span>
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.handleMaterialsChange,
+                          name: 'materialType',
+                          value: selectedMaterials
+                        }
+                      }
+                      meta={reqHandlerMaterials}
+                      value={selectedMaterials}
+                      options={allMaterials}
+                      placeholder="Select material"
+                    />
+                  </div>
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-3 form__form-group">
+                    <span className="form__form-group-label">Rate</span>
+                    <SelectField
+                      input={
+                        {
+                          onChange: this.handleRateChange,
+                          name: 'materialType',
+                          value: selectedRatedHourOrTon
+                        }
+                      }
+                      // meta={reqHandlerMaterials}
+                      value={selectedRatedHourOrTon}
+                      options={
+                        [
+                          {
+                            value: 'hour',
+                            label: 'Hour'
+                          },
+                          {
+                            value: 'ton',
+                            label: 'Ton'
+                          }
+                        ]
+                      }
+                    />
+                  </div>
+                  {this.renderHourOrTon(selectedRatedHourOrTon)}
+                </Row>
+
+                <Row className="col-md-12">
+                  <hr/>
+                  {/* <hr className="bighr"/> */}
+                </Row>
+
+                <Row className="col-md-12 rateTab">
+                  <div className="col-md-6">
+                    <h3 className="subhead">
+                      Start Location
+                    </h3>
+                    <small>
+                      Select a starting address:
+                    </small>
+                    <div
+                      id="starting_id"
+                    >
+                      <SelectField
+                        input={
+                          {
+                            onChange: this.handleStartAddressIdChange,
+                            name: 'selectedStartAddress',
+                            value: selectedStartAddressId
+                          }
+                        }
+                        // meta={reqHandlerMaterials}
+                        value={selectedStartAddressId}
+                        options={allAddresses}
+                        placeholder="Select a location"
+                        meta={reqHandlerSameAddresses}
+                      />
+                    </div>
+                    <div>
+                      &nbsp;
+                    </div>
+                    <small>
+                      Or create a new one:
+                    </small>
+                    <div
+                      id="starting"
+                      className={`${selectedStartAddressId === 0 ? 'shown' : 'fifty'}`}
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      onClick={this.toggleNewStartAddress}
+                    >
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleStartAddressChange,
+                              name: 'startLocationAddressName',
+                              value: startLocationAddressName
+                            }
+                          }
+                          placeholder="Address Name"
+                          type="text"
+                          meta={reqHandlerStartAddressName}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleStartAddressChange,
+                              name: 'startLocationAddress1',
+                              value: startLocationAddress1
+                            }
+                          }
+                          placeholder="Address 1"
+                          type="text"
+                          meta={reqHandlerStartAddress}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <input
+                          name="startLocationAddress2"
+                          type="text"
+                          value={startLocationAddress2}
+                          onChange={this.handleStartAddressChange}
+                          placeholder="Address 2"
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleStartAddressChange,
+                              name: 'startLocationCity',
+                              value: startLocationCity
+                            }
+                          }
+                          placeholder="City"
+                          type="text"
+                          meta={reqHandlerStartCity}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <SelectField
+                          input={
+                            {
+                              onChange: this.handleStartLocationChange,
+                              name: 'startLocationState',
+                              value: startLocationState
+                            }
+                          }
+                          placeholder="State"
+                          meta={reqHandlerStartState}
+                          value={startLocationState}
+                          options={allUSstates}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleStartAddressChange,
+                              name: 'startLocationZip',
+                              value: startLocationZip
+                            }
+                          }
+                          placeholder="Zip"
+                          type="text"
+                          meta={reqHandlerStartZip}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <h3 className="subhead">
+                      End Location
+                    </h3>
+                    <small>
+                      Select a ending address:
+                    </small>
+                    <div
+                      id="ending_id"
+                    >
+                      <SelectField
+                        input={
+                          {
+                            onChange: this.handleEndAddressIdChange,
+                            name: 'selectedEndAddress',
+                            value: selectedEndAddressId
+                          }
+                        }
+                        // meta={reqHandlerMaterials}
+                        value={selectedEndAddressId}
+                        options={allAddresses}
+                        placeholder="Select a location"
+                      />
+                    </div>
+                    <div>
+                      &nbsp;
+                    </div>
+                    <small>
+                      Or create a new one:
+                    </small>
+                    <div
+                      id="ending"
+                      className={`${selectedEndAddressId === 0 ? 'shown' : 'fifty'}`}
+                      role="link"
+                      tabIndex="0"
+                      onKeyPress={this.handleKeyPress}
+                      onClick={this.toggleNewEndAddress}
+                    >
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleEndAddressChange,
+                              name: 'endLocationAddressName',
+                              value: endLocationAddressName
+                            }
+                          }
+                          placeholder="Address Name"
+                          type="text"
+                          meta={reqHandlerEndAddressName}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleEndAddressChange,
+                              name: 'endLocationAddress1',
+                              value: endLocationAddress1
+                            }
+                          }
+                          placeholder="Address 1"
+                          type="text"
+                          meta={reqHandlerEndAddress}
+                        />
+                      </div>
+
+                      <div className="form__form-group">
+                        <input
+                          name="endLocationAddress2"
+                          type="text"
+                          value={endLocationAddress2}
+                          onChange={this.handleEndAddressChange}
+                          placeholder="Address 2"
+                          autoComplete="new-password"
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleEndAddressChange,
+                              name: 'endLocationCity',
+                              value: endLocationCity
+                            }
+                          }
+                          placeholder="City"
+                          type="text"
+                          meta={reqHandlerEndCity}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <SelectField
+                          input={
+                            {
+                              onChange: this.handleEndLocationChange,
+                              name: 'endLocationState',
+                              value: endLocationState
+                            }
+                          }
+                          placeholder="State"
+                          meta={reqHandlerEndState}
+                          value={endLocationState}
+                          options={allUSstates}
+                        />
+                      </div>
+                      <div className="form__form-group">
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleEndAddressChange,
+                              name: 'endLocationZip',
+                              value: endLocationZip
+                            }
+                          }
+                          placeholder="Zip"
+                          type="text"
+                          meta={reqHandlerEndZip}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Row>
+                {/* onSubmit={onSubmit} */}
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Instructions
+                    </h3>
+                  </div>
+                  <div className="col-md-12 form__form-group">
+                    <textarea
+                      name="instructions"
+                      type="text"
+                      value={instructions}
+                      onChange={this.handleInputChange}
+                      placeholder="instructions"
+                      maxLength="255"
+                    />
+                  </div>
+                </Row>
+                <hr/>
+                <Row className="col-md-12">
+                  <ButtonToolbar className="col-md-6 wizard__toolbar">
+                    <Button color="minimal" className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={() => closeModal()}
+                    >
+                      Cancel
+                    </Button>
+                  </ButtonToolbar>
+                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                    <TSubmitButton
+                      onClick={this.saveJob}
+                      className="primaryButton"
+                      loading={btnSubmitting}
+                      loaderSize={10}
+                      bntText="Request Carrier"
+                    />
+                  </ButtonToolbar>
+                </Row>
+
+              </form>
+            </CardBody>
+          </Card>
+        </Col>
       );
     }
     return (

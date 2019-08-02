@@ -6,6 +6,7 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import PaymentsService from '../../api/PaymentsService';
+import PaymentsFilter from './PaymentsFilter';
 
 class PaymentsCustomer extends Component {
   constructor(props) {
@@ -109,6 +110,7 @@ class PaymentsCustomer extends Component {
               <h3 className="page-title">Customer Charges</h3>
             </Col>
           </Row>
+          <PaymentsFilter />
           <Row>
             <Col md={12}>
               <Card>

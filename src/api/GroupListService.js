@@ -13,8 +13,8 @@ class GroupListService extends AgentService {
     return (response);
   }
 
-  static async getGroupListsByCompanyId(companyId) {
-    const response = await this.get(`/companies/${companyId}${PATH}`);
+  static async getGroupListsByCompanyId(favoriteCompanyId, userCompanyId) {
+    const response = await this.get(`/favoriteCompany/${favoriteCompanyId}/userCompany/${userCompanyId}${PATH}`);
     return (response);
   }
 
@@ -23,8 +23,8 @@ class GroupListService extends AgentService {
     return (response);
   }
 
-  static async getGroupListsFavorites() {
-    const response = await this.get(`/favorites${PATH}`);
+  static async getGroupListsFavorites(companyId) {
+    const response = await this.get(`/company/${companyId}/getfavorites${PATH}`);
     return (response);
   }
 
