@@ -600,7 +600,7 @@ class CreateJobFormOne extends PureComponent {
       // job.jobDate.setHours(0, 0, 0, 0);
     }
 
-    if (!job.jobDate || job.jobDate.getTime() < currDate.getTime()) {
+    if (!job.jobDate || new Date(job.jobDate).getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
