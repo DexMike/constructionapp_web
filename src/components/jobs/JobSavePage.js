@@ -818,14 +818,14 @@ class JobSavePage extends Component {
       <Modal
         isOpen={allocateDriversModal}
         toggle={this.toggleAllocateDriversModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="allocate-modal"
       >
         <div className="modal__body" style={{ padding: '0px' }}>
           <Container className="dashboard">
             <Row>
               <Col md={12} lg={12}>
                 <Card style={{ paddingBottom: 0 }}>
-                  <h1 style={{
+                  <h1 style={{                    
                     marginTop: 20,
                     marginLeft: 20
                   }}
@@ -849,7 +849,7 @@ class JobSavePage extends Component {
                       selected={selectedDrivers}
                     />
                     <div className="col-md-8"/>
-                    <div className="col-md-4">
+                    <div className="col-md-4 text-right pr-4">
                       <Button type="button" className="tertiaryButton" onClick={() => {
                         this.toggleAllocateDriversModal();
                       }}
