@@ -110,8 +110,7 @@ class DriverForm extends Component {
       if (this.checkPhoneFormat(mobilePhone)) {
         const notification = {
           to: this.phoneToNumberFormat(mobilePhone),
-          body: `Hi, you’ve been invited by ${currentUser.firstName} ${currentUser.lastName} to join Trelar. 
-            Please click www.trelar.com/drivers-app/ to join Trelar.`
+          body: `Hi, you’ve been invited by ${currentUser.firstName} ${currentUser.lastName} to join Trelar. Please click www.trelar.com/drivers-app/ to join Trelar.`
         };
 
         await TwilioService.createInviteSms(notification);
