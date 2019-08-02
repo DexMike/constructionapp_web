@@ -795,7 +795,7 @@ class JobSavePage extends Component {
 
   renderAllocateDriversModal() {
     const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
-    const driverData = drivers;    
+    const driverData = drivers;
     const driverColumns = [
       {
         displayName: 'First Name',
@@ -825,7 +825,7 @@ class JobSavePage extends Component {
             <Row>
               <Col md={12} lg={12}>
                 <Card style={{ paddingBottom: 0 }}>
-                  <h1 style={{                    
+                  <h1 style={{
                     marginTop: 20,
                     marginLeft: 20
                   }}
