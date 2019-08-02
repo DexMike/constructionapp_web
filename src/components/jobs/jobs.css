@@ -35,3 +35,16 @@
   width: 100%;
   height: 400px !important;
 }
+
+.allocate-modal .modal-content{
+  text-align: left;
+  max-width: 1000px !important;
+  width: 1000px !important;
+}
+
+@media screen and (max-width: 1000px) {
+  .allocate-modal .modal-content{
+    max-width: 80% !important;
+    width: 80% !important;
+  }
+}
