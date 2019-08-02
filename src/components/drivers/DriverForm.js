@@ -13,6 +13,7 @@ import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import TwilioService from '../../api/TwilioService';
+import CompanyService from '../../api/CompanyService';
 import TSubmitButton from '../common/TSubmitButton';
 
 class DriverForm extends Component {
@@ -107,10 +108,15 @@ class DriverForm extends Component {
       // Sending SMS to Truck's company
       const chars = {'(': '', ')': '', '-': '', ' ': ''};
       const mobilePhone = user.mobilePhone.replace(/[abc]/g, m => chars[m]);
+
+      // get company legal name
+      const tempCompany = await CompanyService.getCompanyById(currentUser.companyId);
+      const companyLegalName = tempCompany.legalName;
+
       if (this.checkPhoneFormat(mobilePhone)) {
         const notification = {
           to: this.phoneToNumberFormat(mobilePhone),
-          body: `Hi, you’ve been invited by ${currentUser.firstName} ${currentUser.lastName} to join Trelar. Please click www.trelar.com/drivers-app/ to join Trelar.`
+          body: `Hi, you’ve been invited by ${companyLegalName} to join Trelar Logistics. Go here to download the app https://www.trelar.com/drivers-app/`
         };
 
         await TwilioService.createInviteSms(notification);
