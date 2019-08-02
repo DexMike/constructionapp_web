@@ -795,7 +795,7 @@ class JobSavePage extends Component {
 
   renderAllocateDriversModal() {
     const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
-    const driverData = drivers;    
+    const driverData = drivers;
     const driverColumns = [
       {
         displayName: 'First Name',
@@ -818,7 +818,7 @@ class JobSavePage extends Component {
       <Modal
         isOpen={allocateDriversModal}
         toggle={this.toggleAllocateDriversModal}
-        className="modal-dialog--primary modal-dialog--header"
+        className="allocate-modal"
       >
         <div className="modal__body" style={{ padding: '0px' }}>
           <Container className="dashboard">
@@ -849,7 +849,7 @@ class JobSavePage extends Component {
                       selected={selectedDrivers}
                     />
                     <div className="col-md-8"/>
-                    <div className="col-md-4">
+                    <div className="col-md-4 text-right pr-4">
                       <Button type="button" className="tertiaryButton" onClick={() => {
                         this.toggleAllocateDriversModal();
                       }}
