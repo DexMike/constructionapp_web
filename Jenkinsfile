@@ -29,7 +29,7 @@ pipeline {
         }
         stage('Initialize prod') {
           when {
-            branch 'prod'
+            branch 'master'
           }
           steps {
             echo 'Starting prod'
@@ -94,7 +94,7 @@ npm run deployQa'''
         }
         stage('Build / Package prod') {
           when {
-            branch 'prod'
+            branch 'master'
           }
           steps {
             sh '''npm install
@@ -113,7 +113,7 @@ npm run deployProd'''
           }
           steps {
             sh '''npm install
-npm run deployStaging'''
+npm --max_old_space_size=8192 run deployStaging'''
             slackSend botUser: true,
               channel: 'jenkins',
               color: 'good',
