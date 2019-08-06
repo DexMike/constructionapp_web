@@ -4,7 +4,7 @@ import { Container, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 // import NumberFormat from 'react-number-format';
-import HEREMap, { RouteLine } from 'here-maps-react';
+import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import JobService from '../../api/JobService';
 // import truckImage from '../../img/default_truck.png';
 import AddressService from '../../api/AddressService';
@@ -164,6 +164,8 @@ class JobViewForm extends Component {
     // here
     /**/
     const platform = new H.service.Platform({
+      apikey: '7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A',
+      useCIT: true,
       app_id: HERE_MAPS_APP_ID,
       app_code: HERE_MAPS_APP_CODE,
       useHTTPS: true

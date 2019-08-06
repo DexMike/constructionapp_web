@@ -6,7 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
 // import UserService from '../../api/UserService';
-import HEREMap, { RouteLine } from 'here-maps-react';
+import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -85,6 +85,8 @@ class LoadsExpandableRow extends Component {
 
     // here
     const platform = new H.service.Platform({
+      apikey: '7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A',
+      useCIT: true,
       app_id: HERE_MAPS_APP_ID,
       app_code: HERE_MAPS_APP_CODE,
       useHTTPS: true

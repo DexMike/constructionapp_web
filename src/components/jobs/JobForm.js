@@ -4,7 +4,8 @@ import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
-import HEREMap, { RouteLine } from 'here-maps-react';
+// import HEREMap, { Marker, RouteLine } from 'here-maps-react';
+import HEREMap, { Marker, RouteLine } from '../../utils/here-maps-react';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -70,7 +71,8 @@ class JobForm extends Component {
       profile: [],
       shape: {},
       timeAndDistance: '',
-      instructions: []
+      instructions: [],
+      markersGroup: {}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -83,7 +85,11 @@ class JobForm extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     const { job, companyCarrier } = this.props;
-    let { loads, carrier, images } = this.state;
+    let {
+      loads,
+      carrier,
+      images
+    } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
@@ -91,6 +97,8 @@ class JobForm extends Component {
     let time = 0;
 
     const platform = new H.service.Platform({
+      apikey: '7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A',
+      useCIT: true,
       app_id: hereMapsId,
       app_code: hereMapsCode,
       useHTTPS: true
@@ -108,6 +116,17 @@ class JobForm extends Component {
       metricSystem: 'imperial',
       language: 'en-us' // en-us|es-es|de-de
     };
+
+    const originMarker = new H.map.Marker({
+      lat: startPoint.latitude,
+      lng: startPoint.longitude
+    });
+    const destinationMarker = new H.map.Marker({
+      lat: endPoint.latitude,
+      lng: endPoint.longitude
+    });
+    const group = new H.map.Group();
+    group.addObjects([originMarker, destinationMarker]);
 
     const router = platform.getRoutingService();
     router.calculateRoute(
@@ -156,9 +175,10 @@ class JobForm extends Component {
       job,
       distance,
       time,
-      // cachedOrigin: origin,
-      // cachedDestination: destination,
-      profile
+      cachedOrigin: startPoint,
+      cachedDestination: endPoint,
+      profile,
+      markersGroup: group
     });
   }
 
@@ -679,7 +699,10 @@ class JobForm extends Component {
   renderHereMap() {
     const {
       showMainMap,
-      shape
+      shape,
+      cachedOrigin,
+      cachedDestination,
+      markersGroup
     } = this.state;
 
     const opts = {
@@ -698,17 +721,17 @@ class JobForm extends Component {
           setLayer={opts}
           hidpi={false}
           interactive
+          markersGroup={markersGroup}
         >
-          {/*
-          <Marker {...center}>
-            <div className="circle-marker" />
-          </Marker>
-          */}
           <RouteLine
             shape={shape}
             strokeColor="purple"
             lineWidth="4"
           />
+          {/* // If markersGroup exists, do not send markers
+          <Marker lat={cachedOrigin.latitude} lng={cachedOrigin.longitude} />
+          <Marker lat={cachedDestination.latitude} lng={cachedDestination.longitude} />
+          */}
         </HEREMap>
       );
     }
