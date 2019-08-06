@@ -13,6 +13,8 @@ import LoadInvoiceService from '../../api/LoadInvoiceService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
+import UserService from '../../api/UserService';
+import TFormat from '../common/TFormat';
 
 const routeFeatureWeightType = 0;
 const center = {
@@ -62,8 +64,8 @@ class LoadsExpandableRow extends Component {
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
     // This throws an error
-    // const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
-    const driver = {};
+    const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+    // const driver = {};
 
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
@@ -301,7 +303,7 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
-      const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
+      // const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
           {this.renderModal()}
@@ -319,10 +321,10 @@ class LoadsExpandableRow extends Component {
                        style={{fontStyle: !endTime ? 'italic' : 'normal'}}
             >{(!endTime ? 'In Progress' : endTime)}
             </TableCell>
-            <TableCell align="left">{`${load.tonsEntered} tons`}</TableCell>
+            <TableCell align="left">{`${load.tonsEntered ? (load.tonsEntered).toFixed(2) : '0.00'} tons`}</TableCell>
             {job.rateType === 'Hour' && <TableCell align="left">{`${load.hoursEntered} hours`}</TableCell>}
-            <TableCell align="left">{job.rateType === 'Hour' ? `$${job.rate} / hour` : `$${job.rate} / ton`}</TableCell>
-            <TableCell align="left">${job.rateType === 'Hour' ? job.rate * load.hoursEntered : job.rate * load.tonsEntered}</TableCell>
+            <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoneyByHour(job.rate) : TFormat.asMoneyByTons(job.rate)}</TableCell>
+            <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoney(job.rate * load.hoursEntered) : TFormat.asMoney(job.rate * load.tonsEntered)}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
           {isExpanded && (
@@ -351,14 +353,14 @@ class LoadsExpandableRow extends Component {
                           onClick={this.toggleDisputeModal}
                           // name="DISPUTE"
                           type="button"
-                          className="secondaryButton"
+                          className="btn btn-secondary"
                         >
                           DISPUTE
                         </Button>
                         <Button
                           onClick={this.handleApproveLoad}
                           type="button"
-                          className="PrimaryButton"
+                          color="primary"
                         >
                           APPROVE
                         </Button>
