@@ -34,6 +34,7 @@ const center = {
 
 const hereMapsId = process.env.HERE_MAPS_APP_ID;
 const hereMapsCode = process.env.HERE_MAPS_APP_CODE;
+const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
 
 class JobForm extends Component {
   constructor(props) {
@@ -97,7 +98,7 @@ class JobForm extends Component {
     let time = 0;
 
     const platform = new H.service.Platform({
-      apikey: '7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A',
+      apikey: hereMapsApiKey,
       useCIT: true,
       app_id: hereMapsId,
       app_code: hereMapsCode,

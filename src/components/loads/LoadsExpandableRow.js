@@ -29,6 +29,7 @@ const opts = {
 
 const { HERE_MAPS_APP_ID } = process.env;
 const { HERE_MAPS_APP_CODE } = process.env;
+const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
 
 class LoadsExpandableRow extends Component {
   constructor(props) {
@@ -87,7 +88,7 @@ class LoadsExpandableRow extends Component {
 
     // here
     const platform = new H.service.Platform({
-      apikey: '7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A',
+      apikey: hereMapsApiKey,
       useCIT: true,
       app_id: HERE_MAPS_APP_ID,
       app_code: HERE_MAPS_APP_CODE,

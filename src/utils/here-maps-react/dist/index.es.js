@@ -18,6 +18,8 @@ and limitations under the License.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
+const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
+
 var extendStatics = function(d, b) {
     extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -335,7 +337,7 @@ var HEREMap = /** @class */ (function (_super) {
                 setLayer = _a.setLayer, 
                 originmarkersGroup = _a.originmarkersGroup;
             var platform = getPlatform({
-                apikey: '7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A',
+                apikey: hereMapsApiKey,
                 app_code: appCode,
                 app_id: appId,
                 useHTTPS: true,
