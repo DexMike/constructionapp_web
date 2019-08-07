@@ -5,7 +5,8 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
-import HEREMap, { RouteLine } from 'here-maps-react';
+// import UserService from '../../api/UserService';
+import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -28,6 +29,7 @@ const opts = {
 
 const { HERE_MAPS_APP_ID } = process.env;
 const { HERE_MAPS_APP_CODE } = process.env;
+const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
 
 class LoadsExpandableRow extends Component {
   constructor(props) {
@@ -86,6 +88,8 @@ class LoadsExpandableRow extends Component {
 
     // here
     const platform = new H.service.Platform({
+      apikey: hereMapsApiKey,
+      useCIT: true,
       app_id: HERE_MAPS_APP_ID,
       app_code: HERE_MAPS_APP_CODE,
       useHTTPS: true
