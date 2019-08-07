@@ -4,7 +4,7 @@ import { Container, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 // import NumberFormat from 'react-number-format';
-import HEREMap, { RouteLine } from 'here-maps-react';
+import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import JobService from '../../api/JobService';
 // import truckImage from '../../img/default_truck.png';
 import AddressService from '../../api/AddressService';
@@ -36,6 +36,7 @@ const opts = {
 
 const { HERE_MAPS_APP_ID } = process.env;
 const { HERE_MAPS_APP_CODE } = process.env;
+const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -124,7 +125,7 @@ class JobViewForm extends Component {
             bid = filteredBid;
           } else if (filteredBid.companyCarrierId === profile.companyId
             && filteredBid.hasSchedulerAccepted === 1
-            && filteredBid.status === 'Pending') { // "Requested" bid
+            && (filteredBid.status === 'Pending' || filteredBid.status === 'Declined')) { // "Requested" or "Declied" bid
             bid = filteredBid;
           }
           return bid;
@@ -164,6 +165,8 @@ class JobViewForm extends Component {
     // here
     /**/
     const platform = new H.service.Platform({
+      apikey: hereMapsApiKey,
+      useCIT: true,
       app_id: HERE_MAPS_APP_ID,
       app_code: HERE_MAPS_APP_CODE,
       useHTTPS: true
@@ -434,7 +437,7 @@ class JobViewForm extends Component {
 
     // Job was 'Published' to the Marketplace,
     // Carrier is a favorite OR Customer has requested this particular Carrier
-    if (jobStatus === 'Published' && (favoriteCompany.length > 0 || (bid && bid.hasCustomerAccepted === 1))) {
+    if (jobStatus === 'Published' && (favoriteCompany.length > 0 || (bid && bid.hasCustomerAccepted === 1 && bid.status === 'Pending'))) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -456,7 +459,7 @@ class JobViewForm extends Component {
         />
       );
     // Job was 'Published And Offered', there's a bid
-    } else if (jobStatus === 'Published' && (bid && bid.status !== 'Pending' && bid.status !== 'Declined') && favoriteCompany.length === 0) {
+    } else if (jobStatus === 'Published' && (bid && (bid.status !== 'Pending' && bid.status !== 'Declined')) && favoriteCompany.length === 0) {
       showModalButton = (
         <TSubmitButton
           onClick={this.saveJob}
@@ -470,8 +473,11 @@ class JobViewForm extends Component {
     } else if (jobStatus === 'Published' && (bid && bid.status === 'Pending')) {
       showModalButton = 'You have requested this job';
     // Job "Declined" by the customer
-    } else if (jobStatus === 'Published' && (bid && bid.status === 'Declined')) {
+    } else if (jobStatus === 'Published' && (bid && bid.status === 'Declined' && bid.hasSchedulerAccepted === 1 && bid.hasCustomerAccepted === 0)) {
       showModalButton = 'Your request for this job has been declined.';
+    // Job "Declined" by the carrier
+    } else if (jobStatus === 'Published' && (bid && bid.status === 'Declined' && bid.hasSchedulerAccepted === 0 && bid.hasCustomerAccepted === 1)) {
+      showModalButton = 'You have declined this offer.';
     }
 
     return (

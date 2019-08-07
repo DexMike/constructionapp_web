@@ -59,18 +59,21 @@ class SidebarCarrierContent extends Component {
             onClick={this.hideSidebar}
           />
         </ul> */}
-        <SideElement title="Drivers"
-                     icon="ic_airline_seat_recline_normal"
-                     route="/drivers"
-                     onClick={this.hideSidebar}/>
         {
-          isAdmin ? (
-            <SideElement title="Payments"
-                     icon="ic_attach_money"
-                     route="/payments"
-                     onClick={this.hideSidebar}
-            />
-          ) : null
+          isAdmin && (
+            <React.Fragment>
+              <SideElement title="Drivers"
+                      icon="ic_airline_seat_recline_normal"
+                      route="/drivers"
+                      onClick={this.hideSidebar}
+              />
+              <SideElement title="Payments"
+                      icon="ic_attach_money"
+                      route="/payments"
+                      onClick={this.hideSidebar}
+              />
+            </React.Fragment>
+          )
         }
         <SideElement title="Reports"
                      icon="ic_timeline"
