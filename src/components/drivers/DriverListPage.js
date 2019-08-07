@@ -26,6 +26,7 @@ class DriverListPage extends Component {
 
     this.state = {
       loaded: false,
+      isAdmin: null,
       drivers: [],
       currentUser: {},
       goToDashboard: false,
@@ -46,14 +47,20 @@ class DriverListPage extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchDrivers();
-    this.setState({ loaded: true });
-  }
-
-  async fetchDrivers() {
     const profile = await ProfileService.getProfile();
     const currentUser = await UserService.getUserById(profile.userId);
-    const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+    if (profile.isAdmin) {
+      await this.fetchDrivers(profile.companyId);
+    }    
+    this.setState({       
+      isAdmin: profile.isAdmin,
+      currentUser,
+      loaded: true
+    });
+  }
+
+  async fetchDrivers(companyId) {
+    const drivers = await UserService.getDriversWithUserInfoByCompanyId(companyId);
     let driversWithInfo = [];
 
     if (drivers) {
@@ -65,15 +72,16 @@ class DriverListPage extends Component {
             lastName: driver.lastName,
             mobilePhone: driver.mobilePhone,
             userStatus: driver.userStatus,
+            driverStatus: driver.driverStatus,
             email: driver.email,
             userId: driver.id
           };
           // Do not know what other user statuses we would consider enabled??
           // Should we have an actual driver driver status???
           // IF we add a driver status we will need to change this 
-          if (newDriver.userStatus === 'New' || newDriver.userStatus === 'First Login') {
-            newDriver.userStatus = 'Enabled';
-          }
+          // if (newDriver.userStatus === 'New' || newDriver.userStatus === 'First Login') {
+          //   newDriver.userStatus = 'Enabled';
+          // }
           return newDriver;
         } catch (error) {
           const newDriver = driver;
@@ -83,8 +91,7 @@ class DriverListPage extends Component {
       });
     }
     this.setState({
-      drivers: driversWithInfo,
-      currentUser
+      drivers: driversWithInfo
     });
   }
 
@@ -170,7 +177,10 @@ class DriverListPage extends Component {
   }
 
   render() {
-    const { drivers, loaded } = this.state;
+    const { drivers, loaded, isAdmin } = this.state;
+    if (isAdmin === false) {
+      return <Redirect push to="/" />;
+    }
     if (loaded) {
       return (
         <Container className="dashboard">
