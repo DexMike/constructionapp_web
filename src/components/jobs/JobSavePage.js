@@ -176,7 +176,7 @@ class JobSavePage extends Component {
           const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
           let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
-            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled') {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
               enabledDrivers.push(itm);
             }
           });
@@ -779,7 +779,8 @@ class JobSavePage extends Component {
         </div>
       );
     } */
-    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') && companyType === 'Carrier') {
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') 
+      && companyType === 'Carrier' && profile.isAdmin) {
       return (
         <TSubmitButton
           onClick={() => this.toggleAllocateDriversModal()}
@@ -811,7 +812,7 @@ class JobSavePage extends Component {
         name: 'mobilePhone'
       }, {
         displayName: 'Status',
-        name: 'userStatus'
+        name: 'driverStatus'
       }
     ];
     return (
