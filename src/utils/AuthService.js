@@ -6,7 +6,7 @@ class AuthService {
       const cognitoUser = await Auth.currentAuthenticatedUser();
       const currentSession = await Auth.currentSession();
       await cognitoUser.refreshSession(currentSession.refreshToken, (err, session) => {
-        console.log('session', err, session);
+        // console.log('session', err, session);
         // const { idToken, refreshToken, accessToken } = session;
         // do whatever you want to do now :)
       });

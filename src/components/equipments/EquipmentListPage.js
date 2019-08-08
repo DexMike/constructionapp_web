@@ -227,13 +227,6 @@ class EquipmentListPage extends Component {
       // const tempHourRate = newEquipment.hourRate;
       // const tempTonRate = newEquipment.tonRate;
 
-      if (newEquipment.hourRate === null) {
-        newEquipment.hourRate = 0;
-      }
-      if (newEquipment.hourRate === null) {
-        newEquipment.tonRate = 0;
-      }
-
       newEquipment.newMaxCapacity = newEquipment.maxCapacity;
       newEquipment.newMaxCapacityF = TFormat.getValue(
         TFormat.asTons(newEquipment.maxCapacity)

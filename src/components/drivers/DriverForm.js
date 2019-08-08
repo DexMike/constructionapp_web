@@ -153,7 +153,7 @@ class DriverForm extends Component {
 
     if (user && user.id) {
       user.modifiedBy = currentUser.userId;
-      user.modifiedOn = moment().unix() * 1000;
+      user.modifiedOn = moment.utc().format();
       await UserService.updateUser(user);
       if (updateNewDriver || driverStatus === 'Invited') {
         this.setState({step: 2, sendingSMS: true});
@@ -170,9 +170,9 @@ class DriverForm extends Component {
       user.isEmailVerified = 0;
       user.isPhoneVerified = 0;
       user.createdBy = currentUser.id;
-      user.createdOn = moment().unix() * 1000;
+      user.createdOn = moment.utc().format();
       user.modifiedBy = currentUser.id;
-      user.modifiedOn = moment().unix() * 1000;
+      user.modifiedOn = moment.utc().format();
       const newUser = await UserService.createUser(user);
       user.id = newUser.id;
 
@@ -181,7 +181,7 @@ class DriverForm extends Component {
       driver.usersId = newUser.id;
       driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
-      driver.createdOn = moment().unix() * 1000;
+      driver.createdOn = moment.utc().format();
 
       await DriverService.createDriver(driver);
       this.sendDriverInvite(user);

@@ -118,8 +118,7 @@ class BidsTable extends Component {
       newJob = CloneDeep(job);
       newJob.status = 'Booked';
       newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment()
-        .unix() * 1000;
+      newJob.modifiedOn = moment.utc().format();
       await JobService.updateJob(newJob);
 
       // For all of the Bids that are going to be 'Ignored'
@@ -152,8 +151,7 @@ class BidsTable extends Component {
           ignoredBid.rate = newJob.rate;
           ignoredBid.notes = newJob.notes;
           ignoredBid.modifiedBy = profile.userId;
-          ignoredBid.modifiedOn = moment()
-            .unix() * 1000;
+          ignoredBid.modifiedOn = moment.utc().format();
           // console.log(ignoredBid);
           ignoredBidsList.push(BidService.updateBid(ignoredBid));
         }
@@ -187,8 +185,7 @@ class BidsTable extends Component {
       newBid.rateEstimate = newJob.rateEstimate;
       newBid.notes = newJob.notes;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       newBid = await BidService.updateBid(newBid);
 
       // Create a Booking
@@ -202,8 +199,8 @@ class BidsTable extends Component {
       booking.endAddressId = newJob.endAddress;
       booking.bookingStatus = 'New';
       booking.createdBy = profile.userId;
-      booking.createdOn = moment().unix() * 1000;
-      booking.modifiedOn = moment().unix() * 1000;
+      booking.createdOn = moment.utc().format();
+      booking.modifiedOn = moment.utc().format();
       booking.modifiedBy = profile.userId;
       booking = await BookingService.createBooking(booking);
 
@@ -255,8 +252,7 @@ class BidsTable extends Component {
       newBid.status = 'Declined';
       newBid.hasCustomerAccepted = 0;
       newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment()
-        .unix() * 1000;
+      newBid.modifiedOn = moment.utc().format();
       newBid = await BidService.updateBid(newBid);
 
       // Notify Carrier company's admin that the job request was declined
@@ -417,11 +413,11 @@ class BidsTable extends Component {
                       className="form form--horizontal addtruck__form"
                     >
                       <Row className="col-md-12">
-                        Do you want to assign this job to {selectedBidCompany.legalName}
+                      Do you want to book {selectedBidCompany.legalName} for this job now?
                       </Row>
                       <hr/>
                       <Row className="col-md-12">
-                        <ButtonToolbar className="col-md-6 wizard__toolbar">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
                           <Button color="minimal" className="btn btn-outline-secondary"
                                   type="button"
                                   onClick={this.toggleBidModal}
@@ -429,20 +425,28 @@ class BidsTable extends Component {
                             Cancel
                           </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
                           <TSubmitButton
                             onClick={() => this.saveBid('decline')}
                             className="secondaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
+<<<<<<< HEAD
                             bntText="Decline Request"
+=======
+                            bntText="No, decline this Request"
+>>>>>>> 89e6c3b2db8a71f75ef6bf748dc227121d677c8e
                           />
                           <TSubmitButton
                             onClick={() => this.saveBid('accept')}
                             className="primaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
+<<<<<<< HEAD
                             bntText="Accept Request"
+=======
+                            bntText="Yes, book this Request"
+>>>>>>> 89e6c3b2db8a71f75ef6bf748dc227121d677c8e
                           />
                         </ButtonToolbar>
                       </Row>

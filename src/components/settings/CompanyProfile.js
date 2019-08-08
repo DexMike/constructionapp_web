@@ -350,8 +350,7 @@ class CompanyProfile extends Component {
     const company = this.setCompanyInfo();
     const address = this.setAddressInfo();
     if (company && company.id) {
-      company.modifiedOn = moment()
-        .unix() * 1000;
+      company.modifiedOn = moment.utc().format();
       try {
         await CompanyService.updateCompany(company);
         await AddressService.updateAddress(address);

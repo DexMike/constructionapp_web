@@ -1,4 +1,6 @@
 import React, {PureComponent} from 'react';
+import { Link } from 'react-router-dom';
+import moment from 'moment';
 import {
   Card,
   CardBody,
@@ -18,6 +20,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
 import GeoCodingService from '../../api/GeoCodingService';
+import ProfileService from '../../api/ProfileService';
 
 // import USstates from '../../utils/usStates';
 
@@ -25,6 +28,7 @@ class CreateJobFormOne extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      profile: [],
       userCompanyId: 0,
       // truck properties
       truckType: '',
@@ -201,6 +205,7 @@ class CreateJobFormOne extends PureComponent {
 
     // should load all addresses even if already set
     const response = await AddressService.getAddresses();
+    const profile = await ProfileService.getProfile();
 
     const newItem = {
       id: 0,
@@ -288,7 +293,13 @@ class CreateJobFormOne extends PureComponent {
           };
           allTruckTypes.push(inside);
         });
+
+      const jobDate = moment().tz(
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).valueOf();
+
       this.setState({
+        jobDate,
         allMaterials,
         allTruckTypes
       });
@@ -301,7 +312,7 @@ class CreateJobFormOne extends PureComponent {
       label: state.val1
     }));
 
-    this.setState({allUSstates: states, loaded: true});
+    this.setState({allUSstates: states, profile, loaded: true});
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -1147,6 +1158,7 @@ class CreateJobFormOne extends PureComponent {
 
   render() {
     const {
+      profile,
       truckType,
       allTruckTypes,
       allMaterials,
@@ -1161,7 +1173,6 @@ class CreateJobFormOne extends PureComponent {
       endLocationCity,
       endLocationState,
       endLocationZip,
-      jobDate,
       startLocationAddress1,
       startLocationAddress2,
       startLocationCity,
@@ -1190,8 +1201,10 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndAddressName,
       loaded
     } = this.state;
-    const today = new Date();
-    const currentDate = today.getTime();
+    let { jobDate } = this.state;
+    jobDate = moment(jobDate).tz(
+      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+    ).valueOf();
     const {onClose} = this.props;
     if (loaded) {
       return (
@@ -1234,14 +1247,21 @@ class CreateJobFormOne extends PureComponent {
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Date of Job</span>
+                    <span className="form__form-group-label">Date of Job&nbsp;
+                      <span className="form-small-label">Your current time zone is set to&nbsp;
+                        {profile.timeZone
+                          ? moment().tz(profile.timeZone).format('z')
+                          : moment().tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('z')
+                        }. Your timezone can be changed in <Link to="/settings"><span>User Settings</span></Link>.
+                      </span>
+                    </span>
                     <TDateTimePicker
                       input={
                         {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
                           value: {jobDate},
-                          givenDate: currentDate
+                          givenDate: jobDate
                         }
                       }
                       onChange={this.jobDateChange}

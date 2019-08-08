@@ -96,12 +96,14 @@ class DashboardCustomerPage extends Component {
   }
 
   async componentDidMount() {
+    const profile = await ProfileService.getProfile();
+    this.setState({ profile });
     await this.fetchJobsInfo();
     this.setState({ loaded: true });
   }
 
   async fetchJobsInfo() {
-    const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
     const response = await JobService.getCustomerJobsInfo(profile.userId);
     const jobsInfo = response.data;
     const { totalJobs } = response;
@@ -396,7 +398,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {loaded, totalJobs, totalCount} = this.state;
+    const {profile, loaded, totalJobs, totalCount} = this.state;
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -455,7 +457,7 @@ class DashboardCustomerPage extends Component {
       }
 
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
-      newJob.newStartDate = TFormat.asDate(job.startTime);
+      newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
