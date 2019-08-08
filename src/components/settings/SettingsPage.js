@@ -26,6 +26,9 @@ import UserService from '../../api/UserService';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 
+// TEST
+import GeoUtils from '../../utils/GeoUtils';
+
 class SettingsPage extends Component {
   constructor(props) {
     super(props);
@@ -78,6 +81,26 @@ class SettingsPage extends Component {
       }
     }
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
+
+    // Get distance, send coordinates
+    const newDistance = GeoUtils.getDistance(
+      '37.7397,-121.4252',
+      '37.9577,-121.2908'
+    );
+    newDistance.router.calculateRoute(
+      newDistance.params,
+      this.onSuccess,
+      this.onError
+    );
+  }
+
+  // Get distance return functions
+  onError(error) {
+    console.log('>>ERROR : ', error);
+  }
+
+  onSuccess(r) {
+    console.log('>>SUCCESS : ', r.response.route[0].summary);
   }
 
   toggleAddJobModal() {
@@ -271,7 +294,7 @@ class SettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title"><Trans>User Settings</Trans> / {title}</h3>
+              <h3 className="page-title"><Trans>User Settings 274</Trans> / {title}</h3>
             </Col>
           </Row>
           <Container>
