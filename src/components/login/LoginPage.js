@@ -3,6 +3,10 @@ import React from 'react';
 // import FacebookIcon from 'mdi-react/FacebookIcon';
 // import GooglePlusIcon from 'mdi-react/GooglePlusIcon';
 // import { Link, Redirect } from 'react-router-dom';
+import {
+  Col,
+  Row
+} from 'reactstrap';
 import moment from 'moment';
 import {SignIn} from 'aws-amplify-react';
 import {Auth} from 'aws-amplify';
@@ -342,23 +346,23 @@ class LoginPage extends SignIn {
             >
               <EyeIcon/>
             </button>
-          </div>
-          <div className="account__forgot-password">
-            <button type="button"
-                    className="app-link"
-                    onClick={this.onResetPassword}
-            >
-              Forgot a password?
-            </button>
-          </div>
+          </div>          
         </div>
-        <div className="form__form-group">
-          <div className="form__form-group-field">
-            <TCheckBox name="remember_me" label="Remember me" onChange={() => {
-            }} value={false}
+        <Row className="col-12">
+          <Col>
+            <TCheckBox
+              name="remember_me"
+              label="Remember me"
+              onChange={() => {}}
+              value={false}
             />
-          </div>
-        </div>
+          </Col>
+          <Col className="text-right">
+            <div className="app-link" onClick={this.onResetPassword} style={{marginRight: -40}}>
+              Forgot Password?
+            </div>
+          </Col>
+        </Row>
         <TSubmitButton
           onClick={this.onSignIn}
           className="btn btn-primary account__btn account__btn--small"
