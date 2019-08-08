@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 // import { Redirect } from 'react-router-dom';
 // import JobService from '../../api/JobService';
 // import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Redirect } from 'react-router-dom';
 import { Container } from 'reactstrap';
 import ReportsCarrierPage from './ReportsCarrierPage';
 import ReportsCustomerPage from './ReportsCustomerPage';
@@ -13,6 +14,7 @@ class ReportsPage extends Component {
     super(props);
 
     this.state = {
+      isAdmin: null,
       companyType: null
     };
   } // constructor
@@ -20,6 +22,7 @@ class ReportsPage extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     this.setState({
+      isAdmin: profile.isAdmin,
       companyType: profile.companyType,
       loaded: true
     });
@@ -49,7 +52,10 @@ class ReportsPage extends Component {
   }
 
   render() {
-    const { companyType, loaded } = this.state;
+    const { companyType, loaded, isAdmin } = this.state;
+    if (isAdmin === false) {
+      return <Redirect push to="/" />;
+    }
     if (loaded) {
       return (
         <React.Fragment>
