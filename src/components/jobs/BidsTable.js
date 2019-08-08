@@ -431,22 +431,14 @@ class BidsTable extends Component {
                             className="secondaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-<<<<<<< HEAD
-                            bntText="Decline Request"
-=======
                             bntText="No, decline this Request"
->>>>>>> 89e6c3b2db8a71f75ef6bf748dc227121d677c8e
                           />
                           <TSubmitButton
                             onClick={() => this.saveBid('accept')}
                             className="primaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
-<<<<<<< HEAD
-                            bntText="Accept Request"
-=======
                             bntText="Yes, book this Request"
->>>>>>> 89e6c3b2db8a71f75ef6bf748dc227121d677c8e
                           />
                         </ButtonToolbar>
                       </Row>
