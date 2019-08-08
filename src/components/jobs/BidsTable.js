@@ -417,7 +417,7 @@ class BidsTable extends Component {
                       className="form form--horizontal addtruck__form"
                     >
                       <Row className="col-md-12">
-                        Do you want to assign {selectedBidCompany.legalName} to this job?
+                        Do you want to assign this job to {selectedBidCompany.legalName}
                       </Row>
                       <hr/>
                       <Row className="col-md-12">
