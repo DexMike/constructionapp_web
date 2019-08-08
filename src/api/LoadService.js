@@ -10,7 +10,6 @@ class LoadService extends AgentService {
 
   static async updateLoad(load) {
     const response = await this.put(PATH, load);
-    debugger;
     return (response);
   }
 
