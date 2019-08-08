@@ -294,7 +294,7 @@ class SettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title"><Trans>User Settings 274</Trans> / {title}</h3>
+              <h3 className="page-title"><Trans>User Settings</Trans> / {title}</h3>
             </Col>
           </Row>
           <Container>
