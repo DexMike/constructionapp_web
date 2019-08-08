@@ -21,6 +21,7 @@ import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
 import ProfileService from '../../api/ProfileService';
 import GeoCodingService from '../../api/GeoCodingService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 // import USstates from '../../utils/usStates';
 
@@ -28,6 +29,7 @@ class CreateJobFormOne extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      job: [],
       profile: [],
       userCompanyId: 0,
       // truck properties
@@ -198,6 +200,7 @@ class CreateJobFormOne extends PureComponent {
     this.handleInputChangeTonHour = this.handleInputChangeTonHour.bind(this);
     this.getStartCoords = this.getStartCoords.bind(this);
     this.getEndCoords = this.getEndCoords.bind(this);
+    this.saveJobDraft = this.saveJobDraft.bind(this);
   }
 
   async componentDidMount() {
@@ -227,54 +230,124 @@ class CreateJobFormOne extends PureComponent {
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
       const p = firstTabData();
-      // TODO -> There should be a way to map directly to state
-      // this is not very nice
-      this.setState({
-        userCompanyId: p.userCompanyId,
-        // truck properties
-        truckType: p.truckType,
-        allTruckTypes: p.allTruckTypes,
-        capacity: p.capacity,
-        allMaterials: p.allMaterials,
-        selectedMaterials: p.selectedMaterials,
-        // rates
-        rate: p.rate,
-        ratebyBoth: p.ratebyBoth,
-        tonnage: p.tonnage, // estimated amount of tonnage
-        hourTrucksNumber: p.hourTrucksNumber,
-        // rateTab: r.rateTab,
-        // location
-        selectedEndAddressId: p.selectedEndAddressId,
-        endLocationAddress1: p.endLocationAddress1,
-        endLocationAddress2: p.endLocationAddress2,
-        endLocationCity: p.endLocationCity,
-        endLocationState: p.endLocationState,
-        endLocationZip: p.endLocationZip,
-        endLocationLatitude: p.endLocationLatitude,
-        endLocationLongitude: p.endLocationLongitude,
-        startLocationLatitude: p.startLocationLatitude,
-        startLocationLongitude: p.startLocationLongitude,
-        selectedStartAddressId: p.selectedStartAddressId,
-        startLocationAddress1: p.startLocationAddress1,
-        startLocationAddress2: p.startLocationAddress2,
-        startLocationCity: p.startLocationCity,
-        startLocationState: p.startLocationState,
-        startLocationZip: p.startLocationZip,
-        startLocationAddressName: p.startLocationAddressName,
-        endLocationAddressName: p.endLocationAddressName,
-        // date
-        jobDate: p.jobDate,
-        // job properties
-        name: p.name,
-        instructions: p.instructions,
+      if (p.status && p.status === 'Saved') { // 'Saved' job
+        const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id);
+        const selectedMaterial = {
+          label: materials[0].value,
+          value: materials[0].value
+        };
+        let allMaterials = await LookupsService.getLookupsByType('MaterialType');
+        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+        const allTruckTypes = [];
 
-        // PUT back hour/ton
-        selectedRatedHourOrTon: p.selectedRatedHourOrTon,
-        rateByTonValue: p.rateByTonValue,
-        rateByHourValue: p.rateByHourValue,
-        estimatedTons: p.estimatedTons,
-        estimatedHours: p.estimatedHours
-      });
+        allMaterials = allMaterials.map(material => ({
+          value: material.val1,
+          label: material.val1
+        }));
+        Object.values(truckTypes)
+          .forEach((itm) => {
+            const inside = {
+              label: itm.val1,
+              value: itm.val1
+            };
+            allTruckTypes.push(inside);
+          });
+
+        const jobDate = moment().tz(
+          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        ).valueOf();
+
+        this.setState({
+          jobDate,
+          allMaterials,
+          allTruckTypes
+        });
+        this.setState({
+          job: p,
+          userCompanyId: p.userCompanyId,
+          // truck properties
+          truckType: p.equipmentType,
+          // allTruckTypes: p.allTruckTypes,
+          // capacity: p.capacity,
+          // allMaterials: p.allMaterials,
+          selectedMaterials: selectedMaterial,
+          // rates
+          rate: p.rate,
+          ratebyBoth: p.ratebyBoth,
+          tonnage: p.tonnage, // estimated amount of tonnage
+          hourTrucksNumber: p.numEquipments || '',
+          // rateTab: r.rateTab,
+          // location
+          selectedEndAddressId: p.endAddress,
+          selectedStartAddressId: p.startAddress,
+          // date
+          jobDate: p.startTime,
+          // job properties
+          name: p.name,
+          instructions: p.notes || '',
+
+          // PUT back hour/ton
+          selectedRatedHourOrTon: p.rateType.toLowerCase(),
+          rateByTonValue: p.rate,
+          rateByHourValue: p.rate,
+          estimatedTons: p.rateEstimate,
+          estimatedHours: p.rateEstimate
+        });
+      } else { // We are coming from the second tab
+        // TODO -> There should be a way to map directly to state
+        // this is not very nice
+        p.jobDate = moment(p.jobDate).format('YYYY-MM-DD HH:mm');
+        this.setState({
+          userCompanyId: p.userCompanyId,
+          // truck properties
+          truckType: p.truckType,
+          allTruckTypes: p.allTruckTypes,
+          capacity: p.capacity,
+          allMaterials: p.allMaterials,
+          selectedMaterials: p.selectedMaterials,
+          // rates
+          rate: p.rate,
+          ratebyBoth: p.ratebyBoth,
+          tonnage: p.tonnage, // estimated amount of tonnage
+          hourTrucksNumber: p.hourTrucksNumber,
+          // rateTab: r.rateTab,
+          // location
+          selectedEndAddressId: p.selectedEndAddressId,
+          endLocationAddress1: p.endLocationAddress1,
+          endLocationAddress2: p.endLocationAddress2,
+          endLocationCity: p.endLocationCity,
+          endLocationState: p.endLocationState,
+          endLocationZip: p.endLocationZip,
+          endLocationLatitude: p.endLocationLatitude,
+          endLocationLongitude: p.endLocationLongitude,
+          startLocationLatitude: p.startLocationLatitude,
+          startLocationLongitude: p.startLocationLongitude,
+          selectedStartAddressId: p.selectedStartAddressId,
+          startLocationAddress1: p.startLocationAddress1,
+          startLocationAddress2: p.startLocationAddress2,
+          startLocationCity: p.startLocationCity,
+          startLocationState: p.startLocationState,
+          startLocationZip: p.startLocationZip,
+          startLocationAddressName: p.startLocationAddressName,
+          endLocationAddressName: p.endLocationAddressName,
+          // date
+          jobDate: moment.tz(
+            p.jobDate,
+            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+          ).utc().format(),
+
+          // job properties
+          name: p.name,
+          instructions: p.instructions,
+
+          // PUT back hour/ton
+          selectedRatedHourOrTon: p.selectedRatedHourOrTon,
+          rateByTonValue: p.rateByTonValue,
+          rateByHourValue: p.rateByHourValue,
+          estimatedTons: p.estimatedTons,
+          estimatedHours: p.estimatedHours
+        });
+      }
     } else {
       // we don't have preloaded info, let's hit the server
       let allMaterials = await LookupsService.getLookupsByType('MaterialType');
@@ -605,7 +678,7 @@ class CreateJobFormOne extends PureComponent {
         reqHandlerDate: {
           ...reqHandlerDate,
           touched: true,
-          error: "The date of the job can not be set in the past or as the current date and time"
+          error: 'The date of the job can not be set in the past or as the current date and time'
         }
       });
       isValid = false;
@@ -798,7 +871,7 @@ class CreateJobFormOne extends PureComponent {
     //   });
     //   isValid = false;
     // }
-//
+    //
     // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
     //   this.setState({
     //     reqHandlerTrucksEstimate: {
@@ -1055,6 +1128,18 @@ class CreateJobFormOne extends PureComponent {
     this.setState({rateTab: 2});
   }
 
+  async saveJobDraft() {
+    this.setState({ btnSubmitting: true });
+    const isValid = await this.isFormValid();
+
+    if (!isValid) {
+      this.setState({ btnSubmitting: false });
+      return;
+    }
+    const {saveJobDraft} = this.props;
+    saveJobDraft(this.state);
+  }
+
   async goToSecondFromFirst() {
     const {validateRes} = this.props;
     const isValid = await this.isFormValid();
@@ -1160,6 +1245,8 @@ class CreateJobFormOne extends PureComponent {
 
   render() {
     const {
+      job,
+      jobDate,
       profile,
       truckType,
       allTruckTypes,
@@ -1203,10 +1290,6 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndAddressName,
       loaded
     } = this.state;
-    let { jobDate } = this.state;
-    jobDate = moment(jobDate).tz(
-      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-    ).valueOf();
     const {onClose} = this.props;
     if (loaded) {
       return (
@@ -1216,7 +1299,7 @@ class CreateJobFormOne extends PureComponent {
               {/* this.handleSubmit  */}
               <form
                 className="form form--horizontal addtruck__form"
-                onSubmit={e => this.saveTruck(e)}
+                // onSubmit={e => this.saveTruck(e)}
                 autoComplete="off"
               >
                 <Row className="col-md-12">
@@ -1245,7 +1328,7 @@ class CreateJobFormOne extends PureComponent {
                       placeholder="Job Name"
                       type="text"
                       meta={reqHandlerJobName}
-                      id='jobname'
+                      id="jobname"
                     />
                   </div>
                   <div className="col-md-12 form__form-group">
@@ -1267,7 +1350,7 @@ class CreateJobFormOne extends PureComponent {
                         }
                       }
                       onChange={this.jobDateChange}
-                      dateFormat="yyyy-MM-dd hh:mm"
+                      dateFormat="yyyy-MM-dd hh:mm a"
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
@@ -1289,7 +1372,7 @@ class CreateJobFormOne extends PureComponent {
                         }
                       }
                       placeholder="Any"
-                      allowUndefined={true}
+                      allowUndefined
                       // meta={reqHandlerTrucksEstimate}
                     />
                   </div>
@@ -1641,9 +1724,17 @@ class CreateJobFormOne extends PureComponent {
                     >
                       Back
                     </Button>
+                    {job.status !== 'Saved' && (
+                      <Button
+                        color="outline-primary"
+                        className="next"
+                        onClick={this.saveJobDraft}
+                      >
+                        Save Job
+                      </Button>
+                    )}
                     <Button
                       color="primary"
-                      type="submit"
                       className="next"
                       onClick={this.goToSecondFromFirst}
                     >
@@ -1675,6 +1766,7 @@ CreateJobFormOne.propTypes = {
   firstTabData: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   gotoSecond: PropTypes.func.isRequired,
+  saveJobDraft: PropTypes.func.isRequired,
   validateOnTabClick: PropTypes.bool.isRequired,
   validateRes: PropTypes.func.isRequired
 };

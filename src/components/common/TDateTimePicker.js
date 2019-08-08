@@ -22,9 +22,9 @@ class TDateTimePickerField extends PureComponent {
     const profile = await ProfileService.getProfile();
 
     // startDate and EndDate were added for common datepicker values
-    if (input.value.startDate) {
-      dueDate = input.value.startDate.getTime();
-      const parsedDate = new Date(dueDate);
+    if (input.value.jobDate) {
+      // dueDate = input.value.jobDate.getTime();
+      const parsedDate = new Date(input.value.jobDate);
       startDate = parsedDate;
     }
     if (input.value.endDate) {
@@ -48,16 +48,15 @@ class TDateTimePickerField extends PureComponent {
       profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
     ).format('YYYY-MM-DD HH:mm:ss'));
     this.setState({ startDate: timeZonedStartDate });
-    // this.setState({ startDate: new Date() });
   }
 
   // ComponentWillReceiveProps was added in order to change the
   // datePicker date from a given props value.
   componentWillReceiveProps(props) {
     let dueDate = 0;
-    if (props.input.value.startDate) {
-      dueDate = props.input.value.startDate.getTime();
-      const parsedDate = new Date(dueDate);
+    if (props.input.value.givenDate) {
+      // dueDate = props.input.value.startDate.getTime();
+      const parsedDate = new Date(props.input.value.givenDate);
       this.setState({ startDate: parsedDate });
     }
     if (props.input.value.endDate) {

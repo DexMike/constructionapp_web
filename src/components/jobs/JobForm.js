@@ -330,12 +330,12 @@ class JobForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
+          {carrier && (
             <React.Fragment>
               Carrier: {carrier ? carrier.legalName : ''}
+              <br/>
             </React.Fragment>
           )}
-          <br/>
           Producer: {job.company.legalName}
           {this.renderPhone(showPhone)}
           <br/>
@@ -376,7 +376,7 @@ class JobForm extends Component {
             <br/>
             Rate: {TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Material: {this.materialsAsString(job.materials)}
+            Material: {job.materials}
           </div>
         )}
         {companyType === 'Customer' && (
@@ -403,7 +403,7 @@ class JobForm extends Component {
             <br/>
             Rate:&nbsp;{TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Material: {this.materialsAsString(job.materials)}
+            Material: {job.materials}
           </div>
         )}
       </React.Fragment>

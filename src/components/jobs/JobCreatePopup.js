@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -8,6 +10,10 @@ import {
 } from 'reactstrap';
 import JobCreateFormOne from './JobCreateFormOne';
 import JobCreateFormTwo from './JobCreateFormTwo';
+import ProfileService from '../../api/ProfileService';
+import JobService from '../../api/JobService';
+import AddressService from '../../api/AddressService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCreatePopup extends Component {
   constructor(props) {
@@ -15,9 +21,12 @@ class JobCreatePopup extends Component {
 
     this.state = {
       page: 1,
+      job: [],
       loaded: false,
       validateFormOne: false,
-      firstTabInfo: {}
+      firstTabInfo: {},
+      profile: [],
+      goToJobDetail: false
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -28,15 +37,143 @@ class JobCreatePopup extends Component {
     this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
     this.validateFormOne = this.validateFormOne.bind(this);
     this.validateFormOneRes = this.validateFormOneRes.bind(this);
+    this.saveJobDraft = this.saveJobDraft.bind(this);
+    this.renderGoTo = this.renderGoTo.bind(this);
+    this.updateJob = this.updateJob.bind(this);
   }
 
   async componentDidMount() {
-    this.setState({ loaded: true });
+    const { jobId } = this.props;
+    let job = [];
+    if (jobId) {
+      job = await JobService.getJobById(jobId);
+      this.setState({firstTabInfo: job});
+      this.getFirstTabInfo();
+    }
+    const profile = await ProfileService.getProfile();
+    this.setState({ job, profile, loaded: true });
   }
 
   getFirstTabInfo() {
     const { firstTabInfo } = this.state;
     return firstTabInfo;
+  }
+
+  async updateJob(newJob) {
+    const { updateJob } = this.props;
+    updateJob(newJob, null);
+  }
+
+  async saveJobDraft(e) {
+    const { profile } = this.state;
+    const d = e;
+
+    // start location
+    let startAddress = {
+      id: null
+    };
+    if (d.selectedStartAddressId === 0) {
+      const address1 = {
+        type: 'Delivery',
+        name: d.startLocationAddressName,
+        companyId: profile.companyId,
+        address1: d.startLocationAddress1,
+        address2: d.startLocationAddress2,
+        city: d.startLocationCity,
+        state: d.startLocationState,
+        zipCode: d.startLocationZip,
+        latitude: d.startLocationLatitude,
+        longitude: d.startLocationLongitude,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+      startAddress = await AddressService.createAddress(address1);
+    } else {
+      startAddress.id = d.selectedStartAddressId;
+    }
+    // end location
+    let endAddress = {
+      id: null
+    };
+    if (d.selectedEndAddressId === 0) {
+      const address2 = {
+        type: 'Delivery',
+        name: d.endLocationAddressName,
+        companyId: profile.companyId,
+        address1: d.endLocationAddress1,
+        address2: d.endLocationAddress2,
+        city: d.endLocationCity,
+        state: d.endLocationState,
+        zipCode: d.endLocationZip,
+        latitude: d.endLocationLatitude,
+        longitude: d.endLocationLongitude
+      };
+      endAddress = await AddressService.createAddress(address2);
+    } else {
+      endAddress.id = d.selectedEndAddressId;
+    }
+
+    let rateType = '';
+    let rate = 0;
+    if (d.selectedRatedHourOrTon === 'ton') {
+      rateType = 'Ton';
+      rate = Number(d.rateByTonValue);
+      d.rateEstimate = d.estimatedTons;
+    } else {
+      rateType = 'Hour';
+      rate = Number(d.rateByHourValue);
+      d.rateEstimate = d.estimatedHours;
+    }
+
+    const calcTotal = d.rateEstimate * rate;
+    const rateTotal = Math.round(calcTotal * 100) / 100;
+
+    d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+
+    const job = {
+      companiesId: profile.companyId,
+      name: d.name,
+      status: 'Saved',
+      startAddress: startAddress.id,
+      endAddress: endAddress.id,
+      startTime: moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
+      equipmentType: d.truckType.value,
+      numEquipments: d.hourTrucksNumber,
+      rateType,
+      rate,
+      rateEstimate: d.rateEstimate,
+      rateTotal,
+      notes: d.instructions,
+      createdBy: profile.userId,
+      createdOn: moment.utc().format(),
+      modifiedBy: profile.userId,
+      modifiedOn: moment.utc().format()
+    };
+    const newJob = await JobService.createJob(job);
+    // return false;
+
+    // add material
+    if (newJob) {
+      const newMaterial = {
+        jobsId: newJob.id,
+        value: d.selectedMaterials.value,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+      await JobMaterialsService.createJobMaterials(newMaterial);
+    }
+
+    this.setState({
+      job: newJob,
+      goToJobDetail: true
+    });
   }
 
   saveAndGoToSecondPage(e) {
@@ -76,9 +213,18 @@ class JobCreatePopup extends Component {
     this.setState({ page: pageNumber });
   }
 
+  renderGoTo() {
+    const { goToJobDetail, job } = this.state;
+    if (goToJobDetail) {
+      return <Redirect push to={`/jobs/save/${job.id}`}/>;
+    }
+    return false;
+  }
+
   render() {
-    const { equipmentId, companyId, editDriverId } = this.props;
+    const { equipmentId, companyId, editDriverId, updateJob } = this.props;
     const {
+      job,
       page,
       loaded,
       validateFormOne
@@ -86,6 +232,7 @@ class JobCreatePopup extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          {this.renderGoTo()}
           <Row>
             {/* <h1>TEST</h1> */}
             <Col md={12} lg={12}>
@@ -123,6 +270,7 @@ class JobCreatePopup extends Component {
                         firstTabData={this.getFirstTabInfo}
                         validateOnTabClick={validateFormOne}
                         validateRes={this.validateFormOneRes}
+                        saveJobDraft={this.saveJobDraft}
                       />
                       )}
                     {page === 2
@@ -131,6 +279,9 @@ class JobCreatePopup extends Component {
                         p={page}
                         onClose={this.closeNow}
                         firstTabData={this.getFirstTabInfo}
+                        jobId={job.id}
+                        saveJobDraft={this.saveJobDraft}
+                        updateJob={this.updateJob}
                       />
                       )}
                     {/* onSubmit={onSubmit} */}
@@ -154,14 +305,15 @@ class JobCreatePopup extends Component {
   }
 }
 
-
-/**/
 JobCreatePopup.propTypes = {
-  toggle: PropTypes.func.isRequired
+  toggle: PropTypes.func.isRequired,
+  jobId: PropTypes.number,
+  updateJob: PropTypes.func
 };
 
 JobCreatePopup.defaultProps = {
-  //
+  jobId: null,
+  updateJob: null
 };
 
 
