@@ -83,6 +83,7 @@ class SettingsPage extends Component {
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
 
     // Get distance, send coordinates
+    /*
     const newDistance = GeoUtils.getDistance(
       '37.7397,-121.4252',
       '37.9577,-121.2908'
@@ -92,15 +93,16 @@ class SettingsPage extends Component {
       this.onSuccess,
       this.onError
     );
+    */
   }
 
   // Get distance return functions
   onError(error) {
-    console.log('>>ERROR : ', error);
+    // console.log('>>ERROR : ', error);
   }
 
   onSuccess(r) {
-    console.log('>>SUCCESS : ', r.response.route[0].summary);
+    // console.log('>>SUCCESS : ', r.response.route[0].summary);
   }
 
   toggleAddJobModal() {
