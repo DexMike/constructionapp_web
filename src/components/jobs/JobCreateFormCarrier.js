@@ -89,7 +89,7 @@ class JobCreateFormCarrier extends Component {
       startLocationLatitude: 0,
       startLocationLongitude: 0,
       // date
-      jobDate: new Date(),
+      jobDate: null,
       // job properties
       name: '',
       instructions: '',
@@ -363,7 +363,7 @@ class JobCreateFormCarrier extends Component {
       jobTrucksNeeded,
       selectedMaterials
     } = this.state;
-    let { jobStartDateTime } = this.state;
+    let { jobDate } = this.state;
 
     const { selectedCarrierId } = this.props;
 
@@ -434,7 +434,7 @@ class JobCreateFormCarrier extends Component {
     const calcTotal = rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
-    jobStartDateTime = moment(jobStartDateTime).format('YYYY-MM-DD HH:mm');
+    jobDate = moment(jobDate).format('YYYY-MM-DD HH:mm');
 
     const job = {
       companiesId: profile.companyId,
@@ -444,7 +444,7 @@ class JobCreateFormCarrier extends Component {
       startAddress: startAddress.id,
       endAddress: endAddress.id,
       startTime: moment.tz(
-        jobStartDateTime,
+        jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).utc().format(),
       equipmentType: truckType.value,
@@ -1040,7 +1040,7 @@ class JobCreateFormCarrier extends Component {
   jobDateChange(data) {
     const {reqHandlerDate} = this.state;
     this.setState({
-      jobStartDateTime: data,
+      jobDate: data,
       reqHandlerDate: Object.assign({}, reqHandlerDate, {
         touched: false
       })
@@ -1135,7 +1135,17 @@ class JobCreateFormCarrier extends Component {
 
     const currDate = new Date();
 
-    if (!jobStartDateTime || jobStartDateTime.getTime() < currDate.getTime()) {
+    if (!jobDate) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    if (jobDate && jobDate.getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
@@ -1510,8 +1520,6 @@ class JobCreateFormCarrier extends Component {
       profile,
       loaded
     } = this.state;
-    const today = new Date();
-    const currentDate = today.getTime();
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -1566,15 +1574,16 @@ class JobCreateFormCarrier extends Component {
                         {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
-                          value: jobStartDateTime
-                          // givenDate: currentDate
+                          value: jobDate,
+                          givenDate: jobDate
                         }
                       }
                       onChange={this.jobDateChange}
-                      dateFormat="yyyy-MM-dd hh:mm"
+                      dateFormat="yyyy-MM-dd hh:mm a"
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
+                      placeholder="Date and time of job"
                     />
                   </div>
                 </Row>

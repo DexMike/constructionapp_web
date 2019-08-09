@@ -24,6 +24,7 @@ import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
+import JobCreatePopup from './JobCreatePopup';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -58,7 +59,8 @@ class JobSavePage extends Component {
       allocateDriversModal: false,
       drivers: [],
       selectedDrivers: [],
-      accessForbidden: false
+      accessForbidden: false,
+      modalAddJob: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -68,6 +70,7 @@ class JobSavePage extends Component {
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
     this.updateJob = this.updateJob.bind(this);
+    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -98,21 +101,28 @@ class JobSavePage extends Component {
 
         if (job) {
           // company
-          const company = await CompanyService.getCompanyById(job.companiesId);
+          job.company = await CompanyService.getCompanyById(job.companiesId);
           // start address
-          const startAddress = await AddressService.getAddressById(job.startAddress);
+          let startAddress = null;
+          if (job.startAddress) {
+            job.startAddress = await AddressService.getAddressById(job.startAddress);
+          }
           // end address
           let endAddress = null;
           if (job.endAddress) {
-            endAddress = await AddressService.getAddressById(job.endAddress);
+            job.endAddress = await AddressService.getAddressById(job.endAddress);
           }
 
           // materials
           const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-          job.company = company;
-          job.startAddress = startAddress;
-          job.endAddress = endAddress;
-          job.materials = materials.map(material => material.value);
+          if (materials && materials.length > 0) {
+            const latestMaterial = materials[0];
+            job.materials = latestMaterial.value;
+          }
+          
+          // job.company = company;
+          // job.startAddress = startAddress;
+          // job.endAddress = endAddress;
 
           // bids
           const bids = await BidService.getBidsByJobId(job.id);
@@ -210,6 +220,13 @@ class JobSavePage extends Component {
     }
   }
 
+  async toggleNewJobModal() {
+    const {modalAddJob} = this.state;
+    this.setState({
+      modalAddJob: !modalAddJob
+    });
+  }
+
   async updateJob(newJob, companyCarrier) {
     const job = newJob;
     const company = await CompanyService.getCompanyById(job.companiesId);
@@ -219,10 +236,11 @@ class JobSavePage extends Component {
       endAddress = await AddressService.getAddressById(job.endAddress);
     }
     const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    const latestMaterial = materials[0];
+    job.materials = latestMaterial.value;
     job.company = company;
     job.startAddress = startAddress;
     job.endAddress = endAddress;
-    job.materials = materials.map(material => material.value);
     this.setState({ job, companyCarrier });
   }
 
@@ -791,7 +809,38 @@ class JobSavePage extends Component {
         />
       );
     }
+    if (job.status === 'Saved' && companyType === 'Customer') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleNewJobModal()}
+          className="secondaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Edit"
+        />
+      );
+    }
     return (<React.Fragment/>);
+  }
+
+  renderNewJobModal() {
+    const {
+      job,
+      modalAddJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJob}
+        toggle={this.toggleNewJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleNewJobModal}
+          jobId={job.id}
+          updateJob={this.updateJob}
+        />
+      </Modal>
+    );
   }
 
   renderAllocateDriversModal() {
@@ -904,6 +953,7 @@ class JobSavePage extends Component {
       if (companyType !== null && job !== null) {
         return (
           <div className="container">
+            {this.renderNewJobModal()}
             {this.renderAllocateDriversModal(profile)}
             <div className="row">
               <div className="col-md-3">
