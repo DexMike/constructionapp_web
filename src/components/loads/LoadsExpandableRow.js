@@ -180,14 +180,14 @@ class LoadsExpandableRow extends Component {
   async handleApproveLoad() {
     const {load} = {...this.state};
     load.loadStatus = 'Approved';
-    await LoadService.updateLoad(load.id, load);
+    await LoadService.updateLoad(load);
     this.setState({loadStatus: 'Approved'});
   }
 
   async confirmDisputeLoad() {
     const {load, disputeEmail} = {...this.state};
     load.loadStatus = 'Disputed';
-    await LoadService.updateLoad(load.id, load);
+    await LoadService.updateLoad(load);
     await EmailService.sendEmail(disputeEmail);
     this.setState({load, loadStatus: 'Disputed'});
     this.toggleDisputeModal();
