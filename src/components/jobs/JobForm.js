@@ -5,7 +5,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
 // import HEREMap, { Marker, RouteLine } from 'here-maps-react';
-import HEREMap, { Marker, RouteLine } from '../../utils/here-maps-react';
+import { HEREMap, RouteLine } from '../../utils/here-maps-react';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -15,6 +15,8 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+import pinA from '../../img/PinA.png';
+import pinB from '../../img/PinB.png';
 // import GeoCodingService from '../../api/GeoCodingService';
 
 /*
@@ -94,8 +96,6 @@ class JobForm extends Component {
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
-    let distance = 0;
-    let time = 0;
 
     const platform = new H.service.Platform({
       apikey: hereMapsApiKey,
@@ -117,17 +117,29 @@ class JobForm extends Component {
       metricSystem: 'imperial',
       language: 'en-us' // en-us|es-es|de-de
     };
-
+    const pinAIcon = new H.map.Icon(pinA, { size: { w: 35, h: 50} });
     const originMarker = new H.map.Marker({
       lat: startPoint.latitude,
       lng: startPoint.longitude
+    }, {
+      zIndex: 0,
+      icon: pinAIcon
     });
+    const pinBIcon = new H.map.Icon(pinB, { size: { w: 35, h: 50} });
     const destinationMarker = new H.map.Marker({
       lat: endPoint.latitude,
       lng: endPoint.longitude
+    }, {
+      zIndex: 0,
+      icon: pinBIcon
     });
     const group = new H.map.Group();
     group.addObjects([originMarker, destinationMarker]);
+
+    // const viewModel = new H.map.getViewModel();
+    // viewModel.setLookAtData({
+    //   bounds: group.getBoundingBox()
+    // });
 
     const router = platform.getRoutingService();
     router.calculateRoute(
@@ -135,7 +147,6 @@ class JobForm extends Component {
       this.onSuccess,
       this.onError
     );
-
     try {
       // TODO -> do this without MapBox
       /*
@@ -174,8 +185,6 @@ class JobForm extends Component {
       loaded: true,
       loads,
       job,
-      distance,
-      time,
       cachedOrigin: startPoint,
       cachedDestination: endPoint,
       profile,
@@ -218,6 +227,8 @@ class JobForm extends Component {
     this.setState({
       showMainMap: true,
       shape: route.shape,
+      distance: route.summary.distance,
+      time: route.summary.travelTime,
       timeAndDistance: `Travel time and distance: ${route.summary.text}`,
       instructions: route.leg[0]
     });
@@ -718,7 +729,6 @@ class JobForm extends Component {
           appId="FlTEFFbhzrFwU1InxRgH"
           appCode="gTgJkC9u0YWzXzvjMadDzQ"
           center={center}
-          zoom={14}
           setLayer={opts}
           hidpi={false}
           interactive
@@ -726,7 +736,7 @@ class JobForm extends Component {
         >
           <RouteLine
             shape={shape}
-            strokeColor="purple"
+            strokeColor="blue"
             lineWidth="4"
           />
           {/* // If markersGroup exists, do not send markers
