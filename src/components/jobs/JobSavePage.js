@@ -173,8 +173,17 @@ class JobSavePage extends Component {
             );
           }
 
-          const drivers = await UserService.getEnabledDriversWithUserInfoByCompanyId(profile.companyId);
+          let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
 
+          drivers = drivers.map((driver) => {
+            if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+              const newDriver = driver;
+              newDriver.checkboxDisabled = true;
+              return newDriver;
+            }
+            return driver;
+          });
+          console.log(drivers);
           this.setState({
             job,
             bid,
