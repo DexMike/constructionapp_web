@@ -173,19 +173,8 @@ class JobSavePage extends Component {
             );
           }
 
-          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-          let enabledDrivers = [];
-          Object.values(drivers).forEach((itm) => {
-            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
-              enabledDrivers.push(itm);
-            }
-          });
-          // Setting id to driverId since is getting the userId and saving it as driverId
-          enabledDrivers = enabledDrivers.map((driver) => {
-            const newDriver = driver;
-            newDriver.id = newDriver.driverId;
-            return newDriver;
-          });
+          const drivers = await UserService.getEnabledDriversWithUserInfoByCompanyId(profile.companyId);
+
           this.setState({
             job,
             bid,
@@ -194,7 +183,7 @@ class JobSavePage extends Component {
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers: enabledDrivers
+            drivers
           });
         }
       }
@@ -779,7 +768,7 @@ class JobSavePage extends Component {
         </div>
       );
     } */
-    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') 
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress')
       && companyType === 'Carrier' && profile.isAdmin) {
       return (
         <TSubmitButton
