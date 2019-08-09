@@ -1159,7 +1159,7 @@ class JobCreateFormCarrier extends Component {
     // START ADDRESS VALIDATION
 
     if (!selectedStartAddressId || selectedStartAddressId === 0) {
-      if (startLocationAddressName.length === 0) {
+      /* if (startLocationAddressName.length === 0) { // Commenting out in case we need this later
         this.setState({
           reqHandlerStartAddressName: {
             touched: true,
@@ -1167,7 +1167,7 @@ class JobCreateFormCarrier extends Component {
           }
         });
         isValid = false;
-      }
+      } */
 
       if (startLocationAddress1.length === 0) {
         this.setState({
@@ -1254,7 +1254,7 @@ class JobCreateFormCarrier extends Component {
     // END ADDRESS VALIDATION
 
     if (!selectedEndAddressId || selectedEndAddressId === 0) {
-      if (endLocationAddressName.length === 0) {
+      /* if (endLocationAddressName.length === 0) { // Commenting out in case we need later
         this.setState({
           reqHandlerEndAddressName: {
             touched: true,
@@ -1262,7 +1262,7 @@ class JobCreateFormCarrier extends Component {
           }
         });
         isValid = false;
-      }
+      } */
 
       if (endLocationAddress1.length === 0) {
         this.setState({

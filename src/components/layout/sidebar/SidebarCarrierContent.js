@@ -41,16 +41,6 @@ class SidebarCarrierContent extends Component {
                      icon="ic_assignment"
                      route="/dashboard"
                      onClick={this.hideSidebar}/>
-        <SideElement title="Marketplace"
-                     icon="ic_work"
-                     route="/marketplace"
-                     onClick={this.hideSidebar}/>
-        <SideElement title="Trucks"
-                     icon="ic_local_shipping"
-                     route="/trucks"
-                     onClick={this.hideSidebar}/>
-
-
         {/* <ul className="sidebar__block">
           <SidebarLink
             title="Jobs"
@@ -59,23 +49,34 @@ class SidebarCarrierContent extends Component {
             onClick={this.hideSidebar}
           />
         </ul> */}
-        <SideElement title="Drivers"
-                     icon="ic_airline_seat_recline_normal"
-                     route="/drivers"
-                     onClick={this.hideSidebar}/>
         {
-          isAdmin ? (
-            <SideElement title="Payments"
-                     icon="ic_attach_money"
-                     route="/payments"
-                     onClick={this.hideSidebar}
-            />
-          ) : null
-        }
-        <SideElement title="Reports"
+          isAdmin && (
+            <React.Fragment>
+              <SideElement title="Marketplace"
+                     icon="ic_work"
+                     route="/marketplace"
+                     onClick={this.hideSidebar}/>
+              <SideElement title="Trucks"
+                          icon="ic_local_shipping"
+                          route="/trucks"
+                          onClick={this.hideSidebar}/>
+              <SideElement title="Drivers"
+                      icon="ic_airline_seat_recline_normal"
+                      route="/drivers"
+                      onClick={this.hideSidebar}
+              />
+              <SideElement title="Payments"
+                      icon="ic_attach_money"
+                      route="/payments"
+                      onClick={this.hideSidebar}
+              />
+              <SideElement title="Reports"
                      icon="ic_timeline"
                      route="/Reports"
                      onClick={this.hideSidebar}/>
+            </React.Fragment>
+          )
+        }        
       </div>
     );
   }

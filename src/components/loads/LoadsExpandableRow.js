@@ -6,13 +6,15 @@ import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
 // import UserService from '../../api/UserService';
-import HEREMap, { RouteLine } from 'here-maps-react';
+import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
+import UserService from '../../api/UserService';
+import TFormat from '../common/TFormat';
 
 const routeFeatureWeightType = 0;
 const center = {
@@ -27,6 +29,7 @@ const opts = {
 
 const { HERE_MAPS_APP_ID } = process.env;
 const { HERE_MAPS_APP_CODE } = process.env;
+const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
 
 class LoadsExpandableRow extends Component {
   constructor(props) {
@@ -62,8 +65,8 @@ class LoadsExpandableRow extends Component {
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
     // This throws an error
-    // const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
-    const driver = {};
+    const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+    // const driver = {};
 
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
@@ -85,6 +88,8 @@ class LoadsExpandableRow extends Component {
 
     // here
     const platform = new H.service.Platform({
+      apikey: hereMapsApiKey,
+      useCIT: true,
       app_id: HERE_MAPS_APP_ID,
       app_code: HERE_MAPS_APP_CODE,
       useHTTPS: true
@@ -175,14 +180,14 @@ class LoadsExpandableRow extends Component {
   async handleApproveLoad() {
     const {load} = {...this.state};
     load.loadStatus = 'Approved';
-    await LoadService.updateLoad(load.id, load);
+    await LoadService.updateLoad(load);
     this.setState({loadStatus: 'Approved'});
   }
 
   async confirmDisputeLoad() {
     const {load, disputeEmail} = {...this.state};
     load.loadStatus = 'Disputed';
-    await LoadService.updateLoad(load.id, load);
+    await LoadService.updateLoad(load);
     await EmailService.sendEmail(disputeEmail);
     this.setState({load, loadStatus: 'Disputed'});
     this.toggleDisputeModal();
@@ -299,7 +304,7 @@ class LoadsExpandableRow extends Component {
         default:
           statusColor = 'black';
       }
-      const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
+      // const driverName = `Driver Name: ${driver.firstName} ${driver.lastName}`;
       return (
         <React.Fragment>
           {this.renderModal()}
@@ -317,10 +322,10 @@ class LoadsExpandableRow extends Component {
                        style={{fontStyle: !endTime ? 'italic' : 'normal'}}
             >{(!endTime ? 'In Progress' : endTime)}
             </TableCell>
-            <TableCell align="left">{`${load.tonsEntered} tons`}</TableCell>
+            <TableCell align="left">{`${load.tonsEntered ? (load.tonsEntered).toFixed(2) : '0.00'} tons`}</TableCell>
             {job.rateType === 'Hour' && <TableCell align="left">{`${load.hoursEntered} hours`}</TableCell>}
-            <TableCell align="left">{job.rateType === 'Hour' ? `$${job.rate} / hour` : `$${job.rate} / ton`}</TableCell>
-            <TableCell align="left">${job.rateType === 'Hour' ? job.rate * load.hoursEntered : job.rate * load.tonsEntered}</TableCell>
+            <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoneyByHour(job.rate) : TFormat.asMoneyByTons(job.rate)}</TableCell>
+            <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoney(job.rate * load.hoursEntered) : TFormat.asMoney(job.rate * load.tonsEntered)}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
           </TableRow>
           {isExpanded && (
@@ -349,14 +354,14 @@ class LoadsExpandableRow extends Component {
                           onClick={this.toggleDisputeModal}
                           // name="DISPUTE"
                           type="button"
-                          className="secondaryButton"
+                          className="btn btn-secondary"
                         >
                           DISPUTE
                         </Button>
                         <Button
                           onClick={this.handleApproveLoad}
                           type="button"
-                          className="PrimaryButton"
+                          color="primary"
                         >
                           APPROVE
                         </Button>

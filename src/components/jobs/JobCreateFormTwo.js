@@ -555,6 +555,7 @@ class JobCreateFormTwo extends PureComponent {
                       className="primaryButton"
                       loading={btnSubmitting}
                       loaderSize={10}
+                      disabled={!sendToMkt&&!sendToFavorites}
                       bntText="Send Job"
                     />
                   </ButtonToolbar>

@@ -13,6 +13,7 @@ import TFormat from '../common/TFormat';
 import JobViewForm from './JobViewForm';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
+import ProfileService from '../../api/ProfileService';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
@@ -38,8 +39,12 @@ class MarketplaceCarrierPage extends Component {
   }
 
   async componentDidMount() {
+    const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo();
-    this.setState({ loaded: true });
+    this.setState({ 
+      isAdmin: profile.isAdmin,
+      loaded: true
+    });
   }
 
   async fetchJobsInfo() {
@@ -315,7 +320,10 @@ class MarketplaceCarrierPage extends Component {
   }
 
   render() {
-    const { loaded, page, rows } = this.state;
+    const { loaded, page, rows, isAdmin } = this.state;
+    if (isAdmin === false) {
+      return <Redirect push to="/" />;
+    }
     if (loaded) {
       return (
         <Container className="dashboard">
