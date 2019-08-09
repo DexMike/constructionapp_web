@@ -22,27 +22,31 @@ class TDateTimePickerField extends PureComponent {
     const profile = await ProfileService.getProfile();
 
     if (input.value) {
-      // startDate and EndDate were added for common datepicker values
-      if (input.value.jobDate) {
-        // dueDate = input.value.jobDate.getTime();
-        const parsedDate = new Date(input.value.jobDate);
-        startDate = parsedDate;
-      }
-      if (input.value.endDate) {
-        dueDate = input.value.endDate.getTime();
-        const parsedDate = new Date(dueDate);
-        startDate = parsedDate;
-      }
-      // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
-      if (input.value.startDateComp) {
-        dueDate = input.value.startDateComp.getTime();
-        const parsedDate = new Date(dueDate);
-        startDate = parsedDate;
-      }
-      if (input.value.endDateComp) {
-        dueDate = input.value.endDateComp.getTime();
-        const parsedDate = new Date(dueDate);
-        startDate = parsedDate;
+      if (Object.prototype.toString.call(input.value) !== '[object Date]') {
+        // startDate and EndDate were added for common datepicker values
+        if (input.value.jobDate) {
+          // dueDate = input.value.jobDate.getTime();
+          const parsedDate = new Date(input.value.jobDate);
+          startDate = parsedDate;
+        }
+        if (input.value.endDate) {
+          dueDate = input.value.endDate.getTime();
+          const parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+        // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
+        if (input.value.startDateComp) {
+          dueDate = input.value.startDateComp.getTime();
+          const parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+        if (input.value.endDateComp) {
+          dueDate = input.value.endDateComp.getTime();
+          const parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+      } else {
+        startDate = input.value;
       }
 
       const timeZonedStartDate = new Date(moment(startDate).tz(

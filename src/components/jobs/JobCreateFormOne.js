@@ -300,7 +300,6 @@ class CreateJobFormOne extends PureComponent {
       } else { // We are coming from the second tab
         // TODO -> There should be a way to map directly to state
         // this is not very nice
-        p.jobDate = moment(p.jobDate).format('YYYY-MM-DD HH:mm');
         this.setState({
           userCompanyId: p.userCompanyId,
           // truck properties
@@ -335,10 +334,7 @@ class CreateJobFormOne extends PureComponent {
           startLocationAddressName: p.startLocationAddressName,
           endLocationAddressName: p.endLocationAddressName,
           // date
-          jobDate: moment.tz(
-            p.jobDate,
-            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-          ).utc().format(),
+          jobDate: p.jobDate,
 
           // job properties
           name: p.name,
@@ -1075,6 +1071,7 @@ class CreateJobFormOne extends PureComponent {
     const job = this.state;
     const {rateTab} = this.state;
     const {
+      jobDate,
       // reqHandlerTonnage,
       reqHandlerJobName,
       reqHandlerEndAddress,
@@ -1105,9 +1102,20 @@ class CreateJobFormOne extends PureComponent {
     } = this.state;
     let isValid = true;
 
+    if (!job.name || job.name === '') {
+      this.setState({
+        reqHandlerJobName: {
+          ...reqHandlerJobName,
+          touched: true,
+          error: 'Please enter a name for your job'
+        }
+      });
+      isValid = false;
+    }
+
     const currDate = new Date();
 
-    if (job.jobDate && (new Date(job.jobDate).getTime() < currDate.getTime())) {
+    if (jobDate && (new Date(jobDate).getTime() < currDate.getTime())) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
@@ -1560,14 +1568,17 @@ class CreateJobFormOne extends PureComponent {
 
   async saveJobDraft() {
     this.setState({ btnSubmitting: true });
-    const isValid = await this.isDraftValid();
-
-    if (!isValid) {
+    let isValid = false;
+    if (!await this.isDraftValid()) {
       this.setState({ btnSubmitting: false });
       return;
+    } else {
+      isValid = true;
     }
-    const {saveJobDraft} = this.props;
-    saveJobDraft(this.state);
+    const {saveJobDraftAlt} = this.props;
+    if (isValid) {
+      saveJobDraftAlt(this.state);
+    }
   }
 
   async goToSecondFromFirst() {
@@ -2198,7 +2209,7 @@ CreateJobFormOne.propTypes = {
   firstTabData: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   gotoSecond: PropTypes.func.isRequired,
-  saveJobDraft: PropTypes.func.isRequired,
+  saveJobDraftAlt: PropTypes.func.isRequired,
   validateOnTabClick: PropTypes.bool.isRequired,
   validateRes: PropTypes.func.isRequired
 };

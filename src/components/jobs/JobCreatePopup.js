@@ -37,7 +37,7 @@ class JobCreatePopup extends Component {
     this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
     this.validateFormOne = this.validateFormOne.bind(this);
     this.validateFormOneRes = this.validateFormOneRes.bind(this);
-    this.saveJobDraft = this.saveJobDraft.bind(this);
+    this.saveJobDraftAlt = this.saveJobDraftAlt.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
     this.updateJob = this.updateJob.bind(this);
   }
@@ -64,7 +64,7 @@ class JobCreatePopup extends Component {
     updateJob(newJob, null);
   }
 
-  async saveJobDraft(e) {
+  async saveJobDraftAlt(e) {
     const { profile } = this.state;
     const d = e;
 
@@ -134,14 +134,20 @@ class JobCreatePopup extends Component {
     const calcTotal = d.rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
-    if (d.jobDate && d.jobDate.lenght > 0) {
-      moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+    if (d.jobDate && Object.prototype.toString.call(d.jobDate) === '[object Date]') {
+      d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
       d.jobDate = moment.tz(
         d.jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).utc().format();
     } else {
       d.jobDate = '';
+    }
+
+    if (!d.truckType || d.truckType.lenght === 0) {
+      d.truckType = '';
+    } else {
+      d.truckType = d.truckType.value;
     }
 
     const job = {
@@ -151,7 +157,7 @@ class JobCreatePopup extends Component {
       startAddress: startAddress.id,
       endAddress: endAddress.id,
       startTime: d.jobDate,
-      equipmentType: d.truckType.lenght > 0 ? d.truckType.value : '',
+      equipmentType: d.truckType,
       numEquipments: d.hourTrucksNumber,
       rateType,
       rate,
@@ -164,10 +170,9 @@ class JobCreatePopup extends Component {
       modifiedOn: moment.utc().format()
     };
     const newJob = await JobService.createJob(job);
-    // return false;
 
     // add material
-    if (newJob && d.selectedMaterials.lenght > 0) {
+    if (newJob && Object.entries(d.selectedMaterials).length > 0) {
       const newMaterial = {
         jobsId: newJob.id,
         value: d.selectedMaterials.value,
@@ -279,7 +284,7 @@ class JobCreatePopup extends Component {
                         firstTabData={this.getFirstTabInfo}
                         validateOnTabClick={validateFormOne}
                         validateRes={this.validateFormOneRes}
-                        saveJobDraft={this.saveJobDraft}
+                        saveJobDraftAlt={this.saveJobDraftAlt}
                       />
                       )}
                     {page === 2
@@ -289,7 +294,7 @@ class JobCreatePopup extends Component {
                         onClose={this.closeNow}
                         firstTabData={this.getFirstTabInfo}
                         jobId={job.id}
-                        saveJobDraft={this.saveJobDraft}
+                        saveJobDraftAlt={this.saveJobDraftAlt}
                         updateJob={this.updateJob}
                       />
                       )}

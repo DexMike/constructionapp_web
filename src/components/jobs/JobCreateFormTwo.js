@@ -121,9 +121,9 @@ class JobCreateFormTwo extends PureComponent {
 
   async saveJobDraft() {
     this.setState({ btnSubmitting: true });
-    const { firstTabData, saveJobDraft } = this.props;
+    const { firstTabData, saveJobDraftAlt } = this.props;
     const d = firstTabData();
-    saveJobDraft(d);
+    saveJobDraftAlt(d);
   }
 
   isFormValid() {
@@ -584,7 +584,7 @@ JobCreateFormTwo.propTypes = {
   firstTabData: PropTypes.func.isRequired,
   jobId: PropTypes.number,
   updateJob: PropTypes.func,
-  saveJobDraft: PropTypes.func.isRequired
+  saveJobDraftAlt: PropTypes.func.isRequired
 };
 
 JobCreateFormTwo.defaultProps = {
