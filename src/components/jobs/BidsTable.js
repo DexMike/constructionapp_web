@@ -402,7 +402,7 @@ class BidsTable extends Component {
             <button type="button" className="lnr lnr-cross modal__close-btn"
                     onClick={this.toggleViewJobModal}
             />
-            <div className="bold-text modal__title">Assign a Job</div>
+            <div className="bold-text modal__title">Carrier Request</div>
           </div>
           <div className="modal__body" style={{ padding: '10px 25px 0px 25px' }}>
             <Container className="dashboard">

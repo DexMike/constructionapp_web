@@ -614,7 +614,7 @@ class CreateJobFormOne extends PureComponent {
     // START ADDRESS VALIDATION
 
     if (!job.selectedStartAddressId || job.selectedStartAddressId === 0) {
-      if (job.startLocationAddressName.length === 0) {
+      /* if (job.startLocationAddressName.length === 0) { // Commenting out in the event that we need this back later
         this.setState({
           reqHandlerStartAddressName: {
             touched: true,
@@ -622,7 +622,7 @@ class CreateJobFormOne extends PureComponent {
           }
         });
         isValid = false;
-      }
+      } */
 
       if (job.startLocationAddress1.length === 0) {
         this.setState({
@@ -709,7 +709,7 @@ class CreateJobFormOne extends PureComponent {
     // END ADDRESS VALIDATION
 
     if (!job.selectedEndAddressId || job.selectedEndAddressId === 0) {
-      if (job.endLocationAddressName.length === 0) {
+      /* if (job.endLocationAddressName.length === 0) { // Commenting out in the event we need this later
         this.setState({
           reqHandlerEndAddressName: {
             touched: true,
@@ -717,7 +717,7 @@ class CreateJobFormOne extends PureComponent {
           }
         });
         isValid = false;
-      }
+      } */
 
       if (job.endLocationAddress1.length === 0) {
         this.setState({
