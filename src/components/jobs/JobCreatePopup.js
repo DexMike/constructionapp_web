@@ -72,7 +72,10 @@ class JobCreatePopup extends Component {
     let startAddress = {
       id: null
     };
-    if (d.selectedStartAddressId === 0) {
+    if (d.selectedStartAddressId > 0) {
+      startAddress.id = d.selectedStartAddressId;
+    }
+    if (d.selectedStartAddressId === 0 && d.startLocationAddressName.length > 0) {
       const address1 = {
         type: 'Delivery',
         name: d.startLocationAddressName,
@@ -90,14 +93,15 @@ class JobCreatePopup extends Component {
         modifiedOn: moment.utc().format()
       };
       startAddress = await AddressService.createAddress(address1);
-    } else {
-      startAddress.id = d.selectedStartAddressId;
     }
     // end location
     let endAddress = {
       id: null
     };
-    if (d.selectedEndAddressId === 0) {
+    if (d.selectedEndAddressId > 0) {
+      endAddress.id = d.selectedEndAddressId;
+    }
+    if (d.selectedEndAddressId === 0 && d.endLocationAddressName.length > 0) {
       const address2 = {
         type: 'Delivery',
         name: d.endLocationAddressName,
@@ -111,26 +115,34 @@ class JobCreatePopup extends Component {
         longitude: d.endLocationLongitude
       };
       endAddress = await AddressService.createAddress(address2);
-    } else {
-      endAddress.id = d.selectedEndAddressId;
     }
 
     let rateType = '';
     let rate = 0;
-    if (d.selectedRatedHourOrTon === 'ton') {
-      rateType = 'Ton';
-      rate = Number(d.rateByTonValue);
-      d.rateEstimate = d.estimatedTons;
-    } else {
-      rateType = 'Hour';
-      rate = Number(d.rateByHourValue);
-      d.rateEstimate = d.estimatedHours;
+    if (d.selectedRatedHourOrTon && d.selectedRatedHourOrTon.lenght > 0) {
+      if (d.selectedRatedHourOrTon === 'ton') {
+        rateType = 'Ton';
+        rate = Number(d.rateByTonValue);
+        d.rateEstimate = d.estimatedTons;
+      } else {
+        rateType = 'Hour';
+        rate = Number(d.rateByHourValue);
+        d.rateEstimate = d.estimatedHours;
+      }
     }
 
     const calcTotal = d.rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
-    d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+    if (d.jobDate && d.jobDate.lenght > 0) {
+      moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+      d.jobDate = moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
+    } else {
+      d.jobDate = '';
+    }
 
     const job = {
       companiesId: profile.companyId,
@@ -138,11 +150,8 @@ class JobCreatePopup extends Component {
       status: 'Saved',
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: moment.tz(
-        d.jobDate,
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format(),
-      equipmentType: d.truckType.value,
+      startTime: d.jobDate,
+      equipmentType: d.truckType.lenght > 0 ? d.truckType.value : '',
       numEquipments: d.hourTrucksNumber,
       rateType,
       rate,
@@ -158,7 +167,7 @@ class JobCreatePopup extends Component {
     // return false;
 
     // add material
-    if (newJob) {
+    if (newJob && d.selectedMaterials.lenght > 0) {
       const newMaterial = {
         jobsId: newJob.id,
         value: d.selectedMaterials.value,

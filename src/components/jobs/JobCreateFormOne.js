@@ -51,12 +51,12 @@ class CreateJobFormOne extends PureComponent {
       rateByHourValue: 0,
       estimatedHours: 0,
       isRatedHour: true,
-      selectedRatedHourOrTon: 'ton',
+      selectedRatedHourOrTon: '',
       tonnage: 0, // estimated amount of tonnage
       rateEstimate: 0,
       hourTrucksNumber: '',
       rateTab: 1,
-      hourTon: 'ton',
+      hourTon: '',
       // location
       startLocationAddressName: '',
       endLocationAddressName: '',
@@ -75,7 +75,7 @@ class CreateJobFormOne extends PureComponent {
       startLocationLatitude: 0,
       startLocationLongitude: 0,
       // date
-      jobDate: new Date(),
+      jobDate: null,
       // job properties
       name: '',
       instructions: '',
@@ -106,12 +106,12 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
-      /*
-      reqHandlerHoursEstimate: {
+
+      reqHandlerRateType: {
         touched: false,
         error: ''
       },
-      */
+
       reqHandleTrucksEstimate: {
         touched: false,
         error: ''
@@ -201,6 +201,7 @@ class CreateJobFormOne extends PureComponent {
     this.getStartCoords = this.getStartCoords.bind(this);
     this.getEndCoords = this.getEndCoords.bind(this);
     this.saveJobDraft = this.saveJobDraft.bind(this);
+    this.clearValidationLabels = this.clearValidationLabels.bind(this);
   }
 
   async componentDidMount() {
@@ -232,10 +233,13 @@ class CreateJobFormOne extends PureComponent {
       const p = firstTabData();
       if (p.status && p.status === 'Saved') { // 'Saved' job
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id);
-        const selectedMaterial = {
-          label: materials[0].value,
-          value: materials[0].value
-        };
+        let selectedMaterial = '';
+        if (materials && materials.length > 0) {
+          selectedMaterial = {
+            label: materials[0].value,
+            value: materials[0].value
+          };
+        }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
         const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
         const allTruckTypes = [];
@@ -367,12 +371,12 @@ class CreateJobFormOne extends PureComponent {
           allTruckTypes.push(inside);
         });
 
-      const jobDate = moment().tz(
+      /* const jobDate = moment().tz(
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).valueOf();
+      ).valueOf(); */
 
       this.setState({
-        jobDate,
+        // jobDate,
         allMaterials,
         allTruckTypes
       });
@@ -500,9 +504,10 @@ class CreateJobFormOne extends PureComponent {
 
   handleRateChange(e) {
     const {
-      selectedRatedHourOrTon
+      reqHandlerRateType
     } = this.state;
     let {
+      selectedRatedHourOrTon,
       rateByTonValue,
       estimatedTons,
       rateByHourValue,
@@ -516,12 +521,21 @@ class CreateJobFormOne extends PureComponent {
       rateByTonValue = 0;
       estimatedTons = 0;
     }
+    if (e) {
+      selectedRatedHourOrTon = e.value;
+    } else {
+      selectedRatedHourOrTon = null;
+    }
     this.setState({
+      reqHandlerRateType: {
+        ...reqHandlerRateType,
+        touched: false
+      },
       rateByHourValue,
       estimatedHours,
       rateByTonValue,
       estimatedTons,
-      selectedRatedHourOrTon: e.value
+      selectedRatedHourOrTon
     });
   }
 
@@ -600,6 +614,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   async isFormValid() {
+    this.clearValidationLabels();
     const job = this.state;
     const {rateTab} = this.state;
     const {
@@ -616,7 +631,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerStartZip,
       reqHandlerTruckType,
       reqHandlerMaterials,
-      reqHandlerTrucksEstimate,
+      reqHandlerRateType,
       reqHandlerDate,
 
       selectedRatedHourOrTon,
@@ -667,13 +682,17 @@ class CreateJobFormOne extends PureComponent {
 
     const currDate = new Date();
 
-    if (job.jobDate) {
-      // what's this for?
-      // currDate.setHours(0, 0, 0, 0);
-      // job.jobDate.setHours(0, 0, 0, 0);
+    if (!job.jobDate) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
     }
-
-    if (!job.jobDate || new Date(job.jobDate).getTime() < currDate.getTime()) {
+    if (job.jobDate && new Date(job.jobDate).getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
@@ -882,6 +901,417 @@ class CreateJobFormOne extends PureComponent {
     //   });
     //   isValid = false;
     // }
+
+    // rates
+    if (!selectedRatedHourOrTon || selectedRatedHourOrTon === '') {
+      this.setState({
+        reqHandlerRateType: {
+          ...reqHandlerRateType,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+      if (rateByTonValue <= 0) {
+        this.setState({
+          reqHandlerTons: {
+            ...reqHandlerTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedTons <= 0) {
+        this.setState({
+          reqHandlerEstimatedTons: {
+            ...reqHandlerEstimatedTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (rateByHourValue <= 0) {
+        this.setState({
+          reqHandlerHours: {
+            ...reqHandlerHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedHours <= 0) {
+        this.setState({
+          reqHandlerEstimatedHours: {
+            ...reqHandlerEstimatedHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    }
+    if (selectedRatedHourOrTon === 'ton') {
+      if (rateByTonValue <= 0) {
+        this.setState({
+          reqHandlerTons: {
+            ...reqHandlerTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedTons <= 0) {
+        this.setState({
+          reqHandlerEstimatedTons: {
+            ...reqHandlerEstimatedTons,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    } else if (selectedRatedHourOrTon === 'hour') {
+      if (rateByHourValue <= 0) {
+        this.setState({
+          reqHandlerHours: {
+            ...reqHandlerHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+      if (estimatedHours <= 0) {
+        this.setState({
+          reqHandlerEstimatedHours: {
+            ...reqHandlerEstimatedHours,
+            touched: true,
+            error: 'Required input'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  }
+
+  clearValidationLabels() {
+    const {
+      reqHandlerEndAddressName,
+      reqHandlerSameAddresses,
+      reqHandlerJobName,
+      reqHandlerDate,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerRateType,
+      reqHandleTrucksEstimate,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartZip,
+      reqHandlerStartState,
+      reqHandlerEndCity,
+      reqHandlerEndZip,
+      reqHandlerEndState,
+      reqHandlerEndAddress,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours,
+      reqHandlerStartAddressName
+    } = this.state;
+    reqHandlerEndAddressName.touched = false;
+    reqHandlerSameAddresses.touched = false;
+    reqHandlerJobName.touched = false;
+    reqHandlerDate.touched = false;
+    reqHandlerTruckType.touched = false;
+    reqHandlerMaterials.touched = false;
+    reqHandlerRateType.touched = false;
+    reqHandleTrucksEstimate.touched = false;
+    reqHandlerStartAddress.touched = false;
+    reqHandlerStartCity.touched = false;
+    reqHandlerStartZip.touched = false;
+    reqHandlerStartState.touched = false;
+    reqHandlerEndCity.touched = false;
+    reqHandlerEndZip.touched = false;
+    reqHandlerEndState.touched = false;
+    reqHandlerEndAddress.touched = false;
+    reqHandlerTons.touched = false;
+    reqHandlerEstimatedTons.touched = false;
+    reqHandlerHours.touched = false;
+    reqHandlerEstimatedHours.touched = false;
+    reqHandlerStartAddressName.touched = false;
+    this.setState({
+      reqHandlerEndAddressName,
+      reqHandlerSameAddresses,
+      reqHandlerJobName,
+      reqHandlerDate,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerRateType,
+      reqHandleTrucksEstimate,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartZip,
+      reqHandlerStartState,
+      reqHandlerEndCity,
+      reqHandlerEndZip,
+      reqHandlerEndState,
+      reqHandlerEndAddress,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours,
+      reqHandlerStartAddressName
+    });
+  }
+
+  async isDraftValid() {
+    this.clearValidationLabels();
+    const job = this.state;
+    const {rateTab} = this.state;
+    const {
+      // reqHandlerTonnage,
+      reqHandlerJobName,
+      reqHandlerEndAddress,
+      reqHandlerEndState,
+      reqHandlerEndCity,
+      reqHandlerEndZip,
+      reqHandlerSameAddresses,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartState,
+      reqHandlerStartZip,
+      reqHandlerTruckType,
+      reqHandlerMaterials,
+      reqHandlerTrucksEstimate,
+      reqHandlerDate,
+
+      selectedRatedHourOrTon,
+      rateByTonValue,
+      rateByHourValue,
+      estimatedTons,
+      estimatedHours,
+      reqHandlerTons,
+      reqHandlerEstimatedTons,
+      reqHandlerHours,
+      reqHandlerEstimatedHours,
+      reqHandlerStartAddressName,
+      reqHandlerEndAddressName
+    } = this.state;
+    let isValid = true;
+
+    const currDate = new Date();
+
+    if (job.jobDate && (new Date(job.jobDate).getTime() < currDate.getTime())) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: 'The date of the job can not be set in the past or as the current date and time'
+        }
+      });
+      isValid = false;
+    }
+
+    // START ADDRESS VALIDATION
+    if ((!job.selectedStartAddressId || job.selectedStartAddressId === 0)
+      && (job.startLocationAddressName.length > 0
+        || job.startLocationAddress1.length > 0
+        || job.startLocationCity.length > 0
+        || job.startLocationZip.length > 0
+        || job.startLocationState.length > 0)) {
+      if (job.startLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerStartAddressName: {
+            touched: true,
+            error: 'Missing starting address name'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.startLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerStartAddress: {
+            ...reqHandlerStartAddress,
+            touched: true,
+            error: 'Missing starting address field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.startLocationCity.length === 0) {
+        this.setState({
+          reqHandlerStartCity: {
+            ...reqHandlerStartCity,
+            touched: true,
+            error: 'Missing starting city field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.startLocationZip.length === 0) {
+        this.setState({
+          reqHandlerStartZip: {
+            ...reqHandlerStartZip,
+            touched: true,
+            error: 'Missing starting zip code field'
+          }
+        });
+        isValid = false;
+      }
+
+      // only work if tab is 1
+      if (job.startLocationState.length === 0) {
+        this.setState({
+          reqHandlerStartState: {
+            ...reqHandlerStartState,
+            touched: true,
+            error: 'Missing starting state field'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    if ((!job.selectedStartAddressId || job.selectedStartAddressId === 0)
+    && (job.startLocationAddressName.length > 0
+      || job.startLocationAddress1.length > 0
+      || job.startLocationCity.length > 0
+      || job.startLocationZip.length > 0
+      || job.startLocationState.length > 0)) {
+      const geoResponseStart = await this.getStartCoords();
+      if (!geoResponseStart || geoResponseStart.features.length < 1
+        || geoResponseStart.features[0].relevance < 0.90) {
+        this.setState({
+          reqHandlerStartAddress: {
+            ...reqHandlerStartAddress,
+            touched: true,
+            error: 'Start address not found.'
+          }
+        });
+        isValid = false;
+      }
+      if (typeof geoResponseStart.features[0] !== 'undefined') {
+        const coordinates = geoResponseStart.features[0].center;
+        const startLocationLatitude = coordinates[1];
+        const startLocationLongitude = coordinates[0];
+        this.setState({
+          startLocationLatitude,
+          startLocationLongitude
+        });
+      }
+    }
+
+    if (job.selectedEndAddressId > 0 && job.selectedStartAddressId > 0
+      && job.selectedStartAddressId === job.selectedEndAddressId) {
+      this.setState({
+        reqHandlerSameAddresses: {
+          ...reqHandlerSameAddresses,
+          touched: true,
+          error: "Can't have same start and end locations"
+        }
+      });
+      isValid = false;
+    }
+
+    // END ADDRESS VALIDATION
+    if ((!job.selectedEndAddressId || job.selectedEndAddressId === 0)
+    && (job.endLocationAddressName.length > 0
+      || job.endLocationAddress1.length > 0
+      || job.endLocationCity.length > 0
+      || job.endLocationZip.length > 0
+      || job.endLocationState.length > 0)) {
+      if (job.endLocationAddressName.length === 0) {
+        this.setState({
+          reqHandlerEndAddressName: {
+            touched: true,
+            error: 'Missing ending address name'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationAddress1.length === 0) {
+        this.setState({
+          reqHandlerEndAddress: {
+            ...reqHandlerEndAddress,
+            touched: true,
+            error: 'Missing ending address field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationCity.length === 0) {
+        this.setState({
+          reqHandlerEndCity: {
+            ...reqHandlerEndCity,
+            touched: true,
+            error: 'Missing ending city field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationState.length === 0) {
+        this.setState({
+          reqHandlerEndState: {
+            ...reqHandlerEndState,
+            touched: true,
+            error: 'Missing ending state field'
+          }
+        });
+        isValid = false;
+      }
+
+      if (job.endLocationZip.length === 0) {
+        this.setState({
+          reqHandlerEndZip: {
+            ...reqHandlerEndZip,
+            touched: true,
+            error: 'Missing ending zip field'
+          }
+        });
+        isValid = false;
+      }
+    }
+
+    if ((!job.selectedEndAddressId || job.selectedEndAddressId === 0)
+    && (job.endLocationAddressName.length > 0
+      || job.endLocationAddress1.length > 0
+      || job.endLocationCity.length > 0
+      || job.endLocationZip.length > 0
+      || job.endLocationState.length > 0)) {
+      const geoResponseEnd = await this.getEndCoords();
+      if (!geoResponseEnd || geoResponseEnd.features.length < 1
+        || geoResponseEnd.features[0].relevance < 0.90) {
+        this.setState({
+          reqHandlerEndAddress: {
+            ...reqHandlerEndAddress,
+            touched: true,
+            error: 'End address not found.'
+          }
+        });
+        isValid = false;
+      }
+      if (typeof geoResponseEnd.features[0] !== 'undefined') {
+        const coordinates = geoResponseEnd.features[0].center;
+        const endLocationLatitude = coordinates[1];
+        const endLocationLongitude = coordinates[0];
+        this.setState({
+          endLocationLatitude,
+          endLocationLongitude
+        });
+      }
+    }
 
     // rates
     if (selectedRatedHourOrTon === 'ton') {
@@ -1130,7 +1560,7 @@ class CreateJobFormOne extends PureComponent {
 
   async saveJobDraft() {
     this.setState({ btnSubmitting: true });
-    const isValid = await this.isFormValid();
+    const isValid = await this.isDraftValid();
 
     if (!isValid) {
       this.setState({ btnSubmitting: false });
@@ -1272,7 +1702,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerJobName,
       reqHandlerTruckType,
       reqHandlerMaterials,
-      reqHandlerTrucksEstimate,
+      reqHandlerRateType,
       reqHandlerStartAddress,
       reqHandlerStartCity,
       reqHandlerStartZip,
@@ -1345,7 +1775,7 @@ class CreateJobFormOne extends PureComponent {
                         {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
-                          value: {jobDate},
+                          value: jobDate,
                           givenDate: jobDate
                         }
                       }
@@ -1354,6 +1784,7 @@ class CreateJobFormOne extends PureComponent {
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
+                      placeholder="Date and time of job"
                     />
                   </div>
                 </Row>
@@ -1421,7 +1852,7 @@ class CreateJobFormOne extends PureComponent {
                           value: selectedRatedHourOrTon
                         }
                       }
-                      // meta={reqHandlerMaterials}
+                      meta={reqHandlerRateType}
                       value={selectedRatedHourOrTon}
                       options={
                         [
@@ -1435,6 +1866,7 @@ class CreateJobFormOne extends PureComponent {
                           }
                         ]
                       }
+                      placeholder="Rate"
                     />
                   </div>
                   {this.renderHourOrTon(selectedRatedHourOrTon)}

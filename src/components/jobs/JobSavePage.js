@@ -101,22 +101,28 @@ class JobSavePage extends Component {
 
         if (job) {
           // company
-          const company = await CompanyService.getCompanyById(job.companiesId);
+          job.company = await CompanyService.getCompanyById(job.companiesId);
           // start address
-          const startAddress = await AddressService.getAddressById(job.startAddress);
+          let startAddress = null;
+          if (job.startAddress) {
+            job.startAddress = await AddressService.getAddressById(job.startAddress);
+          }
           // end address
           let endAddress = null;
           if (job.endAddress) {
-            endAddress = await AddressService.getAddressById(job.endAddress);
+            job.endAddress = await AddressService.getAddressById(job.endAddress);
           }
 
           // materials
           const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-          const latestMaterial = materials[0];
-          job.materials = latestMaterial.value;
-          job.company = company;
-          job.startAddress = startAddress;
-          job.endAddress = endAddress;
+          if (materials && materials.length > 0) {
+            const latestMaterial = materials[0];
+            job.materials = latestMaterial.value;
+          }
+          
+          // job.company = company;
+          // job.startAddress = startAddress;
+          // job.endAddress = endAddress;
 
           // bids
           const bids = await BidService.getBidsByJobId(job.id);
@@ -809,7 +815,7 @@ class JobSavePage extends Component {
           className="secondaryButton"
           loading={btnSubmitting}
           loaderSize={10}
-          bntText="Send"
+          bntText="Edit"
         />
       );
     }
