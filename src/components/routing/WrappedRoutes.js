@@ -2,12 +2,6 @@ import React, { PureComponent } from 'react';
 import { Route } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import DashboardPage from '../dashboard/DashboardPage';
-// import DashboardCarrierPage from '../dashboard/DashboardCarrierPage';
-// import DashboardCustomerPage from '../dashboard/DashboardCustomerPage';
-
-// import JobPage from '../jobs/JobPage';
-// import JobCarrierListPage from '../jobs/JobCarrierListPage';
-// import JobCustomerListPage from '../jobs/JobCustomerListPage';
 import JobListPage from '../jobs/JobListPage';
 import JobSavePage from '../jobs/JobSavePage';
 import EquipmentListPage from '../equipments/EquipmentListPage';
