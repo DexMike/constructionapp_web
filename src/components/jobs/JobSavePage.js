@@ -34,6 +34,7 @@ class JobSavePage extends Component {
       loaded: false,
       goToDashboard: false,
       goToJob: false,
+      goToRefreshJob: false,
       job: {
         company: {
           legalName: '',
@@ -70,10 +71,25 @@ class JobSavePage extends Component {
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
     this.updateJob = this.updateJob.bind(this);
+    this.updateCopiedJob = this.updateCopiedJob.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
+    this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
+    this.loadSavePage = this.loadSavePage.bind(this);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadSavePage();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    const { job } = this.state;
+    if (parseInt(nextProps.match.params.id, 10) !== parseInt(job.id, 10)) {
+      this.setState({goToRefreshJob: false});
+      await this.loadSavePage(parseInt(nextProps.match.params.id, 10));
+    }
+  }
+
+  async loadSavePage(jobId) {
     const { match } = this.props;
     let {
       job,
@@ -90,7 +106,11 @@ class JobSavePage extends Component {
 
       if (match.params.id) {
         try {
-          job = await JobService.getJobById(match.params.id);
+          if (jobId) { // we are updating the view
+            job = await JobService.getJobById(jobId);
+          } else { // we are loading the view
+            job = await JobService.getJobById(match.params.id);
+          }
         } catch (e) {
           if (e.message === 'Access Forbidden') {
             // access 403
@@ -224,6 +244,22 @@ class JobSavePage extends Component {
     const {modalAddJob} = this.state;
     this.setState({
       modalAddJob: !modalAddJob
+    });
+  }
+
+  async toggleCopyJobModal() {
+    const {modalCopyJob} = this.state;
+    this.setState({
+      modalCopyJob: !modalCopyJob
+    });
+  }
+
+  updateCopiedJob(newJob) {
+    const { job } = this.state;
+    job.newId = newJob.id;
+    this.setState({
+      job,
+      goToRefreshJob: true
     });
   }
 
@@ -639,12 +675,15 @@ class JobSavePage extends Component {
   }
 
   renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
+    const { goToDashboard, goToJob, goToRefreshJob, job } = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
     if (goToJob) {
       return <Redirect push to="/jobs"/>;
+    }
+    if (goToRefreshJob) {
+      return <Redirect to={`/jobs/save/${job.newId}`}/>;
     }
     return false;
   }
@@ -823,6 +862,19 @@ class JobSavePage extends Component {
     return (<React.Fragment/>);
   }
 
+  renderCopyButton() {
+    const { job, profile, btnSubmitting } = this.state;
+    return (
+      <TSubmitButton
+        onClick={() => this.toggleCopyJobModal()}
+        className="secondaryButton"
+        loading={btnSubmitting}
+        loaderSize={10}
+        bntText="Copy Job"
+      />
+    );
+  }
+
   renderNewJobModal() {
     const {
       job,
@@ -838,6 +890,28 @@ class JobSavePage extends Component {
           toggle={this.toggleNewJobModal}
           jobId={job.id}
           updateJob={this.updateJob}
+        />
+      </Modal>
+    );
+  }
+
+  renderCopyJobModal() {
+    const {
+      job,
+      modalCopyJob
+    } = this.state;
+    const copyJob = true;
+    return (
+      <Modal
+        isOpen={modalCopyJob}
+        toggle={this.toggleCopyJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleCopyJobModal}
+          jobId={job.id}
+          copyJob={copyJob}
+          updateCopiedJob={this.updateCopiedJob}
         />
       </Modal>
     );
@@ -953,11 +1027,16 @@ class JobSavePage extends Component {
       if (companyType !== null && job !== null) {
         return (
           <div className="container">
+            {this.renderGoTo()}
             {this.renderNewJobModal()}
+            {this.renderCopyJobModal()}
             {this.renderAllocateDriversModal(profile)}
             <div className="row">
               <div className="col-md-3">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
+              </div>
+              <div className="col-md-9 text-right">
+                {this.renderCopyButton()}
               </div>
             </div>
             {this.renderBidsTable()}
