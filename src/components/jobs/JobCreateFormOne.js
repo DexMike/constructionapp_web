@@ -232,9 +232,7 @@ class CreateJobFormOne extends PureComponent {
     // if we have preloaded info, let's set it
     if (Object.keys(firstTabData()).length > 0) {
       const p = firstTabData();
-      console.log(p);
       if (p.status && p.status === 'Saved') { // 'Saved' job
-        console.log('Saved');
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id);
         let selectedMaterial = '';
         if (materials && materials.length > 0) {
@@ -299,8 +297,6 @@ class CreateJobFormOne extends PureComponent {
           rateEstimate: p.rateEstimate
         });
       } else if (copyJob) { // We're trying to Copy an existing job
-        console.log('copy job');
-        console.log(p.id ? p.id : p.job.id);
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id ? p.id : p.jobId);
         let selectedMaterial = '';
         if (materials && materials.length > 0) {
@@ -366,9 +362,6 @@ class CreateJobFormOne extends PureComponent {
           tonnage: p.tonnage, // estimated amount of tonnage
           hourTrucksNumber: p.numEquipments || p.hourTrucksNumber,
           // location
-          // selectedEndAddressId: p.endAddress,
-          // selectedStartAddressId: p.startAddress,
-
           selectedEndAddressId: p.selectedEndAddressId || p.endAddress,
           endLocationAddress1: p.endLocationAddress1 || '',
           endLocationAddress2: p.endLocationAddress2 || '',
@@ -401,7 +394,6 @@ class CreateJobFormOne extends PureComponent {
           rateEstimate: p.rateEstimate
         });
       } else { // We are coming from the second tab
-        console.log('from second tab');
         // TODO -> There should be a way to map directly to state
         // this is not very nice
         this.setState({
@@ -732,14 +724,10 @@ class CreateJobFormOne extends PureComponent {
       rateByTonValue,
       rateByHourValue,
       rateEstimate,
-      estimatedTons,
-      estimatedHours,
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
-      reqHandlerEstimatedHours,
-      reqHandlerStartAddressName,
-      reqHandlerEndAddressName
+      reqHandlerEstimatedHours
     } = this.state;
     let isValid = true;
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
