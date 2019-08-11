@@ -1644,7 +1644,6 @@ class CreateJobFormOne extends PureComponent {
     const isValid = await this.isFormValid();
 
     if (!isValid) {
-      console.log('>>NOT VALID!');
       return;
     }
     validateRes(true);
