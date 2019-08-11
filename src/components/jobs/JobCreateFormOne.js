@@ -539,7 +539,6 @@ class CreateJobFormOne extends PureComponent {
     this.setState({
       reqTrucks: {...reqHandlerTruckType, touched: false}
     });
-    /**/
     this.setState({selectedTrucks: data});
   }
 
