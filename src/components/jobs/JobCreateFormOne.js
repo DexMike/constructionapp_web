@@ -114,15 +114,12 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
-<<<<<<< HEAD
-=======
 
->>>>>>> dev
       reqHandleTrucksEstimate: {
         touched: false,
         error: ''
       },
-      */
+
       reqHandlerStartAddress: {
         touched: false,
         error: ''
