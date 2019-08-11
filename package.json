@@ -42,7 +42,6 @@
     "@babel/runtime": "^7.4.3",
     "@emotion/core": "^10.0.10",
     "@impargo/react-here-maps": "github:jlabeit/react-here-maps",
-    "@mapbox/mapbox-sdk": "^0.6.0",
     "@material-ui/core": "^3.9.3",
     "@mdi/font": "^3.5.95",
     "@types/googlemaps": "^3.30.19",

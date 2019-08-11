@@ -32,6 +32,7 @@ class CreateJobFormOne extends PureComponent {
       job: [],
       profile: [],
       userCompanyId: 0,
+      jobId: null,
       // truck properties
       truckType: '',
       allTruckTypes: [],
@@ -205,7 +206,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   async componentDidMount() {
-    const {firstTabData} = this.props;
+    const {firstTabData, copyJob} = this.props;
 
     // should load all addresses even if already set
     const response = await AddressService.getAddresses();
@@ -257,9 +258,12 @@ class CreateJobFormOne extends PureComponent {
             allTruckTypes.push(inside);
           });
 
-        const jobDate = moment().tz(
-          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-        ).valueOf();
+        let jobDate = null;
+        if (p.startTime) {
+          jobDate = new Date(moment(p.startTime).tz(
+            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+          ).format('YYYY-MM-DD HH:mm:ss'));
+        }  
 
         this.setState({
           jobDate,
@@ -271,21 +275,17 @@ class CreateJobFormOne extends PureComponent {
           userCompanyId: p.userCompanyId,
           // truck properties
           truckType: p.equipmentType,
-          // allTruckTypes: p.allTruckTypes,
-          // capacity: p.capacity,
-          // allMaterials: p.allMaterials,
           selectedMaterials: selectedMaterial,
           // rates
           rate: p.rate,
           ratebyBoth: p.ratebyBoth,
           tonnage: p.tonnage, // estimated amount of tonnage
-          hourTrucksNumber: p.numEquipments || '',
-          // rateTab: r.rateTab,
+          hourTrucksNumber: p.numEquipments || p.hourTrucksNumber,
           // location
           selectedEndAddressId: p.endAddress,
           selectedStartAddressId: p.startAddress,
           // date
-          jobDate: p.startTime,
+          jobDate,
           // job properties
           name: p.name,
           instructions: p.notes || '',
@@ -294,8 +294,104 @@ class CreateJobFormOne extends PureComponent {
           selectedRatedHourOrTon: p.rateType.toLowerCase(),
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
-          estimatedTons: p.rateEstimate,
-          estimatedHours: p.rateEstimate
+          rateEstimate: p.rateEstimate
+        });
+      } else if (copyJob) { // We're trying to Copy an existing job
+        const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id ? p.id : p.jobId);
+        let selectedMaterial = '';
+        if (materials && materials.length > 0) {
+          selectedMaterial = {
+            label: materials[0].value,
+            value: materials[0].value
+          };
+        }
+        let allMaterials = await LookupsService.getLookupsByType('MaterialType');
+        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+        const allTruckTypes = [];
+
+        allMaterials = allMaterials.map(material => ({
+          value: material.val1,
+          label: material.val1
+        }));
+        Object.values(truckTypes)
+          .forEach((itm) => {
+            const inside = {
+              label: itm.val1,
+              value: itm.val1
+            };
+            allTruckTypes.push(inside);
+          });
+
+        let jobDate = null;
+        if (p.startTime) {
+          jobDate = new Date(moment(p.startTime).tz(
+            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+          ).format('YYYY-MM-DD HH:mm:ss'));
+        }
+        if (p.jobDate) {
+          jobDate = new Date(moment(p.jobDate).tz(
+            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+          ).format('YYYY-MM-DD HH:mm:ss'));
+        }
+
+        let truckType = '';
+        if (p.truckType && p.truckType.value) {
+          truckType = p.truckType;
+        } else {
+          truckType = {
+            label: p.equipmentType,
+            value: p.equipmentType
+          };
+        }
+
+        this.setState({
+          jobDate,
+          allMaterials,
+          allTruckTypes
+        });
+        this.setState({
+          jobId: p.id,
+          userCompanyId: p.userCompanyId,
+          // truck properties
+          truckType,
+          capacity: p.capacity || 0,
+          selectedMaterials: selectedMaterial,
+          // rates
+          rate: p.rate,
+          ratebyBoth: p.ratebyBoth,
+          tonnage: p.tonnage, // estimated amount of tonnage
+          hourTrucksNumber: p.numEquipments || p.hourTrucksNumber,
+          // location
+          selectedEndAddressId: p.selectedEndAddressId || p.endAddress,
+          endLocationAddress1: p.endLocationAddress1 || '',
+          endLocationAddress2: p.endLocationAddress2 || '',
+          endLocationCity: p.endLocationCity || '',
+          endLocationState: p.endLocationState || '',
+          endLocationZip: p.endLocationZip || '',
+          endLocationLatitude: p.endLocationLatitude || '',
+          endLocationLongitude: p.endLocationLongitude || '',
+          startLocationLatitude: p.startLocationLatitude || '',
+          startLocationLongitude: p.startLocationLongitude || '',
+          selectedStartAddressId: p.selectedStartAddressId || p.startAddress,
+          startLocationAddress1: p.startLocationAddress1 || '',
+          startLocationAddress2: p.startLocationAddress2 || '',
+          startLocationCity: p.startLocationCity || '',
+          startLocationState: p.startLocationState || '',
+          startLocationZip: p.startLocationZip || '',
+          startLocationAddressName: p.startLocationAddressName || '',
+          endLocationAddressName: p.endLocationAddressName || '',
+          // date
+          jobDate,
+          // job properties
+          name: p.name,
+          instructions: p.notes || p.instructions,
+
+          // PUT back hour/ton
+          selectedRatedHourOrTon: p.rateType
+            ? p.rateType.toLowerCase() : p.selectedRatedHourOrTon.toLowerCase(),
+          rateByTonValue: p.rate,
+          rateByHourValue: p.rate,
+          rateEstimate: p.rateEstimate
         });
       } else { // We are coming from the second tab
         // TODO -> There should be a way to map directly to state
@@ -303,7 +399,7 @@ class CreateJobFormOne extends PureComponent {
         this.setState({
           userCompanyId: p.userCompanyId,
           // truck properties
-          truckType: p.truckType,
+          truckType: typeof p.truckType.value !== 'undefined' ? p.truckType.value : p.truckType,
           allTruckTypes: p.allTruckTypes,
           capacity: p.capacity,
           allMaterials: p.allMaterials,
@@ -344,8 +440,7 @@ class CreateJobFormOne extends PureComponent {
           selectedRatedHourOrTon: p.selectedRatedHourOrTon,
           rateByTonValue: p.rateByTonValue,
           rateByHourValue: p.rateByHourValue,
-          estimatedTons: p.estimatedTons,
-          estimatedHours: p.estimatedHours
+          rateEstimate: p.rateEstimate
         });
       }
     } else {
@@ -367,12 +462,7 @@ class CreateJobFormOne extends PureComponent {
           allTruckTypes.push(inside);
         });
 
-      /* const jobDate = moment().tz(
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).valueOf(); */
-
       this.setState({
-        // jobDate,
         allMaterials,
         allTruckTypes
       });
@@ -633,14 +723,11 @@ class CreateJobFormOne extends PureComponent {
       selectedRatedHourOrTon,
       rateByTonValue,
       rateByHourValue,
-      estimatedTons,
-      estimatedHours,
+      rateEstimate,
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
-      reqHandlerEstimatedHours,
-      reqHandlerStartAddressName,
-      reqHandlerEndAddressName
+      reqHandlerEstimatedHours
     } = this.state;
     let isValid = true;
     if (!job.selectedMaterials || job.selectedMaterials.length === 0) {
@@ -918,16 +1005,6 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      if (estimatedTons <= 0) {
-        this.setState({
-          reqHandlerEstimatedTons: {
-            ...reqHandlerEstimatedTons,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
       if (rateByHourValue <= 0) {
         this.setState({
           reqHandlerHours: {
@@ -938,7 +1015,7 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      if (estimatedHours <= 0) {
+      if (rateEstimate <= 0) {
         this.setState({
           reqHandlerEstimatedHours: {
             ...reqHandlerEstimatedHours,
@@ -960,7 +1037,7 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      if (estimatedTons <= 0) {
+      if (rateEstimate <= 0) {
         this.setState({
           reqHandlerEstimatedTons: {
             ...reqHandlerEstimatedTons,
@@ -981,7 +1058,7 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-      if (estimatedHours <= 0) {
+      if (rateEstimate <= 0) {
         this.setState({
           reqHandlerEstimatedHours: {
             ...reqHandlerEstimatedHours,
@@ -1069,7 +1146,6 @@ class CreateJobFormOne extends PureComponent {
   async isDraftValid() {
     this.clearValidationLabels();
     const job = this.state;
-    const {rateTab} = this.state;
     const {
       jobDate,
       // reqHandlerTonnage,
@@ -1083,22 +1159,13 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerStartCity,
       reqHandlerStartState,
       reqHandlerStartZip,
-      reqHandlerTruckType,
-      reqHandlerMaterials,
-      reqHandlerTrucksEstimate,
+      reqHandlerRateType,
       reqHandlerDate,
-
       selectedRatedHourOrTon,
       rateByTonValue,
       rateByHourValue,
       estimatedTons,
-      estimatedHours,
-      reqHandlerTons,
-      reqHandlerEstimatedTons,
-      reqHandlerHours,
-      reqHandlerEstimatedHours,
-      reqHandlerStartAddressName,
-      reqHandlerEndAddressName
+      estimatedHours
     } = this.state;
     let isValid = true;
 
@@ -1322,7 +1389,19 @@ class CreateJobFormOne extends PureComponent {
     }
 
     // rates
-    if (selectedRatedHourOrTon === 'ton') {
+    if ((!selectedRatedHourOrTon || selectedRatedHourOrTon === '')
+    && ((rateByTonValue > 0 || estimatedTons > 0)
+      || (rateByHourValue > 0 || estimatedHours > 0))) {
+      this.setState({
+        reqHandlerRateType: {
+          ...reqHandlerRateType,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    /* if (selectedRatedHourOrTon === 'ton') {
       if (rateByTonValue <= 0) {
         this.setState({
           reqHandlerTons: {
@@ -1364,7 +1443,7 @@ class CreateJobFormOne extends PureComponent {
         });
         isValid = false;
       }
-    }
+    } */
 
     return isValid;
   }
@@ -1575,9 +1654,9 @@ class CreateJobFormOne extends PureComponent {
     } else {
       isValid = true;
     }
-    const {saveJobDraftAlt} = this.props;
+    const {saveJobDraftOrCopy} = this.props;
     if (isValid) {
-      saveJobDraftAlt(this.state);
+      saveJobDraftOrCopy(this.state);
     }
   }
 
@@ -1607,6 +1686,7 @@ class CreateJobFormOne extends PureComponent {
       rateByHourValue,
       estimatedTons,
       estimatedHours,
+      rateEstimate,
       reqHandlerTons,
       reqHandlerEstimatedTons,
       reqHandlerHours,
@@ -1637,7 +1717,7 @@ class CreateJobFormOne extends PureComponent {
                 {
                   onChange: this.handleInputChangeTonHour,
                   name: 'estimatedTons',
-                  value: estimatedTons
+                  value: rateEstimate
                 }
               }
               placeholder="0"
@@ -1672,7 +1752,7 @@ class CreateJobFormOne extends PureComponent {
               {
                 onChange: this.handleInputChangeTonHour,
                 name: 'estimatedHours',
-                value: estimatedHours
+                value: rateEstimate
               }
             }
             placeholder="0"
@@ -2209,11 +2289,14 @@ CreateJobFormOne.propTypes = {
   firstTabData: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   gotoSecond: PropTypes.func.isRequired,
-  saveJobDraftAlt: PropTypes.func.isRequired,
+  saveJobDraftOrCopy: PropTypes.func.isRequired,
   validateOnTabClick: PropTypes.bool.isRequired,
-  validateRes: PropTypes.func.isRequired
+  validateRes: PropTypes.func.isRequired,
+  copyJob: PropTypes.bool
 };
 
-CreateJobFormOne.defaultProps = {};
+CreateJobFormOne.defaultProps = {
+  copyJob: false
+};
 
 export default CreateJobFormOne;
