@@ -21,7 +21,11 @@ class TDateTimePickerField extends PureComponent {
     let dueDate = 0;
     const profile = await ProfileService.getProfile();
 
+    console.log(input);
+
     if (input.value) {
+      const parsedDate = new Date(input.value);
+      startDate = parsedDate;
       // startDate and EndDate were added for common datepicker values
       if (input.value.jobDate) {
         // dueDate = input.value.jobDate.getTime();
@@ -44,6 +48,8 @@ class TDateTimePickerField extends PureComponent {
         const parsedDate = new Date(dueDate);
         startDate = parsedDate;
       }
+
+      console.log(startDate);
 
       const timeZonedStartDate = new Date(moment(startDate).tz(
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone

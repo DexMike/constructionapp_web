@@ -232,6 +232,7 @@ class CreateJobFormOne extends PureComponent {
     if (Object.keys(firstTabData()).length > 0) {
       const p = firstTabData();
       if (p.status && p.status === 'Saved') { // 'Saved' job
+        console.log(p);
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id);
         let selectedMaterial = '';
         if (materials && materials.length > 0) {
@@ -257,12 +258,20 @@ class CreateJobFormOne extends PureComponent {
             allTruckTypes.push(inside);
           });
 
-        const jobDate = moment().tz(
+        /* const jobDate = moment(p.startTime).tz(
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-        ).valueOf();
+        ); */
+        /* let jobDate = moment(p.jobDate).format('YYYY-MM-DD HH:mm');
+        jobDate = moment.tz(
+          jobDate,
+          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        ).utc().format();
+        jobDate = new Date(jobDate);
+        console.log(typeof jobDate);
+        console.log(jobDate); */
 
         this.setState({
-          jobDate,
+          // jobDate,
           allMaterials,
           allTruckTypes
         });
@@ -1720,6 +1729,8 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerEndAddressName,
       loaded
     } = this.state;
+    console.log(typeof jobDate);
+    console.log(jobDate);
     const {onClose} = this.props;
     if (loaded) {
       return (
