@@ -46,6 +46,7 @@ class JobCreateFormTwo extends PureComponent {
     this.saveJobMaterials = this.saveJobMaterials.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.saveJob = this.saveJob.bind(this);
+    this.saveJobTrucks = this.saveJobTrucks.bind(this);
     this.saveJobDraft = this.saveJobDraft.bind(this);
   }
 
@@ -179,6 +180,19 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
+  // let's create a list of truck types that we want to save
+  async saveJobTrucks(jobId, trucks) {
+    const allTrucks = [];
+    for (const truck of trucks) {
+      const equipmentMaterial = {
+        jobId,
+        equipmentMaterialId: Number(truck.value)
+      };
+      allTrucks.push(equipmentMaterial);
+    }
+    await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+  }
+
   async saveJob() {
     const { updateJob } = this.props;
     this.setState({ btnSubmitting: true });
@@ -300,7 +314,7 @@ class JobCreateFormTwo extends PureComponent {
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
         ).utc().format(),
-        equipmentType: d.truckType,
+        equipmentType: '',
         numEquipments: d.hourTrucksNumber,
         rateType,
         rate,
@@ -348,6 +362,9 @@ class JobCreateFormTwo extends PureComponent {
     if (newJob) {
       if (d.selectedMaterials) { // check if there's materials to add
         this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+      }
+      if (Object.keys(d.selectedTrucks).length > 0) {
+        this.saveJobTrucks(newJob.id, d.selectedTrucks);
       }
     }
 
