@@ -1876,10 +1876,7 @@ class CreateJobFormOne extends PureComponent {
                         }
                       }
                       placeholder="Any"
-<<<<<<< HEAD
-=======
                       allowUndefined
->>>>>>> dev
                       // meta={reqHandlerTrucksEstimate}
                     />
                   </div>
