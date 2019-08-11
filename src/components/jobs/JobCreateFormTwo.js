@@ -180,7 +180,7 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
-  // let's create a list of tryck types that we want to save
+  // let's create a list of truck types that we want to save
   async saveJobTrucks(jobId, trucks) {
     const allTrucks = [];
     for (const truck of trucks) {
