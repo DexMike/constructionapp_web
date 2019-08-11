@@ -438,7 +438,6 @@ class BidsTable extends Component {
 
   handleApproveInputChange(e) {
     this.setState({approveInsurance: e.target.value.toUpperCase()});
-
   }
 
   renderBidModal() {
