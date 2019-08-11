@@ -245,28 +245,19 @@ class CreateJobFormOne extends PureComponent {
           };
         }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-        const allTruckTypes = [];
+        const allTruckTypes = await this.getTruckTypes();
 
         allMaterials = allMaterials.map(material => ({
           value: material.val1,
           label: material.val1
         }));
-        Object.values(truckTypes)
-          .forEach((itm) => {
-            const inside = {
-              label: itm.val1,
-              value: itm.val1
-            };
-            allTruckTypes.push(inside);
-          });
 
         let jobDate = null;
         if (p.startTime) {
           jobDate = new Date(moment(p.startTime).tz(
             profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
           ).format('YYYY-MM-DD HH:mm:ss'));
-        }  
+        }
 
         this.setState({
           jobDate,
@@ -309,21 +300,12 @@ class CreateJobFormOne extends PureComponent {
           };
         }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-        const allTruckTypes = [];
+        const allTruckTypes = await this.getTruckTypes();
 
         allMaterials = allMaterials.map(material => ({
           value: material.val1,
           label: material.val1
         }));
-        Object.values(truckTypes)
-          .forEach((itm) => {
-            const inside = {
-              label: itm.val1,
-              value: itm.val1
-            };
-            allTruckTypes.push(inside);
-          });
 
         let jobDate = null;
         if (p.startTime) {
@@ -449,21 +431,12 @@ class CreateJobFormOne extends PureComponent {
     } else {
       // we don't have preloaded info, let's hit the server
       let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-      const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-      const allTruckTypes = [];
+      const allTruckTypes = await this.getTruckTypes();
 
       allMaterials = allMaterials.map(material => ({
         value: material.val1,
         label: material.val1
       }));
-      Object.values(truckTypes)
-        .forEach((itm) => {
-          const inside = {
-            label: itm.val1,
-            value: String(itm.id)
-          };
-          allTruckTypes.push(inside);
-        });
 
       this.setState({
         allMaterials,
@@ -485,6 +458,20 @@ class CreateJobFormOne extends PureComponent {
     if (nextProps.validateOnTabClick) {
       await this.goToSecondFromFirst();
     }
+  }
+
+  async getTruckTypes() {
+    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    const allTruckTypes = [];
+    Object.values(truckTypes).forEach((itm) => {
+      const inside = {
+        label: itm.val1,
+        value: String(itm.id)
+      };
+      allTruckTypes.push(inside);
+    });
+    // console.log('>>>GOT TRUCK TYPES', allTruckTypes);
+    return allTruckTypes;
   }
 
   async getStartCoords() {
