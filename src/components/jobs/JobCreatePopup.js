@@ -37,7 +37,7 @@ class JobCreatePopup extends Component {
     this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
     this.validateFormOne = this.validateFormOne.bind(this);
     this.validateFormOneRes = this.validateFormOneRes.bind(this);
-    this.saveJobDraftAlt = this.saveJobDraftAlt.bind(this);
+    this.saveJobDraftOrCopy = this.saveJobDraftOrCopy.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
     this.updateJob = this.updateJob.bind(this);
   }
@@ -59,14 +59,21 @@ class JobCreatePopup extends Component {
     return firstTabInfo;
   }
 
-  async updateJob(newJob) {
-    const { updateJob } = this.props;
-    updateJob(newJob, null);
+  updateJob(newJob) {
+    const { updateJob, updateCopiedJob } = this.props;
+    if (newJob.copiedJob) {
+      updateCopiedJob(newJob)
+    }
+    if (updateJob) {
+      updateJob(newJob, null);
+    }
   }
 
-  async saveJobDraftAlt(e) {
+  // Used to either store a Copied or 'Saved' job to the database
+  async saveJobDraftOrCopy(e) {
     const { profile } = this.state;
     const d = e;
+    // return;
 
     // start location
     let startAddress = {
@@ -119,7 +126,7 @@ class JobCreatePopup extends Component {
 
     let rateType = '';
     let rate = 0;
-    if (d.selectedRatedHourOrTon && d.selectedRatedHourOrTon.lenght > 0) {
+    if (d.selectedRatedHourOrTon && d.selectedRatedHourOrTon.length > 0) {
       if (d.selectedRatedHourOrTon === 'ton') {
         rateType = 'Ton';
         rate = Number(d.rateByTonValue);
@@ -236,7 +243,7 @@ class JobCreatePopup extends Component {
   }
 
   render() {
-    const { equipmentId, companyId, editDriverId, updateJob } = this.props;
+    const { equipmentId, companyId, editDriverId, updateJob, copyJob } = this.props;
     const {
       job,
       page,
@@ -284,7 +291,8 @@ class JobCreatePopup extends Component {
                         firstTabData={this.getFirstTabInfo}
                         validateOnTabClick={validateFormOne}
                         validateRes={this.validateFormOneRes}
-                        saveJobDraftAlt={this.saveJobDraftAlt}
+                        saveJobDraftOrCopy={this.saveJobDraftOrCopy}
+                        copyJob={copyJob}
                       />
                       )}
                     {page === 2
@@ -294,8 +302,9 @@ class JobCreatePopup extends Component {
                         onClose={this.closeNow}
                         firstTabData={this.getFirstTabInfo}
                         jobId={job.id}
-                        saveJobDraftAlt={this.saveJobDraftAlt}
+                        saveJobDraftOrCopy={this.saveJobDraftOrCopy}
                         updateJob={this.updateJob}
+                        copyJob={copyJob}
                       />
                       )}
                     {/* onSubmit={onSubmit} */}
@@ -322,12 +331,16 @@ class JobCreatePopup extends Component {
 JobCreatePopup.propTypes = {
   toggle: PropTypes.func.isRequired,
   jobId: PropTypes.number,
-  updateJob: PropTypes.func
+  updateJob: PropTypes.func,
+  copyJob: PropTypes.bool,
+  updateCopiedJob: PropTypes.func
 };
 
 JobCreatePopup.defaultProps = {
   jobId: null,
-  updateJob: null
+  updateJob: null,
+  copyJob: false,
+  updateCopiedJob: null
 };
 
 
