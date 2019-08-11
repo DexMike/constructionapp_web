@@ -18,10 +18,12 @@ class CarrierRow extends Component {
     super(props);
     this.state = {
       modalFavoriteCarrier: false,
+      modalRequestJob: false,
       carrierCompany: null,
       profile: null,
       producerCompany: null,
       approveFavorite: '',
+      approveRequest: '',
       isLoading: true,
       favoriteWarningEmail: '',
       forceSend: false
@@ -30,6 +32,8 @@ class CarrierRow extends Component {
     this.editEquipment = this.editEquipment.bind(this);
     this.handleApproveInputChange = this.handleApproveInputChange.bind(this);
     this.toggleFavoriteModal = this.toggleFavoriteModal.bind(this);
+    this.toggleRequestJobModal = this.toggleRequestJobModal.bind(this);
+    this.handleRequest = this.handleRequest.bind(this);
   }
 
   async componentDidMount() {
@@ -46,6 +50,13 @@ class CarrierRow extends Component {
     const {modalFavoriteCarrier} = this.state;
     this.setState({
       modalFavoriteCarrier: !modalFavoriteCarrier
+    });
+  }
+
+  async toggleRequestJobModal() {
+    const {modalRequestJob} = this.state;
+    this.setState({
+      modalRequestJob: !modalRequestJob
     });
   }
 
@@ -72,8 +83,20 @@ class CarrierRow extends Component {
     }
   }
 
+  async handleRequest(companyId) {
+    const {producerCompany} = {...this.state};
+    const carrierCompany = CompanyService.getCompanyById(companyId);
+    if (carrierCompany.liabilityGeneral < producerCompany.liabilityGeneral
+      || carrierCompany.liabilityAuto < producerCompany.liabilityAuto
+      || carrierCompany.liabilityOther < producerCompany.liabilityOther) {
+      this.setState({modalRequestJob: true});
+    } else {
+      this.editEquipment(companyId);
+    }
+  }
+
   handleApproveInputChange(e) {
-    this.setState({approveFavorite: e.target.value.toUpperCase()});
+    this.setState({[e.target.name]: e.target.value.toUpperCase()});
   }
 
   editEquipment(companyId) {
@@ -97,7 +120,7 @@ class CarrierRow extends Component {
       return (
         <Modal
           isOpen={modalFavoriteCarrier}
-          toggle={this.toggleBidModal}
+          toggle={this.toggleViewJobModal}
           className="modal-dialog--primary modal-dialog--header"
         >
           <div className="modal__header">
@@ -197,6 +220,120 @@ class CarrierRow extends Component {
     return null;
   }
 
+  renderRequestJobModal() {
+    const {
+      modalRequestJob,
+      producerCompany,
+      carrierCompany,
+      approveRequest
+    } = this.state;
+    const {
+      carrierId
+    } = this.props;
+    if (modalRequestJob) {
+      return (
+        <Modal
+          isOpen={modalRequestJob}
+          toggle={this.toggleRequestJobModal}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleRequestJobModal}
+            />
+            <div className="bold-text modal__title">Carrier Favorite</div>
+          </div>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        Are you sure you want to accept this carrier as a favorite?
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12" style={{paddingBottom: 50}}>
+                        <Row className="col-md-12">
+                          <span style={{fontWeight: 'bold'}}> Minimum Insurance Level Warning</span>
+                        </Row>
+                        <Row className="col-md-12">
+                          {carrierCompany.liabilityGeneral < producerCompany.liabilityGeneral && (
+                            <Row className="col-md-12">
+                              <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
+                              General: {carrierCompany.legalName} has {carrierCompany.liabilityGeneral},
+                              but requires {producerCompany.liabilityGeneral}
+                            </Row>
+                          )}
+                          {carrierCompany.liabilityAuto < producerCompany.liabilityAuto && (
+                            <Row className="col-md-12">
+                              <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
+                              Auto: {carrierCompany.legalName} has {carrierCompany.liabilityAuto},
+                              but requires {producerCompany.liabilityAuto}
+                            </Row>
+                          )}
+                          {carrierCompany.liabilityOther < producerCompany.liabilityOther && (
+                            <Row className="col-md-12">
+                              <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
+                              Other: {carrierCompany.legalName} has {carrierCompany.liabilityOther},
+                              but requires {producerCompany.liabilityOther}
+                            </Row>
+                          )}
+                          <Row className="col-md-12">
+                            To use this carrier, and override your insurance requirements,
+                            you must type APPROVE in this box:
+                            <Row className="col-md-12" style={{paddingTop: 15}}>
+                              <div className="form__form-group-field">
+                                <input
+                                  name="approveRequest"
+                                  type="text"
+                                  value={approveRequest}
+                                  onChange={this.handleApproveInputChange}
+                                />
+                              </div>
+                            </Row>
+                          </Row>
+                        </Row>
+                      </Row>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
+                          <Button color="minimal" className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={this.toggleRequestJobModal}
+                          >
+                            Cancel
+                          </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            // onClick={() => this.saveBid('accept')}
+                            onClick={() => {
+                              if (approveRequest === 'APPROVE') {
+                                this.editEquipment(carrierId);
+                                this.toggleRequestJobModal();
+                              }
+                            }
+                            }
+                            className="primaryButton float-right"
+                            loaderSize={10}
+                            bntText="Yes, request job"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
   renderMaterials(materials) {
     return (
       <table>
@@ -255,6 +392,7 @@ class CarrierRow extends Component {
       return (
         <React.Fragment>
           {this.renderFavoriteModal()}
+          {this.renderRequestJobModal()}
           <Row className="truck-card truck-details">
             <div className="col-md-12">
               <div className="row">
@@ -276,7 +414,7 @@ class CarrierRow extends Component {
                     </div>
                     <div className="col-md-3 button-card">
                       <Button
-                        onClick={() => this.editEquipment(5)}
+                        onClick={() => this.handleRequest(carrierId)}
                         className="btn btn-primary"
                         styles="margin:0px !important"
                       >
