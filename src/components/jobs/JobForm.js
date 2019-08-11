@@ -119,7 +119,12 @@ class JobForm extends Component {
         metricSystem: 'imperial',
         language: 'en-us' // en-us|es-es|de-de
       };
-      const pinAIcon = new H.map.Icon(pinA, { size: { w: 35, h: 50} });
+      const pinAIcon = new H.map.Icon(pinA, {
+        size: {
+          w: 35,
+          h: 50
+        }
+      });
       const originMarker = new H.map.Marker({
         lat: startPoint.latitude,
         lng: startPoint.longitude
@@ -127,7 +132,12 @@ class JobForm extends Component {
         zIndex: 0,
         icon: pinAIcon
       });
-      const pinBIcon = new H.map.Icon(pinB, { size: { w: 35, h: 50} });
+      const pinBIcon = new H.map.Icon(pinB, {
+        size: {
+          w: 35,
+          h: 50
+        }
+      });
       const destinationMarker = new H.map.Marker({
         lat: endPoint.latitude,
         lng: endPoint.longitude
@@ -146,18 +156,6 @@ class JobForm extends Component {
       );
     }
 
-    try {
-      // TODO -> do this without MapBox
-      /*
-      const response = await GeoCodingService
-        .getDistance(startPoint.longitude, startPoint.latitude,
-          endPoint.longitude, endPoint.latitude);
-      distance = response.routes[0].distance;
-      time = response.routes[0].duration;
-      */
-    } catch (e) {
-      // console.log(e)
-    }
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
@@ -713,8 +711,6 @@ class JobForm extends Component {
     const {
       showMainMap,
       shape,
-      cachedOrigin,
-      cachedDestination,
       markersGroup
     } = this.state;
 
