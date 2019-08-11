@@ -24,6 +24,7 @@ import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
+import JobCreatePopup from './JobCreatePopup';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -33,6 +34,7 @@ class JobSavePage extends Component {
       loaded: false,
       goToDashboard: false,
       goToJob: false,
+      goToRefreshJob: false,
       job: {
         company: {
           legalName: '',
@@ -58,7 +60,8 @@ class JobSavePage extends Component {
       allocateDriversModal: false,
       drivers: [],
       selectedDrivers: [],
-      accessForbidden: false
+      accessForbidden: false,
+      modalAddJob: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -68,9 +71,25 @@ class JobSavePage extends Component {
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
     this.updateJob = this.updateJob.bind(this);
+    this.updateCopiedJob = this.updateCopiedJob.bind(this);
+    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
+    this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
+    this.loadSavePage = this.loadSavePage.bind(this);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadSavePage();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    const { job } = this.state;
+    if (parseInt(nextProps.match.params.id, 10) !== parseInt(job.id, 10)) {
+      this.setState({goToRefreshJob: false});
+      await this.loadSavePage(parseInt(nextProps.match.params.id, 10));
+    }
+  }
+
+  async loadSavePage(jobId) {
     const { match } = this.props;
     let {
       job,
@@ -87,7 +106,11 @@ class JobSavePage extends Component {
 
       if (match.params.id) {
         try {
-          job = await JobService.getJobById(match.params.id);
+          if (jobId) { // we are updating the view
+            job = await JobService.getJobById(jobId);
+          } else { // we are loading the view
+            job = await JobService.getJobById(match.params.id);
+          }
         } catch (e) {
           if (e.message === 'Access Forbidden') {
             // access 403
@@ -98,21 +121,28 @@ class JobSavePage extends Component {
 
         if (job) {
           // company
-          const company = await CompanyService.getCompanyById(job.companiesId);
+          job.company = await CompanyService.getCompanyById(job.companiesId);
           // start address
-          const startAddress = await AddressService.getAddressById(job.startAddress);
+          let startAddress = null;
+          if (job.startAddress) {
+            job.startAddress = await AddressService.getAddressById(job.startAddress);
+          }
           // end address
           let endAddress = null;
           if (job.endAddress) {
-            endAddress = await AddressService.getAddressById(job.endAddress);
+            job.endAddress = await AddressService.getAddressById(job.endAddress);
           }
 
           // materials
           const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-          job.company = company;
-          job.startAddress = startAddress;
-          job.endAddress = endAddress;
-          job.materials = materials.map(material => material.value);
+          if (materials && materials.length > 0) {
+            const latestMaterial = materials[0];
+            job.materials = latestMaterial.value;
+          }
+          
+          // job.company = company;
+          // job.startAddress = startAddress;
+          // job.endAddress = endAddress;
 
           // bids
           const bids = await BidService.getBidsByJobId(job.id);
@@ -173,19 +203,17 @@ class JobSavePage extends Component {
             );
           }
 
-          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-          let enabledDrivers = [];
-          Object.values(drivers).forEach((itm) => {
-            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
-              enabledDrivers.push(itm);
+          let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+
+          drivers = drivers.map((driver) => {
+            if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+              const newDriver = driver;
+              newDriver.checkboxDisabled = true;
+              return newDriver;
             }
+            return driver;
           });
-          // Setting id to driverId since is getting the userId and saving it as driverId
-          enabledDrivers = enabledDrivers.map((driver) => {
-            const newDriver = driver;
-            newDriver.id = newDriver.driverId;
-            return newDriver;
-          });
+          console.log(drivers);
           this.setState({
             job,
             bid,
@@ -194,7 +222,7 @@ class JobSavePage extends Component {
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers: enabledDrivers
+            drivers
           });
         }
       }
@@ -210,6 +238,29 @@ class JobSavePage extends Component {
     }
   }
 
+  async toggleNewJobModal() {
+    const {modalAddJob} = this.state;
+    this.setState({
+      modalAddJob: !modalAddJob
+    });
+  }
+
+  async toggleCopyJobModal() {
+    const {modalCopyJob} = this.state;
+    this.setState({
+      modalCopyJob: !modalCopyJob
+    });
+  }
+
+  updateCopiedJob(newJob) {
+    const { job } = this.state;
+    job.newId = newJob.id;
+    this.setState({
+      job,
+      goToRefreshJob: true
+    });
+  }
+
   async updateJob(newJob, companyCarrier) {
     const job = newJob;
     const company = await CompanyService.getCompanyById(job.companiesId);
@@ -219,10 +270,11 @@ class JobSavePage extends Component {
       endAddress = await AddressService.getAddressById(job.endAddress);
     }
     const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    const latestMaterial = materials[0];
+    job.materials = latestMaterial.value;
     job.company = company;
     job.startAddress = startAddress;
     job.endAddress = endAddress;
-    job.materials = materials.map(material => material.value);
     this.setState({ job, companyCarrier });
   }
 
@@ -621,12 +673,15 @@ class JobSavePage extends Component {
   }
 
   renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
+    const { goToDashboard, goToJob, goToRefreshJob, job } = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
     if (goToJob) {
       return <Redirect push to="/jobs"/>;
+    }
+    if (goToRefreshJob) {
+      return <Redirect to={`/jobs/save/${job.newId}`}/>;
     }
     return false;
   }
@@ -779,7 +834,7 @@ class JobSavePage extends Component {
         </div>
       );
     } */
-    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress') 
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress')
       && companyType === 'Carrier' && profile.isAdmin) {
       return (
         <TSubmitButton
@@ -791,7 +846,73 @@ class JobSavePage extends Component {
         />
       );
     }
+    if (job.status === 'Saved' && companyType === 'Customer') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleNewJobModal()}
+          className="secondaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Edit"
+        />
+      );
+    }
     return (<React.Fragment/>);
+  }
+
+  renderCopyButton() {
+    const { job, profile, btnSubmitting } = this.state;
+    return (
+      <TSubmitButton
+        onClick={() => this.toggleCopyJobModal()}
+        className="secondaryButton"
+        loading={btnSubmitting}
+        loaderSize={10}
+        bntText="Copy Job"
+      />
+    );
+  }
+
+  renderNewJobModal() {
+    const {
+      job,
+      modalAddJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJob}
+        toggle={this.toggleNewJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleNewJobModal}
+          jobId={job.id}
+          updateJob={this.updateJob}
+        />
+      </Modal>
+    );
+  }
+
+  renderCopyJobModal() {
+    const {
+      job,
+      modalCopyJob
+    } = this.state;
+    const copyJob = true;
+    return (
+      <Modal
+        isOpen={modalCopyJob}
+        toggle={this.toggleCopyJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleCopyJobModal}
+          jobId={job.id}
+          copyJob={copyJob}
+          updateCopiedJob={this.updateCopiedJob}
+        />
+      </Modal>
+    );
   }
 
   renderAllocateDriversModal() {
@@ -904,10 +1025,16 @@ class JobSavePage extends Component {
       if (companyType !== null && job !== null) {
         return (
           <div className="container">
+            {this.renderGoTo()}
+            {this.renderNewJobModal()}
+            {this.renderCopyJobModal()}
             {this.renderAllocateDriversModal(profile)}
             <div className="row">
               <div className="col-md-3">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
+              </div>
+              <div className="col-md-9 text-right">
+                {this.renderCopyButton()}
               </div>
             </div>
             {this.renderBidsTable()}

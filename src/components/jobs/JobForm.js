@@ -5,7 +5,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
 // import HEREMap, { Marker, RouteLine } from 'here-maps-react';
-import HEREMap, { Marker, RouteLine } from '../../utils/here-maps-react';
+import { HEREMap, RouteLine } from '../../utils/here-maps-react';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -15,6 +15,8 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+import pinA from '../../img/PinA.png';
+import pinB from '../../img/PinB.png';
 // import GeoCodingService from '../../api/GeoCodingService';
 
 /*
@@ -73,7 +75,7 @@ class JobForm extends Component {
       shape: {},
       timeAndDistance: '',
       instructions: [],
-      markersGroup: {}
+      markersGroup: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -89,13 +91,12 @@ class JobForm extends Component {
     let {
       loads,
       carrier,
-      images
+      images,
+      markersGroup
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
-    let distance = 0;
-    let time = 0;
 
     const platform = new H.service.Platform({
       apikey: hereMapsApiKey,
@@ -105,49 +106,56 @@ class JobForm extends Component {
       useHTTPS: true
     });
 
-    const routeRequestParams = {
-      mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
-      representation: 'display',
-      routeattributes: 'waypoints,summary,shape,legs,incidents',
-      maneuverattributes: 'direction,action',
-      waypoint0: `${startPoint.latitude},${startPoint.longitude}`,
-      waypoint1: `${endPoint.latitude},${endPoint.longitude}`,
-      truckType: 'tractorTruck',
-      limitedWeight: 700,
-      metricSystem: 'imperial',
-      language: 'en-us' // en-us|es-es|de-de
-    };
+    if (job.startAddress) {
+      const routeRequestParams = {
+        mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
+        representation: 'display',
+        routeattributes: 'waypoints,summary,shape,legs,incidents',
+        maneuverattributes: 'direction,action',
+        waypoint0: `${startPoint.latitude},${startPoint.longitude}`,
+        waypoint1: `${endPoint.latitude},${endPoint.longitude}`,
+        truckType: 'tractorTruck',
+        limitedWeight: 700,
+        metricSystem: 'imperial',
+        language: 'en-us' // en-us|es-es|de-de
+      };
+      const pinAIcon = new H.map.Icon(pinA, {
+        size: {
+          w: 35,
+          h: 50
+        }
+      });
+      const originMarker = new H.map.Marker({
+        lat: startPoint.latitude,
+        lng: startPoint.longitude
+      }, {
+        zIndex: 0,
+        icon: pinAIcon
+      });
+      const pinBIcon = new H.map.Icon(pinB, {
+        size: {
+          w: 35,
+          h: 50
+        }
+      });
+      const destinationMarker = new H.map.Marker({
+        lat: endPoint.latitude,
+        lng: endPoint.longitude
+      }, {
+        zIndex: 0,
+        icon: pinBIcon
+      });
+      markersGroup = new H.map.Group();
+      markersGroup.addObjects([originMarker, destinationMarker]);
 
-    const originMarker = new H.map.Marker({
-      lat: startPoint.latitude,
-      lng: startPoint.longitude
-    });
-    const destinationMarker = new H.map.Marker({
-      lat: endPoint.latitude,
-      lng: endPoint.longitude
-    });
-    const group = new H.map.Group();
-    group.addObjects([originMarker, destinationMarker]);
-
-    const router = platform.getRoutingService();
-    router.calculateRoute(
-      routeRequestParams,
-      this.onSuccess,
-      this.onError
-    );
-
-    try {
-      // TODO -> do this without MapBox
-      /*
-      const response = await GeoCodingService
-        .getDistance(startPoint.longitude, startPoint.latitude,
-          endPoint.longitude, endPoint.latitude);
-      distance = response.routes[0].distance;
-      time = response.routes[0].duration;
-      */
-    } catch (e) {
-      // console.log(e)
+      const router = platform.getRoutingService();
+      router.calculateRoute(
+        routeRequestParams,
+        this.onSuccess,
+        this.onError
+      );
     }
+
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
@@ -174,12 +182,10 @@ class JobForm extends Component {
       loaded: true,
       loads,
       job,
-      distance,
-      time,
       cachedOrigin: startPoint,
       cachedDestination: endPoint,
       profile,
-      markersGroup: group
+      markersGroup
     });
   }
 
@@ -218,6 +224,8 @@ class JobForm extends Component {
     this.setState({
       showMainMap: true,
       shape: route.shape,
+      distance: route.summary.distance,
+      time: route.summary.travelTime,
       timeAndDistance: `Travel time and distance: ${route.summary.text}`,
       instructions: route.leg[0]
     });
@@ -331,7 +339,7 @@ class JobForm extends Component {
     const { profile, companyType, carrier } = this.state;
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
-    estimatedCost = estimatedCost.props.value;
+    estimatedCost = estimatedCost.props ? estimatedCost.props.value : 0;
     const fee = estimatedCost * 0.1;
     let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
@@ -351,12 +359,12 @@ class JobForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {job.status !== 'On Offer' && job.status !== 'Published' && job.status !== 'Published And Offered' && (
+          {carrier && (
             <React.Fragment>
               Carrier: {carrier ? carrier.legalName : ''}
+              <br/>
             </React.Fragment>
           )}
-          <br/>
           Producer: {job.company.legalName}
           {this.renderPhone(showPhone)}
           <br/>
@@ -369,7 +377,7 @@ class JobForm extends Component {
           <h3 className="subhead">
             Dates:
           </h3>
-          Start Date: {TFormat.asDayWeek(job.startTime, profile.timeZone)}
+          Start Date: {job.startTime && TFormat.asDayWeek(job.startTime, profile.timeZone)}
           <br/>
           Created On: {TFormat.asDayWeek(job.createdOn, profile.timeZone)}
         </div>
@@ -395,9 +403,9 @@ class JobForm extends Component {
             }
             &nbsp;Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
-            Rate: {TFormat.asMoney(job.rate)} / {job.rateType}
+            Rate: {job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Material: {this.materialsAsString(job.materials)}
+            Material: {job.materials}
           </div>
         )}
         {companyType === 'Customer' && (
@@ -422,9 +430,9 @@ class JobForm extends Component {
             <br/>
             Estimated Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
-            Rate:&nbsp;{TFormat.asMoney(job.rate)} / {job.rateType}
+            Rate:&nbsp;{job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Material: {this.materialsAsString(job.materials)}
+            Material: {job.materials}
           </div>
         )}
       </React.Fragment>
@@ -434,9 +442,11 @@ class JobForm extends Component {
   renderAddress(address) {
     return (
       <React.Fragment>
+        {address.address1 && (
         <div>
           <span>{address.address1}</span>
         </div>
+        )}
         {address.address2 && (
           <div>
             <span>{address.address2}</span>
@@ -677,7 +687,7 @@ class JobForm extends Component {
         <h3 className="subhead">
           Start Location
         </h3>
-        {this.renderAddress(address)}
+        {address && this.renderAddress(address)}
       </React.Fragment>
     );
   }
@@ -701,8 +711,6 @@ class JobForm extends Component {
     const {
       showMainMap,
       shape,
-      cachedOrigin,
-      cachedDestination,
       markersGroup
     } = this.state;
 
@@ -718,7 +726,6 @@ class JobForm extends Component {
           appId="FlTEFFbhzrFwU1InxRgH"
           appCode="gTgJkC9u0YWzXzvjMadDzQ"
           center={center}
-          zoom={14}
           setLayer={opts}
           hidpi={false}
           interactive
@@ -726,7 +733,7 @@ class JobForm extends Component {
         >
           <RouteLine
             shape={shape}
-            strokeColor="purple"
+            strokeColor="blue"
             lineWidth="4"
           />
           {/* // If markersGroup exists, do not send markers
@@ -794,7 +801,7 @@ class JobForm extends Component {
                 <div className="col-md-4">
                   <div className="row">
                     <div className="col-md-12">
-                      {this.renderStartAddress(job.startAddress)}
+                      {job.startAddress && this.renderStartAddress(job.startAddress)}
                     </div>
                   </div>
                   <div className="row mt-1">
