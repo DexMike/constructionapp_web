@@ -1,24 +1,155 @@
 import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
+import pinA from '../../img/PinA.png';
+import pinB from '../../img/PinB.png';
 
 class TMap extends Component {
-  componentDidMount() {
-    const { zoom, center, id } = this.props;
+  constructor(props) {
+    super(props);
 
-    const platform = new H.service.Platform({
+    this.platform = new H.service.Platform({
       apikey: process.env.HERE_MAPS_API_KEY,
       useCIT: true,
       app_id: process.env.HERE_MAPS_APP_ID,
       app_code: process.env.HERE_MAPS_APP_CODE,
       useHTTPS: true
     });
+    this.map = null;
+    this.behavior = null;
+    this.ui = null;
+    this.boundingBoxDistance = 0;
 
-    const defaultLayers = platform.createDefaultLayers();
+    this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
+    this.onRouteSuccess = this.onRouteSuccess.bind(this);
+  }
+
+  componentDidMount() {
+    const { zoom, center, id, startAddress, endAddress } = this.props;
+    const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
     mapOptions.center = center;
     mapOptions.zoom = zoom;
-    const map = new H.Map(mapDiv, defaultLayers.vector.normal.map, mapOptions);
+    this.map = new H.Map(mapDiv, defaultLayers.vector.normal.map, mapOptions);
+    // add a resize listener to make sure that the map occupies the whole container
+    window.addEventListener('resize', () => this.map.getViewPort().resize());
+    // MapEvents enables the event system
+    // Behavior implements default interactions for pan/zoom (also on mobile touch environments)
+    this.behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    // Create the default UI components
+    this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
+    if (startAddress && endAddress) {
+      this.calculateRouteFromAtoB();
+      this.addMarkersToMap();
+    }
+  }
+
+  onRouteSuccess(result) {
+    const { trackings } = this.props;
+    const route = result.response.route[0];
+    this.addRouteShapeToMap(route);
+    for (const tracking of trackings) {
+      this.addGPSPoint(tracking[1], tracking[0]);
+    }
+  }
+
+  onRouteError(error) {
+    console.error(error);
+  }
+
+  calculateRouteFromAtoB() {
+    const {startAddress, endAddress} = this.props;
+    const router = this.platform.getRoutingService();
+    const routeRequestParams = {
+      mode: 'fastest;car',
+      representation: 'display',
+      routeattributes: 'waypoints,summary,shape,legs',
+      maneuverattributes: 'direction,action',
+      waypoint0: `${startAddress.latitude},${startAddress.longitude}`,
+      waypoint1: `${endAddress.latitude},${endAddress.longitude}`
+    };
+
+    router.calculateRoute(
+      routeRequestParams,
+      this.onRouteSuccess,
+      this.onRouteError
+    );
+  }
+
+  /**
+   * Creates a H.map.Polyline from the shape of the route and adds it to the map.
+   * @param {Object} route A route as received from the H.service.RoutingService
+   */
+  addRouteShapeToMap(route) {
+    const lineString = new H.geo.LineString();
+    const routeShape = route.shape;
+
+    routeShape.forEach((point) => {
+      const parts = point.split(',');
+      lineString.pushLatLngAlt(parts[0], parts[1]);
+    });
+
+    const polyline = new H.map.Polyline(lineString, {
+      style: {
+        lineWidth: 4,
+        strokeColor: 'rgba(0, 128, 255, 0.7)'
+      }
+    });
+    // Add the polyline to the map
+    this.map.addObject(polyline);
+    let bounds = polyline.getBoundingBox(); // H.geo.Rect
+    // zoom out a little so the markers fit
+    const offsetFactor = 0.2;
+    const boundParams = {
+      top: bounds.getTop(),
+      left: bounds.getLeft(),
+      bottom: bounds.getBottom(),
+      right: bounds.getRight()
+    };
+    boundParams.top += (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
+      * offsetFactor);
+    boundParams.left -= (Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
+      * offsetFactor);
+    boundParams.bottom -= (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
+      * offsetFactor);
+    boundParams.right += (Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
+      * offsetFactor);
+    this.boundingBoxDistance = Math.sqrt((((boundParams.top - boundParams.bottom) ** 2))
+      + (((boundParams.left - boundParams.right) ** 2)));
+    console.log('expected' + this.boundingBoxDistance);
+    bounds = new H.geo.Rect(boundParams.top, boundParams.left, boundParams.bottom,
+      boundParams.right);
+    // And zoom to its bounding rectangle
+    this.map.getViewModel().setLookAtData({
+      bounds
+    });
+  }
+
+  addMarkersToMap() {
+    const {startAddress, endAddress} = this.props;
+    const pinAIcon = new H.map.Icon(`${window.location.origin}/${pinA}`,
+      { size: { w: 35, h: 50 } });
+    const markerA = new H.map.Marker({ lat: startAddress.latitude, lng: startAddress.longitude },
+      { zIndex: 0, icon: pinAIcon });
+    const pinBIcon = new H.map.Icon(`${window.location.origin}/${pinB}`,
+      { size: { w: 35, h: 50 } });
+    const markerB = new H.map.Marker({ lat: endAddress.latitude, lng: endAddress.longitude },
+      { zIndex: 0, icon: pinBIcon });
+    this.map.addObject(markerA);
+    this.map.addObject(markerB);
+  }
+
+  addGPSPoint(latitude, longitude) {
+    this.map.addObject(new H.map.Circle(
+      {lat: latitude, lng: longitude}, (1 + (this.boundingBoxDistance * 500)),
+      {
+        style: {
+          strokeColor: 'rgba(0, 0, 255, 0.5)', // Color of the perimeter
+          lineWidth: 1,
+          fillColor: 'rgba(255, 255, 255, 0.5)' // Color of the circle
+        }
+      }
+    ));
   }
 
   render() {
@@ -30,25 +161,37 @@ class TMap extends Component {
 }
 
 TMap.propTypes = {
-  id: PropTypes.number,
+  id: PropTypes.string,
   width: PropTypes.number,
   height: PropTypes.number,
   zoom: PropTypes.number,
   center: PropTypes.shape({
     lat: PropTypes.number,
     lng: PropTypes.number
-  })
+  }),
+  startAddress: PropTypes.shape({
+    latitude: PropTypes.number,
+    longitude: PropTypes.number
+  }),
+  endAddress: PropTypes.shape({
+    latitude: PropTypes.number,
+    longitude: PropTypes.number
+  }),
+  trackings: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
 };
 
 TMap.defaultProps = {
-  id: 1,
+  id: '1',
   width: 400,
   height: 400,
   zoom: 10,
   center: {
     lat: 30.274983,
     lng: -97.739604
-  }
+  },
+  startAddress: null,
+  endAddress: null,
+  trackings: []
 };
 
 export default TMap;
