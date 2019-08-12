@@ -212,9 +212,8 @@ class CreateJobFormOne extends PureComponent {
     const {firstTabData, copyJob} = this.props;
 
     // should load all addresses even if already set
-    const response = await AddressService.getAddresses();
     const profile = await ProfileService.getProfile();
-
+    const response = await AddressService.getAddressesByCompanyId(profile.companyId);
     const newItem = {
       id: 0,
       name: 'NEW ADDRESS',
