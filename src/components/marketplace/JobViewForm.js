@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
-import { Container, Card, CardBody, Col, Row } from 'reactstrap';
+import {
+  Container,
+  Card,
+  CardBody,
+  Col,
+  Row,
+  Modal,
+  Button,
+  ButtonToolbar
+} from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 // import NumberFormat from 'react-number-format';
@@ -45,6 +54,7 @@ class JobViewForm extends Component {
 
     this.state = {
       company: [],
+      companyCarrier: [],
       companyName: '',
       booking: null,
       ...job,
@@ -55,12 +65,14 @@ class JobViewForm extends Component {
       btnSubmitting: false,
       selectedDrivers: [],
       accessForbidden: false,
-      shape: {}
+      shape: {},
+      modalLiability: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
     this.onError = this.onError.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
+    this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
   }
 
   async componentDidMount() {
@@ -68,6 +80,7 @@ class JobViewForm extends Component {
       job,
       company,
       companyName,
+      companyCarrier,
       booking,
       profile,
       favoriteCompany,
@@ -92,6 +105,9 @@ class JobViewForm extends Component {
       }
     }
     if (job) {
+      if (profile.companyType === 'Carrier') {
+        companyCarrier = await CompanyService.getCompanyById(profile.companyId);
+      }
       company = await CompanyService.getCompanyById(job.companiesId);
       startAddress = await AddressService.getAddressById(job.startAddress);
       endAddress = null;
@@ -155,6 +171,7 @@ class JobViewForm extends Component {
       job,
       company,
       companyName,
+      companyCarrier,
       bid,
       booking,
       profile,
@@ -396,6 +413,13 @@ class JobViewForm extends Component {
     return true;
   }
 
+  toggleLiabilityModal() {
+    const {modalLiability} = this.state;
+    this.setState({
+      modalLiability: !modalLiability
+    });
+  }
+
   equipmentMaterialsAsString(materials) {
     let materialsString = '';
     if (materials) {
@@ -420,11 +444,14 @@ class JobViewForm extends Component {
   renderJobTop(job) {
     const {
       bid,
+      company,
+      companyCarrier,
       companyName,
       favoriteCompany,
       profile,
       btnSubmitting
     } = this.state;
+    const companyProducer = company;
     let showModalButton;
     let jobStatus;
 
@@ -435,12 +462,21 @@ class JobViewForm extends Component {
       jobStatus = job.status;
     }
 
+    let btnFunction;
+    // If Carrier has not enough liability insurance, show confirmation modal
+    if ((companyProducer.liabilityGeneral > 0.01 || companyProducer.liabilityAuto > 0.01)
+    && ((companyCarrier.liabilityGeneral < companyProducer.liabilityGeneral) || (companyCarrier.liabilityAuto < companyProducer.liabilityAuto))) {
+      btnFunction = () => this.toggleLiabilityModal();
+    } else {
+      btnFunction = this.saveJob;
+    }
+
     // Job was 'Published' to the Marketplace,
     // Carrier is a favorite OR Customer has requested this particular Carrier
     if (jobStatus === 'Published' && (favoriteCompany.length > 0 || (bid && bid.hasCustomerAccepted === 1 && bid.status === 'Pending'))) {
       showModalButton = (
         <TSubmitButton
-          onClick={this.saveJob}
+          onClick={btnFunction}
           className="primaryButton float-right"
           loading={btnSubmitting}
           loaderSize={10}
@@ -451,7 +487,7 @@ class JobViewForm extends Component {
     } else if (jobStatus === 'Published' && !bid && favoriteCompany.length === 0) {
       showModalButton = (
         <TSubmitButton
-          onClick={this.saveJob}
+          onClick={btnFunction}
           className="primaryButton float-right"
           loading={btnSubmitting}
           loaderSize={10}
@@ -462,7 +498,7 @@ class JobViewForm extends Component {
     } else if (jobStatus === 'Published' && (bid && (bid.status !== 'Pending' && bid.status !== 'Declined')) && favoriteCompany.length === 0) {
       showModalButton = (
         <TSubmitButton
-          onClick={this.saveJob}
+          onClick={btnFunction}
           className="primaryButton float-right"
           loading={btnSubmitting}
           loaderSize={10}
@@ -511,6 +547,99 @@ class JobViewForm extends Component {
         </Row>
       </React.Fragment>
     );
+  }
+
+  renderLiabilityConfirmation() {
+    const {
+      modalLiability,
+      btnSubmitting,
+      company,
+      companyCarrier,
+      favoriteCompany,
+      bid,
+      job
+    } = this.state;
+
+    const companyProducer = company;
+
+    let jobAction;
+    if ((job.status === 'Published' || job.status === 'Published And Offered')
+    && (favoriteCompany.length > 0 || (bid && bid.hasCustomerAccepted === 1 && bid.status === 'Pending'))) {
+      jobAction = 'Accept';
+    } else {
+      jobAction = 'Request';
+    }
+
+    if (modalLiability) {
+      return (
+        <Modal
+          isOpen={modalLiability}
+          toggle={this.toggleLiabilityModal}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleLiabilityModal}
+            />
+            <div className="bold-text modal__title">Liability Insurance</div>
+          </div>
+          <div className="modal__body" style={{ padding: '10px 25px 0px 25px' }}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        <p>This job requires a minimum&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyProducer.liabilityGeneral)} of
+                          General Liability Insurance and&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyProducer.liabilityAuto)} of Auto
+                          Liability Insurance. Our records show that you have&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyCarrier.liabilityGeneral)} of General
+                          Liability Insurance and&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyCarrier.liabilityAuto)}&nbsp;
+                          of Auto Liability Insurance.
+                        </p>
+
+                        <p>You risk being rejected by {companyProducer.legalName} due to your
+                        insurance levels. If you have updated your insurance levels please
+                        contact <a href="mailto:csr@trelar.com">Trelar Support</a>.
+                        </p>
+
+                        <p>Are you sure you want to {jobAction.toLowerCase()} this job?</p>
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
+                          <Button color="minimal" className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={this.toggleLiabilityModal}
+                          >
+                            Cancel
+                          </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={this.saveJob}
+                            className="primaryButton"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText={`${jobAction} Job`}
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
   }
 
   renderMap() {
@@ -688,6 +817,7 @@ class JobViewForm extends Component {
                 {this.renderJobAddresses(job)}
                 {this.renderJobDetails(job)}
                 {this.renderJobBottom(job)}
+                {this.renderLiabilityConfirmation()}
                 {/* {this.renderJobFormButtons()} */}
               </CardBody>
             </Card>

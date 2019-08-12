@@ -2,12 +2,18 @@ import React, { Component } from 'react';
 import {
   Col,
   Row,
-  Container, Modal, Card, Button
+  Container,
+  Modal,
+  Card,
+  Button,
+  CardBody,
+  ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
+import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -18,6 +24,7 @@ import BookingService from '../../api/BookingService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
+import LoadService from '../../api/LoadService';
 import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
@@ -48,6 +55,7 @@ class JobSavePage extends Component {
         },
         status: null
       },
+      company: null,
       bid: null,
       booking: null,
       favoriteCompany: [],
@@ -61,7 +69,9 @@ class JobSavePage extends Component {
       drivers: [],
       selectedDrivers: [],
       accessForbidden: false,
-      modalAddJob: false
+      modalAddJob: false,
+      modalLiability: false,
+      activeDrivers: []
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -74,6 +84,7 @@ class JobSavePage extends Component {
     this.updateCopiedJob = this.updateCopiedJob.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
     this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
+    this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
     this.loadSavePage = this.loadSavePage.bind(this);
   }
 
@@ -93,6 +104,7 @@ class JobSavePage extends Component {
     const { match } = this.props;
     let {
       job,
+      company,
       bid,
       booking,
       profile,
@@ -100,7 +112,7 @@ class JobSavePage extends Component {
       selectedDrivers,
       companyCarrier
     } = this.state;
-
+    let activeDrivers = [];
     try {
       profile = await ProfileService.getProfile();
 
@@ -111,6 +123,7 @@ class JobSavePage extends Component {
           } else { // we are loading the view
             job = await JobService.getJobById(match.params.id);
           }
+          company = await CompanyService.getCompanyById(profile.companyId);
         } catch (e) {
           if (e.message === 'Access Forbidden') {
             // access 403
@@ -192,6 +205,12 @@ class JobSavePage extends Component {
             //   bookingEq => bookingEq.bookingId === booking.id,
             //   booking
             // );
+            const driversResponse = await LoadService.getActiveDriversByBookingId(booking.id);
+            if (driversResponse && driversResponse.length > 0) {
+              driversResponse.map(driver => (
+                activeDrivers.push(driver.id)
+              ));
+            }
           }
 
           // Check if carrier is favorite for this job's customer
@@ -203,26 +222,42 @@ class JobSavePage extends Component {
             );
           }
 
-          let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-
-          drivers = drivers.map((driver) => {
-            if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
-              const newDriver = driver;
-              newDriver.checkboxDisabled = true;
-              return newDriver;
+          // let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          // console.log(207, drivers);
+          // drivers = drivers.map((driver) => {
+          //   if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+          //     const newDriver = driver;
+          //     newDriver.checkboxDisabled = true;
+          //     return newDriver;
+          //   }
+          //   return driver;
+          // });
+          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          let enabledDrivers = [];
+          Object.values(drivers).forEach((itm) => {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
+              enabledDrivers.push(itm);
             }
-            return driver;
           });
-          console.log(drivers);
+          // Setting id to driverId since is getting the userId and saving it as driverId
+          enabledDrivers = enabledDrivers.map((driver) => {
+            const newDriver = driver;
+            newDriver.id = newDriver.driverId;
+            if (activeDrivers.includes(newDriver.driverId)) {
+              newDriver.checkboxDisabled = true;
+            }
+            return newDriver;
+          });
           this.setState({
             job,
+            company,
             bid,
             companyCarrier,
             booking,
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers
+            drivers: enabledDrivers
           });
         }
       }
@@ -238,17 +273,24 @@ class JobSavePage extends Component {
     }
   }
 
-  async toggleNewJobModal() {
+  toggleNewJobModal() {
     const {modalAddJob} = this.state;
     this.setState({
       modalAddJob: !modalAddJob
     });
   }
 
-  async toggleCopyJobModal() {
+  toggleCopyJobModal() {
     const {modalCopyJob} = this.state;
     this.setState({
       modalCopyJob: !modalCopyJob
+    });
+  }
+
+  toggleLiabilityModal() {
+    const {modalLiability} = this.state;
+    this.setState({
+      modalLiability: !modalLiability
     });
   }
 
@@ -722,7 +764,9 @@ class JobSavePage extends Component {
   }
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
-    const { profile } = this.state;
+    const { profile, company } = this.state;
+    const companyProducer = job.company;
+    const companyCarrier = company;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
     if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       // If the carrier is a favorite OR the Customer has requested this particular Carrier
@@ -737,18 +781,34 @@ class JobSavePage extends Component {
               loaderSize={10}
               bntText="Decline Job"
             />
-            <TSubmitButton
-              onClick={() => this.handleConfirmRequestCarrier('Accept')}
-              className="primaryButton"
-              loading={btnSubmitting}
-              loaderSize={10}
-              bntText="Accept Job"
-            />
+            {(companyProducer.liabilityGeneral > 0.01 || companyProducer.liabilityAuto > 0.01)
+            && ((companyCarrier.liabilityGeneral < companyProducer.liabilityGeneral) || (companyCarrier.liabilityAuto < companyProducer.liabilityAuto))
+            && ( // Carrier has not enough liability insurance, show confirmation modal
+              <TSubmitButton
+                onClick={() => this.toggleLiabilityModal()}
+                className="primaryButton"
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Accept Job"
+              />
+            )}
+            {(((!companyProducer.liabilityGeneral || companyProducer.liabilityGeneral === 0)
+              && (!companyProducer.liabilityAuto || companyProducer.liabilityAuto === 0))
+            || ((companyCarrier.liabilityGeneral > companyProducer.liabilityGeneral) && (companyCarrier.liabilityAuto > companyProducer.liabilityAuto)))
+            && ( // Carrier has enough liability insurance OR Producer has not set up Insurance
+              <TSubmitButton
+                onClick={() => this.handleConfirmRequestCarrier('Accept')}
+                className="primaryButton"
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Accept Job"
+              />
+            )}
           </div>
         );
       }
-      // the carrier is not a favorite
-      if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
+      // the carrier is not a favorite (We're not showing this button here, only through the Marketplace)
+      /* if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
         return (
           <TSubmitButton
             onClick={() => this.handleConfirmRequestCarrier('Request')}
@@ -756,9 +816,9 @@ class JobSavePage extends Component {
             loading={btnSubmitting}
             loaderSize={10}
             bntText="Request Job"
-          />
+          /> 
         );
-      }
+      } */
 
       // the carrier is not a favorite
       if (bid && bid.status === 'Declined') {
@@ -996,6 +1056,89 @@ class JobSavePage extends Component {
     );
   }
 
+  renderLiabilityConfirmation() {
+    const {
+      modalLiability,
+      btnSubmitting,
+      job,
+      company
+    } = this.state;
+
+    const companyProducer = job.company;
+    const companyCarrier = company;
+
+    if (modalLiability) {
+      return (
+        <Modal
+          isOpen={modalLiability}
+          toggle={this.toggleLiabilityModal}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleLiabilityModal}
+            />
+            <div className="bold-text modal__title">Liability Insurance</div>
+          </div>
+          <div className="modal__body" style={{ padding: '10px 25px 0px 25px' }}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        <p>This job requires a minimum&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyProducer.liabilityGeneral)} of
+                          General Liability Insurance and&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyProducer.liabilityAuto)} of Auto
+                          Liability Insurance. Our records show that you have&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyCarrier.liabilityGeneral)} of General
+                          Liability Insurance and&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyCarrier.liabilityAuto)}&nbsp;
+                          of Auto Liability Insurance.
+                        </p>
+
+                        <p>You risk being rejected by {companyProducer.legalName} due to your
+                        insurance levels. If you have updated your insurance levels please
+                        contact <a href="mailto:csr@trelar.com">Trelar Support</a>.
+                        </p>
+
+                        <p>Are you sure you want to accept this job?</p>
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
+                          <Button color="minimal" className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={this.toggleLiabilityModal}
+                          >
+                            Cancel
+                          </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={() => this.handleConfirmRequestCarrier('Accept')}
+                            className="primaryButton"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Accept Job"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
   render() {
     const {
       job,
@@ -1029,12 +1172,13 @@ class JobSavePage extends Component {
             {this.renderNewJobModal()}
             {this.renderCopyJobModal()}
             {this.renderAllocateDriversModal(profile)}
+            {this.renderLiabilityConfirmation()}
             <div className="row">
               <div className="col-md-3">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
               <div className="col-md-9 text-right">
-                {this.renderCopyButton()}
+                {companyType !== 'Carrier' && this.renderCopyButton()}
               </div>
             </div>
             {this.renderBidsTable()}

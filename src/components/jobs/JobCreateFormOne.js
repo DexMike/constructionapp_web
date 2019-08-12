@@ -212,9 +212,8 @@ class CreateJobFormOne extends PureComponent {
     const {firstTabData, copyJob} = this.props;
 
     // should load all addresses even if already set
-    const response = await AddressService.getAddresses();
     const profile = await ProfileService.getProfile();
-
+    const response = await AddressService.getAddressesByCompanyId(profile.companyId);
     const newItem = {
       id: 0,
       name: 'NEW ADDRESS',
@@ -245,31 +244,15 @@ class CreateJobFormOne extends PureComponent {
           };
         }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-        const allTruckTypes = [];
+        const allTruckTypes = await this.getTruckTypes();
 
         allMaterials = allMaterials.map(material => ({
           value: material.val1,
           label: material.val1
         }));
-        Object.values(truckTypes)
-          .forEach((itm) => {
-            const inside = {
-              label: itm.val1,
-              value: itm.val1
-            };
-            allTruckTypes.push(inside);
-          });
-
-        let jobDate = null;
-        if (p.startTime) {
-          jobDate = new Date(moment(p.startTime).tz(
-            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-          ).format('YYYY-MM-DD HH:mm:ss'));
-        }  
 
         this.setState({
-          jobDate,
+          // jobDate,
           allMaterials,
           allTruckTypes
         });
@@ -288,7 +271,7 @@ class CreateJobFormOne extends PureComponent {
           selectedEndAddressId: p.endAddress,
           selectedStartAddressId: p.startAddress,
           // date
-          jobDate,
+          jobDate: p.startTime,
           // job properties
           name: p.name,
           instructions: p.notes || '',
@@ -309,21 +292,12 @@ class CreateJobFormOne extends PureComponent {
           };
         }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-        const allTruckTypes = [];
+        const allTruckTypes = await this.getTruckTypes();
 
         allMaterials = allMaterials.map(material => ({
           value: material.val1,
           label: material.val1
         }));
-        Object.values(truckTypes)
-          .forEach((itm) => {
-            const inside = {
-              label: itm.val1,
-              value: itm.val1
-            };
-            allTruckTypes.push(inside);
-          });
 
         let jobDate = null;
         if (p.startTime) {
@@ -449,21 +423,12 @@ class CreateJobFormOne extends PureComponent {
     } else {
       // we don't have preloaded info, let's hit the server
       let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-      const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-      const allTruckTypes = [];
+      const allTruckTypes = await this.getTruckTypes();
 
       allMaterials = allMaterials.map(material => ({
         value: material.val1,
         label: material.val1
       }));
-      Object.values(truckTypes)
-        .forEach((itm) => {
-          const inside = {
-            label: itm.val1,
-            value: String(itm.id)
-          };
-          allTruckTypes.push(inside);
-        });
 
       this.setState({
         allMaterials,
@@ -485,6 +450,20 @@ class CreateJobFormOne extends PureComponent {
     if (nextProps.validateOnTabClick) {
       await this.goToSecondFromFirst();
     }
+  }
+
+  async getTruckTypes() {
+    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    const allTruckTypes = [];
+    Object.values(truckTypes).forEach((itm) => {
+      const inside = {
+        label: itm.val1,
+        value: String(itm.id)
+      };
+      allTruckTypes.push(inside);
+    });
+    // console.log('>>>GOT TRUCK TYPES', allTruckTypes);
+    return allTruckTypes;
   }
 
   async getStartCoords() {
@@ -537,7 +516,7 @@ class CreateJobFormOne extends PureComponent {
   handleTruckTypeChange(data) {
     const { reqHandlerTruckType } = this.state;
     this.setState({
-      reqTrucks: {...reqHandlerTruckType, touched: false}
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
     });
     this.setState({selectedTrucks: data});
   }
