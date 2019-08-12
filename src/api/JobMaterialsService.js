@@ -23,6 +23,11 @@ class JobMaterialsService extends AgentService {
     return (response);
   }
 
+  static async createJobEquipments(jobId, equipmentMaterials) {
+    const response = await super.post(`/jobs/${jobId}${PATH}/materials`, equipmentMaterials);
+    return (response);
+  }
+
   static async updateJobMaterials(jobMaterial) {
     const response = await this.put(PATH, jobMaterial);
     return (response);

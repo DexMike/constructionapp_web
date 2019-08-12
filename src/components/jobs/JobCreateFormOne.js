@@ -11,6 +11,7 @@ import {
   Row
 } from 'reactstrap';
 import PropTypes from 'prop-types';
+import MultiSelect from '../common/TMultiSelect';
 import SelectField from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
 import TDateTimePicker from '../common/TDateTimePicker';
@@ -39,6 +40,7 @@ class CreateJobFormOne extends PureComponent {
       capacity: 0,
       allMaterials: [],
       selectedMaterials: '',
+      selectedTrucks: '',
       allUSstates: [],
       // addresses
       allAddresses: [],
@@ -117,6 +119,7 @@ class CreateJobFormOne extends PureComponent {
         touched: false,
         error: ''
       },
+
       reqHandlerStartAddress: {
         touched: false,
         error: ''
@@ -209,9 +212,8 @@ class CreateJobFormOne extends PureComponent {
     const {firstTabData, copyJob} = this.props;
 
     // should load all addresses even if already set
-    const response = await AddressService.getAddresses();
     const profile = await ProfileService.getProfile();
-
+    const response = await AddressService.getAddressesByCompanyId(profile.companyId);
     const newItem = {
       id: 0,
       name: 'NEW ADDRESS',
@@ -242,28 +244,19 @@ class CreateJobFormOne extends PureComponent {
           };
         }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-        const allTruckTypes = [];
+        const allTruckTypes = await this.getTruckTypes();
 
         allMaterials = allMaterials.map(material => ({
           value: material.val1,
           label: material.val1
         }));
-        Object.values(truckTypes)
-          .forEach((itm) => {
-            const inside = {
-              label: itm.val1,
-              value: itm.val1
-            };
-            allTruckTypes.push(inside);
-          });
 
         let jobDate = null;
         if (p.startTime) {
           jobDate = new Date(moment(p.startTime).tz(
             profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
           ).format('YYYY-MM-DD HH:mm:ss'));
-        }  
+        }
 
         this.setState({
           jobDate,
@@ -306,21 +299,12 @@ class CreateJobFormOne extends PureComponent {
           };
         }
         let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-        const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-        const allTruckTypes = [];
+        const allTruckTypes = await this.getTruckTypes();
 
         allMaterials = allMaterials.map(material => ({
           value: material.val1,
           label: material.val1
         }));
-        Object.values(truckTypes)
-          .forEach((itm) => {
-            const inside = {
-              label: itm.val1,
-              value: itm.val1
-            };
-            allTruckTypes.push(inside);
-          });
 
         let jobDate = null;
         if (p.startTime) {
@@ -446,21 +430,12 @@ class CreateJobFormOne extends PureComponent {
     } else {
       // we don't have preloaded info, let's hit the server
       let allMaterials = await LookupsService.getLookupsByType('MaterialType');
-      const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
-      const allTruckTypes = [];
+      const allTruckTypes = await this.getTruckTypes();
 
       allMaterials = allMaterials.map(material => ({
         value: material.val1,
         label: material.val1
       }));
-      Object.values(truckTypes)
-        .forEach((itm) => {
-          const inside = {
-            label: itm.val1,
-            value: itm.val1
-          };
-          allTruckTypes.push(inside);
-        });
 
       this.setState({
         allMaterials,
@@ -482,6 +457,20 @@ class CreateJobFormOne extends PureComponent {
     if (nextProps.validateOnTabClick) {
       await this.goToSecondFromFirst();
     }
+  }
+
+  async getTruckTypes() {
+    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    const allTruckTypes = [];
+    Object.values(truckTypes).forEach((itm) => {
+      const inside = {
+        label: itm.val1,
+        value: String(itm.id)
+      };
+      allTruckTypes.push(inside);
+    });
+    // console.log('>>>GOT TRUCK TYPES', allTruckTypes);
+    return allTruckTypes;
   }
 
   async getStartCoords() {
@@ -532,14 +521,11 @@ class CreateJobFormOne extends PureComponent {
   }
 
   handleTruckTypeChange(data) {
-    const {reqHandlerTruckType} = this.state;
+    const { reqHandlerTruckType } = this.state;
     this.setState({
-      reqHandlerTruckType: {
-        ...reqHandlerTruckType,
-        touched: false
-      }
+      reqTrucks: {...reqHandlerTruckType, touched: false}
     });
-    this.setState({truckType: data});
+    this.setState({selectedTrucks: data});
   }
 
   handleStartLocationChange(e) {
@@ -717,6 +703,7 @@ class CreateJobFormOne extends PureComponent {
       reqHandlerStartZip,
       reqHandlerTruckType,
       reqHandlerMaterials,
+      // reqHandlerTrucksEstimate,
       reqHandlerRateType,
       reqHandlerDate,
 
@@ -752,12 +739,12 @@ class CreateJobFormOne extends PureComponent {
       isValid = false;
     }
 
-    if (!job.truckType || job.truckType.length === 0) {
+    if (!job.selectedTrucks || job.selectedTrucks.length === 0) {
       this.setState({
         reqHandlerTruckType: {
           ...reqHandlerTruckType,
           touched: true,
-          error: 'Required input'
+          error: 'Please select type of truck'
         }
       });
       isValid = false;
@@ -962,28 +949,6 @@ class CreateJobFormOne extends PureComponent {
         });
       }
     }
-
-    // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-    //   this.setState({
-    //     reqHandlerTrucksEstimate: {
-    //       ...reqHandlerTrucksEstimate,
-    //       touched: true,
-    //       error: 'Required input'
-    //     }
-    //   });
-    //   isValid = false;
-    // }
-    //
-    // if (job.hourTrucksNumber <= 0 && rateTab === 1) {
-    //   this.setState({
-    //     reqHandlerTrucksEstimate: {
-    //       ...reqHandlerTrucksEstimate,
-    //       touched: true,
-    //       error: 'Required input'
-    //     }
-    //   });
-    //   isValid = false;
-    // }
 
     // rates
     if (!selectedRatedHourOrTon || selectedRatedHourOrTon === '') {
@@ -1773,6 +1738,7 @@ class CreateJobFormOne extends PureComponent {
       allTruckTypes,
       allMaterials,
       selectedMaterials,
+      selectedTrucks,
       allUSstates,
       allAddresses,
       selectedStartAddressId,
@@ -1900,18 +1866,18 @@ class CreateJobFormOne extends PureComponent {
                   </div>
                   <div className="col-md-4">
                     <span className="form__form-group-label">Truck Type</span>
-                    <SelectField
+                    <MultiSelect
                       input={
                         {
                           onChange: this.handleTruckTypeChange,
-                          name: 'truckType',
-                          value: truckType
+                          name: 'selectedTrucks',
+                          value: selectedTrucks
                         }
                       }
-                      meta={reqHandlerTruckType}
-                      value={truckType}
+                      // meta={reqHandlerMaterials}
                       options={allTruckTypes}
-                      placeholder="Truck Type"
+                      placeholder="Truck type"
+                      meta={reqHandlerTruckType}
                     />
                   </div>
                   <div className="col-md-5 form__form-group">
