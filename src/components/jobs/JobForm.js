@@ -121,7 +121,7 @@ class JobForm extends Component {
         metricSystem: 'imperial',
         language: 'en-us' // en-us|es-es|de-de
       };
-      const pinAIcon = new H.map.Icon(pinA, {
+      const pinAIcon = new H.map.Icon(`${window.location.origin}/${pinA}`, {
         size: {
           w: 35,
           h: 50
@@ -134,7 +134,7 @@ class JobForm extends Component {
         zIndex: 0,
         icon: pinAIcon
       });
-      const pinBIcon = new H.map.Icon(pinB, {
+      const pinBIcon = new H.map.Icon(`${window.location.origin}/${pinB}`, {
         size: {
           w: 35,
           h: 50

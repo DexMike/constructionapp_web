@@ -255,7 +255,7 @@ class JobCreateFormCarrier extends Component {
     }));
 
     // should load all addresses even if already set
-    const response = await AddressService.getAddresses();
+    const response = await AddressService.getAddressesByCompanyId(profile.companyId);
 
     const newItem = {
       id: 0,

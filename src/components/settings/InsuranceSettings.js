@@ -223,11 +223,13 @@ class InsuranceSettings extends Component {
               input={{
                 onChange: this.handleInputChange,
                 name: 'liabilityGeneral',
-                value: liabilityGeneral
+                value: liabilityGeneral,
+                disabled: true
               }}
               placeholder="General Liability"
               type="text"
               meta={reqHandlerGeneral}
+              readonly
             />
           </Col>
           <Col md={6}>
@@ -238,7 +240,8 @@ class InsuranceSettings extends Component {
               input={{
                 onChange: this.handleInputChange,
                 name: 'liabilityAuto',
-                value: liabilityAuto
+                value: liabilityAuto,
+                disabled: true
               }}
               placeholder="Auto Liability"
               type="text"
@@ -255,7 +258,8 @@ class InsuranceSettings extends Component {
               input={{
                 onChange: this.handleInputChange,
                 name: 'liabilityOther',
-                value: liabilityOther
+                value: liabilityOther,
+                disabled: true
               }}
               placeholder="Other Liability"
               type="text"
@@ -277,12 +281,13 @@ class InsuranceSettings extends Component {
               dateFormat="yyyy-MM-dd"
               meta={reqHandlerExp}
               placeholder="Liability expiration date"
+              disabled
             />
           </Col>
         </Row>
         <Row>
           <Col md={12} className="pt-4 text-right">
-            <Link to="/">
+            {/* <Link to="/">
               <Button className="mr-2">
               Cancel
               </Button>
@@ -292,7 +297,7 @@ class InsuranceSettings extends Component {
               onClick={this.saveCompany}
             >
               Save
-            </Button>
+            </Button> */}
           </Col>
         </Row>
       </Container>

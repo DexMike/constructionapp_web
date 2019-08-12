@@ -24,6 +24,7 @@ import BookingService from '../../api/BookingService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
+import LoadService from '../../api/LoadService';
 import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
@@ -69,7 +70,8 @@ class JobSavePage extends Component {
       selectedDrivers: [],
       accessForbidden: false,
       modalAddJob: false,
-      modalLiability: false
+      modalLiability: false,
+      activeDrivers: []
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -110,7 +112,7 @@ class JobSavePage extends Component {
       selectedDrivers,
       companyCarrier
     } = this.state;
-
+    let activeDrivers = [];
     try {
       profile = await ProfileService.getProfile();
 
@@ -203,6 +205,12 @@ class JobSavePage extends Component {
             //   bookingEq => bookingEq.bookingId === booking.id,
             //   booking
             // );
+            const driversResponse = await LoadService.getActiveDriversByBookingId(booking.id);
+            if (driversResponse && driversResponse.length > 0) {
+              driversResponse.map(driver => (
+                activeDrivers.push(driver.id)
+              ));
+            }
           }
 
           // Check if carrier is favorite for this job's customer
@@ -214,15 +222,31 @@ class JobSavePage extends Component {
             );
           }
 
-          let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-
-          drivers = drivers.map((driver) => {
-            if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
-              const newDriver = driver;
-              newDriver.checkboxDisabled = true;
-              return newDriver;
+          // let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          // console.log(207, drivers);
+          // drivers = drivers.map((driver) => {
+          //   if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+          //     const newDriver = driver;
+          //     newDriver.checkboxDisabled = true;
+          //     return newDriver;
+          //   }
+          //   return driver;
+          // });
+          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          let enabledDrivers = [];
+          Object.values(drivers).forEach((itm) => {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
+              enabledDrivers.push(itm);
             }
-            return driver;
+          });
+          // Setting id to driverId since is getting the userId and saving it as driverId
+          enabledDrivers = enabledDrivers.map((driver) => {
+            const newDriver = driver;
+            newDriver.id = newDriver.driverId;
+            if (activeDrivers.includes(newDriver.driverId)) {
+              newDriver.checkboxDisabled = true;
+            }
+            return newDriver;
           });
           this.setState({
             job,
@@ -233,7 +257,7 @@ class JobSavePage extends Component {
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers
+            drivers: enabledDrivers
           });
         }
       }
