@@ -214,7 +214,6 @@ class CreateJobFormOne extends PureComponent {
     // should load all addresses even if already set
     const profile = await ProfileService.getProfile();
     const response = await AddressService.getAddressesByCompanyId(profile.companyId);
-    console.log(217, response);
     const newItem = {
       id: 0,
       name: 'NEW ADDRESS',
