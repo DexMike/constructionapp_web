@@ -97,32 +97,7 @@ class TMap extends Component {
     });
     // Add the polyline to the map
     this.map.addObject(polyline);
-    let bounds = polyline.getBoundingBox(); // H.geo.Rect
-    // zoom out a little so the markers fit
-    const offsetFactor = 0.2;
-    const boundParams = {
-      top: bounds.getTop(),
-      left: bounds.getLeft(),
-      bottom: bounds.getBottom(),
-      right: bounds.getRight()
-    };
-    boundParams.top += (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
-      * offsetFactor);
-    boundParams.left -= (Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
-      * offsetFactor);
-    boundParams.bottom -= (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
-      * offsetFactor);
-    boundParams.right += (Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
-      * offsetFactor);
-    this.boundingBoxDistance = Math.sqrt((((boundParams.top - boundParams.bottom) ** 2))
-      + (((boundParams.left - boundParams.right) ** 2)));
-    console.log('expected' + this.boundingBoxDistance);
-    bounds = new H.geo.Rect(boundParams.top, boundParams.left, boundParams.bottom,
-      boundParams.right);
-    // And zoom to its bounding rectangle
-    this.map.getViewModel().setLookAtData({
-      bounds
-    });
+    // let bounds = polyline.getBoundingBox(); // H.geo.Rect
   }
 
   addMarkersToMap() {
@@ -135,8 +110,39 @@ class TMap extends Component {
       { size: { w: 35, h: 50 } });
     const markerB = new H.map.Marker({ lat: endAddress.latitude, lng: endAddress.longitude },
       { zIndex: 0, icon: pinBIcon });
-    this.map.addObject(markerA);
-    this.map.addObject(markerB);
+    const group = new H.map.Group();
+    group.addObjects([markerA, markerB]);
+    this.map.addObject(group);
+    let bounds = group.getBoundingBox(); // H.geo.Rect
+    // zoom out a little so the markers fit
+    const offsetFactor = 0.2;
+    let smallFactor = 0;
+    const boundParams = {
+      top: bounds.getTop(),
+      left: bounds.getLeft(),
+      bottom: bounds.getBottom(),
+      right: bounds.getRight()
+    };
+    if ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom) <= 0.0001))) {
+      smallFactor = 0.01;
+    }
+    boundParams.top += ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
+      + smallFactor) * offsetFactor);
+    boundParams.left -= ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
+      + smallFactor) * offsetFactor);
+    // not needed since bottom pin fits
+    // boundParams.bottom -= (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
+    //   * offsetFactor);
+    boundParams.right += ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
+      + smallFactor) * offsetFactor);
+    this.boundingBoxDistance = Math.sqrt((((boundParams.top - boundParams.bottom) ** 2))
+      + (((boundParams.left - boundParams.right) ** 2)));
+    bounds = new H.geo.Rect(boundParams.top, boundParams.left, boundParams.bottom,
+      boundParams.right);
+    // And zoom to its bounding rectangle
+    this.map.getViewModel().setLookAtData({
+      bounds
+    });
   }
 
   addGPSPoint(latitude, longitude) {
@@ -162,8 +168,8 @@ class TMap extends Component {
 
 TMap.propTypes = {
   id: PropTypes.string,
-  width: PropTypes.number,
-  height: PropTypes.number,
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   zoom: PropTypes.number,
   center: PropTypes.shape({
     lat: PropTypes.number,

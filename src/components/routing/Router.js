@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import MainWrapper from '../MainWrapper';
 import WrappedRoutes from './WrappedRoutes';
 import LoginPage from '../login/LoginPage';
+import HereTestPage from '../HereTestPage';
 
 class Router extends Component {
   render() {
@@ -12,6 +13,7 @@ class Router extends Component {
           <Switch>
             <Route exact path="/login" component={LoginPage}/>
             <Route path="/" component={WrappedRoutes}/>
+            {/*<Route path="/" component={HereTestPage}/>*/}
           </Switch>
         </main>
       </MainWrapper>

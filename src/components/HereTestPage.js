@@ -12,8 +12,6 @@ class HereTestPage extends Component {
         <Col md={6}>
           <TMap
             id="1"
-            width={410}
-            height={410}
             startAddress={startAddress}
             endAddress={endAddress}
           />
@@ -21,7 +19,7 @@ class HereTestPage extends Component {
         <Col md={6}>
           <TMap
             id="2"
-            width={410}
+            width="100%"
             height={410}
             startAddress={{latitude: 30.42935881, longitude: -97.74502295}}
             endAddress={{latitude: 30.3568157, longitude: -97.73729526}}
