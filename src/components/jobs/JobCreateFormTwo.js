@@ -186,7 +186,7 @@ class JobCreateFormTwo extends PureComponent {
     for (const truck of trucks) {
       const equipmentMaterial = {
         jobId,
-        equipmentMaterialId: Number(truck.value)
+        equipmentTypeId: Number(truck.value)
       };
       allTrucks.push(equipmentMaterial);
     }
