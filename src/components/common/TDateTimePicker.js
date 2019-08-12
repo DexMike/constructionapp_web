@@ -21,35 +21,35 @@ class TDateTimePickerField extends PureComponent {
     let dueDate = 0;
     const profile = await ProfileService.getProfile();
 
-    console.log(input);
-
     if (input.value) {
-      const parsedDate = new Date(input.value);
+      let parsedDate = new Date(input.value);
       startDate = parsedDate;
-      // startDate and EndDate were added for common datepicker values
-      if (input.value.jobDate) {
-        // dueDate = input.value.jobDate.getTime();
-        const parsedDate = new Date(input.value.jobDate);
-        startDate = parsedDate;
+      if (Object.prototype.toString.call(input.value) !== '[object Date]') {
+        // startDate and EndDate were added for common datepicker values
+        if (input.value.jobDate) {
+          // dueDate = input.value.jobDate.getTime();
+          parsedDate = new Date(input.value.jobDate);
+          startDate = parsedDate;
+        }
+        if (input.value.endDate) {
+          dueDate = input.value.endDate.getTime();
+          parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+        // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
+        if (input.value.startDateComp) {
+          dueDate = input.value.startDateComp.getTime();
+          parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+        if (input.value.endDateComp) {
+          dueDate = input.value.endDateComp.getTime();
+          parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+      } else {
+        startDate = input.value;
       }
-      if (input.value.endDate) {
-        dueDate = input.value.endDate.getTime();
-        const parsedDate = new Date(dueDate);
-        startDate = parsedDate;
-      }
-      // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
-      if (input.value.startDateComp) {
-        dueDate = input.value.startDateComp.getTime();
-        const parsedDate = new Date(dueDate);
-        startDate = parsedDate;
-      }
-      if (input.value.endDateComp) {
-        dueDate = input.value.endDateComp.getTime();
-        const parsedDate = new Date(dueDate);
-        startDate = parsedDate;
-      }
-
-      console.log(startDate);
 
       const timeZonedStartDate = new Date(moment(startDate).tz(
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -60,30 +60,39 @@ class TDateTimePickerField extends PureComponent {
 
   // ComponentWillReceiveProps was added in order to change the
   // datePicker date from a given props value.
-  componentWillReceiveProps(props) {
+  async componentWillReceiveProps(props) {
+    let { startDate } = this.state;
+    const profile = await ProfileService.getProfile();
     let dueDate = 0;
 
     if (props.input.value) {
+      let parsedDate = new Date(props.input.value);
+      startDate = parsedDate;
       if (props.input.value.givenDate) {
         // dueDate = props.input.value.startDate.getTime();
-        const parsedDate = new Date(props.input.value.givenDate);
-        this.setState({ startDate: parsedDate });
+        parsedDate = new Date(props.input.value.givenDate);
+        // this.setState({ startDate: parsedDate });
       }
       if (props.input.value.endDate) {
         dueDate = props.input.value.endDate.getTime();
-        const parsedDate = new Date(dueDate);
-        this.setState({ startDate: parsedDate });
+        parsedDate = new Date(dueDate);
+        // this.setState({ startDate: parsedDate });
       }
       if (props.input.value.startDateComp) {
         dueDate = props.input.value.startDateComp.getTime();
-        const parsedDate = new Date(dueDate);
-        this.setState({ startDate: parsedDate });
+        parsedDate = new Date(dueDate);
+        // this.setState({ startDate: parsedDate });
       }
       if (props.input.value.endDateComp) {
         dueDate = props.input.value.endDateComp.getTime();
-        const parsedDate = new Date(dueDate);
-        this.setState({ startDate: parsedDate });
+        parsedDate = new Date(dueDate);
+        // this.setState({ startDate: parsedDate });
       }
+
+      const timeZonedStartDate = new Date(moment(startDate).tz(
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).format('YYYY-MM-DD HH:mm:ss'));
+      this.setState({ startDate: timeZonedStartDate });
     }
   }
 
@@ -132,7 +141,10 @@ TDateTimePickerField.propTypes = {
   input: PropTypes.shape({
     onChange: PropTypes.func,
     name: PropTypes.string,
-    value: PropTypes.object
+    value: PropTypes.oneOfType([
+      PropTypes.object,
+      PropTypes.number
+    ])
   }).isRequired,
   dateFormat: PropTypes.string,
   timeFormat: PropTypes.string,

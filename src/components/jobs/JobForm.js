@@ -5,7 +5,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
 // import HEREMap, { Marker, RouteLine } from 'here-maps-react';
-import HEREMap, { Marker, RouteLine } from '../../utils/here-maps-react';
+import { HEREMap, RouteLine } from '../../utils/here-maps-react';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -15,6 +15,8 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+import pinA from '../../img/PinA.png';
+import pinB from '../../img/PinB.png';
 // import GeoCodingService from '../../api/GeoCodingService';
 
 /*
@@ -73,7 +75,7 @@ class JobForm extends Component {
       shape: {},
       timeAndDistance: '',
       instructions: [],
-      markersGroup: {}
+      markersGroup: []
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -89,14 +91,12 @@ class JobForm extends Component {
     let {
       loads,
       carrier,
-      images
+      images,
+      markersGroup
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
-    let distance = 0;
-    let time = 0;
-    let group = [];
 
     const platform = new H.service.Platform({
       apikey: hereMapsApiKey,
@@ -119,17 +119,34 @@ class JobForm extends Component {
         metricSystem: 'imperial',
         language: 'en-us' // en-us|es-es|de-de
       };
-
+      const pinAIcon = new H.map.Icon(pinA, {
+        size: {
+          w: 35,
+          h: 50
+        }
+      });
       const originMarker = new H.map.Marker({
         lat: startPoint.latitude,
         lng: startPoint.longitude
+      }, {
+        zIndex: 0,
+        icon: pinAIcon
+      });
+      const pinBIcon = new H.map.Icon(pinB, {
+        size: {
+          w: 35,
+          h: 50
+        }
       });
       const destinationMarker = new H.map.Marker({
         lat: endPoint.latitude,
         lng: endPoint.longitude
+      }, {
+        zIndex: 0,
+        icon: pinBIcon
       });
-      group = new H.map.Group();
-      group.addObjects([originMarker, destinationMarker]);
+      markersGroup = new H.map.Group();
+      markersGroup.addObjects([originMarker, destinationMarker]);
 
       const router = platform.getRoutingService();
       router.calculateRoute(
@@ -139,18 +156,6 @@ class JobForm extends Component {
       );
     }
 
-    try {
-      // TODO -> do this without MapBox
-      /*
-      const response = await GeoCodingService
-        .getDistance(startPoint.longitude, startPoint.latitude,
-          endPoint.longitude, endPoint.latitude);
-      distance = response.routes[0].distance;
-      time = response.routes[0].duration;
-      */
-    } catch (e) {
-      // console.log(e)
-    }
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
@@ -177,12 +182,10 @@ class JobForm extends Component {
       loaded: true,
       loads,
       job,
-      distance,
-      time,
       cachedOrigin: startPoint,
       cachedDestination: endPoint,
       profile,
-      markersGroup: group
+      markersGroup
     });
   }
 
@@ -221,6 +224,8 @@ class JobForm extends Component {
     this.setState({
       showMainMap: true,
       shape: route.shape,
+      distance: route.summary.distance,
+      time: route.summary.travelTime,
       timeAndDistance: `Travel time and distance: ${route.summary.text}`,
       instructions: route.leg[0]
     });
@@ -330,6 +335,39 @@ class JobForm extends Component {
     return false;
   }
 
+  renderMinimumInsurance() {
+    const { job } = this.state;
+    const { company } = job;
+    let liabilityGeneral;
+    let liabilityAuto;
+    if (company.liabilityGeneral > 0.01) {
+      liabilityGeneral = (
+        <React.Fragment>
+          Minimum General Liability: {TFormat.asMoneyNoDecimals(company.liabilityGeneral)}
+          <br/>
+        </React.Fragment>
+      );
+    }
+    if (company.liabilityAuto > 0.01) {
+      liabilityAuto = (
+        <React.Fragment>
+          Minimum Auto Liability: {TFormat.asMoneyNoDecimals(company.liabilityAuto)}
+          <br/>
+        </React.Fragment>
+      );
+    }
+
+    if (company.liabilityGeneral < 0.01 && company.liabilityAuto < 0.01) {
+      return false;
+    }
+    return (
+      <React.Fragment>
+        {liabilityGeneral}
+        {liabilityAuto}
+      </React.Fragment>
+    );
+  }
+
   renderJobTop(job) {
     const { profile, companyType, carrier } = this.state;
 
@@ -363,6 +401,7 @@ class JobForm extends Component {
           Producer: {job.company.legalName}
           {this.renderPhone(showPhone)}
           <br/>
+          {this.renderMinimumInsurance()}
           Number of Trucks: {job.numEquipments}
           <br/>
           Truck Type: {job.equipmentType}
@@ -386,7 +425,7 @@ class JobForm extends Component {
                 ? 'Total'
                 : 'Potential'
             }
-            &nbsp;Earnings:
+            &nbsp;Earnings:&nbsp;
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }
@@ -706,8 +745,6 @@ class JobForm extends Component {
     const {
       showMainMap,
       shape,
-      cachedOrigin,
-      cachedDestination,
       markersGroup
     } = this.state;
 
@@ -723,7 +760,6 @@ class JobForm extends Component {
           appId="FlTEFFbhzrFwU1InxRgH"
           appCode="gTgJkC9u0YWzXzvjMadDzQ"
           center={center}
-          zoom={14}
           setLayer={opts}
           hidpi={false}
           interactive
@@ -731,7 +767,7 @@ class JobForm extends Component {
         >
           <RouteLine
             shape={shape}
-            strokeColor="purple"
+            strokeColor="blue"
             lineWidth="4"
           />
           {/* // If markersGroup exists, do not send markers

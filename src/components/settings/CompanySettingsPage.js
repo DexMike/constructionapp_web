@@ -58,6 +58,7 @@ class CompanySettingsPage extends Component {
         user,
         address,
         isAdmin,
+        profile,
         loaded: true
       });
     }
@@ -131,7 +132,7 @@ class CompanySettingsPage extends Component {
   }
 
   renderTabs() {
-    const { activeTab, user, company, address, isAdmin } = this.state;
+    const { activeTab, user, company, address, isAdmin, profile } = this.state;
     return (
       <div>
         <Nav tabs>
@@ -220,7 +221,8 @@ class CompanySettingsPage extends Component {
           </TabPane>
           <TabPane tabId="5">
             <InsuranceSettings
-              companyId={company.id}
+              company={company}
+              profile={profile}
             />
           </TabPane>
         </TabContent>

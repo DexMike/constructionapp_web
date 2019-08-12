@@ -29,7 +29,8 @@ class CompanyProfile extends Component {
       url: '',
       fax: '',
       rating: 0,
-      type: '0'
+      type: '0',
+      dotNumber: ''
     };
 
     const address = {

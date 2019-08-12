@@ -46,6 +46,7 @@ class JobCreateFormTwo extends PureComponent {
     this.saveJobMaterials = this.saveJobMaterials.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.saveJob = this.saveJob.bind(this);
+    this.saveJobTrucks = this.saveJobTrucks.bind(this);
     this.saveJobDraft = this.saveJobDraft.bind(this);
   }
 
@@ -121,9 +122,9 @@ class JobCreateFormTwo extends PureComponent {
 
   async saveJobDraft() {
     this.setState({ btnSubmitting: true });
-    const { firstTabData, saveJobDraft } = this.props;
+    const { firstTabData, saveJobDraftOrCopy } = this.props;
     const d = firstTabData();
-    saveJobDraft(d);
+    saveJobDraftOrCopy(d);
   }
 
   isFormValid() {
@@ -179,6 +180,19 @@ class JobCreateFormTwo extends PureComponent {
     }
   }
 
+  // let's create a list of truck types that we want to save
+  async saveJobTrucks(jobId, trucks) {
+    const allTrucks = [];
+    for (const truck of trucks) {
+      const equipmentMaterial = {
+        jobId,
+        equipmentMaterialId: Number(truck.value)
+      };
+      allTrucks.push(equipmentMaterial);
+    }
+    await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+  }
+
   async saveJob() {
     const { updateJob } = this.props;
     this.setState({ btnSubmitting: true });
@@ -187,7 +201,7 @@ class JobCreateFormTwo extends PureComponent {
       this.setState({ btnSubmitting: false });
       return;
     }
-    const { firstTabData } = this.props;
+    const { firstTabData, copyJob } = this.props;
     const {
       favoriteCompanies,
       showSendtoFavorites,
@@ -260,11 +274,11 @@ class JobCreateFormTwo extends PureComponent {
     if (d.selectedRatedHourOrTon === 'ton') {
       rateType = 'Ton';
       rate = Number(d.rateByTonValue);
-      d.rateEstimate = d.estimatedTons;
+      d.rateEstimate = d.rateEstimate;
     } else {
       rateType = 'Hour';
       rate = Number(d.rateByHourValue);
-      d.rateEstimate = d.estimatedHours;
+      d.rateEstimate = d.rateEstimate;
     }
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
@@ -286,8 +300,8 @@ class JobCreateFormTwo extends PureComponent {
     d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
 
     let newJob = [];
-    let jobCopy = false;
-    if (job && Object.keys(job).length > 0) { // Job exists, from a 'Saved' job
+    let savedJob = false;
+    if (job && Object.keys(job).length > 0 && !copyJob) { // Job exists, from a 'Saved' job
       job = {
         id: job.id,
         companiesId: profile.companyId,
@@ -300,19 +314,20 @@ class JobCreateFormTwo extends PureComponent {
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
         ).utc().format(),
-        equipmentType: d.truckType,
+        equipmentType: '',
         numEquipments: d.hourTrucksNumber,
         rateType,
         rate,
         rateEstimate: d.rateEstimate,
         rateTotal,
         notes: d.instructions,
+        createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
         modifiedOn: moment.utc().format()
       };
 
       newJob = await JobService.updateJob(job);
-      jobCopy = true;
+      savedJob = true;
     } else { // new job
       job = {
         companiesId: profile.companyId,
@@ -325,7 +340,7 @@ class JobCreateFormTwo extends PureComponent {
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
         ).utc().format(),
-        equipmentType: d.truckType.value,
+        equipmentType: d.truckType.value ? d.truckType.value : d.truckType,
         numEquipments: d.hourTrucksNumber,
         rateType,
         rate,
@@ -347,6 +362,9 @@ class JobCreateFormTwo extends PureComponent {
     if (newJob) {
       if (d.selectedMaterials) { // check if there's materials to add
         this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+      }
+      if (Object.keys(d.selectedTrucks).length > 0) {
+        this.saveJobTrucks(newJob.id, d.selectedTrucks);
       }
     }
 
@@ -405,7 +423,12 @@ class JobCreateFormTwo extends PureComponent {
     }
 
     const { onClose } = this.props;
-    if (jobCopy) { // if we're saving from a copy of a job we have to update the view
+    if (savedJob) { // we have to update the view
+      updateJob(newJob);
+    }
+
+    if (copyJob) { // we're making a duplicate of a job we have to update the view
+      newJob.copiedJob = true;
       updateJob(newJob);
     }
     onClose();
@@ -541,15 +564,6 @@ class JobCreateFormTwo extends PureComponent {
                     </Button>
                   </ButtonToolbar>
                   <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                    {job.status !== 'Saved' && (
-                      <Button
-                        color="outline-primary"
-                        className="next"
-                        onClick={this.saveJobDraft}
-                      >
-                        Save Job
-                      </Button>
-                    )}
                     <TSubmitButton
                       onClick={this.saveJob}
                       className="primaryButton"
@@ -584,12 +598,14 @@ JobCreateFormTwo.propTypes = {
   firstTabData: PropTypes.func.isRequired,
   jobId: PropTypes.number,
   updateJob: PropTypes.func,
-  saveJobDraft: PropTypes.func.isRequired
+  saveJobDraftOrCopy: PropTypes.func.isRequired,
+  copyJob: PropTypes.bool
 };
 
 JobCreateFormTwo.defaultProps = {
   jobId: null,
-  updateJob: null
+  updateJob: null,
+  copyJob: false
 };
 
 export default JobCreateFormTwo;

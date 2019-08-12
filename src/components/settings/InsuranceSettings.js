@@ -51,15 +51,13 @@ class InsuranceSettings extends Component {
   }
 
   async componentDidMount() {
-    const { companyId } = this.props;
-    await this.setCompany(companyId);
-    const profile = await ProfileService.getProfile();
+    await this.setCompany();
+    const { profile } = this.props;
     this.setState({ profile });
   }
 
-  async setCompany(companyId) {
-    const company = await CompanyService.getCompanyById(companyId);
-    console.log(company);
+  setCompany() {
+    const { company } = this.props;
     this.setState({
       liabilityGeneral: company.liabilityGeneral,
       liabilityAuto: company.liabilityAuto,
@@ -184,17 +182,17 @@ class InsuranceSettings extends Component {
     updatedCompany.liabilityExpiration = liabilityExpiration;
     updatedCompany.modifiedOn = moment.utc().format();
     updatedCompany.modifiedBy = profile.userId;
-    console.log(company);
 
     try {
       await CompanyService.updateCompany(updatedCompany);
-      console.log('Updated');
+      // console.log('Updated');
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     }
   }
 
   render() {
+    const { profile } = this.props;
     const {
       liabilityGeneral,
       liabilityAuto,
@@ -218,7 +216,7 @@ class InsuranceSettings extends Component {
           <Col md={12}>&nbsp;</Col>
           <Col md={6}>
             <span>
-              General Liability
+              {profile.companyType !== 'Carrier' ? 'Minimum ' : ''}General Liability
             </span>
             <TField
               className="settings-input"
@@ -234,7 +232,7 @@ class InsuranceSettings extends Component {
           </Col>
           <Col md={6}>
             <span>
-              Auto Liability
+              {profile.companyType !== 'Carrier' ? 'Minimum ' : ''}Auto Liability
             </span>
             <TField
               input={{
@@ -251,7 +249,7 @@ class InsuranceSettings extends Component {
         <Row className="pt-2">
           <Col md={6}>
             <span>
-              Other Liability
+              {profile.companyType !== 'Carrier' ? 'Minimum ' : ''}Other Liability
             </span>
             <TField
               input={{
@@ -264,8 +262,6 @@ class InsuranceSettings extends Component {
               meta={reqHandlerOther}
             />
           </Col>
-        </Row>
-        <Row className="pt-2">
           <Col md={6}>
             <span>Expiration Date:</span>
             <TDateTimePicker
@@ -305,11 +301,10 @@ class InsuranceSettings extends Component {
 }
 
 InsuranceSettings.propTypes = {
-  companyId: PropTypes.number
+  company: PropTypes.objectOf(PropTypes.object).isRequired,
+  profile: PropTypes.objectOf(PropTypes.object).isRequired
 };
 
-InsuranceSettings.defaultProps = {
-  companyId: 0
-};
+InsuranceSettings.defaultProps = {};
 
 export default InsuranceSettings;
