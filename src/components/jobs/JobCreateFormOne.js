@@ -251,15 +251,8 @@ class CreateJobFormOne extends PureComponent {
           label: material.val1
         }));
 
-        let jobDate = null;
-        if (p.startTime) {
-          jobDate = new Date(moment(p.startTime).tz(
-            profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-          ).format('YYYY-MM-DD HH:mm:ss'));
-        }
-
         this.setState({
-          jobDate,
+          // jobDate,
           allMaterials,
           allTruckTypes
         });
@@ -278,7 +271,7 @@ class CreateJobFormOne extends PureComponent {
           selectedEndAddressId: p.endAddress,
           selectedStartAddressId: p.startAddress,
           // date
-          jobDate,
+          jobDate: p.startTime,
           // job properties
           name: p.name,
           instructions: p.notes || '',
@@ -523,7 +516,7 @@ class CreateJobFormOne extends PureComponent {
   handleTruckTypeChange(data) {
     const { reqHandlerTruckType } = this.state;
     this.setState({
-      reqTrucks: {...reqHandlerTruckType, touched: false}
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
     });
     this.setState({selectedTrucks: data});
   }
