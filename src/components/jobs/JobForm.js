@@ -62,6 +62,7 @@ class JobForm extends Component {
     this.state = {
       ...job,
       images: [],
+      company: [],
       carrier: null,
       coords: null,
       loads: [],
@@ -92,7 +93,8 @@ class JobForm extends Component {
       loads,
       carrier,
       images,
-      markersGroup
+      markersGroup,
+      company
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
@@ -159,6 +161,7 @@ class JobForm extends Component {
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
+    company = await CompanyService.getCompanyById(job.companiesId);
     if (bookings.length > 0) {
       const bookingEquipments = await BookingEquipmentService
         .getBookingEquipmentsByBookingId(bookings[0].id);
@@ -185,6 +188,7 @@ class JobForm extends Component {
       cachedOrigin: startPoint,
       cachedDestination: endPoint,
       profile,
+      company,
       markersGroup
     });
   }
@@ -336,8 +340,7 @@ class JobForm extends Component {
   }
 
   renderMinimumInsurance() {
-    const { job } = this.state;
-    const { company } = job;
+    const { company } = this.state;
     let liabilityGeneral;
     let liabilityAuto;
     if (company.liabilityGeneral > 0.01) {

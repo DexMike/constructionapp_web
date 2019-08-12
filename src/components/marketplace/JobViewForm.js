@@ -105,7 +105,9 @@ class JobViewForm extends Component {
       }
     }
     if (job) {
-      companyCarrier = await CompanyService.getCompanyById(profile.companyId);
+      if (profile.companyType === 'Carrier') {
+        companyCarrier = await CompanyService.getCompanyById(profile.companyId);
+      }
       company = await CompanyService.getCompanyById(job.companiesId);
       startAddress = await AddressService.getAddressById(job.startAddress);
       endAddress = null;
