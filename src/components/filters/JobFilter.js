@@ -414,7 +414,6 @@ class JobFilter extends Component {
     });
   }
 
-  //AQUI ME QUEDO< HAY QUE ADAPTAR ESTE FILTRO AL NUEVO MULTI
   handleMultiTruckChange(data) {
     const {filters} = this.state;
     filters.equipmentType = data;
