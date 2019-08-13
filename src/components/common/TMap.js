@@ -24,7 +24,7 @@ class TMap extends Component {
   }
 
   componentDidMount() {
-    const { zoom, center, id, startAddress, endAddress } = this.props;
+    const { zoom, center, id, startAddress, endAddress, trackings } = this.props;
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
@@ -39,18 +39,28 @@ class TMap extends Component {
     // Create the default UI components
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
     if (startAddress && endAddress) {
-      this.calculateRouteFromAtoB();
+      if (trackings && trackings.length > 0) {
+        const lineString = new H.geo.LineString();
+        for (const tracking of trackings) {
+          // this.addGPSPoint(tracking[1], tracking[0]);
+          lineString.pushPoint({lat: tracking[1], lng: tracking[0]});
+        }
+        this.map.addObject(new H.map.Polyline(
+          lineString, { style: { lineWidth: 4 }}
+        ));
+      } else {
+        this.calculateRouteFromAtoB();
+      }
       this.addMarkersToMap();
     }
   }
 
   onRouteSuccess(result) {
-    const { trackings } = this.props;
     const route = result.response.route[0];
     this.addRouteShapeToMap(route);
-    for (const tracking of trackings) {
-      this.addGPSPoint(tracking[1], tracking[0]);
-    }
+    // for (const tracking of trackings) {
+    //   this.addGPSPoint(tracking[1], tracking[0]);
+    // }
   }
 
   onRouteError(error) {
