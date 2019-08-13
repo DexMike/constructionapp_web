@@ -54,7 +54,7 @@ class CreateJobFormOne extends PureComponent {
       rateByHourValue: 0,
       estimatedHours: 0,
       isRatedHour: true,
-      selectedRatedHourOrTon: '',
+      selectedRatedHourOrTon: 'hour',
       tonnage: 0, // estimated amount of tonnage
       rateEstimate: 0,
       hourTrucksNumber: '',
@@ -260,7 +260,7 @@ class CreateJobFormOne extends PureComponent {
           job: p,
           userCompanyId: p.userCompanyId,
           // truck properties
-          truckType: p.equipmentType,
+          // truckType: p.equipmentType,
           selectedMaterials: selectedMaterial,
           // rates
           rate: p.rate,
@@ -280,7 +280,8 @@ class CreateJobFormOne extends PureComponent {
           selectedRatedHourOrTon: p.rateType.toLowerCase(),
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
-          rateEstimate: p.rateEstimate
+          rateEstimate: p.rateEstimate,
+          selectedTrucks: p.selectedTrucks
         });
       } else if (copyJob) { // We're trying to Copy an existing job
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id ? p.id : p.jobId);
@@ -311,16 +312,6 @@ class CreateJobFormOne extends PureComponent {
           ).format('YYYY-MM-DD HH:mm:ss'));
         }
 
-        let truckType = '';
-        if (p.truckType && p.truckType.value) {
-          truckType = p.truckType;
-        } else {
-          truckType = {
-            label: p.equipmentType,
-            value: p.equipmentType
-          };
-        }
-
         this.setState({
           jobDate,
           allMaterials,
@@ -330,7 +321,7 @@ class CreateJobFormOne extends PureComponent {
           jobId: p.id,
           userCompanyId: p.userCompanyId,
           // truck properties
-          truckType,
+          // truckType,
           capacity: p.capacity || 0,
           selectedMaterials: selectedMaterial,
           // rates
@@ -368,7 +359,8 @@ class CreateJobFormOne extends PureComponent {
             ? p.rateType.toLowerCase() : p.selectedRatedHourOrTon.toLowerCase(),
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
-          rateEstimate: p.rateEstimate
+          rateEstimate: p.rateEstimate,
+          selectedTrucks: p.selectedTrucks
         });
       } else { // We are coming from the second tab
         // TODO -> There should be a way to map directly to state
@@ -376,7 +368,7 @@ class CreateJobFormOne extends PureComponent {
         this.setState({
           userCompanyId: p.userCompanyId,
           // truck properties
-          truckType: typeof p.truckType.value !== 'undefined' ? p.truckType.value : p.truckType,
+          // truckType: typeof p.truckType.value !== 'undefined' ? p.truckType.value : p.truckType,
           allTruckTypes: p.allTruckTypes,
           capacity: p.capacity,
           allMaterials: p.allMaterials,
@@ -417,7 +409,8 @@ class CreateJobFormOne extends PureComponent {
           selectedRatedHourOrTon: p.selectedRatedHourOrTon,
           rateByTonValue: p.rateByTonValue,
           rateByHourValue: p.rateByHourValue,
-          rateEstimate: p.rateEstimate
+          rateEstimate: p.rateEstimate,
+          selectedTrucks: p.selectedTrucks
         });
       }
     } else {
@@ -1359,49 +1352,6 @@ class CreateJobFormOne extends PureComponent {
       });
       isValid = false;
     }
-    /* if (selectedRatedHourOrTon === 'ton') {
-      if (rateByTonValue <= 0) {
-        this.setState({
-          reqHandlerTons: {
-            ...reqHandlerTons,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
-      if (estimatedTons <= 0) {
-        this.setState({
-          reqHandlerEstimatedTons: {
-            ...reqHandlerEstimatedTons,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
-    } else if (selectedRatedHourOrTon === 'hour') {
-      if (rateByHourValue <= 0) {
-        this.setState({
-          reqHandlerHours: {
-            ...reqHandlerHours,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
-      if (estimatedHours <= 0) {
-        this.setState({
-          reqHandlerEstimatedHours: {
-            ...reqHandlerEstimatedHours,
-            touched: true,
-            error: 'Required input'
-          }
-        });
-        isValid = false;
-      }
-    } */
 
     return isValid;
   }
