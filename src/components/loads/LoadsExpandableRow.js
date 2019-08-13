@@ -6,7 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
 // import UserService from '../../api/UserService';
-import HEREMap, { RouteLine } from '../../utils/here-maps-react';
+// import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -15,6 +15,7 @@ import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
 import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
+import TMap from '../common/TMap';
 
 const routeFeatureWeightType = 0;
 const center = {
@@ -138,7 +139,7 @@ class LoadsExpandableRow extends Component {
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
     this.setState({
-      // gpsTrackings,
+      gpsTrackings,
       loadInvoices,
       disputeEmail,
       profile
@@ -277,12 +278,24 @@ class LoadsExpandableRow extends Component {
         loadStatus,
         index,
         driver,
-        // gpsTrackings,
+        gpsTrackings,
         loadInvoices,
         profile,
-        job,
-        shape
+        job
       } = {...this.state};
+      let startCoords = job.startAddress;
+      let endCoords = job.endAddress;
+      // if there are tracking points use those instead of job address.
+      if(gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
+        startCoords = {
+          latitude: gpsTrackings[0][1],
+          longitude: gpsTrackings[0][0]
+        };
+        endCoords = {
+          latitude: gpsTrackings[gpsTrackings.length - 1][1],
+          longitude: gpsTrackings[gpsTrackings.length - 1][0]
+        };
+      }
 
       const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
@@ -393,7 +406,14 @@ class LoadsExpandableRow extends Component {
                   </Row>
                   <Row>
                     <Col md={4}>
-                      {this.renderMap(shape)}
+                      <TMap
+                        id={`load${load.id}`}
+                        width="100%"
+                        height={400}
+                        startAddress={startCoords}
+                        endAddress={endCoords}
+                        trackings={gpsTrackings}
+                      />
                     </Col>
                     <Col md={4}>
                       {loadInvoices.map(item => (

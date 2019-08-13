@@ -5,7 +5,7 @@ import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
 // import HEREMap, { Marker, RouteLine } from 'here-maps-react';
-import { HEREMap, RouteLine } from '../../utils/here-maps-react';
+// import { HEREMap, RouteLine } from '../../utils/here-maps-react';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -15,8 +15,9 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
-import pinA from '../../img/PinA.png';
-import pinB from '../../img/PinB.png';
+// import pinA from '../../img/PinA.png';
+// import pinB from '../../img/PinB.png';
+import TMap from '../common/TMap';
 // import GeoCodingService from '../../api/GeoCodingService';
 
 /*
@@ -121,31 +122,17 @@ class JobForm extends Component {
         metricSystem: 'imperial',
         language: 'en-us' // en-us|es-es|de-de
       };
-      const pinAIcon = new H.map.Icon(`${window.location.origin}/${pinA}`, {
-        size: {
-          w: 35,
-          h: 50
-        }
-      });
       const originMarker = new H.map.Marker({
         lat: startPoint.latitude,
         lng: startPoint.longitude
       }, {
-        zIndex: 0,
-        icon: pinAIcon
-      });
-      const pinBIcon = new H.map.Icon(`${window.location.origin}/${pinB}`, {
-        size: {
-          w: 35,
-          h: 50
-        }
+        zIndex: 0
       });
       const destinationMarker = new H.map.Marker({
         lat: endPoint.latitude,
         lng: endPoint.longitude
       }, {
-        zIndex: 0,
-        icon: pinBIcon
+        zIndex: 0
       });
       markersGroup = new H.map.Group();
       markersGroup.addObjects([originMarker, destinationMarker]);
@@ -832,8 +819,13 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
-                  {/* NOTE seems like we dont need overlayMapData or coords */}
-                  {this.renderHereMap(overlayMapData, coords)}
+                  <TMap
+                    id={`job${job.id}`}
+                    width="100%"
+                    height="100%"
+                    startAddress={job.startAddress}
+                    endAddress={job.endAddress}
+                  />
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -876,7 +868,13 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
-                  {this.renderHereMap(null, null)}
+                  <TMap
+                    id={`job${job.id}`}
+                    width="100%"
+                    height="100%"
+                    startAddress={job.startAddress}
+                    endAddress={job.endAddress}
+                  />
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -918,7 +916,13 @@ class JobForm extends Component {
             }}
             >
               <div className="col-md-8" style={{ padding: 0 }}>
-                {this.renderHereMap(null, null)}
+                <TMap
+                  id={`job${job.id}`}
+                  width="100%"
+                  height="100%"
+                  startAddress={job.startAddress}
+                  endAddress={job.endAddress}
+                />
               </div>
               <div className="col-md-4">
                 <div className="row">
