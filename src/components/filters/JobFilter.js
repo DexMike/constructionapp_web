@@ -503,7 +503,7 @@ class JobFilter extends Component {
                         endDate={intervals.endInterval}
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
-                        dateFormat="MM/dd/yy"
+                        dateFormat="m/d/Y"
                       />
                     </Col>
                     <Col md="1">
