@@ -12,6 +12,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import CompanySettingsService from '../../api/CompanySettingsService';
 import LookupsService from '../../api/LookupsService';
+import TSpinner from '../common/TSpinner';
 
 import './Settings.css';
 
@@ -25,7 +26,10 @@ class CompanyNotifications extends Component {
       rateTypes: [],
       companyEquipments: ['Any'],
       companyMaterials: ['Any'],
-      companyOperatingRange: 0
+      companyOperatingRange: 0,
+      loading: false,
+      alert: false,
+      error: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -67,10 +71,9 @@ class CompanyNotifications extends Component {
 
   async fetchLookupsValues() {
     const lookups = await LookupsService.getLookups();
-
     let rateTypes = [];
-    const equipmentTypes = [];
-    const materialTypes = [];
+    const equipmentTypes = ['Any'];
+    const materialTypes = ['Any'];
     Object.values(lookups)
       .forEach((itm) => {
         if (itm.key === 'RateType') rateTypes.push(itm);
@@ -83,12 +86,12 @@ class CompanyNotifications extends Component {
       label: `${rate.val1}`
     }));
 
-    let index = equipmentTypes.indexOf('Any');
-    equipmentTypes.splice(index, 1);
-    equipmentTypes.push('Any');
-    index = materialTypes.indexOf('Any');
-    materialTypes.splice(index, 1);
-    materialTypes.push('Any');
+    // let index = equipmentTypes.indexOf('Any');
+    // equipmentTypes.splice(index, 1);
+    // equipmentTypes.push('Any');
+    // index = materialTypes.indexOf('Any');
+    // materialTypes.splice(index, 1);
+    // materialTypes.push('Any');
 
     this.setState({
       equipmentTypes,
@@ -220,14 +223,28 @@ class CompanyNotifications extends Component {
   }
 
   async saveCompanyNotificationsSettings() {
+    this.setState({
+      loading: true
+    });
     const {company} = this.props;
     const newSettings = this.createNewCompanyNotifications();
+    let alert = false;
+    let error = false;
     try {
       await CompanySettingsService.updateCompanySettings(newSettings, company.id);
-    } catch (error) {
-      // console.log(error);
+      alert = true;
+      error = false;
+    } catch (e) {
+      alert = true;
+      error = true;
     }
+    this.setState({
+      loading: false,
+      alert,
+      error
+    });
     await this.fetchCompanySettings(company.id);
+    window.scrollTo(0, 0);
   }
 
   renderCompanyPreferences() {
@@ -361,6 +378,7 @@ class CompanyNotifications extends Component {
   }
 
   render() {
+    const { alert, error, loading } = this.state;
     return (
       <Container>
         <Row className="tab-content-header">
@@ -375,6 +393,35 @@ class CompanyNotifications extends Component {
             <span className="sub-header">Job Preferences</span>
           </Col>
         </Row>
+        <Row>
+          <Col>
+            {
+              alert && (
+                <div className={`alert alert-${error ? 'danger' : 'success'} p-2`} role="alert" style={{ width: '100%', color: '#FFF', marginTop: 16, borderLeft: 5, borderLeftColor: 'red' }}>
+                  {
+                    !error ? (
+                      <span style={{ width: '70%' }}>
+                        <span className="lnr lnr-checkmark-circle"/>
+                        &nbsp;Preferences Updated!
+                      </span>
+                    ) : (
+                      <span style={{ width: '70%' }}>
+                        <span className="lnr lnr-cross-circle"/>
+                        &nbsp;Error!
+                        &nbsp;The information couldn&apos;t be saved. Please try again...
+                      </span>
+                    )
+                  }
+                  <div className="text-right" style={{ width: '30%' }}>
+                    <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={() => this.setState({ alert: false })}>
+                      <span className="lnr lnr-cross"/>
+                    </button>
+                  </div>
+                </div>
+              )
+            }
+          </Col>
+        </Row>
         {this.renderCompanyPreferences()}
         <Row>
           <Col md={12} className="pt-4 text-right">
@@ -384,10 +431,20 @@ class CompanyNotifications extends Component {
               </Button>
             </Link>
             <Button
+              disabled={loading}
+              active={loading}
               color="primary"
               onClick={this.saveCompanyNotificationsSettings}
             >
-              Save
+              {
+                loading ? (
+                  <TSpinner
+                    color="#808080"
+                    loaderSize={10}
+                    loading
+                  />
+                ) : 'Save'
+              }
             </Button>
           </Col>
         </Row>
