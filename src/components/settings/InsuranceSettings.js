@@ -278,9 +278,8 @@ class InsuranceSettings extends Component {
                 }
               }
               onChange={this.jobDateChange}
-              dateFormat="yyyy-MM-dd"
               meta={reqHandlerExp}
-              placeholder="Liability expiration date"
+              placeholderDate={liabilityExpiration}
               disabled
             />
           </Col>
