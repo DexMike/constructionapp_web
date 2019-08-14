@@ -54,7 +54,7 @@ class CreateJobFormOne extends PureComponent {
       rateByHourValue: 0,
       estimatedHours: 0,
       isRatedHour: true,
-      selectedRatedHourOrTon: 'hour',
+      selectedRatedHourOrTon: 'ton',
       tonnage: 0, // estimated amount of tonnage
       rateEstimate: 0,
       hourTrucksNumber: '',
