@@ -436,7 +436,7 @@ var HEREMap = /** @class */ (function (_super) {
                 bounds: group.getBoundingBox()
             })
 
-            const that = this;
+            const that = this; 
             function setZoom() {
                 var animateZoom = that.props.animateZoom;
                 const zoom = map.getZoom();
