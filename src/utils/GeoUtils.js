@@ -23,11 +23,17 @@ class GeoUtils {
     };
 
     const router = platform.getRoutingService();
-
-    return {
-      router,
-      params
-    };
+    return new Promise((resolve, reject) => router.calculateRoute(
+      params,
+      (result) => {
+        const route = result.response.route[0];
+        const { summary } = route;
+        resolve(summary);
+      },
+      (err) => {
+        reject(new Error(err));
+      }
+    ));
   }
 }
 

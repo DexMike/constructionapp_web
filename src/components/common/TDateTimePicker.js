@@ -17,10 +17,10 @@ class TDateTimePickerField extends PureComponent {
   // componentDidMount was added in order to prepopulate
   // datePicker date from a fixed date passed from other component.
   async componentDidMount() {
-    const { input } = this.props;
+    const { input, profileTimeZone } = this.props;
     let { startDate } = this.state;
     let dueDate = 0;
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
 
     if (input.value) {
       let parsedDate = new Date(input.value);
@@ -53,7 +53,7 @@ class TDateTimePickerField extends PureComponent {
       }
 
       const timeZonedStartDate = new Date(moment(startDate).tz(
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).format('YYYY-MM-DD HH:mm:ss'));
       this.setState({ startDate: timeZonedStartDate });
     }
@@ -63,7 +63,7 @@ class TDateTimePickerField extends PureComponent {
   // datePicker date from a given props value.
   async componentWillReceiveProps(props) {
     let { startDate } = this.state;
-    const profile = await ProfileService.getProfile();
+    // const profile = await ProfileService.getProfile();
     let dueDate = 0;
 
     if (props.input.value) {
@@ -91,7 +91,7 @@ class TDateTimePickerField extends PureComponent {
       }
 
       const timeZonedStartDate = new Date(moment(startDate).tz(
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        props.profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).format('YYYY-MM-DD HH:mm:ss'));
       this.setState({ startDate: timeZonedStartDate });
     }
@@ -106,12 +106,12 @@ class TDateTimePickerField extends PureComponent {
   }
 
   render() {
-    const { startDate } = this.state;
+    // const { startDate } = this.state;
     const {
       dateFormat,
       meta: { touched, error },
       showTime,
-      timeFormat,
+      // timeFormat,
       disabled,
       id,
       placeholderDate
@@ -166,7 +166,8 @@ TDateTimePickerField.propTypes = {
   }),
   showTime: PropTypes.bool,
   placeholderDate: PropTypes.object,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  profileTimeZone: PropTypes.string
 };
 
 TDateTimePickerField.defaultProps = {
@@ -177,7 +178,8 @@ TDateTimePickerField.defaultProps = {
   },
   showTime: false,
   placeholderDate: new Date(),
-  disabled: false
+  disabled: false,
+  profileTimeZone: null
 };
 
 export default TDateTimePickerField;
