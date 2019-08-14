@@ -3,6 +3,7 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
+import Flatpickr from "react-flatpickr";
 
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
@@ -98,10 +99,10 @@ class TDateTimePickerField extends PureComponent {
 
   handleChange(date) {
     this.setState({
-      startDate: date
+      startDate: date[0]
     });
     const { onChange } = this.props;
-    onChange(date);
+    onChange(date[0]);
   }
 
   render() {
@@ -113,22 +114,34 @@ class TDateTimePickerField extends PureComponent {
       timeFormat,
       disabled,
       id,
-      placeholder
+      placeholderDate
     } = this.props;
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
-          <DatePicker
-            timeFormat={timeFormat}
-            className="form__form-group-datepicker"
-            selected={startDate}
-            showTimeSelect={showTime}
-            onChange={this.handleChange}
-            dateFormat={dateFormat}
+          <Flatpickr
             disabled={disabled}
+            className="c-date-picker"
             id={id}
-            placeholderText={placeholder}
+            options={{
+              enableTime: showTime,
+              defaultDate: placeholderDate,
+              dateFormat,
+              // enableTime: true,
+              onChange: this.handleChange
+            }}
           />
+          {/*<DatePicker*/}
+          {/*  timeFormat={timeFormat}*/}
+          {/*  className="form__form-group-datepicker"*/}
+          {/*  selected={startDate}*/}
+          {/*  showTimeSelect={showTime}*/}
+          {/*  onChange={this.handleChange}*/}
+          {/*  dateFormat={dateFormat}*/}
+          {/*  disabled={disabled}*/}
+          {/*  id={id}*/}
+          {/*  placeholderText={placeholder}*/}
+          {/*/>*/}
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>
       </div>
@@ -147,25 +160,23 @@ TDateTimePickerField.propTypes = {
     ])
   }).isRequired,
   dateFormat: PropTypes.string,
-  timeFormat: PropTypes.string,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
   }),
   showTime: PropTypes.bool,
-  placeholder: PropTypes.string,
+  placeholderDate: PropTypes.object,
   disabled: PropTypes.bool
 };
 
 TDateTimePickerField.defaultProps = {
-  dateFormat: 'MMMM dd, yyyy hh:mm aaa',
-  timeFormat: 'h:mm aa',
+  dateFormat: 'm/d/Y',
   meta: {
     touched: null,
     error: null
   },
   showTime: false,
-  placeholder: null,
+  placeholderDate: new Date(),
   disabled: false
 };
 

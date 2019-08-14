@@ -630,7 +630,7 @@ class TrucksCustomerPage extends Component {
                         endDate={endDate}
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
-                        dateFormat="MM/dd/yy"
+                        dateFormat="m/d/Y"
                       />
                     </Col>
                     <Col md="2" id="truckTypeSelect">
