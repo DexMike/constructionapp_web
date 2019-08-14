@@ -434,7 +434,16 @@ var HEREMap = /** @class */ (function (_super) {
             // get geo bounding box for the group and set it to the map
             map.getViewModel().setLookAtData({
                 bounds: group.getBoundingBox()
-            });
+            })
+
+            const that = this;
+            function setZoom() {
+                var animateZoom = that.props.animateZoom;
+                const zoom = map.getZoom();
+                map.setZoom((zoom - 0.5), animateZoom === true);
+            }
+            setTimeout(setZoom, 1500);
+            
         }
         
     };
