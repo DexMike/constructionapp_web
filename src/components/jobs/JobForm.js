@@ -4,8 +4,6 @@ import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Row, Container, Col } from 'reactstrap';
 import './jobs.css';
-// import HEREMap, { Marker, RouteLine } from 'here-maps-react';
-// import { HEREMap, RouteLine } from '../../utils/here-maps-react';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -15,29 +13,8 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
-// import pinA from '../../img/PinA.png';
-// import pinB from '../../img/PinB.png';
 import TMap from '../common/TMap';
-// import GeoCodingService from '../../api/GeoCodingService';
-
-/*
-RouteFeatureWeightType
--3) strictExclude The routing engine guarantees that the route does not contain strictly excluded features.
- If the condition cannot be fulfilled no route is returned.
--2) softExclude The routing engine does not consider links containing the corresponding feature.
-  If no route can be found because of these limitations the condition is weakened.
--1) avoid The routing engine assigns penalties for links containing the corresponding feature.
-0)  normal The routing engine does not alter the ranking of links containing the corresponding feature.
-*/
-const routeFeatureWeightType = 0;
-const center = {
-  lat: 30.252606,
-  lng: -97.754209
-};
-
-const hereMapsId = process.env.HERE_MAPS_APP_ID;
-const hereMapsCode = process.env.HERE_MAPS_APP_CODE;
-const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
+import GeoUtils from '../../utils/GeoUtils';
 
 class JobForm extends Component {
   constructor(props) {
@@ -82,9 +59,6 @@ class JobForm extends Component {
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
-    this.renderHereMap = this.renderHereMap.bind(this);
-    this.onError = this.onError.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -94,55 +68,20 @@ class JobForm extends Component {
       loads,
       carrier,
       images,
-      markersGroup,
+      distance,
+      time,
       company
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
 
-    const platform = new H.service.Platform({
-      apikey: hereMapsApiKey,
-      useCIT: true,
-      app_id: hereMapsId,
-      app_code: hereMapsCode,
-      useHTTPS: true
-    });
-
     if (job.startAddress) {
-      const routeRequestParams = {
-        mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
-        representation: 'display',
-        routeattributes: 'waypoints,summary,shape,legs,incidents',
-        maneuverattributes: 'direction,action',
-        waypoint0: `${startPoint.latitude},${startPoint.longitude}`,
-        waypoint1: `${endPoint.latitude},${endPoint.longitude}`,
-        truckType: 'tractorTruck',
-        limitedWeight: 700,
-        metricSystem: 'imperial',
-        language: 'en-us' // en-us|es-es|de-de
-      };
-      const originMarker = new H.map.Marker({
-        lat: startPoint.latitude,
-        lng: startPoint.longitude
-      }, {
-        zIndex: 0
-      });
-      const destinationMarker = new H.map.Marker({
-        lat: endPoint.latitude,
-        lng: endPoint.longitude
-      }, {
-        zIndex: 0
-      });
-      markersGroup = new H.map.Group();
-      markersGroup.addObjects([originMarker, destinationMarker]);
-
-      const router = platform.getRoutingService();
-      router.calculateRoute(
-        routeRequestParams,
-        this.onSuccess,
-        this.onError
-      );
+      const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
+      const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
+      const summary = await GeoUtils.getDistance(waypoint0, waypoint1);
+      distance = summary.distance;
+      time = summary.travelTime;
     }
 
     if (companyCarrier) {
@@ -176,7 +115,8 @@ class JobForm extends Component {
       cachedDestination: endPoint,
       profile,
       company,
-      markersGroup
+      distance,
+      time
     });
   }
 
@@ -204,23 +144,6 @@ class JobForm extends Component {
         });
       }
     }
-  }
-
-  onError(error) {
-    console.log('>>ERROR : ', error);
-  }
-
-  onSuccess(result) {
-    const route = result.response.route[0];
-    this.setState({
-      showMainMap: true,
-      shape: route.shape,
-      distance: route.summary.distance,
-      time: route.summary.travelTime,
-      timeAndDistance: `Travel time and distance: ${route.summary.text}`,
-      instructions: route.leg[0]
-    });
-    // ... etc.
   }
 
   onExpandedChanged(rowId) {
@@ -731,54 +654,9 @@ class JobForm extends Component {
     );
   }
 
-  renderHereMap() {
-    const {
-      showMainMap,
-      shape,
-      markersGroup
-    } = this.state;
-
-    const opts = {
-      layer: 'traffic',
-      mapType: 'normal'
-    };
-
-    if (showMainMap) {
-      return (
-        <HEREMap
-          style={{height: '200px', background: 'gray' }}
-          appId="FlTEFFbhzrFwU1InxRgH"
-          appCode="gTgJkC9u0YWzXzvjMadDzQ"
-          center={center}
-          setLayer={opts}
-          hidpi={false}
-          interactive
-          markersGroup={markersGroup}
-        >
-          <RouteLine
-            shape={shape}
-            strokeColor="blue"
-            lineWidth="4"
-          />
-          {/* // If markersGroup exists, do not send markers
-          <Marker lat={cachedOrigin.latitude} lng={cachedOrigin.longitude} />
-          <Marker lat={cachedDestination.latitude} lng={cachedDestination.longitude} />
-          */}
-        </HEREMap>
-      );
-    }
-    return (
-      <React.Fragment>
-        &nbsp; Map not available
-      </React.Fragment>
-    );
-  }
-
   renderEverything() {
     const {
       images,
-      coords,
-      overlayMapData,
       loads
     } = this.state;
     const { job } = this.props;

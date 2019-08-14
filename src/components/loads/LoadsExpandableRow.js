@@ -5,8 +5,6 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
-// import UserService from '../../api/UserService';
-// import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -17,21 +15,6 @@ import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
 import TMap from '../common/TMap';
 
-const routeFeatureWeightType = 0;
-const center = {
-  lat: 30.252606,
-  lng: -97.754209
-};
-
-const opts = {
-  layer: 'traffic',
-  mapType: 'normal'
-};
-
-const { HERE_MAPS_APP_ID } = process.env;
-const { HERE_MAPS_APP_CODE } = process.env;
-const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
-
 class LoadsExpandableRow extends Component {
   constructor(props) {
     super(props);
@@ -41,7 +24,6 @@ class LoadsExpandableRow extends Component {
       job: props.job,
       loaded: false, // if page is loading
       index: props.index,
-      // expanded: false,
       modal: false,
       driver: null,
       gpsTrackings: null,
@@ -49,12 +31,9 @@ class LoadsExpandableRow extends Component {
       disputeEmail: null,
       profile: null,
       toggledId: 0,
-      shape: {}
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
-    this.onError = this.onError.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -87,54 +66,6 @@ class LoadsExpandableRow extends Component {
       attachments: []
     };
 
-    // here
-    const platform = new H.service.Platform({
-      apikey: hereMapsApiKey,
-      useCIT: true,
-      app_id: HERE_MAPS_APP_ID,
-      app_code: HERE_MAPS_APP_CODE,
-      useHTTPS: true
-    });
-
-    if (Object.keys(gpsTrackings).length > 0) {
-      let origin = '';
-      let destination = '';
-
-      // console.log('>>GPS:', gpsTrackings, typeof gpsTrackings);
-      if (gpsTrackings[0] && gpsTrackings[1]) {
-        origin = `${gpsTrackings[0][1]},${gpsTrackings[0][0]}`;
-        destination = `${gpsTrackings[1][1]},${gpsTrackings[1][0]}`;
-      } else if (gpsTrackings[0] && !gpsTrackings[1]) {
-        origin = `${gpsTrackings[0][1]},${gpsTrackings[0][0]}`;
-        destination = `${gpsTrackings[0][1]},${gpsTrackings[0][0]}`;
-      } else if (!gpsTrackings[0] && gpsTrackings[1]) {
-        origin = `${gpsTrackings[1][1]},${gpsTrackings[1][0]}`;
-        destination = `${gpsTrackings[1][1]},${gpsTrackings[1][0]}`;
-      }
-
-      // console.log('Origin, destination:', origin, destination);
-      const routeRequestParams = {
-        mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
-        representation: 'display',
-        routeattributes: 'waypoints,summary,shape,legs,incidents',
-        maneuverattributes: 'direction,action',
-        waypoint0: origin,
-        waypoint1: destination,
-        truckType: 'tractorTruck',
-        limitedWeight: 700,
-        metricSystem: 'imperial',
-        language: 'en-us' // en-us|es-es|de-de
-      };
-
-      const router = platform.getRoutingService();
-      router.calculateRoute(
-        routeRequestParams,
-        this.onSuccess,
-        this.onError
-      );
-    }
-    // here
-
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
@@ -144,22 +75,6 @@ class LoadsExpandableRow extends Component {
       disputeEmail,
       profile
     });
-  }
-
-  onError(error) {
-    console.log('>>ERROR : ', error);
-  }
-
-  onSuccess(result) {
-    const route = result.response.route[0];
-    // console.log(result.response);
-    this.setState({
-      // showMainMap: true,
-      shape: route.shape,
-      timeAndDistance: `Travel time and distance: ${route.summary.text}`
-      // instructions: route.leg[0]
-    });
-    // ... etc.
   }
 
   async fetchGPSPoints(loadId) {
@@ -239,34 +154,6 @@ class LoadsExpandableRow extends Component {
           </Row>
         </div>
       </Modal>
-    );
-  }
-
-  renderMap(shape) {
-    if (Object.keys(shape).length > 0) {
-      return (
-        <HEREMap
-          style={{height: '200px', background: 'gray' }}
-          appId="FlTEFFbhzrFwU1InxRgH"
-          appCode="gTgJkC9u0YWzXzvjMadDzQ"
-          center={center}
-          zoom={14}
-          setLayer={opts}
-          hidpi={false}
-          interactive
-        >
-          <RouteLine
-            shape={shape}
-            strokeColor="purple"
-            lineWidth="4"
-          />
-        </HEREMap>
-      );
-    }
-    return (
-      <React.Fragment>
-        No map available
-      </React.Fragment>
     );
   }
 
