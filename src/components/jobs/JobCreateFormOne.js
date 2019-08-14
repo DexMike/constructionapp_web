@@ -1432,6 +1432,7 @@ class CreateJobFormOne extends PureComponent {
   }
 
   jobDateChange(data) {
+    // return false;
     const {reqHandlerDate} = this.state;
     this.setState({
       jobDate: data,
@@ -1784,6 +1785,7 @@ class CreateJobFormOne extends PureComponent {
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
+                      profileTimeZone={profile.timeZone}
                     />
                   </div>
                 </Row>
