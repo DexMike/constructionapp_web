@@ -12,13 +12,13 @@ class GeoCodingService {
     return response.json();
   }
 
-  static async getDistance(long1, lat1, long2, lat2) {
-    const input = `https://api.mapbox.com/directions/v5/mapbox/driving/${long1},${lat1};${long2},${lat2}?geometries=geojson&access_token=${MAPBOX_API}`;
-    const init = {
-      method: 'GET'
-    };
-    const response = await fetch(input, init);
-    return response.json();
-  }
+  // static async getDistance(long1, lat1, long2, lat2) {
+  //   const input = `https://api.mapbox.com/directions/v5/mapbox/driving/${long1},${lat1};${long2},${lat2}?geometries=geojson&access_token=${MAPBOX_API}`;
+  //   const init = {
+  //     method: 'GET'
+  //   };
+  //   const response = await fetch(input, init);
+  //   return response.json();
+  // }
 }
 export default GeoCodingService;

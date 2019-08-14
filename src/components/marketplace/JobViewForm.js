@@ -12,10 +12,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
-// import NumberFormat from 'react-number-format';
-import HEREMap, { RouteLine } from '../../utils/here-maps-react';
 import JobService from '../../api/JobService';
-// import truckImage from '../../img/default_truck.png';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
@@ -25,27 +22,11 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import TFormat from '../common/TFormat';
 import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
-// import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
-// import GPSTrackingService from '../../api/GPSTrackingService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
-
-const routeFeatureWeightType = 0;
-const center = {
-  lat: 30.252606,
-  lng: -97.754209
-};
-
-const opts = {
-  layer: 'traffic',
-  mapType: 'normal'
-};
-
-const { HERE_MAPS_APP_ID } = process.env;
-const { HERE_MAPS_APP_CODE } = process.env;
-const hereMapsApiKey = process.env.HERE_MAPS_API_KEY;
+import TMap from '../common/TMap';
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -65,13 +46,10 @@ class JobViewForm extends Component {
       btnSubmitting: false,
       selectedDrivers: [],
       accessForbidden: false,
-      shape: {},
       modalLiability: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
-    this.onError = this.onError.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
     this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
   }
 
@@ -176,61 +154,9 @@ class JobViewForm extends Component {
       booking,
       profile,
       favoriteCompany,
-      selectedDrivers
-    });
-
-    // here
-    /**/
-    const platform = new H.service.Platform({
-      apikey: hereMapsApiKey,
-      useCIT: true,
-      app_id: HERE_MAPS_APP_ID,
-      app_code: HERE_MAPS_APP_CODE,
-      useHTTPS: true
-    });
-
-    if (startAddress.latitude
-      && startAddress.longitude
-      && endAddress.latitude
-      && endAddress.longitude) {
-      const origin = `${startAddress.latitude},${startAddress.longitude}`;
-      const destination = `${endAddress.latitude},${endAddress.longitude}`;
-
-      const routeRequestParams = {
-        mode: `balanced;truck;traffic:disabled;motorway:${routeFeatureWeightType}`,
-        representation: 'display',
-        routeattributes: 'waypoints,summary,shape,legs,incidents',
-        maneuverattributes: 'direction,action',
-        waypoint0: origin,
-        waypoint1: destination,
-        truckType: 'tractorTruck',
-        limitedWeight: 700,
-        metricSystem: 'imperial',
-        language: 'en-us' // en-us|es-es|de-de
-      };
-
-      const router = platform.getRoutingService();
-      router.calculateRoute(
-        routeRequestParams,
-        this.onSuccess,
-        this.onError
-      );
-    } else {
-      this.setState({ loaded: true });
-    }
-  }
-
-  onError(error) {
-    // console.log('>>ERROR : ', error);
-  }
-
-  onSuccess(result) {
-    const route = result.response.route[0];
-    this.setState({
-      shape: route.shape,
+      selectedDrivers,
       loaded: true
     });
-    // ... etc.
   }
 
   // save after the user has checked the info
@@ -642,37 +568,6 @@ class JobViewForm extends Component {
     return null;
   }
 
-  renderMap() {
-    const { shape } = this.state;
-    if (Object.keys(shape).length > 0) {
-      return (
-        <React.Fragment>
-          <HEREMap
-            style={{height: '200px', background: 'gray' }}
-            appId="FlTEFFbhzrFwU1InxRgH"
-            appCode="gTgJkC9u0YWzXzvjMadDzQ"
-            center={center}
-            zoom={14}
-            setLayer={opts}
-            hidpi={false}
-            interactive
-          >
-            <RouteLine
-              shape={shape}
-              strokeColor="purple"
-              lineWidth="4"
-            />
-          </HEREMap>
-        </React.Fragment>
-      );
-    }
-    return (
-      <React.Fragment>
-        No map available
-      </React.Fragment>
-    );
-  }
-
   renderJobAddresses(job) {
     return (
       <Container>
@@ -685,7 +580,13 @@ class JobViewForm extends Component {
           </span>
         </Row>
         <span className="col-md-12">
-          {this.renderMap()}
+          <TMap
+            id={`job${job.id}`}
+            width="100%"
+            height="250px"
+            startAddress={job.startAddress}
+            endAddress={job.endAddress}
+          />
         </span>
       </Container>
     );

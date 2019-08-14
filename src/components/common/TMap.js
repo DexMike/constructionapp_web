@@ -71,10 +71,14 @@ class TMap extends Component {
     const {startAddress, endAddress} = this.props;
     const router = this.platform.getRoutingService();
     const routeRequestParams = {
-      mode: 'fastest;car',
+      mode: 'balanced;truck;traffic:disabled;motorway:0',
       representation: 'display',
-      routeattributes: 'waypoints,summary,shape,legs',
+      routeattributes: 'waypoints,summary,shape,legs,incidents',
       maneuverattributes: 'direction,action',
+      truckType: 'tractorTruck',
+      limitedWeight: 700,
+      metricSystem: 'imperial',
+      language: 'en-us', // en-us|es-es|de-de
       waypoint0: `${startAddress.latitude},${startAddress.longitude}`,
       waypoint1: `${endAddress.latitude},${endAddress.longitude}`
     };
