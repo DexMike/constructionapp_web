@@ -116,10 +116,12 @@ class DriverListPage extends Component {
   }
 
   handleDriverEdit(id) {
-    this.setState({
-      modal: true,
-      driverId: id
-    });
+    /*
+      this.setState({
+        modal: true,
+        driverId: id
+      });
+    */
   }
 
   toggleAddDriverModal() {

@@ -505,7 +505,8 @@ class ReportsCarrierPage extends Component {
                               }
                             }
                             onChange={this.startDateChange}
-                            dateFormat="MM-dd-yy"
+                            placeholderDate={startDate}
+                            dateFormat="m/d/Y"
                           />
 
                         </div>
@@ -525,8 +526,9 @@ class ReportsCarrierPage extends Component {
                                 givenDate: new Date(endDate).getTime()
                               }
                             }
+                            placeholderDate={endDate}
                             onChange={this.endDateChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
                         </div>
                         <i className="material-icons iconSet calendarIcon">calendar_today</i>
@@ -568,8 +570,9 @@ class ReportsCarrierPage extends Component {
                                 givenDate: new Date(startDateComp).getTime()
                               }
                             }
+                            placeholderDate={startDateComp}
                             onChange={this.startDateCompChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
 
                         </div>
@@ -589,8 +592,9 @@ class ReportsCarrierPage extends Component {
                                 givenDate: new Date(endDateComp).getTime()
                               }
                             }
+                            placeholderDate={endDateComp}
                             onChange={this.endDateCompChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
                         </div>
                         <i className="material-icons iconSet calendarIcon">calendar_today</i>

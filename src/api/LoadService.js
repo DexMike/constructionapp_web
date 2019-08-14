@@ -8,13 +8,18 @@ class LoadService extends AgentService {
     return (response);
   }
 
-  static async updateLoad(id, load) {
-    const response = await this.put(`${PATH}/${id}`, load);
+  static async updateLoad(load) {
+    const response = await this.put(PATH, load);
     return (response);
   }
 
   static async getLoadsByBookingId(id) {
     const response = await this.get(`/bookings/${id}${PATH}`);
+    return (response);
+  }
+
+  static async getActiveDriversByBookingId(id) {
+    const response = await this.get(`/bookings/${id}${PATH}/active_drivers`);
     return (response);
   }
 }

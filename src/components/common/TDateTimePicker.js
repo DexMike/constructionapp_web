@@ -3,12 +3,13 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import PropTypes from 'prop-types';
 import ProfileService from '../../api/ProfileService';
+import Flatpickr from "react-flatpickr";
 
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: new Date()
+      startDate: null
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -21,68 +22,87 @@ class TDateTimePickerField extends PureComponent {
     let dueDate = 0;
     const profile = await ProfileService.getProfile();
 
-    // startDate and EndDate were added for common datepicker values
-    if (input.value.startDate) {
-      dueDate = input.value.startDate.getTime();
-      const parsedDate = new Date(dueDate);
+    if (input.value) {
+      let parsedDate = new Date(input.value);
       startDate = parsedDate;
-    }
-    if (input.value.endDate) {
-      dueDate = input.value.endDate.getTime();
-      const parsedDate = new Date(dueDate);
-      startDate = parsedDate;
-    }
-    // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
-    if (input.value.startDateComp) {
-      dueDate = input.value.startDateComp.getTime();
-      const parsedDate = new Date(dueDate);
-      startDate = parsedDate;
-    }
-    if (input.value.endDateComp) {
-      dueDate = input.value.endDateComp.getTime();
-      const parsedDate = new Date(dueDate);
-      startDate = parsedDate;
-    }
+      if (Object.prototype.toString.call(input.value) !== '[object Date]') {
+        // startDate and EndDate were added for common datepicker values
+        if (input.value.jobDate) {
+          // dueDate = input.value.jobDate.getTime();
+          parsedDate = new Date(input.value.jobDate);
+          startDate = parsedDate;
+        }
+        if (input.value.endDate) {
+          dueDate = input.value.endDate.getTime();
+          parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+        // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
+        if (input.value.startDateComp) {
+          dueDate = input.value.startDateComp.getTime();
+          parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+        if (input.value.endDateComp) {
+          dueDate = input.value.endDateComp.getTime();
+          parsedDate = new Date(dueDate);
+          startDate = parsedDate;
+        }
+      } else {
+        startDate = input.value;
+      }
 
-    const timeZonedStartDate = new Date(moment(startDate).tz(
-      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-    ).format('YYYY-MM-DD HH:mm:ss'));
-    this.setState({ startDate: timeZonedStartDate });
-    // this.setState({ startDate: new Date() });
+      const timeZonedStartDate = new Date(moment(startDate).tz(
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).format('YYYY-MM-DD HH:mm:ss'));
+      this.setState({ startDate: timeZonedStartDate });
+    }
   }
 
   // ComponentWillReceiveProps was added in order to change the
   // datePicker date from a given props value.
-  componentWillReceiveProps(props) {
+  async componentWillReceiveProps(props) {
+    let { startDate } = this.state;
+    const profile = await ProfileService.getProfile();
     let dueDate = 0;
-    if (props.input.value.startDate) {
-      dueDate = props.input.value.startDate.getTime();
-      const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
-    }
-    if (props.input.value.endDate) {
-      dueDate = props.input.value.endDate.getTime();
-      const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
-    }
-    if (props.input.value.startDateComp) {
-      dueDate = props.input.value.startDateComp.getTime();
-      const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
-    }
-    if (props.input.value.endDateComp) {
-      dueDate = props.input.value.endDateComp.getTime();
-      const parsedDate = new Date(dueDate);
-      this.setState({ startDate: parsedDate });
+
+    if (props.input.value) {
+      let parsedDate = new Date(props.input.value);
+      startDate = parsedDate;
+      if (props.input.value.givenDate) {
+        // dueDate = props.input.value.startDate.getTime();
+        parsedDate = new Date(props.input.value.givenDate);
+        // this.setState({ startDate: parsedDate });
+      }
+      if (props.input.value.endDate) {
+        dueDate = props.input.value.endDate.getTime();
+        parsedDate = new Date(dueDate);
+        // this.setState({ startDate: parsedDate });
+      }
+      if (props.input.value.startDateComp) {
+        dueDate = props.input.value.startDateComp.getTime();
+        parsedDate = new Date(dueDate);
+        // this.setState({ startDate: parsedDate });
+      }
+      if (props.input.value.endDateComp) {
+        dueDate = props.input.value.endDateComp.getTime();
+        parsedDate = new Date(dueDate);
+        // this.setState({ startDate: parsedDate });
+      }
+
+      const timeZonedStartDate = new Date(moment(startDate).tz(
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).format('YYYY-MM-DD HH:mm:ss'));
+      this.setState({ startDate: timeZonedStartDate });
     }
   }
 
   handleChange(date) {
     this.setState({
-      startDate: date
+      startDate: date[0]
     });
     const { onChange } = this.props;
-    onChange(date);
+    onChange(date[0]);
   }
 
   render() {
@@ -93,21 +113,35 @@ class TDateTimePickerField extends PureComponent {
       showTime,
       timeFormat,
       disabled,
-      id
+      id,
+      placeholderDate
     } = this.props;
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
-          <DatePicker
-            timeFormat={timeFormat}
-            className="form__form-group-datepicker"
-            selected={startDate}
-            showTimeSelect={showTime}
-            onChange={this.handleChange}
-            dateFormat={dateFormat}
+          <Flatpickr
             disabled={disabled}
+            className="c-date-picker"
             id={id}
+            options={{
+              enableTime: showTime,
+              defaultDate: placeholderDate,
+              dateFormat,
+              // enableTime: true,
+              onChange: this.handleChange
+            }}
           />
+          {/*<DatePicker*/}
+          {/*  timeFormat={timeFormat}*/}
+          {/*  className="form__form-group-datepicker"*/}
+          {/*  selected={startDate}*/}
+          {/*  showTimeSelect={showTime}*/}
+          {/*  onChange={this.handleChange}*/}
+          {/*  dateFormat={dateFormat}*/}
+          {/*  disabled={disabled}*/}
+          {/*  id={id}*/}
+          {/*  placeholderText={placeholder}*/}
+          {/*/>*/}
           {touched && error && <span className="form__form-group-error">{error}</span>}
         </div>
       </div>
@@ -120,26 +154,29 @@ TDateTimePickerField.propTypes = {
   input: PropTypes.shape({
     onChange: PropTypes.func,
     name: PropTypes.string,
-    value: PropTypes.object
+    value: PropTypes.oneOfType([
+      PropTypes.object,
+      PropTypes.number
+    ])
   }).isRequired,
   dateFormat: PropTypes.string,
-  timeFormat: PropTypes.string,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
   }),
   showTime: PropTypes.bool,
+  placeholderDate: PropTypes.object,
   disabled: PropTypes.bool
 };
 
 TDateTimePickerField.defaultProps = {
-  dateFormat: 'MMMM dd, yyyy hh:mm aaa',
-  timeFormat: 'h:mm aa',
+  dateFormat: 'm/d/Y',
   meta: {
     touched: null,
     error: null
   },
   showTime: false,
+  placeholderDate: new Date(),
   disabled: false
 };
 

@@ -575,8 +575,9 @@ class ReportsCustomerPage extends Component {
                                 givenDate: new Date(startDate).getTime()
                               }
                             }
+                            placeholderDate={startDate}
                             onChange={this.startDateChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
 
                         </div>
@@ -596,8 +597,9 @@ class ReportsCustomerPage extends Component {
                                 givenDate: new Date(endDate).getTime()
                               }
                             }
+                            placeholderDate={endDate}
                             onChange={this.endDateChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
                         </div>
                         <i className="material-icons iconSet calendarIcon">calendar_today</i>
@@ -639,8 +641,9 @@ class ReportsCustomerPage extends Component {
                                 givenDate: new Date(startDateComp).getTime()
                               }
                             }
+                            placeholderDate={startDateComp}
                             onChange={this.startDateCompChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
 
                         </div>
@@ -660,8 +663,9 @@ class ReportsCustomerPage extends Component {
                                 givenDate: new Date(endDateComp).getTime()
                               }
                             }
+                            placeholderDate={endDateComp}
                             onChange={this.endDateCompChange}
-                            dateFormat="MM-dd-yy"
+                            dateFormat="m/d/Y"
                           />
                         </div>
                         <i className="material-icons iconSet calendarIcon">calendar_today</i>
