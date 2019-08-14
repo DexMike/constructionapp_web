@@ -154,7 +154,7 @@ class WrappedRoutes extends PureComponent {
 
           <Route
             exact
-            path="/settings/company"
+            path="/company/settings"
             component={CompanySettingsPage}
           />
 
