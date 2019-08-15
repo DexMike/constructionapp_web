@@ -100,7 +100,7 @@ class PaymentsCarrier extends Component {
           <Row>
             <Col md={12}>
               <h5>For detailed information on your payments, please log into your &nbsp;
-                <a href="https://hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://hyperwallet.com</a>&nbsp;account.
+                <a href="https://trelar.hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://trelar.hyperwallet.com</a>&nbsp;account.
               </h5>
             </Col>
           </Row>
