@@ -89,7 +89,7 @@ class JobCreateFormCarrier extends Component {
       startLocationLatitude: 0,
       startLocationLongitude: 0,
       // date
-      jobDate: new Date(),
+      jobDate: null,
       // job properties
       name: '',
       instructions: '',
@@ -255,7 +255,7 @@ class JobCreateFormCarrier extends Component {
     }));
 
     // should load all addresses even if already set
-    const response = await AddressService.getAddresses();
+    const response = await AddressService.getAddressesByCompanyId(profile.companyId);
 
     const newItem = {
       id: 0,
@@ -363,7 +363,7 @@ class JobCreateFormCarrier extends Component {
       jobTrucksNeeded,
       selectedMaterials
     } = this.state;
-    let { jobStartDateTime } = this.state;
+    let { jobDate } = this.state;
 
     const { selectedCarrierId } = this.props;
 
@@ -434,7 +434,7 @@ class JobCreateFormCarrier extends Component {
     const calcTotal = rateEstimate * rate;
     const rateTotal = Math.round(calcTotal * 100) / 100;
 
-    jobStartDateTime = moment(jobStartDateTime).format('YYYY-MM-DD HH:mm');
+    jobDate = moment(jobDate).format('YYYY-MM-DD HH:mm');
 
     const job = {
       companiesId: profile.companyId,
@@ -444,7 +444,7 @@ class JobCreateFormCarrier extends Component {
       startAddress: startAddress.id,
       endAddress: endAddress.id,
       startTime: moment.tz(
-        jobStartDateTime,
+        jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).utc().format(),
       equipmentType: truckType.value,
@@ -1040,7 +1040,7 @@ class JobCreateFormCarrier extends Component {
   jobDateChange(data) {
     const {reqHandlerDate} = this.state;
     this.setState({
-      jobStartDateTime: data,
+      jobDate: data,
       reqHandlerDate: Object.assign({}, reqHandlerDate, {
         touched: false
       })
@@ -1135,7 +1135,17 @@ class JobCreateFormCarrier extends Component {
 
     const currDate = new Date();
 
-    if (!jobStartDateTime || jobStartDateTime.getTime() < currDate.getTime()) {
+    if (!jobDate) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    if (jobDate && jobDate.getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
@@ -1149,7 +1159,7 @@ class JobCreateFormCarrier extends Component {
     // START ADDRESS VALIDATION
 
     if (!selectedStartAddressId || selectedStartAddressId === 0) {
-      if (startLocationAddressName.length === 0) {
+      /* if (startLocationAddressName.length === 0) { // Commenting out in case we need this later
         this.setState({
           reqHandlerStartAddressName: {
             touched: true,
@@ -1157,7 +1167,7 @@ class JobCreateFormCarrier extends Component {
           }
         });
         isValid = false;
-      }
+      } */
 
       if (startLocationAddress1.length === 0) {
         this.setState({
@@ -1244,7 +1254,7 @@ class JobCreateFormCarrier extends Component {
     // END ADDRESS VALIDATION
 
     if (!selectedEndAddressId || selectedEndAddressId === 0) {
-      if (endLocationAddressName.length === 0) {
+      /* if (endLocationAddressName.length === 0) { // Commenting out in case we need later
         this.setState({
           reqHandlerEndAddressName: {
             touched: true,
@@ -1252,7 +1262,7 @@ class JobCreateFormCarrier extends Component {
           }
         });
         isValid = false;
-      }
+      } */
 
       if (endLocationAddress1.length === 0) {
         this.setState({
@@ -1510,8 +1520,6 @@ class JobCreateFormCarrier extends Component {
       profile,
       loaded
     } = this.state;
-    const today = new Date();
-    const currentDate = today.getTime();
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -1566,12 +1574,12 @@ class JobCreateFormCarrier extends Component {
                         {
                           onChange: this.jobDateChange,
                           name: 'jobDate',
-                          value: jobStartDateTime
-                          // givenDate: currentDate
+                          value: jobDate,
+                          givenDate: jobDate
                         }
                       }
                       onChange={this.jobDateChange}
-                      dateFormat="yyyy-MM-dd hh:mm"
+                      dateFormat="Y-m-d H:i"
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"

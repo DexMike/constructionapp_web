@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 // import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import { Container } from 'reactstrap';
 import DashboardCarrierPage from './DashboardCarrierPage';
+import DashboardDriverPage from './DashboardDriverPage';
 import DashboardCustomerPage from './DashboardCustomerPage';
 import ProfileService from '../../api/ProfileService';
 // import EquipmentsService from '../../api/EquipmentService';
@@ -60,6 +61,7 @@ class DashboardPage extends Component {
     const { companyType } = this.state;
     return (
       <React.Fragment>
+        {/* companyType === 'Carrier' && <DashboardDriverPage/> */}
         { companyType === 'Carrier' && <DashboardCarrierPage/>}
         { companyType === 'Customer' && <DashboardCustomerPage/>}
       </React.Fragment>

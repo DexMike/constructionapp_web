@@ -134,10 +134,13 @@ class TTable extends Component {
     });
     return (
       <React.Fragment>
-        {isSelectable && (
+        {(isSelectable && !item.checkboxDisabled) && (
           <TableCell className="material-table__cell" padding="checkbox">
-            <Checkbox checked={isSelected} className="material-table__checkbox"/>
+            <Checkbox checked={isSelected && !item.checkboxDisabled} className="material-table__checkbox"/>
           </TableCell>
+        )}
+        {(isSelectable && item.checkboxDisabled) && (
+          <TableCell className="material-table__cell" padding="checkbox"/>
         )}
         {Object.keys(shallowItem)
           .map((key) => {

@@ -21,6 +21,20 @@ class TFormat {
     );
   }
 
+  static asMoneyNoDecimals(inputValue) {
+    return (
+      <NumberFormat
+        value={inputValue}
+        displayType="text"
+        decimalSeparator="."
+        fixedDecimalScale
+        thousandSeparator
+        prefix="$&nbsp;"
+        suffix=""
+      />
+    );
+  }
+
   static asMoneyByHour(inputValue) {
     return (
       <NumberFormat

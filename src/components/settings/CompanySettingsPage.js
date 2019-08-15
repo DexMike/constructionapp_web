@@ -22,6 +22,7 @@ import UserService from '../../api/UserService';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import AttachmentsListPage from '../attachments/AttachmentsListPage';
+import InsuranceSettings from './InsuranceSettings';
 
 class CompanySettingsPage extends Component {
   constructor(props) {
@@ -57,6 +58,7 @@ class CompanySettingsPage extends Component {
         user,
         address,
         isAdmin,
+        profile,
         loaded: true
       });
     }
@@ -81,6 +83,9 @@ class CompanySettingsPage extends Component {
         break;
       case '4':
         title = 'Attachments';
+        break;
+      case '5':
+        title = 'Insurance';
         break;
       default:
         break;
@@ -127,7 +132,7 @@ class CompanySettingsPage extends Component {
   }
 
   renderTabs() {
-    const { activeTab, user, company, address, isAdmin } = this.state;
+    const { activeTab, user, company, address, isAdmin, profile } = this.state;
     return (
       <div>
         <Nav tabs>
@@ -167,6 +172,14 @@ class CompanySettingsPage extends Component {
               Attachments
             </NavLink>
           </NavItem>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '5' }, 'tab')}
+              onClick={() => { this.toggle('5'); }}
+            >
+              Insurance
+            </NavLink>
+          </NavItem>
         </Nav>
         <TabContent
           activeTab={activeTab}
@@ -204,6 +217,12 @@ class CompanySettingsPage extends Component {
           <TabPane tabId="4">
             <AttachmentsListPage
               companyId={company.id}
+            />
+          </TabPane>
+          <TabPane tabId="5">
+            <InsuranceSettings
+              company={company}
+              profile={profile}
             />
           </TabPane>
         </TabContent>
