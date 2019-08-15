@@ -15,8 +15,7 @@ import DashboardObjectClickable from './DashboardObjectClickable';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
-import NumberFormatting from '../../utils/NumberFormatting'
-import GeoUtils from '../../utils/GeoUtils';
+import NumberFormatting from '../../utils/NumberFormatting';
 
 function PageTitle() {
   const {t} = useTranslation();
