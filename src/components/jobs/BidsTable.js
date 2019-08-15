@@ -69,6 +69,11 @@ class BidsTable extends Component {
       } else {
         newBid.insCoverage = 'Yes';
       }
+
+      newBid.insuranceInfo = `General: $ ${Math.trunc(bidCompany.liabilityGeneral).toLocaleString('en-US')}\n`
+      + `Auto: $ ${Math.trunc(bidCompany.liabilityAuto).toLocaleString('en-US')}\n`
+      + `Other: $ ${Math.trunc(bidCompany.liabilityOther).toLocaleString('en-US')}\n`;
+
       newBid.date = bid.createdOn;
       newBid.dateF = TFormat.asDate(bid.createdOn);
 
@@ -315,6 +320,45 @@ class BidsTable extends Component {
     return true;
   }
 
+  async handleAcceptBid() {
+    const {job} = {...this.props};
+    const {selectedBidCompany, producerCompany, approveInsurance, insuranceWarning, profile} = {...this.state};
+    if (approveInsurance !== 'APPROVE' && (selectedBidCompany.liabilityGeneral < producerCompany.liabilityGeneral
+      || selectedBidCompany.liabilityAuto < producerCompany.liabilityAuto
+      || selectedBidCompany.liabilityOther < producerCompany.liabilityOther)) {
+      this.setState({insuranceWarning: true});
+    } else {
+      if (insuranceWarning) {
+        const user = await UserService.getUserById(profile.userId);
+        const date = moment(new Date()).format('lll');
+        const insuranceWarningEmail = {
+          toEmail: 'csr@trelar.net',
+          toName: 'Trelar CSR',
+          subject: `Insurance Warning: ${producerCompany.legalName}: ${user.firstName} ${user.lastName} Favorited Carrier`,
+          isHTML: true,
+          body: `Producer Name: ${producerCompany.legalName}<br>`
+            + `User Name: ${user.firstName} ${user.lastName}<br><br>`
+            + `Carrier Name: ${selectedBidCompany.legalName}<br><br>`
+            + `Job Name: ${job.name}<br>`
+            + `Job ID: ${job.id}`
+            + `Date: ${date}<br>`,
+          recipients: [
+            {name: 'CSR', email: 'csr@trelar.net'}
+          ],
+          attachments: []
+        };
+        await EmailService.sendEmail(insuranceWarningEmail);
+        this.saveBid('accept');
+      } else {
+        this.saveBid('accept');
+      }
+    }
+  }
+
+  handleApproveInputChange(e) {
+    this.setState({approveInsurance: e.target.value.toUpperCase()});
+  }
+
   renderTitle() {
     const {newJob} = this.state;
     return (
@@ -341,7 +385,7 @@ class BidsTable extends Component {
     return (
       <Container>
         <Card>
-          <CardBody>
+          <CardBody className="bids-table">
             {this.renderTableLegend()}
             <TTable
               columns={
@@ -359,7 +403,7 @@ class BidsTable extends Component {
                     displayName: 'Status'
                   },
                   {
-                    name: 'insCoverage',
+                    name: 'insuranceInfo',
                     displayName: 'Ins Coverage'
                   },
                   /* { // TODO v2
@@ -401,45 +445,6 @@ class BidsTable extends Component {
     );
   }
 
-  async handleAcceptBid() {
-    const {job} = {...this.props};
-    const {selectedBidCompany, producerCompany, approveInsurance, insuranceWarning, profile} = {...this.state};
-    if (approveInsurance !== 'APPROVE' && (selectedBidCompany.liabilityGeneral < producerCompany.liabilityGeneral
-      || selectedBidCompany.liabilityAuto < producerCompany.liabilityAuto
-      || selectedBidCompany.liabilityOther < producerCompany.liabilityOther)) {
-      this.setState({insuranceWarning: true});
-    } else {
-      if (insuranceWarning) {
-        const user = await UserService.getUserById(profile.userId);
-        const date = moment(new Date()).format('lll');
-        const insuranceWarningEmail = {
-          toEmail: 'csr@trelar.net',
-          toName: 'Trelar CSR',
-          subject: `Insurance Warning: ${producerCompany.legalName}: ${user.firstName} ${user.lastName} Favorited Carrier`,
-          isHTML: true,
-          body: `Producer Name: ${producerCompany.legalName}<br>`
-            + `User Name: ${user.firstName} ${user.lastName}<br><br>`
-            + `Carrier Name: ${selectedBidCompany.legalName}<br><br>`
-            + `Job Name: ${job.name}<br>`
-            + `Job ID: ${job.id}`
-            + `Date: ${date}<br>`,
-          recipients: [
-            {name: 'CSR', email: 'csr@trelar.net'}
-          ],
-          attachments: []
-        };
-        await EmailService.sendEmail(insuranceWarningEmail);
-        this.saveBid('accept');
-      } else {
-        this.saveBid('accept');
-      }
-    }
-  }
-
-  handleApproveInputChange(e) {
-    this.setState({approveInsurance: e.target.value.toUpperCase()});
-  }
-
   renderBidModal() {
     const {
       modalAcceptBid,
@@ -459,7 +464,7 @@ class BidsTable extends Component {
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
-                    onClick={this.toggleViewJobModal}
+                    onClick={this.toggleBidModal}
             />
             <div className="bold-text modal__title">Carrier Request</div>
           </div>
