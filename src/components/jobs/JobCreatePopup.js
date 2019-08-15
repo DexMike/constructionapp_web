@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -73,7 +74,6 @@ class JobCreatePopup extends Component {
   async saveJobDraftOrCopy(e) {
     const { profile } = this.state;
     const d = e;
-    // return;
 
     // start location
     let startAddress = {
@@ -147,6 +147,12 @@ class JobCreatePopup extends Component {
         d.jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).utc().format();
+    } else if (d.job.startTime) {
+      d.jobDate = moment(d.job.startTime).format('YYYY-MM-DD HH:mm');
+      d.jobDate = moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
     } else {
       d.jobDate = '';
     }
@@ -176,7 +182,17 @@ class JobCreatePopup extends Component {
       modifiedBy: profile.userId,
       modifiedOn: moment.utc().format()
     };
-    const newJob = await JobService.createJob(job);
+
+    let newJob = [];
+    if (d.job.id) { // UPDATING 'Saved' JOB
+      newJob = CloneDeep(job);
+      newJob.id = d.job.id;
+      delete newJob.createdBy;
+      delete newJob.createdOn;
+      await JobService.updateJob(newJob);
+    } else { // CREATING NEW 'Saved' JOB
+      newJob = await JobService.createJob(job);
+    }
 
     // add material
     if (newJob && Object.entries(d.selectedMaterials).length > 0) {
@@ -191,10 +207,15 @@ class JobCreatePopup extends Component {
       await JobMaterialsService.createJobMaterials(newMaterial);
     }
 
-    this.setState({
-      job: newJob,
-      goToJobDetail: true
-    });
+    if (d.job.id) { // we're updating a Saved job, reload the view with new data
+      this.updateJob(newJob);
+      this.closeNow();
+    } else {
+      this.setState({
+        job: newJob,
+        goToJobDetail: true
+      });
+    }
   }
 
   saveAndGoToSecondPage(e) {
