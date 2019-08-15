@@ -18,6 +18,7 @@ import EquipmentService from '../../api/EquipmentService';
 import GroupService from '../../api/GroupService';
 import ProfileService from '../../api/ProfileService';
 import EmailService from "../../api/EmailService";
+import NumberFormatting from '../../utils/NumberFormatting';
 
 
 class BidsTable extends Component {
@@ -70,9 +71,9 @@ class BidsTable extends Component {
         newBid.insCoverage = 'Yes';
       }
 
-      newBid.insuranceInfo = `General: $ ${Math.trunc(bidCompany.liabilityGeneral).toLocaleString('en-US')}\n`
-      + `Auto: $ ${Math.trunc(bidCompany.liabilityAuto).toLocaleString('en-US')}\n`
-      + `Other: $ ${Math.trunc(bidCompany.liabilityOther).toLocaleString('en-US')}\n`;
+      newBid.insuranceInfo = `General: ${NumberFormatting.asMoney(bidCompany.liabilityGeneral)}\n`
+      + `Auto: ${NumberFormatting.asMoney(bidCompany.liabilityAuto)}\n`
+      + `Other: ${NumberFormatting.asMoney(bidCompany.liabilityOther)}\n`;
 
       newBid.date = bid.createdOn;
       newBid.dateF = TFormat.asDate(bid.createdOn);
@@ -332,7 +333,7 @@ class BidsTable extends Component {
         const user = await UserService.getUserById(profile.userId);
         const date = moment(new Date()).format('lll');
         const insuranceWarningEmail = {
-          toEmail: 'csr@trelar.net',
+          toEmail: 'csr@trelar.com',
           toName: 'Trelar CSR',
           subject: `Insurance Warning: ${producerCompany.legalName}: ${user.firstName} ${user.lastName} Favorited Carrier`,
           isHTML: true,
@@ -343,7 +344,7 @@ class BidsTable extends Component {
             + `Job ID: ${job.id}`
             + `Date: ${date}<br>`,
           recipients: [
-            {name: 'CSR', email: 'csr@trelar.net'}
+            {name: 'CSR', email: 'csr@trelar.com'}
           ],
           attachments: []
         };
