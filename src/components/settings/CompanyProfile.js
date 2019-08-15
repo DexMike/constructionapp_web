@@ -13,9 +13,10 @@ import TSelect from '../common/TSelect';
 
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
-import './Settings.css';
 import CompanyService from '../../api/CompanyService';
-
+import TSpinner from '../common/TSpinner';
+import GeoUtils from '../../utils/GeoUtils';
+import './Settings.css';
 
 class CompanyProfile extends Component {
   constructor(props) {
@@ -75,7 +76,10 @@ class CompanyProfile extends Component {
       reqHandlerZip: {
         touched: false,
         error: ''
-      }
+      },
+      loading: false,
+      alert: false,
+      error: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -149,7 +153,7 @@ class CompanyProfile extends Component {
     return newCompany;
   }
 
-  setAddressInfo() {
+  async setAddressInfo() {
     const { address } = this.props;
     const {
       address1,
@@ -167,6 +171,13 @@ class CompanyProfile extends Component {
     newAddress.state = state;
     newAddress.zipCode = zipCode;
     newAddress.country = country;
+    try {
+      const response = await GeoUtils.getCoordsFromAddress(`${address1}, ${city} ${state} ${zipCode}`);
+      newAddress.latitude = response.lat;
+      newAddress.longitude = response.lng;
+    } catch (e) {
+      // console.log(e);
+    }
     return newAddress;
   }
 
@@ -344,22 +355,28 @@ class CompanyProfile extends Component {
   }
 
   async saveCompany() {
+    this.setState({loading: true});
     if (!this.isFormValid()) {
       return;
     }
-
+    let error = false;
     const company = this.setCompanyInfo();
-    const address = this.setAddressInfo();
+    const address = await this.setAddressInfo();
     if (company && company.id) {
       company.modifiedOn = moment.utc().format();
       try {
         await CompanyService.updateCompany(company);
         await AddressService.updateAddress(address);
-        // console.log('Updated');
       } catch (err) {
+        error = true;
         // console.log(err);
       }
     }
+    this.setState({
+      error,
+      alert: true,
+      loading: false
+    });
   }
 
   render() {
@@ -379,7 +396,10 @@ class CompanyProfile extends Component {
       reqHandlerPhone,
       reqHandlerAddress,
       reqHandlerCity,
-      reqHandlerZip
+      reqHandlerZip,
+      error,
+      alert,
+      loading
     } = this.state;
 
     const {
@@ -394,6 +414,35 @@ class CompanyProfile extends Component {
             <span style={{fontWeight: 'bold', fontSize: 20}}>
               {legalName}
             </span>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {
+              alert && (
+                <div className={`alert alert-${error ? 'danger' : 'success'} p-2`} role="alert" style={{ width: '100%', color: '#FFF', marginTop: 16, borderLeft: 5, borderLeftColor: 'red' }}>
+                  {
+                    !error ? (
+                      <span style={{ width: '70%' }}>
+                        <span className="lnr lnr-checkmark-circle"/>
+                        &nbsp;Company Updated!
+                      </span>
+                    ) : (
+                      <span style={{ width: '70%' }}>
+                        <span className="lnr lnr-cross-circle"/>
+                        &nbsp;Error!
+                        &nbsp;The information couldn&apos;t be saved. Please try again...
+                      </span>
+                    )
+                  }
+                  <div className="text-right" style={{ width: '30%' }}>
+                    <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={() => this.setState({ alert: false })}>
+                      <span className="lnr lnr-cross"/>
+                    </button>
+                  </div>
+                </div>
+              )
+            }
           </Col>
         </Row>
         <Row className="pt-2">
@@ -587,10 +636,19 @@ class CompanyProfile extends Component {
               </Button>
             </Link>
             <Button
+              disabled={loading}
               color="primary"
               onClick={this.saveCompany}
             >
-              Save
+              {
+                loading ? (
+                  <TSpinner
+                    color="#808080"
+                    loaderSize={10}
+                    loading
+                  />
+                ) : 'Save'
+              }
             </Button>
           </Col>
         </Row>
