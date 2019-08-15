@@ -163,6 +163,8 @@ class JobCarrierListPage extends Component {
         newJob.estimatedIncomeF = 'Invalid Rate Type';
       }
 
+      console.log('>>GOT JOBS: ', jobs)
+
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDate(job.startTime);
 

@@ -15,6 +15,7 @@ import DashboardObjectClickable from './DashboardObjectClickable';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
+import NumberFormatting from '../../utils/NumberFormatting';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -391,6 +392,7 @@ class DashboardCarrierPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
+
       if (newJob.rateType === 'Hour') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
@@ -403,13 +405,8 @@ class DashboardCarrierPage extends Component {
         );
 
         newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-        newJob.potentialIncomeF = TFormat.getValue(
-          TFormat.asMoney(
-            (tempRate * newJob.rateEstimate)
-          )
-        );
-      }
-      if (newJob.rateType === 'Ton') {
+        newJob.potentialIncomeF = NumberFormatting.asMoney(tempRate * newJob.rateEstimate);
+      } else if (newJob.rateType === 'Ton') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asTons(newJob.rateEstimate)
@@ -421,11 +418,7 @@ class DashboardCarrierPage extends Component {
         );
 
         newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-        newJob.potentialIncomeF = TFormat.getValue(
-          TFormat.asMoney(
-            (tempRate * newJob.rateEstimate)
-          )
-        );
+        newJob.potentialIncomeF = NumberFormatting.asMoney(tempRate * newJob.rateEstimate);
       }
 
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
