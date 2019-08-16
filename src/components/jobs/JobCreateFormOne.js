@@ -1132,7 +1132,16 @@ class CreateJobFormOne extends PureComponent {
     }
 
     const currDate = new Date();
-
+    if (!jobDate) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
     if (jobDate && (new Date(jobDate).getTime() < currDate.getTime())) {
       this.setState({
         reqHandlerDate: {
@@ -1780,6 +1789,7 @@ class CreateJobFormOne extends PureComponent {
                           givenDate: jobDate
                         }
                       }
+                      placeholderDate={jobDate}
                       onChange={this.jobDateChange}
                       dateFormat="Y-m-d H:i"
                       showTime
@@ -2157,15 +2167,13 @@ class CreateJobFormOne extends PureComponent {
                     >
                       Back
                     </Button>
-                    {job.status !== 'Saved' && (
-                      <Button
-                        color="outline-primary"
-                        className="next"
-                        onClick={this.saveJobDraft}
-                      >
-                        Save Job
-                      </Button>
-                    )}
+                    <Button
+                      color="outline-primary"
+                      className="next"
+                      onClick={this.saveJobDraft}
+                    >
+                      Save Job
+                    </Button>
                     <Button
                       color="primary"
                       className="next"

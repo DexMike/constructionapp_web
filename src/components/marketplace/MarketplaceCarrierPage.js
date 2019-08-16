@@ -14,6 +14,7 @@ import JobViewForm from './JobViewForm';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
+import NumberFormatting from '../../utils/NumberFormatting';
 
 class MarketplaceCarrierPage extends Component {
   constructor(props) {
@@ -165,61 +166,32 @@ class MarketplaceCarrierPage extends Component {
       jobs = jobs.map((job) => {
         const newJob = job;
 
-        // const company = await CompanyService.getCompanyById(newJob.companiesId);
-        // newJob.companyName = company.legalName;
-        //
-        // // console.log(companyName);
-        // // console.log(job.companyName);
-        //
-        // const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        // const materials = materialsList.map(materialItem => materialItem.value);
-        // newJob.material = this.equipmentMaterialsAsString(materials);
-        // console.log(companyName);
-        // console.log(job.material);
-        //
-        // const address = await AddressService.getAddressById(newJob.startAddress);
-        // newJob.zip = address.zipCode;
-
         const tempRate = newJob.rate;
         if (newJob.rateType === 'Hour') {
           newJob.newSize = newJob.rateEstimate;
           newJob.newSizeF = TFormat.getValue(
             TFormat.asHours(newJob.rateEstimate)
           );
-
-          newJob.newRate = newJob.rate;
-          newJob.newRateF = TFormat.getValue(
-            TFormat.asMoneyByHour(newJob.rate)
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
           );
-          // Job's Potential Earnings
-          // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
-          newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-          newJob.potentialIncomeF = TFormat.getValue(
-            TFormat.asMoney(
-              (tempRate * newJob.rateEstimate)
-            )
-          );
-        }
-        if (newJob.rateType === 'Ton') {
+        } else if (newJob.rateType === 'Ton') {
           newJob.newSize = newJob.rateEstimate;
           newJob.newSizeF = TFormat.getValue(
             TFormat.asTons(newJob.rateEstimate)
           );
-
-          newJob.newRate = newJob.rate;
-          newJob.newRateF = TFormat.getValue(
-            TFormat.asMoneyByTons(newJob.rate)
-          );
-          // Job's Potential Earnings
-          // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
-          newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-          newJob.potentialIncomeF = TFormat.getValue(
-            TFormat.asMoney(
-              (tempRate * newJob.rateEstimate)
-            )
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
           );
         }
 
+        newJob.newRate = newJob.rate;
+        // Job's Potential Earnings
+        // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
+        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+        newJob.potentialIncomeF = NumberFormatting.asMoney(
+          tempRate * newJob.rateEstimate
+        );
         newJob.newStartDate = TFormat.asDate(job.startTime);
         newJob.newStartDateF = TFormat.getValue(
           TFormat.asDate(job.startTime)
