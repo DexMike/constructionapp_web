@@ -165,7 +165,10 @@ TDateTimePickerField.propTypes = {
     error: PropTypes.string
   }),
   showTime: PropTypes.bool,
-  placeholderDate: PropTypes.object,
+  placeholderDate: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.number
+  ]),
   disabled: PropTypes.bool,
   profileTimeZone: PropTypes.string
 };
