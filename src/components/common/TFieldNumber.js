@@ -60,20 +60,25 @@ class TFieldNumber extends PureComponent {
       meta: { touched, error },
       negative,
       decimal,
-      currency,
-      allowUndefined
+      currency
     } = this.props;
     let step = 1;
     const min = !negative ? 0 : null;
     step = decimal ? 0.01 : null;
+    let extraClass = '';
+
+    if (currency) {
+      extraClass = 'form_currency';
+    }
     return (
       <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above input-number">
         {
           currency ? (
-            <span style={{position: 'absolute', paddingLeft: 16, paddingTop: 8}}>$</span>
+            <span style={{position: 'absolute', paddingLeft: 6, paddingTop: 8}}>$</span>
           ) : null
         }
         <input
+          className={extraClass}
           style={{textAlign: 'left', height: '32px', maxHeight: '32px'}}
           {...input}
           placeholder={placeholder}
@@ -101,7 +106,8 @@ TFieldNumber.propTypes = {
   placeholder: PropTypes.string,
   type: PropTypes.string,
   decimal: PropTypes.bool,
-  negative: PropTypes.bool
+  negative: PropTypes.bool,
+  currency: PropTypes.bool
 };
 
 TFieldNumber.defaultProps = {
@@ -112,7 +118,8 @@ TFieldNumber.defaultProps = {
   },
   type: 'number',
   decimal: false,
-  negative: false
+  negative: false,
+  currency: false
 };
 
 export default TFieldNumber;
