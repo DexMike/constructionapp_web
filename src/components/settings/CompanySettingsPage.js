@@ -108,8 +108,8 @@ class CompanySettingsPage extends Component {
           track your payment account information.
           That is kept securely at Hyperwallet, a PayPal company.
           To make changes to your account, please click this&nbsp;
-          <a href="https://www.hyperwallet.com" target="_blank">link</a>
-          &nbsp;or go directly to www.hyperwallet.com.<br/>
+          <a href="https://trelar.hyperwallet.com" target="_blank">link</a>
+          &nbsp;or go directly to https://trelar.hyperwallet.com.<br/>
           <br/>
           Please remember that no one at Trelar will ever ask you for your
           bank or account information.<br/>
