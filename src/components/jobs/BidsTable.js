@@ -71,9 +71,9 @@ class BidsTable extends Component {
         newBid.insCoverage = 'Yes';
       }
 
-      newBid.insuranceInfo = `General: ${NumberFormatting.asMoney(bidCompany.liabilityGeneral)}\n`
-      + `Auto: ${NumberFormatting.asMoney(bidCompany.liabilityAuto)}\n`
-      + `Other: ${NumberFormatting.asMoney(bidCompany.liabilityOther)}\n`;
+      newBid.insuranceInfo = `General: ${NumberFormatting.asMoney(bidCompany.liabilityGeneral, '.', 0)}\n`
+      + `Auto: ${NumberFormatting.asMoney(bidCompany.liabilityAuto, '.', 0)}\n`
+      + `Other: ${NumberFormatting.asMoney(bidCompany.liabilityOther, '.', 0)}\n`;
 
       newBid.date = bid.createdOn;
       newBid.dateF = TFormat.asDate(bid.createdOn);

@@ -131,6 +131,9 @@ class LoadsExpandableRow extends Component {
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           <Row className="col-md-12">
             <h5 style={{paddingBottom: '25px'}}>Are you sure you wish to dispute this load?</h5>
+            <h5 style={{paddingBottom: '25px'}}>If you dispute it, a Trelar representative will be
+              in contact with you soon to help solve the issue.
+            </h5>
           </Row>
           <Row className="col-md-12">
             <ButtonToolbar className="col-md-6 wizard__toolbar">
