@@ -771,7 +771,7 @@ class CarriersCustomerPage extends Component {
           />
           <div className="bold-text modal__title">Job Request</div>
         </div>
-        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+        <div className="modal__body" style={{ paddingTop: '25px', paddingRight: '0px' }}>
           <JobCreateFormCarrier
             selectedCarrierId={selectedCarrier}
             closeModal={this.toggleAddJobModal}

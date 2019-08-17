@@ -253,6 +253,7 @@ class JobForm extends Component {
     const { company } = this.state;
     let liabilityGeneral;
     let liabilityAuto;
+    let liabilityOther;
     if (company.liabilityGeneral > 0.01) {
       liabilityGeneral = (
         <React.Fragment>
@@ -269,6 +270,14 @@ class JobForm extends Component {
         </React.Fragment>
       );
     }
+    if (company.liabilityOther > 0.01) {
+      liabilityOther = (
+        <React.Fragment>
+          Minimum Other Liability: {TFormat.asMoneyNoDecimals(company.liabilityOther)}
+          <br/>
+        </React.Fragment>
+      );
+    }
 
     if (company.liabilityGeneral < 0.01 && company.liabilityAuto < 0.01) {
       return false;
@@ -277,6 +286,7 @@ class JobForm extends Component {
       <React.Fragment>
         {liabilityGeneral}
         {liabilityAuto}
+        {liabilityOther}
       </React.Fragment>
     );
   }

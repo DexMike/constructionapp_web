@@ -10,6 +10,7 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
@@ -229,6 +230,7 @@ class JobCreateFormCarrier extends Component {
   }
 
   async componentDidMount() {
+    const { job } = this.props;
     const profile = await ProfileService.getProfile();
     let allMaterials = await LookupsService.getLookupsByType('MaterialType');
     const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
@@ -270,6 +272,29 @@ class JobCreateFormCarrier extends Component {
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
+
+    if (job) {
+      this.setState({
+        name: job.name,
+        selectedStartAddressId: job.startAddress.id,
+        selectedEndAddressId: job.endAddress.id,
+        jobDate: moment.tz(
+          job.startTime,
+          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        ).utc().format(),
+        truckType: job.truckType,
+        hourTrucksNumber: job.numEquipments,
+        selectedRatedHourOrTon: job.rateType.toLowerCase(),
+        rateByHourValue: job.rate,
+        rateByTonValue: job.rate,
+        estimatedTons: job.rateEstimate,
+        estimatedHours: job.rateEstimate,
+        selectedMaterials: job.materials,
+        rateEstimate: job.rateEstimate,
+        instructions: job.notes
+      });
+    }
+
     this.setState({
       allAddresses,
       allUSstates: states,
@@ -319,6 +344,7 @@ class JobCreateFormCarrier extends Component {
 
   // save begins ///////////////////////////////////////////////////////
   async saveJob() {
+    const { job } = this.props;
     this.setState({ btnSubmitting: true });
 
     const isValid = await this.isFormValid();
@@ -436,146 +462,177 @@ class JobCreateFormCarrier extends Component {
 
     jobDate = moment(jobDate).format('YYYY-MM-DD HH:mm');
 
-    const job = {
-      companiesId: profile.companyId,
-      name,
-      status: 'Published And Offered',
-      isFavorited: false,
-      startAddress: startAddress.id,
-      endAddress: endAddress.id,
-      startTime: moment.tz(
+    let newJob = [];
+    let createdJob = [];
+
+    if (job) { // updating/editing Job from Job Detail Page
+      newJob = CloneDeep(job);
+      newJob.name = name;
+      newJob.startAddress = startAddress.id;
+      newJob.endAddress = endAddress.id;
+      newJob.startTime = moment.tz(
         jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format(),
-      equipmentType: truckType.value,
-      numEquipments: jobTrucksNeeded,
-      rateType,
-      rate,
-      rateEstimate,
-      rateTotal,
-      notes: instructions,
-      createdBy: profile.userId,
-      createdOn: moment.utc().format(),
-      modifiedBy: profile.userId,
-      modifiedOn: moment.utc().format()
-    };
+      ).utc().format();
+      newJob.equipmentType = truckType.value; // TODO: make this work with multiple truck types
+      newJob.numEquipments = jobTrucksNeeded;
+      newJob.rateType = rateType;
+      newJob.rate = rate;
+      newJob.rateEstimate = rateEstimate;
+      newJob.rateTotal = rateTotal;
+      newJob.notes = instructions;
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment.utc().format();
+      createdJob = await JobService.updateJob(newJob);
+      if (createdJob) {
+        this.saveJobMaterials(createdJob.id, selectedMaterials.value);
+      }
+      const { closeModal, updateJob } = this.props;
+      this.setState({ btnSubmitting: false });
+      updateJob(createdJob);
+      closeModal();
+    } else { // new Job Request from Carrier Search
+      newJob = {
+        companiesId: profile.companyId,
+        name,
+        status: 'Published And Offered',
+        isFavorited: false,
+        startAddress: startAddress.id,
+        endAddress: endAddress.id,
+        startTime: moment.tz(
+          jobDate,
+          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        ).utc().format(),
+        equipmentType: truckType.value,
+        numEquipments: jobTrucksNeeded,
+        rateType,
+        rate,
+        rateEstimate,
+        rateTotal,
+        notes: instructions,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
 
-    const createdJob = await JobService.createJob(job);
-    // return false;
+      createdJob = await JobService.createJob(newJob);
+      // return false;
 
-    // add materials
-    if (createdJob) {
+      // add materials
+      if (createdJob) {
+        /*
+        if (d.selectedMaterials) { // check if there's materials to add
+          this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+        }
+        */
+        // one material only
+        this.saveJobMaterials(createdJob.id, selectedMaterials.value);
+      }
+
+      const bid = {};
+      const booking = {};
+      // const bookingEquipment = {};
+
+      // final steps
+      bid.jobId = createdJob.id;
+      bid.userId = profile.userId;
+      // bid.startAddress = createdJob.startAddress;
+      // bid.endAddress = createdJob.endAddress;
+      bid.companyCarrierId = selectedCarrierId;
+      bid.rate = createdJob.rate;
+      bid.rateType = rateType;
+      bid.rateEstimate = createdJob.rateEstimate;
+      bid.hasCustomerAccepted = 1;
+      bid.hasSchedulerAccepted = 0;
+      bid.status = 'Pending';
+      bid.notes = createdJob.notes;
+      bid.createdBy = profile.userId;
+      bid.createdOn = moment.utc().format();
+      bid.modifiedBy = profile.userId;
+      bid.modifiedOn = moment.utc().format();
+      const createdBid = await BidService.createBid(bid);
+
+      // Now we need to create a Booking
+      booking.bidId = createdBid.id;
+      booking.schedulersCompanyId = selectedCarrierId.companyId;
+      booking.rateType = createdJob.rateType;
+      booking.schedulersCompanyId = selectedCarrierId;
+      booking.startTime = createdJob.startTime;
+
+      // if the startaddress is the actual ID
+      if (Number.isInteger(createdJob.startAddress)) {
+        booking.sourceAddressId = createdJob.startAddress;
+        booking.startAddressId = createdJob.startAddress;
+      } else {
+        booking.sourceAddressId = createdJob.startAddress.id;
+        booking.startAddressId = createdJob.startAddress.id;
+      }
+
+      if (Number.isInteger(createdJob.endAddress)) {
+        booking.endAddressId = createdJob.endAddress;
+      } else {
+        booking.endAddressId = createdJob.endAddress.id;
+      }
+
+      const createdBooking = await BookingService.createBooking(booking);
+
       /*
-      if (d.selectedMaterials) { // check if there's materials to add
-        this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
-      }
+      // now we need to create a BookingEquipment record
+      // Since in this scenario we are only allowing 1 truck for one booking
+      // we are going to create one BookingEquipment.  NOTE: the idea going forward is
+      // to allow multiple trucks per booking
+      bookingEquipment.bookingId = createdBooking.id;
+
+      // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+
+      // this needs to be createdBid.carrierCompanyId.adminId
+      bookingEquipment.schedulerId = createdBid.userId;
+      // bookingEquipment.driverId = selectedCarrierId.driversId; // check out
+      // bookingEquipment.equipmentId = selectedCarrierId.id; // check out
+      bookingEquipment.rateType = createdBid.rateType;
+      // At this point we do not know what rateActual is, this will get set upon completion
+      // of the job
+      bookingEquipment.rateActual = 0;
+      // Lets copy the bid info
+      bookingEquipment.startTime = createdBooking.startTime;
+      bookingEquipment.endTime = createdBooking.endTime;
+      bookingEquipment.startAddressId = createdBooking.startAddressId;
+      bookingEquipment.endAddressId = createdBooking.endAddressId;
+
+      // Since this is booking method 1, we do not have any notes as this is getting created
+      // automatically and not by a user
+      bookingEquipment.notes = '';
+
+      // this needs to be createdBid.carrierCompanyId.adminId
+      bookingEquipment.createdBy = selectedCarrierId.driversId; // check out
+      bookingEquipment.modifiedBy = selectedCarrierId.driversId; // check out
+      bookingEquipment.modifiedOn = moment()
+        .unix() * 1000;
+      bookingEquipment.createdOn = moment()
+        .unix() * 1000;
+      await BookingEquipmentService.createBookingEquipments(bookingEquipment);
       */
-      // one material only
-      this.saveJobMaterials(createdJob.id, selectedMaterials.value);
-    }
 
-    const bid = {};
-    const booking = {};
-    // const bookingEquipment = {};
-
-    // final steps
-    bid.jobId = createdJob.id;
-    bid.userId = profile.userId;
-    // bid.startAddress = createdJob.startAddress;
-    // bid.endAddress = createdJob.endAddress;
-    bid.companyCarrierId = selectedCarrierId;
-    bid.rate = createdJob.rate;
-    bid.rateType = rateType;
-    bid.rateEstimate = createdJob.rateEstimate;
-    bid.hasCustomerAccepted = 1;
-    bid.hasSchedulerAccepted = 0;
-    bid.status = 'Pending';
-    bid.notes = createdJob.notes;
-    bid.createdBy = profile.userId;
-    bid.createdOn = moment.utc().format();
-    bid.modifiedBy = profile.userId;
-    bid.modifiedOn = moment.utc().format();
-    const createdBid = await BidService.createBid(bid);
-
-    // Now we need to create a Booking
-    booking.bidId = createdBid.id;
-    booking.schedulersCompanyId = selectedCarrierId.companyId;
-    booking.rateType = createdJob.rateType;
-    booking.schedulersCompanyId = selectedCarrierId;
-    booking.startTime = createdJob.startTime;
-
-    // if the startaddress is the actual ID
-    if (Number.isInteger(createdJob.startAddress)) {
-      booking.sourceAddressId = createdJob.startAddress;
-      booking.startAddressId = createdJob.startAddress;
-    } else {
-      booking.sourceAddressId = createdJob.startAddress.id;
-      booking.startAddressId = createdJob.startAddress.id;
-    }
-
-    if (Number.isInteger(createdJob.endAddress)) {
-      booking.endAddressId = createdJob.endAddress;
-    } else {
-      booking.endAddressId = createdJob.endAddress.id;
-    }
-
-    const createdBooking = await BookingService.createBooking(booking);
-
-    /*
-    // now we need to create a BookingEquipment record
-    // Since in this scenario we are only allowing 1 truck for one booking
-    // we are going to create one BookingEquipment.  NOTE: the idea going forward is
-    // to allow multiple trucks per booking
-    bookingEquipment.bookingId = createdBooking.id;
-
-    // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
-
-    // this needs to be createdBid.carrierCompanyId.adminId
-    bookingEquipment.schedulerId = createdBid.userId;
-    // bookingEquipment.driverId = selectedCarrierId.driversId; // check out
-    // bookingEquipment.equipmentId = selectedCarrierId.id; // check out
-    bookingEquipment.rateType = createdBid.rateType;
-    // At this point we do not know what rateActual is, this will get set upon completion
-    // of the job
-    bookingEquipment.rateActual = 0;
-    // Lets copy the bid info
-    bookingEquipment.startTime = createdBooking.startTime;
-    bookingEquipment.endTime = createdBooking.endTime;
-    bookingEquipment.startAddressId = createdBooking.startAddressId;
-    bookingEquipment.endAddressId = createdBooking.endAddressId;
-
-    // Since this is booking method 1, we do not have any notes as this is getting created
-    // automatically and not by a user
-    bookingEquipment.notes = '';
-
-    // this needs to be createdBid.carrierCompanyId.adminId
-    bookingEquipment.createdBy = selectedCarrierId.driversId; // check out
-    bookingEquipment.modifiedBy = selectedCarrierId.driversId; // check out
-    bookingEquipment.modifiedOn = moment()
-      .unix() * 1000;
-    bookingEquipment.createdOn = moment()
-      .unix() * 1000;
-    await BookingEquipmentService.createBookingEquipments(bookingEquipment);
-    */
-
-    // Let's make a call to Twilio to send an SMS
-    // We need to get the phone number from the carrier co
-    // Sending SMS to Truck's company's admin
-    const carrierAdmin = await UserService.getAdminByCompanyId(selectedCarrierId);
-    if (carrierAdmin.length > 0) { // check if we get a result
-      if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
-        const notification = {
-          to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-          body: 'You have a new job offer, please log in to https://www.mytrelar.com'
-        };
-        await TwilioService.createSms(notification);
+      // Let's make a call to Twilio to send an SMS
+      // We need to get the phone number from the carrier co
+      // Sending SMS to Truck's company's admin
+      const carrierAdmin = await UserService.getAdminByCompanyId(selectedCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: 'You have a new job offer, please log in to https://www.mytrelar.com'
+          };
+          await TwilioService.createSms(notification);
+        }
       }
-    }
 
-    alert('Job Sent to carrier');
-    const { closeModal } = this.props;
-    this.setState({ btnSubmitting: false });
-    closeModal();
+      alert('Job Sent to carrier');
+      const { closeModal } = this.props;
+      this.setState({ btnSubmitting: false });
+      closeModal();
+    }
   }
   // save ends /////////////////////////////////////////////////////////
 
@@ -1068,7 +1125,6 @@ class JobCreateFormCarrier extends Component {
       rateByHourValue,
       name,
       jobStartDateTime,
-      jobDate,
       truckType,
       selectedMaterials,
       startLocationAddressName,
@@ -1098,6 +1154,7 @@ class JobCreateFormCarrier extends Component {
       reqHandlerStartAddressName,
       reqHandlerEndAddressName
     } = this.state;
+    let { jobDate } = this.state;
     let isValid = true;
 
     if (!selectedMaterials || selectedMaterials.length === 0) {
@@ -1145,12 +1202,14 @@ class JobCreateFormCarrier extends Component {
       });
       isValid = false;
     }
+
+    jobDate = new Date(jobDate);
     if (jobDate && jobDate.getTime() < currDate.getTime()) {
       this.setState({
         reqHandlerDate: {
           ...reqHandlerDate,
           touched: true,
-          error: "The date of the job can not be set in the past or as the current date and time"
+          error: 'The date of the job can not be set in the past or as the current date and time'
         }
       });
       isValid = false;
@@ -1465,7 +1524,7 @@ class JobCreateFormCarrier extends Component {
   }
 
   render() {
-    const { closeModal } = this.props;
+    const { closeModal, job } = this.props;
     const {
       btnSubmitting,
       jobName,
@@ -1578,11 +1637,13 @@ class JobCreateFormCarrier extends Component {
                           givenDate: jobDate
                         }
                       }
+                      placeholderDate={jobDate}
                       onChange={this.jobDateChange}
                       dateFormat="Y-m-d H:i"
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
+                      profileTimeZone={profile.timeZone}
                     />
                   </div>
                 </Row>
@@ -1949,13 +2010,24 @@ class JobCreateFormCarrier extends Component {
                     </Button>
                   </ButtonToolbar>
                   <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                    <TSubmitButton
-                      onClick={this.saveJob}
-                      className="primaryButton"
-                      loading={btnSubmitting}
-                      loaderSize={10}
-                      bntText="Request Carrier"
-                    />
+                    { job && (
+                      <TSubmitButton
+                        onClick={this.saveJob}
+                        className="primaryButton"
+                        loading={btnSubmitting}
+                        loaderSize={10}
+                        bntText="Update Job"
+                      />
+                    )}
+                    { !job && (
+                      <TSubmitButton
+                        onClick={this.saveJob}
+                        className="primaryButton"
+                        loading={btnSubmitting}
+                        loaderSize={10}
+                        bntText="Request Carrier"
+                      />
+                    )}
                   </ButtonToolbar>
                 </Row>
 
@@ -1980,12 +2052,16 @@ class JobCreateFormCarrier extends Component {
 JobCreateFormCarrier.propTypes = {
   selectedCarrierId: PropTypes.number,
   // getAllMaterials: PropTypes.func.isRequired,
-  closeModal: PropTypes.func.isRequired
+  closeModal: PropTypes.func.isRequired,
+  job: PropTypes.object,
+  updateJob: PropTypes.func
   // selectedMaterials: PropTypes.func.isRequired
 };
 
 JobCreateFormCarrier.defaultProps = {
   selectedCarrierId: null,
+  job: null,
+  updateJob: null
   // getAllMaterials: PropTypes.func,
   // closeModal: PropTypes.bool
 };
