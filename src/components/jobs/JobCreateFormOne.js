@@ -1613,7 +1613,7 @@ class CreateJobFormOne extends PureComponent {
     if (hourTon === 'ton') {
       return (
         <React.Fragment>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-3 form__form-group">
             <span className="form__form-group-label">Rate / Ton</span>
             <TFieldNumber
               input={
@@ -1628,7 +1628,7 @@ class CreateJobFormOne extends PureComponent {
               meta={reqHandlerTons}
             />
           </div>
-          <div className="col-md-5 form__form-group">
+          <div className="col-md-3 form__form-group">
             <span className="form__form-group-label">Estimated Tons</span>
             <TFieldNumber
               input={
@@ -1648,7 +1648,7 @@ class CreateJobFormOne extends PureComponent {
     }
     return (
       <React.Fragment>
-        <div className="col-md-4 form__form-group">
+        <div className="col-md-3 form__form-group">
           <span className="form__form-group-label">Rate / Hour</span>
           <TFieldNumber
             input={
@@ -1663,7 +1663,7 @@ class CreateJobFormOne extends PureComponent {
             meta={reqHandlerHours}
           />
         </div>
-        <div className="col-md-5 form__form-group">
+        <div className="col-md-3 form__form-group">
           <span className="form__form-group-label">Estimated Hours</span>
           <TFieldNumber
             input={
@@ -1818,7 +1818,7 @@ class CreateJobFormOne extends PureComponent {
                       // meta={reqHandlerTrucksEstimate}
                     />
                   </div>
-                  <div className="col-md-4">
+                  <div className="col-md-9 multitop">
                     <span className="form__form-group-label">Truck Type</span>
                     <MultiSelect
                       input={
@@ -1834,7 +1834,11 @@ class CreateJobFormOne extends PureComponent {
                       meta={reqHandlerTruckType}
                     />
                   </div>
-                  <div className="col-md-5 form__form-group">
+                  
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-3 form__form-group">
                     <span className="form__form-group-label">Material</span>
                     <SelectField
                       input={
@@ -1850,9 +1854,7 @@ class CreateJobFormOne extends PureComponent {
                       placeholder="Select material"
                     />
                   </div>
-                </Row>
 
-                <Row className="col-md-12">
                   <div className="col-md-3 form__form-group">
                     <span className="form__form-group-label">Rate</span>
                     <SelectField
