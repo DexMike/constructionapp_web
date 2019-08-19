@@ -34,7 +34,8 @@ class JobForm extends Component {
       modifiedOn: moment.utc().format(),
       isArchived: 0,
       overlayMapData: {},
-      isExpanded: false
+      isExpanded: false,
+      allTruckTypes: []
     };
 
     this.state = {
@@ -104,6 +105,8 @@ class JobForm extends Component {
       images = bookingInvoices.map(item => item.image);
     }
 
+    const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
+
     this.setState({
       images,
       companyType: profile.companyType,
@@ -116,7 +119,8 @@ class JobForm extends Component {
       profile,
       company,
       distance,
-      time
+      time,
+      allTruckTypes
     });
   }
 
@@ -292,7 +296,14 @@ class JobForm extends Component {
   }
 
   renderJobTop(job) {
-    const { profile, companyType, carrier } = this.state;
+    const {
+      profile,
+      companyType,
+      carrier,
+      allTruckTypes
+    } = this.state;
+
+    const trucks = allTruckTypes.join(', ');
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props ? estimatedCost.props.value : 0;
@@ -327,7 +338,7 @@ class JobForm extends Component {
           {this.renderMinimumInsurance()}
           Number of Trucks: {job.numEquipments}
           <br/>
-          Truck Type: {job.equipmentType}
+          Truck Types: {trucks}
           <br/>
         </div>
         <div className="col-md-4">
