@@ -21,6 +21,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
 import ProfileService from '../../api/ProfileService';
+import JobService from '../../api/JobService';
 import GeoCodingService from '../../api/GeoCodingService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 
@@ -251,6 +252,25 @@ class CreateJobFormOne extends PureComponent {
           label: material.val1
         }));
 
+        // we map the selected truck types to the allTruckTypes array to get the Lookup value
+        const selectedTruckTypes = await JobService.getMaterialsByJobId(p.id);
+        const mapSelectedTruckTypes = [];
+        Object.values(selectedTruckTypes)
+          .forEach((itm) => {
+            let inside = {};
+            Object.keys(allTruckTypes).map((propKey) => {
+              if (allTruckTypes[propKey].label === itm) {
+                inside = {
+                  label: itm,
+                  value: allTruckTypes[propKey].value
+                }
+                return inside;
+              }
+              return null;
+            });
+            mapSelectedTruckTypes.push(inside);
+          });
+
         this.setState({
           // jobDate,
           allMaterials,
@@ -281,7 +301,7 @@ class CreateJobFormOne extends PureComponent {
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
           rateEstimate: p.rateEstimate,
-          selectedTrucks: p.selectedTrucks
+          selectedTrucks: mapSelectedTruckTypes
         });
       } else if (copyJob) { // We're trying to Copy an existing job
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id ? p.id : p.jobId);
@@ -312,13 +332,29 @@ class CreateJobFormOne extends PureComponent {
           ).format('YYYY-MM-DD HH:mm:ss'));
         }
 
+        // we map the selected truck types to the allTruckTypes array to get the Lookup value
+        const selectedTruckTypes = await JobService.getMaterialsByJobId(p.id ? p.id : p.jobId);
+        const mapSelectedTruckTypes = [];
+        Object.values(selectedTruckTypes)
+          .forEach((itm) => {
+            let inside = {};
+            Object.keys(allTruckTypes).map((propKey) => {
+              if (allTruckTypes[propKey].label === itm) {
+                inside = {
+                  label: itm,
+                  value: allTruckTypes[propKey].value
+                }
+                return inside;
+              }
+              return null;
+            });
+            mapSelectedTruckTypes.push(inside);
+          });
+
         this.setState({
-          jobDate,
           allMaterials,
-          allTruckTypes
-        });
-        this.setState({
-          jobId: p.id,
+          allTruckTypes,
+          jobId: p.id ? p.id : p.jobId,
           userCompanyId: p.userCompanyId,
           // truck properties
           // truckType,
@@ -360,7 +396,7 @@ class CreateJobFormOne extends PureComponent {
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
           rateEstimate: p.rateEstimate,
-          selectedTrucks: p.selectedTrucks
+          selectedTrucks: mapSelectedTruckTypes
         });
       } else { // We are coming from the second tab
         // TODO -> There should be a way to map directly to state
@@ -1789,7 +1825,8 @@ class CreateJobFormOne extends PureComponent {
                           givenDate: jobDate
                         }
                       }
-                      placeholderDate={jobDate}
+                      placeholder="Date and time of job"
+                      defaultDate={jobDate}
                       onChange={this.jobDateChange}
                       dateFormat="Y-m-d H:i"
                       showTime

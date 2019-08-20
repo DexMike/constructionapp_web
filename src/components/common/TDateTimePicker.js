@@ -114,7 +114,8 @@ class TDateTimePickerField extends PureComponent {
       // timeFormat,
       disabled,
       id,
-      placeholderDate
+      placeholder,
+      defaultDate
     } = this.props;
     return (
       <div className="date-picker">
@@ -123,9 +124,10 @@ class TDateTimePickerField extends PureComponent {
             disabled={disabled}
             className="c-date-picker"
             id={id}
+            placeholder={placeholder}
             options={{
               enableTime: showTime,
-              defaultDate: placeholderDate,
+              defaultDate,
               dateFormat,
               // enableTime: true,
               onChange: this.handleChange
@@ -159,14 +161,19 @@ TDateTimePickerField.propTypes = {
       PropTypes.number
     ])
   }).isRequired,
+  placeholder: PropTypes.string,
   dateFormat: PropTypes.string,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
   }),
   showTime: PropTypes.bool,
-  placeholderDate: PropTypes.oneOfType([
+  defaultDate: PropTypes.oneOfType([
     PropTypes.object,
+    PropTypes.number
+  ]),
+  id: PropTypes.oneOfType([
+    PropTypes.string,
     PropTypes.number
   ]),
   disabled: PropTypes.bool,
@@ -180,7 +187,9 @@ TDateTimePickerField.defaultProps = {
     error: null
   },
   showTime: false,
-  placeholderDate: new Date(),
+  defaultDate: null,
+  id: null,
+  placeholder: null,
   disabled: false,
   profileTimeZone: null
 };
