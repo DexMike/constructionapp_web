@@ -1,0 +1,23 @@
+{
+  "setupFiles": [
+    "jest-canvas-mock",
+    "./vendor/mapsjs-core.js",
+    "./vendor/mapsjs-service.js",
+    "./src/setupEnzyme.js"
+  ],
+  "testURL": "http://localhost/",
+  "coverageThreshold": {
+    "global": {
+      "branches": 0,
+      "functions": 0,
+      "lines": 0,
+      "statements": 0
+    }
+  },
+  "coveragePathIgnorePatterns": [
+    "./src/setupEnzyme"
+  ],
+  "moduleNameMapper": {
+    "\\.(css|less|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "jest-transform-stub"
+  }
+}
