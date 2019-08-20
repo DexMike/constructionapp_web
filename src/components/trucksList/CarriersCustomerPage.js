@@ -426,7 +426,7 @@ class CarriersCustomerPage extends Component {
           // had to add 'US' to specify country
           const geoCode = await GeoUtils.getCoordsFromAddress(`${filters.zipCode}, US`);
           filters.companyLatitude = geoCode.lat;
-          filters.companyLongitude = geoCode.long;
+          filters.companyLongitude = geoCode.lng;
         } catch (e) {
           this.setState({
             reqHandlerZip: {
