@@ -1626,6 +1626,7 @@ class CreateJobFormOne extends PureComponent {
               placeholder="0"
               decimal
               meta={reqHandlerTons}
+              currency
             />
           </div>
           <div className="col-md-3 form__form-group">
