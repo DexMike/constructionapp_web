@@ -51,10 +51,11 @@ class LoadsExpandableRow extends Component {
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
     const date = new Date();
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
     disputeEmail = {
       toEmail: 'csr@trelar.net',
       toName: 'Trelar CSR',
-      subject: `[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
+      subject: `${envString}[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
       isHTML: true,
       body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
         + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
