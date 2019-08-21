@@ -175,7 +175,7 @@ class TMap extends Component {
   render() {
     const {width, height, id} = this.props;
     return (
-      <div style={{width, height}} id={`mapContainer${id}`}/>
+      <section style={{width, height}} id={`mapContainer${id}`}/>
     );
   }
 }
