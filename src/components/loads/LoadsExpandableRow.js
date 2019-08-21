@@ -251,7 +251,7 @@ class LoadsExpandableRow extends Component {
               >{!isExpanded ? '+' : '-'}
               </IconButton>
             </TableCell>
-            <TableCell align="left">{index + 1} - IZ: {isExpanded.toString()}</TableCell>
+            <TableCell align="left">{index + 1}{isExpanded.toString()}</TableCell>
             <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
