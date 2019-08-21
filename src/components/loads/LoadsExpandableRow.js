@@ -15,6 +15,9 @@ import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
 import TMap from '../common/TMap';
 
+const refreshInterval = 90; // refresh every 90 seconds
+let timerVar;
+
 class LoadsExpandableRow extends Component {
   constructor(props) {
     super(props);
@@ -30,23 +33,25 @@ class LoadsExpandableRow extends Component {
       loadInvoices: [],
       disputeEmail: null,
       profile: null,
-      toggledId: 0,
+      toggledId: 0
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.programmedRefresh = this.programmedRefresh.bind(this);
+    this.getTrackings = this.getTrackings.bind(this);
   }
 
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let {gpsTrackings, loadInvoices, disputeEmail} = {...this.state};
-    gpsTrackings = await this.fetchGPSPoints(load.id);
-    // return false;
+    let { loadInvoices, disputeEmail } = {...this.state};
+
+    this.getTrackings(load.id);
+
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
     // This throws an error
     const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
-    // const driver = {};
 
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
@@ -70,11 +75,19 @@ class LoadsExpandableRow extends Component {
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
     this.setState({
-      gpsTrackings,
-      loadInvoices,
       disputeEmail,
-      profile
+      profile,
+      loadInvoices
     });
+  }
+
+  componentWillUnmount() {
+    this.programmedRefresh(true);
+  }
+
+  async getTrackings(loadId) {
+    const gpsTrackings = await this.fetchGPSPoints(loadId);
+    this.setState({ gpsTrackings });
   }
 
   async fetchGPSPoints(loadId) {
@@ -87,8 +100,10 @@ class LoadsExpandableRow extends Component {
     const { onRowExpanded } = this.props;
     isExpanded = !isExpanded;
     if (isExpanded) {
+      this.programmedRefresh(false);
       onRowExpanded(load.id, isExpanded);
     } else {
+      this.programmedRefresh(true);
       onRowExpanded(0, isExpanded);
     }
   }
@@ -112,6 +127,23 @@ class LoadsExpandableRow extends Component {
   toggleDisputeModal() {
     const {modal} = this.state;
     this.setState({modal: !modal});
+  }
+
+  programmedRefresh(remove) {
+    const { load } = this.state;
+    if (!remove) {
+      const that = this;
+      const timerTimer = function timerTimer() {
+        const { isExpanded } = that.props;
+        if (!isExpanded) {
+          clearInterval(timerVar);
+        }
+        that.getTrackings(load.id);
+      };
+      timerVar = setInterval(timerTimer, (refreshInterval * 1000));
+    } else {
+      clearInterval(timerVar);
+    }
   }
 
   renderModal() {
@@ -173,10 +205,11 @@ class LoadsExpandableRow extends Component {
         profile,
         job
       } = {...this.state};
+
       let startCoords = job.startAddress;
       let endCoords = job.endAddress;
       // if there are tracking points use those instead of job address.
-      if(gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
+      if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
         startCoords = {
           latitude: gpsTrackings[0][1],
           longitude: gpsTrackings[0][0]
@@ -202,7 +235,7 @@ class LoadsExpandableRow extends Component {
           statusColor = 'orange';
           break;
         case 'Ended':
-          statusColor = 'blue';
+          statusColor = 'gray';
           break;
         default:
           statusColor = 'black';
@@ -218,7 +251,7 @@ class LoadsExpandableRow extends Component {
               >{!isExpanded ? '+' : '-'}
               </IconButton>
             </TableCell>
-            <TableCell align="left">{index + 1}</TableCell>
+            <TableCell align="left">{index + 1} - IZ: {isExpanded.toString()}</TableCell>
             <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
@@ -315,9 +348,6 @@ class LoadsExpandableRow extends Component {
                             width: '100%'
                           }}
                         />
-                        // <Col className="col-md-3 pt-3" key={`img-${item}`}>
-                        //   <img key={item} src={`${item[2]}`} alt={`${item}`}/>
-                        // </Col>
                       ))
                       }
                     </Col>
