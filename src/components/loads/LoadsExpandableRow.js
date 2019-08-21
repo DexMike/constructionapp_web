@@ -15,7 +15,7 @@ import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
 import TMap from '../common/TMap';
 
-const refreshInterval = 15; // refresh every 90 seconds
+const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;
 
 class LoadsExpandableRow extends Component {
