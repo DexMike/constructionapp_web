@@ -934,6 +934,7 @@ class JobSavePage extends Component {
       )
     ) {
       if (job.status === 'Published' || job.status === 'Published And Offered' || job.status === 'On Offer') {
+      // this is to edit an already 'published' job
         return (
           <TSubmitButton
             onClick={() => this.toggleEditExistingJobModal()}
@@ -944,6 +945,7 @@ class JobSavePage extends Component {
           />
         );
       }
+      // this is to edit a 'saved' job
       return (
         <TSubmitButton
           onClick={() => this.toggleNewJobModal()}
