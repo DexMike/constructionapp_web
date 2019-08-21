@@ -25,7 +25,17 @@ class GeoUtils {
         resolve(summary);
       },
       (err) => {
-        reject(new Error(err));
+        // reject(new Error(err));
+        const errorValues = {
+          baseTime: 0,
+          distance: 0,
+          flags: [],
+          text: err,
+          trafficTime: 0,
+          travelTime: 0,
+          _type: 'RouteSummaryType'
+        };
+        resolve({errorValues});
       }
     ));
   }

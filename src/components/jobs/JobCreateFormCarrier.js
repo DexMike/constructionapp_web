@@ -11,6 +11,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
+import MultiSelect from '../common/TMultiSelect';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import LookupsService from '../../api/LookupsService';
@@ -48,6 +49,7 @@ class JobCreateFormCarrier extends Component {
       profile: null,
 
       // truck properties
+      selectedTrucks: '',
       truckType: '',
       allTruckTypes: [],
       capacity: 0,
@@ -100,7 +102,6 @@ class JobCreateFormCarrier extends Component {
       // jobStartDate
       jobStartDateTime: new Date(),
       jobTruckType: '',
-      jobTrucksNeeded: '',
 
       // Request Handlers
       reqHandlerSameAddresses: {
@@ -244,7 +245,7 @@ class JobCreateFormCarrier extends Component {
       .forEach((itm) => {
         const inside = {
           label: itm.val1,
-          value: itm.val1
+          value: String(itm.id)
         };
         allTruckTypes.push(inside);
       });
@@ -274,15 +275,33 @@ class JobCreateFormCarrier extends Component {
     }));
 
     if (job) {
+      // we map the selected truck types to the allTruckTypes array to get the Lookup value
+      const selectedTruckTypes = await JobService.getMaterialsByJobId(job.id);
+      const mapSelectedTruckTypes = [];
+      Object.values(selectedTruckTypes)
+        .forEach((itm) => {
+          let inside = {};
+          Object.keys(allTruckTypes).map((propKey) => {
+            if (allTruckTypes[propKey].label === itm) {
+              inside = {
+                label: itm,
+                value: allTruckTypes[propKey].value
+              }
+              return inside;
+            }
+            return null;
+          });
+          mapSelectedTruckTypes.push(inside);
+        });
       this.setState({
         name: job.name,
         selectedStartAddressId: job.startAddress.id,
         selectedEndAddressId: job.endAddress.id,
-        jobDate: moment.tz(
-          job.startTime,
+        jobDate: new Date(moment(job.startTime).tz(
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-        ).utc().format(),
+        ).format('YYYY-MM-DD HH:mm:ss')),
         truckType: job.truckType,
+        selectedTrucks: mapSelectedTruckTypes,
         hourTrucksNumber: job.numEquipments,
         selectedRatedHourOrTon: job.rateType.toLowerCase(),
         rateByHourValue: job.rate,
@@ -342,6 +361,22 @@ class JobCreateFormCarrier extends Component {
     return null;
   }
 
+  // let's create a list of truck types that we want to save
+  async saveJobTrucks(jobId, trucks) {
+    const allTrucks = [];
+    for (const truck of trucks) {
+      const equipmentMaterial = {
+        jobId,
+        equipmentTypeId: Number(truck.value)
+      };
+      allTrucks.push(equipmentMaterial);
+    }
+    // delete old set of equipment types
+    await JobMaterialsService.deleteJobEquipmentsByJobId(jobId);
+    // create a new set of equipment types
+    await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+  }
+
   // save begins ///////////////////////////////////////////////////////
   async saveJob() {
     const { job } = this.props;
@@ -385,8 +420,9 @@ class JobCreateFormCarrier extends Component {
       name,
       instructions,
       jobTruckType,
+      selectedTrucks,
       truckType,
-      jobTrucksNeeded,
+      hourTrucksNumber,
       selectedMaterials
     } = this.state;
     let { jobDate } = this.state;
@@ -474,8 +510,8 @@ class JobCreateFormCarrier extends Component {
         jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).utc().format();
-      newJob.equipmentType = truckType.value; // TODO: make this work with multiple truck types
-      newJob.numEquipments = jobTrucksNeeded;
+      // newJob.equipmentType = truckType.value; // TODO: make this work with multiple truck types
+      newJob.numEquipments = hourTrucksNumber;
       newJob.rateType = rateType;
       newJob.rate = rate;
       newJob.rateEstimate = rateEstimate;
@@ -485,7 +521,12 @@ class JobCreateFormCarrier extends Component {
       newJob.modifiedOn = moment.utc().format();
       createdJob = await JobService.updateJob(newJob);
       if (createdJob) {
+        // save material
         this.saveJobMaterials(createdJob.id, selectedMaterials.value);
+        // save job equipments
+        if (Object.keys(selectedTrucks).length > 0) {
+          this.saveJobTrucks(createdJob.id, selectedTrucks);
+        }
       }
       const { closeModal, updateJob } = this.props;
       this.setState({ btnSubmitting: false });
@@ -504,7 +545,7 @@ class JobCreateFormCarrier extends Component {
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
         ).utc().format(),
         equipmentType: truckType.value,
-        numEquipments: jobTrucksNeeded,
+        numEquipments: hourTrucksNumber,
         rateType,
         rate,
         rateEstimate,
@@ -528,6 +569,10 @@ class JobCreateFormCarrier extends Component {
         */
         // one material only
         this.saveJobMaterials(createdJob.id, selectedMaterials.value);
+        // save job equipments
+        if (Object.keys(selectedTrucks).length > 0) {
+          this.saveJobTrucks(createdJob.id, selectedTrucks);
+        }
       }
 
       const bid = {};
@@ -637,14 +682,11 @@ class JobCreateFormCarrier extends Component {
   // save ends /////////////////////////////////////////////////////////
 
   handleTruckTypeChange(data) {
-    const {reqHandlerTruckType} = this.state;
+    const { reqHandlerTruckType } = this.state;
     this.setState({
-      reqHandlerTruckType: {
-        ...reqHandlerTruckType,
-        touched: false
-      }
+      reqHandlerTruckType: {...reqHandlerTruckType, touched: false}
     });
-    this.setState({truckType: data});
+    this.setState({selectedTrucks: data});
   }
 
   handleStartLocationChange(e) {
@@ -1125,7 +1167,7 @@ class JobCreateFormCarrier extends Component {
       rateByHourValue,
       name,
       jobStartDateTime,
-      truckType,
+      selectedTrucks,
       selectedMaterials,
       startLocationAddressName,
       endLocationAddressName,
@@ -1179,12 +1221,12 @@ class JobCreateFormCarrier extends Component {
       isValid = false;
     }
 
-    if (!truckType || truckType.length === 0) {
+    if (!selectedTrucks || selectedTrucks.length === 0) {
       this.setState({
         reqHandlerTruckType: {
           ...reqHandlerTruckType,
           touched: true,
-          error: 'Required input'
+          error: 'Please select type of truck'
         }
       });
       isValid = false;
@@ -1454,7 +1496,7 @@ class JobCreateFormCarrier extends Component {
     if (hourTon === 'ton') {
       return (
         <React.Fragment>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-3 form__form-group">
             <span className="form__form-group-label">Rate / Ton</span>
             <TFieldNumber
               input={
@@ -1469,7 +1511,7 @@ class JobCreateFormCarrier extends Component {
               meta={reqHandlerTons}
             />
           </div>
-          <div className="col-md-5 form__form-group">
+          <div className="col-md-3 form__form-group">
             <span className="form__form-group-label">Estimated Tons</span>
             <TFieldNumber
               input={
@@ -1489,7 +1531,7 @@ class JobCreateFormCarrier extends Component {
     }
     return (
       <React.Fragment>
-        <div className="col-md-4 form__form-group">
+        <div className="col-md-3 form__form-group">
           <span className="form__form-group-label">Rate / Hour</span>
           <TFieldNumber
             input={
@@ -1504,7 +1546,7 @@ class JobCreateFormCarrier extends Component {
             meta={reqHandlerHours}
           />
         </div>
-        <div className="col-md-5 form__form-group">
+        <div className="col-md-3 form__form-group">
           <span className="form__form-group-label">Estimated Hours</span>
           <TFieldNumber
             input={
@@ -1531,7 +1573,6 @@ class JobCreateFormCarrier extends Component {
       jobStartDateTime,
       jobTruckType,
       allTruckTypes,
-      jobTrucksNeeded,
 
       selectedRatedHourOrTon,
 
@@ -1539,7 +1580,7 @@ class JobCreateFormCarrier extends Component {
       allMaterials,
       selectedMaterials,
 
-      truckType,
+      selectedTrucks,
       allUSstates,
       allAddresses,
       selectedStartAddressId,
@@ -1637,7 +1678,8 @@ class JobCreateFormCarrier extends Component {
                           givenDate: jobDate
                         }
                       }
-                      placeholderDate={jobDate}
+                      placeholder="Date and time of job"
+                      defaultDate={jobDate}
                       onChange={this.jobDateChange}
                       dateFormat="Y-m-d H:i"
                       showTime
@@ -1662,27 +1704,30 @@ class JobCreateFormCarrier extends Component {
                         }
                       }
                       placeholder="Any"
-                      allowUndefined={true}
+                      allowUndefined
                       // meta={reqHandlerTrucksEstimate}
                     />
                   </div>
-                  <div className="col-md-4">
+                  <div className="col-md-9 multitop">
                     <span className="form__form-group-label">Truck Type</span>
-                    <SelectField
+                    <MultiSelect
                       input={
                         {
                           onChange: this.handleTruckTypeChange,
-                          name: 'truckType',
-                          value: truckType
+                          name: 'selectedTrucks',
+                          value: selectedTrucks
                         }
                       }
-                      meta={reqHandlerTruckType}
-                      value={truckType}
+                      // meta={reqHandlerMaterials}
                       options={allTruckTypes}
-                      placeholder="Truck Type"
+                      placeholder="Truck type"
+                      meta={reqHandlerTruckType}
                     />
                   </div>
-                  <div className="col-md-5 form__form-group">
+
+                </Row>
+                <Row className="col-md-12">
+                  <div className="col-md-3 form__form-group">
                     <span className="form__form-group-label">Material</span>
                     <SelectField
                       input={
@@ -1698,9 +1743,7 @@ class JobCreateFormCarrier extends Component {
                       placeholder="Select material"
                     />
                   </div>
-                </Row>
 
-                <Row className="col-md-12">
                   <div className="col-md-3 form__form-group">
                     <span className="form__form-group-label">Rate</span>
                     <SelectField

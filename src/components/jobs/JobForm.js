@@ -135,8 +135,10 @@ class JobForm extends Component {
           }
           return true;
         });
+      const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
       this.setState({
         ...job,
+        allTruckTypes,
         loaded: true
       });
     }
