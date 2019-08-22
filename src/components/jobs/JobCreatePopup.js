@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -62,18 +63,49 @@ class JobCreatePopup extends Component {
   updateJob(newJob) {
     const { updateJob, updateCopiedJob } = this.props;
     if (newJob.copiedJob) {
-      updateCopiedJob(newJob)
+      updateCopiedJob(newJob);
     }
     if (updateJob) {
       updateJob(newJob, null);
     }
   }
 
+  async saveJobMaterials(jobId, material) {
+    // const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
+    if (profile && material) {
+      const newMaterial = {
+        jobsId: jobId,
+        value: material,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+      /* eslint-disable no-await-in-loop */
+      await JobMaterialsService.createJobMaterials(newMaterial);
+    }
+  }
+
+  // let's create a list of truck types that we want to save
+  async saveJobTrucks(jobId, trucks) {
+    const allTrucks = [];
+    for (const truck of trucks) {
+      const equipmentMaterial = {
+        jobId,
+        equipmentTypeId: Number(truck.value)
+      };
+      allTrucks.push(equipmentMaterial);
+    }
+    await JobMaterialsService.deleteJobEquipmentsByJobId(jobId);
+    await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+  }
+
   // Used to either store a Copied or 'Saved' job to the database
   async saveJobDraftOrCopy(e) {
+    const { copyJob } = this.props;
     const { profile } = this.state;
     const d = e;
-    // return;
 
     // start location
     let startAddress = {
@@ -130,11 +162,11 @@ class JobCreatePopup extends Component {
       if (d.selectedRatedHourOrTon === 'ton') {
         rateType = 'Ton';
         rate = Number(d.rateByTonValue);
-        d.rateEstimate = d.estimatedTons;
+        // d.rateEstimate = d.rateEstimate;
       } else {
         rateType = 'Hour';
         rate = Number(d.rateByHourValue);
-        d.rateEstimate = d.estimatedHours;
+        // d.rateEstimate = d.estimatedHours;
       }
     }
 
@@ -143,6 +175,12 @@ class JobCreatePopup extends Component {
 
     if (d.jobDate && Object.prototype.toString.call(d.jobDate) === '[object Date]') {
       d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+      d.jobDate = moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
+    } else if (d.job.startTime) {
+      d.jobDate = moment(d.job.startTime).format('YYYY-MM-DD HH:mm');
       d.jobDate = moment.tz(
         d.jobDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -176,25 +214,43 @@ class JobCreatePopup extends Component {
       modifiedBy: profile.userId,
       modifiedOn: moment.utc().format()
     };
-    const newJob = await JobService.createJob(job);
 
-    // add material
-    if (newJob && Object.entries(d.selectedMaterials).length > 0) {
-      const newMaterial = {
-        jobsId: newJob.id,
-        value: d.selectedMaterials.value,
-        createdBy: profile.userId,
-        createdOn: moment.utc().format(),
-        modifiedBy: profile.userId,
-        modifiedOn: moment.utc().format()
-      };
-      await JobMaterialsService.createJobMaterials(newMaterial);
+    let newJob = [];
+    if (d.job.id) { // UPDATING 'Saved' JOB
+      newJob = CloneDeep(job);
+      newJob.id = d.job.id;
+      delete newJob.createdBy;
+      delete newJob.createdOn;
+      await JobService.updateJob(newJob);
+    } else { // CREATING NEW 'Saved' JOB
+      newJob = await JobService.createJob(job);
     }
 
-    this.setState({
-      job: newJob,
-      goToJobDetail: true
-    });
+    // add material
+    if (newJob) {
+      if (Object.keys(d.selectedMaterials).length > 0) { // check if there's materials to add
+        this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+      }
+      if (Object.keys(d.selectedTrucks).length > 0) {
+        this.saveJobTrucks(newJob.id, d.selectedTrucks);
+      }
+    }
+
+    if (d.job.id) { // we're updating a Saved job, reload the view with new data
+      this.updateJob(newJob);
+      this.closeNow();
+    } else {
+      if (copyJob) { // user clicked on Copy Job, then tried to Save a new Job, reload the view with new data
+        newJob.copiedJob = true;
+        this.updateJob(newJob);
+        this.closeNow();
+      } else { // user clicked on Save Job, go to new Job's Detail page
+        this.setState({
+          job: newJob,
+          goToJobDetail: true
+        });
+      }
+    }
   }
 
   saveAndGoToSecondPage(e) {
@@ -292,6 +348,7 @@ class JobCreatePopup extends Component {
                         validateOnTabClick={validateFormOne}
                         validateRes={this.validateFormOneRes}
                         saveJobDraftOrCopy={this.saveJobDraftOrCopy}
+                        updateJob={this.updateJob}
                         copyJob={copyJob}
                       />
                       )}

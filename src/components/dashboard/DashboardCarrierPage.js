@@ -15,6 +15,7 @@ import DashboardObjectClickable from './DashboardObjectClickable';
 import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
+import NumberFormatting from '../../utils/NumberFormatting';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -244,14 +245,6 @@ class DashboardCarrierPage extends Component {
     let completedJobCount = 0;
     let totalPotentialIncome = 0;
 
-    // let jobsCompleted = 0;
-    // let totalEarnings = 0;
-    // let earningsPerJob = 0;
-    // let cancelledJobs = 0;
-    // let jobsPerTruck = 0;
-    // let idleTrucks = 0;
-    // let completedOffersPercent = 0;
-
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
@@ -276,24 +269,6 @@ class DashboardCarrierPage extends Component {
           // completedJobCount += 1;
           completedJobCount = newJob.countJobs;
         }
-
-        // if (newJob.rateType === 'Hour') {
-        //   newJob.newSize = TFormat.asHours(newJob.rateEstimate);
-        //   newJob.newRate = TFormat.asMoneyByHour(newJob.rate);
-        //   newJob.potentialIncome = TFormat.asMoney(
-        //     (tempRate * newJob.rateEstimate) * 0.95
-        //   );
-        // }
-        // if (newJob.rateType === 'Ton') {
-        //   newJob.newSize = TFormat.asTons(newJob.rateEstimate);
-        //   newJob.newRate = TFormat.asMoneyByTons(newJob.rate);
-        //   newJob.potentialIncome = TFormat.asMoney(
-        //     (tempRate * newJob.rateEstimate) * 0.95
-        //   );
-        // }
-        //
-        // newJob.newStartDate = TFormat.asDate(job.startTime);
-        //
         totalPotentialIncome += (newJob.estimatedEarnings) * 0.95;
 
         return newJob;
@@ -391,43 +366,30 @@ class DashboardCarrierPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
+
       if (newJob.rateType === 'Hour') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asHours(newJob.rateEstimate)
         );
-
-        newJob.newRate = newJob.rate;
-        newJob.newRateF = TFormat.getValue(
-          TFormat.asMoneyByHour(newJob.rate)
+        newJob.newRateF = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Hour'
         );
-
-        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-        newJob.potentialIncomeF = TFormat.getValue(
-          TFormat.asMoney(
-            (tempRate * newJob.rateEstimate)
-          )
-        );
-      }
-      if (newJob.rateType === 'Ton') {
+      } else if (newJob.rateType === 'Ton') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asTons(newJob.rateEstimate)
         );
-
-        newJob.newRate = newJob.rate;
-        newJob.newRateF = TFormat.getValue(
-          TFormat.asMoneyByTons(newJob.rate)
-        );
-
-        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-        newJob.potentialIncomeF = TFormat.getValue(
-          TFormat.asMoney(
-            (tempRate * newJob.rateEstimate)
-          )
+        newJob.newRateF = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Ton'
         );
       }
 
+      newJob.newRate = newJob.rate;
+      newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+      newJob.potentialIncomeF = NumberFormatting.asMoney(
+        tempRate * newJob.rateEstimate
+      );
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {

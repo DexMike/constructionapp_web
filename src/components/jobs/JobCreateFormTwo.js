@@ -190,6 +190,7 @@ class JobCreateFormTwo extends PureComponent {
       };
       allTrucks.push(equipmentMaterial);
     }
+    await JobMaterialsService.deleteJobEquipmentsByJobId(jobId);
     await JobMaterialsService.createJobEquipments(jobId, allTrucks);
   }
 
@@ -360,7 +361,7 @@ class JobCreateFormTwo extends PureComponent {
 
     // add materials
     if (newJob) {
-      if (d.selectedMaterials) { // check if there's materials to add
+      if (Object.keys(d.selectedMaterials).length > 0) { // check if there's materials to add
         this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
       }
       if (Object.keys(d.selectedTrucks).length > 0) {

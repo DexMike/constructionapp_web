@@ -143,8 +143,20 @@
   .distance {
     margin-top: 25px;
   }
+  .carrier-name span {
+    color: #3b6273;
+    font-weight: 500;
+    font-size: 16px;
+  }
 }
 // ---- TUI Trucks List
+
+
+// ---- TUI Bids Table
+.bids-table  {
+  white-space: pre-wrap;
+}
+// ---- TUI Bids Table
 
 
 // ---- TUI (Trelar User Interface) ---- //

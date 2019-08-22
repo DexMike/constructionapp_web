@@ -6,7 +6,7 @@ class PaymentsService extends AgentService {
   // Carrier
   // This is HW
   static async getPayments() {
-    const response = await super.get(`${PATH}${PATH}`);
+    const response = await super.get(`${PATH}`);
     return (response);
   }
 

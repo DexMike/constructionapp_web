@@ -32,6 +32,7 @@ import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
 import JobCreatePopup from './JobCreatePopup';
+import JobCreateFormCarrier from './JobCreateFormCarrier';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -57,6 +58,7 @@ class JobSavePage extends Component {
       },
       company: null,
       bid: null,
+      bids: [],
       booking: null,
       favoriteCompany: [],
       profile: {},
@@ -70,6 +72,7 @@ class JobSavePage extends Component {
       selectedDrivers: [],
       accessForbidden: false,
       modalAddJob: false,
+      modalEditJob: false,
       modalLiability: false,
       activeDrivers: []
     };
@@ -83,6 +86,7 @@ class JobSavePage extends Component {
     this.updateJob = this.updateJob.bind(this);
     this.updateCopiedJob = this.updateCopiedJob.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
+    this.toggleEditExistingJobModal = this.toggleEditExistingJobModal.bind(this);
     this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
     this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
     this.loadSavePage = this.loadSavePage.bind(this);
@@ -252,6 +256,7 @@ class JobSavePage extends Component {
             job,
             company,
             bid,
+            bids,
             companyCarrier,
             booking,
             profile,
@@ -277,6 +282,13 @@ class JobSavePage extends Component {
     const {modalAddJob} = this.state;
     this.setState({
       modalAddJob: !modalAddJob
+    });
+  }
+
+  toggleEditExistingJobModal() {
+    const {modalEditJob} = this.state;
+    this.setState({
+      modalEditJob: !modalEditJob
     });
   }
 
@@ -764,7 +776,7 @@ class JobSavePage extends Component {
   }
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
-    const { profile, company } = this.state;
+    const { profile, company, bids } = this.state;
     const companyProducer = job.company;
     const companyCarrier = company;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
@@ -906,7 +918,34 @@ class JobSavePage extends Component {
         />
       );
     }
-    if (job.status === 'Saved' && companyType === 'Customer') {
+
+    const requestedBids = bids.filter((filteredBid) => {
+      if (filteredBid.status !== 'New') {
+        return filteredBid;
+      }
+      return null;
+    });
+    if ((companyType === 'Customer') // Show only to customers
+      // And Saved jobs
+      && ((job.status === 'Saved')
+      // Or Jobs offers that do not have requests
+      || ((job.status === 'Published' || job.status === 'Published And Offered' || job.status === 'On Offer')
+        && ((requestedBids.length === 0)))
+      )
+    ) {
+      if (job.status === 'Published' || job.status === 'Published And Offered' || job.status === 'On Offer') {
+      // this is to edit an already 'published' job
+        return (
+          <TSubmitButton
+            onClick={() => this.toggleEditExistingJobModal()}
+            className="secondaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Edit"
+          />
+        );
+      }
+      // this is to edit a 'saved' job
       return (
         <TSubmitButton
           onClick={() => this.toggleNewJobModal()}
@@ -949,6 +988,34 @@ class JobSavePage extends Component {
           jobId={job.id}
           updateJob={this.updateJob}
         />
+      </Modal>
+    );
+  }
+
+  renderEditExistingJobModal() {
+    const {
+      job,
+      modalEditJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalEditJob}
+        toggle={this.toggleEditExistingJobModal}
+        className="modal-dialog--primary modal-dialog--header form"
+      >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleEditExistingJobModal}
+          />
+          <div className="bold-text modal__title">Edit Job</div>
+        </div>
+        <div className="modal__body" style={{ paddingTop: '25px', paddingRight: '0px' }}>
+          <JobCreateFormCarrier
+            job={job}
+            closeModal={this.toggleEditExistingJobModal}
+            updateJob={this.updateJob}
+          />
+        </div>
       </Modal>
     );
   }
@@ -1171,6 +1238,7 @@ class JobSavePage extends Component {
             {this.renderGoTo()}
             {this.renderNewJobModal()}
             {this.renderCopyJobModal()}
+            {this.renderEditExistingJobModal()}
             {this.renderAllocateDriversModal(profile)}
             {this.renderLiabilityConfirmation()}
             <div className="row">
