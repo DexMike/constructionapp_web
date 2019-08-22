@@ -550,6 +550,7 @@ class JobFilter extends Component {
                         decimal
                         className="filter-text"
                         placeholder="Any"
+                        currency
                       />
                     </Col>
                     <Col md="1">

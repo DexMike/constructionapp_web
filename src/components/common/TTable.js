@@ -181,8 +181,11 @@ class TTable extends Component {
               );
             }
             return (
-              <TableCell key={key} className="material-table__cell"
-                         align="left"
+              <TableCell
+                style={{ maxWidth: 300 }}
+                key={key}
+                className="material-table__cell"
+                align="left"
               >
                 {shallowItem[key]}
               </TableCell>

@@ -5,6 +5,7 @@ import {
 } from 'reactstrap';
 import '../addTruck/AddTruck.css';
 import * as PropTypes from 'prop-types';
+import TFormat from '../common/TFormat';
 import truckImage from '../../img/default_truck.png';
 import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
@@ -343,13 +344,13 @@ class CarrierRow extends Component {
         </tr>
         </thead>
         <tbody>
-        {
-          materials.map((value, i) => (
-            <tr key={`li_${i}`}>
-              <td>{value}</td>
-            </tr>
-          ))
-        }
+          {
+            materials.map((value, i) => (
+              <tr key={`li_${i}`}>
+                <td>{value}</td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
     );
@@ -365,14 +366,14 @@ class CarrierRow extends Component {
         </tr>
         </thead>
         <tbody>
-        {
-          equipmentTypes.map((value, i) => (
-            <tr key={`tru_${i}`}>
-              <td>{value.equipmentType}</td>
-              <td style={{textAlign: 'center'}}>{value.count}</td>
-            </tr>
-          ))
-        }
+          {
+            equipmentTypes.map((value, i) => (
+              <tr key={`tru_${i}`}>
+                <td>{value.equipmentType}</td>
+                <td style={{textAlign: 'center'}}>{value.count}</td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
     );
@@ -387,7 +388,7 @@ class CarrierRow extends Component {
       equipmentTypes,
       materials
     } = this.props;
-    const {isLoading} = this.state;
+    const {isLoading, carrierCompany} = this.state;
     if (!isLoading) {
       return (
         <React.Fragment>
@@ -396,15 +397,20 @@ class CarrierRow extends Component {
           <Row className="truck-card truck-details">
             <div className="col-md-12">
               <div className="row">
-                <div className="col-md-3">
-                  <h5>
-                    {carrierName} {distance ? `[Distance: ${distance.toFixed(2)} mi]` : ''}
+                <div className="col-md-4">
+                  <h5 className="carrier-name">
+                    <span>{carrierName}</span> {distance ? `[Distance: ${distance.toFixed(2)} mi]` : ''}
                   </h5>
                   <br/>
-                  <img src={truckImage} alt="" style={{width: 'auto', display: 'block', margin: '0 auto'}}
-                  />
+                  <img src={truckImage} alt="" style={{width: 'auto', display: 'block', margin: '0 auto'}}/>
+                  <br/>
+                  General Liability: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityGeneral)}
+                  <br/>
+                  Auto Liability: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityAuto)}
+                  <br/>
+                  Other Liability: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityOther)}
                 </div>
-                <div className="col-md-9">
+                <div className="col-md-8">
                   <div className="row truck-card">
                     <div className="col-md-6">
                       {this.renderTotals(equipmentTypes)}

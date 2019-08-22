@@ -42,23 +42,25 @@ class PaymentsCarrier extends Component {
   }
 
   async fetchPayments() {
-    let payments = await PaymentsService.getPayments();
-
-    payments = payments.map((payment) => {
-      const newPayment = payment;
-      newPayment.id = payment.token;
-
-      newPayment.amount = payment.amount;
-      newPayment.amountF = TFormat.getValue(
-        TFormat.asMoney(payment.amount)
-      );
-
-      newPayment.createdOn = TFormat.asDate(payment.createdOn);
-
-      return newPayment;
-    });
-
-    this.setState({ payments });
+    // I am commenting this out as we will be getting the payment information from
+    // finTrans table
+    // let payments = await PaymentsService.getPayments();
+    //
+    // payments = payments.map((payment) => {
+    //   const newPayment = payment;
+    //   newPayment.id = payment.token;
+    //
+    //   newPayment.amount = payment.amount;
+    //   newPayment.amountF = TFormat.getValue(
+    //     TFormat.asMoney(payment.amount)
+    //   );
+    //
+    //   newPayment.createdOn = TFormat.asDate(payment.createdOn);
+    //
+    //   return newPayment;
+    // });
+    //
+    // this.setState({ payments });
   }
 
   renderGoTo() {
@@ -100,37 +102,46 @@ class PaymentsCarrier extends Component {
           <Row>
             <Col md={12}>
               <h5>For detailed information on your payments, please log into your &nbsp;
-                <a href="https://hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://hyperwallet.com</a>&nbsp;account.
+                <a href="https://trelar.hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://trelar.hyperwallet.com</a>&nbsp;account.
               </h5>
+              <h5>&nbsp; </h5>
             </Col>
           </Row>
           <Row>
             <Col md={12}>
               <Card>
                 <CardBody>
-                  <TTable
-                    columns={
-                      [
-                        {
-                          name: 'createdOn',
-                          displayName: 'Date'
-                        },
-                        {
-                          name: 'token',
-                          displayName: 'ID'
-                        },
-                        {
-                          name: 'amount',
-                          displayName: 'Amount',
-                          label: 'amountF'
-                        }
-                      ]
-                    }
-                    data={payments}
-                    handleIdClick={() => {}}
-                    handlePageChange={() => {}}
-                    handleRowsChange={() => {}}
-                  />
+                  <h5>&nbsp; </h5>
+                  <h5>&nbsp; </h5>
+                  <h5>There are no payments to show at this time</h5>
+                  <h5>&nbsp; </h5>
+                  <h5>&nbsp; </h5>
+
+                  {/*commenting this out until we have the payments done*/}
+
+                  {/*<TTable*/}
+                    {/*columns={*/}
+                      {/*[*/}
+                        {/*{*/}
+                          {/*name: 'createdOn',*/}
+                          {/*displayName: 'Date'*/}
+                        {/*},*/}
+                        {/*{*/}
+                          {/*name: 'token',*/}
+                          {/*displayName: 'ID'*/}
+                        {/*},*/}
+                        {/*{*/}
+                          {/*name: 'amount',*/}
+                          {/*displayName: 'Amount',*/}
+                          {/*label: 'amountF'*/}
+                        {/*}*/}
+                      {/*]*/}
+                    {/*}*/}
+                    {/*data={payments}*/}
+                    {/*handleIdClick={() => {}}*/}
+                    {/*handlePageChange={() => {}}*/}
+                    {/*handleRowsChange={() => {}}*/}
+                  {/*/>*/}
                 </CardBody>
               </Card>
             </Col>

@@ -15,6 +15,9 @@ import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
 import TMap from '../common/TMap';
 
+const refreshInterval = 15; // refresh every 15 seconds
+let timerVar;
+
 class LoadsExpandableRow extends Component {
   constructor(props) {
     super(props);
@@ -30,31 +33,34 @@ class LoadsExpandableRow extends Component {
       loadInvoices: [],
       disputeEmail: null,
       profile: null,
-      toggledId: 0,
+      toggledId: 0
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.programmedRefresh = this.programmedRefresh.bind(this);
+    this.getTrackings = this.getTrackings.bind(this);
   }
 
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let {gpsTrackings, loadInvoices, disputeEmail} = {...this.state};
-    gpsTrackings = await this.fetchGPSPoints(load.id);
-    // return false;
+    let { loadInvoices, disputeEmail } = {...this.state};
+
+    this.getTrackings(load.id);
+
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
     // This throws an error
     const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
-    // const driver = {};
 
     const profile = await ProfileService.getProfile();
     const company = await CompanyService.getCompanyById(profile.companyId);
     const date = new Date();
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
     disputeEmail = {
       toEmail: 'csr@trelar.net',
       toName: 'Trelar CSR',
-      subject: `[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
+      subject: `${envString}[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
       isHTML: true,
       body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
         + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
@@ -70,11 +76,19 @@ class LoadsExpandableRow extends Component {
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
     this.setState({
-      gpsTrackings,
-      loadInvoices,
       disputeEmail,
-      profile
+      profile,
+      loadInvoices
     });
+  }
+
+  componentWillUnmount() {
+    this.programmedRefresh(true);
+  }
+
+  async getTrackings(loadId) {
+    const gpsTrackings = await this.fetchGPSPoints(loadId);
+    this.setState({ gpsTrackings });
   }
 
   async fetchGPSPoints(loadId) {
@@ -87,8 +101,10 @@ class LoadsExpandableRow extends Component {
     const { onRowExpanded } = this.props;
     isExpanded = !isExpanded;
     if (isExpanded) {
+      this.programmedRefresh(false);
       onRowExpanded(load.id, isExpanded);
     } else {
+      this.programmedRefresh(true);
       onRowExpanded(0, isExpanded);
     }
   }
@@ -114,6 +130,23 @@ class LoadsExpandableRow extends Component {
     this.setState({modal: !modal});
   }
 
+  programmedRefresh(remove) {
+    const { load } = this.state;
+    if (!remove) {
+      const that = this;
+      const timerTimer = function timerTimer() {
+        const { isExpanded } = that.props;
+        if (!isExpanded) {
+          clearInterval(timerVar);
+        }
+        that.getTrackings(load.id);
+      };
+      timerVar = setInterval(timerTimer, (refreshInterval * 1000));
+    } else {
+      clearInterval(timerVar);
+    }
+  }
+
   renderModal() {
     const {modal} = this.state;
     return (
@@ -131,6 +164,9 @@ class LoadsExpandableRow extends Component {
         <div className="modal__body" style={{padding: '25px 25px 20px 25px'}}>
           <Row className="col-md-12">
             <h5 style={{paddingBottom: '25px'}}>Are you sure you wish to dispute this load?</h5>
+            <h5 style={{paddingBottom: '25px'}}>If you dispute it, a Trelar representative will be
+              in contact with you soon to help solve the issue.
+            </h5>
           </Row>
           <Row className="col-md-12">
             <ButtonToolbar className="col-md-6 wizard__toolbar">
@@ -170,10 +206,11 @@ class LoadsExpandableRow extends Component {
         profile,
         job
       } = {...this.state};
+
       let startCoords = job.startAddress;
       let endCoords = job.endAddress;
       // if there are tracking points use those instead of job address.
-      if(gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
+      if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
         startCoords = {
           latitude: gpsTrackings[0][1],
           longitude: gpsTrackings[0][0]
@@ -199,7 +236,7 @@ class LoadsExpandableRow extends Component {
           statusColor = 'orange';
           break;
         case 'Ended':
-          statusColor = 'blue';
+          statusColor = 'gray';
           break;
         default:
           statusColor = 'black';
@@ -312,9 +349,6 @@ class LoadsExpandableRow extends Component {
                             width: '100%'
                           }}
                         />
-                        // <Col className="col-md-3 pt-3" key={`img-${item}`}>
-                        //   <img key={item} src={`${item[2]}`} alt={`${item}`}/>
-                        // </Col>
                       ))
                       }
                     </Col>
