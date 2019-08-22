@@ -96,6 +96,7 @@ class JobForm extends Component {
         loads = await LoadService.getLoadsByBookingId(
           bookings[0].id // booking.id 6
         );
+        loads = loads.reverse();
       }
     }
 
@@ -134,8 +135,10 @@ class JobForm extends Component {
           }
           return true;
         });
+      const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
       this.setState({
         ...job,
+        allTruckTypes,
         loaded: true
       });
     }
@@ -355,11 +358,11 @@ class JobForm extends Component {
               Job Status: {job.status}
             </h3>
             {
-              job.status === 'Job Completed'
-                ? 'Total'
-                : 'Potential'
+              // job.status === 'Job Completed'
+              //   ? 'Total'
+              //   : 'Potential'
             }
-            &nbsp;Earnings:&nbsp;
+            Potential Earnings:&nbsp;
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }

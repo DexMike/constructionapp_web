@@ -28,6 +28,11 @@ class JobMaterialsService extends AgentService {
     return (response);
   }
 
+  static async deleteJobEquipmentsByJobId(jobId) {
+    const response = await super.delete(`/jobs${PATH}/materials`, jobId);
+    return (response);
+  }
+
   static async updateJobMaterials(jobMaterial) {
     const response = await this.put(PATH, jobMaterial);
     return (response);
