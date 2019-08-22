@@ -34,7 +34,8 @@ class JobForm extends Component {
       modifiedOn: moment.utc().format(),
       isArchived: 0,
       overlayMapData: {},
-      isExpanded: false
+      isExpanded: false,
+      allTruckTypes: []
     };
 
     this.state = {
@@ -95,6 +96,7 @@ class JobForm extends Component {
         loads = await LoadService.getLoadsByBookingId(
           bookings[0].id // booking.id 6
         );
+        loads = loads.reverse();
       }
     }
 
@@ -103,6 +105,8 @@ class JobForm extends Component {
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
       images = bookingInvoices.map(item => item.image);
     }
+
+    const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
 
     this.setState({
       images,
@@ -116,7 +120,8 @@ class JobForm extends Component {
       profile,
       company,
       distance,
-      time
+      time,
+      allTruckTypes
     });
   }
 
@@ -130,8 +135,10 @@ class JobForm extends Component {
           }
           return true;
         });
+      const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
       this.setState({
         ...job,
+        allTruckTypes,
         loaded: true
       });
     }
@@ -253,6 +260,7 @@ class JobForm extends Component {
     const { company } = this.state;
     let liabilityGeneral;
     let liabilityAuto;
+    let liabilityOther;
     if (company.liabilityGeneral > 0.01) {
       liabilityGeneral = (
         <React.Fragment>
@@ -269,6 +277,14 @@ class JobForm extends Component {
         </React.Fragment>
       );
     }
+    if (company.liabilityOther > 0.01) {
+      liabilityOther = (
+        <React.Fragment>
+          Minimum Other Liability: {TFormat.asMoneyNoDecimals(company.liabilityOther)}
+          <br/>
+        </React.Fragment>
+      );
+    }
 
     if (company.liabilityGeneral < 0.01 && company.liabilityAuto < 0.01) {
       return false;
@@ -277,12 +293,20 @@ class JobForm extends Component {
       <React.Fragment>
         {liabilityGeneral}
         {liabilityAuto}
+        {liabilityOther}
       </React.Fragment>
     );
   }
 
   renderJobTop(job) {
-    const { profile, companyType, carrier } = this.state;
+    const {
+      profile,
+      companyType,
+      carrier,
+      allTruckTypes
+    } = this.state;
+
+    const trucks = allTruckTypes.join(', ');
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props ? estimatedCost.props.value : 0;
@@ -317,7 +341,7 @@ class JobForm extends Component {
           {this.renderMinimumInsurance()}
           Number of Trucks: {job.numEquipments}
           <br/>
-          Truck Type: {job.equipmentType}
+          Truck Types: {trucks}
           <br/>
         </div>
         <div className="col-md-4">
@@ -334,11 +358,11 @@ class JobForm extends Component {
               Job Status: {job.status}
             </h3>
             {
-              job.status === 'Job Completed'
-                ? 'Total'
-                : 'Potential'
+              // job.status === 'Job Completed'
+              //   ? 'Total'
+              //   : 'Potential'
             }
-            &nbsp;Earnings:&nbsp;
+            Potential Earnings:&nbsp;
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }

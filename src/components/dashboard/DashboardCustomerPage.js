@@ -15,11 +15,10 @@ import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
-
 import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
-
+import NumberFormatting from '../../utils/NumberFormatting';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -444,8 +443,9 @@ class DashboardCustomerPage extends Component {
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
         newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.newRateFormatted = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Hour'
+        );
       }
       if (newJob.rateType === 'Ton') {
         // newSize is the size with its original value, so that it can be sorted
@@ -455,10 +455,14 @@ class DashboardCustomerPage extends Component {
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
         newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.newRateFormatted = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Ton'
+        );
       }
 
+      newJob.estimatedIncome = NumberFormatting.asMoney(
+        (tempRate * newJob.rateEstimate), '.', 2, ',', '$', ''
+      );
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 

@@ -25,6 +25,11 @@ class EmailService extends AgentService {
     const response = await super.post(PATH, email);
     return (response);
   }
+
+  static async sendEmailToNonUsers(email) {
+    const response = await super.post(`/notifications${PATH}`, email);
+    return response;
+  }
 }
 
 export default EmailService;

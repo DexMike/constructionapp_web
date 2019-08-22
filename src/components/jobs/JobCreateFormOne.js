@@ -21,6 +21,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import AddressService from '../../api/AddressService';
 import TSpinner from '../common/TSpinner';
 import ProfileService from '../../api/ProfileService';
+import JobService from '../../api/JobService';
 import GeoCodingService from '../../api/GeoCodingService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 
@@ -251,6 +252,25 @@ class CreateJobFormOne extends PureComponent {
           label: material.val1
         }));
 
+        // we map the selected truck types to the allTruckTypes array to get the Lookup value
+        const selectedTruckTypes = await JobService.getMaterialsByJobId(p.id);
+        const mapSelectedTruckTypes = [];
+        Object.values(selectedTruckTypes)
+          .forEach((itm) => {
+            let inside = {};
+            Object.keys(allTruckTypes).map((propKey) => {
+              if (allTruckTypes[propKey].label === itm) {
+                inside = {
+                  label: itm,
+                  value: allTruckTypes[propKey].value
+                }
+                return inside;
+              }
+              return null;
+            });
+            mapSelectedTruckTypes.push(inside);
+          });
+
         this.setState({
           // jobDate,
           allMaterials,
@@ -281,7 +301,7 @@ class CreateJobFormOne extends PureComponent {
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
           rateEstimate: p.rateEstimate,
-          selectedTrucks: p.selectedTrucks
+          selectedTrucks: mapSelectedTruckTypes
         });
       } else if (copyJob) { // We're trying to Copy an existing job
         const materials = await JobMaterialsService.getJobMaterialsByJobId(p.id ? p.id : p.jobId);
@@ -312,13 +332,29 @@ class CreateJobFormOne extends PureComponent {
           ).format('YYYY-MM-DD HH:mm:ss'));
         }
 
+        // we map the selected truck types to the allTruckTypes array to get the Lookup value
+        const selectedTruckTypes = await JobService.getMaterialsByJobId(p.id ? p.id : p.jobId);
+        const mapSelectedTruckTypes = [];
+        Object.values(selectedTruckTypes)
+          .forEach((itm) => {
+            let inside = {};
+            Object.keys(allTruckTypes).map((propKey) => {
+              if (allTruckTypes[propKey].label === itm) {
+                inside = {
+                  label: itm,
+                  value: allTruckTypes[propKey].value
+                }
+                return inside;
+              }
+              return null;
+            });
+            mapSelectedTruckTypes.push(inside);
+          });
+
         this.setState({
-          jobDate,
           allMaterials,
-          allTruckTypes
-        });
-        this.setState({
-          jobId: p.id,
+          allTruckTypes,
+          jobId: p.id ? p.id : p.jobId,
           userCompanyId: p.userCompanyId,
           // truck properties
           // truckType,
@@ -360,7 +396,7 @@ class CreateJobFormOne extends PureComponent {
           rateByTonValue: p.rate,
           rateByHourValue: p.rate,
           rateEstimate: p.rateEstimate,
-          selectedTrucks: p.selectedTrucks
+          selectedTrucks: mapSelectedTruckTypes
         });
       } else { // We are coming from the second tab
         // TODO -> There should be a way to map directly to state
@@ -1132,7 +1168,16 @@ class CreateJobFormOne extends PureComponent {
     }
 
     const currDate = new Date();
-
+    if (!jobDate) {
+      this.setState({
+        reqHandlerDate: {
+          ...reqHandlerDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
     if (jobDate && (new Date(jobDate).getTime() < currDate.getTime())) {
       this.setState({
         reqHandlerDate: {
@@ -1604,7 +1649,7 @@ class CreateJobFormOne extends PureComponent {
     if (hourTon === 'ton') {
       return (
         <React.Fragment>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-3 form__form-group">
             <span className="form__form-group-label">Rate / Ton</span>
             <TFieldNumber
               input={
@@ -1617,9 +1662,10 @@ class CreateJobFormOne extends PureComponent {
               placeholder="0"
               decimal
               meta={reqHandlerTons}
+              currency
             />
           </div>
-          <div className="col-md-5 form__form-group">
+          <div className="col-md-3 form__form-group">
             <span className="form__form-group-label">Estimated Tons</span>
             <TFieldNumber
               input={
@@ -1639,7 +1685,7 @@ class CreateJobFormOne extends PureComponent {
     }
     return (
       <React.Fragment>
-        <div className="col-md-4 form__form-group">
+        <div className="col-md-3 form__form-group">
           <span className="form__form-group-label">Rate / Hour</span>
           <TFieldNumber
             input={
@@ -1654,7 +1700,7 @@ class CreateJobFormOne extends PureComponent {
             meta={reqHandlerHours}
           />
         </div>
-        <div className="col-md-5 form__form-group">
+        <div className="col-md-3 form__form-group">
           <span className="form__form-group-label">Estimated Hours</span>
           <TFieldNumber
             input={
@@ -1780,6 +1826,8 @@ class CreateJobFormOne extends PureComponent {
                           givenDate: jobDate
                         }
                       }
+                      placeholder="Date and time of job"
+                      defaultDate={jobDate}
                       onChange={this.jobDateChange}
                       dateFormat="Y-m-d H:i"
                       showTime
@@ -1808,7 +1856,7 @@ class CreateJobFormOne extends PureComponent {
                       // meta={reqHandlerTrucksEstimate}
                     />
                   </div>
-                  <div className="col-md-4">
+                  <div className="col-md-9 multitop">
                     <span className="form__form-group-label">Truck Type</span>
                     <MultiSelect
                       input={
@@ -1824,7 +1872,11 @@ class CreateJobFormOne extends PureComponent {
                       meta={reqHandlerTruckType}
                     />
                   </div>
-                  <div className="col-md-5 form__form-group">
+                  
+                </Row>
+
+                <Row className="col-md-12">
+                  <div className="col-md-3 form__form-group">
                     <span className="form__form-group-label">Material</span>
                     <SelectField
                       input={
@@ -1840,9 +1892,7 @@ class CreateJobFormOne extends PureComponent {
                       placeholder="Select material"
                     />
                   </div>
-                </Row>
 
-                <Row className="col-md-12">
                   <div className="col-md-3 form__form-group">
                     <span className="form__form-group-label">Rate</span>
                     <SelectField
@@ -2157,15 +2207,13 @@ class CreateJobFormOne extends PureComponent {
                     >
                       Back
                     </Button>
-                    {job.status !== 'Saved' && (
-                      <Button
-                        color="outline-primary"
-                        className="next"
-                        onClick={this.saveJobDraft}
-                      >
-                        Save Job
-                      </Button>
-                    )}
+                    <Button
+                      color="outline-primary"
+                      className="next"
+                      onClick={this.saveJobDraft}
+                    >
+                      Save Job
+                    </Button>
                     <Button
                       color="primary"
                       className="next"

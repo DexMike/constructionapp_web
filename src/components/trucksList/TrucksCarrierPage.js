@@ -10,6 +10,7 @@ import JobService from '../../api/JobService';
 import CompanyService from '../../api/CompanyService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import AddressService from '../../api/AddressService';
+import NumberFormatting from '../../utils/NumberFormatting';
 
 class TrucksCarrierPage extends Component {
   constructor(props) {
@@ -148,15 +149,8 @@ class TrucksCarrierPage extends Component {
         newJob.newSizeF = TFormat.getValue(
           TFormat.asHours(newJob.rateEstimate)
         );
-
-        newJob.newRate = newJob.rate;
-        newJob.newRateF = TFormat.getValue(
-          TFormat.asMoneyByHour(newJob.rate)
-        );
-
-        newJob.estimatedIncome = Math.round(tempRate * newJob.rateEstimate);
-        newJob.estimatedIncomeF = TFormat.getValue(
-          TFormat.asMoney(tempRate * newJob.rateEstimate)
+        newJob.newRateF = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Hour'
         );
       }
       if (newJob.rateType === 'Ton') {
@@ -164,18 +158,16 @@ class TrucksCarrierPage extends Component {
         newJob.newSizeF = TFormat.getValue(
           TFormat.asTons(newJob.rateEstimate)
         );
-
-        newJob.newRate = newJob.rate;
-        newJob.newRateF = TFormat.getValue(
-          TFormat.asMoneyByTons(newJob.rate)
-        );
-
-        newJob.estimatedIncome = Math.round(tempRate * newJob.rateEstimate);
-        newJob.estimatedIncomeF = TFormat.getValue(
-          TFormat.asMoney(tempRate * newJob.rateEstimate)
+        newJob.newRateF = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Ton'
         );
       }
 
+      newJob.newRate = newJob.rate;
+      newJob.estimatedIncome = Math.round(tempRate * newJob.rateEstimate);
+      newJob.estimatedIncomeF = TFormat.getValue(
+        TFormat.asMoney(tempRate * newJob.rateEstimate)
+      );
       newJob.newStartDate = TFormat.asDate(job.startTime);
 
       potentialIncome += tempRate * newJob.rateEstimate;
