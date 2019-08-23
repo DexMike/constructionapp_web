@@ -195,7 +195,7 @@ class JobCreateFormTwo extends PureComponent {
   }
 
   async saveJob() {
-    const { updateJob } = this.props;
+    const { updateJobView } = this.props;
     this.setState({ btnSubmitting: true });
 
     if (!this.isFormValid()) {
@@ -425,12 +425,12 @@ class JobCreateFormTwo extends PureComponent {
 
     const { onClose } = this.props;
     if (savedJob) { // we have to update the view
-      updateJob(newJob);
+      updateJobView(newJob);
     }
 
     if (copyJob) { // we're making a duplicate of a job we have to update the view
       newJob.copiedJob = true;
-      updateJob(newJob);
+      updateJobView(newJob);
     }
     onClose();
   }
@@ -598,14 +598,14 @@ JobCreateFormTwo.propTypes = {
   onClose: PropTypes.func.isRequired,
   firstTabData: PropTypes.func.isRequired,
   jobId: PropTypes.number,
-  updateJob: PropTypes.func,
+  updateJobView: PropTypes.func,
   saveJobDraftOrCopy: PropTypes.func.isRequired,
   copyJob: PropTypes.bool
 };
 
 JobCreateFormTwo.defaultProps = {
   jobId: null,
-  updateJob: null,
+  updateJobView: null,
   copyJob: false
 };
 
