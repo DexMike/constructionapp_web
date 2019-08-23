@@ -42,7 +42,7 @@ class MarketplaceCarrierPage extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo();
-    this.setState({ 
+    this.setState({
       isAdmin: profile.isAdmin,
       loaded: true
     });
@@ -200,6 +200,9 @@ class MarketplaceCarrierPage extends Component {
         if (typeof job.distance === 'number') {
           newJob.distance = newJob.distance.toFixed(2);
         }
+        if (typeof job.haulDistance === 'number') {
+          newJob.haulDistance = newJob.haulDistance.toFixed(2);
+        }
 
         return newJob;
       });
@@ -248,6 +251,10 @@ class MarketplaceCarrierPage extends Component {
                       {
                         name: 'distance',
                         displayName: 'Distance (mi)'
+                      },
+                      {
+                        name: 'haulDistance',
+                        displayName: 'Haul Distance (One Way) (mi)'
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
