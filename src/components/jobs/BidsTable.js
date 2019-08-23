@@ -17,7 +17,7 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
 import GroupService from '../../api/GroupService';
 import ProfileService from '../../api/ProfileService';
-import EmailService from "../../api/EmailService";
+import EmailService from '../../api/EmailService';
 import NumberFormatting from '../../utils/NumberFormatting';
 
 
@@ -50,14 +50,33 @@ class BidsTable extends Component {
     this.toggleBidModal = this.toggleBidModal.bind(this);
     this.handleAcceptBid = this.handleAcceptBid.bind(this);
     this.handleApproveInputChange = this.handleApproveInputChange.bind(this);
+    this.loadBidsTable = this.loadBidsTable.bind(this);
     // this.closeNow = this.closeNow.bind(this);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadBidsTable();
+  }
+
+  componentWillReceiveProps(props) {
+    const { newJob } = this.state;
+    if ((newJob) && (parseInt(props.job.id, 10) !== parseInt(newJob.id, 10))) {
+      this.loadBidsTable(props.job.id); // load a new job bids table
+    }
+  }
+
+  async loadBidsTable(jobId) {
     const {job} = this.props;
     let {totalBids, profile} = this.state;
     profile = await ProfileService.getProfile();
-    let bids = await BidService.getBidsInfoByJobId(job.id);
+    let bids = [];
+
+    if (jobId) { // we are updating the view
+      bids = await BidService.getBidsInfoByJobId(jobId);
+    } else { // we are loading the view
+      bids = await BidService.getBidsInfoByJobId(job.id);
+    }
+
     const producerCompany = await CompanyService.getCompanyById(profile.companyId);
 
     bids = await Promise.all(bids.map(async (bid) => {
@@ -118,7 +137,7 @@ class BidsTable extends Component {
   }
 
   async saveBid(action) {
-    const {updateJob} = this.props;
+    const {updateJobView} = this.props;
     const {
       selectedBid, profile
     } = this.state;
@@ -263,7 +282,7 @@ class BidsTable extends Component {
       }
 
       // updating parent component JobSavePage
-      updateJob(newJob, newBid.companyCarrierId);
+      updateJobView(newJob, newBid.companyCarrierId);
     } else {
       // Decline Bid
       newBid = CloneDeep(selectedBid);
@@ -289,7 +308,7 @@ class BidsTable extends Component {
       }
 
       // updating parent component JobSavePage
-      updateJob(newJob);
+      updateJobView(newJob);
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
@@ -587,7 +606,7 @@ BidsTable.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
   }),
-  updateJob: PropTypes.func.isRequired
+  updateJobView: PropTypes.func.isRequired
 };
 
 BidsTable.defaultProps = {
