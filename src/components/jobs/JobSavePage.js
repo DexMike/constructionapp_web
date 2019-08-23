@@ -399,34 +399,47 @@ class JobSavePage extends Component {
       newJob.modifiedOn = moment.utc().format();
       newJob = await JobService.updateJob(newJob);
 
+      const cancelledSms = `Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
+      The reason for cancellation is: ${newJob.cancelReason}.`; // TODO: do we need to check for this field's length?
+
       // Notify Carrier about cancelled job
       const carrierAdmin = await UserService.getAdminByCompanyId(companyCarrierData.id);
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
           const notification = {
             to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-            body: `Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
-              The reason for cancellation is: ${newJob.cancelReason}.` // TODO: do we need to check for this field's length?
+            body: cancelledSms
           };
           await TwilioService.createSms(notification);
         }
       }
 
-      // get allocated drivers for this job
+      // get allocated drivers for this job, and send sms to those drivers
       const allocatedDrivers = await JobService.getAllocatedDriversInfoByJobId(job.id);
       let allocatedDriversNames = '';
       if (allocatedDrivers.length > 0) {
         allocatedDriversNames = allocatedDrivers.map(driver => `${driver.firstName} ${driver.lastName}`);
         allocatedDriversNames = `Drivers affected: ${allocatedDriversNames.join(', ')}`;
+
+        const cancelledDriversSms = [];
+        for (const driver of allocatedDrivers) {
+          if (this.checkPhoneFormat(driver.mobilePhone)) {
+            const notification = {
+              to: this.phoneToNumberFormat(driver.mobilePhone),
+              body: cancelledSms
+            };
+            cancelledDriversSms.push(TwilioService.createSms(notification));
+          }
+        }
+        await Promise.all(cancelledDriversSms);
       }
 
       // sending an email to CSR
-      // const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
+      const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
       const cancelJobEmail = {
         toEmail: 'csr@trelar.com',
         toName: 'Trelar CSR',
-        // subject: `${envString}Trelar Job Cancelled`,
-        subject: 'Trelar Job Cancelled',
+        subject: `${envString}Trelar Job Cancelled`,
         isHTML: true,
         body: 'A producer cancelled a job on Trelar.<br><br>'
           + `Producer Company Name: ${job.company.legalName}<br>`
