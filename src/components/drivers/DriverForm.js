@@ -143,7 +143,8 @@ class DriverForm extends Component {
   async saveUser() {
     const {toggle, currentUser} = this.props;
     this.setState({btnSubmitting: true});
-    if (!this.isFormValid()) {
+    const isValid = await this.isFormValid();
+    if (!isValid) {
       this.setState({btnSubmitting: false});
       return;
     }
@@ -168,7 +169,7 @@ class DriverForm extends Component {
         toggle();
       }
     } else {
-      user.email = `referredBy${currentUser.email}`;
+      user.email = `${user.mobilePhone}refBy${currentUser.email}`;
       user.companyId = currentUser.companyId;
       user.isBanned = 0;
       user.preferredLanguage = 'English';
@@ -183,20 +184,19 @@ class DriverForm extends Component {
       user.id = newUser.id;
 
       const driver = {};
-      driver.driverLicenseId = 1;
       driver.usersId = newUser.id;
       driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
       driver.createdOn = moment.utc().format();
-
+      // we are not seeting driver id to user record.. we should do that here
       await DriverService.createDriver(driver);
       this.sendDriverInvite(user);
       this.setState({step: 2, selectedUser: user});
     }
   }
 
-  isFormValid() {
-    const {firstName, lastName, email, mobilePhone} = this.state;
+  async isFormValid() {
+    const {firstName, lastName, mobilePhone} = this.state;
     let isValid = true;
 
     if (firstName === null || firstName.length === 0) {
@@ -241,6 +241,16 @@ class DriverForm extends Component {
       isValid = false;
     }
 
+    const user = await UserService.getUserByMobile(`+1${mobilePhone}`);
+    if (user.id) {
+      this.setState({
+        reqHandlerPhone: {
+          touched: true,
+          error: 'Mobile phone is already taken'
+        }
+      });
+      isValid = false;
+    }
     return isValid;
   }
 

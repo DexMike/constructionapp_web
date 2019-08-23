@@ -395,6 +395,9 @@ class DashboardCarrierPage extends Component {
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
       }
+      if (typeof job.haulDistance === 'number') {
+        newJob.haulDistance = newJob.haulDistance.toFixed(2);
+      }
 
       potentialIncome += (tempRate * newJob.rateEstimate) * 0.95;
 
@@ -445,6 +448,10 @@ class DashboardCarrierPage extends Component {
                         {
                           name: 'distance',
                           displayName: 'Distance (mi)'
+                        },
+                        {
+                          name: 'haulDistance',
+                          displayName: 'Haul Distance (One Way) (mi)'
                         },
                         {
                           name: 'potentialIncome',

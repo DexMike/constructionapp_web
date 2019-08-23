@@ -48,6 +48,11 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getUserByMobile(mobile) {
+    const response = await this.get(`${PATH}/mobile/${mobile}`);
+    return (response);
+  }
+
   static async getUserById(id) {
     const response = await this.get(`${PATH}/${id}`);
     return (response);
