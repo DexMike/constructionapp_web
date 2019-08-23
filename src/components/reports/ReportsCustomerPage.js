@@ -515,7 +515,7 @@ class ReportsCustomerPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Find a Job</h3>
+          <h3 className="page-title">Reports: Comparison</h3>
         </Col>
       </Row>
     );
