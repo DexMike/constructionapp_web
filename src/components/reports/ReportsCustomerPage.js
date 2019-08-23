@@ -759,73 +759,7 @@ class ReportsCustomerPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {/*<div className="card-body">*/}
-          {/*  <div className="row">*/}
-          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
-          {/*      <div className="card">*/}
-          {/*        <div className="dashboard__card-widget card-body">*/}
-          {/*          <h5 className="card__title bold-text">Jobs In Progress</h5>*/}
-          {/*          <span><h4>{inProgressJobCount}</h4></span>*/}
-          {/*        </div>*/}
-          {/*      </div>*/}
-          {/*    </div>*/}
 
-          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
-          {/*      <div className="card">*/}
-          {/*        <div className="dashboard__card-widget card-body">*/}
-          {/*          <h5 className="card__title bold-text">Booked Jobs</h5>*/}
-          {/*          <span><h4>{acceptedJobCount}</h4></span>*/}
-          {/*        </div>*/}
-          {/*      </div>*/}
-          {/*    </div>*/}
-
-          {/*    /!*<div className="col-12 col-sm-12 col-md-4 col-lg-3">*!/*/}
-          {/*      /!*<div className="card">*!/*/}
-          {/*        /!*<div className="dashboard__card-widget card-body">*!/*/}
-          {/*          /!*<h5 className="card__title bold-text">New Offers</h5>*!/*/}
-          {/*          /!*<span><h4>{newJobCount}</h4></span>*!/*/}
-          {/*        /!*</div>*!/*/}
-          {/*      /!*</div>*!/*/}
-          {/*    /!*</div>*!/*/}
-
-          {/*    /!*<div className="col-12 col-sm-12 col-md-4 col-lg-3">*!/*/}
-          {/*      /!*<div className="card">*!/*/}
-          {/*        /!*<div className="dashboard__card-widget card-body">*!/*/}
-          {/*          /!*<h5 className="card__title bold-text">Potential Earnings</h5>*!/*/}
-          {/*          /!*<div className="my-auto">*!/*/}
-          {/*            /!*<span><h4>{potentialIncome}</h4></span>*!/*/}
-          {/*          /!*</div>*!/*/}
-          {/*        /!*</div>*!/*/}
-          {/*      /!*</div>*!/*/}
-          {/*    /!*</div>*!/*/}
-
-          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
-          {/*      <div className="card">*/}
-          {/*        <div className="dashboard__card-widget card-body">*/}
-          {/*          <div className="my-auto">*/}
-          {/*            <h5 className="card__title bold-text">Job Completion Rate</h5>*/}
-          {/*            <span><h4>{completedOffersPercent}</h4></span>*/}
-          {/*            <div className="text-center pt-3">*/}
-          {/*              <span className="form__form-group-label">completed:</span>&nbsp;<span>{completedJobCount}</span>*/}
-          {/*              &nbsp;&nbsp;*/}
-          {/*              <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>*/}
-          {/*            </div>*/}
-          {/*          </div>*/}
-          {/*        </div>*/}
-          {/*      </div>*/}
-          {/*    </div>*/}
-
-          {/*    <div className="col-12 col-sm-12 col-md-4 col-lg-3">*/}
-          {/*      <div className="card">*/}
-          {/*        <div className="dashboard__card-widget card-body">*/}
-          {/*          <h5 className="card__title bold-text">Completed Jobs</h5>*/}
-          {/*          <span><h4>{completedJobCount}</h4></span>*/}
-          {/*        </div>*/}
-          {/*      </div>*/}
-          {/*    </div>*/}
-          {/*  </div>*/}
-
-          {/*</div>*/}
         </Container>
       );
     }
@@ -910,14 +844,7 @@ class ReportsCustomerPage extends Component {
       return (
         <Container className="dashboard">
           <div className="text-center">
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3*/}
-            {/*      className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>*/}
-            {/*    <h3*/}
-            {/*      className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
+
             <div className="row">
               <div className="col-md-2">
                 <div className="card">
@@ -1128,12 +1055,6 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Product Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
             <Row>
               <div className="col-md-12 mt-1">
                 <img width="100%" height="100%" src={customerProductMetrics} alt=""
@@ -1141,67 +1062,6 @@ class ReportsCustomerPage extends Component {
               </div>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Material</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Cost</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Material</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Cost</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderMaterialMetricsRow('RMA')}*/}
-            {/*  {this.renderMaterialMetricsRow('Stone')}*/}
-            {/*  {this.renderMaterialMetricsRow('Sand')}*/}
-            {/*  {this.renderMaterialMetricsRow('Gravel')}*/}
-            {/*  {this.renderMaterialMetricsRow('Recycling')}*/}
-            {/*  {this.renderMaterialMetricsRow('Other')}*/}
-            {/*  {this.renderMaterialMetricsRow('TOTALS')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1274,11 +1134,6 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Carrier Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
             <Row>
               <div className="col-md-12 mt-1">
                 <img width="100%" height="100%" src={customerCarrierMetrics} alt=""
@@ -1286,65 +1141,6 @@ class ReportsCustomerPage extends Component {
               </div>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Carrier</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Carrier</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderCarrierMetricsRow('Irging Construction')}*/}
-            {/*  {this.renderCarrierMetricsRow('Midlo Quarry')}*/}
-            {/*  {this.renderCarrierMetricsRow('TexasTexas Dirt')}*/}
-            {/*  {this.renderCarrierMetricsRow('Grovel R Us')}*/}
-            {/*  {this.renderCarrierMetricsRow('Dump Buddies')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1417,12 +1213,6 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Project Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
             <Row>
               <div className="col-md-12 mt-1">
                 <img width="100%" height="100%" src={customerProjectMetrics} alt=""
@@ -1430,65 +1220,6 @@ class ReportsCustomerPage extends Component {
               </div>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Customer</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Customer</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderCustomerMetricsRow('DFW Airport')}*/}
-            {/*  {this.renderCustomerMetricsRow('Midland Quarry')}*/}
-            {/*  {this.renderCustomerMetricsRow('Dirt USA')}*/}
-            {/*  {this.renderCustomerMetricsRow('Us')}*/}
-            {/*  {this.renderCustomerMetricsRow('Buddy Dump 3')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1561,71 +1292,6 @@ class ReportsCustomerPage extends Component {
         <Container className="dashboard">
           <div className="card-body">
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Site Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div*/}
-            {/*      className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})*/}
-            {/*    </div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Site</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Site</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderSiteMetricsRow('Mega Site')}*/}
-            {/*  {this.renderSiteMetricsRow('New Tower Riverside')}*/}
-            {/*  {this.renderSiteMetricsRow('SMU Campus')}*/}
-            {/*  {this.renderSiteMetricsRow('DFW Airport Facilities')}*/}
-            {/*  {this.renderSiteMetricsRow('Amazon HQ3')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
