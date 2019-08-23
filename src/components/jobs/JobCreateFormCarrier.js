@@ -528,9 +528,9 @@ class JobCreateFormCarrier extends Component {
           this.saveJobTrucks(createdJob.id, selectedTrucks);
         }
       }
-      const { closeModal, updateJob } = this.props;
+      const { closeModal, updateJobView } = this.props;
       this.setState({ btnSubmitting: false });
-      updateJob(createdJob);
+      updateJobView(createdJob);
       closeModal();
     } else { // new Job Request from Carrier Search
       newJob = {
@@ -2097,14 +2097,14 @@ JobCreateFormCarrier.propTypes = {
   // getAllMaterials: PropTypes.func.isRequired,
   closeModal: PropTypes.func.isRequired,
   job: PropTypes.object,
-  updateJob: PropTypes.func
+  updateJobView: PropTypes.func
   // selectedMaterials: PropTypes.func.isRequired
 };
 
 JobCreateFormCarrier.defaultProps = {
   selectedCarrierId: null,
   job: null,
-  updateJob: null
+  updateJobView: null
   // getAllMaterials: PropTypes.func,
   // closeModal: PropTypes.bool
 };

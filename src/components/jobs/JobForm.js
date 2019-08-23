@@ -141,6 +141,12 @@ class JobForm extends Component {
         allTruckTypes,
         loaded: true
       });
+      if (nextProps.companyCarrier === null) { // we're copying/saving a new job
+        this.setState({
+          companyCarrier: null,
+          carrier: null
+        });
+      }
     }
     if (nextProps.companyCarrier) {
       let { carrier } = this.state;

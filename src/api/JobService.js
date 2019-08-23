@@ -110,6 +110,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getAllocatedDriversInfoByJobId(jobId) {
+    const response = await this.get(`${PATH}/${jobId}/drivers`);
+    return (response);
+  }
+
   static getDefaultJob() {
     return {
       companiesId: 0,

@@ -40,7 +40,7 @@ class JobCreatePopup extends Component {
     this.validateFormOneRes = this.validateFormOneRes.bind(this);
     this.saveJobDraftOrCopy = this.saveJobDraftOrCopy.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.updateJob = this.updateJob.bind(this);
+    this.updateJobView = this.updateJobView.bind(this);
   }
 
   async componentDidMount() {
@@ -60,13 +60,13 @@ class JobCreatePopup extends Component {
     return firstTabInfo;
   }
 
-  updateJob(newJob) {
-    const { updateJob, updateCopiedJob } = this.props;
+  updateJobView(newJob) {
+    const { updateJobView, updateCopiedJob } = this.props;
     if (newJob.copiedJob) {
       updateCopiedJob(newJob);
     }
-    if (updateJob) {
-      updateJob(newJob, null);
+    if (updateJobView) {
+      updateJobView(newJob, null);
     }
   }
 
@@ -237,12 +237,12 @@ class JobCreatePopup extends Component {
     }
 
     if (d.job.id) { // we're updating a Saved job, reload the view with new data
-      this.updateJob(newJob);
+      this.updateJobView(newJob);
       this.closeNow();
     } else {
       if (copyJob) { // user clicked on Copy Job, then tried to Save a new Job, reload the view with new data
         newJob.copiedJob = true;
-        this.updateJob(newJob);
+        this.updateJobView(newJob);
         this.closeNow();
       } else { // user clicked on Save Job, go to new Job's Detail page
         this.setState({
@@ -299,7 +299,7 @@ class JobCreatePopup extends Component {
   }
 
   render() {
-    const { equipmentId, companyId, editDriverId, updateJob, copyJob } = this.props;
+    const { equipmentId, companyId, editDriverId, updateJobView, copyJob } = this.props;
     const {
       job,
       page,
@@ -348,7 +348,7 @@ class JobCreatePopup extends Component {
                         validateOnTabClick={validateFormOne}
                         validateRes={this.validateFormOneRes}
                         saveJobDraftOrCopy={this.saveJobDraftOrCopy}
-                        updateJob={this.updateJob}
+                        updateJobView={this.updateJobView}
                         copyJob={copyJob}
                       />
                       )}
@@ -360,7 +360,7 @@ class JobCreatePopup extends Component {
                         firstTabData={this.getFirstTabInfo}
                         jobId={job.id}
                         saveJobDraftOrCopy={this.saveJobDraftOrCopy}
-                        updateJob={this.updateJob}
+                        updateJobView={this.updateJobView}
                         copyJob={copyJob}
                       />
                       )}
@@ -388,14 +388,14 @@ class JobCreatePopup extends Component {
 JobCreatePopup.propTypes = {
   toggle: PropTypes.func.isRequired,
   jobId: PropTypes.number,
-  updateJob: PropTypes.func,
+  updateJobView: PropTypes.func,
   copyJob: PropTypes.bool,
   updateCopiedJob: PropTypes.func
 };
 
 JobCreatePopup.defaultProps = {
   jobId: null,
-  updateJob: null,
+  updateJobView: null,
   copyJob: false,
   updateCopiedJob: null
 };
