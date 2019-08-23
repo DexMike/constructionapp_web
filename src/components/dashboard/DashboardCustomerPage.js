@@ -19,6 +19,7 @@ import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
 import NumberFormatting from '../../utils/NumberFormatting';
+import GeoUtils from '../../utils/GeoUtils';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -470,6 +471,10 @@ class DashboardCustomerPage extends Component {
         newJob.distance = newJob.distance.toFixed(2);
       }
 
+      if (typeof job.haulDistance === 'number') {
+        newJob.haulDistance = newJob.haulDistance.toFixed(2);
+      }
+
       if (!job.companyCarrierLegalName) {
         newJob.companyCarrierLegalName = 'Unassigned';
       }
@@ -529,7 +534,11 @@ class DashboardCustomerPage extends Component {
                         },
                         {
                           name: 'distance',
-                          displayName: 'Distance (mi)'
+                          displayName: 'Distance to Zip (mi)'
+                        },
+                        {
+                          name: 'haulDistance',
+                          displayName: 'Haul Distance (One Way) (mi)'
                         },
                         {
                           name: 'newRate',
