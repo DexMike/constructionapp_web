@@ -60,18 +60,18 @@ class LoadsExpandableRow extends Component {
     disputeEmail = {
       toEmail: 'csr@trelar.net',
       toName: 'Trelar CSR',
-      subject: `${envString}[Dispute] ${company.legalName}, Load Ticket Number ${load.ticketNumber}`,
+      subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
       isHTML: true,
       body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
         + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
         + `Company: ${company.legalName}<br>`
+        + `Job: ${props.job.name}<br>`
         + `Load Ticket Number: ${load.ticketNumber}`,
       recipients: [
         {name: 'CSR', email: 'csr@trelar.net'}
       ],
       attachments: []
     };
-
     this.setState({driver, loaded: true});
     this.handleApproveLoad = this.handleApproveLoad.bind(this);
     this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
