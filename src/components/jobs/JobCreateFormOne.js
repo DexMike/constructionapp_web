@@ -1650,7 +1650,7 @@ class CreateJobFormOne extends PureComponent {
       return (
         <React.Fragment>
           <div className="col-md-3 form__form-group">
-            <span className="form__form-group-label">Rate / Ton</span>
+            <span className="form__form-group-label">$/Ton</span>
             <TFieldNumber
               input={
                 {
@@ -1686,7 +1686,7 @@ class CreateJobFormOne extends PureComponent {
     return (
       <React.Fragment>
         <div className="col-md-3 form__form-group">
-          <span className="form__form-group-label">Rate / Hour</span>
+          <span className="form__form-group-label">$/Hour</span>
           <TFieldNumber
             input={
               {
