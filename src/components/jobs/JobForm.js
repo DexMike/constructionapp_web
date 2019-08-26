@@ -79,8 +79,6 @@ class JobForm extends Component {
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
 
-    // console.log('>>JOB:', job)
-
     if (job.startAddress) {
       const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
       const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
@@ -100,7 +98,6 @@ class JobForm extends Component {
         loads = await LoadService.getLoadsByBookingId(
           bookings[0].id // booking.id 6
         );
-        // console.log('>>>GOT LOADS!', loads)
         loads = loads.reverse();
       }
     }
