@@ -7,7 +7,7 @@ import LoadsService from '../../api/LoadService';
 // import { type } from 'os';
 import './overrides.css';
 
-const refreshInterval = 5; // refresh every 15 seconds
+const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;
 let count = 0;
 const groupTrackings = new H.map.Group();
