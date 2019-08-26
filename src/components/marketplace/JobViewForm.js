@@ -59,6 +59,7 @@ class JobViewForm extends Component {
       company,
       companyName,
       companyCarrier,
+      allTruckTypes,
       booking,
       profile,
       favoriteCompany,
@@ -110,6 +111,11 @@ class JobViewForm extends Component {
         job.materials = materials.map(material => material.value);
       }
 
+      allTruckTypes = await JobService.getMaterialsByJobId(job.id);
+      if (allTruckTypes.length > 0) {
+        allTruckTypes = allTruckTypes.join(', ');
+      }
+
       bids = await BidService.getBidsByJobId(job.id);
       if (bids.length) { // we have a bid record
         bids.filter((filteredBid) => {
@@ -150,6 +156,7 @@ class JobViewForm extends Component {
       company,
       companyName,
       companyCarrier,
+      allTruckTypes,
       bid,
       booking,
       profile,
@@ -626,6 +633,7 @@ class JobViewForm extends Component {
   }
 
   renderJobDetails(job) {
+    const { allTruckTypes } = this.state;
     return (
       <React.Fragment>
         <Container>
@@ -639,7 +647,7 @@ class JobViewForm extends Component {
               <h3 className="subhead">
                 Truck Details
               </h3>
-              {job.equipmentType}
+              {allTruckTypes}
             </div>
             <div className="col-md-4">
               <h3 className="subhead">
