@@ -5,6 +5,8 @@ import DatePicker from 'react-datepicker';
 import MinusIcon from 'mdi-react/MinusIcon';
 import PropTypes from 'prop-types';
 import './overrides.css';
+import Flatpickr from 'react-flatpickr';
+import 'flatpickr/dist/themes/material_green.css';
 
 class IntervalDatePickerField extends PureComponent {
   constructor(props) {
@@ -18,11 +20,14 @@ class IntervalDatePickerField extends PureComponent {
     this.handleChangeEnd = this.handleChangeEnd.bind(this);
   }
 
-  handleChangeStart(changedStartDate) {
+  handleChangeStart(startDate) {
+    const changedStartDate = startDate[0];
     this.handleChange({ changedStartDate });
   }
 
-  handleChangeEnd(changedEndDate) {
+  handleChangeEnd(endDate) {
+    const changedEndDate = endDate[0];
+    changedEndDate.setHours(23, 59, 59);
     this.handleChange({ changedEndDate });
   }
 
@@ -56,27 +61,49 @@ class IntervalDatePickerField extends PureComponent {
     const { name, dateFormat } = this.props;
     return (
       <div className="date-picker date-picker--interval" style={{backgroundColor: 'transparent'}}>
-        <DatePicker
+        {/*<DatePicker*/}
+        {/*  name={name}*/}
+        {/*  selected={startDate}*/}
+        {/*  selectsStart*/}
+        {/*  startDate={startDate}*/}
+        {/*  endDate={endDate}*/}
+        {/*  onChange={this.handleChangeStart}*/}
+        {/*  dateFormat={dateFormat}*/}
+        {/*  placeholderText="From"*/}
+        {/*/>*/}
+        <Flatpickr
+          className="c-date-picker"
           name={name}
-          selected={startDate}
-          selectsStart
-          startDate={startDate}
-          endDate={endDate}
-          onChange={this.handleChangeStart}
-          dateFormat={dateFormat}
-          placeholderText="From"
+          options={{
+            defaultDate: startDate,
+            maxDate: endDate,
+            dateFormat,
+            // enableTime: true,
+            onChange: this.handleChangeStart
+          }}
         />
         <MinusIcon className="date-picker__svg" />
-        <DatePicker
+        <Flatpickr
+          className="c-date-picker"
           name={name}
-          selected={endDate}
-          selectsEnd
-          startDate={startDate}
-          endDate={endDate}
-          onChange={this.handleChangeEnd}
-          dateFormat={dateFormat}
-          placeholderText="To"
+          options={{
+            defaultDate: endDate,
+            dateFormat,
+            minDate: startDate,
+            // enableTime: true,
+            onChange: this.handleChangeEnd
+          }}
         />
+        {/*<DatePicker*/}
+        {/*  name={name}*/}
+        {/*  selected={endDate}*/}
+        {/*  selectsEnd*/}
+        {/*  startDate={startDate}*/}
+        {/*  endDate={endDate}*/}
+        {/*  onChange={this.handleChangeEnd}*/}
+        {/*  dateFormat={dateFormat}*/}
+        {/*  placeholderText="To"*/}
+        {/*/>*/}
       </div>
     );
   }
@@ -98,7 +125,7 @@ IntervalDatePickerField.propTypes = {
 };
 
 IntervalDatePickerField.defaultProps = {
-  dateFormat: 'MMMM dd, yyyy',
+  dateFormat: 'm/d/Y',
   startDate: null,
   endDate: null
 };

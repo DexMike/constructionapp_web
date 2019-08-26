@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
-import { Card, CardBody, Row, Container, Col, Modal, ButtonToolbar, Button } from 'reactstrap';
+import {Card, CardBody, Row, Container, Col, Modal, ButtonToolbar, Button, Alert} from 'reactstrap';
 import './jobs.css';
 import CloneDeep from 'lodash.clonedeep';
 import moment from 'moment';
@@ -17,6 +17,9 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
 import GroupService from '../../api/GroupService';
 import ProfileService from '../../api/ProfileService';
+import EmailService from '../../api/EmailService';
+import NumberFormatting from '../../utils/NumberFormatting';
+
 
 class BidsTable extends Component {
   constructor(props) {
@@ -35,24 +38,61 @@ class BidsTable extends Component {
       rows: 10,
       modalAcceptBid: false,
       loaded: false,
-      btnSubmitting: false
+      btnSubmitting: false,
+      producerCompany: null,
+      insuranceWarning: false,
+      approveInsurance: ''
     };
 
     // this.handleJobEdit = this.handleJobEdit.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.toggleBidModal = this.toggleBidModal.bind(this);
+    this.handleAcceptBid = this.handleAcceptBid.bind(this);
+    this.handleApproveInputChange = this.handleApproveInputChange.bind(this);
+    this.loadBidsTable = this.loadBidsTable.bind(this);
     // this.closeNow = this.closeNow.bind(this);
   }
 
-  async componentDidMount() {
-    const { job } = this.props;
-    let { totalBids, profile } = this.state;
-    profile = await ProfileService.getProfile();
-    let bids = await BidService.getBidsInfoByJobId(job.id);
+  componentDidMount() {
+    this.loadBidsTable();
+  }
 
-    bids = bids.map((bid) => {
+  componentWillReceiveProps(props) {
+    const { newJob } = this.state;
+    if ((newJob) && (parseInt(props.job.id, 10) !== parseInt(newJob.id, 10))) {
+      this.loadBidsTable(props.job.id); // load a new job bids table
+    }
+  }
+
+  async loadBidsTable(jobId) {
+    const {job} = this.props;
+    let {totalBids, profile} = this.state;
+    profile = await ProfileService.getProfile();
+    let bids = [];
+
+    if (jobId) { // we are updating the view
+      bids = await BidService.getBidsInfoByJobId(jobId);
+    } else { // we are loading the view
+      bids = await BidService.getBidsInfoByJobId(job.id);
+    }
+
+    const producerCompany = await CompanyService.getCompanyById(profile.companyId);
+
+    bids = await Promise.all(bids.map(async (bid) => {
       const newBid = bid;
+      const bidCompany = await CompanyService.getCompanyById(bid.companyCarrierId);
+      if (bidCompany.liabilityGeneral < producerCompany.liabilityGeneral
+        || bidCompany.liabilityAuto < producerCompany.liabilityAuto
+        || bidCompany.liabilityOther < producerCompany.liabilityOther) {
+        newBid.insCoverage = 'No';
+      } else {
+        newBid.insCoverage = 'Yes';
+      }
+
+      newBid.insuranceInfo = `General: ${NumberFormatting.asMoney(bidCompany.liabilityGeneral, '.', 0)}\n`
+      + `Auto: ${NumberFormatting.asMoney(bidCompany.liabilityAuto, '.', 0)}\n`
+      + `Other: ${NumberFormatting.asMoney(bidCompany.liabilityOther, '.', 0)}\n`;
 
       newBid.date = bid.createdOn;
       newBid.dateF = TFormat.asDate(bid.createdOn);
@@ -62,21 +102,18 @@ class BidsTable extends Component {
       }
 
       return newBid;
-    });
-
+    }));
     totalBids = bids.length;
 
-    this.setState({ newJob: job, bids, totalBids, profile, loaded: true });
+    this.setState({newJob: job, bids, totalBids, profile, loaded: true, producerCompany});
   }
 
   async toggleBidModal(bidId) {
-    let {modalAcceptBid} = this.state;
-    let { selectedBid, selectedBidCompany } = this.state;
+    let {modalAcceptBid, selectedBid, selectedBidCompany} = this.state;
 
     if (typeof bidId === 'number') {
       selectedBid = await BidService.getBidById(bidId);
       selectedBidCompany = await CompanyService.getCompanyById(selectedBid.companyCarrierId);
-
       if (selectedBid.status === 'Declined'
         || selectedBid.status === 'Ignored'
         || selectedBid.status === 'Accepted'
@@ -92,24 +129,24 @@ class BidsTable extends Component {
   }
 
   handlePageChange(page) {
-    this.setState({ page });
+    this.setState({page});
   }
 
   handleRowsPerPage(rows) {
-    this.setState({ rows });
+    this.setState({rows});
   }
 
   async saveBid(action) {
-    const { updateJob } = this.props;
+    const {updateJobView} = this.props;
     const {
       selectedBid, profile
     } = this.state;
-    let { newJob, bids, booking, bookingEquipment } = this.state;
+    let {newJob, bids, booking, bookingEquipment} = this.state;
     let newBid = [];
     let ignoredBids = [];
     let allBids = [];
     const ignoredCompanies = [];
-    this.setState({ btnSubmitting: true });
+    this.setState({btnSubmitting: true});
 
     const job = await JobService.getJobById(selectedBid.jobId);
 
@@ -245,7 +282,7 @@ class BidsTable extends Component {
       }
 
       // updating parent component JobSavePage
-      updateJob(newJob, newBid.companyCarrierId);
+      updateJobView(newJob, newBid.companyCarrierId);
     } else {
       // Decline Bid
       newBid = CloneDeep(selectedBid);
@@ -271,7 +308,7 @@ class BidsTable extends Component {
       }
 
       // updating parent component JobSavePage
-      updateJob(newJob);
+      updateJobView(newJob);
     }
 
     allBids = await BidService.getBidsInfoByJobId(selectedBid.jobId);
@@ -282,7 +319,7 @@ class BidsTable extends Component {
       return newBid;
     });
 
-    this.setState({ newJob, bids: allBids, btnSubmitting: false });
+    this.setState({newJob, bids: allBids, btnSubmitting: false});
     this.toggleBidModal();
   }
 
@@ -303,19 +340,59 @@ class BidsTable extends Component {
     return true;
   }
 
+  async handleAcceptBid() {
+    const {job} = {...this.props};
+    const {selectedBidCompany, producerCompany, approveInsurance, insuranceWarning, profile} = {...this.state};
+    if (approveInsurance !== 'APPROVE' && (selectedBidCompany.liabilityGeneral < producerCompany.liabilityGeneral
+      || selectedBidCompany.liabilityAuto < producerCompany.liabilityAuto
+      || selectedBidCompany.liabilityOther < producerCompany.liabilityOther)) {
+      this.setState({insuranceWarning: true});
+    } else {
+      if (insuranceWarning) {
+        const user = await UserService.getUserById(profile.userId);
+        const date = moment(new Date()).format('lll');
+        const insuranceWarningEmail = {
+          toEmail: 'csr@trelar.com',
+          toName: 'Trelar CSR',
+          subject: `Insurance Warning: ${producerCompany.legalName}: ${user.firstName} ${user.lastName} Favorited Carrier`,
+          isHTML: true,
+          body: `Producer Name: ${producerCompany.legalName}<br>`
+            + `User Name: ${user.firstName} ${user.lastName}<br><br>`
+            + `Carrier Name: ${selectedBidCompany.legalName}<br><br>`
+            + `Job Name: ${job.name}<br>`
+            + `Job ID: ${job.id}`
+            + `Date: ${date}<br>`,
+          recipients: [
+            {name: 'CSR', email: 'csr@trelar.com'}
+          ],
+          attachments: []
+        };
+        await EmailService.sendEmail(insuranceWarningEmail);
+        this.saveBid('accept');
+      } else {
+        this.saveBid('accept');
+      }
+    }
+  }
+
+  handleApproveInputChange(e) {
+    this.setState({approveInsurance: e.target.value.toUpperCase()});
+  }
+
   renderTitle() {
-    const { newJob } = this.state;
+    const {newJob} = this.state;
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">{newJob.status === 'Published' || newJob.status === 'Published And Offered' ? 'Open Requests' : 'Requests History' }</h3>
+          <h3
+            className="page-title">{newJob.status === 'Published' || newJob.status === 'Published And Offered' ? 'Open Requests' : 'Requests History'}</h3>
         </Col>
       </Row>
     );
   }
 
   renderTableLegend() {
-    const { totalBids } = this.state;
+    const {totalBids} = this.state;
     return (
       <div className="ml-4 mt-4">
         Total number of offers: {totalBids}
@@ -324,11 +401,11 @@ class BidsTable extends Component {
   }
 
   renderBidsTable() {
-    const { bids } = this.state;
+    const {bids} = this.state;
     return (
       <Container>
         <Card>
-          <CardBody>
+          <CardBody className="bids-table">
             {this.renderTableLegend()}
             <TTable
               columns={
@@ -344,6 +421,10 @@ class BidsTable extends Component {
                   {
                     name: 'status',
                     displayName: 'Status'
+                  },
+                  {
+                    name: 'insuranceInfo',
+                    displayName: 'Ins Coverage'
                   },
                   /* { // TODO v2
                     name: 'acceptanceRate',
@@ -388,7 +469,10 @@ class BidsTable extends Component {
     const {
       modalAcceptBid,
       btnSubmitting,
-      selectedBidCompany
+      selectedBidCompany,
+      insuranceWarning,
+      producerCompany,
+      approveInsurance
     } = this.state;
 
     if (modalAcceptBid) {
@@ -400,11 +484,11 @@ class BidsTable extends Component {
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
-                    onClick={this.toggleViewJobModal}
+                    onClick={this.toggleBidModal}
             />
-            <div className="bold-text modal__title">Assign a Job</div>
+            <div className="bold-text modal__title">Carrier Request</div>
           </div>
-          <div className="modal__body" style={{ padding: '10px 25px 0px 25px' }}>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
             <Container className="dashboard">
               <Row>
                 <Col md={12} lg={12}>
@@ -413,9 +497,53 @@ class BidsTable extends Component {
                       className="form form--horizontal addtruck__form"
                     >
                       <Row className="col-md-12">
-                      Do you want to book {selectedBidCompany.legalName} for this job now?
+                        Do you want to book {selectedBidCompany.legalName} for this job now?
                       </Row>
                       <hr/>
+                      {insuranceWarning && (
+                        <Row className="col-md-12" style={{paddingBottom: 50}}>
+                          <Row className="col-md-12">
+                            <span style={{fontWeight: 'bold'}}> Minimum Insurance Level Warning</span>
+                          </Row>
+                          <Row className="col-md-12">
+                            {selectedBidCompany.liabilityGeneral < producerCompany.liabilityGeneral && (
+                              <Row className="col-md-12">
+                                <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
+                                General: {selectedBidCompany.legalName} has {selectedBidCompany.liabilityGeneral},
+                                but requires {producerCompany.liabilityGeneral}
+                              </Row>
+                            )}
+                            {selectedBidCompany.liabilityAuto < producerCompany.liabilityAuto && (
+                              <Row className="col-md-12">
+                                <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
+                                Auto: {selectedBidCompany.legalName} has {selectedBidCompany.liabilityAuto},
+                                but requires {producerCompany.liabilityAuto}
+                              </Row>
+                            )}
+                            {selectedBidCompany.liabilityOther < producerCompany.liabilityOther && (
+                              <Row className="col-md-12">
+                                <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
+                                Other: {selectedBidCompany.legalName} has {selectedBidCompany.liabilityOther},
+                                but requires {producerCompany.liabilityOther}
+                              </Row>
+                            )}
+                            <Row className="col-md-12">
+                              To use this carrier, and override your insurance requirements,
+                              you must type APPROVE in this box:
+                              <Row className="col-md-12" style={{paddingTop: 15}}>
+                                <div className="form__form-group-field">
+                                  <input
+                                    name="approveInsurance"
+                                    type="text"
+                                    value={approveInsurance}
+                                    onChange={this.handleApproveInputChange}
+                                  />
+                                </div>
+                              </Row>
+                            </Row>
+                          </Row>
+                        </Row>
+                      )}
                       <Row className="col-md-12">
                         <ButtonToolbar className="col-md-4 wizard__toolbar">
                           <Button color="minimal" className="btn btn-outline-secondary"
@@ -434,7 +562,8 @@ class BidsTable extends Component {
                             bntText="No, decline this Request"
                           />
                           <TSubmitButton
-                            onClick={() => this.saveBid('accept')}
+                            // onClick={() => this.saveBid('accept')}
+                            onClick={() => this.handleAcceptBid()}
                             className="primaryButton float-right"
                             loading={btnSubmitting}
                             loaderSize={10}
@@ -455,7 +584,7 @@ class BidsTable extends Component {
   }
 
   render() {
-    const { loaded } = this.state;
+    const {loaded} = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -477,7 +606,7 @@ BidsTable.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
   }),
-  updateJob: PropTypes.func.isRequired
+  updateJobView: PropTypes.func.isRequired
 };
 
 BidsTable.defaultProps = {

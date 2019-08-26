@@ -12,10 +12,9 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import DashboardObjectClickable from './DashboardObjectClickable';
-import JobFilter from '../filters/JobFilter';
+import JobDriversFilter from '../filters/JobDriversFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
-import NumberFormatting from '../../utils/NumberFormatting';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -24,7 +23,7 @@ function PageTitle() {
   );
 }
 
-function DashboardLoading () {
+function DashboardLoading() {
   const {t} = useTranslation();
   return (
     <Container className="dashboard">
@@ -181,44 +180,6 @@ class DashboardCarrierPage extends Component {
     return filters.materialType;
   }
 
-  // renderModal stolen from MarketplaceCarrierPage
-  renderModal() {
-    // const {
-    //   // equipments,
-    //   // startAvailability,
-    //   // endAvailability,
-    //   // equipmentType,
-    //   // minCapacity,
-    //   // materials,
-    //   // zipCode,
-    //   // rateType,
-    //   modal,
-    //   selectedEquipment
-    // } = this.state;
-    // return (
-    //   <Modal
-    //     isOpen={modal}
-    //     toggle={this.toggleAddJobModal}
-    //     className="modal-dialog--primary modal-dialog--header"
-    //   >
-    //     <div className="modal__header">
-    //       <button type="button" className="lnr lnr-cross modal__close-btn"
-    //               onClick={this.toggleAddJobModal}
-    //       />
-    //       <h4 className="bold-text modal__title">Job Request</h4>
-    //     </div>
-    //     <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-    //       <JobCreateForm
-    //         selectedEquipment={selectedEquipment}
-    //         closeModal={this.toggleAddJobModal}
-    //         selectedMaterials={this.returnSelectedMaterials}
-    //         getAllMaterials={this.retrieveAllMaterials}
-    //       />
-    //     </div>
-    //   </Modal>
-    // );
-  }
-
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -245,6 +206,14 @@ class DashboardCarrierPage extends Component {
     let completedJobCount = 0;
     let totalPotentialIncome = 0;
 
+    // let jobsCompleted = 0;
+    // let totalEarnings = 0;
+    // let earningsPerJob = 0;
+    // let cancelledJobs = 0;
+    // let jobsPerTruck = 0;
+    // let idleTrucks = 0;
+    // let completedOffersPercent = 0;
+
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
@@ -269,7 +238,8 @@ class DashboardCarrierPage extends Component {
           // completedJobCount += 1;
           completedJobCount = newJob.countJobs;
         }
-        totalPotentialIncome += (newJob.estimatedEarnings) * 0.95;
+
+        // totalPotentialIncome += (newJob.estimatedEarnings) * 0.95;
 
         return newJob;
       });
@@ -280,14 +250,6 @@ class DashboardCarrierPage extends Component {
         <Container className="dashboard">
           {/* {this.renderGoTo()} */}
           <div className="row">
-            <DashboardObjectClickable
-              title="New Offers"
-              displayVal={onOfferJobCount}
-              value="On Offer"
-              handle={this.handleFilterStatusChange}
-              name="status"
-              status={filters.status}
-            />
             <DashboardObjectClickable
               title="Booked Jobs"
               displayVal={bookedJobCount}
@@ -311,18 +273,6 @@ class DashboardCarrierPage extends Component {
               handle={this.handleFilterStatusChange}
               name="status"
               status={filters.status}
-            />
-            {
-            /*
-            <DashboardObjectStatic
-              title="% Completed"
-              displayVal = {completedOffersPercent}
-            />
-            */
-            }
-            <DashboardObjectStatic
-              title={filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings'}
-              displayVal={TFormat.asMoney(totalPotentialIncome)}
             />
           </div>
         </Container>
@@ -366,37 +316,47 @@ class DashboardCarrierPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
-
       if (newJob.rateType === 'Hour') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asHours(newJob.rateEstimate)
         );
-        newJob.newRateF = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Hour'
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateF = TFormat.getValue(
+          TFormat.asMoneyByHour(newJob.rate)
         );
-      } else if (newJob.rateType === 'Ton') {
+
+        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+        newJob.potentialIncomeF = TFormat.getValue(
+          TFormat.asMoney(
+            (tempRate * newJob.rateEstimate)
+          )
+        );
+      }
+      if (newJob.rateType === 'Ton') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asTons(newJob.rateEstimate)
         );
-        newJob.newRateF = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Ton'
+
+        newJob.newRate = newJob.rate;
+        newJob.newRateF = TFormat.getValue(
+          TFormat.asMoneyByTons(newJob.rate)
+        );
+
+        newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
+        newJob.potentialIncomeF = TFormat.getValue(
+          TFormat.asMoney(
+            (tempRate * newJob.rateEstimate)
+          )
         );
       }
 
-      newJob.newRate = newJob.rate;
-      newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
-      newJob.potentialIncomeF = NumberFormatting.asMoney(
-        tempRate * newJob.rateEstimate
-      );
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
-      }
-      if (typeof job.haulDistance === 'number') {
-        newJob.haulDistance = newJob.haulDistance.toFixed(2);
       }
 
       potentialIncome += (tempRate * newJob.rateEstimate) * 0.95;
@@ -450,28 +410,9 @@ class DashboardCarrierPage extends Component {
                           displayName: 'Distance (mi)'
                         },
                         {
-                          name: 'haulDistance',
-                          displayName: 'Haul Distance (One Way) (mi)'
-                        },
-                        {
-                          name: 'potentialIncome',
-                          displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings',
-                          label: 'potentialIncomeF'
-                        },
-                        {
-                          name: 'newRate',
-                          displayName: 'Rate',
-                          label: 'newRateF'
-                        },
-                        {
                           name: 'newSize',
                           displayName: 'Size',
                           label: 'newSizeF'
-                        },
-                        {
-                          // the materials needs to come from the the JobMaterials Table
-                          name: 'materials',
-                          displayName: 'Materials'
                         }
                       ]
                     }
@@ -512,11 +453,10 @@ class DashboardCarrierPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}
-          <JobFilter
+          <JobDriversFilter
             returnJobs={this.returnJobs}
             page={page}
             rows={rows}

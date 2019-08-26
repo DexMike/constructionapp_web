@@ -22,3 +22,7 @@
     font-weight: bold;
     font-size: 12px;
 }
+
+.form_currency {
+    padding-left: 16px !important;
+}

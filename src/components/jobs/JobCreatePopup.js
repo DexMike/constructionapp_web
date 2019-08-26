@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
+import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -8,6 +11,10 @@ import {
 } from 'reactstrap';
 import JobCreateFormOne from './JobCreateFormOne';
 import JobCreateFormTwo from './JobCreateFormTwo';
+import ProfileService from '../../api/ProfileService';
+import JobService from '../../api/JobService';
+import AddressService from '../../api/AddressService';
+import JobMaterialsService from '../../api/JobMaterialsService';
 
 class JobCreatePopup extends Component {
   constructor(props) {
@@ -15,9 +22,12 @@ class JobCreatePopup extends Component {
 
     this.state = {
       page: 1,
+      job: [],
       loaded: false,
       validateFormOne: false,
-      firstTabInfo: {}
+      firstTabInfo: {},
+      profile: [],
+      goToJobDetail: false
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -28,15 +38,219 @@ class JobCreatePopup extends Component {
     this.getFirstTabInfo = this.getFirstTabInfo.bind(this);
     this.validateFormOne = this.validateFormOne.bind(this);
     this.validateFormOneRes = this.validateFormOneRes.bind(this);
+    this.saveJobDraftOrCopy = this.saveJobDraftOrCopy.bind(this);
+    this.renderGoTo = this.renderGoTo.bind(this);
+    this.updateJobView = this.updateJobView.bind(this);
   }
 
   async componentDidMount() {
-    this.setState({ loaded: true });
+    const { jobId } = this.props;
+    let job = [];
+    if (jobId) {
+      job = await JobService.getJobById(jobId);
+      this.setState({firstTabInfo: job});
+      this.getFirstTabInfo();
+    }
+    const profile = await ProfileService.getProfile();
+    this.setState({ job, profile, loaded: true });
   }
 
   getFirstTabInfo() {
     const { firstTabInfo } = this.state;
     return firstTabInfo;
+  }
+
+  updateJobView(newJob) {
+    const { updateJobView, updateCopiedJob } = this.props;
+    if (newJob.copiedJob) {
+      updateCopiedJob(newJob);
+    }
+    if (updateJobView) {
+      updateJobView(newJob, null);
+    }
+  }
+
+  async saveJobMaterials(jobId, material) {
+    // const profile = await ProfileService.getProfile();
+    const { profile } = this.state;
+    if (profile && material) {
+      const newMaterial = {
+        jobsId: jobId,
+        value: material,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+      /* eslint-disable no-await-in-loop */
+      await JobMaterialsService.createJobMaterials(newMaterial);
+    }
+  }
+
+  // let's create a list of truck types that we want to save
+  async saveJobTrucks(jobId, trucks) {
+    const allTrucks = [];
+    for (const truck of trucks) {
+      const equipmentMaterial = {
+        jobId,
+        equipmentTypeId: Number(truck.value)
+      };
+      allTrucks.push(equipmentMaterial);
+    }
+    await JobMaterialsService.deleteJobEquipmentsByJobId(jobId);
+    await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+  }
+
+  // Used to either store a Copied or 'Saved' job to the database
+  async saveJobDraftOrCopy(e) {
+    const { copyJob } = this.props;
+    const { profile } = this.state;
+    const d = e;
+
+    // start location
+    let startAddress = {
+      id: null
+    };
+    if (d.selectedStartAddressId > 0) {
+      startAddress.id = d.selectedStartAddressId;
+    }
+    if (d.selectedStartAddressId === 0 && d.startLocationAddressName.length > 0) {
+      const address1 = {
+        type: 'Delivery',
+        name: d.startLocationAddressName,
+        companyId: profile.companyId,
+        address1: d.startLocationAddress1,
+        address2: d.startLocationAddress2,
+        city: d.startLocationCity,
+        state: d.startLocationState,
+        zipCode: d.startLocationZip,
+        latitude: d.startLocationLatitude,
+        longitude: d.startLocationLongitude,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+      startAddress = await AddressService.createAddress(address1);
+    }
+    // end location
+    let endAddress = {
+      id: null
+    };
+    if (d.selectedEndAddressId > 0) {
+      endAddress.id = d.selectedEndAddressId;
+    }
+    if (d.selectedEndAddressId === 0 && d.endLocationAddressName.length > 0) {
+      const address2 = {
+        type: 'Delivery',
+        name: d.endLocationAddressName,
+        companyId: profile.companyId,
+        address1: d.endLocationAddress1,
+        address2: d.endLocationAddress2,
+        city: d.endLocationCity,
+        state: d.endLocationState,
+        zipCode: d.endLocationZip,
+        latitude: d.endLocationLatitude,
+        longitude: d.endLocationLongitude
+      };
+      endAddress = await AddressService.createAddress(address2);
+    }
+
+    let rateType = '';
+    let rate = 0;
+    if (d.selectedRatedHourOrTon && d.selectedRatedHourOrTon.length > 0) {
+      if (d.selectedRatedHourOrTon === 'ton') {
+        rateType = 'Ton';
+        rate = Number(d.rateByTonValue);
+        // d.rateEstimate = d.rateEstimate;
+      } else {
+        rateType = 'Hour';
+        rate = Number(d.rateByHourValue);
+        // d.rateEstimate = d.estimatedHours;
+      }
+    }
+
+    const calcTotal = d.rateEstimate * rate;
+    const rateTotal = Math.round(calcTotal * 100) / 100;
+
+    if (d.jobDate && Object.prototype.toString.call(d.jobDate) === '[object Date]') {
+      d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
+      d.jobDate = moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
+    } else if (d.job.startTime) {
+      d.jobDate = moment(d.job.startTime).format('YYYY-MM-DD HH:mm');
+      d.jobDate = moment.tz(
+        d.jobDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
+    } else {
+      d.jobDate = '';
+    }
+
+    if (!d.truckType || d.truckType.lenght === 0) {
+      d.truckType = '';
+    } else {
+      d.truckType = d.truckType.value;
+    }
+
+    const job = {
+      companiesId: profile.companyId,
+      name: d.name,
+      status: 'Saved',
+      startAddress: startAddress.id,
+      endAddress: endAddress.id,
+      startTime: d.jobDate,
+      equipmentType: d.truckType,
+      numEquipments: d.hourTrucksNumber,
+      rateType,
+      rate,
+      rateEstimate: d.rateEstimate,
+      rateTotal,
+      notes: d.instructions,
+      createdBy: profile.userId,
+      createdOn: moment.utc().format(),
+      modifiedBy: profile.userId,
+      modifiedOn: moment.utc().format()
+    };
+
+    let newJob = [];
+    if (d.job.id) { // UPDATING 'Saved' JOB
+      newJob = CloneDeep(job);
+      newJob.id = d.job.id;
+      delete newJob.createdBy;
+      delete newJob.createdOn;
+      await JobService.updateJob(newJob);
+    } else { // CREATING NEW 'Saved' JOB
+      newJob = await JobService.createJob(job);
+    }
+
+    // add material
+    if (newJob) {
+      if (Object.keys(d.selectedMaterials).length > 0) { // check if there's materials to add
+        this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+      }
+      if (Object.keys(d.selectedTrucks).length > 0) {
+        this.saveJobTrucks(newJob.id, d.selectedTrucks);
+      }
+    }
+
+    if (d.job.id) { // we're updating a Saved job, reload the view with new data
+      this.updateJobView(newJob);
+      this.closeNow();
+    } else {
+      if (copyJob) { // user clicked on Copy Job, then tried to Save a new Job, reload the view with new data
+        newJob.copiedJob = true;
+        this.updateJobView(newJob);
+        this.closeNow();
+      } else { // user clicked on Save Job, go to new Job's Detail page
+        this.setState({
+          job: newJob,
+          goToJobDetail: true
+        });
+      }
+    }
   }
 
   saveAndGoToSecondPage(e) {
@@ -76,9 +290,18 @@ class JobCreatePopup extends Component {
     this.setState({ page: pageNumber });
   }
 
+  renderGoTo() {
+    const { goToJobDetail, job } = this.state;
+    if (goToJobDetail) {
+      return <Redirect push to={`/jobs/save/${job.id}`}/>;
+    }
+    return false;
+  }
+
   render() {
-    const { equipmentId, companyId, editDriverId } = this.props;
+    const { equipmentId, companyId, editDriverId, updateJobView, copyJob } = this.props;
     const {
+      job,
       page,
       loaded,
       validateFormOne
@@ -86,6 +309,7 @@ class JobCreatePopup extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          {this.renderGoTo()}
           <Row>
             {/* <h1>TEST</h1> */}
             <Col md={12} lg={12}>
@@ -123,6 +347,9 @@ class JobCreatePopup extends Component {
                         firstTabData={this.getFirstTabInfo}
                         validateOnTabClick={validateFormOne}
                         validateRes={this.validateFormOneRes}
+                        saveJobDraftOrCopy={this.saveJobDraftOrCopy}
+                        updateJobView={this.updateJobView}
+                        copyJob={copyJob}
                       />
                       )}
                     {page === 2
@@ -131,6 +358,10 @@ class JobCreatePopup extends Component {
                         p={page}
                         onClose={this.closeNow}
                         firstTabData={this.getFirstTabInfo}
+                        jobId={job.id}
+                        saveJobDraftOrCopy={this.saveJobDraftOrCopy}
+                        updateJobView={this.updateJobView}
+                        copyJob={copyJob}
                       />
                       )}
                     {/* onSubmit={onSubmit} */}
@@ -154,14 +385,19 @@ class JobCreatePopup extends Component {
   }
 }
 
-
-/**/
 JobCreatePopup.propTypes = {
-  toggle: PropTypes.func.isRequired
+  toggle: PropTypes.func.isRequired,
+  jobId: PropTypes.number,
+  updateJobView: PropTypes.func,
+  copyJob: PropTypes.bool,
+  updateCopiedJob: PropTypes.func
 };
 
 JobCreatePopup.defaultProps = {
-  //
+  jobId: null,
+  updateJobView: null,
+  copyJob: false,
+  updateCopiedJob: null
 };
 
 

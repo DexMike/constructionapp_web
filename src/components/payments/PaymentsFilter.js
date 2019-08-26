@@ -87,7 +87,7 @@ class PaymentsFilter extends Component {
                         name="dateInterval"
                         onChange={() => {
                         }}
-                        dateFormat="MM/dd/yy"
+                        dateFormat="m/d/Y"
                       />
                     </Col>
                     <Col md="5">

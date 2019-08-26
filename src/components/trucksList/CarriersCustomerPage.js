@@ -26,6 +26,7 @@ import GroupService from '../../api/GroupService';
 import GroupListService from '../../api/GroupListService';
 import CarrierRow from './CarrierRow';
 // import GeoCodingService from '../../api/GeoCodingService';
+import GeoUtils from '../../utils/GeoUtils';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -420,12 +421,12 @@ class CarriersCustomerPage extends Component {
     // or we don't have any coordinates on our db
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
-        // TODO -> do this without MapBox
-        /*
-        try { // Search for that new zip code's coordinates with MapBox API
-          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-          filters.companyLatitude = geoLocation.features[0].center[1];
-          filters.companyLongitude = geoLocation.features[0].center[0];
+        try {
+          // Search for that new zip code's coordinates with Here.com API,
+          // had to add 'US' to specify country
+          const geoCode = await GeoUtils.getCoordsFromAddress(`${filters.zipCode}, US`);
+          filters.companyLatitude = geoCode.lat;
+          filters.companyLongitude = geoCode.lng;
         } catch (e) {
           this.setState({
             reqHandlerZip: {
@@ -435,14 +436,6 @@ class CarriersCustomerPage extends Component {
             }
           });
         }
-        */
-        this.setState({
-          reqHandlerZip: {
-            ...reqHandlerZip,
-            error: 'Invalid US Zip Code',
-            touched: true
-          }
-        });
       } else {
         // if the zipCode filter is empty, or it is the same as the initial code,
         // default the coordinates to user's address
@@ -771,7 +764,7 @@ class CarriersCustomerPage extends Component {
           />
           <div className="bold-text modal__title">Job Request</div>
         </div>
-        <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
+        <div className="modal__body" style={{ paddingTop: '25px', paddingRight: '0px' }}>
           <JobCreateFormCarrier
             selectedCarrierId={selectedCarrier}
             closeModal={this.toggleAddJobModal}
@@ -989,7 +982,7 @@ class CarriersCustomerPage extends Component {
                         endDate={endDate}
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
-                        dateFormat="MM/dd/yy"
+                        dateFormat='m/d/Y'
                       />
                     </Col> */}
                     <Col md="4" className="">

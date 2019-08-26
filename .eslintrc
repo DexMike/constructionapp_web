@@ -6,7 +6,8 @@
   ],
   "env": {
     "es6": true,
-    "browser": true
+    "browser": true,
+    "jest": true
   },
   "rules": {
     "comma-dangle": [2, "never"],
@@ -26,5 +27,8 @@
     "react/prefer-stateless-function": 0,
     "react/prefer-es6-class": 2,
     "react/jsx-one-expression-per-line": 0
+  },
+  "globals": {
+    "H": true
   }
 }

@@ -2,12 +2,19 @@ import React, { Component } from 'react';
 import {
   Col,
   Row,
-  Container, Modal, Card, Button
+  Container,
+  Modal,
+  Card,
+  Button,
+  CardBody,
+  ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
+import TFormat from '../common/TFormat';
+import TField from '../common/TField';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -18,12 +25,16 @@ import BookingService from '../../api/BookingService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
+import LoadService from '../../api/LoadService';
 import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
+import JobCreatePopup from './JobCreatePopup';
+import JobCreateFormCarrier from './JobCreateFormCarrier';
+import EmailService from '../../api/EmailService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -33,6 +44,7 @@ class JobSavePage extends Component {
       loaded: false,
       goToDashboard: false,
       goToJob: false,
+      goToRefreshJob: false,
       job: {
         company: {
           legalName: '',
@@ -46,7 +58,9 @@ class JobSavePage extends Component {
         },
         status: null
       },
+      company: null,
       bid: null,
+      bids: [],
       booking: null,
       favoriteCompany: [],
       profile: {},
@@ -58,7 +72,23 @@ class JobSavePage extends Component {
       allocateDriversModal: false,
       drivers: [],
       selectedDrivers: [],
-      accessForbidden: false
+      accessForbidden: false,
+      modalAddJob: false,
+      modalEditJob: false,
+      modalLiability: false,
+      modalCancel1: false,
+      modalCancel2: false,
+      activeDrivers: [],
+      approveCancel: '',
+      approveCancelReason: '',
+      reqHandlerCancel: {
+        touched: false,
+        error: ''
+      },
+      reqHandlerCancelReason: {
+        touched: false,
+        error: ''
+      }
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -67,13 +97,37 @@ class JobSavePage extends Component {
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
-    this.updateJob = this.updateJob.bind(this);
+    this.updateJobView = this.updateJobView.bind(this);
+    this.updateCopiedJob = this.updateCopiedJob.bind(this);
+    this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
+    this.toggleEditExistingJobModal = this.toggleEditExistingJobModal.bind(this);
+    this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
+    this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
+    this.toggleCancelModal1 = this.toggleCancelModal1.bind(this);
+    this.toggleCancelModal2 = this.toggleCancelModal2.bind(this);
+    this.loadSavePage = this.loadSavePage.bind(this);
+    this.handleCancelJob = this.handleCancelJob.bind(this);
+    this.handleCancelInputChange = this.handleCancelInputChange.bind(this);
+    this.handleCancelReasonInputChange = this.handleCancelReasonInputChange.bind(this);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadSavePage();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    const { job } = this.state;
+    if (parseInt(nextProps.match.params.id, 10) !== parseInt(job.id, 10)) {
+      this.setState({goToRefreshJob: false});
+      await this.loadSavePage(parseInt(nextProps.match.params.id, 10));
+    }
+  }
+
+  async loadSavePage(jobId) {
     const { match } = this.props;
     let {
       job,
+      company,
       bid,
       booking,
       profile,
@@ -81,13 +135,18 @@ class JobSavePage extends Component {
       selectedDrivers,
       companyCarrier
     } = this.state;
-
+    let activeDrivers = [];
     try {
       profile = await ProfileService.getProfile();
 
       if (match.params.id) {
         try {
-          job = await JobService.getJobById(match.params.id);
+          if (jobId) { // we are updating the view
+            job = await JobService.getJobById(jobId);
+          } else { // we are loading the view
+            job = await JobService.getJobById(match.params.id);
+          }
+          company = await CompanyService.getCompanyById(profile.companyId);
         } catch (e) {
           if (e.message === 'Access Forbidden') {
             // access 403
@@ -98,21 +157,28 @@ class JobSavePage extends Component {
 
         if (job) {
           // company
-          const company = await CompanyService.getCompanyById(job.companiesId);
+          job.company = await CompanyService.getCompanyById(job.companiesId);
           // start address
-          const startAddress = await AddressService.getAddressById(job.startAddress);
+          let startAddress = null;
+          if (job.startAddress) {
+            job.startAddress = await AddressService.getAddressById(job.startAddress);
+          }
           // end address
           let endAddress = null;
           if (job.endAddress) {
-            endAddress = await AddressService.getAddressById(job.endAddress);
+            job.endAddress = await AddressService.getAddressById(job.endAddress);
           }
 
           // materials
           const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-          job.company = company;
-          job.startAddress = startAddress;
-          job.endAddress = endAddress;
-          job.materials = materials.map(material => material.value);
+          if (materials && materials.length > 0) {
+            const latestMaterial = materials[0];
+            job.materials = latestMaterial.value;
+          }
+          
+          // job.company = company;
+          // job.startAddress = startAddress;
+          // job.endAddress = endAddress;
 
           // bids
           const bids = await BidService.getBidsByJobId(job.id);
@@ -162,6 +228,12 @@ class JobSavePage extends Component {
             //   bookingEq => bookingEq.bookingId === booking.id,
             //   booking
             // );
+            const driversResponse = await LoadService.getActiveDriversByBookingId(booking.id);
+            if (driversResponse && driversResponse.length > 0) {
+              driversResponse.map(driver => (
+                activeDrivers.push(driver.id)
+              ));
+            }
           }
 
           // Check if carrier is favorite for this job's customer
@@ -173,26 +245,43 @@ class JobSavePage extends Component {
             );
           }
 
-          let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-
-          drivers = drivers.map((driver) => {
-            if (driver.userStatus !== 'Driver Enabled' && driver.userStatus !== 'Enabled') {
-              const newDriver = driver;
-              newDriver.checkboxDisabled = true;
-              return newDriver;
+          // let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          // console.log(207, drivers);
+          // drivers = drivers.map((driver) => {
+          //   if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+          //     const newDriver = driver;
+          //     newDriver.checkboxDisabled = true;
+          //     return newDriver;
+          //   }
+          //   return driver;
+          // });
+          const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+          let enabledDrivers = [];
+          Object.values(drivers).forEach((itm) => {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
+              enabledDrivers.push(itm);
             }
-            return driver;
           });
-          
+          // Setting id to driverId since is getting the userId and saving it as driverId
+          enabledDrivers = enabledDrivers.map((driver) => {
+            const newDriver = driver;
+            newDriver.id = newDriver.driverId;
+            if (activeDrivers.includes(newDriver.driverId)) {
+              newDriver.checkboxDisabled = true;
+            }
+            return newDriver;
+          });
           this.setState({
             job,
+            company,
             bid,
+            bids,
             companyCarrier,
             booking,
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers
+            drivers: enabledDrivers
           });
         }
       }
@@ -208,7 +297,63 @@ class JobSavePage extends Component {
     }
   }
 
-  async updateJob(newJob, companyCarrier) {
+  toggleNewJobModal() {
+    const {modalAddJob} = this.state;
+    this.setState({
+      modalAddJob: !modalAddJob
+    });
+  }
+
+  toggleEditExistingJobModal() {
+    const {modalEditJob} = this.state;
+    this.setState({
+      modalEditJob: !modalEditJob
+    });
+  }
+
+  toggleCopyJobModal() {
+    const {modalCopyJob} = this.state;
+    this.setState({
+      modalCopyJob: !modalCopyJob
+    });
+  }
+
+  toggleLiabilityModal() {
+    const {modalLiability} = this.state;
+    this.setState({
+      modalLiability: !modalLiability
+    });
+  }
+
+  toggleCancelModal1() {
+    const {modalCancel1, reqHandlerCancel} = this.state;
+    reqHandlerCancel.touched = false;
+    this.setState({
+      modalCancel1: !modalCancel1,
+      reqHandlerCancel
+    });
+  }
+
+  toggleCancelModal2() {
+    const {modalCancel2, reqHandlerCancelReason} = this.state;
+    reqHandlerCancelReason.touched = false;
+    this.setState({
+      modalCancel2: !modalCancel2,
+      reqHandlerCancelReason
+    });
+  }
+
+  updateCopiedJob(newJob) {
+    const { job } = this.state;
+    job.newId = newJob.id;
+    this.setState({
+      job,
+      companyCarrier: null,
+      goToRefreshJob: true
+    });
+  }
+
+  async updateJobView(newJob, companyCarrier) { // updating the job view
     const job = newJob;
     const company = await CompanyService.getCompanyById(job.companiesId);
     const startAddress = await AddressService.getAddressById(job.startAddress);
@@ -217,11 +362,139 @@ class JobSavePage extends Component {
       endAddress = await AddressService.getAddressById(job.endAddress);
     }
     const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+    const latestMaterial = materials[0];
+    job.materials = latestMaterial.value;
     job.company = company;
     job.startAddress = startAddress;
     job.endAddress = endAddress;
-    job.materials = materials.map(material => material.value);
     this.setState({ job, companyCarrier });
+  }
+
+  async handleCancelJob() {
+    const { job, companyCarrier, approveCancelReason, reqHandlerCancelReason, profile } = this.state;
+    let newJob = [];
+
+    if (approveCancelReason === '') {
+      this.setState({
+        reqHandlerCancelReason: {
+          ...reqHandlerCancelReason,
+          touched: true,
+          error: 'You must provide the reason for the cancellation of the job'
+        }
+      });
+    } else {
+      this.setState({ btnSubmitting: true });
+      const companyCarrierData = await CompanyService.getCompanyById(companyCarrier);
+
+      // updating job
+      newJob = CloneDeep(job);
+      delete newJob.company;
+      newJob.startAddress = newJob.startAddress.id;
+      newJob.endAddress = newJob.endAddress.id;
+      newJob.cancelReason = approveCancelReason;
+      newJob.status = 'Cancelled';
+      newJob.cancelReason = approveCancelReason;
+      newJob.dateCancelled = moment.utc().format();
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment.utc().format();
+      newJob = await JobService.updateJob(newJob);
+
+      const cancelledSms = `Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
+      The reason for cancellation is: ${newJob.cancelReason}.`; // TODO: do we need to check for this field's length?
+
+      // Notify Carrier about cancelled job
+      const carrierAdmin = await UserService.getAdminByCompanyId(companyCarrierData.id);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: cancelledSms
+          };
+          await TwilioService.createSms(notification);
+        }
+      }
+
+      // get allocated drivers for this job, and send sms to those drivers
+      const allocatedDrivers = await JobService.getAllocatedDriversInfoByJobId(job.id);
+      let allocatedDriversNames = '';
+      if (allocatedDrivers.length > 0) {
+        allocatedDriversNames = allocatedDrivers.map(driver => `${driver.firstName} ${driver.lastName}`);
+        allocatedDriversNames = `Drivers affected: ${allocatedDriversNames.join(', ')}`;
+
+        const cancelledDriversSms = [];
+        for (const driver of allocatedDrivers) {
+          if (this.checkPhoneFormat(driver.mobilePhone)) {
+            const notification = {
+              to: this.phoneToNumberFormat(driver.mobilePhone),
+              body: cancelledSms
+            };
+            cancelledDriversSms.push(TwilioService.createSms(notification));
+          }
+        }
+        await Promise.all(cancelledDriversSms);
+      }
+
+      // sending an email to CSR
+      const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+      const cancelJobEmail = {
+        toEmail: 'csr@trelar.com',
+        toName: 'Trelar CSR',
+        subject: `${envString}Trelar Job Cancelled`,
+        isHTML: true,
+        body: 'A producer cancelled a job on Trelar.<br><br>'
+          + `Producer Company Name: ${job.company.legalName}<br>`
+          + `Cancel Reason: ${newJob.cancelReason}<br>`
+          + `Job Name: ${newJob.name}<br>`
+          // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
+          + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
+          + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}<br>`
+          + `Carrier(s) Affected: ${companyCarrierData.legalName}<br>`
+          + `${allocatedDriversNames}`,
+        recipients: [
+          {name: 'CSR', email: 'csr@trelar.com'}
+        ],
+        attachments: []
+      };
+      await EmailService.sendEmail(cancelJobEmail);
+
+      this.updateJobView(newJob);
+      this.setState({ btnSubmitting: false });
+      this.toggleCancelModal2();
+    }
+  }
+
+  handleCancelInputChange(e) {
+    const { reqHandlerCancel } = this.state;
+    reqHandlerCancel.touched = false;
+    this.setState({
+      approveCancel: e.target.value.toUpperCase(),
+      reqHandlerCancel
+    });
+  }
+
+  handleCancelReasonInputChange(e) {
+    const { reqHandlerCancelReason } = this.state;
+    reqHandlerCancelReason.touched = false;
+    this.setState({
+      approveCancelReason: e.target.value,
+      reqHandlerCancelReason
+    });
+  }
+
+  goToSecondCancelJobModal() {
+    const { approveCancel, reqHandlerCancel } = this.state;
+    if (approveCancel !== 'CANCEL') {
+      this.setState({
+        reqHandlerCancel: {
+          ...reqHandlerCancel,
+          touched: true,
+          error: 'You must type CANCEL in this box in order to proceed'
+        }
+      });
+    } else {
+      this.toggleCancelModal1();
+      this.toggleCancelModal2();
+    }
   }
 
   toggleAllocateDriversModal() {
@@ -619,12 +892,15 @@ class JobSavePage extends Component {
   }
 
   renderGoTo() {
-    const { goToDashboard, goToJob } = this.state;
+    const { goToDashboard, goToJob, goToRefreshJob, job } = this.state;
     if (goToDashboard) {
       return <Redirect push to="/"/>;
     }
     if (goToJob) {
       return <Redirect push to="/jobs"/>;
+    }
+    if (goToRefreshJob) {
+      return <Redirect to={`/jobs/save/${job.newId}`}/>;
     }
     return false;
   }
@@ -641,7 +917,8 @@ class JobSavePage extends Component {
     );
   }
 
-  renderJobForm(companyType, companyCarrier, job) {
+  renderJobForm(companyType, job) {
+    const { companyCarrier } = this.state;
     return (
       <JobForm
         job={job}
@@ -657,7 +934,7 @@ class JobSavePage extends Component {
       return (
         <BidsTable
           job={job}
-          updateJob={this.updateJob}
+          updateJobView={this.updateJobView}
         />
       );
     }
@@ -665,7 +942,9 @@ class JobSavePage extends Component {
   }
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
-    const { profile } = this.state;
+    const { profile, company, bids } = this.state;
+    const companyProducer = job.company;
+    const companyCarrier = company;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
     if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       // If the carrier is a favorite OR the Customer has requested this particular Carrier
@@ -680,18 +959,34 @@ class JobSavePage extends Component {
               loaderSize={10}
               bntText="Decline Job"
             />
-            <TSubmitButton
-              onClick={() => this.handleConfirmRequestCarrier('Accept')}
-              className="primaryButton"
-              loading={btnSubmitting}
-              loaderSize={10}
-              bntText="Accept Job"
-            />
+            {(companyProducer.liabilityGeneral > 0.01 || companyProducer.liabilityAuto > 0.01)
+            && ((companyCarrier.liabilityGeneral < companyProducer.liabilityGeneral) || (companyCarrier.liabilityAuto < companyProducer.liabilityAuto))
+            && ( // Carrier has not enough liability insurance, show confirmation modal
+              <TSubmitButton
+                onClick={() => this.toggleLiabilityModal()}
+                className="primaryButton"
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Accept Job"
+              />
+            )}
+            {(((!companyProducer.liabilityGeneral || companyProducer.liabilityGeneral === 0)
+              && (!companyProducer.liabilityAuto || companyProducer.liabilityAuto === 0))
+            || ((companyCarrier.liabilityGeneral > companyProducer.liabilityGeneral) && (companyCarrier.liabilityAuto > companyProducer.liabilityAuto)))
+            && ( // Carrier has enough liability insurance OR Producer has not set up Insurance
+              <TSubmitButton
+                onClick={() => this.handleConfirmRequestCarrier('Accept')}
+                className="primaryButton"
+                loading={btnSubmitting}
+                loaderSize={10}
+                bntText="Accept Job"
+              />
+            )}
           </div>
         );
       }
-      // the carrier is not a favorite
-      if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
+      // the carrier is not a favorite (We're not showing this button here, only through the Marketplace)
+      /* if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
         return (
           <TSubmitButton
             onClick={() => this.handleConfirmRequestCarrier('Request')}
@@ -699,9 +994,9 @@ class JobSavePage extends Component {
             loading={btnSubmitting}
             loaderSize={10}
             bntText="Request Job"
-          />
+          /> 
         );
-      }
+      } */
 
       // the carrier is not a favorite
       if (bid && bid.status === 'Declined') {
@@ -789,7 +1084,142 @@ class JobSavePage extends Component {
         />
       );
     }
+
+    const requestedBids = bids.filter((filteredBid) => {
+      if (filteredBid.status !== 'New') {
+        return filteredBid;
+      }
+      return null;
+    });
+    if ((companyType === 'Customer') // 'Edit' button: show only to customers
+      // For Saved jobs
+      && ((job.status === 'Saved')
+      // Or Jobs offers that do not have requests yet
+      || ((job.status === 'Published' || job.status === 'Published And Offered' || job.status === 'On Offer')
+        && ((requestedBids.length === 0)))
+      )
+    ) {
+      if (job.status === 'Published' || job.status === 'Published And Offered' || job.status === 'On Offer') {
+      // this is to edit an already 'published' job
+        return (
+          <TSubmitButton
+            onClick={() => this.toggleEditExistingJobModal()}
+            className="secondaryButton"
+            loading={btnSubmitting}
+            loaderSize={10}
+            bntText="Edit"
+          />
+        );
+      }
+      // this is to edit a 'saved' job
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleNewJobModal()}
+          className="secondaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Edit"
+        />
+      );
+    }
+    if ((companyType === 'Customer') // 'Cancel' button: show only to customers
+      // For Booked  or Allocated jobs
+      && (job.status === 'Booked' || job.status === 'Allocated')
+    ) {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleCancelModal1()}
+          className="secondaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Cancel Job"
+        />
+      );
+    }
     return (<React.Fragment/>);
+  }
+
+  renderCopyButton() {
+    const { job, profile, btnSubmitting } = this.state;
+    return (
+      <TSubmitButton
+        onClick={() => this.toggleCopyJobModal()}
+        className="secondaryButton"
+        loading={btnSubmitting}
+        loaderSize={10}
+        bntText="Copy Job"
+      />
+    );
+  }
+
+  renderNewJobModal() {
+    const {
+      job,
+      modalAddJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJob}
+        toggle={this.toggleNewJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleNewJobModal}
+          jobId={job.id}
+          updateJobView={this.updateJobView}
+        />
+      </Modal>
+    );
+  }
+
+  renderEditExistingJobModal() {
+    const {
+      job,
+      modalEditJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalEditJob}
+        toggle={this.toggleEditExistingJobModal}
+        className="modal-dialog--primary modal-dialog--header form"
+      >
+        <div className="modal__header">
+          <button type="button" className="lnr lnr-cross modal__close-btn"
+                  onClick={this.toggleEditExistingJobModal}
+          />
+          <div className="bold-text modal__title">Edit Job</div>
+        </div>
+        <div className="modal__body" style={{ paddingTop: '25px', paddingRight: '0px' }}>
+          <JobCreateFormCarrier
+            job={job}
+            closeModal={this.toggleEditExistingJobModal}
+            updateJobView={this.updateJobView}
+          />
+        </div>
+      </Modal>
+    );
+  }
+
+  renderCopyJobModal() {
+    const {
+      job,
+      modalCopyJob
+    } = this.state;
+    const copyJob = true;
+    return (
+      <Modal
+        isOpen={modalCopyJob}
+        toggle={this.toggleCopyJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreatePopup
+          toggle={this.toggleCopyJobModal}
+          jobId={job.id}
+          copyJob={copyJob}
+          updateCopiedJob={this.updateCopiedJob}
+        />
+      </Modal>
+    );
   }
 
   renderAllocateDriversModal() {
@@ -873,6 +1303,256 @@ class JobSavePage extends Component {
     );
   }
 
+  renderLiabilityConfirmation() {
+    const {
+      modalLiability,
+      btnSubmitting,
+      job,
+      company
+    } = this.state;
+
+    const companyProducer = job.company;
+    const companyCarrier = company;
+
+    if (modalLiability) {
+      return (
+        <Modal
+          isOpen={modalLiability}
+          toggle={this.toggleLiabilityModal}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleLiabilityModal}
+            />
+            <div className="bold-text modal__title">Liability Insurance</div>
+          </div>
+          <div className="modal__body" style={{ padding: '10px 25px 0px 25px' }}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        <p>This job requires a minimum&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyProducer.liabilityGeneral)} of
+                          General Liability Insurance and&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyProducer.liabilityAuto)} of Auto
+                          Liability Insurance. Our records show that you have&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyCarrier.liabilityGeneral)} of General
+                          Liability Insurance and&nbsp;
+                          {TFormat.asMoneyNoDecimals(companyCarrier.liabilityAuto)}&nbsp;
+                          of Auto Liability Insurance.
+                        </p>
+
+                        <p>You risk being rejected by {companyProducer.legalName} due to your
+                        insurance levels. If you have updated your insurance levels please
+                        contact <a href="mailto:csr@trelar.com">Trelar Support</a>.
+                        </p>
+
+                        <p>Are you sure you want to accept this job?</p>
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
+                          <Button color="minimal" className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={this.toggleLiabilityModal}
+                          >
+                            Cancel
+                          </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={() => this.handleConfirmRequestCarrier('Accept')}
+                            className="primaryButton"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Accept Job"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
+  renderCancelModal1() {
+    const {
+      modalCancel1,
+      btnSubmitting,
+      job,
+      approveCancel,
+      reqHandlerCancel
+    } = this.state;
+
+    if (modalCancel1) {
+      return (
+        <Modal
+          isOpen={modalCancel1}
+          toggle={this.toggleCancelModal1}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleCancelModal1}
+            />
+            <div className="bold-text modal__title">Cancel Job (step 1 of 2)</div>
+          </div>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        Are you sure you want to cancel this job&nbsp;<span style={{fontWeight: 'bold'}}>{job.name}</span>?
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12" style={{paddingBottom: 50}}>
+                        <Row className="col-md-12">
+                          To cancel this job,
+                          you must type CANCEL in this box:
+                          <Row className="col-md-12" style={{paddingTop: 15}}>
+                            <div className="form__form-group-field">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleCancelInputChange,
+                                    name: 'approveCancel',
+                                    value: approveCancel
+                                  }
+                                }
+                                type="text"
+                                meta={reqHandlerCancel}
+                              />
+                            </div>
+                          </Row>
+                        </Row>
+                      </Row>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-12 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={this.toggleCancelModal1}
+                            className="secondaryButton float-right"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="No"
+                          />
+                          <TSubmitButton
+                            onClick={() => this.goToSecondCancelJobModal()}
+                            className="primaryButton float-right"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Yes"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
+  renderCancelModal2() {
+    const {
+      modalCancel2,
+      btnSubmitting,
+      job,
+      approveCancelReason,
+      reqHandlerCancelReason
+    } = this.state;
+
+    if (modalCancel2) {
+      return (
+        <Modal
+          isOpen={modalCancel2}
+          toggle={this.toggleCancelModal2}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleCancelModal2}
+            />
+            <div className="bold-text modal__title">Cancel Job (step 2 of 2)</div>
+          </div>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12" style={{paddingBottom: 50}}>
+                        <Row className="col-md-12">
+                          To avoid a fee and finalize the cancellation of {job.name},
+                          include a reason for cancelling this job. This reason will be shared
+                          with the booked carrier:
+                          <Row className="col-md-12" style={{paddingTop: 15}}>
+                            <div className="form__form-group-field">
+                              <TField
+                                input={
+                                  {
+                                    onChange: this.handleCancelReasonInputChange,
+                                    name: 'approveCancelReason',
+                                    value: approveCancelReason
+                                  }
+                                }
+                                type="text"
+                                meta={reqHandlerCancelReason}
+                              />
+                            </div>
+                          </Row>
+                        </Row>
+                      </Row>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-12 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={this.toggleCancelModal2}
+                            className="secondaryButton float-right"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Keep Job"
+                          />
+                          <TSubmitButton
+                            onClick={() => this.handleCancelJob()}
+                            className="primaryButton float-right"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Cancel Job"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
   render() {
     const {
       job,
@@ -902,14 +1582,24 @@ class JobSavePage extends Component {
       if (companyType !== null && job !== null) {
         return (
           <div className="container">
+            {this.renderGoTo()}
+            {this.renderNewJobModal()}
+            {this.renderCopyJobModal()}
+            {this.renderEditExistingJobModal()}
             {this.renderAllocateDriversModal(profile)}
+            {this.renderLiabilityConfirmation()}
+            {this.renderCancelModal1()}
+            {this.renderCancelModal2()}
             <div className="row">
               <div className="col-md-3">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
+              <div className="col-md-9 text-right">
+                {companyType !== 'Carrier' && this.renderCopyButton()}
+              </div>
             </div>
             {this.renderBidsTable()}
-            {this.renderJobForm(companyType, companyCarrier, job)}
+            {this.renderJobForm(companyType, job)}
           </div>
         );
       }

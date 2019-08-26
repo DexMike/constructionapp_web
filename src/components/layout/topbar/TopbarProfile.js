@@ -56,7 +56,7 @@ class TopbarProfile extends PureComponent {
           <div className="topbar__menu">
             {
               isAdmin ? (
-                <TopbarMenuLink title="Company Settings" icon="cog" path="/settings/company"/>
+                <TopbarMenuLink title="Company Settings" icon="cog" path="/company/settings"/>
               ) : null
             }
             {

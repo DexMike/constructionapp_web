@@ -15,11 +15,11 @@ import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
-
 import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
-
+import NumberFormatting from '../../utils/NumberFormatting';
+import GeoUtils from '../../utils/GeoUtils';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -208,7 +208,8 @@ class DashboardCustomerPage extends Component {
   async toggleNewJobModal() {
     const {modalAddJob, filters} = this.state;
     if (modalAddJob) {
-      this.fetchJobsInfo();
+      const profile = await ProfileService.getProfile();
+      this.fetchJobsInfo(profile);
       this.refs.filterChild.filterWithStatus(filters);
       this.setState({loaded: true});
     }
@@ -443,8 +444,9 @@ class DashboardCustomerPage extends Component {
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
         newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByHour(newJob.rate));
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.newRateFormatted = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Hour'
+        );
       }
       if (newJob.rateType === 'Ton') {
         // newSize is the size with its original value, so that it can be sorted
@@ -454,15 +456,23 @@ class DashboardCustomerPage extends Component {
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
         newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = TFormat.getValue(TFormat.asMoneyByTons(newJob.rate));
-        newJob.estimatedIncome = TFormat.asMoney(tempRate * newJob.rateEstimate);
+        newJob.newRateFormatted = NumberFormatting.asMoney(
+          newJob.rate, '.', 2, ',', '$', '/Ton'
+        );
       }
 
+      newJob.estimatedIncome = NumberFormatting.asMoney(
+        (tempRate * newJob.rateEstimate), '.', 2, ',', '$', ''
+      );
       // newJob.newStartDate = moment(job.startTime).format("MM/DD/YYYY");
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
+      }
+
+      if (typeof job.haulDistance === 'number') {
+        newJob.haulDistance = newJob.haulDistance.toFixed(2);
       }
 
       if (!job.companyCarrierLegalName) {
@@ -524,7 +534,11 @@ class DashboardCustomerPage extends Component {
                         },
                         {
                           name: 'distance',
-                          displayName: 'Distance (mi)'
+                          displayName: 'Distance to Zip (mi)'
+                        },
+                        {
+                          name: 'haulDistance',
+                          displayName: 'Haul Distance (One Way) (mi)'
                         },
                         {
                           name: 'newRate',

@@ -81,19 +81,6 @@ class SettingsPage extends Component {
       }
     }
     this.toggleAddJobModal = this.toggleAddJobModal.bind(this);
-
-    // Get distance, send coordinates
-    /*
-    const newDistance = GeoUtils.getDistance(
-      '37.7397,-121.4252',
-      '37.9577,-121.2908'
-    );
-    newDistance.router.calculateRoute(
-      newDistance.params,
-      this.onSuccess,
-      this.onError
-    );
-    */
   }
 
   // Get distance return functions

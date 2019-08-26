@@ -22,6 +22,7 @@ import UserService from '../../api/UserService';
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
 import AttachmentsListPage from '../attachments/AttachmentsListPage';
+import InsuranceSettings from './InsuranceSettings';
 
 class CompanySettingsPage extends Component {
   constructor(props) {
@@ -57,6 +58,7 @@ class CompanySettingsPage extends Component {
         user,
         address,
         isAdmin,
+        profile,
         loaded: true
       });
     }
@@ -82,6 +84,9 @@ class CompanySettingsPage extends Component {
       case '4':
         title = 'Attachments';
         break;
+      case '5':
+        title = 'Insurance';
+        break;
       default:
         break;
     }
@@ -103,8 +108,8 @@ class CompanySettingsPage extends Component {
           track your payment account information.
           That is kept securely at Hyperwallet, a PayPal company.
           To make changes to your account, please click this&nbsp;
-          <a href="https://www.hyperwallet.com" target="_blank">link</a>
-          &nbsp;or go directly to www.hyperwallet.com.<br/>
+          <a href="https://trelar.hyperwallet.com" target="_blank">link</a>
+          &nbsp;or go directly to https://trelar.hyperwallet.com.<br/>
           <br/>
           Please remember that no one at Trelar will ever ask you for your
           bank or account information.<br/>
@@ -127,7 +132,7 @@ class CompanySettingsPage extends Component {
   }
 
   renderTabs() {
-    const { activeTab, user, company, address, isAdmin } = this.state;
+    const { activeTab, user, company, address, isAdmin, profile } = this.state;
     return (
       <div>
         <Nav tabs>
@@ -167,6 +172,14 @@ class CompanySettingsPage extends Component {
               Attachments
             </NavLink>
           </NavItem>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: activeTab === '5' }, 'tab')}
+              onClick={() => { this.toggle('5'); }}
+            >
+              Insurance
+            </NavLink>
+          </NavItem>
         </Nav>
         <TabContent
           activeTab={activeTab}
@@ -204,6 +217,12 @@ class CompanySettingsPage extends Component {
           <TabPane tabId="4">
             <AttachmentsListPage
               companyId={company.id}
+            />
+          </TabPane>
+          <TabPane tabId="5">
+            <InsuranceSettings
+              company={company}
+              profile={profile}
             />
           </TabPane>
         </TabContent>
