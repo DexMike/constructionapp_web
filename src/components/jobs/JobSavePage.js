@@ -163,6 +163,7 @@ class JobSavePage extends Component {
 
           // bids
           const bids = await BidService.getBidsByJobId(job.id);
+          // console.log('>>GOT BIDS!', bids, job.id);
           if (bids && bids.length > 0) { // check if there's a bid
             // If there's more than one bid
             // if (bids.length > 1) {

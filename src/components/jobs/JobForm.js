@@ -13,6 +13,7 @@ import LoadsTable from '../loads/LoadsTable';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
+import TMapLive from '../common/TMapLive';
 import TMap from '../common/TMap';
 import GeoUtils from '../../utils/GeoUtils';
 
@@ -60,6 +61,7 @@ class JobForm extends Component {
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
+    this.getLoads = this.getLoads.bind(this);
   }
 
   async componentDidMount() {
@@ -76,6 +78,8 @@ class JobForm extends Component {
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
+
+    // console.log('>>JOB:', job)
 
     if (job.startAddress) {
       const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
@@ -96,6 +100,7 @@ class JobForm extends Component {
         loads = await LoadService.getLoadsByBookingId(
           bookings[0].id // booking.id 6
         );
+        // console.log('>>>GOT LOADS!', loads)
         loads = loads.reverse();
       }
     }
@@ -163,6 +168,11 @@ class JobForm extends Component {
         showMainMap: true
       });
     }
+  }
+
+  getLoads() {
+    const { loads } = this.state;
+    return loads;
   }
 
   isFormValid() {
@@ -770,12 +780,13 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
-                  <TMap
+                  <TMapLive
                     id={`job${job.id}`}
                     width="100%"
                     height="100%"
                     startAddress={job.startAddress}
                     endAddress={job.endAddress}
+                    loads={this.getLoads}
                   />
                 </div>
                 <div className="col-md-4">

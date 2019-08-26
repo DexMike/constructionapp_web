@@ -22,6 +22,12 @@ class LoadService extends AgentService {
     const response = await this.get(`/bookings/${id}${PATH}/active_drivers`);
     return (response);
   }
+
+  static async getLatestGPSForLoads(loadIdList) {
+    const url = `/gpsTrackings${PATH}`;
+    const response = await this.post(url, loadIdList);
+    return (response);
+  }
 }
 
 export default LoadService;
