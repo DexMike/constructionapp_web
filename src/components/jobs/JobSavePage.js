@@ -176,7 +176,7 @@ class JobSavePage extends Component {
           let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
 
           drivers = drivers.map((driver) => {
-            if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+            if (driver.userStatus !== 'Driver Enabled' && driver.userStatus !== 'Enabled') {
               const newDriver = driver;
               newDriver.checkboxDisabled = true;
               return newDriver;
