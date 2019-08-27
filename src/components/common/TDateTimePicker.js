@@ -130,6 +130,8 @@ class TDateTimePickerField extends PureComponent {
               defaultDate,
               dateFormat,
               // enableTime: true,
+              allowInput: true,
+              altFormat: 'm\\/d\\/Y h\\:i K',
               onChange: this.handleChange
             }}
           />
