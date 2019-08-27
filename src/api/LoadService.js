@@ -24,7 +24,7 @@ class LoadService extends AgentService {
   }
 
   static async getLatestGPSForLoads(loadIdList) {
-    const url = `/gpsTrackings${PATH}`;
+    const url = `/gpstrackings${PATH}`;
     const response = await this.post(url, loadIdList);
     return (response);
   }
