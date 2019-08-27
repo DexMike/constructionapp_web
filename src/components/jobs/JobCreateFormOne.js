@@ -263,7 +263,7 @@ class CreateJobFormOne extends PureComponent {
                 inside = {
                   label: itm,
                   value: allTruckTypes[propKey].value
-                }
+                };
                 return inside;
               }
               return null;
@@ -343,7 +343,7 @@ class CreateJobFormOne extends PureComponent {
                 inside = {
                   label: itm,
                   value: allTruckTypes[propKey].value
-                }
+                };
                 return inside;
               }
               return null;
