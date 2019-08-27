@@ -361,11 +361,7 @@ class LoadsExpandableRow extends Component {
         </React.Fragment>
       );
     }
-    return (
-      <Container>
-        Loading...
-      </Container>
-    );
+    return false;
   }
 }
 

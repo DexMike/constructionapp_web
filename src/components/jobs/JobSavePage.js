@@ -175,13 +175,14 @@ class JobSavePage extends Component {
             const latestMaterial = materials[0];
             job.materials = latestMaterial.value;
           }
-          
+
           // job.company = company;
           // job.startAddress = startAddress;
           // job.endAddress = endAddress;
 
           // bids
           const bids = await BidService.getBidsByJobId(job.id);
+          // console.log('>>GOT BIDS!', bids, job.id);
           if (bids && bids.length > 0) { // check if there's a bid
             // If there's more than one bid
             // if (bids.length > 1) {
@@ -248,7 +249,7 @@ class JobSavePage extends Component {
           // let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
           // console.log(207, drivers);
           // drivers = drivers.map((driver) => {
-          //   if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
+          //   if (driver.userStatus !== 'Driver Enabled' && driver.userStatus !== 'Enabled') {
           //     const newDriver = driver;
           //     newDriver.checkboxDisabled = true;
           //     return newDriver;
@@ -258,7 +259,7 @@ class JobSavePage extends Component {
           const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
           let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
-            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
+            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Driver Enabled') {
               enabledDrivers.push(itm);
             }
           });
@@ -994,7 +995,7 @@ class JobSavePage extends Component {
             loading={btnSubmitting}
             loaderSize={10}
             bntText="Request Job"
-          /> 
+          />
         );
       } */
 
