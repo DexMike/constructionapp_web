@@ -24,3 +24,8 @@
 .input-number input[type=number] {
     -moz-appearance:textfield;
 }
+
+@font-face {
+    font-family: Interstate;
+    src: url('../../fonts/interstate-regular-webfont.woff');
+}

@@ -16,6 +16,18 @@ class AuthService {
     }
     return {};
   }
+
+  static async logOut() {
+    try {
+      localStorage.removeItem('filters');
+      await Auth.signOut();
+    } catch (err) {
+      // POST https://cognito-idp.us-east-1.amazonaws.com/ 400
+      // Uncaught (in promise) {code: "NotAuthorizedException",
+      // name: "NotAuthorizedException", message: "Access Token has been revoked"}
+      window.location = '/login';
+    }
+  }
 }
 
 export default AuthService;
