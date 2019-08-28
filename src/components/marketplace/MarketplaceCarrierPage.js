@@ -262,7 +262,7 @@ class MarketplaceCarrierPage extends Component {
                         displayName: 'Materials'
                       },
                       {
-                        name: 'equipmentType',
+                        name: 'equipmentTypes',
                         displayName: 'Truck Type'
                       },
                       {
