@@ -278,7 +278,7 @@ class PaymentSettings extends Component {
         <Row>
           <Col md={5} className="mx-auto text-center mb-4">
             <a href="mailto:support@trelar.net">
-              Having problems getting signing up? Please contact our team to get help.
+              Having problems signing up? Please contact our team to get help.
             </a>
           </Col>
         </Row>
