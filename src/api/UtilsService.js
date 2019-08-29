@@ -31,6 +31,12 @@ class UserUtils {
     };
   }
 
+  // remove non numeric (useful for converting phones to numbers for Twilio)
+  static phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
+  }
+
   static async getScreenDimentions() {
     return {
       height: window.innerWidth,
