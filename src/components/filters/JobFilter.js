@@ -307,9 +307,7 @@ class JobFilter extends Component {
         // console.log('marketplace');
         result = await JobService.getMarketplaceJobsByFilters(filters);
       } else if (profile.companyType === 'Carrier') {
-        // for now hard coding isAdmin to true because drivers don't
-        // have access to web - all jobs will show
-        filters.isAdmin = true;
+        filters.isAdmin = profile.isAdmin;
         result = await JobService.getJobCarrierDashboardByFilters(filters);
       } else {
         result = await JobService.getJobDashboardByFilters(filters);
