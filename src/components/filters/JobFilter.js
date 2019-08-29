@@ -19,6 +19,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
+
 // import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
@@ -109,8 +110,8 @@ class JobFilter extends Component {
   }
 
   async componentDidMount() {
-    const { intervals } = {...this.state};
-    let { companyZipCode, lastZipCode, address, company, filters } = {...this.state};
+    const {intervals} = {...this.state};
+    let {companyZipCode, lastZipCode, address, company, filters} = {...this.state};
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
 
@@ -143,7 +144,7 @@ class JobFilter extends Component {
   }
 
   async componentWillReceiveProps(nextProps) {
-    const { filters } = this.state;
+    const {filters} = this.state;
     if (filters.rows !== nextProps.rows || filters.page !== nextProps.page) {
       filters.rows = nextProps.rows;
       filters.page = nextProps.page;
@@ -196,7 +197,7 @@ class JobFilter extends Component {
   }
 
   saveFilters() {
-    const { filters } = {...this.state};
+    const {filters} = {...this.state};
     // don't save status
     delete filters.status;
     localStorage.setItem('filters', JSON.stringify(filters));
@@ -237,8 +238,8 @@ class JobFilter extends Component {
   }
 
   async fetchJobs() {
-    const { lastZipCode, companyZipCode, filters, reqHandlerZip } = this.state;
-    let { company, address, profile } = this.state;
+    const {lastZipCode, companyZipCode, filters, reqHandlerZip} = this.state;
+    let {company, address, profile} = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
 
@@ -305,13 +306,13 @@ class JobFilter extends Component {
       if (filters.isMarketplaceView) {
         // console.log('marketplace');
         result = await JobService.getMarketplaceJobsByFilters(filters);
+      } else if (profile.companyType === 'Carrier') {
+        // for now hard coding isAdmin to true because drivers don't
+        // have access to web - all jobs will show
+        filters.isAdmin = true;
+        result = await JobService.getJobCarrierDashboardByFilters(filters);
       } else {
-        // console.log('not marketplace');
-        if (profile.companyType === 'Carrier') {
-          result = await JobService.getJobCarrierDashboardByFilters(filters);
-        } else {
-          result = await JobService.getJobDashboardByFilters(filters);
-        }
+        result = await JobService.getJobDashboardByFilters(filters);
       }
     } catch (err) {
       // console.log(err);
@@ -319,7 +320,7 @@ class JobFilter extends Component {
     }
 
     const jobs = result.data;
-    const { metadata } = result;
+    const {metadata} = result;
     const {returnJobs} = this.props;
 
     returnJobs(jobs, filters, metadata);
@@ -691,7 +692,7 @@ class JobFilter extends Component {
                 </Col>
                 <Col lg={12} style={{background: '#F9F9F7'}}>
                   <Row>
-                    <Col lg={9} />
+                    <Col lg={9}/>
                     <Col lg={3}>
                       <ButtonToolbar className="wizard__toolbar right-buttons">
                         <Button className="btn btn-secondary"
