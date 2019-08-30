@@ -389,7 +389,13 @@ class JobSavePage extends Component {
   }
 
   async handleCancelJob() {
-    const { job, companyCarrier, approveCancelReason, reqHandlerCancelReason, profile } = this.state;
+    const {
+      job,
+      companyCarrier,
+      approveCancelReason,
+      reqHandlerCancelReason,
+      profile
+    } = this.state;
     let newJob = [];
 
     if (approveCancelReason === '') {
@@ -541,7 +547,6 @@ class JobSavePage extends Component {
       profile
     } = this.state;
     let { booking, bookingEquipment } = this.state;
-    
 
     if (action === 'Approve') { // Customer is accepting the job request
       // console.log('accepting');
@@ -918,11 +923,18 @@ class JobSavePage extends Component {
     }
 
     // change job status and cleanup
+    const newJob = CloneDeep(job);
+    newJob.status = 'Job Ended';
+    newJob.startAddress = job.startAddress.id;
+    newJob.endAddress = job.endAddress.id;
+    await JobService.updateJob(newJob);
+
     job.status = 'Job Ended';
-    job.startAddress = job.startAddress.id;
-    job.endAddress = job.endAddress.id;
-    await JobService.updateJob(job);
-    // console.log('>> THE JOB HAS ENDED');
+    this.setState({
+      job
+    });
+
+    this.forceUpdate();
     // TODO -> Graciously notify the user that we ended the job.
   }
 
@@ -1188,16 +1200,19 @@ class JobSavePage extends Component {
   }
 
   renderCloseButton() {
-    // const { job, profile, btnSubmitting } = this.state;
-    return (
-      <TSubmitButton
-        onClick={() => this.toggleCloseModal()}
-        className="secondaryButton"
-        loading={false}
-        loaderSize={10}
-        bntText="Close Job"
-      />
-    );
+    const { job } = this.state;
+    if (job.status !== 'Job Ended') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleCloseModal()}
+          className="secondaryButton"
+          loading={false}
+          loaderSize={10}
+          bntText="End Job"
+        />
+      );
+    }
+    return false;
   }
 
   renderCloseJobModal() {
