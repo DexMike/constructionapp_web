@@ -541,7 +541,7 @@ class JobSavePage extends Component {
       profile
     } = this.state;
     let { booking, bookingEquipment } = this.state;
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+    
 
     if (action === 'Approve') { // Customer is accepting the job request
       // console.log('accepting');
@@ -627,7 +627,7 @@ class JobSavePage extends Component {
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
       try {
-        await this.notifyAdminViaSms(`[${envString}] Your request for the job has been rejected`, newBid.companyCarrierId);
+        await this.notifyAdminViaSms('Your request for the job has been rejected', newBid.companyCarrierId);
       } catch (error) {
         // console.log('Unable to notify user.');
       }
@@ -649,7 +649,7 @@ class JobSavePage extends Component {
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
       try {
-        await this.notifyAdminViaSms(`[${envString}] Your request for the job has been rejected`, job.id);
+        await this.notifyAdminViaSms('Your request for the job has been rejected', job.id);
       } catch (error) {
         // console.log('Unable to notify user.');
       }
@@ -660,6 +660,7 @@ class JobSavePage extends Component {
   }
 
   async notifyAdminViaSms(message, jobId) {
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
     // Sending SMS to customer's Admin from the company who created the Job
     const customerAdmin = await UserService.getAdminByCompanyId(jobId);
     let notification = '';
@@ -667,7 +668,7 @@ class JobSavePage extends Component {
       if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
         notification = {
           to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
-          body: message
+          body: `${envString} ${message}`
         };
         await TwilioService.createSms(notification);
       }
@@ -908,11 +909,10 @@ class JobSavePage extends Component {
 
   async closeJobModal() {
     const { job } = this.state;
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     // Notify Admin
     try {
-      await this.notifyAdminViaSms(`[${envString}] ${job.name} has ended. Do not pickup any more material.`, job.id);
+      await this.notifyAdminViaSms(`${job.name} has ended. Do not pickup any more material.`, job.id);
     } catch (error) {
       // console.log('Unable to notify admin');
     }
