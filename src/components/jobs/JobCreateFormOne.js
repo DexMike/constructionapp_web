@@ -1872,7 +1872,7 @@ class CreateJobFormOne extends PureComponent {
                       meta={reqHandlerTruckType}
                     />
                   </div>
-                  
+
                 </Row>
 
                 <Row className="col-md-12">
