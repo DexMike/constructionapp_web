@@ -37,8 +37,13 @@ class JobClosePopup extends Component {
     const { jobId } = this.props;
     let { loads } = this.state;
 
+    let bookings = [];
     // get loads
-    const bookings = await BookingService.getBookingsByJobId(jobId);
+    try {
+      bookings = await BookingService.getBookingsByJobId(jobId);
+    } catch (error) {
+      // console.log('Unable to obtain bookings');
+    }
     if (bookings.length > 0) {
       const bookingEquipments = await BookingEquipmentService
         .getBookingEquipmentsByBookingId(bookings[0].id);
@@ -51,8 +56,19 @@ class JobClosePopup extends Component {
     }
 
     // get drivers
-    const profile = await ProfileService.getProfile();
-    const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+    let profile = [];
+    let drivers = [];
+    try {
+      profile = await ProfileService.getProfile();
+    } catch (error) {
+      // console.log('Unable to obtain profile');
+    }
+
+    try {
+      drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+    } catch (error) {
+      // console.log('Unable to obtain drivers');
+    }
 
     this.setState({
       loads,
@@ -69,6 +85,7 @@ class JobClosePopup extends Component {
   async closeJob() {
     const { jobId, jobName, closeJobModalPopup } = this.props;
     const { loads } = this.state;
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     // Specs at SG-811
     // 1) All existing loads get to finish
@@ -82,7 +99,13 @@ class JobClosePopup extends Component {
     // 2) No new loads can be started?
 
     // 3) All drivers need text notification
-    const gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
+    let gpsTrackings = [];
+    try {
+      gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
+    } catch (error) {
+      // console.log('Unable to retrieve GPS for loads');
+    }
+
     const allSms = [];
     if (Object.entries(gpsTrackings).length > 0) {
       // console.log('>>>GOT LOADS: ', gpsTrackings, typeof gpsTrackings);
@@ -92,7 +115,7 @@ class JobClosePopup extends Component {
         // Finish your load, and then you are done with the job.”
           const notificationInProgress = {
             to: UserUtils.phoneToNumberFormat(tracking.telephone),
-            body: `Job ${jobName} is ending. Finish your load, and then you are done with the job.`
+            body: `[${envString}] Job ${jobName} is ending. Finish your load, and then you are done with the job.`
           };
           allSms.push(TwilioService.createSms(notificationInProgress));
         } else {
@@ -100,7 +123,7 @@ class JobClosePopup extends Component {
           // “<job name> has ended. Do not pickup any more material.”
           const notificationNotInProgress = {
             to: UserUtils.phoneToNumberFormat(tracking.telephone),
-            body: `Job ${jobName} is ending. Finish your load, and then you are done with the job.`
+            body: `[${envString}] Job ${jobName} is ending. Finish your load, and then you are done with the job.`
           };
           allSms.push(TwilioService.createSms(notificationNotInProgress));
         }
@@ -111,30 +134,13 @@ class JobClosePopup extends Component {
       // await Promise.all(allSms); TEST DISABLED!!! (reenable pending)
     }
 
-    // This is the first step, but we need to close the load
-    // at the end
+    // Set load's status as Job Ended
     const loadsFinish = {
       id: 0,
       ids: loadsToFinish,
-      status: 'Ended'
+      status: 'Job Ended'
     };
-    // LoadService.closeLoads(loadsFinish); TEST DISABLED!!! (reenable pending)
-
-    // TODO -> Missing steps:
-    /*
-    If backend job status = 'job ended', what does each persona see for job status?
-    What does producer see?
-    ‘Job Finishing’
-    What does a driver still on a load see?
-    ‘Final Load’
-    What does a driver not on a load see?
-    ‘Job Completed’
-    What does carrier admin see?
-    ‘Job Finishing’
-
-    Once all loads are complete, and job status is job ended, job status changes to job complete
-    Then everyone sees ‘Job Completed’
-    */
+    LoadService.closeLoads(loadsFinish);
 
     // bubble to parent
     closeJobModalPopup();

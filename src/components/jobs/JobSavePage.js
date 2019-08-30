@@ -114,7 +114,7 @@ class JobSavePage extends Component {
     this.handleCancelReasonInputChange = this.handleCancelReasonInputChange.bind(this);
     this.toggleCloseModal = this.toggleCloseModal.bind(this);
     this.closeJobModal = this.closeJobModal.bind(this);
-    this.notifyAdmin = this.notifyAdmin.bind(this);
+    this.notifyAdminViaSms = this.notifyAdminViaSms.bind(this);
   }
 
   componentDidMount() {
@@ -223,7 +223,12 @@ class JobSavePage extends Component {
           }
 
           // bookings
-          const bookings = await BookingService.getBookingsByJobId(job.id);
+          let bookings = [];
+          try {
+            bookings = await BookingService.getBookingsByJobId(job.id);
+          } catch (error) {
+            // console.log('Unable to obtain bookings');
+          }
           if (bookings && bookings.length > 0) {
             [booking] = bookings;
             const bookingEquipments = await BookingEquipmentService
@@ -536,6 +541,7 @@ class JobSavePage extends Component {
       profile
     } = this.state;
     let { booking, bookingEquipment } = this.state;
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     if (action === 'Approve') { // Customer is accepting the job request
       // console.log('accepting');
@@ -620,7 +626,11 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      await this.notifyAdmin('Your request for the job has been rejected', newBid.companyCarrierId);
+      try {
+        await this.notifyAdminViaSms(`[${envString}] Your request for the job has been rejected`, newBid.companyCarrierId);
+      } catch (error) {
+        // console.log('Unable to notify user.');
+      }
 
       job.status = 'Booked';
       this.setState({ job, companyCarrier: newBid.companyCarrierId });
@@ -638,14 +648,18 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      await this.notifyAdmin('Your request for the job has been rejected', job.id);
+      try {
+        await this.notifyAdminViaSms(`[${envString}] Your request for the job has been rejected`, job.id);
+      } catch (error) {
+        // console.log('Unable to notify user.');
+      }
 
       // eslint-disable-next-line no-alert
       // alert('You have accepted this job request! Congratulations.');
     }
   }
 
-  async notifyAdmin(message, jobId) {
+  async notifyAdminViaSms(message, jobId) {
     // Sending SMS to customer's Admin from the company who created the Job
     const customerAdmin = await UserService.getAdminByCompanyId(jobId);
     let notification = '';
@@ -894,9 +908,14 @@ class JobSavePage extends Component {
 
   async closeJobModal() {
     const { job } = this.state;
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     // Notify Admin
-    await this.notifyAdmin(`${job.name} has ended. Do not pickup any more material.`, job.id);
+    try {
+      await this.notifyAdminViaSms(`[${envString}] ${job.name} has ended. Do not pickup any more material.`, job.id);
+    } catch (error) {
+      // console.log('Unable to notify admin');
+    }
 
     // change job status and cleanup
     job.status = 'Job Ended';
