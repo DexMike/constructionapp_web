@@ -35,6 +35,8 @@ import BidsTable from './BidsTable';
 import JobCreatePopup from './JobCreatePopup';
 import JobCreateFormCarrier from './JobCreateFormCarrier';
 import EmailService from '../../api/EmailService';
+import JobClosePopup from './JobClosePopup';
+import UserUtils from '../../api/UtilsService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -88,7 +90,8 @@ class JobSavePage extends Component {
       reqHandlerCancelReason: {
         touched: false,
         error: ''
-      }
+      },
+      closeModal: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -109,6 +112,9 @@ class JobSavePage extends Component {
     this.handleCancelJob = this.handleCancelJob.bind(this);
     this.handleCancelInputChange = this.handleCancelInputChange.bind(this);
     this.handleCancelReasonInputChange = this.handleCancelReasonInputChange.bind(this);
+    this.toggleCloseModal = this.toggleCloseModal.bind(this);
+    this.closeJobModal = this.closeJobModal.bind(this);
+    this.notifyAdminViaSms = this.notifyAdminViaSms.bind(this);
   }
 
   componentDidMount() {
@@ -217,7 +223,12 @@ class JobSavePage extends Component {
           }
 
           // bookings
-          const bookings = await BookingService.getBookingsByJobId(job.id);
+          let bookings = [];
+          try {
+            bookings = await BookingService.getBookingsByJobId(job.id);
+          } catch (error) {
+            // console.log('Unable to obtain bookings');
+          }
           if (bookings && bookings.length > 0) {
             [booking] = bookings;
             const bookingEquipments = await BookingEquipmentService
@@ -318,6 +329,13 @@ class JobSavePage extends Component {
     });
   }
 
+  toggleCloseModal() {
+    const {closeModal} = this.state;
+    this.setState({
+      closeModal: !closeModal
+    });
+  }
+
   toggleLiabilityModal() {
     const {modalLiability} = this.state;
     this.setState({
@@ -371,7 +389,13 @@ class JobSavePage extends Component {
   }
 
   async handleCancelJob() {
-    const { job, companyCarrier, approveCancelReason, reqHandlerCancelReason, profile } = this.state;
+    const {
+      job,
+      companyCarrier,
+      approveCancelReason,
+      reqHandlerCancelReason,
+      profile
+    } = this.state;
     let newJob = [];
 
     if (approveCancelReason === '') {
@@ -407,7 +431,7 @@ class JobSavePage extends Component {
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
           const notification = {
-            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            to: UserUtils.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
             body: cancelledSms
           };
           await TwilioService.createSms(notification);
@@ -425,7 +449,7 @@ class JobSavePage extends Component {
         for (const driver of allocatedDrivers) {
           if (this.checkPhoneFormat(driver.mobilePhone)) {
             const notification = {
-              to: this.phoneToNumberFormat(driver.mobilePhone),
+              to: UserUtils.phoneToNumberFormat(driver.mobilePhone),
               body: cancelledSms
             };
             cancelledDriversSms.push(TwilioService.createSms(notification));
@@ -607,19 +631,11 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      const carrierAdmin = await UserService.getAdminByCompanyId(newBid.companyCarrierId);
-      if (carrierAdmin.length > 0) { // check if we get a result
-        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
-          const notification = {
-            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-            body: 'Your request for the job has been accepted!'
-          };
-          await TwilioService.createSms(notification);
-        }
+      try {
+        await this.notifyAdminViaSms('Your request for the job has been rejected', newBid.companyCarrierId);
+      } catch (error) {
+        // console.log('Unable to notify user.');
       }
-
-      // eslint-disable-next-line no-alert
-      // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
       this.setState({ job, companyCarrier: newBid.companyCarrierId });
@@ -637,19 +653,30 @@ class JobSavePage extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to change later get the body from the lookups table
       // Sending SMS to Truck's company
-      const carrierAdmin = await UserService.getAdminByCompanyId(newBid.companyCarrierId);
-      if (carrierAdmin.length > 0) { // check if we get a result
-        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
-          const notification = {
-            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-            body: 'Your request for the job has been rejected'
-          };
-          await TwilioService.createSms(notification);
-        }
+      try {
+        await this.notifyAdminViaSms('Your request for the job has been rejected', job.id);
+      } catch (error) {
+        // console.log('Unable to notify user.');
       }
 
       // eslint-disable-next-line no-alert
       // alert('You have accepted this job request! Congratulations.');
+    }
+  }
+
+  async notifyAdminViaSms(message, jobId) {
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+    // Sending SMS to customer's Admin from the company who created the Job
+    const customerAdmin = await UserService.getAdminByCompanyId(jobId);
+    let notification = '';
+    if (customerAdmin.length > 0) { // check if we get a result
+      if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
+        notification = {
+          to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+          body: `${envString} ${message}`
+        };
+        await TwilioService.createSms(notification);
+      }
     }
   }
 
@@ -756,7 +783,7 @@ class JobSavePage extends Component {
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
           notification = {
-            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            to: UserUtils.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
             body: 'Your request for the job has been accepted.'
           };
           await TwilioService.createSms(notification);
@@ -803,7 +830,7 @@ class JobSavePage extends Component {
       if (customerAdmin.length > 0) { // check if we get a result
         if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
           notification = {
-            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
             body: 'You have a new job request.'
           };
           await TwilioService.createSms(notification);
@@ -831,7 +858,7 @@ class JobSavePage extends Component {
       if (customerAdmin.length > 0) { // check if we get a result
         if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
           notification = {
-            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
+            to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
             body: 'Your job request has been declined.'
           };
           await TwilioService.createSms(notification);
@@ -846,15 +873,9 @@ class JobSavePage extends Component {
     this.setState({ btnSubmitting: false });
   }
 
-  // remove non numeric
-  phoneToNumberFormat(phone) {
-    const num = Number(phone.replace(/\D/g, ''));
-    return num;
-  }
-
   // check format ok
   checkPhoneFormat(phone) {
-    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const phoneNotParents = String(UserUtils.phoneToNumberFormat(phone));
     const areaCode3 = phoneNotParents.substring(0, 3);
     const areaCode4 = phoneNotParents.substring(0, 4);
     if (areaCode3.includes('555') || areaCode4.includes('1555')) {
@@ -889,6 +910,32 @@ class JobSavePage extends Component {
       // console.error(err);
     }
     this.toggleAllocateDriversModal();
+  }
+
+  async closeJobModal() {
+    const { job } = this.state;
+
+    // Notify Admin
+    try {
+      await this.notifyAdminViaSms(`${job.name} has ended. Do not pickup any more material.`, job.id);
+    } catch (error) {
+      // console.log('Unable to notify admin');
+    }
+
+    // change job status and cleanup
+    const newJob = CloneDeep(job);
+    newJob.status = 'Job Ended';
+    newJob.startAddress = job.startAddress.id;
+    newJob.endAddress = job.endAddress.id;
+    await JobService.updateJob(newJob);
+
+    job.status = 'Job Ended';
+    this.setState({
+      job
+    });
+
+    this.forceUpdate();
+    // TODO -> Graciously notify the user that we ended the job.
   }
 
   renderGoTo() {
@@ -1150,6 +1197,41 @@ class JobSavePage extends Component {
         bntText="Copy Job"
       />
     );
+  }
+
+  renderCloseButton() {
+    const { job } = this.state;
+    if (job.status !== 'Job Ended') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleCloseModal()}
+          className="secondaryButton"
+          loading={false}
+          loaderSize={10}
+          bntText="End Job"
+        />
+      );
+    }
+    return false;
+  }
+
+  renderCloseJobModal() {
+    const { closeModal, job } = this.state;
+    return (
+      <Modal
+        isOpen={closeModal}
+        toggle={this.toggleCloseModal}
+        className="status-modal"
+      >
+        <JobClosePopup
+          toggle={this.toggleCloseModal}
+          closeJobModalPopup={this.closeJobModal}
+          jobName={job.name}
+          jobId={job.id}
+        />
+      </Modal>
+    );
+    /**/
   }
 
   renderNewJobModal() {
@@ -1565,6 +1647,7 @@ class JobSavePage extends Component {
       profile,
       accessForbidden
     } = this.state;
+    // console.log('>>>CO:', companyType);
     if (accessForbidden) {
       return (
         <Container className="container">
@@ -1574,7 +1657,7 @@ class JobSavePage extends Component {
             </Col>
           </Row>
           <h1>Access Forbidden</h1>
-        </Container>
+        </Container>  
       );
     }
 
@@ -1590,12 +1673,16 @@ class JobSavePage extends Component {
             {this.renderLiabilityConfirmation()}
             {this.renderCancelModal1()}
             {this.renderCancelModal2()}
+            {this.renderCloseJobModal()}
             <div className="row">
-              <div className="col-md-3">
+              <div className="col-md-6">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
-              <div className="col-md-9 text-right">
+              <div className="col-md-3 text-right">
                 {companyType !== 'Carrier' && this.renderCopyButton()}
+              </div>
+              <div className="col-md-3">
+                {companyType == 'Customer' && this.renderCloseButton()}
               </div>
             </div>
             {this.renderBidsTable()}

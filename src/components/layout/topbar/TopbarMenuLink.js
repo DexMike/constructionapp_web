@@ -1,20 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
-import {Auth} from 'aws-amplify';
 import ThemeContext from '../../ThemeContext';
+import AuthService from '../../../utils/AuthService';
 
 
 class TopbarMenuLink extends Component {
   async logOut() {
-    try {
-      await Auth.signOut();
-    } catch (err) {
-      // POST https://cognito-idp.us-east-1.amazonaws.com/ 400
-      // Uncaught (in promise) {code: "NotAuthorizedException",
-      // name: "NotAuthorizedException", message: "Access Token has been revoked"}
-      window.location = '/login';
-    }
+    await AuthService.logOut();
   }
 
   render() {
