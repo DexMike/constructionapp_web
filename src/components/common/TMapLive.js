@@ -76,6 +76,7 @@ class TMapLive extends Component {
     }
     this.getLatestGPSForLoad();
     this.programmedRefresh(false);
+    // console.log('>> This is a live view...')
   }
 
   componentWillUnmount() {
@@ -242,7 +243,7 @@ class TMapLive extends Component {
     strokeColor = 'rgba(0, 0, 255, 0.5)',
     fillColor = 'rgba(255, 255, 255, 0.5)'
   ) {
-    console.log('>>Trying to add load: ', arguments);
+    // console.log('>>Trying to add load: ', arguments);
     this.map.addObject(new H.map.Circle(
       {lat: latitude, lng: longitude}, (1 + (this.boundingBoxDistance * 500)),
       {
@@ -260,7 +261,7 @@ class TMapLive extends Component {
       const that = this;
       const timerTimer = function timerTimer() {
         count += 1;
-        console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
+        // console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
         that.getLatestGPSForLoad();
       };
       timerVar = setInterval(timerTimer, (refreshInterval * 1000));

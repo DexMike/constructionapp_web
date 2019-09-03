@@ -28,6 +28,12 @@ class LoadService extends AgentService {
     const response = await this.post(url, loadIdList);
     return (response);
   }
+
+  static async closeLoads(loadsFinish) {
+    const url = `/status${PATH}`;
+    const response = await this.put(url, loadsFinish);
+    return (response);
+  }
 }
 
 export default LoadService;

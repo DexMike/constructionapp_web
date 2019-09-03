@@ -52,3 +52,22 @@
 .multitop {
   margin-top: -3px;
 }
+
+/* modals */
+.modal .status-modal {
+  max-width: 100% !important;
+  top: 35%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.status-modal .modal-content {
+  border-radius: 5px !important;
+  width: 500px !important;
+  background-color: white !important;
+}
+.status-modal .modal-footer {
+  display: inline-block;
+}
+.close {
+  display: none;
+}

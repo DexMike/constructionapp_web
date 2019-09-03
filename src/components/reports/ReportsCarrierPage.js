@@ -17,7 +17,10 @@ import carrierProductMetrics from '../../img/Carrier_ProductMetrics.png';
 import carrierProjectMetrics from '../../img/Carrier_ProjectMetrics.png';
 
 import './Reports.css';
-// import customerProductMetrics from '../../img/Customer_ProductMetrics.png';
+import customerProductMetrics from '../../img/Customer_ProductMetrics.png';
+import customerCarrierMetrics from '../../img/Customer_CarrierMetrics.png';
+import customerProjectMetrics from '../../img/Customer_ProjectMetrics.png';
+
 
 class ReportsCarrierPage extends Component {
   constructor(props) {
@@ -27,11 +30,26 @@ class ReportsCarrierPage extends Component {
     // Fixed options for Time Range filtering
 
     this.timeRanges = [
-      {name: 'Custom', value: 0},
-      {name: 'Last Week', value: 7},
-      {name: 'Last 30 days', value: 30},
-      {name: 'Last 60 days', value: 60},
-      {name: 'Last 90 days', value: 90},
+      {
+        name: 'Custom',
+        value: 0
+      },
+      {
+        name: 'Last Week',
+        value: 7
+      },
+      {
+        name: 'Last 30 days',
+        value: 30
+      },
+      {
+        name: 'Last 60 days',
+        value: 60
+      },
+      {
+        name: 'Last 90 days',
+        value: 90
+      }
       // { name: 'Next Week', value: -7 },
       // { name: 'Next 30 days', value: -30 },
       // { name: 'Next 60 days', value: -60 },
@@ -41,6 +59,7 @@ class ReportsCarrierPage extends Component {
     this.state = {
       loaded: false,
       jobs: [],
+      jobsComp: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
@@ -58,15 +77,37 @@ class ReportsCarrierPage extends Component {
       selectIndexComp: 3, // Parameter for setting the dropdown default option.
       selectedRangeComp: 0, // Parameter for setting startDate.
 
-      filters: {
+      filters: { // Filter object for the first Jobs response
         companiesId: 0,
         rateType: '',
-        searchType: 'Carrier Job',
-        userId: '',
+
         startAvailability: null,
         endAvailability: null,
         startAvailDateComp: null,    // Comparison
         endAvailDateComp: null,      // Comparison
+                                     // NOTE: I don't know if these fields works or exists on the backend for filters
+        rate: 'Any',
+        minTons: 'Any',
+        minHours: '',
+        minCapacity: '',
+        searchType: 'Customer Job',
+        userId: '',
+
+        equipmentType: [],
+        numEquipments: '',
+        zipCode: '',
+        materialType: [],
+
+        sortBy: sortByList[0]
+
+      },
+      // ↓ Based on the previous NOTE, added a second filter object for the second Jobs response
+      filtersComp: {
+        companiesId: 0,
+        rateType: '',
+
+        startAvailability: null,
+        endAvailability: null,
 
         rate: 'Any',
         minTons: 'Any',
@@ -79,7 +120,6 @@ class ReportsCarrierPage extends Component {
         materialType: [],
 
         sortBy: sortByList[0]
-
       }
       // profile: null
     };
@@ -95,23 +135,24 @@ class ReportsCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    const {filters} = this.state;
+    const {filters, filtersComp, selectIndex, selectIndexComp} = this.state;
     let {
       startDate,
       endDate,
       startDateComp,
       endDateComp,
       selectedRange,
-      selectedRangeComp,
-
+      selectedRangeComp
     } = this.state;
 
     const profile = await ProfileService.getProfile();
     if (profile.companyId) {
       filters.companiesId = profile.companyId;
+      filtersComp.companiesId = profile.companyId;
     }
     filters.userId = profile.userId;
-    selectedRange = 30;
+
+    selectedRange = this.timeRanges[selectIndex].value;
     const currentDate = new Date();
     startDate = new Date();
     endDate = currentDate;
@@ -119,16 +160,7 @@ class ReportsCarrierPage extends Component {
     filters.startAvailability = startDate;
     filters.endAvailability = endDate;
 
-    selectedRangeComp = 60;
-    const currentDate2 = new Date();
-    startDateComp = new Date();
-    endDateComp = currentDate2;
-    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
-    filters.startAvailDateComp = startDateComp;
-    filters.endAvailDateComp = endDateComp;
-
     const jobs = await this.fetchJobs(filters);
-
     if (jobs) {
       jobs.map(async (job) => {
         const newJob = job;
@@ -146,11 +178,43 @@ class ReportsCarrierPage extends Component {
         return newJob;
       });
     }
+    // console.log('First Filter Jobs', jobs);
+
+    // Added a copy of the previous code but using it for the second filter mainly for testing
+    selectedRangeComp = this.timeRanges[selectIndexComp].value;
+    const currentDate2 = new Date();
+    startDateComp = new Date();
+    endDateComp = currentDate2;
+    startDateComp.setDate(currentDate2.getDate() - selectedRangeComp);
+    filtersComp.startAvailability = startDateComp;
+    filtersComp.endAvailability = endDateComp;
+
+    const jobsComp = await this.fetchJobs(filtersComp);
+    if (jobsComp) {
+      jobsComp.map(async (job) => {
+        const newJob = job;
+
+        const company = await CompanyService.getCompanyById(newJob.companiesId);
+        newJob.companyName = company.legalName;
+
+        const materialsList = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        const materials = materialsList.map(materialItem => materialItem.value);
+        newJob.material = this.equipmentMaterialsAsString(materials);
+
+        const address = await AddressService.getAddressById(newJob.startAddress);
+        newJob.zip = address.zipCode;
+
+        return newJob;
+      });
+    }
+    // console.log('Second Filter Jobs', jobsComp);
 
     this.setState({
       loaded: true,
       jobs,
+      jobsComp,
       filters,
+      filtersComp,
       startDate,
       endDate,
       startDateComp,
@@ -195,7 +259,6 @@ class ReportsCarrierPage extends Component {
     const { companyId } = profile;
     const jobs = await JobService.getJobsByCompanyIdAndCustomerAccepted(companyId);
     */
-
     const jobs = await JobService.getJobByFilters(filters);
 
     if (jobs) {
@@ -235,6 +298,7 @@ class ReportsCarrierPage extends Component {
     const {value, name} = option;
     const {filters} = this.state;
     let {
+      jobsComp,
       startDate,
       endDate,
       selectedRange,
@@ -253,7 +317,8 @@ class ReportsCarrierPage extends Component {
     filters.endAvailability = endDate;
 
     const jobs = await this.fetchJobs(filters);
-
+    // console.log('First Filter Jobs', jobs);
+    // console.log('Second Filter Jobs', jobsComp);
     this.setState({
       jobs,
       loaded: true,
@@ -267,8 +332,9 @@ class ReportsCarrierPage extends Component {
 
   async handleSelectFilterChangeComp(option) {
     const {value, name} = option;
-    const {filters} = this.state;
+    const {filtersComp} = this.state;
     let {
+      jobs,
       startDateComp,
       endDateComp,
       selectedRangeComp,
@@ -283,15 +349,17 @@ class ReportsCarrierPage extends Component {
     startDateComp = new Date();
     endDateComp = currentDate;
     startDateComp.setDate(currentDate.getDate() - selectedRangeComp);
-    filters.startAvailDateComp = startDateComp;
-    filters.endAvailDateComp = endDateComp;
+    filtersComp.startAvailability = startDateComp;
+    filtersComp.endAvailability = endDateComp;
 
-    const jobs = await this.fetchJobs(filters);
+    const jobsComp = await this.fetchJobs(filtersComp);
+    // console.log('First Filter Jobs', jobs);
+    // console.log('Second Filter Jobs', jobsComp);
 
     this.setState({
-      jobs,
+      jobsComp,
       loaded: true,
-      filters,
+      filtersComp,
       startDateComp,
       endDateComp,
       selectedRangeComp,
@@ -364,7 +432,12 @@ class ReportsCarrierPage extends Component {
   }
 
   formatDate(date) {
-    const options = {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
     return (date.toLocaleDateString('en-US', options));
   }
 
@@ -444,7 +517,7 @@ class ReportsCarrierPage extends Component {
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Find a Job</h3>
+          <h3 className="page-title">Reports: Comparison</h3>
         </Col>
       </Row>
     );
@@ -504,8 +577,8 @@ class ReportsCarrierPage extends Component {
                                 givenDate: new Date(startDate).getTime()
                               }
                             }
-                            onChange={this.startDateChange}
                             placeholderDate={startDate}
+                            onChange={this.startDateChange}
                             dateFormat="m/d/Y"
                           />
 
@@ -685,89 +758,10 @@ class ReportsCarrierPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
-          <div className="card-body">
-            <div className="row">
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text">
-                      <center>Jobs In Progress</center>
-                    </h5>
-                    <span><center><h4>{inProgressJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text">
-                      <center>Booked Jobs</center>
-                    </h5>
-                    <span><center><h4>{acceptedJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text">
-                      <center>New Offers</center>
-                    </h5>
-                    <span><center><h4>{newJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text">
-                      <center>Potential Earnings</center>
-                    </h5>
-                    <div className="my-auto">
-                      <span><center><h4>{potentialIncome}</h4></center></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <div className="my-auto">
-                      <h5 className="card__title bold-text">
-                        <center>Job Completion Rate</center>
-                      </h5>
-                      <span><center><h4>{completedOffersPercent}</h4></center></span>
-                      <div className="text-center pt-3">
-                        <span className="form__form-group-label">completed:</span>&nbsp;<span>{completedJobCount}</span>
-                        &nbsp;&nbsp;
-                        <span className="form__form-group-label">created:</span>&nbsp;<span>{totalJobs}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12 col-sm-12 col-md-4 col-lg-3">
-                <div className="card">
-                  <div className="dashboard__card-widget card-body">
-                    <h5 className="card__title bold-text">
-                      <center>Completed Jobs</center>
-                    </h5>
-                    <span><center><h4>{completedJobCount}</h4></center></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
         </Container>
       );
     }
@@ -848,90 +842,80 @@ class ReportsCarrierPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
-
-          <div className="card-body">
-
-            <Row>
-              <Col md={12}>
-                <h3
-                  className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>
-                <h3
-                  className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>
-              </Col>
-            </Row>
-
+          <div className="text-center">
+            {/*<Row>*/}
+            {/*  <Col md={12}>*/}
+            {/*    <h3*/}
+            {/*      className="page-title">{this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</h3>*/}
+            {/*    <h3*/}
+            {/*      className="page-title">{this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</h3>*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
             <div className="row">
-              <div className="col-12 col-md-2 col-lg-4">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text">
-                      <center>Jobs Completed</center>
+                      Jobs Completed
                     </h5>
-                    <span><center><h4>{jobsCompleted}</h4></center></span>
+                    <span><h4>{jobsCompleted}</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-4 col-lg-4">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text">
-                      <center>Total Earnings</center>
+                      Total Earnings
                     </h5>
-                    <span><center><h4>{totalEarnings}</h4></center></span>
+                    <span><h4>{totalEarnings}</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-4 col-lg-4">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text">
-                      <center>Earnings / Job</center>
+                      Average Earnings / Job
                     </h5>
-                    <span><center><h4>{earningsPerJob}</h4></center></span>
+                    <span><h4>{earningsPerJob}</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-4 col-lg-4">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text">
-                      <center>Cancelled Jobs</center>
+                      Tons Delivered
                     </h5>
-                    <span><center><h4>{cancelledJobs}</h4></center></span>
+                    <span><h4>34,567</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-4 col-lg-4">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text">
-                      <center>Jobs / Truck</center>
+                      Average Rate / hr
                     </h5>
-                    <span><center><h4>{jobsPerTruck}</h4></center></span>
+                    <span><h4>$50.00</h4></span>
                   </div>
                 </div>
               </div>
-
-              <div className="col-12 col-md-4 col-lg-4">
+              <div className="col-md-2">
                 <div className="card">
                   <div className="dashboard__card-widget card-body">
                     <h5 className="card__title bold-text">
-                      <center>Idle Trucks</center>
+                      Average Rate / ton
                     </h5>
-                    <span><center><h4>{idleTrucks}</h4></center></span>
+                    <span><h4>$50.00</h4></span>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </Container>
       );
@@ -1012,7 +996,6 @@ class ReportsCarrierPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / jobs.length) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1076,7 +1059,6 @@ class ReportsCarrierPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1089,69 +1071,6 @@ class ReportsCarrierPage extends Component {
               </div>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Material Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Material</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Cost</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Material</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Cost</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*        {this.renderMaterialMetricsRow('RMA')}*/}
-            {/*        {this.renderMaterialMetricsRow('Stone')}*/}
-            {/*        {this.renderMaterialMetricsRow('Sand')}*/}
-            {/*        {this.renderMaterialMetricsRow('Gravel')}*/}
-            {/*        {this.renderMaterialMetricsRow('Recycling')}*/}
-            {/*        {this.renderMaterialMetricsRow('Other')}*/}
-            {/*        {this.renderMaterialMetricsRow('TOTALS')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1219,7 +1138,6 @@ class ReportsCarrierPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1232,67 +1150,6 @@ class ReportsCarrierPage extends Component {
               </div>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Carrier Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Carrier</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Carrier</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderCarrierMetricsRow('Irging Construction')}*/}
-            {/*  {this.renderCarrierMetricsRow('Midlo Quarry')}*/}
-            {/*  {this.renderCarrierMetricsRow('TexasTexas Dirt')}*/}
-            {/*  {this.renderCarrierMetricsRow('Grovel R Us')}*/}
-            {/*  {this.renderCarrierMetricsRow('Dump Buddies')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1360,7 +1217,6 @@ class ReportsCarrierPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -1373,61 +1229,6 @@ class ReportsCarrierPage extends Component {
               </div>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Customer</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Customer</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Ton</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg $/Hr</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderCustomerMetricsRow('DFW Airport')}*/}
-            {/*  {this.renderCustomerMetricsRow('Midland Quarry')}*/}
-            {/*  {this.renderCustomerMetricsRow('Dirt USA')}*/}
-            {/*  {this.renderCustomerMetricsRow('Us')}*/}
-            {/*  {this.renderCustomerMetricsRow('Buddy Dump 3')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1495,73 +1296,11 @@ class ReportsCarrierPage extends Component {
       selectIndexComp
     } = this.state;
 
-    // console.log(jobs);
     if (loaded) {
       return (
         <Container className="dashboard">
           <div className="card-body">
 
-            {/*<Row>*/}
-            {/*  <Col md={12}>*/}
-            {/*    <h3 className="page-title">Site Metrics</h3>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Baseline {this.timeRanges[selectIndex].name} (From {this.formatDate(startDate)} To {this.formatDate(endDate)})</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={6}>*/}
-            {/*    <div className="card__title bold-text">Comparison {this.timeRanges[selectIndexComp].name} (From {this.formatDate(startDateComp)} To {this.formatDate(endDateComp)})</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<Row>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Site</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Site</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text"># of Loads</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Earnings</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Tons</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Time Spent</div>*/}
-            {/*  </Col>*/}
-            {/*  <Col md={1}>*/}
-            {/*    <div className="card__title bold-text">Avg Idle Time</div>*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
-            {/*<div>*/}
-            {/*  {this.renderSiteMetricsRow('Mega Site')}*/}
-            {/*  {this.renderSiteMetricsRow('New Tower Riverside')}*/}
-            {/*  {this.renderSiteMetricsRow('SMU Campus')}*/}
-            {/*  {this.renderSiteMetricsRow('DFW Airport Facilities')}*/}
-            {/*  {this.renderSiteMetricsRow('Amazon HQ3')}*/}
-            {/*</div>*/}
           </div>
         </Container>
       );
@@ -1641,7 +1380,7 @@ class ReportsCarrierPage extends Component {
           {this.renderFilter()}
           {this.renderTopCards()}
 
-          {/*{this.renderComparisonCardReports()}*/}
+          {this.renderComparisonCardReports()}
 
           {this.renderMaterialMetrics()}
           {this.renderCarrierMetrics()}
@@ -1661,5 +1400,13 @@ class ReportsCarrierPage extends Component {
   }
 
 }
+
+ReportsCarrierPage.propTypes = {
+  // companyId: PropTypes.number.isRequired
+};
+
+ReportsCarrierPage.defaultProps = {
+  // companyId: null
+};
 
 export default ReportsCarrierPage;
