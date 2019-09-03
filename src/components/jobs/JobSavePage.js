@@ -1341,7 +1341,7 @@ class JobSavePage extends Component {
   }
 
   renderAllocateDriversModal() {
-    const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
+    const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting, driversWithLoads } = this.state;
     const driverData = drivers;
     const driverColumns = [
       {
@@ -1385,6 +1385,7 @@ class JobSavePage extends Component {
                       isSelectable
                       onSelect={selected => this.setState({ selectedDrivers: selected })}
                       selected={selectedDrivers}
+                      omitFromSelect={driversWithLoads}
                     />
                     <div className="col-md-8"/>
                     <div className="col-md-4 text-right pr-4">

@@ -52,7 +52,12 @@ class TTable extends Component {
   }
 
   handleClick(event, id) {
-    const { onSelect, handleIdClick, isSelectable } = this.props;
+    const { onSelect, handleIdClick, isSelectable, omitFromSelect } = this.props;
+    if (omitFromSelect.length > 0) {
+      if (omitFromSelect.includes(id)) {
+        return;
+      }
+    }
     const { selected } = this.state;
     if (isSelectable) {
       const selectedIndex = selected.indexOf(id);
@@ -132,6 +137,8 @@ class TTable extends Component {
         shallowItem[column.name] = item[column.name];
       }
     });
+
+    // {/*<CheckBoxIcon checked={isSelected && item.checkboxDisabled} disabled onChange={null} className="mate
     return (
       <React.Fragment>
         {(isSelectable && !item.checkboxDisabled) && (
@@ -140,7 +147,11 @@ class TTable extends Component {
           </TableCell>
         )}
         {(isSelectable && item.checkboxDisabled) && (
-          <TableCell className="material-table__cell" padding="checkbox"/>
+          <TableCell className="material-table__cell" style={{ textAlign: 'center' }}>
+            <i className="material-icons" style={{ color: 'grey' }}>
+              check_box
+            </i>
+          </TableCell>
         )}
         {Object.keys(shallowItem)
           .map((key) => {
@@ -296,7 +307,15 @@ TTable.propTypes = {
   ).isRequired,
   onSelect: PropTypes.func,
   selected: PropTypes.arrayOf(PropTypes.number),
-  isSelectable: PropTypes.bool
+  isSelectable: PropTypes.bool,
+  omitFromSelect: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number
+      ])
+    })
+  )
 };
 
 TTable.defaultProps = {
@@ -305,7 +324,8 @@ TTable.defaultProps = {
   orderBy: 'id',
   selected: [],
   onSelect: () => {},
-  isSelectable: false
+  isSelectable: false,
+  omitFromSelect: []
 };
 
 export default TTable;
