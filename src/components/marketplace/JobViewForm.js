@@ -27,6 +27,7 @@ import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
 import TMap from '../common/TMap';
+import UserUtils from "../../api/UtilsService";
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -44,12 +45,15 @@ class JobViewForm extends Component {
       favoriteCompany: [],
       profile: [],
       btnSubmitting: false,
+      modalCancelRequest: false,
       selectedDrivers: [],
       accessForbidden: false,
       modalLiability: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
+    this.toggleCancelRequest = this.toggleCancelRequest.bind(this);
+    this.handleCancelRequest = this.handleCancelRequest.bind(this);
     this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
   }
 
@@ -164,6 +168,23 @@ class JobViewForm extends Component {
       selectedDrivers,
       loaded: true
     });
+  }
+
+  async handleCancelRequest() {
+    this.setState({btnSubmitting: true});
+
+    const {
+      bid
+    } = this.state;
+    try {
+      await BidService.deleteBidbById(bid.id);
+      this.setState({bid: null});
+    } catch (err) {
+      console.error(err);
+    }
+    this.toggleCancelRequest();
+
+    this.setState({btnSubmitting: false});
   }
 
   // save after the user has checked the info
@@ -329,6 +350,13 @@ class JobViewForm extends Component {
     }
   }
 
+  toggleCancelRequest() {
+    const {modalCancelRequest} = this.state;
+    this.setState({
+      modalCancelRequest: !modalCancelRequest
+    });
+  }
+
   // remove non numeric
   phoneToNumberFormat(phone) {
     const num = Number(phone.replace(/\D/g, ''));
@@ -372,6 +400,68 @@ class JobViewForm extends Component {
   closeNow() {
     const { toggle } = this.props;
     toggle();
+  }
+
+  renderCancelRequestConfirmation() {
+    const {
+      modalCancelRequest,
+      btnSubmitting
+    } = this.state;
+
+    if (modalCancelRequest) {
+      return (
+        <Modal
+          isOpen={modalCancelRequest}
+          toggle={this.toggleCancelRequest}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleCancelRequest}
+            />
+            <div className="bold-text modal__title">Request Cancellation</div>
+          </div>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        <p>Are you sure you want to cancel your request for this job?</p>
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
+                          <Button color="minimal" className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={this.toggleCancelRequest}
+                          >
+                            Cancel
+                          </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={() => this.handleCancelRequest()}
+                            className="primaryButton"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Cancel Request"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
   }
 
   renderJobTop(job) {
@@ -440,7 +530,15 @@ class JobViewForm extends Component {
       );
     // Job "Requested" by the carrier
     } else if (jobStatus === 'Published' && (bid && bid.status === 'Pending')) {
-      showModalButton = 'You have requested this job';
+      showModalButton = (
+        <TSubmitButton
+          onClick={this.toggleCancelRequest}
+          className="primaryButton float-right"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Cancel Request"
+        />
+      );
     // Job "Declined" by the customer
     } else if (jobStatus === 'Published' && (bid && bid.status === 'Declined' && bid.hasSchedulerAccepted === 1 && bid.hasCustomerAccepted === 0)) {
       showModalButton = 'Your request for this job has been declined.';
@@ -727,6 +825,7 @@ class JobViewForm extends Component {
                 {this.renderJobDetails(job)}
                 {this.renderJobBottom(job)}
                 {this.renderLiabilityConfirmation()}
+                {this.renderCancelRequestConfirmation()}
                 {/* {this.renderJobFormButtons()} */}
               </CardBody>
             </Card>
