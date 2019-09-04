@@ -80,7 +80,7 @@ class JobSavePage extends Component {
       modalLiability: false,
       modalCancel1: false,
       modalCancel2: false,
-      activeDrivers: [],
+      driversWithLoads: [],
       approveCancel: '',
       approveCancelReason: '',
       reqHandlerCancel: {
@@ -141,7 +141,7 @@ class JobSavePage extends Component {
       selectedDrivers,
       companyCarrier
     } = this.state;
-    let activeDrivers = [];
+    let driversWithLoads = [];
     try {
       profile = await ProfileService.getProfile();
 
@@ -181,7 +181,7 @@ class JobSavePage extends Component {
             const latestMaterial = materials[0];
             job.materials = latestMaterial.value;
           }
-          
+
           // job.company = company;
           // job.startAddress = startAddress;
           // job.endAddress = endAddress;
@@ -239,14 +239,13 @@ class JobSavePage extends Component {
             //   bookingEq => bookingEq.bookingId === booking.id,
             //   booking
             // );
-            const driversResponse = await LoadService.getActiveDriversByBookingId(booking.id);
+            const driversResponse = await LoadService.getDriversWithLoadsByBookingId(booking.id);
             if (driversResponse && driversResponse.length > 0) {
               driversResponse.map(driver => (
-                activeDrivers.push(driver.id)
+                driversWithLoads.push(driver.id)
               ));
             }
           }
-
           // Check if carrier is favorite for this job's customer
           if (profile.companyType === 'Carrier') {
             // check if Carrier Company [profile.companyId]
@@ -269,15 +268,17 @@ class JobSavePage extends Component {
           const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
           let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
-            if (itm.driverStatus === 'Enabled' || itm.userStatus === 'Driver Created') {
-              enabledDrivers.push(itm);
+            const newDriver = {...itm};
+            if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled') {
+              newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
+              enabledDrivers.push(newDriver);
             }
           });
           // Setting id to driverId since is getting the userId and saving it as driverId
           enabledDrivers = enabledDrivers.map((driver) => {
             const newDriver = driver;
             newDriver.id = newDriver.driverId;
-            if (activeDrivers.includes(newDriver.driverId)) {
+            if (driversWithLoads.includes(newDriver.driverId)) {
               newDriver.checkboxDisabled = true;
             }
             return newDriver;
@@ -521,9 +522,44 @@ class JobSavePage extends Component {
     }
   }
 
-  toggleAllocateDriversModal() {
-    const { allocateDriversModal } = this.state;
-    this.setState({ allocateDriversModal: !allocateDriversModal });
+  async toggleAllocateDriversModal() {
+    const { allocateDriversModal, booking, profile, driversWithLoads } = this.state;
+    const driversResponse = await LoadService.getDriversWithLoadsByBookingId(booking.id);
+    if (driversResponse && driversResponse.length > 0) {
+      driversResponse.map(driver => (
+        driversWithLoads.push(driver.id)
+      ));
+    }
+    this.setState({btnSubmitting: true});
+    const bookingEquipments = await BookingEquipmentService
+      .getBookingEquipmentsByBookingId(booking.id);
+    const selectedDrivers = bookingEquipments
+      .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
+    const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
+    let enabledDrivers = [];
+    Object.values(drivers).forEach((itm) => {
+      const newDriver = {...itm};
+      if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled') {
+        newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
+        enabledDrivers.push(newDriver);
+      }
+    });
+    // Setting id to driverId since is getting the userId and saving it as driverId
+    enabledDrivers = enabledDrivers.map((driver) => {
+      const newDriver = driver;
+      newDriver.id = newDriver.driverId;
+      if (driversWithLoads.includes(newDriver.driverId)) {
+        newDriver.checkboxDisabled = true;
+      }
+      return newDriver;
+    });
+    this.setState({
+      allocateDriversModal: !allocateDriversModal,
+      selectedDrivers,
+      drivers: enabledDrivers,
+      btnSubmitting: false,
+      driversWithLoads
+    });
   }
 
   handlePageClick(menuItem) {
@@ -888,7 +924,7 @@ class JobSavePage extends Component {
     try {
       // console.log('saving...');
       const { selectedDrivers, booking, job, profile } = this.state;
-      const bookingEquipments = selectedDrivers.map(selectedDriver => ({
+      const newBookingEquipments = selectedDrivers.map(selectedDriver => ({
         bookingId: booking.id,
         schedulerId: profile.userId,
         driverId: selectedDriver,
@@ -905,7 +941,7 @@ class JobSavePage extends Component {
         modifiedBy: profile.userId,
         modifiedOn: new Date()
       }));
-      await BookingEquipmentService.allocateDrivers(bookingEquipments, booking.id);
+      await BookingEquipmentService.allocateDrivers(newBookingEquipments, booking.id);
     } catch (err) {
       // console.error(err);
     }
@@ -1041,7 +1077,7 @@ class JobSavePage extends Component {
             loading={btnSubmitting}
             loaderSize={10}
             bntText="Request Job"
-          /> 
+          />
         );
       } */
 
@@ -1305,24 +1341,15 @@ class JobSavePage extends Component {
   }
 
   renderAllocateDriversModal() {
-    const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting } = this.state;
+    const { allocateDriversModal, drivers, selectedDrivers, btnSubmitting, driversWithLoads } = this.state;
     const driverData = drivers;
     const driverColumns = [
       {
-        displayName: 'First Name',
-        name: 'firstName'
-      }, {
-        displayName: 'Last Name',
-        name: 'lastName'
-      }, {
-        displayName: 'Email',
-        name: 'email'
+        displayName: 'Name',
+        name: 'fullName'
       }, {
         displayName: 'Phone',
         name: 'mobilePhone'
-      }, {
-        displayName: 'Status',
-        name: 'driverStatus'
       }
     ];
     return (
@@ -1358,6 +1385,7 @@ class JobSavePage extends Component {
                       isSelectable
                       onSelect={selected => this.setState({ selectedDrivers: selected })}
                       selected={selectedDrivers}
+                      omitFromSelect={driversWithLoads}
                     />
                     <div className="col-md-8"/>
                     <div className="col-md-4 text-right pr-4">
@@ -1657,7 +1685,7 @@ class JobSavePage extends Component {
             </Col>
           </Row>
           <h1>Access Forbidden</h1>
-        </Container>  
+        </Container>
       );
     }
 
