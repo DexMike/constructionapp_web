@@ -647,6 +647,7 @@ class JobViewForm extends Component {
               <h3 className="subhead">
                 Truck Details
               </h3>
+              Number of Trucks: {job.numEquipments || 'Any'}<br/>
               {allTruckTypes}
             </div>
             <div className="col-md-4">
