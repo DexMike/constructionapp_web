@@ -78,6 +78,7 @@ class JobSavePage extends Component {
       modalAddJob: false,
       modalEditJob: false,
       modalLiability: false,
+      modalCancelRequest: false,
       modalCancel1: false,
       modalCancel2: false,
       driversWithLoads: [],
@@ -106,6 +107,7 @@ class JobSavePage extends Component {
     this.toggleEditExistingJobModal = this.toggleEditExistingJobModal.bind(this);
     this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
     this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
+    this.toggleCancelRequest = this.toggleCancelRequest.bind(this);
     this.toggleCancelModal1 = this.toggleCancelModal1.bind(this);
     this.toggleCancelModal2 = this.toggleCancelModal2.bind(this);
     this.loadSavePage = this.loadSavePage.bind(this);
@@ -341,6 +343,13 @@ class JobSavePage extends Component {
     const {modalLiability} = this.state;
     this.setState({
       modalLiability: !modalLiability
+    });
+  }
+
+  toggleCancelRequest() {
+    const {modalCancelRequest} = this.state;
+    this.setState({
+      modalCancelRequest: !modalCancelRequest
     });
   }
 
@@ -911,6 +920,7 @@ class JobSavePage extends Component {
       } catch (err) {
         console.error(err);
       }
+      this.toggleCancelRequest();
     }
 
     this.setState({btnSubmitting: false});
@@ -1035,7 +1045,6 @@ class JobSavePage extends Component {
     const {profile, company, bids} = this.state;
     const companyProducer = job.company;
     const companyCarrier = company;
-    console.log(bid);
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
     if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       // If the carrier is a favorite OR the Customer has requested this particular Carrier
@@ -1104,7 +1113,7 @@ class JobSavePage extends Component {
       if (bid && bid.status === 'Pending') {
         return (
           <TSubmitButton
-            onClick={() => this.handleConfirmRequestCarrier('Cancel Request')}
+            onClick={() => this.toggleCancelRequest()}
             className="primaryButton"
             loading={btnSubmitting}
             loaderSize={10}
@@ -1422,6 +1431,68 @@ class JobSavePage extends Component {
     );
   }
 
+  renderCancelRequestConfirmation() {
+    const {
+      modalCancelRequest,
+      btnSubmitting
+    } = this.state;
+
+    if (modalCancelRequest) {
+      return (
+        <Modal
+          isOpen={modalCancelRequest}
+          toggle={this.toggleCancelRequest}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleCancelRequest}
+            />
+            <div className="bold-text modal__title">Request Cancellation</div>
+          </div>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        <p>Are you sure you want to cancel your request for this job?</p>
+                      </Row>
+                      <hr/>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-4 wizard__toolbar">
+                          <Button color="minimal" className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={this.toggleCancelRequest}
+                          >
+                            Cancel
+                          </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={() => this.handleConfirmRequestCarrier('Cancel Request')}
+                            className="primaryButton"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Cancel Request"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
   renderLiabilityConfirmation() {
     const {
       modalLiability,
@@ -1707,6 +1778,7 @@ class JobSavePage extends Component {
             {this.renderCopyJobModal()}
             {this.renderEditExistingJobModal()}
             {this.renderAllocateDriversModal(profile)}
+            {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
             {this.renderCancelModal1()}
             {this.renderCancelModal2()}
