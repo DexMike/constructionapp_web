@@ -12,7 +12,7 @@ import {
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import * as PropTypes from 'prop-types';
-import {Redirect} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import JobService from '../../api/JobService';
@@ -917,6 +917,7 @@ class JobSavePage extends Component {
       try {
         await BidService.deleteBidbById(bid.id);
         this.setState({bid: null});
+        // return <Redirect push to="/marketplace"/>;
       } catch (err) {
         console.error(err);
       }
@@ -1472,13 +1473,15 @@ class JobSavePage extends Component {
                           </Button>
                         </ButtonToolbar>
                         <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
-                          <TSubmitButton
-                            onClick={() => this.handleConfirmRequestCarrier('Cancel Request')}
-                            className="primaryButton"
-                            loading={btnSubmitting}
-                            loaderSize={10}
-                            bntText="Cancel Request"
-                          />
+                          <Link to="/marketplace">
+                            <TSubmitButton
+                              onClick={() => this.handleConfirmRequestCarrier('Cancel Request')}
+                              className="primaryButton"
+                              loading={btnSubmitting}
+                              loaderSize={10}
+                              bntText="Cancel Request"
+                            />
+                          </Link>
                         </ButtonToolbar>
                       </Row>
                     </CardBody>
