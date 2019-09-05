@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
 import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
+import GeoUtils from '../../utils/GeoUtils';
 
 class TMap extends Component {
   constructor(props) {
@@ -24,7 +25,14 @@ class TMap extends Component {
   }
 
   componentDidMount() {
-    const { zoom, center, id, startAddress, endAddress, trackings } = this.props;
+    const {
+      zoom,
+      center,
+      id,
+      startAddress,
+      endAddress,
+      trackings
+    } = this.props;
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
@@ -38,20 +46,28 @@ class TMap extends Component {
     this.behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
     // Create the default UI components
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
+
     if (startAddress && endAddress) {
-      if (trackings && trackings.length > 0) {
-        const lineString = new H.geo.LineString();
-        for (const tracking of trackings) {
-          // this.addGPSPoint(tracking[1], tracking[0]);
-          lineString.pushPoint({lat: tracking[1], lng: tracking[0]});
-        }
-        this.map.addObject(new H.map.Polyline(
-          lineString, { style: { lineWidth: 4 }}
-        ));
-      } else {
-        this.calculateRouteFromAtoB();
-      }
+      /**/
+      this.calculateRouteFromAtoB();
       this.addMarkersToMap();
+    }
+
+    if (trackings && trackings.length > 0) {
+      const lineString = new H.geo.LineString();
+      for (const tracking of trackings) {
+        // this.addGPSPoint(tracking[1], tracking[0]);
+        lineString.pushPoint({lat: tracking[1], lng: tracking[0]});
+      }
+      this.map.addObject(new H.map.Polyline(
+        lineString,
+        {
+          style: {
+            lineWidth: 5,
+            strokeColor: 'rgb(0, 196, 147)'
+          }
+        }
+      ));
     }
   }
 
@@ -105,8 +121,8 @@ class TMap extends Component {
 
     const polyline = new H.map.Polyline(lineString, {
       style: {
-        lineWidth: 4,
-        strokeColor: 'rgba(0, 128, 255, 0.7)'
+        lineWidth: 2,
+        strokeColor: 'rgb(0, 111, 83)'
       }
     });
     // Add the polyline to the map
@@ -127,35 +143,10 @@ class TMap extends Component {
     const group = new H.map.Group();
     group.addObjects([markerA, markerB]);
     this.map.addObject(group);
-    let bounds = group.getBoundingBox(); // H.geo.Rect
-    // zoom out a little so the markers fit
-    const offsetFactor = 0.2;
-    let smallFactor = 0;
-    const boundParams = {
-      top: bounds.getTop(),
-      left: bounds.getLeft(),
-      bottom: bounds.getBottom(),
-      right: bounds.getRight()
-    };
-    if ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom) <= 0.0001))) {
-      smallFactor = 0.01;
-    }
-    boundParams.top += ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
-      + smallFactor) * offsetFactor);
-    boundParams.left -= ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
-      + smallFactor) * offsetFactor);
-    // not needed since bottom pin fits
-    // boundParams.bottom -= (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
-    //   * offsetFactor);
-    boundParams.right += ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
-      + smallFactor) * offsetFactor);
-    this.boundingBoxDistance = Math.sqrt((((boundParams.top - boundParams.bottom) ** 2))
-      + (((boundParams.left - boundParams.right) ** 2)));
-    bounds = new H.geo.Rect(boundParams.top, boundParams.left, boundParams.bottom,
-      boundParams.right);
+    const bounds = group.getBoundingBox(); // H.geo.Rect
     // And zoom to its bounding rectangle
     this.map.getViewModel().setLookAtData({
-      bounds
+      bounds: GeoUtils.setZoomBounds(bounds)
     });
   }
 

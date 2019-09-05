@@ -352,7 +352,7 @@ class JobForm extends Component {
           {this.renderPhone(showPhone)}
           <br/>
           {this.renderMinimumInsurance()}
-          Number of Trucks: {job.numEquipments}
+          Number of Trucks: {job.numEquipments || 'Any'}
           <br/>
           Truck Types: {trucks}
           <br/>
