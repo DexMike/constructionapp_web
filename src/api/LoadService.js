@@ -34,6 +34,16 @@ class LoadService extends AgentService {
     return (response);
   }
 
+  static async getLastGPSForCompanyId(companyId) {
+    const response = await this.get(`/company/${companyId}/gpstrackings${PATH}`);
+    return (response);
+  }
+
+  static async getLastGPSForSchedulerCustomer(companyId) {
+    const response = await this.get(`/scheduler/${companyId}/gpstrackings${PATH}`);
+    return (response);
+  }
+
   static async closeLoads(loadsFinish) {
     const url = `/status${PATH}`;
     const response = await this.put(url, loadsFinish);

@@ -93,6 +93,7 @@ class LoadsExpandableRow extends Component {
 
   async fetchGPSPoints(loadId) {
     return GPSTrackingService.getGPSTrackingByLoadId(loadId);
+    // return GPSTrackingService.getGPSTrackingByLoadId(315);
   }
 
   toggle() {

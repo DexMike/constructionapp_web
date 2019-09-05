@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
-import {useTranslation} from "react-i18next";
-import SidebarLink from "./SidebarLink";
+import {useTranslation} from 'react-i18next';
+import SidebarLink from './SidebarLink';
 // import SidebarCategory from './SidebarCategory';
 // import ThemeTogglerButton from '../../App';
 // import ThemeContext from '../../ThemeContext';
@@ -37,10 +37,13 @@ class SidebarCarrierContent extends Component {
     const { isAdmin } = this.props;
     return (
       <div className="sidebar__content">
-        <SideElement title="Job Dashboard"
-                     icon="ic_assignment"
-                     route="/dashboard"
-                     onClick={this.hideSidebar}/>
+        <SideElement
+          title="Job Dashboard"
+          icon="ic_assignment"
+          route="/dashboard"
+          onClick={this.hideSidebar}
+        />
+        {/* <ul className="sidebar__block">
         {/* <ul className="sidebar__block">
           <SidebarLink
             title="Jobs"
@@ -52,6 +55,12 @@ class SidebarCarrierContent extends Component {
         {
           isAdmin && (
             <React.Fragment>
+              <SideElement
+                title="Truck Locator"
+                icon="ic_map"
+                route="/generalmap"
+                onClick={this.hideSidebar}
+              />
               <SideElement title="Marketplace"
                      icon="ic_work"
                      route="/marketplace"
