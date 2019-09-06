@@ -4,14 +4,13 @@ import {Link} from 'react-router-dom';
 import ThemeContext from '../../ThemeContext';
 import AuthService from '../../../utils/AuthService';
 
-
 class TopbarMenuLink extends Component {
   async logOut() {
     await AuthService.logOut();
   }
 
   render() {
-    const {title, icon, path} = this.props;
+    const {title, icon, path, toggle} = this.props;
     return (
       <React.Fragment>
         {title === 'Log Out' && (
@@ -23,7 +22,14 @@ class TopbarMenuLink extends Component {
         {title === 'Toggle Theme' && (
           <ThemeContext.Consumer>
             {({toggleTheme}) => (
-              <Link className="topbar__link" to="" onClick={toggleTheme}>
+              <Link 
+                className="topbar__link" 
+                to=""
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleTheme()
+                  }}
+              >
                 <span className={`topbar__link-icon lnr lnr-${icon}`}/>
                 <p className="topbar__link-title">Toggle Theme</p>
               </Link>
@@ -31,7 +37,13 @@ class TopbarMenuLink extends Component {
           </ThemeContext.Consumer>
         )}
         {title !== 'Log Out' && title !== 'Toggle Theme' && (
-          <Link className="topbar__link" to={path}>
+          <Link className="topbar__link" to={path}
+            onClick={() => {
+              if (toggle) {
+                toggle();
+              }
+            }}
+          >
             <span className={`topbar__link-icon lnr lnr-${icon}`}/>
             <p className="topbar__link-title">{title}</p>
           </Link>
@@ -44,7 +56,13 @@ class TopbarMenuLink extends Component {
 TopbarMenuLink.propTypes = {
   title: PropTypes.string.isRequired,
   icon: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired
+  path: PropTypes.string,
+  toggle: PropTypes.func
+};
+
+TopbarMenuLink.defaultProps = {
+  path: null,
+  toggle: null
 };
 
 export default TopbarMenuLink;

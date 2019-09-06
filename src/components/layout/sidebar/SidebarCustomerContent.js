@@ -38,12 +38,15 @@ class SidebarCustomerContent extends Component {
   }
 
   render() {
-    const { isAdmin } = this.props;
+    let { isAdmin } = this.props;
     return (
       <div className="sidebar__content">
-        <SideElement title="Job Dashboard" icon="ic_assignment" route="/" handle={this.hideSidebar}/>
-        {/* <SideElement title="Truck Search" icon="ic_local_shipping" route="/TrucksList" handle={this.hideSidebar}/> */}
-
+        <SideElement
+          title="Job Dashboard"
+          icon="ic_assignment"
+          route="/"
+          handle={this.hideSidebar}
+        />
         <SideElement
           title="Carrier Search"
           icon="ic_supervised_user_circle"
@@ -52,10 +55,28 @@ class SidebarCustomerContent extends Component {
         />
         {
           isAdmin ? (
-            <SideElement title="Charges" icon="ic_attach_money" route="/payments" handle={this.hideSidebar}/>
+            <React.Fragment>
+              <SideElement
+                title="Truck Locator"
+                icon="ic_map"
+                route="/generalmap"
+                onClick={this.hideSidebar}
+              />
+              <SideElement
+                title="Charges"
+                icon="ic_attach_money"
+                route="/payments"
+                handle={this.hideSidebar}
+              />
+            </React.Fragment>
           ) : null
         }
-        <SideElement title="Reporting" icon="ic_timeline" route="/Reports" handle={this.hideSidebar}/>
+        <SideElement
+          title="Reporting"
+          icon="ic_timeline"
+          route="/Reports"
+          handle={this.hideSidebar}
+        />
       </div>
     );
   }

@@ -334,7 +334,15 @@ class JobForm extends Component {
       || job.status === 'In Progress' || job.status === 'Job Complete'
     ) {
       // showPhone = `Telephone: ${TFormat.asPhoneText(job.company.phone)}`;
-      showPhone = TFormat.asPhoneText(job.company.phone);
+      if (companyType === 'Carrier') {
+        // showPhone = TFormat.asPhoneText(job.company.phone);
+        showPhone = job.company.phone;
+      }
+      if (companyType === 'Customer' && carrier) {
+        // showPhone = TFormat.asPhoneText(carrier.phone);
+        showPhone = carrier.phone;
+      }
+      showPhone = TFormat.asPhoneText(showPhone);
     }
     return (
       <React.Fragment>
@@ -342,17 +350,22 @@ class JobForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {carrier && (
+          {(carrier && companyType === 'Customer') && (
             <React.Fragment>
               Carrier: {carrier ? carrier.legalName : ''}
-              <br/>
             </React.Fragment>
           )}
-          Producer: {job.company.legalName}
+          {
+            (companyType === 'Carrier') && (
+              <React.Fragment>
+                Producer: {job.company.legalName}
+              </React.Fragment>
+            )
+          }
           {this.renderPhone(showPhone)}
           <br/>
           {this.renderMinimumInsurance()}
-          Number of Trucks: {job.numEquipments}
+          Number of Trucks: {job.numEquipments || 'Any'}
           <br/>
           Truck Types: {trucks}
           <br/>
