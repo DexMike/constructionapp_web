@@ -245,7 +245,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'newSize',
-                        displayName: 'Min Hours',
+                        displayName: 'Size',
                         label: 'newSizeF'
                       },
                       {
