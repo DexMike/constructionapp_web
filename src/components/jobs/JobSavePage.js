@@ -978,12 +978,12 @@ class JobSavePage extends Component {
 
     // change job status and cleanup
     const newJob = CloneDeep(job);
-    newJob.status = 'Job Ended';
+    newJob.status = 'Job Completed';
     newJob.startAddress = job.startAddress.id;
     newJob.endAddress = job.endAddress.id;
     await JobService.updateJob(newJob);
 
-    job.status = 'Job Ended';
+    job.status = 'Job Completed';
     this.setState({
       job
     });
@@ -1019,10 +1019,11 @@ class JobSavePage extends Component {
   }
 
   renderJobForm(companyType, job) {
-    const {companyCarrier} = this.state;
+    const {companyCarrier, bid} = this.state;
     return (
       <JobForm
         job={job}
+        bid={bid}
         companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
       />
