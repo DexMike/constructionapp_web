@@ -362,7 +362,6 @@ class DashboardCarrierPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-    console.log(6335, jobs);
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
