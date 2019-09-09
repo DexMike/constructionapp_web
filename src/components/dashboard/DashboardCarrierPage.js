@@ -353,9 +353,12 @@ class DashboardCarrierPage extends Component {
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
-      if (newJob.status === 'On Offer' || newJob.status === 'Published And Offered') {
+      if ((newJob.status === 'On Offer' || newJob.status === 'Published And Offered') && (newJob.bidHasSchedulerAccepted === 0)) {
         onOfferJobCount += 1;
         newJob.status = 'On Offer';
+      }
+      if ((newJob.status === 'Published' || newJob.status === 'Published And Offered') && (newJob.bidHasSchedulerAccepted === 1)) {
+        newJob.status = 'Requested';
       }
       if (newJob.status === 'Booked') {
         acceptedJobCount += 1;

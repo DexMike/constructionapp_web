@@ -1019,10 +1019,11 @@ class JobSavePage extends Component {
   }
 
   renderJobForm(companyType, job) {
-    const {companyCarrier} = this.state;
+    const {companyCarrier, bid} = this.state;
     return (
       <JobForm
         job={job}
+        bid={bid}
         companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
       />
