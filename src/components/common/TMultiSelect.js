@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
+import ReactDOM from 'react-dom';
 
 class MultiSelectField extends PureComponent {
   constructor(props) {
@@ -56,30 +57,41 @@ const renderMultiSelectField = function renderMultiSelectField(
     container.scrollTop = 0;
   }
 
+  function appendArrows() {
+    const arrows = document.getElementById(`${id}Scroll`);
+    let selector = document.getElementById(id).getElementsByClassName('form__form-group-select')[0].contains(arrows);
+    if (selector) return;
+    selector = document.getElementById(id).getElementsByClassName('form__form-group-select')[0].appendChild(document.createElement('section'));
+    selector.setAttribute('id', `${id}Scroll`);
+    const element = (
+      <React.Fragment>
+        <i
+          className="material-icons select-navigator"
+          style={{color: '#666666', fontSize: 18, position: 'absolute', right: 16, top: -20, zIndex: 50 }}
+          onClick={() => slideTo(false)}
+        >
+          navigate_before
+        </i>
+        <i
+          className="material-icons select-navigator"
+          style={{color: '#666666', fontSize: 18, position: 'absolute', right: 0, top: -20, zIndex: 50}}
+          onClick={() => slideTo(true)}
+        >
+          navigate_next
+        </i>
+      </React.Fragment>
+    );
+    ReactDOM.render(element, document.querySelector(`#${id}Scroll`));
+  }
+
+  if (horizontalScroll === 'true' && selectedItems >= 3) {
+    appendArrows();
+  }
+
   return (
     <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
-      {
-        horizontalScroll === 'true' && selectedItems >= 3 ? (
-          <React.Fragment>
-            <i
-            className="material-icons select-navigator"
-            style={{color: '#666666', fontSize: 18, position: 'absolute', left: 0, top: 32}}
-            onClick={() => slideTo(false)}
-            >
-              navigate_before
-            </i>
-            <i
-              className="material-icons select-navigator"
-              style={{color: '#666666', fontSize: 18, position: 'absolute', right: 0, top: 32}}
-              onClick={() => slideTo(true)}
-            >
-              navigate_next
-            </i>
-          </React.Fragment>
-        )
-          : null
-      }
       <MultiSelectField
+      style
         {...input}
         options={options}
         placeholder={placeholder}
