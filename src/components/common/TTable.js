@@ -109,12 +109,18 @@ class TTable extends Component {
   }
 
   handleRequestSort(event, property) {
+    const { handleSortChange, data } = this.props;
     let { order } = this.state;
     const { orderBy } = this.state;
     if (orderBy === property) {
       order = order === 'desc' ? 'asc' : 'desc';
     } else {
       order = 'asc';
+    }
+    if (handleSortChange) {
+      handleSortChange(property, order);
+    } else {
+      data.sort(this.getSorting(order, orderBy));
     }
     this.setState({
       order,
@@ -236,7 +242,7 @@ class TTable extends Component {
                 />
                 <TableBody>
                   {data
-                    .sort(this.getSorting(order, orderBy))
+                    // .sort(this.getSorting(order, orderBy))
                     // .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
                     .map((dataItem) => {
                       const isSelected = this.isSelected(dataItem.id);

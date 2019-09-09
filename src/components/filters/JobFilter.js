@@ -84,7 +84,8 @@ class JobFilter extends Component {
         equipmentType: [],
         isMarketplaceView: false,
         status: '',
-        sortBy: sortByList[0],
+        sortBy: '',
+        order: '',
         page: 0,
         rows: 5
       },

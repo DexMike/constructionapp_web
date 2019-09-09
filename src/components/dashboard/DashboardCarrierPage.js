@@ -70,6 +70,7 @@ class DashboardCarrierPage extends Component {
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
+    this.sortFilters = this.sortFilters.bind(this);
   }
 
   async componentDidMount() {
@@ -94,6 +95,18 @@ class DashboardCarrierPage extends Component {
       jobs,
       filters,
       totalCount
+    });
+  }
+
+  sortFilters(orderBy, order) {
+    const { filters } = this.state;
+    const newFilters = filters;
+    newFilters.sortBy = orderBy;
+    newFilters.order = order;
+    this.setState({
+      filters: newFilters
+    }, function wait() {
+      this.refs.filterChild.fetchJobs();
     });
   }
 
@@ -349,7 +362,7 @@ class DashboardCarrierPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
+    console.log(6335, jobs);
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -477,6 +490,7 @@ class DashboardCarrierPage extends Component {
                     }
                     data={jobs}
                     handleIdClick={this.handleJobEdit}
+                    handleSortChange={this.sortFilters}
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
