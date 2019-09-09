@@ -250,7 +250,7 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'distance',
-                        displayName: 'Distance (mi)'
+                        displayName: 'Distance from Me (mi)'
                       },
                       {
                         name: 'haulDistance',
