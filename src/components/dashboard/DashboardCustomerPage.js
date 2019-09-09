@@ -93,6 +93,7 @@ class DashboardCustomerPage extends Component {
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
+    this.sortFilters = this.sortFilters.bind(this);
   }
 
   async componentDidMount() {
@@ -143,6 +144,18 @@ class DashboardCustomerPage extends Component {
     this.setState({
       filters,
       page: 0
+    });
+  }
+
+  sortFilters(orderBy, order) {
+    const { filters } = this.state;
+    const newFilters = filters;
+    newFilters.sortBy = orderBy;
+    newFilters.order = order;
+    this.setState({
+      filters: newFilters
+    }, function wait() {
+      this.refs.filterChild.fetchJobs();
     });
   }
 
@@ -555,6 +568,7 @@ class DashboardCustomerPage extends Component {
                     }
                     data={jobs}
                     handleIdClick={this.handleJobEdit}
+                    handleSortChange={this.sortFilters}
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}

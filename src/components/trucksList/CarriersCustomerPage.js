@@ -810,9 +810,8 @@ class CarriersCustomerPage extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-                <Col lg={12}>
-                  <Row lg={12} id="filter-input-row">
-                    <Col md="4" id="materialTypeSelect">
+                  <div className="flex-carrier-filters">
+                    <div id="materialTypeSelect">
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -844,8 +843,8 @@ class CarriersCustomerPage extends Component {
                         horizontalScroll="true"
                         selectedItems={filters.materialType.length}
                       />
-                    </Col>
-                    <Col md="3" id="truckTypeSelect">
+                    </div>
+                    <div id="truckTypeSelect">
                       {/* TODO: There will be changes for Truck Type and Number of trucks */}
                       <div className="filter-item-title">
                         Truck Type
@@ -877,8 +876,8 @@ class CarriersCustomerPage extends Component {
                         horizontalScroll="true"
                         selectedItems={filters.equipmentType.length}
                       />
-                    </Col>
-                    <Col md="2">
+                    </div>
+                    <div>
                       <div className="filter-item-title">
                         Number of trucks
                       </div>
@@ -889,8 +888,8 @@ class CarriersCustomerPage extends Component {
                         value={filters.numEquipments}
                         onChange={this.handleNumChange}
                       />
-                    </Col>
-                    <Col md="3">
+                    </div>
+                    <div>
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -918,14 +917,8 @@ class CarriersCustomerPage extends Component {
                         }
                         placeholder="Any"
                       />
-                    </Col>
-                  </Row>
-                </Col>
-                <br/>
-
-                <Col lg={12}>
-                  <Row lg={12} id="filter-input-row">
-                    <Col md="4">
+                    </div>
+                    <div>
                       <div className="filter-item-title">
                         Search by name
                       </div>
@@ -936,8 +929,8 @@ class CarriersCustomerPage extends Component {
                         value={filters.name}
                         onChange={this.handleFilterChangeDelayed}
                       />
-                    </Col>
-                    <Col md="2">
+                    </div>                
+                    <div>
                       <div className="filter-item-title">
                         Zip Code
                       </div>
@@ -954,8 +947,8 @@ class CarriersCustomerPage extends Component {
                         placeholder={companyZipCode}
                         type="number"
                       />
-                    </Col>
-                    <Col md="2">
+                    </div>
+                    <div>
                       <div className="filter-item-title">
                         Range (mi)
                       </div>
@@ -972,7 +965,7 @@ class CarriersCustomerPage extends Component {
                         placeholder="Any"
                         type="number"
                       />
-                    </Col>
+                    </div>
                     {/* <Col md="4">
                       <div className="filter-item-title">
                         Availability
@@ -984,19 +977,16 @@ class CarriersCustomerPage extends Component {
                         onChange={this.handleIntervalInputChange}
                         dateFormat='m/d/Y'
                       />
-                    </Col> */}
-                    <Col md="4" className="">
-                      <Button
-                        onClick={() => this.clear()}
-                        className="btn btn-primary float-right mt-20"
-                        styles="margin:0px !important"
-                      >
-                        Reset Filters
-                      </Button>
-                    </Col>
-                  </Row>
-                </Col>
-
+                    </Col> */}      
+                  </div>
+                  <div className="flex-reverse">
+                    <Button
+                      onClick={() => this.clear()}
+                      className="btn btn-primary"
+                    >
+                      Reset Filters
+                    </Button>
+                  </div> 
               </form>
             </CardBody>
           </Card>
