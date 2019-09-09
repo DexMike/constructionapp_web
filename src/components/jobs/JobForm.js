@@ -318,6 +318,7 @@ class JobForm extends Component {
       carrier,
       allTruckTypes
     } = this.state;
+    const { bid } = this.props;
 
     const trucks = allTruckTypes.join(', ');
 
@@ -327,8 +328,11 @@ class JobForm extends Component {
     let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
-    if (job.status === 'Published And Offered' && companyType === 'Carrier') {
+    if ((job.status === 'Published And Offered' && job.status === 'Published And Offered') && companyType === 'Carrier') {
       displayStatus = 'On Offer';
+      if (bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
+        displayStatus = 'Requested';
+      }
     }
     if (job.status === 'Booked' || job.status === 'Allocated'
       || job.status === 'In Progress' || job.status === 'Job Complete'
@@ -381,7 +385,7 @@ class JobForm extends Component {
         {companyType === 'Carrier' && (
           <div className="col-md-4">
             <h3 className="subhead">
-              Job Status: {job.status}
+              Job Status: {displayStatus}
             </h3>
             {
               // job.status === 'Job Completed'
@@ -921,12 +925,17 @@ JobForm.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
   }),
+  bid: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array
+  ]),
   companyCarrier: PropTypes.number,
   handlePageClick: PropTypes.func.isRequired
 };
 
 JobForm.defaultProps = {
   job: null,
+  bid: null,
   companyCarrier: null
 };
 
