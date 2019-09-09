@@ -7,6 +7,11 @@
     width: 1500px !important;
     /*overflow-y: scroll;*/
     overflow-x: scroll;
+    position: absolute;
+}
+
+.Select-clear, .Select-arrow {
+    display: none !important;
 }
 
 .select-navigator:hover {
