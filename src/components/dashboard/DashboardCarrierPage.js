@@ -263,14 +263,14 @@ class DashboardCarrierPage extends Component {
       jobs = jobs.map((job) => {
         const newJob = job;
         // const tempRate = newJob.rate;
-        if (newJob.status === 'On Offer') {
+        if (newJob.status === 'On Offer' || newJob.status === 'Published And Offered') {
           // onOfferJobCount += 1;
           onOfferJobCount += newJob.countJobs;
         }
-        if (newJob.status === 'Published And Offered') {
+        /* if (newJob.status === 'Published And Offered') {
           // publishedJobCount += 1;
           onOfferJobCount += newJob.countJobs;
-        }
+        } */
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;
           bookedJobCount = newJob.countJobs;
@@ -279,7 +279,7 @@ class DashboardCarrierPage extends Component {
           // inProgressJobCount += 1;
           inProgressJobCount = newJob.countJobs;
         }
-        if (newJob.status === 'Published' || 'Published And Offered') {
+        if (newJob.status === 'Requested') {
           // NOTE:
           // We need to also see if there is a bid for this carrier for this job
           requestedJobCount = newJob.countJobs;
@@ -356,7 +356,7 @@ class DashboardCarrierPage extends Component {
       );
     }
     return (
-      <DashboardLoading  />
+      <DashboardLoading />
     );
   }
 
@@ -376,6 +376,7 @@ class DashboardCarrierPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
