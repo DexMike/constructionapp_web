@@ -978,12 +978,12 @@ class JobSavePage extends Component {
 
     // change job status and cleanup
     const newJob = CloneDeep(job);
-    newJob.status = 'Job Ended';
+    newJob.status = 'Job Completed';
     newJob.startAddress = job.startAddress.id;
     newJob.endAddress = job.endAddress.id;
     await JobService.updateJob(newJob);
 
-    job.status = 'Job Ended';
+    job.status = 'Job Completed';
     this.setState({
       job
     });
