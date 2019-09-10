@@ -257,19 +257,20 @@ class DashboardCarrierPage extends Component {
     let inProgressJobCount = 0;
     let completedJobCount = 0;
     let totalPotentialIncome = 0;
+    let requestedJobCount = 0;
 
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
         // const tempRate = newJob.rate;
-        if (newJob.status === 'On Offer') {
+        if (newJob.status === 'On Offer' || newJob.status === 'Published And Offered') {
           // onOfferJobCount += 1;
           onOfferJobCount += newJob.countJobs;
         }
-        if (newJob.status === 'Published And Offered') {
+        /* if (newJob.status === 'Published And Offered') {
           // publishedJobCount += 1;
           onOfferJobCount += newJob.countJobs;
-        }
+        } */
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;
           bookedJobCount = newJob.countJobs;
@@ -277,6 +278,11 @@ class DashboardCarrierPage extends Component {
         if (newJob.status === 'In Progress') {
           // inProgressJobCount += 1;
           inProgressJobCount = newJob.countJobs;
+        }
+        if (newJob.status === 'Requested') {
+          // NOTE:
+          // We need to also see if there is a bid for this carrier for this job
+          requestedJobCount = newJob.countJobs;
         }
         if (newJob.status === 'Job Completed') {
           // completedJobCount += 1;
@@ -318,6 +324,14 @@ class DashboardCarrierPage extends Component {
               status={filters.status}
             />
             <DashboardObjectClickable
+              title="Jobs Requested"
+              displayVal={requestedJobCount}
+              value="Requested"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            <DashboardObjectClickable
               title="Completed Jobs"
               displayVal={completedJobCount}
               value="Job Completed"
@@ -342,7 +356,7 @@ class DashboardCarrierPage extends Component {
       );
     }
     return (
-      <DashboardLoading  />
+      <DashboardLoading />
     );
   }
 
@@ -362,6 +376,7 @@ class DashboardCarrierPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -407,6 +422,7 @@ class DashboardCarrierPage extends Component {
       );
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
 
+      // Where are we getting this distance?
       if (typeof job.distance === 'number') {
         newJob.distance = newJob.distance.toFixed(2);
       }
@@ -462,7 +478,7 @@ class DashboardCarrierPage extends Component {
                         },
                         {
                           name: 'distance',
-                          displayName: 'Distance (mi)'
+                          displayName: 'Distance from Me (mi)'
                         },
                         {
                           name: 'haulDistance',

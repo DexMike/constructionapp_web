@@ -328,7 +328,7 @@ class JobForm extends Component {
     let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
-    if ((job.status === 'Published And Offered' && job.status === 'Published And Offered') && companyType === 'Carrier') {
+    if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       displayStatus = 'On Offer';
       if (bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
         displayStatus = 'Requested';
