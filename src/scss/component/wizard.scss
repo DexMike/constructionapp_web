@@ -51,6 +51,16 @@
       color: #ffffff;
     }
   }
+
+  &.wizard__step--active-sub-tabs {
+    background: #ffffff;
+    border-color: #006f53;
+    border-width: 4px;
+
+    p {
+      color: #006f53;
+    }
+  }
 }
 
 .wizard__form-wrapper {
