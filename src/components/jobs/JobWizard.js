@@ -46,7 +46,7 @@ class JobWizard extends Component {
       },
       tabMaterials: {
         quantityType: 'ton',
-        quantity: '34',
+        quantity: 34,
         allMaterials: [],
         selectedMaterial: {
           value: '',
@@ -145,13 +145,15 @@ class JobWizard extends Component {
           estimateTypeRadio: 'ton',
           rateTypeRadio: 'ton',
           estimatedTons: '',
-          estimatedHours: '10',
+          estimatedHours: 10,
           ratePerTon: '',
           ratePerHour: '',
           invalidAddress: false,
           truckCapacity: 22,
-          travelTime: null,
-          distance: null,
+          travelTimeEnroute: 0,
+          travelTimeReturn: 0,
+          loadTime: 0,
+          unloadTime: 0
         }
       },
       // old stuff
@@ -810,7 +812,7 @@ class JobWizard extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          <div className="dashboard dashboard__job-create" style={{width: 800}}>
+          <div className="dashboard dashboard__job-create" style={{width: 900}}>
             {/*{this.renderGoTo()}*/}
             <Row>
               {/* <h1>TEST</h1> */}

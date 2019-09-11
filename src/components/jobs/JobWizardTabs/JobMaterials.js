@@ -55,7 +55,8 @@ class JobMaterials extends PureComponent {
   handleQuantityChange(quantity) {
     const {data} = {...this.props};
     const {handleInputChange} = {...this.props};
-    const {value} = quantity.target;
+    let {value} = quantity.target;
+    value = value.replace(/\D/g, '');
     data.quantity = value;
     handleInputChange('tabMaterials', data);
   }
@@ -242,7 +243,7 @@ JobMaterials.propTypes = {
   data: PropTypes.shape({
     materialType: PropTypes.string,
     quantityType: PropTypes.string,
-    quantity: PropTypes.string,
+    quantity: PropTypes.number,
     allMaterials: PropTypes.array,
     selectedMaterial: PropTypes.shape({
       value: PropTypes.string,
