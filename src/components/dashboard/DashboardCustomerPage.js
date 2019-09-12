@@ -122,29 +122,31 @@ class DashboardCustomerPage extends Component {
   }
 
   async handleFilterStatusChange({value, name}) {
-    const {filters} = this.state;
-    if (filters[name] === value) {
-      filters[name] = '';
-    } else {
-      filters[name] = value;
+    const { filters, jobs } = this.state;
+    if (jobs && jobs.length > 0) {
+      if (filters[name] === value) {
+        filters[name] = '';
+      } else {
+        filters[name] = value;
+      }
+      // clearing filter fields for general jobs based on Status (Top cards)
+      filters.equipmentType = [];
+      filters.startAvailability = '';
+      filters.endAvailability = '';
+      delete filters.rateType;
+      filters.rate = '';
+      filters.minTons = '';
+      filters.minHours = '';
+      filters.minCapacity = '';
+      filters.numEquipments = '';
+      filters.zipCode = '';
+      filters.range = '';
+      this.refs.filterChild.filterWithStatus(filters);
+      this.setState({
+        filters,
+        page: 0
+      });
     }
-    // clearing filter fields for general jobs based on Status (Top cards)
-    filters.equipmentType = [];
-    filters.startAvailability = '';
-    filters.endAvailability = '';
-    delete filters.rateType;
-    filters.rate = '';
-    filters.minTons = '';
-    filters.minHours = '';
-    filters.minCapacity = '';
-    filters.numEquipments = '';
-    filters.zipCode = '';
-    filters.range = '';
-    this.refs.filterChild.filterWithStatus(filters);
-    this.setState({
-      filters,
-      page: 0
-    });
   }
 
   sortFilters(orderBy, order) {
@@ -399,11 +401,11 @@ class DashboardCustomerPage extends Component {
               name="status"
               status={filters.status}
             />
-            <DashboardObjectStatic
-              title="% Completed"
-              displayVal={completedOffersPercent}
-              value="% Completed"
-            />
+            {/* <DashboardObjectStatic */}
+            {/* title="% Completed" */}
+            {/* displayVal={completedOffersPercent} */}
+            {/* value="% Completed" */}
+            {/* /> */}
           </div>
         </Container>
       );
@@ -497,7 +499,7 @@ class DashboardCustomerPage extends Component {
       return newJob;
     });
 
-    jobsCompleted = onOfferJobCount * 20;
+    // jobsCompleted = onOfferJobCount * 20;
     totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
     earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
     cancelledJobs = 1;
@@ -545,10 +547,11 @@ class DashboardCustomerPage extends Component {
                           name: 'newStartDate',
                           displayName: 'Start Date'
                         },
-                        {
-                          name: 'distance',
-                          displayName: 'Distance to Zip (mi)'
-                        },
+                        // This is the producer they do not need to see distance to job
+                        // {
+                        //   name: 'distance',
+                        //   displayName: 'Distance to Zip (mi)'
+                        // },
                         {
                           name: 'haulDistance',
                           displayName: 'Haul Distance (One Way) (mi)'

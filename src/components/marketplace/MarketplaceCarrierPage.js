@@ -245,12 +245,12 @@ class MarketplaceCarrierPage extends Component {
                       },
                       {
                         name: 'newSize',
-                        displayName: 'Min Hours',
+                        displayName: 'Size',
                         label: 'newSizeF'
                       },
                       {
                         name: 'distance',
-                        displayName: 'Distance (mi)'
+                        displayName: 'Distance from Me (mi)'
                       },
                       {
                         name: 'haulDistance',
