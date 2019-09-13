@@ -7,6 +7,9 @@ import {
   Col,
   Container,
   Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Row
 } from 'reactstrap';
 import moment from 'moment';
@@ -27,6 +30,7 @@ import GroupListService from '../../api/GroupListService';
 import CarrierRow from './CarrierRow';
 // import GeoCodingService from '../../api/GeoCodingService';
 import GeoUtils from '../../utils/GeoUtils';
+import BidService from '../../api/BidService';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -88,7 +92,10 @@ class CarriersCustomerPage extends Component {
       reqHandlerRange: {
         touched: false,
         error: ''
-      }
+      },
+      unfavoriteModal: false,
+      selectedGroup: null,
+      selectedCarrierId: null
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -108,6 +115,7 @@ class CarriersCustomerPage extends Component {
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.handleNumChange = this.handleNumChange.bind(this);
     this.clear = this.clear.bind(this);
+    this.toggleUnfavoriteModal = this.toggleUnfavoriteModal.bind(this);
   }
 
   async componentDidMount() {
@@ -506,6 +514,20 @@ class CarriersCustomerPage extends Component {
     }
   }
 
+  async handleUnfavoriteCompany() {
+    const { profile, selectedCarrierId, selectedGroup, carriers } = this.state;
+    try {
+      await GroupListService.deleteGroupListById(selectedGroup.id);
+      await GroupService.deleteGroupById(selectedGroup.groupId);
+      await BidService
+        .updateUnfavoritedCompanyBids(profile.companyId, selectedCarrierId);
+    } catch (e) {
+      // console.log(e);
+    }
+    this.fetchFavoriteCarriers(carriers);
+    this.toggleUnfavoriteModal(null, null);
+  }
+
   async handleSetFavorite(companyId) {
     const { carriers, profile } = this.state;
 
@@ -519,24 +541,21 @@ class CarriersCustomerPage extends Component {
         }
         return null;
       });
-
       // if we got a group with companyId
-      if (group.length > 0) { // delete
-        // first we delete the Group List
-        await GroupListService.deleteGroupListById(group[0][0]);
-        // then the Group
-        await GroupService.deleteGroupById(group[0][2]);
+      if (group.length > 0) { 
+        // delete
+        this.toggleUnfavoriteModal(group[0], companyId);
       } else { // create "Favorite" Group record
         const groupData = {
           createdBy: profile.userId,
           companyId
         };
         await GroupListService.createFavoriteGroupList(groupData);
+        this.fetchFavoriteCarriers(carriers);
       }
-      this.fetchFavoriteCarriers(carriers);
     } catch (error) {
       this.setState({ carriers });
-    }
+    }    
   }
 
   handleCarrierEdit(selectedCarrier) {
@@ -663,6 +682,15 @@ class CarriersCustomerPage extends Component {
     const { modalSelectMaterials } = this.state;
     this.setState({
       modalSelectMaterials: !modalSelectMaterials
+    });
+  }
+
+  toggleUnfavoriteModal(group, selectedCarrierId) {
+    const { unfavoriteModal } = this.state;
+    this.setState({
+      unfavoriteModal: !unfavoriteModal,
+      selectedGroup: group,
+      selectedCarrierId
     });
   }
 
@@ -810,188 +838,226 @@ class CarriersCustomerPage extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form" onSubmit={e => this.saveCompany(e)}>
-                  <div className="flex-carrier-filters">
-                    <div id="materialTypeSelect">
-                      <div className="filter-item-title">
-                        Materials
-                      </div>
-                      <MultiSelect
-                        input={
-                          {
-                            onChange: this.handleMultiChange,
-                            // onChange: this.handleSelectFilterChange,
-                            name: 'materialType',
-                            value: filters.materialType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        options={
-                          materialTypeList.map(materialType => ({
-                            name: 'materialType',
-                            value: materialType.trim(),
-                            label: materialType.trim()
-                          }))
-                        }
-                        placeholder="Any"
-                        // placeholder={materialTypeList[0]}
-                        id="materialTypeSelect"
-                        horizontalScroll="true"
-                        selectedItems={filters.materialType.length}
-                      />
+                <div className="flex-carrier-filters">
+                  <div id="materialTypeSelect">
+                    <div className="filter-item-title">
+                      Materials
                     </div>
-                    <div id="truckTypeSelect">
-                      {/* TODO: There will be changes for Truck Type and Number of trucks */}
-                      <div className="filter-item-title">
-                        Truck Type
-                      </div>
-                      <MultiSelect
-                        input={
-                          {
-                            onChange: this.handleMultiTruckChange,
-                            // onChange: this.handleSelectFilterChange,
-                            name: 'equipmentType',
-                            value: filters.equipmentType
-                          }
+                    <MultiSelect
+                      input={
+                        {
+                          onChange: this.handleMultiChange,
+                          // onChange: this.handleSelectFilterChange,
+                          name: 'materialType',
+                          value: filters.materialType
                         }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
                         }
-                        options={
-                          equipmentTypeList.map(equipmentType => ({
-                            name: 'equipmentType',
-                            value: equipmentType.trim(),
-                            label: equipmentType.trim()
-                          }))
-                        }
-                        placeholder="Any"
-                        id="truckTypeSelect"
-                        horizontalScroll="true"
-                        selectedItems={filters.equipmentType.length}
-                      />
-                    </div>
-                    <div>
-                      <div className="filter-item-title">
-                        Number of trucks
-                      </div>
-                      <input
-                        name="numEquipments"
-                        type="number"
-                        placeholder="Any"
-                        value={filters.numEquipments}
-                        onChange={this.handleNumChange}
-                      />
-                    </div>
-                    <div>
-                      <div className="filter-item-title">
-                        Rate Type
-                      </div>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'rateType',
-                            value: filters.rateType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.rateType}
-                        options={
-                          rateTypeList.map(rateType => ({
-                            name: 'rateType',
-                            value: rateType,
-                            label: rateType
-                          }))
-                        }
-                        placeholder="Any"
-                      />
-                    </div>
-                    <div>
-                      <div className="filter-item-title">
-                        Search by name
-                      </div>
-                      <input
-                        name="name"
-                        type="text"
-                        placeholder="Name"
-                        value={filters.name}
-                        onChange={this.handleFilterChangeDelayed}
-                      />
-                    </div>                
-                    <div>
-                      <div className="filter-item-title">
-                        Zip Code
-                      </div>
-                      <TField
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'zipCode',
-                            value: filters.zipCode
-                          }
-                        }
-                        meta={reqHandlerZip}
-                        className="filter-text"
-                        placeholder={companyZipCode}
-                        type="number"
-                      />
-                    </div>
-                    <div>
-                      <div className="filter-item-title">
-                        Range (mi)
-                      </div>
-                      <TField
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'range',
-                            value: filters.range
-                          }
-                        }
-                        meta={reqHandlerRange}
-                        className="filter-text"
-                        placeholder="Any"
-                        type="number"
-                      />
-                    </div>
-                    {/* <Col md="4">
-                      <div className="filter-item-title">
-                        Availability
-                      </div>
-                      <TIntervalDatePicker
-                        startDate={startDate}
-                        endDate={endDate}
-                        name="dateInterval"
-                        onChange={this.handleIntervalInputChange}
-                        dateFormat='m/d/Y'
-                      />
-                    </Col> */}      
+                      }
+                      options={
+                        materialTypeList.map(materialType => ({
+                          name: 'materialType',
+                          value: materialType.trim(),
+                          label: materialType.trim()
+                        }))
+                      }
+                      placeholder="Any"
+                      // placeholder={materialTypeList[0]}
+                      id="materialTypeSelect"
+                      horizontalScroll="true"
+                      selectedItems={filters.materialType.length}
+                    />
                   </div>
-                  <div className="flex-reverse">
-                    <Button
-                      onClick={() => this.clear()}
-                      className="btn btn-primary"
-                    >
-                      Reset Filters
-                    </Button>
-                  </div> 
+                  <div id="truckTypeSelect">
+                    {/* TODO: There will be changes for Truck Type and Number of trucks */}
+                    <div className="filter-item-title">
+                      Truck Type
+                    </div>
+                    <MultiSelect
+                      input={
+                        {
+                          onChange: this.handleMultiTruckChange,
+                          // onChange: this.handleSelectFilterChange,
+                          name: 'equipmentType',
+                          value: filters.equipmentType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      options={
+                        equipmentTypeList.map(equipmentType => ({
+                          name: 'equipmentType',
+                          value: equipmentType.trim(),
+                          label: equipmentType.trim()
+                        }))
+                      }
+                      placeholder="Any"
+                      id="truckTypeSelect"
+                      horizontalScroll="true"
+                      selectedItems={filters.equipmentType.length}
+                    />
+                  </div>
+                  <div>
+                    <div className="filter-item-title">
+                      Number of trucks
+                    </div>
+                    <input
+                      name="numEquipments"
+                      type="number"
+                      placeholder="Any"
+                      value={filters.numEquipments}
+                      onChange={this.handleNumChange}
+                    />
+                  </div>
+                  <div>
+                    <div className="filter-item-title">
+                      Rate Type
+                    </div>
+                    <TSelect
+                      input={
+                        {
+                          onChange: this.handleSelectFilterChange,
+                          name: 'rateType',
+                          value: filters.rateType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      value={filters.rateType}
+                      options={
+                        rateTypeList.map(rateType => ({
+                          name: 'rateType',
+                          value: rateType,
+                          label: rateType
+                        }))
+                      }
+                      placeholder="Any"
+                    />
+                  </div>
+                  <div>
+                    <div className="filter-item-title">
+                      Search by name
+                    </div>
+                    <input
+                      name="name"
+                      type="text"
+                      placeholder="Name"
+                      value={filters.name}
+                      onChange={this.handleFilterChangeDelayed}
+                    />
+                  </div>
+                  <div>
+                    <div className="filter-item-title">
+                      Zip Code
+                    </div>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'zipCode',
+                          value: filters.zipCode
+                        }
+                      }
+                      meta={reqHandlerZip}
+                      className="filter-text"
+                      placeholder={companyZipCode}
+                      type="number"
+                    />
+                  </div>
+                  <div>
+                    <div className="filter-item-title">
+                      Range (mi)
+                    </div>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'range',
+                          value: filters.range
+                        }
+                      }
+                      meta={reqHandlerRange}
+                      className="filter-text"
+                      placeholder="Any"
+                      type="number"
+                    />
+                  </div>
+                  {/* <Col md="4">
+                    <div className="filter-item-title">
+                      Availability
+                    </div>
+                    <TIntervalDatePicker
+                      startDate={startDate}
+                      endDate={endDate}
+                      name="dateInterval"
+                      onChange={this.handleIntervalInputChange}
+                      dateFormat='m/d/Y'
+                    />
+                  </Col> */}
+                </div>
+                <div className="flex-reverse">
+                  <Button
+                    onClick={() => this.clear()}
+                    className="btn btn-primary"
+                  >
+                    Reset Filters
+                  </Button>
+                </div>
               </form>
             </CardBody>
           </Card>
         </Col>
       </Row>
+    );
+  }
+
+  renderUnfavoriteModal() {
+    const { unfavoriteModal, selectedFavoriteCompanyId, selectedFavoriteCompanyName } = this.state;
+    return (
+      <React.Fragment>
+        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal">
+          <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
+            <div style={{ fontSize: 16, color: '#FFF' }}>
+              Are you sure you want to unfavorite &apos;{selectedFavoriteCompanyName}&apos;?
+            </div>
+          </ModalHeader>
+          <ModalBody className="text-left">
+            <p>
+              If you do, they will not be able to auto
+              accept any currently posted or future jobs that you send to your favorites group.
+              They will have to request the job and get your approval.
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Row>
+              <Col md={12} className="text-right">
+                <Button color="secondary" onClick={this.toggleUnfavoriteModal}>
+                  No, keep as a favorite
+                </Button>
+                &nbsp;
+                <Button
+                  color="primary"
+                  onClick={() => this.handleUnfavoriteCompany()}
+                >
+                  Yes, unfavorite
+                </Button>
+              </Col>
+            </Row>
+          </ModalFooter>
+        </Modal>
+      </React.Fragment>
     );
   }
 
@@ -1058,7 +1124,10 @@ class CarriersCustomerPage extends Component {
                   favorite={c.favorite}
                   equipmentTypes={c.equipmentTypes}
                   materials={c.carrierMaterials}
-                  setFavorite={() => this.handleSetFavorite(c.id)}
+                  setFavorite={() => {
+                    this.handleSetFavorite(c.id);
+                    this.setState({ selectedFavoriteCompanyName: c.legalName });
+                  }}
                   requestEquipment={() => this.handleCarrierEdit(c.id)}
                   distance={c.distance}
                 />
@@ -1075,6 +1144,7 @@ class CarriersCustomerPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          {this.renderUnfavoriteModal()}
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
