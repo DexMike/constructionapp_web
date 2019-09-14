@@ -200,9 +200,6 @@ class PickupAndDelivery extends PureComponent {
           <Card>
             <CardBody>
               {/* this.handleSubmit  */}
-              <div className="dashboard dashboard__job-create-section-title">
-                <span>Select a Material Type</span>
-              </div>
               <form
                 className="form form--horizontal addtruck__form"
                 // onSubmit={e => this.saveTruck(e)}

@@ -34,10 +34,12 @@ class TruckSpecs extends PureComponent {
     this.setState({data: {...data}});
   }
 
-  handleTruckQuantityChange(quantityType) {
+  handleTruckQuantityChange(quantity) {
     const {data} = {...this.props};
     const {handleInputChange} = {...this.props};
-    data.truckQuantity = quantityType;
+    let {value} = quantity.target;
+    value = value.replace(/\D/g, '');
+    data.truckQuantity = value;
     handleInputChange('tabTruckSpecs', data);
   }
 
@@ -66,10 +68,6 @@ class TruckSpecs extends PureComponent {
         <Col md={12} lg={12}>
           <Card>
             <CardBody>
-              {/* this.handleSubmit  */}
-              <div className="dashboard dashboard__job-create-section-title">
-                <span>Select a Material Type</span>
-              </div>
               <form
                 className="form form--horizontal addtruck__form"
                 // onSubmit={e => this.saveTruck(e)}

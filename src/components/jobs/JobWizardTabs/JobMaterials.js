@@ -22,6 +22,7 @@ class JobMaterials extends PureComponent {
       loaded: false
     };
     this.handleMaterialTypeChange = this.handleMaterialTypeChange.bind(this);
+    this.handleSubMaterialTypeChange = this.handleSubMaterialTypeChange.bind(this);
     this.handleQuantityTypeChange = this.handleQuantityTypeChange.bind(this);
     this.handleQuantityChange = this.handleQuantityChange.bind(this);
     this.handleEstimatedMaterialPricingChange = this.handleEstimatedMaterialPricingChange.bind(this);
@@ -41,6 +42,13 @@ class JobMaterials extends PureComponent {
     const {handleInputChange} = {...this.props};
     data.selectedMaterial = materialType;
     data.reqHandlerMaterials.touched = false;
+    handleInputChange('tabMaterials', data);
+  }
+
+  handleSubMaterialTypeChange(materialType) {
+    const {data} = {...this.props};
+    const {handleInputChange} = {...this.props};
+    data.selectedSubMaterial = materialType;
     handleInputChange('tabMaterials', data);
   }
 
@@ -65,8 +73,9 @@ class JobMaterials extends PureComponent {
   handleEstimatedMaterialPricingChange(estimatedMaterialPricing) {
     const {data} = {...this.props};
     const {handleInputChange} = {...this.props};
-    const {value} = estimatedMaterialPricing.target;
-    data.estimatedMaterialPricing = value;
+    let {value} = estimatedMaterialPricing.target;
+    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    data.estMaterialPricing = value;
     handleInputChange('tabMaterials', data);
   }
 
@@ -89,7 +98,7 @@ class JobMaterials extends PureComponent {
                 autoComplete="off"
               >
                 <Row className="col-md-12">
-                  <div className="col-md-3 form__form-group">
+                  <div className="col-md-6 form__form-group">
                     <span className="form__form-group-label">Material Type</span>
                     <SelectField
                       input={
@@ -102,9 +111,27 @@ class JobMaterials extends PureComponent {
                       meta={data.reqHandlerMaterials}
                       value={data.selectedMaterial}
                       options={data.allMaterials}
-                      placeholder="Select material"
+                      placeholder="Select Material"
                     />
                   </div>
+                  {/*<div className="col-md-6 form__form-group">*/}
+                  {/*  <span className="form__form-group-label">Sub Material</span>*/}
+                  {/*  <SelectField*/}
+                  {/*    input={*/}
+                  {/*      {*/}
+                  {/*        onChange: this.handleSubMaterialTypeChange,*/}
+                  {/*        name: 'subMaterialType',*/}
+                  {/*        value: data.selectedSubMaterial*/}
+                  {/*      }*/}
+                  {/*    }*/}
+                  {/*    value={data.selectedSubMaterial}*/}
+                  {/*    options={data.allMaterials}*/}
+                  {/*    placeholder="Select Material"*/}
+                  {/*  />*/}
+                  {/*</div>*/}
+                </Row>
+                <Row className="col-md-12">
+                  <hr/>
                 </Row>
                 <Row className="col-md-12">
                   <div className="col-md-6 form__form-group">
@@ -131,27 +158,17 @@ class JobMaterials extends PureComponent {
                 </Row>
                 <Row className="col-md-12">
                   <div className="col-md-6 form__form-group">
-    <span className="form__form-group-label">How many <span style={{
-      fontWeight: 'bold',
-      color: 'black'
-    }}
-    >{data.quantityType === 'ton' ? 'tons' : 'hours'}</span> do you need delivered?</span>
-                  </div>
-                  <div className="col-md-3 form__form-group">
-    <span
-      className="form__form-group-label">Estimated {data.quantityType === 'ton' ? 'Tons' : 'Hours'}</span>
-                    {
-                      /*
-                      <input
-                      name="name"
-                      type="text"
-                      value={name}
-                      onChange={this.handleInputChange}
-                      placeholder="Job Name"
-                      meta={reqHandlerJobName}
-                    />
-                      */
-                    }
+                    <span className="form__form-group-label">How many <span style={{
+                      fontWeight: 'bold',
+                      color: 'black'
+                    }}
+                    >{data.quantityType === 'ton' ? 'tons' : 'hours'}</span>
+                      {data.quantityType === 'ton' ? ' do you need delivered' : ' will be worked'}?
+                      </span>
+                                  </div>
+                                  <div className="col-md-3 form__form-group">
+                    <span
+                      className="form__form-group-label">Estimated {data.quantityType === 'ton' ? 'Tons' : 'Hours'}</span>
                     <TField
                       input={
                         {
@@ -167,32 +184,24 @@ class JobMaterials extends PureComponent {
                     />
                   </div>
                 </Row>
+                <Row className="col-md-12">
+                  <hr/>
+                </Row>
                 <div className="dashboard dashboard__job-create-section-title">
                   <span>Estimated Material Pricing</span> ( for calculation of delivered price )
                 </div>
                 <Row className="col-md-12">
                   <div className="col-md-3 form__form-group">
-    <span
-      className="form__form-group-label">Price / ton
-    </span>
-                    {
-                      /*
-                      <input
-                      name="name"
-                      type="text"
-                      value={name}
-                      onChange={this.handleInputChange}
-                      placeholder="Job Name"
-                      meta={reqHandlerJobName}
-                    />
-                      */
-                    }
+                    <span
+                      className="form__form-group-label">Price / ton
+                    </span>
+
                     <TField
                       input={
                         {
                           onChange: this.handleEstimatedMaterialPricingChange,
                           name: 'estimatedMaterialPricing',
-                          value: data.estimatedMaterialPricing
+                          value: data.estMaterialPricing
                         }
                       }
                       placeholder=""
@@ -202,21 +211,9 @@ class JobMaterials extends PureComponent {
                     />
                   </div>
                   <div className="col-md-3 form__form-group">
-    <span
-      className="form__form-group-label">Total
-    </span>
-                    {
-                      /*
-                      <input
-                      name="name"
-                      type="text"
-                      value={name}
-                      onChange={this.handleInputChange}
-                      placeholder="Job Name"
-                      meta={reqHandlerJobName}
-                    />
-                      */
-                    }
+                    <span
+                      className="form__form-group-label">Total
+                    </span>
                     <text>$</text>
                   </div>
                 </Row>
@@ -249,7 +246,11 @@ JobMaterials.propTypes = {
       value: PropTypes.string,
       label: PropTypes.string
     }),
-    estimatedMaterialPricing: PropTypes.string,
+    selectedSubMaterial: PropTypes.shape({
+      value: PropTypes.string,
+      label: PropTypes.string
+    }),
+    estMaterialPricing: PropTypes.string,
     reqHandlerMaterials: PropTypes.shape({
       touched: PropTypes.bool,
       error: PropTypes.string
