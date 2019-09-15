@@ -8,12 +8,13 @@ import {
   Row,
   Col,
   Card,
-  CardBody
+  CardBody, ButtonToolbar, Button
 } from 'reactstrap';
 import JobMaterials from './JobWizardTabs/JobMaterials';
 import PickupAndDelivery from './JobWizardTabs/PickupAndDelivery';
 import TruckSpecs from './JobWizardTabs/TruckSpecs';
 import HaulRate from './JobWizardTabs/HaulRate';
+import Summary from './JobWizardTabs/Summary';
 import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
@@ -22,6 +23,10 @@ import TField from '../common/TField';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TSpinner from '../common/TSpinner';
 import LookupsService from '../../api/LookupsService';
+import GeoCodingService from "../../api/GeoCodingService";
+import SendJob from "./JobWizardTabs/SendJob";
+import BidService from "../../api/BidService";
+import TwilioService from "../../api/TwilioService";
 
 class JobWizard extends Component {
   constructor(props) {
@@ -36,19 +41,24 @@ class JobWizard extends Component {
         touched: false,
         error: ''
       },
-      reHandlerStartDate: {
+      reqHandlerStartDate: {
         touched: false,
         error: ''
       },
-      reHandlerEndDate: {
+      reqHandlerEndDate: {
         touched: false,
         error: ''
       },
       tabMaterials: {
         quantityType: 'ton',
-        quantity: 34,
+        estMaterialPricing: 0,
+        quantity: 0,
         allMaterials: [],
         selectedMaterial: {
+          value: '',
+          label: ''
+        },
+        selectedSubMaterial: {
           value: '',
           label: ''
         },
@@ -62,6 +72,22 @@ class JobWizard extends Component {
           error: ''
         }
       },
+      tabSend: {
+        sendToMkt: true,
+        sendToFavorites: true,
+        showSendtoFavorites: false,
+        favoriteCompanies: [],
+        favoriteAdminTels: [],
+        nonFavoriteAdminTels: []
+      },
+      tabSummary: {
+        instructions: '',
+        startGPS: null,
+        endGPS: null,
+        avgDistanceEnroute: 0,
+        avgTimeEnroute: 0,
+
+      },
       tabPickupDelivery: {
         allUSstates: [],
         allAddresses: [],
@@ -69,18 +95,18 @@ class JobWizard extends Component {
         selectedEndAddressId: 0,
         startLocationAddressName: '',
         endLocationAddressName: '',
-        endLocationAddress1: '7756 Northcross Drive',
+        endLocationAddress1: '',
         endLocationAddress2: '',
-        endLocationCity: 'Austin',
-        endLocationState: 'Texas',
-        endLocationZip: '78757',
+        endLocationCity: '',
+        endLocationState: '',
+        endLocationZip: '',
         endLocationLatitude: 0,
         endLocationLongitude: 0,
-        startLocationAddress1: '74 Julius Street',
+        startLocationAddress1: '',
         startLocationAddress2: '',
-        startLocationCity: 'Austin',
-        startLocationState: 'Texas',
-        startLocationZip: '78702',
+        startLocationCity: '',
+        startLocationState: '',
+        startLocationZip: '',
         startLocationLatitude: 0,
         startLocationLongitude: 0,
         reqHandlerSameAddresses: {
@@ -139,15 +165,19 @@ class JobWizard extends Component {
       },
       tabHaulRate: {
         payType: 'ton',
-        ratePerPayType: '',
+        ratePerPayType: 0,
         rateCalcOpen: false,
+        avgDistanceEnroute: 0,
+        avgDistanceReturn: 0,
+        avgTimeEnroute: 0,
+        avgTimeReturn: 0,
         rateCalculator: {
           estimateTypeRadio: 'ton',
           rateTypeRadio: 'ton',
-          estimatedTons: '',
+          estimatedTons: 0,
           estimatedHours: 10,
-          ratePerTon: '',
-          ratePerHour: '',
+          ratePerTon: 0,
+          ratePerHour: 0,
           invalidAddress: false,
           truckCapacity: 22,
           travelTimeEnroute: 0,
@@ -168,18 +198,32 @@ class JobWizard extends Component {
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
     this.gotoPage.bind(this);
+    this.setPageNumber = this.setPageNumber.bind(this);
+    this.goBack = this.goBack.bind(this);
     this.firstPage = this.firstPage.bind(this);
+    this.secondPage = this.secondPage.bind(this);
+    this.thirdPage = this.thirdPage.bind(this);
+    this.fourthPage = this.fourthPage.bind(this);
+    this.fifthPage = this.fifthPage.bind(this);
+    this.sixthPage = this.sixthPage.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.validateAndSaveJobDraft = this.validateAndSaveJobDraft.bind(this);
+    this.validateSend = this.validateSend.bind(this);
     this.handleChildInputChange = this.handleChildInputChange.bind(this);
     this.closeNow = this.closeNow.bind(this);
     this.getTruckTypes = this.getTruckTypes.bind(this);
-    this.saveJobDraftOrCopy = this.saveJobDraftOrCopy.bind(this);
+    this.saveJobDraft = this.saveJobDraft.bind(this);
+    this.saveJob = this.saveJob.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
-    this.updateJobView = this.updateJobView.bind(this);
+    // this.updateJobView = this.updateJobView.bind(this);
     this.validateMaterialsPage = this.validateMaterialsPage.bind(this);
     this.clearValidationMaterialsPage = this.clearValidationMaterialsPage.bind(this);
     this.jobStartDateChange = this.jobStartDateChange.bind(this);
     this.jobEndDateChange = this.jobEndDateChange.bind(this);
+    this.isDraftValid = this.isDraftValid.bind(this);
+    this.getStartCoords = this.getStartCoords.bind(this);
+    this.getEndCoords = this.getEndCoords.bind(this);
+    this.clearValidationLabels = this.clearValidationLabels.bind(this);
   }
 
   async componentDidMount() {
@@ -322,15 +366,15 @@ class JobWizard extends Component {
     });
   }
 
-  updateJobView(newJob) {
-    const {updateJobView, updateCopiedJob} = this.props;
-    if (newJob.copiedJob) {
-      updateCopiedJob(newJob);
-    }
-    if (updateJobView) {
-      updateJobView(newJob, null);
-    }
-  }
+  // updateJobView(newJob) {
+  //   const {updateJobView, updateCopiedJob} = this.props;
+  //   if (newJob.copiedJob) {
+  //     updateCopiedJob(newJob);
+  //   }
+  //   if (updateJobView) {
+  //     updateJobView(newJob, null);
+  //   }
+  // }
 
   handleInputChange(e) {
     if (e.target.name === 'name') {
@@ -367,13 +411,424 @@ class JobWizard extends Component {
     }
   }
 
+  async validateAndSaveJobDraft() {
+    this.setState({btnSubmitting: true});
+    let isValid = false;
+    if (!await this.isDraftValid()) {
+      this.setState({btnSubmitting: false});
+      return;
+    } else {
+      isValid = true;
+    }
+    // const {saveJobDraft} = this.props;
+    if (isValid) {
+      await this.saveJobDraft();
+    }
+  }
+
+  async getStartCoords() {
+    const {
+      tabPickupDelivery
+    } = this.state;
+    const startString = `${tabPickupDelivery.startLocationAddress1}, ${tabPickupDelivery.startLocationCity}, ${tabPickupDelivery.startLocationState}, ${tabPickupDelivery.startLocationZip}`;
+    // TODO -> do this without MapBox
+    try {
+      const geoResponseStart = await GeoCodingService.getGeoCode(startString);
+      return geoResponseStart;
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+  }
+
+  async getEndCoords() {
+    const {
+      tabPickupDelivery
+    } = this.state;
+    const endString = `${tabPickupDelivery.endLocationAddress1}, ${tabPickupDelivery.endLocationCity}, ${tabPickupDelivery.endLocationState}, ${tabPickupDelivery.endLocationZip}`;
+    // TODO -> do this without MapBox
+    try {
+      const geoResponseEnd = await GeoCodingService.getGeoCode(endString);
+      return geoResponseEnd;
+    } catch (err) {
+      // console.log(err);
+      return null;
+    }
+  }
+
+  clearValidationLabels() {
+    const {
+      tabPickupDelivery,
+      reqHandlerJobName,
+      reqHandlerStartDate,
+      reqHandlerEndDate
+    } = this.state;
+    tabPickupDelivery.reqHandlerEndAddressName.touched = false;
+    tabPickupDelivery.reqHandlerSameAddresses.touched = false;
+    reqHandlerJobName.touched = false;
+    reqHandlerStartDate.touched = false;
+    reqHandlerEndDate.touched = false;
+    tabPickupDelivery.reqHandlerStartAddress.touched = false;
+    tabPickupDelivery.reqHandlerStartCity.touched = false;
+    tabPickupDelivery.reqHandlerStartZip.touched = false;
+    tabPickupDelivery.reqHandlerStartState.touched = false;
+    tabPickupDelivery.reqHandlerEndCity.touched = false;
+    tabPickupDelivery.reqHandlerEndZip.touched = false;
+    tabPickupDelivery.reqHandlerEndState.touched = false;
+    tabPickupDelivery.reqHandlerEndAddress.touched = false;
+    tabPickupDelivery.reqHandlerStartAddressName.touched = false;
+    this.setState({
+      reqHandlerJobName,
+      reqHandlerStartDate,
+      reqHandlerEndDate,
+      tabPickupDelivery
+    });
+  }
+
+  async validateSend() {
+    this.clearValidationLabels();
+    const {
+      name,
+      jobStartDate,
+      reqHandlerJobName,
+      reqHandlerStartDate,
+      jobEndDate,
+      reqHandlerEndDate,
+    } = {...this.state};
+    let isValid = true;
+    if (!name || name === '') {
+      this.setState({
+        reqHandlerJobName: {
+          ...reqHandlerJobName,
+          touched: true,
+          error: 'Please enter a name for your job'
+        }
+      });
+      isValid = false;
+    }
+
+    const currDate = new Date();
+    if (!jobStartDate) {
+      this.setState({
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    if (jobStartDate && (new Date(jobStartDate).getTime() < currDate.getTime())) {
+      this.setState({
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: 'The start date of the job can not be set in the past or as the current date and time'
+        }
+      });
+      isValid = false;
+    }
+
+    if (!jobEndDate) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() < currDate.getTime())) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'The end date of the job can not be set in the past or as the current date and time'
+        }
+      });
+      isValid = false;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() < new Date(jobStartDate).getTime())) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'The end date of the job can not be set in the past of start date'
+        }
+      });
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  async isDraftValid() {
+    this.clearValidationLabels();
+    const {
+      name,
+      jobStartDate,
+      // reqHandlerTonnage,
+      tabPickupDelivery,
+      reqHandlerJobName,
+      reqHandlerEndAddress,
+      reqHandlerEndState,
+      reqHandlerEndCity,
+      reqHandlerEndZip,
+      reqHandlerSameAddresses,
+      reqHandlerStartAddressName,
+      reqHandlerEndAddressName,
+      reqHandlerStartAddress,
+      reqHandlerStartCity,
+      reqHandlerStartState,
+      reqHandlerStartZip,
+      reqHandlerStartDate,
+    } = {...this.state};
+    let isValid = true;
+    if (!name || name === '') {
+      this.setState({
+        reqHandlerJobName: {
+          ...reqHandlerJobName,
+          touched: true,
+          error: 'Please enter a name for your job'
+        }
+      });
+      isValid = false;
+    }
+
+    const currDate = new Date();
+    if (!jobStartDate) {
+      this.setState({
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    if (jobStartDate && (new Date(jobStartDate).getTime() < currDate.getTime())) {
+      this.setState({
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: 'The start date of the job can not be set in the past or as the current date and time'
+        }
+      });
+      isValid = false;
+    }
+    let goToAddressTab = false;
+
+    // START ADDRESS VALIDATION
+    if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
+      && (tabPickupDelivery.startLocationAddressName.length > 0
+        || tabPickupDelivery.startLocationAddress1.length > 0
+        || tabPickupDelivery.startLocationCity.length > 0
+        || tabPickupDelivery.startLocationZip.length > 0
+        || tabPickupDelivery.startLocationState.length > 0)) {
+      if (tabPickupDelivery.startLocationAddressName.length === 0) {
+        tabPickupDelivery.reqHandlerStartAddressName = {
+          ...reqHandlerStartAddressName,
+          touched: true,
+          error: 'Missing starting address name'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.startLocationAddress1.length === 0) {
+        tabPickupDelivery.reqHandlerStartAddress = {
+          ...reqHandlerStartAddress,
+          touched: true,
+          error: 'Missing starting address field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.startLocationCity.length === 0) {
+        tabPickupDelivery.reqHandlerStartCity = {
+          ...reqHandlerStartCity,
+          touched: true,
+          error: 'Missing starting city field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.startLocationZip.length === 0) {
+        tabPickupDelivery.reqHandlerStartZip = {
+          ...reqHandlerStartZip,
+          touched: true,
+          error: 'Missing starting zip code field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      // only work if tab is 1
+      if (tabPickupDelivery.startLocationState.length === 0) {
+        tabPickupDelivery.reqHandlerStartState = {
+          ...reqHandlerStartState,
+          touched: true,
+          error: 'Missing starting state field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+      debugger;
+      this.setState({tabPickupDelivery});
+    }
+
+    if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
+      && (tabPickupDelivery.startLocationAddressName.length > 0
+        || tabPickupDelivery.startLocationAddress1.length > 0
+        || tabPickupDelivery.startLocationCity.length > 0
+        || tabPickupDelivery.startLocationZip.length > 0
+        || tabPickupDelivery.startLocationState.length > 0)) {
+      const geoResponseStart = await this.getStartCoords();
+      if (!geoResponseStart || geoResponseStart.features.length < 1
+        || geoResponseStart.features[0].relevance < 0.90) {
+        tabPickupDelivery.reqHandlerStartAddress = {
+          ...reqHandlerStartAddress,
+          touched: true,
+          error: 'Start address not found.'
+        };
+        isValid = false;
+        goToAddressTab = true;
+        this.setState({tabPickupDelivery});
+      }
+      if (typeof geoResponseStart.features[0] !== 'undefined') {
+        const coordinates = geoResponseStart.features[0].center;
+        tabPickupDelivery.startLocationLatitude = coordinates[1];
+        tabPickupDelivery.startLocationLongitude = coordinates[0];
+        this.setState({
+          tabPickupDelivery
+        });
+      }
+    }
+
+    if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
+      && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
+      tabPickupDelivery.reqHandlerSameAddresses = {
+        ...reqHandlerSameAddresses,
+        touched: true,
+        error: "Can't have same start and end locations"
+      };
+      isValid = false;
+      goToAddressTab = true;
+      this.setState({
+        tabPickupDelivery
+      });
+    }
+
+    // END ADDRESS VALIDATION
+    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
+      && (tabPickupDelivery.endLocationAddressName.length > 0
+        || tabPickupDelivery.endLocationAddress1.length > 0
+        || tabPickupDelivery.endLocationCity.length > 0
+        || tabPickupDelivery.endLocationZip.length > 0
+        || tabPickupDelivery.endLocationState.length > 0)) {
+      if (tabPickupDelivery.endLocationAddressName.length === 0) {
+        tabPickupDelivery.reqHandlerEndAddressName = {
+          ...reqHandlerEndAddressName,
+          touched: true,
+          error: 'Missing ending address name'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.endLocationAddress1.length === 0) {
+        tabPickupDelivery.reqHandlerEndAddress = {
+          ...reqHandlerEndAddress,
+          touched: true,
+          error: 'Missing ending address field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.endLocationCity.length === 0) {
+        tabPickupDelivery.reqHandlerEndCity = {
+          ...reqHandlerEndCity,
+          touched: true,
+          error: 'Missing ending city field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.endLocationState.length === 0) {
+        tabPickupDelivery.reqHandlerEndState = {
+          ...reqHandlerEndState,
+          touched: true,
+          error: 'Missing ending state field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+
+      if (tabPickupDelivery.endLocationZip.length === 0) {
+        tabPickupDelivery.reqHandlerEndZip = {
+          ...reqHandlerEndZip,
+          touched: true,
+          error: 'Missing ending zip field'
+        };
+        isValid = false;
+        goToAddressTab = true;
+      }
+      this.setState({
+        tabPickupDelivery
+      });
+    }
+
+    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
+      && (tabPickupDelivery.endLocationAddressName.length > 0
+        || tabPickupDelivery.endLocationAddress1.length > 0
+        || tabPickupDelivery.endLocationCity.length > 0
+        || tabPickupDelivery.endLocationZip.length > 0
+        || tabPickupDelivery.endLocationState.length > 0)) {
+      const geoResponseEnd = await this.getEndCoords();
+      if (!geoResponseEnd || geoResponseEnd.features.length < 1
+        || geoResponseEnd.features[0].relevance < 0.90) {
+        tabPickupDelivery.reqHandlerEndAddress = {
+          ...reqHandlerEndAddress,
+          touched: true,
+          error: 'End address not found.'
+        };
+        isValid = false;
+        goToAddressTab = true;
+        this.setState({
+          tabPickupDelivery
+        });
+      }
+      if (typeof geoResponseEnd.features[0] !== 'undefined') {
+        const coordinates = geoResponseEnd.features[0].center;
+        tabPickupDelivery.endLocationLatitude = coordinates[1];
+        tabPickupDelivery.endLocationLongitude = coordinates[0];
+        this.setState({
+          tabPickupDelivery
+        });
+      }
+    }
+    if (goToAddressTab) {
+      this.secondPage();
+    }
+
+    return isValid;
+  }
+
+
   // let's create a list of truck types that we want to save
   async saveJobTrucks(jobId, trucks) {
     const allTrucks = [];
     for (const truck of trucks) {
       const equipmentMaterial = {
         jobId,
-        equipmentTypeId: Number(truck.value)
+        equipmentTypeId: Number(truck)
       };
       allTrucks.push(equipmentMaterial);
     }
@@ -381,156 +836,458 @@ class JobWizard extends Component {
     await JobMaterialsService.createJobEquipments(jobId, allTrucks);
   }
 
-  // Used to either store a Copied or 'Saved' job to the database
-  async saveJobDraftOrCopy(e) {
-    const {copyJob} = this.props;
-    const {profile} = this.state;
-    const d = e;
+
+  async saveJob() {
+    // const {updateJobView} = this.props;
+    this.setState({btnSubmitting: true});
+    // All validations happen by the summary page
+
+    // if (!this.isFormValid()) {
+    //   this.setState({btnSubmitting: false});
+    //   return;
+    // }
+    // const {firstTabData, copyJob} = this.props;
+    const {
+      profile,
+      tabSend,
+      tabPickupDelivery,
+      tabHaulRate,
+      tabMaterials,
+      name,
+      jobEndDate,
+      tabSummary,
+      tabTruckSpecs
+    } = this.state;
+
+    let {jobStartDate} = this.state;
+
+    let status = 'Published';
 
     // start location
     let startAddress = {
       id: null
     };
-    if (d.selectedStartAddressId > 0) {
-      startAddress.id = d.selectedStartAddressId;
-    }
-    if (d.selectedStartAddressId === 0 && d.startLocationAddressName.length > 0) {
+    if (tabPickupDelivery.selectedStartAddressId === 0) {
       const address1 = {
         type: 'Delivery',
-        name: d.startLocationAddressName,
+        name: tabPickupDelivery.startLocationAddressName,
         companyId: profile.companyId,
-        address1: d.startLocationAddress1,
-        address2: d.startLocationAddress2,
-        city: d.startLocationCity,
-        state: d.startLocationState,
-        zipCode: d.startLocationZip,
-        latitude: d.startLocationLatitude,
-        longitude: d.startLocationLongitude,
+        address1: tabPickupDelivery.startLocationAddress1,
+        address2: tabPickupDelivery.startLocationAddress2,
+        city: tabPickupDelivery.startLocationCity,
+        state: tabPickupDelivery.startLocationState,
+        zipCode: tabPickupDelivery.startLocationZip,
+        latitude: tabPickupDelivery.startLocationLatitude,
+        longitude: tabPickupDelivery.startLocationLongitude,
         createdBy: profile.userId,
         createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
         modifiedOn: moment.utc().format()
       };
-      startAddress = await AddressService.createAddress(address1);
+      try {
+        startAddress = await AddressService.createAddress(address1);
+      } catch (err) {
+        console.error(err);
+      }
+      debugger;
+    } else {
+      startAddress.id = tabPickupDelivery.selectedStartAddressId;
     }
     // end location
     let endAddress = {
       id: null
     };
-    if (d.selectedEndAddressId > 0) {
-      endAddress.id = d.selectedEndAddressId;
-    }
-    if (d.selectedEndAddressId === 0 && d.endLocationAddressName.length > 0) {
+    if (tabPickupDelivery.selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
-        name: d.endLocationAddressName,
+        name: tabPickupDelivery.endLocationAddressName,
         companyId: profile.companyId,
-        address1: d.endLocationAddress1,
-        address2: d.endLocationAddress2,
-        city: d.endLocationCity,
-        state: d.endLocationState,
-        zipCode: d.endLocationZip,
-        latitude: d.endLocationLatitude,
-        longitude: d.endLocationLongitude
+        address1: tabPickupDelivery.endLocationAddress1,
+        address2: tabPickupDelivery.endLocationAddress2,
+        city: tabPickupDelivery.endLocationCity,
+        state: tabPickupDelivery.endLocationState,
+        zipCode: tabPickupDelivery.endLocationZip,
+        latitude: tabPickupDelivery.endLocationLatitude,
+        longitude: tabPickupDelivery.endLocationLongitude
       };
-      endAddress = await AddressService.createAddress(address2);
-    }
-
-    let rateType = '';
-    let rate = 0;
-    if (d.selectedRatedHourOrTon && d.selectedRatedHourOrTon.length > 0) {
-      if (d.selectedRatedHourOrTon === 'ton') {
-        rateType = 'Ton';
-        rate = Number(d.rateByTonValue);
-        // d.rateEstimate = d.rateEstimate;
-      } else {
-        rateType = 'Hour';
-        rate = Number(d.rateByHourValue);
-        // d.rateEstimate = d.estimatedHours;
+      try {
+        endAddress = await AddressService.createAddress(address2);
+      } catch (err) {
+        console.error(err);
       }
-    }
-
-    const calcTotal = d.rateEstimate * rate;
-    const rateTotal = Math.round(calcTotal * 100) / 100;
-
-    if (d.jobDate && Object.prototype.toString.call(d.jobDate) === '[object Date]') {
-      d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
-      d.jobDate = moment.tz(
-        d.jobDate,
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format();
-    } else if (d.job.startTime) {
-      d.jobDate = moment(d.job.startTime).format('YYYY-MM-DD HH:mm');
-      d.jobDate = moment.tz(
-        d.jobDate,
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format();
     } else {
-      d.jobDate = '';
+      endAddress.id = tabPickupDelivery.selectedEndAddressId;
     }
 
-    if (!d.truckType || d.truckType.lenght === 0) {
-      d.truckType = '';
-    } else {
-      d.truckType = d.truckType.value;
+    // job p
+    let isFavorited = 0;
+    if (tabSend.showSendtoFavorites) {
+      isFavorited = 1;
     }
 
+    // let rateType = '';
+    // let rate = 0;
+    // if (d.selectedRatedHourOrTon === 'ton') {
+    //   rateType = 'Ton';
+    //   rate = Number(d.rateByTonValue);
+    //   d.rateEstimate = d.rateEstimate;
+    // } else {
+    //   rateType = 'Hour';
+    //   rate = Number(d.rateByHourValue);
+    //   d.rateEstimate = d.rateEstimate;
+    // }
+
+    const rateType = tabHaulRate.payType;
+    const rate = tabHaulRate.ratePerPayType;
+    const amountType = tabMaterials.quantityType;
+    const rateEstimate = tabMaterials.quantity;
+
+    // if both checks (Send to Mkt and Send to All Favorites) are selected
+    if (tabSend.showSendtoFavorites
+      && (tabSend.sendToMkt === true || tabSend.sendToMkt === 1)
+      && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1)
+    ) {
+      status = 'Published And Offered';
+    } else if (tabSend.showSendtoFavorites
+      && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1)) { // sending to All Favorites only
+      status = 'On Offer';
+    } else { // default
+      status = 'Published';
+    }
+
+    // const calcTotal = d.rateEstimate * rate;
+    // const rateTotal = Math.round(calcTotal * 100) / 100;
+
+    jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
+
+    // let newJob = [];
+    // let savedJob = false;
+    // if (job && Object.keys(job).length > 0 && !copyJob) { // Job exists, from a 'Saved' job
+    //   job = {
+    //     id: job.id,
+    //     companiesId: profile.companyId,
+    //     name: d.name,
+    //     status,
+    //     isFavorited,
+    //     startAddress: startAddress.id,
+    //     endAddress: endAddress.id,
+    //     startTime: moment.tz(
+    //       d.jobDate,
+    //       profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+    //     ).utc().format(),
+    //     equipmentType: '',
+    //     numEquipments: d.hourTrucksNumber,
+    //     rateType,
+    //     rate,
+    //     rateEstimate: d.rateEstimate,
+    //     rateTotal,
+    //     notes: d.instructions,
+    //     createdOn: moment.utc().format(),
+    //     modifiedBy: profile.userId,
+    //     modifiedOn: moment.utc().format()
+    //   };
+    //
+    //   newJob = await JobService.updateJob(job);
+    //   savedJob = true;
+    // } else { // new job
     const job = {
       companiesId: profile.companyId,
-      name: d.name,
-      status: 'Saved',
+      name,
+      status,
+      isFavorited,
       startAddress: startAddress.id,
       endAddress: endAddress.id,
-      startTime: d.jobDate,
-      equipmentType: d.truckType,
-      numEquipments: d.hourTrucksNumber,
+      startTime: moment.tz(
+        jobStartDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
+      endTime: moment.tz(
+        jobEndDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
+      numEquipments: tabTruckSpecs.truckQuantity,
       rateType,
       rate,
-      rateEstimate: d.rateEstimate,
-      rateTotal,
-      notes: d.instructions,
+      amountType,
+      rateEstimate,
+      estMaterialPricing: tabMaterials.estMaterialPricing,
+      notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
       modifiedOn: moment.utc().format()
     };
 
-    let newJob = [];
-    if (d.job.id) { // UPDATING 'Saved' JOB
-      newJob = CloneDeep(job);
-      newJob.id = d.job.id;
-      delete newJob.createdBy;
-      delete newJob.createdOn;
-      await JobService.updateJob(newJob);
-    } else { // CREATING NEW 'Saved' JOB
-      newJob = await JobService.createJob(job);
+
+    let newJob;
+    try {
+      newJob = await JobService.createJob(job); // creating new saved job
+      debugger;
+    } catch (err) {
+      console.error(err);
+    }
+    // }
+
+    // return false;
+
+    // add materials
+    if (newJob) {
+      if (Object.keys(tabMaterials.selectedMaterial).length > 0) { // check if there's materials to add
+        const r = await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
+        debugger;
+      }
+      if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
+        const r = await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
+        debugger;
+      }
+    }
+
+    // create bids if this user has favorites:
+    if (tabSend.showSendtoFavorites && tabSend.sendToFavorites && newJob) {
+      const results = [];
+      for (const favCompany of tabSend.favoriteCompanies) {
+        // bid
+        const bid = {
+          jobId: newJob.id,
+          userId: profile.userId,
+          companyCarrierId: favCompany.id,
+          hasCustomerAccepted: 1,
+          hasSchedulerAccepted: 0,
+          status: 'New',
+          rateType,
+          rate: 0,
+          rateEstimate,
+          notes: tabSummary.instructions,
+          createdBy: profile.userId,
+          createdOn: moment.utc().format(),
+          modifiedBy: profile.userId,
+          modifiedOn: moment.utc().format()
+        };
+        results.push(BidService.createBid(bid));
+      }
+      await Promise.all(results);
+
+      // now let's send them an SMS to all favorites
+      const allSms = [];
+      for (const adminIdTel of tabSend.favoriteAdminTels) {
+        if (adminIdTel && this.checkPhoneFormat(adminIdTel)) {
+          // console.log('>>Sending SMS to Jake...');
+          const notification = {
+            to: this.phoneToNumberFormat(adminIdTel),
+            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
+          };
+          allSms.push(TwilioService.createSms(notification));
+        }
+      }
+      await Promise.all(allSms);
+    }
+
+    // if sending to mktplace, let's send SMS to everybody
+    if (tabSend.sendToMkt) {
+      const allBiddersSms = [];
+      for (const bidderTel of tabSend.nonFavoriteAdminTels) {
+        if (bidderTel && this.checkPhoneFormat(bidderTel)) {
+          const notification = {
+            to: this.phoneToNumberFormat(bidderTel),
+            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.net'
+          };
+          allBiddersSms.push(TwilioService.createSms(notification));
+        }
+      }
+    }
+
+    // const {onClose} = this.props;
+    // if (savedJob) { // we have to update the view
+    //   updateJobView(newJob);
+    // }
+    //
+    // if (copyJob) { // we're making a duplicate of a job we have to update the view
+    //   newJob.copiedJob = true;
+    //   updateJobView(newJob);
+    // }
+    this.closeNow();
+  }
+
+  // Used to either store a Copied or 'Saved' job to the database
+  async saveJobDraft() {
+    const {profile, tabPickupDelivery, tabHaulRate, tabMaterials, name, tabTruckSpecs, tabSummary} = this.state;
+    debugger;
+    let {jobStartDate, jobEndDate} = this.state;
+    // start location
+    let startAddress = {
+      id: null
+    };
+    if (tabPickupDelivery.selectedStartAddressId > 0) {
+      startAddress.id = tabPickupDelivery.selectedStartAddressId;
+    }
+    if (tabPickupDelivery.selectedStartAddressId === 0 && tabPickupDelivery.startLocationAddressName.length > 0) {
+      const address1 = {
+        type: 'Delivery',
+        name: tabPickupDelivery.startLocationAddressName,
+        companyId: profile.companyId,
+        address1: tabPickupDelivery.startLocationAddress1,
+        address2: tabPickupDelivery.startLocationAddress2,
+        city: tabPickupDelivery.startLocationCity,
+        state: tabPickupDelivery.startLocationState,
+        zipCode: tabPickupDelivery.startLocationZip,
+        latitude: tabPickupDelivery.startLocationLatitude,
+        longitude: tabPickupDelivery.startLocationLongitude,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+      try {
+        startAddress = await AddressService.createAddress(address1);
+      } catch (err) {
+        console.error(err);
+      }
+      debugger;
+    }
+    // end location
+    let endAddress = {
+      id: null
+    };
+    if (tabPickupDelivery.selectedEndAddressId > 0) {
+      endAddress.id = tabPickupDelivery.selectedEndAddressId;
+    }
+    if (tabPickupDelivery.selectedEndAddressId === 0 && tabPickupDelivery.endLocationAddressName.length > 0) {
+      const address2 = {
+        type: 'Delivery',
+        name: tabPickupDelivery.endLocationAddressName,
+        companyId: profile.companyId,
+        address1: tabPickupDelivery.endLocationAddress1,
+        address2: tabPickupDelivery.endLocationAddress2,
+        city: tabPickupDelivery.endLocationCity,
+        state: tabPickupDelivery.endLocationState,
+        zipCode: tabPickupDelivery.endLocationZip,
+        latitude: tabPickupDelivery.endLocationLatitude,
+        longitude: tabPickupDelivery.endLocationLongitude
+      };
+      try {
+        endAddress = await AddressService.createAddress(address2);
+      } catch (err) {
+        console.error(err);
+      }
+      debugger;
+    }
+
+    // let rateType = '';
+    // let rate = 0;
+    // if (tabHaulRate.payType && tabHaulRate.payType.length > 0) {
+    //   if (tabHaulRate.payType === 'ton') {
+    //     rateType = 'Ton';
+    //     rate = Number(tabHaulRate.ratePerPayType);
+    //     // d.rateEstimate = d.rateEstimate;
+    //   } else {
+    //     rateType = 'Hour';
+    //     rate = Number(d.rateByHourValue);
+    //     // d.rateEstimate = d.estimatedHours;
+    //   }
+    // }
+
+    const rateType = tabHaulRate.payType;
+    const rate = tabHaulRate.ratePerPayType;
+    const amountType = tabMaterials.quantityType;
+    const rateEstimate = tabMaterials.quantity;
+
+
+    // const calcTotal = d.rateEstimate * rate;
+    // const rateTotal = Math.round(calcTotal * 100) / 100;
+
+    if (jobStartDate && Object.prototype.toString.call(jobStartDate) === '[object Date]') {
+      jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
+      jobStartDate = moment.tz(
+        jobStartDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
+    } else {
+      jobStartDate = '';
+    }
+
+    if (jobEndDate && Object.prototype.toString.call(jobStartDate) === '[object Date]') {
+      jobEndDate = moment(jobEndDate).format('YYYY-MM-DD HH:mm');
+      jobEndDate = moment.tz(
+        jobEndDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format();
+    } else {
+      jobEndDate = '';
+    }
+
+    const job = {
+      companiesId: profile.companyId,
+      name,
+      status: 'Saved',
+      startAddress: startAddress.id,
+      endAddress: endAddress.id,
+      startTime: jobStartDate,
+      endTime: jobEndDate,
+      numEquipments: tabTruckSpecs.truckQuantity,
+      estMaterialPricing: tabMaterials.estMaterialPricing,
+      rateType,
+      rate,
+      amountType,
+      rateEstimate,
+      notes: tabSummary.instructions,
+      createdBy: profile.userId,
+      createdOn: moment.utc().format(),
+      modifiedBy: profile.userId,
+      modifiedOn: moment.utc().format()
+    };
+
+    // let newJob = [];
+    // if (d.job.id) { // UPDATING 'Saved' JOB
+    //   newJob = CloneDeep(job);
+    //   newJob.id = d.job.id;
+    //   delete newJob.createdBy;
+    //   delete newJob.createdOn;
+    //   await JobService.updateJob(newJob);
+    // } else { // CREATING NEW 'Saved' JOB
+    //   newJob = await JobService.createJob(job);
+    // }
+    let newJob;
+    try {
+      newJob = await JobService.createJob(job); // creating new saved job
+    } catch (err) {
+      console.error(err);
     }
 
     // add material
     if (newJob) {
-      if (Object.keys(d.selectedMaterials).length > 0) { // check if there's materials to add
-        this.saveJobMaterials(newJob.id, d.selectedMaterials.value);
+      if (Object.keys(tabMaterials.selectedMaterial).length > 0) { // check if there's materials to add
+        const r = await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
+        debugger;
       }
-      if (Object.keys(d.selectedTrucks).length > 0) {
-        this.saveJobTrucks(newJob.id, d.selectedTrucks);
+      if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
+        const r = await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
+        debugger;
       }
     }
 
-    if (d.job.id) { // we're updating a Saved job, reload the view with new data
-      this.updateJobView(newJob);
-      this.closeNow();
-    } else {
-      if (copyJob) { // user clicked on Copy Job, then tried to Save a new Job, reload the view with new data
-        newJob.copiedJob = true;
-        this.updateJobView(newJob);
-        this.closeNow();
-      } else { // user clicked on Save Job, go to new Job's Detail page
-        this.setState({
-          job: newJob,
-          goToJobDetail: true
-        });
-      }
-    }
+    this.closeNow();
+
+    // GO TO NEW JOB
+    // this.setState({
+    //   job: newJob,
+    //   goToJobDetail: true
+    // });
+
+    // if (d.job.id) { // we're updating a Saved job, reload the view with new data
+    //   this.updateJobView(newJob);
+    //   this.closeNow();
+    // } else {
+    //   if (copyJob) { // user clicked on Copy Job, then tried to Save a new Job, reload the view with new data
+    //     newJob.copiedJob = true;
+    //     this.updateJobView(newJob);
+    //     this.closeNow();
+    //   } else { // user clicked on Save Job, go to new Job's Detail page
+    //     this.setState({
+    //       job: newJob,
+    //       goToJobDetail: true
+    //     });
+    //   }
+    // }
   }
 
 
@@ -539,8 +1296,37 @@ class JobWizard extends Component {
     toggle();
   }
 
+  setPageNumber(page) {
+    this.setState({page});
+  }
+
+  goBack() {
+    const {page} = this.state
+    this.setState({page: page - 1});
+  }
+
   firstPage() {
     this.setState({page: 1});
+  }
+
+  secondPage() {
+    this.setState({page: 2});
+  }
+
+  thirdPage() {
+    this.setState({page: 3});
+  }
+
+  fourthPage() {
+    this.setState({page: 4});
+  }
+
+  fifthPage() {
+    this.setState({page: 5});
+  }
+
+  sixthPage() {
+    this.setState({page: 6});
   }
 
   nextPage() {
@@ -579,56 +1365,56 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            onClick={this.setState({page: 1})}
-            className={`wizard__step${page === 1 ? ' wizard__step--active-sub-tabs' : ''}`}
+            onClick={this.firstPage}
+            className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
           >
             <p>Materials</p>
           </div>
-          {/*<div*/}
-          {/*  role="link"*/}
-          {/*  tabIndex="0"*/}
-          {/*  onKeyPress={this.handleKeyPress}*/}
-          {/*  onClick={this.setState({page: 2})}*/}
-          {/*  className={`wizard__step${page === 2 ? ' wizard__step--active-sub-tabs' : ''}`}*/}
-          {/*>*/}
-          {/*  <p>Pickup / Delivery</p>*/}
-          {/*</div>*/}
-          {/*<div*/}
-          {/*  role="link"*/}
-          {/*  tabIndex="0"*/}
-          {/*  // onKeyPress={this.handleKeyPress}*/}
-          {/*  // onClick={this.validateFormOne}*/}
-          {/*  className={`wizard__step${page === 2 ? ' wizard__step--active-sub-tabs' : ''}`}*/}
-          {/*>*/}
-          {/*  <p>Truck Specs</p>*/}
-          {/*</div>*/}
-          {/*<div*/}
-          {/*  role="link"*/}
-          {/*  tabIndex="0"*/}
-          {/*  // onKeyPress={this.handleKeyPress}*/}
-          {/*  // onClick={this.validateFormOne}*/}
-          {/*  className={`wizard__step${page === 2 ? ' wizard__step--active-sub-tabs' : ''}`}*/}
-          {/*>*/}
-          {/*  <p>Haul Rate</p>*/}
-          {/*</div>*/}
-          {/*<div*/}
-          {/*  role="link"*/}
-          {/*  tabIndex="0"*/}
-          {/*  // onKeyPress={this.handleKeyPress}*/}
-          {/*  // onClick={this.validateFormOne}*/}
-          {/*  className={`wizard__step${page === 2 ? ' wizard__step--active-sub-tabs' : ''}`}*/}
-          {/*>*/}
-          {/*  <p>Summary</p>*/}
-          {/*</div>*/}
-          {/*<div*/}
-          {/*  role="link"*/}
-          {/*  tabIndex="0"*/}
-          {/*  // onKeyPress={this.handleKeyPress}*/}
-          {/*  // onClick={this.validateFormOne}*/}
-          {/*  className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}*/}
-          {/*>*/}
-          {/*  <p>Send</p>*/}
-          {/*</div>*/}
+          <div
+            role="link"
+            tabIndex="0"
+            onKeyPress={this.handleKeyPress}
+            onClick={this.secondPage}
+            className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
+          >
+            <p>Pickup / Delivery</p>
+          </div>
+          <div
+            role="link"
+            tabIndex="0"
+            onKeyPress={this.handleKeyPress}
+            onClick={this.thirdPage}
+            className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
+          >
+            <p>Truck Specs</p>
+          </div>
+          <div
+            role="link"
+            tabIndex="0"
+            onKeyPress={this.handleKeyPress}
+            onClick={this.fourthPage}
+            className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}
+          >
+            <p>Haul Rate</p>
+          </div>
+          <div
+            role="link"
+            tabIndex="0"
+            onKeyPress={this.handleKeyPress}
+            onClick={this.fifthPage}
+            className={`wizard__step${page === 5 ? ' wizard__step--active' : ''}`}
+          >
+            <p>Summary</p>
+          </div>
+          <div
+            role="link"
+            tabIndex="0"
+            onKeyPress={this.handleKeyPress}
+            // onClick={this.sixthPage}
+            className={`wizard__step${page === 6 ? ' wizard__step--active' : ''}`}
+          >
+            <p>Send</p>
+          </div>
         </div>
       );
     }
@@ -800,14 +1586,16 @@ class JobWizard extends Component {
   }
 
   render() {
-    const {equipmentId, companyId, editDriverId, updateJobView, copyJob} = this.props;
+    const {equipmentId, companyId, editDriverId, updateJobView, copyJob, toggle} = this.props;
     const {
       page,
       loaded,
       tabMaterials,
       tabPickupDelivery,
       tabTruckSpecs,
-      tabHaulRate
+      tabHaulRate,
+      tabSummary,
+      tabSend
     } = this.state;
     if (loaded) {
       return (
@@ -831,59 +1619,102 @@ class JobWizard extends Component {
                       <div className="dashboard dashboard__job-create-section">
                         {this.renderJobDetails()}
                       </div>
-                      {/* onSubmit={this.nextPage} */}
-                      {/*{page === 1*/}
-                      {/*&& (*/}
-                      {/*  <JobCreateFormOne*/}
-                      {/*    p={page}*/}
-                      {/*    onClose={this.closeNow}*/}
-                      {/*    gotoSecond={this.saveAndGoToSecondPage}*/}
-                      {/*    firstTabData={this.getFirstTabInfo}*/}
-                      {/*    validateOnTabClick={validateFormOne}*/}
-                      {/*    validateRes={this.validateFormOneRes}*/}
-                      {/*    saveJobDraftOrCopy={this.saveJobDraftOrCopy}*/}
-                      {/*    updateJobView={this.updateJobView}*/}
-                      {/*    copyJob={copyJob}*/}
-                      {/*  />*/}
-                      {/*)}*/}
-                      {/*{page === 2*/}
-                      {/*&& (*/}
-                      {/*  <JobCreateFormTwo*/}
-                      {/*    p={page}*/}
-                      {/*    onClose={this.closeNow}*/}
-                      {/*    firstTabData={this.getFirstTabInfo}*/}
-                      {/*    jobId={job.id}*/}
-                      {/*    saveJobDraftOrCopy={this.saveJobDraftOrCopy}*/}
-                      {/*    updateJobView={this.updateJobView}*/}
-                      {/*    copyJob={copyJob}*/}
-                      {/*  />*/}
-                      {/*)}*/}
-                      {/*/!* onSubmit={onSubmit} *!/*/}
                     </div>
                     <div className="dashboard dashboard__job-create-section">
-                      {/*{this.renderTabs()}*/}
-                      {page === 2
-                      && <JobMaterials
-                        data={tabMaterials}
-                        handleInputChange={this.handleChildInputChange}
-                      />}
-                      {page === 2
-                      && <PickupAndDelivery
-                        data={tabPickupDelivery}
-                        handleInputChange={this.handleChildInputChange}
-                      />}
-                      {page === 2
-                      && <TruckSpecs
-                        data={tabTruckSpecs}
-                        handleInputChange={this.handleChildInputChange}
-                      />}
-                      {page === 1
-                      && <HaulRate
-                        data={tabHaulRate}
-                        tabMaterials={tabMaterials}
-                        tabPickupDelivery={tabPickupDelivery}
-                        handleInputChange={this.handleChildInputChange}
-                      />}
+                      <div className="wizard">
+
+                        {this.renderTabs()}
+                        <div className="wizard__form-wrapper">
+
+                          {page === 1
+                          && <JobMaterials
+                            data={tabMaterials}
+                            handleInputChange={this.handleChildInputChange}
+                          />}
+                          {page === 2
+                          && <PickupAndDelivery
+                            data={tabPickupDelivery}
+                            handleInputChange={this.handleChildInputChange}
+                          />}
+                          {page === 3
+                          && <TruckSpecs
+                            data={tabTruckSpecs}
+                            handleInputChange={this.handleChildInputChange}
+                          />}
+                          {page === 4
+                          && <HaulRate
+                            data={tabHaulRate}
+                            tabMaterials={tabMaterials}
+                            tabPickupDelivery={tabPickupDelivery}
+                            handleInputChange={this.handleChildInputChange}
+                          />}
+                          {page === 5
+                          && <Summary
+                            tabHaulRate={tabHaulRate}
+                            tabMaterials={tabMaterials}
+                            tabPickupDelivery={tabPickupDelivery}
+                            tabTruckSpecs={tabTruckSpecs}
+                            data={tabSummary}
+                            closeModal={this.closeNow}
+                            saveJob={this.validateAndSaveJobDraft}
+                            goBack={this.goBack}
+                            goToSend={this.sixthPage}
+                            setPageNumber={this.setPageNumber}
+                            handleInputChange={this.handleChildInputChange}
+                            validateSend={this.validateSend}
+                          />}
+                          {page === 6
+                          && <SendJob
+                            data={tabSend}
+                            handleInputChange={this.handleChildInputChange}
+                            tabMaterials={tabMaterials}
+                            saveJob={this.saveJob}
+                            onClose={this.closeNow}
+                          />}
+                        </div>
+                      </div>
+                      {page < 5 &&
+                      <React.Fragment>
+                        <Row className="col-md-12">
+                          <hr/>
+                        </Row>
+                        <Row className="col-md-12">
+                          <ButtonToolbar className="col-md-6 wizard__toolbar">
+                            <Button color="minimal" className="btn btn-outline-secondary"
+                                    type="button"
+                                    onClick={this.closeNow}
+                            >
+                              Cancel
+                            </Button>
+                          </ButtonToolbar>
+                          <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                            <Button
+                              color="outline-primary"
+                              className="next"
+                              onClick={this.validateAndSaveJobDraft}
+                            >
+                              Save Job & Close
+                            </Button>
+                            {page !== 1 &&
+                            <Button color="outline-primary" type="button"
+                                    className="previous"
+                                    onClick={this.goBack}
+                            >
+                              Back
+                            </Button>
+                            }
+                            <Button
+                              color="primary"
+                              className="next"
+                              onClick={this.nextPage}
+                            >
+                              Next
+                            </Button>
+                          </ButtonToolbar>
+                        </Row>
+                      </React.Fragment>
+                      }
+
                     </div>
                   </div>
                 </Card>
