@@ -53,6 +53,18 @@ class CompanyService extends AgentService {
     const response = await this.post(url, filters);
     return (response);
   }
+
+  static async getFavoritesByUserId(userId, filters) {
+    const url = `/companies/user/${userId}/favorites`;
+    const response = await this.post(url, filters);
+    return (response);
+  }
+
+  static async getNonFavoritesByUserId(userId, filters) {
+    const url = `/companies/user/${userId}/nonfavorites`;
+    const response = await this.post(url, filters);
+    return (response);
+  }
 }
 
 export default CompanyService;

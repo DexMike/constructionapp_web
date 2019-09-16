@@ -37,6 +37,7 @@ class JobCreateFormTwo extends PureComponent {
       btnSubmitting: false,
       profile: null,
       job: [],
+      filters: null,
       reqCheckABox: {
         touched: false,
         error: ''
@@ -61,7 +62,6 @@ class JobCreateFormTwo extends PureComponent {
 
     const d = firstTabData();
     let favoriteAdminTels = [];
-    let nonFavoriteAdminTels = [];
     // does this customer has favorites?
     const profile = await ProfileService.getProfile();
     // get only those that match criteria
@@ -78,16 +78,11 @@ class JobCreateFormTwo extends PureComponent {
       material: d.selectedMaterials.value
     };
 
-    const allCompanies = await CompanyService.getFavoritesNonFavoritesCompaniesByUserId(
+    // get favorite companies for this carrier
+    const favoriteCompanies = await CompanyService.getFavoritesByUserId(
       profile.userId,
       filters
     );
-
-    // get favorite companies for this carrier
-    const favoriteCompanies = allCompanies.filter(x => x.isFavorite === 'Favorite');
-
-    // get non favorite companies for this carrier
-    const biddersIdsNotFavorites = allCompanies.filter(x => x.isFavorite === 'Non Favorite');
 
     // are there any favorite companies?
     if (favoriteCompanies.length > 0) {
@@ -100,22 +95,13 @@ class JobCreateFormTwo extends PureComponent {
       showSendtoFavorites = true;
     }
 
-    if (biddersIdsNotFavorites.length > 0) {
-      // get the phone numbers from the admins
-      nonFavoriteAdminTels = biddersIdsNotFavorites.map(x => (x.adminPhone ? x.adminPhone : null));
-      // remove null values
-      Object.keys(nonFavoriteAdminTels).forEach(
-        key => (nonFavoriteAdminTels[key] === null) && delete nonFavoriteAdminTels[key]
-      );
-    }
-
     this.setState({
       showSendtoFavorites,
       favoriteCompanies,
       favoriteAdminTels,
-      nonFavoriteAdminTels,
       profile,
       job,
+      filters,
       loaded: true
     });
   }
@@ -209,7 +195,7 @@ class JobCreateFormTwo extends PureComponent {
       sendToFavorites,
       sendToMkt,
       favoriteAdminTels,
-      nonFavoriteAdminTels,
+      filters,
       profile
     } = this.state;
     let { job } = this.state;
@@ -406,12 +392,36 @@ class JobCreateFormTwo extends PureComponent {
           allSms.push(TwilioService.createSms(notification));
         }
       }
-      await Promise.all(allSms);
+      try {
+        await Promise.all(allSms);
+      } catch (e) {
+        // console.log(e);
+      }
     }
 
     // if sending to mktplace, let's send SMS to everybody
     if (sendToMkt) {
       const allBiddersSms = [];
+      let nonFavoriteAdminTels = [];
+
+      // Get non-favorites carriers admin phone numbers based on each
+      // carrier company_settings.operatingRange setting.
+      // startAddressId is used to calculate distance between carrier address and job start address.
+      // If distance <= operatingRange then we sent the SMS
+      filters.startAddressId = startAddress.id;
+      const nonFavoriteCarriers = await CompanyService.getNonFavoritesByUserId(
+        profile.userId,
+        filters
+      );
+      if (nonFavoriteCarriers.length > 0) {
+        // get the phone numbers from the admins
+        nonFavoriteAdminTels = nonFavoriteCarriers.map(x => (x.adminPhone ? x.adminPhone : null));
+        // remove null values
+        Object.keys(nonFavoriteAdminTels).forEach(
+          key => (nonFavoriteAdminTels[key] === null) && delete nonFavoriteAdminTels[key]
+        );
+      }
+
       for (const bidderTel of nonFavoriteAdminTels) {
         if (bidderTel && this.checkPhoneFormat(bidderTel)) {
           const notification = {
@@ -420,6 +430,11 @@ class JobCreateFormTwo extends PureComponent {
           };
           allBiddersSms.push(TwilioService.createSms(notification));
         }
+      }
+      try {
+        await Promise.all(allBiddersSms);
+      } catch (e) {
+        // console.log(e);
       }
     }
 
@@ -538,8 +553,7 @@ class JobCreateFormTwo extends PureComponent {
                       />
                     </div>
                     <div
-                      // className="col-md-6 form__form-group"
-                      className={showSendtoFavorites ? 'col-md-11 form__form-group' : 'col-md-11 form__form-group'}
+                      className="col-md-11 form__form-group"
                     >
                       <h3 className="subhead">
                         Send this job to the Trelar Marketplace
@@ -570,7 +584,7 @@ class JobCreateFormTwo extends PureComponent {
                       className="primaryButton"
                       loading={btnSubmitting}
                       loaderSize={10}
-                      disabled={!sendToMkt&&!sendToFavorites}
+                      disabled={!sendToMkt && !sendToFavorites}
                       bntText="Send Job"
                     />
                   </ButtonToolbar>
