@@ -27,6 +27,7 @@ import GeoCodingService from "../../api/GeoCodingService";
 import SendJob from "./JobWizardTabs/SendJob";
 import BidService from "../../api/BidService";
 import TwilioService from "../../api/TwilioService";
+import UserUtils from "../../api/UtilsService";
 
 class JobWizard extends Component {
   constructor(props) {
@@ -62,7 +63,6 @@ class JobWizard extends Component {
           value: '',
           label: ''
         },
-        estimatedMaterialPricing: '',
         reqHandlerMaterials: {
           touched: false,
           error: ''
@@ -186,14 +186,10 @@ class JobWizard extends Component {
           unloadTime: 0
         }
       },
-      // old stuff
       page: 1,
       job: [],
       loaded: false,
-      validateFormOne: false,
-      firstTabInfo: {},
       profile: [],
-      goToJobDetail: false
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -214,7 +210,6 @@ class JobWizard extends Component {
     this.getTruckTypes = this.getTruckTypes.bind(this);
     this.saveJobDraft = this.saveJobDraft.bind(this);
     this.saveJob = this.saveJob.bind(this);
-    this.renderGoTo = this.renderGoTo.bind(this);
     // this.updateJobView = this.updateJobView.bind(this);
     this.validateMaterialsPage = this.validateMaterialsPage.bind(this);
     this.clearValidationMaterialsPage = this.clearValidationMaterialsPage.bind(this);
@@ -224,6 +219,8 @@ class JobWizard extends Component {
     this.getStartCoords = this.getStartCoords.bind(this);
     this.getEndCoords = this.getEndCoords.bind(this);
     this.clearValidationLabels = this.clearValidationLabels.bind(this);
+    this.checkPhoneFormat = this.checkPhoneFormat.bind(this);
+    this.phoneToNumberFormat = this.phoneToNumberFormat.bind(this);
   }
 
   async componentDidMount() {
@@ -454,6 +451,11 @@ class JobWizard extends Component {
       // console.log(err);
       return null;
     }
+  }
+
+  phoneToNumberFormat(phone) {
+    const num = Number(phone.replace(/\D/g, ''));
+    return num;
   }
 
   clearValidationLabels() {
@@ -836,6 +838,13 @@ class JobWizard extends Component {
     await JobMaterialsService.createJobEquipments(jobId, allTrucks);
   }
 
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(UserUtils.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    return !(areaCode3.includes('555') || areaCode4.includes('1555'));
+  }
+
 
   async saveJob() {
     // const {updateJobView} = this.props;
@@ -859,6 +868,7 @@ class JobWizard extends Component {
       tabTruckSpecs
     } = this.state;
 
+    debugger;
     let {jobStartDate} = this.state;
 
     let status = 'Published';
@@ -1344,14 +1354,6 @@ class JobWizard extends Component {
     this.setState({page: pageNumber});
   }
 
-  renderGoTo() {
-    const {goToJobDetail, job} = this.state;
-    if (goToJobDetail) {
-      return <Redirect push to={`/jobs/save/${job.id}`}/>;
-    }
-    return false;
-  }
-
   renderTabs() {
     const {
       page,
@@ -1668,7 +1670,9 @@ class JobWizard extends Component {
                             data={tabSend}
                             handleInputChange={this.handleChildInputChange}
                             tabMaterials={tabMaterials}
-                            saveJob={this.saveJob}
+                            saveJob={this.validateAndSaveJobDraft}
+                            goBack={this.goBack}
+                            sendJob={this.saveJob}
                             onClose={this.closeNow}
                           />}
                         </div>

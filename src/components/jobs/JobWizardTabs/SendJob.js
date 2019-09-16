@@ -141,218 +141,13 @@ class SendJob extends PureComponent {
     });
   }
 
-  renderDeliveryCosts() {
-    const {data, tabMaterials} = {...this.props};
-    const {rateCalculator} = {...data};
-
-
-    let haulCostPerTonHour = 0;
-    let oneWayCostPerTonHourPerMile = 0;
-    let deliveredPricePerTon = 0;
-    let deliveredPriceJob = 0;
-    let estimatedCostForJob = 0;
-    const sufficientInfo = (parseFloat(data.avgTimeEnroute) + parseFloat(data.avgTimeReturn)) * parseFloat(data.ratePerPayType);
-    if (sufficientInfo > 0) {
-      haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
-      oneWayCostPerTonHourPerMile = (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2);
-      deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
-      estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
-      debugger;
-      if (tabMaterials.quantityType === 'ton') {
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
-      } else {
-        const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-          + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-        const numTrips = Math.floor(parseFloat(data.rateCalculator.estimatedHours) / oneLoad);
-        const estimatedTons = (numTrips * parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
-        deliveredPriceJob = (deliveredPricePerTon * estimatedTons).toFixed(2);
-      }
-    }
-
-    return (
-      <React.Fragment>
-        <Row className="col-md-12">
-          <hr/>
-        </Row>
-        <Row className="col-md-12">
-          <Row className="col-md-12">
-            {tabMaterials.estMaterialPricing > 0 &&
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12 ">
-                <span className="form__form-group-label">Delivered Price</span>
-              </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
-              </Row>
-            </div>
-            }
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12 ">
-                <span className="form__form-group-label">Haul Costs</span>
-              </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
-              </Row>
-            </div>
-          </Row>
-          <Row className="col-md-12">
-            {tabMaterials.estMaterialPricing > 0 &&
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label">Material Price per ton</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
-                    >
-                      {tabMaterials.estMaterialPricing}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label">Delivered Price per ton</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
-                    >
-                      {deliveredPricePerTon}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label">Delivered Price for job</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
-                    >
-                      {deliveredPriceJob}
-                    </span>
-                </div>
-              </Row>
-            </div>
-            }
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label">One way cost / {tabMaterials.quantityType} / mile</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
-                    >
-                      {oneWayCostPerTonHourPerMile}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label">Haul Cost per {tabMaterials.quantityType}</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
-                    >
-                      {haulCostPerTonHour}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label">Estimated Cost for Job</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
-                    >
-                      {estimatedCostForJob}
-                    </span>
-                </div>
-              </Row>
-            </div>
-          </Row>
-        </Row>
-      </React.Fragment>
-    );
-  }
-
   render() {
     const {
       reqCheckABox,
       loaded,
       btnSubmitting
     } = this.state;
-    const {data, saveJob, onClose} = {...this.props};
+    const {data, saveJob, sendJob, goBack, onClose} = {...this.props};
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -410,36 +205,47 @@ class SendJob extends PureComponent {
                   </div>
                   <br/>
                 </Row>
-
-                <Row className="col-md-12">
-                  <hr/>
-                </Row>
-
-                <Row className="col-md-12 ">
-                  <ButtonToolbar className="col-md-6 wizard__toolbar">
-                    <Button
-                      color="minimal"
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      onClick={onClose()}
-                    >
-                      Cancel
-                    </Button>
-                  </ButtonToolbar>
-                  <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                    <TSubmitButton
-                      onClick={saveJob}
-                      className="primaryButton"
-                      loading={btnSubmitting}
-                      loaderSize={10}
-                      disabled={!data.sendToMkt && !data.sendToFavorites}
-                      bntText="Send Job"
-                    />
-                  </ButtonToolbar>
-                  <TSpinner loading={false}/>
-                </Row>
               </form>
-              {this.renderDeliveryCosts()}
+              <Row className="col-md-12">
+                <hr/>
+              </Row>
+
+              <Row className="col-md-12 ">
+                <ButtonToolbar className="col-md-4 wizard__toolbar">
+                  <Button
+                    color="minimal"
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </Button>
+                </ButtonToolbar>
+                <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                  <Button color="primary" type="button"
+                          className="previous"
+                          onClick={goBack}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    color="outline-primary"
+                    className="next"
+                    onClick={saveJob}
+                  >
+                    Save Job & Close
+                  </Button>
+                  <TSubmitButton
+                    onClick={sendJob}
+                    className="primaryButton"
+                    loading={btnSubmitting}
+                    loaderSize={10}
+                    disabled={!data.sendToMkt && !data.sendToFavorites}
+                    bntText="Send Job"
+                  />
+                </ButtonToolbar>
+                <TSpinner loading={false}/>
+              </Row>
             </CardBody>
           </Card>
         </Col>

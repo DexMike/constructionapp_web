@@ -41,8 +41,7 @@ class Summary extends PureComponent {
       truckSpecsTabValidations,
       haulRateTabValidations,
       startAddressValidations,
-      endAddressValidations,
-      validateTopForm
+      endAddressValidations
     } = {...this.state};
     let endString;
     if (tabPickupDelivery.selectedEndAddressId > 0) {
@@ -76,7 +75,6 @@ class Summary extends PureComponent {
       data.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
       data.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
     }
-    // validateTopForm = await validateSend();
     handleInputChange('tabSummary', data);
     materialTabValidations = this.validateMaterialsTab();
     truckSpecsTabValidations = this.validateTruckSpecsTab();
@@ -108,7 +106,6 @@ class Summary extends PureComponent {
   validateMaterialsTab() {
     const {tabMaterials} = {...this.props};
     const val = [];
-    debugger;
     if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.value === '') {
       val.push('Material Type');
     }
@@ -421,6 +418,7 @@ class Summary extends PureComponent {
           <div className="col-md-5 form__form-group">
                     <span style={{
                       marginLeft: 40,
+                      marginTop: -15,
                       position: 'absolute'
                     }}
                     >
@@ -526,6 +524,209 @@ class Summary extends PureComponent {
     );
   }
 
+  renderDeliveryCosts() {
+    const {tabHaulRate, tabMaterials} = {...this.props};
+    const {rateCalculator} = {...tabHaulRate};
+
+    let haulCostPerTonHour = 0;
+    let oneWayCostPerTonHourPerMile = 0;
+    let deliveredPricePerTon = 0;
+    let deliveredPriceJob = 0;
+    let estimatedCostForJob = 0;
+    const sufficientInfo = (parseFloat(tabHaulRate.avgTimeEnroute) + parseFloat(tabHaulRate.avgTimeReturn)) * parseFloat(tabHaulRate.ratePerPayType);
+    if (sufficientInfo > 0) {
+      haulCostPerTonHour = ((sufficientInfo) / parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
+      oneWayCostPerTonHourPerMile = (parseFloat(haulCostPerTonHour) / parseFloat(tabHaulRate.avgDistanceEnroute)).toFixed(2);
+      deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
+      estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
+      if (tabMaterials.quantityType === 'ton') {
+        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
+      } else {
+        const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
+          + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
+        const numTrips = Math.floor(parseFloat(tabHaulRate.rateCalculator.estimatedHours) / oneLoad);
+        const estimatedTons = (numTrips * parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
+        deliveredPriceJob = (deliveredPricePerTon * estimatedTons).toFixed(2);
+      }
+    }
+    debugger;
+    return (
+      <React.Fragment>
+        <Row className="col-md-12">
+          <hr/>
+        </Row>
+        <Row className="col-md-12">
+          <Row className="col-md-12">
+            {tabMaterials.estMaterialPricing > 0 &&
+            <div className="col-md-6 form__form-group">
+              <Row className="col-md-12 ">
+                <span className="form__form-group-label">Delivered Price</span>
+              </Row>
+              <Row className="col-md-12" style={{marginTop: -20}}>
+                <hr/>
+              </Row>
+            </div>
+            }
+            <div className="col-md-6 form__form-group">
+              <Row className="col-md-12 ">
+                <span className="form__form-group-label">Haul Costs</span>
+              </Row>
+              <Row className="col-md-12" style={{marginTop: -20}}>
+                <hr/>
+              </Row>
+            </div>
+          </Row>
+          <Row className="col-md-12">
+            {tabMaterials.estMaterialPricing > 0 &&
+            <div className="col-md-6 form__form-group">
+              <Row className="col-md-12">
+                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                  <span className="form__form-group-label">Material Price per ton</span>
+                </div>
+                <div className="col-md-1 form__form-group">
+                    <span style={{
+                      marginLeft: 40,
+                      position: 'absolute'
+                    }}
+                    >
+                      $
+                    </span>
+                </div>
+                <div className="col-md-3 form__form-group">
+                    <span style={{
+                      marginLeft: 30,
+                      position: 'absolute'
+                    }}
+                    >
+                      {tabMaterials.estMaterialPricing}
+                    </span>
+                </div>
+              </Row>
+              <Row className="col-md-12">
+                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                  <span className="form__form-group-label">Delivered Price per ton</span>
+                </div>
+                <div className="col-md-1 form__form-group">
+                    <span style={{
+                      marginLeft: 40,
+                      position: 'absolute'
+                    }}
+                    >
+                      $
+                    </span>
+                </div>
+                <div className="col-md-3 form__form-group">
+                    <span style={{
+                      marginLeft: 30,
+                      position: 'absolute'
+                    }}
+                    >
+                      {deliveredPricePerTon}
+                    </span>
+                </div>
+              </Row>
+              <Row className="col-md-12">
+                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                  <span className="form__form-group-label">Delivered Price for job</span>
+                </div>
+                <div className="col-md-1 form__form-group">
+                    <span style={{
+                      marginLeft: 40,
+                      position: 'absolute'
+                    }}
+                    >
+                      $
+                    </span>
+                </div>
+                <div className="col-md-3 form__form-group">
+                    <span style={{
+                      marginLeft: 30,
+                      position: 'absolute'
+                    }}
+                    >
+                      {deliveredPriceJob}
+                    </span>
+                </div>
+              </Row>
+            </div>
+            }
+            <div className="col-md-6 form__form-group">
+              <Row className="col-md-12">
+                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                  <span className="form__form-group-label">One way cost / {tabMaterials.quantityType} / mile</span>
+                </div>
+                <div className="col-md-1 form__form-group">
+                    <span style={{
+                      marginLeft: 40,
+                      position: 'absolute'
+                    }}
+                    >
+                      $
+                    </span>
+                </div>
+                <div className="col-md-3 form__form-group">
+                    <span style={{
+                      marginLeft: 30,
+                      position: 'absolute'
+                    }}
+                    >
+                      {oneWayCostPerTonHourPerMile}
+                    </span>
+                </div>
+              </Row>
+              <Row className="col-md-12">
+                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                  <span className="form__form-group-label">Haul Cost per {tabMaterials.quantityType}</span>
+                </div>
+                <div className="col-md-1 form__form-group">
+                    <span style={{
+                      marginLeft: 40,
+                      position: 'absolute'
+                    }}
+                    >
+                      $
+                    </span>
+                </div>
+                <div className="col-md-3 form__form-group">
+                    <span style={{
+                      marginLeft: 30,
+                      position: 'absolute'
+                    }}
+                    >
+                      {haulCostPerTonHour}
+                    </span>
+                </div>
+              </Row>
+              <Row className="col-md-12">
+                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                  <span className="form__form-group-label">Estimated Cost for Job</span>
+                </div>
+                <div className="col-md-1 form__form-group">
+                    <span style={{
+                      marginLeft: 40,
+                      position: 'absolute'
+                    }}
+                    >
+                      $
+                    </span>
+                </div>
+                <div className="col-md-3 form__form-group">
+                    <span style={{
+                      marginLeft: 30,
+                      position: 'absolute'
+                    }}
+                    >
+                      {estimatedCostForJob}
+                    </span>
+                </div>
+              </Row>
+            </div>
+          </Row>
+        </Row>
+      </React.Fragment>
+    );
+  }
+
   renderValidationBox(missingFields, pageNumber) {
     const {setPageNumber} = {...this.props};
     return (
@@ -557,15 +758,13 @@ class Summary extends PureComponent {
       truckSpecsTabValidations,
       haulRateTabValidations,
       startAddressValidations,
-      endAddressValidations,
-      validateTopForm
+      endAddressValidations
     } = {...this.state};
     const sendIsDisabled = materialTabValidations.length > 0
       || truckSpecsTabValidations.length > 0
       || haulRateTabValidations.length > 0
       || startAddressValidations.length > 0
-      || endAddressValidations.length > 0
-      || !validateTopForm;
+      || endAddressValidations.length > 0;
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -581,6 +780,10 @@ class Summary extends PureComponent {
                   <hr/>
                 </Row>
                 {this.renderMaterialHaulRate()}
+                <Row className="col-md-12" style={{marginTop: 15}}>
+                  <hr/>
+                </Row>
+                {this.renderDeliveryCosts()}
                 <Row className="col-md-12" style={{marginTop: 15}}>
                   <hr/>
                 </Row>

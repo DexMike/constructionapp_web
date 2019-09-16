@@ -147,6 +147,7 @@ class PickupAndDelivery extends PureComponent {
     const {handleInputChange} = {...this.props};
     data.selectedStartAddressId = 0;
     handleInputChange('tabPickupDelivery', data);
+    debugger;
   }
 
   toggleNewEndAddress() {
@@ -243,92 +244,95 @@ class PickupAndDelivery extends PureComponent {
                       Or create a new one:
                     </small>
                     <div
-                      id="starting"
-                      className={`${data.selectedStartAddressId === 0 ? 'shown' : 'fifty'}`}
-                      role="link"
-                      tabIndex="0"
                       onKeyPress={this.handleKeyPress}
-                      onClick={this.toggleNewStartAddress}
+                      onClick={() => this.toggleNewStartAddress()}
+                      role="link"
+                      tabIandex="0"
                     >
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleStartAddressChange,
-                              name: 'startLocationAddressName',
-                              value: data.startLocationAddressName
+                      <div
+                        id="starting"
+                        className={`${data.selectedStartAddressId === 0 ? 'shown' : 'fifty'}`}
+                      >
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleStartAddressChange,
+                                name: 'startLocationAddressName',
+                                value: data.startLocationAddressName
+                              }
                             }
-                          }
-                          placeholder="Address Name"
-                          type="text"
-                          meta={data.reqHandlerStartAddressName}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleStartAddressChange,
-                              name: 'startLocationAddress1',
-                              value: data.startLocationAddress1
+                            placeholder="Address Name"
+                            type="text"
+                            meta={data.reqHandlerStartAddressName}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleStartAddressChange,
+                                name: 'startLocationAddress1',
+                                value: data.startLocationAddress1
+                              }
                             }
-                          }
-                          placeholder="Address 1"
-                          type="text"
-                          meta={data.reqHandlerStartAddress}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <input
-                          name="startLocationAddress2"
-                          type="text"
-                          value={data.startLocationAddress2}
-                          onChange={this.handleStartAddressChange}
-                          placeholder="Address 2"
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleStartAddressChange,
-                              name: 'startLocationCity',
-                              value: data.startLocationCity
+                            placeholder="Address 1"
+                            type="text"
+                            meta={data.reqHandlerStartAddress}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <input
+                            name="startLocationAddress2"
+                            type="text"
+                            value={data.startLocationAddress2}
+                            onChange={this.handleStartAddressChange}
+                            placeholder="Address 2"
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleStartAddressChange,
+                                name: 'startLocationCity',
+                                value: data.startLocationCity
+                              }
                             }
-                          }
-                          placeholder="City"
-                          type="text"
-                          meta={data.reqHandlerStartCity}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <SelectField
-                          input={
-                            {
-                              onChange: this.handleStartStateChange,
-                              name: 'startLocationState',
-                              value: data.startLocationState
+                            placeholder="City"
+                            type="text"
+                            meta={data.reqHandlerStartCity}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <SelectField
+                            input={
+                              {
+                                onChange: this.handleStartStateChange,
+                                name: 'startLocationState',
+                                value: data.startLocationState
+                              }
                             }
-                          }
-                          placeholder="State"
-                          meta={data.reqHandlerStartState}
-                          value={data.startLocationState}
-                          options={data.allUSstates}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleStartAddressChange,
-                              name: 'startLocationZip',
-                              value: data.startLocationZip
+                            placeholder="State"
+                            meta={data.reqHandlerStartState}
+                            value={data.startLocationState}
+                            options={data.allUSstates}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleStartAddressChange,
+                                name: 'startLocationZip',
+                                value: data.startLocationZip
+                              }
                             }
-                          }
-                          placeholder="Zip"
-                          type="text"
-                          meta={data.reqHandlerStartZip}
-                        />
+                            placeholder="Zip"
+                            type="text"
+                            meta={data.reqHandlerStartZip}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -364,93 +368,96 @@ class PickupAndDelivery extends PureComponent {
                       Or create a new one:
                     </small>
                     <div
-                      id="ending"
-                      className={`${data.selectedEndAddressId === 0 ? 'shown' : 'fifty'}`}
-                      role="link"
-                      tabIndex="0"
                       onKeyPress={this.handleKeyPress}
                       onClick={this.toggleNewEndAddress}
+                      role="link"
+                      tabIndex="0"
                     >
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleEndAddressChange,
-                              name: 'endLocationAddressName',
-                              value: data.endLocationAddressName
+                      <div
+                        id="ending"
+                        className={`${data.selectedEndAddressId === 0 ? 'shown' : 'fifty'}`}
+                      >
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationAddressName',
+                                value: data.endLocationAddressName
+                              }
                             }
-                          }
-                          placeholder="Address Name"
-                          type="text"
-                          meta={data.reqHandlerEndAddressName}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleEndAddressChange,
-                              name: 'endLocationAddress1',
-                              value: data.endLocationAddress1
+                            placeholder="Address Name"
+                            type="text"
+                            meta={data.reqHandlerEndAddressName}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationAddress1',
+                                value: data.endLocationAddress1
+                              }
                             }
-                          }
-                          placeholder="Address 1"
-                          type="text"
-                          meta={data.reqHandlerEndAddress}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <input
-                          name="endLocationAddress2"
-                          type="text"
-                          value={data.endLocationAddress2}
-                          onChange={this.handleEndAddressChange}
-                          placeholder="Address 2"
-                          autoComplete="new-password"
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleEndAddressChange,
-                              name: 'endLocationCity',
-                              value: data.endLocationCity
+                            placeholder="Address 1"
+                            type="text"
+                            meta={data.reqHandlerEndAddress}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <input
+                            name="endLocationAddress2"
+                            type="text"
+                            value={data.endLocationAddress2}
+                            onChange={this.handleEndAddressChange}
+                            placeholder="Address 2"
+                            autoComplete="new-password"
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationCity',
+                                value: data.endLocationCity
+                              }
                             }
-                          }
-                          placeholder="City"
-                          type="text"
-                          meta={data.reqHandlerEndCity}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <SelectField
-                          input={
-                            {
-                              onChange: this.handleEndStateChange,
-                              name: 'endLocationState',
-                              value: data.endLocationState
+                            placeholder="City"
+                            type="text"
+                            meta={data.reqHandlerEndCity}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <SelectField
+                            input={
+                              {
+                                onChange: this.handleEndStateChange,
+                                name: 'endLocationState',
+                                value: data.endLocationState
+                              }
                             }
-                          }
-                          placeholder="State"
-                          meta={data.reqHandlerEndState}
-                          value={data.endLocationState}
-                          options={data.allUSstates}
-                        />
-                      </div>
-                      <div className="form__form-group">
-                        <TField
-                          input={
-                            {
-                              onChange: this.handleEndAddressChange,
-                              name: 'endLocationZip',
-                              value: data.endLocationZip
+                            placeholder="State"
+                            meta={data.reqHandlerEndState}
+                            value={data.endLocationState}
+                            options={data.allUSstates}
+                          />
+                        </div>
+                        <div className="form__form-group">
+                          <TField
+                            input={
+                              {
+                                onChange: this.handleEndAddressChange,
+                                name: 'endLocationZip',
+                                value: data.endLocationZip
+                              }
                             }
-                          }
-                          placeholder="Zip"
-                          type="text"
-                          meta={data.reqHandlerEndZip}
-                        />
+                            placeholder="Zip"
+                            type="text"
+                            meta={data.reqHandlerEndZip}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

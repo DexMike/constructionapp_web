@@ -15,6 +15,7 @@ import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
+import JobCreateWizard from '../jobs/JobWizard';
 import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
@@ -75,6 +76,7 @@ class DashboardCustomerPage extends Component {
       goToUpdateJob: false,
       jobId: 0,
       modalAddJob: false,
+      modalAddJobWizard: false,
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
@@ -89,6 +91,7 @@ class DashboardCustomerPage extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobEdit = this.handleJobEdit.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
+    this.toggleNewJobWizardModal = this.toggleNewJobWizardModal.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
@@ -218,6 +221,19 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  async toggleNewJobWizardModal() {
+    const {modalAddJobWizard, filters} = this.state;
+    if (modalAddJobWizard) {
+      const profile = await ProfileService.getProfile();
+      this.fetchJobsInfo(profile);
+      this.refs.filterChild.filterWithStatus(filters);
+      this.setState({loaded: true});
+    }
+    this.setState({
+      modalAddJobWizard: !modalAddJobWizard
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -249,14 +265,34 @@ class DashboardCustomerPage extends Component {
     );
   }
 
+  renderNewJobWizardModal() {
+    const {
+      modalAddJobWizard
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalAddJobWizard}
+        toggle={this.toggleNewJobWizardModal}
+        className="modal-dialog--primary modal-dialog--header"
+      >
+        <JobCreateWizard
+          toggle={this.toggleNewJobWizardModal}
+        />
+      </Modal>
+    );
+  }
+
   renderTitle() {
     return (
       <Row>
         <Col md={10}>
           <PageTitle />
         </Col>
+        {/*<Col md={2}>*/}
+        {/*  <AddJobButton handle={this.toggleNewJobModal}/>*/}
+        {/*</Col>*/}
         <Col md={2}>
-          <AddJobButton handle={this.toggleNewJobModal}/>
+          <AddJobButton handle={this.toggleNewJobWizardModal}/>
         </Col>
       </Row>
     );
@@ -591,6 +627,7 @@ class DashboardCustomerPage extends Component {
         <Container className="dashboard">
           {/* {this.renderModal()} */}
           {this.renderNewJobModal()}
+          {this.renderNewJobWizardModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}

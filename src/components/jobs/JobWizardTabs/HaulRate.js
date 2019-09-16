@@ -15,6 +15,7 @@ import GeoUtils from '../../../utils/GeoUtils';
 import ReactTooltip from 'react-tooltip';
 
 
+
 // import USstates from '../../utils/usStates';
 
 class HaulRate extends PureComponent {
@@ -276,7 +277,6 @@ class HaulRate extends PureComponent {
       oneWayCostPerTonHourPerMile = (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2);
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
-      debugger;
       if (tabMaterials.quantityType === 'ton') {
         deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
       } else {
@@ -467,7 +467,7 @@ class HaulRate extends PureComponent {
 
 
   renderRateCalc() {
-    const {data} = {...this.props};
+    const {data, tabMaterials} = {...this.props};
     const {rateCalculator} = {...data};
     let estimatedTotalPrice = 0;
     if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'ton') {
@@ -813,7 +813,6 @@ class HaulRate extends PureComponent {
             </div>
           </Row>
         </Row>
-        {this.renderDeliveryCosts()}
       </React.Fragment>
     );
   }
@@ -894,6 +893,7 @@ class HaulRate extends PureComponent {
                   </div>
                 </Row>
                 {rateCalculator.rateCalcOpen && this.renderRateCalc()}
+                {this.renderDeliveryCosts()}
               </form>
             </CardBody>
           </Card>
