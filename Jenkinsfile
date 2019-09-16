@@ -119,9 +119,9 @@ pipeline {
     MAPBOX_API           = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA"
     HERE_MAPS_APP_ID     = "FlTEFFbhzrFwU1InxRgH"
     HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
-    /*
     HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
     APP_ENV              = app_env()
+    /*
     API_ENDPOINT         = api_endpoint()
     AWS_USER_POOL_ID     = user_pool_id()
     AWS_IDENTITY_POOL_ID = pool_id()
