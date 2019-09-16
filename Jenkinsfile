@@ -114,6 +114,20 @@ pipeline {
 
   environment {
     ENVIRONMENT = env_fullname()
+    AWS_REGION           = "us-east-1"
+    GOOGLE_MAPS_APII     = "AIzaSyDUwWVXa6msmVdA-oGjnvhFXtvTzkvw2Jg"
+    MAPBOX_API           = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA"
+    HERE_MAPS_APP_ID     = "FlTEFFbhzrFwU1InxRgH"
+    HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
+    HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
+    APP_ENV              = app_env()
+    API_ENDPOINT         = api_endpoint()
+    AWS_USER_POOL_ID     = user_pool_id()
+    AWS_IDENTITY_POOL_ID = pool_id()
+    AWS_UPLOADS_BUCKET   = uploads_bucket()
+    CLOUDFRONT_ID        = cloudfront_id()
+
+    AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
   }
   agent {
     node {
