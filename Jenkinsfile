@@ -123,12 +123,14 @@ pipeline {
     APP_ENV              = app_env()
     API_ENDPOINT         = api_endpoint()
     AWS_USER_POOL_ID     = user_pool_id()
+    /*
     AWS_IDENTITY_POOL_ID = pool_id()
     AWS_UPLOADS_BUCKET   = uploads_bucket()
     AWS_UPLOADS_ENDPOINT = "https://${uploads_bucket()}"
     CLOUDFRONT_ID        = cloudfront_id()
 
     AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
+    */
   }
   agent {
     node {
