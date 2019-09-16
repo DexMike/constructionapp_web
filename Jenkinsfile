@@ -51,15 +51,6 @@ def cloudfront_id() {
   return id_map["${BRANCH_NAME}"]
 }
 
-def api_endpoint() {
-  if ("${BRANCH_NAME}" == "master") {
-    return "api.mytrelar.com"
-  }
-  else {
-    return "api.${env_shortname()}.mytrelar.com"
-  }
-}
-
 def user_pool_id() {
   def id_map = [
 
@@ -98,12 +89,12 @@ def pool_id() {
   return id_map["${BRANCH_NAME}"]
 }
 
-def uploads_bucket() {
+def domain() {
   if ("${BRANCH_NAME}" == "master") {
-    return "uploads.mytrelar.com"
+    return "mytrelar.com"
   }
   else {
-    return "uploads.${env_shortname()}.mytrelar.com"
+    return "${env_shortname()}.mytrelar.com"
   }
 }
 
@@ -121,11 +112,11 @@ pipeline {
     HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
     HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
     APP_ENV              = app_env()
-    API_ENDPOINT         = api_endpoint()
+    API_ENDPOINT         = "api.${domain()}"
     AWS_USER_POOL_ID     = user_pool_id()
     AWS_IDENTITY_POOL_ID = pool_id()
-    AWS_UPLOADS_BUCKET   = uploads_bucket()
-    AWS_UPLOADS_ENDPOINT = "https://${uploads_bucket()}"
+    AWS_UPLOADS_BUCKET   = "uploads.${domain()}"
+    AWS_UPLOADS_ENDPOINT = "https://uploads.${domain()}"
     CLOUDFRONT_ID        = cloudfront_id()
 
     AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
@@ -148,7 +139,7 @@ pipeline {
     }
     stage("Sync to S3") {
       steps {
-        sh "aws s3 sync dist/ s3://${API_ENDPOINT}"
+        sh "aws s3 sync dist/ s3://app.${domain}"
       }
     }
     stage("Invalidate cloudfront") {
