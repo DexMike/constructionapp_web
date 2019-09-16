@@ -22,6 +22,18 @@
     border-top: 18px solid rgb(102, 102, 102);
   }
 
+  .infoCircle {
+    border-radius: 50%;
+    width: 6px;
+    height: 6px;
+    padding: 1px;
+    background: #666;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    text-align: center;
+    font: 13px Arial, sans-serif;
+  }
+
   .dashboard__job-create-section-title {
     margin: 15px;
     span {

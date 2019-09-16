@@ -213,7 +213,8 @@ class PickupAndDelivery extends PureComponent {
                 <Row className="col-md-12 rateTab">
                   <div className="col-md-6">
                     <h3 className="subhead">
-                      Start Location
+                      Start Location <span
+                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
                     </h3>
                     <small>
                       Select a starting address:
@@ -338,7 +339,8 @@ class PickupAndDelivery extends PureComponent {
 
                   <div className="col-md-6">
                     <h3 className="subhead">
-                      End Location
+                      End Location <span
+                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
                     </h3>
                     <small>
                       Select a ending address:

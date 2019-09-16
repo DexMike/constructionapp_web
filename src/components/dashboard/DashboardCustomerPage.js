@@ -15,7 +15,7 @@ import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import JobCreatePopup from '../jobs/JobCreatePopup';
-import JobCreateWizard from '../jobs/JobWizard';
+import JobWizard from '../jobs/JobWizard';
 import DashboardObjectClickable from './DashboardObjectClickable';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
@@ -274,8 +274,9 @@ class DashboardCustomerPage extends Component {
         isOpen={modalAddJobWizard}
         toggle={this.toggleNewJobWizardModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
-        <JobCreateWizard
+        <JobWizard
           toggle={this.toggleNewJobWizardModal}
         />
       </Modal>

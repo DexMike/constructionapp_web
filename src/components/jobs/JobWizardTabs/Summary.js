@@ -208,8 +208,8 @@ class Summary extends PureComponent {
       const startDestination = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
       return (
         <React.Fragment>
-          <Row className="col-md-12">
-            <div className="col-md-12 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
+          <Row className="col-md-12" style={{marginTop: -25}}>
+            <div className="col-md-12 form__form-group">
               <span className="form__form-group-label">{startDestination.label}</span>
             </div>
           </Row>
@@ -218,20 +218,20 @@ class Summary extends PureComponent {
     }
     return (
       <React.Fragment>
-        <Row className="col-md-12">
-          <div className="col-md-12 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
+        <Row className="col-md-12" style={{marginTop: -15}}>
+          <div className="col-md-12 form__form-group">
             <span className="form__form-group-label">{tabPickupDelivery.startLocationAddress1}</span>
           </div>
         </Row>
         {tabPickupDelivery.startLocationAddress2 && tabPickupDelivery.startLocationAddress2.length > 0
         && <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
             <span className="form__form-group-label">{tabPickupDelivery.startLocationAddress2}</span>
           </div>
         </Row>
         }
         <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">{tabPickupDelivery.startLocationCity} {' '}
                     {tabPickupDelivery.startLocationState} {tabPickupDelivery.startLocationZip}
                   </span>
@@ -246,31 +246,29 @@ class Summary extends PureComponent {
     if (tabPickupDelivery.selectedEndAddressId > 0) {
       const endDestination = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
       return (
-        <React.Fragment>
-          <Row className="col-md-12">
-            <div className="col-md-12 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
-              <span className="form__form-group-label">{endDestination.label}</span>
-            </div>
-          </Row>
-        </React.Fragment>
+        <Row className="col-md-12" style={{marginTop: -25}}>
+          <div className="col-md-12 form__form-group">
+            <span className="form__form-group-label">{endDestination.label}</span>
+          </div>
+        </Row>
       );
     }
     return (
       <React.Fragment>
-        <Row className="col-md-12">
-          <div className="col-md-12 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
+        <Row className="col-md-12" style={{marginTop: -15}}>
+          <div className="col-md-12 form__form-group">
             <span className="form__form-group-label">{tabPickupDelivery.endLocationAddress1}</span>
           </div>
         </Row>
         {tabPickupDelivery.endLocationAddress2 && tabPickupDelivery.endLocationAddress2.length > 0
         && <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
             <span className="form__form-group-label">{tabPickupDelivery.endLocationAddress2}</span>
           </div>
         </Row>
         }
         <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">{tabPickupDelivery.endLocationCity} {' '}
                     {tabPickupDelivery.endLocationState} {tabPickupDelivery.endLocationZip}
                   </span>
@@ -339,64 +337,51 @@ class Summary extends PureComponent {
     }
     return (
       <React.Fragment>
-        <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
+        <Row className="col-md-12" style={{marginTop: -15}}>
+          <div className="col-md-7 form__form-group">
             <span className="form__form-group-label"># Trucks</span>
           </div>
           <div className="col-md-5 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      marginTop: -15,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {tabTruckSpecs.truckQuantity === '' ? 'Any' : tabTruckSpecs.truckQuantity}
                     </span>
           </div>
         </Row>
         <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
             <span className="form__form-group-label">Truck Type</span>
           </div>
           <div className="col-md-5 form__form-group">
-            <span style={{
-              marginLeft: 40,
-              position: 'absolute'
-            }}
+            <span style={{}}
             >
             <a data-tip data-for='truckTypes' style={{color: 'rgb(62, 110, 85)'}}> View </a>
             </span>
             <div className="customTooltip">
-              <ReactTooltip id='truckTypes'>
+              <ReactTooltip id='truckTypes' effect='solid'>
                 {selectedTruckTypesName.map(name =>
-                  <p> {name} </p>)}
+                  <p style={{color: 'white'}}> {name} </p>)}
               </ReactTooltip>
             </div>
           </div>
         </Row>
         <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
             <span className="form__form-group-label">Miles one way</span>
           </div>
           <div className="col-md-5 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {data.avgDistanceEnroute}
                     </span>
           </div>
         </Row>
         <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-7 form__form-group">
             <span className="form__form-group-label">Hours one way</span>
           </div>
           <div className="col-md-5 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {data.avgTimeEnroute}
                     </span>
@@ -410,32 +395,25 @@ class Summary extends PureComponent {
     const {tabMaterials} = {...this.props};
     return (
       <React.Fragment>
-        <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
+        <Row className="col-md-12" style={{marginTop: -15}}>
+          <div className="col-md-8 form__form-group">
             <span
               className="form__form-group-label">Material Type</span>
           </div>
-          <div className="col-md-5 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      marginTop: -15,
-                      position: 'absolute'
-                    }}
+          <div className="col-md-4 form__form-group">
+                    <span style={{}}
                     >
                       {tabMaterials.selectedMaterial.value}
                     </span>
           </div>
         </Row>
         <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginLeft: -5}}>
+          <div className="col-md-8 form__form-group">
             <span
               className="form__form-group-label">{tabMaterials.quantityType === 'hour' ? 'Estimated Hours' : 'Estimated Tons'}</span>
           </div>
-          <div className="col-md-5 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+          <div className="col-md-4 form__form-group">
+                    <span style={{}}
                     >
                       {tabMaterials.quantity}
                     </span>
@@ -448,18 +426,16 @@ class Summary extends PureComponent {
 
   renderHaulRate() {
     const {tabHaulRate} = {...this.props};
-    const {truckSpecsTabValidations} = {...this.state};
     return (
       <React.Fragment>
-        <Row className="col-md-12">
-          <div className="col-md-7 form__form-group" style={{marginTop: truckSpecsTabValidations.length === 0 ? -80 : -15, marginLeft: -5}}>
+        <Row className="col-md-12" style={{marginTop: -15}}>
+          <div className="col-md-7 form__form-group">
             <span
-              className="form__form-group-label">Rate per {tabHaulRate.payType}</span>
+              className="form__form-group-label" style={{fontWeight: 'bold'}}>Rate per {tabHaulRate.payType}</span>
           </div>
           <div className="col-md-5 form__form-group">
                     <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
+                      fontWeight: 'bold'
                     }}
                     >
                       {tabHaulRate.ratePerPayType}
@@ -471,7 +447,6 @@ class Summary extends PureComponent {
   }
 
   renderMaterialHaulRate() {
-    const {tabMaterials, tabPickupDelivery, tabHaulRate, tabTruckSpecs} = {...this.props};
     const {materialTabValidations, truckSpecsTabValidations, haulRateTabValidations} = {...this.state};
     return (
       <React.Fragment>
@@ -486,7 +461,7 @@ class Summary extends PureComponent {
                 <hr/>
               </Row>
             </div>
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               <Row className="col-md-12 " style={{paddingTop: 20}}>
                 <span className="form__form-group-label"
                       style={truckSpecsTabValidations.length > 0 ? {color: 'rgb(140, 25, 25)'} : {}}>Haul</span>
@@ -495,7 +470,7 @@ class Summary extends PureComponent {
                 <hr/>
               </Row>
             </div>
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               <Row className="col-md-12 " style={{paddingTop: 20}}>
                 <span className="form__form-group-label"
                       style={haulRateTabValidations.length > 0 ? {color: 'rgb(140, 25, 25)'} : {}}>Haul Rate</span>
@@ -506,15 +481,15 @@ class Summary extends PureComponent {
             </div>
           </Row>
           <Row className="col-md-12">
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               {materialTabValidations.length > 0 ? this.renderValidationBox(materialTabValidations, 1)
                 : this.renderMaterials()}
             </div>
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               {truckSpecsTabValidations.length > 0 ? this.renderValidationBox(truckSpecsTabValidations, 3)
                 : this.renderHaul()}
             </div>
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               {haulRateTabValidations.length > 0 ? this.renderValidationBox(haulRateTabValidations, 4)
                 : this.renderHaulRate()}
             </div>
@@ -554,7 +529,7 @@ class Summary extends PureComponent {
         <Row className="col-md-12">
           <hr/>
         </Row>
-        <Row className="col-md-12">
+        <Row className="col-md-12" style={{paddingBottom: 20}}>
           <Row className="col-md-12">
             {tabMaterials.estMaterialPricing > 0 &&
             <div className="col-md-6 form__form-group">
@@ -579,69 +554,51 @@ class Summary extends PureComponent {
             {tabMaterials.estMaterialPricing > 0 &&
             <div className="col-md-6 form__form-group">
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Material Price per ton</span>
                 </div>
                 <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       $
                     </span>
                 </div>
                 <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {tabMaterials.estMaterialPricing}
                     </span>
                 </div>
               </Row>
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Delivered Price per ton</span>
                 </div>
                 <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       $
                     </span>
                 </div>
                 <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {deliveredPricePerTon}
                     </span>
                 </div>
               </Row>
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Delivered Price for job</span>
                 </div>
                 <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       $
                     </span>
                 </div>
                 <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {deliveredPriceJob}
                     </span>
@@ -651,69 +608,51 @@ class Summary extends PureComponent {
             }
             <div className="col-md-6 form__form-group">
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">One way cost / {tabMaterials.quantityType} / mile</span>
                 </div>
                 <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       $
                     </span>
                 </div>
                 <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {oneWayCostPerTonHourPerMile}
                     </span>
                 </div>
               </Row>
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Haul Cost per {tabMaterials.quantityType}</span>
                 </div>
                 <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       $
                     </span>
                 </div>
                 <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {haulCostPerTonHour}
                     </span>
                 </div>
               </Row>
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Estimated Cost for Job</span>
                 </div>
                 <div className="col-md-1 form__form-group">
-                    <span style={{
-                      marginLeft: 40,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       $
                     </span>
                 </div>
                 <div className="col-md-3 form__form-group">
-                    <span style={{
-                      marginLeft: 30,
-                      position: 'absolute'
-                    }}
+                    <span style={{}}
                     >
                       {estimatedCostForJob}
                     </span>
@@ -729,8 +668,8 @@ class Summary extends PureComponent {
   renderValidationBox(missingFields, pageNumber) {
     const {setPageNumber} = {...this.props};
     return (
-      <Row className="col-md-12" onClick={() => setPageNumber(pageNumber)} style={{paddingBottom: 15}}>
-        <div className="col-md-12 form__form-group" style={{marginTop: -15, marginLeft: -5}}>
+      <Row className="col-md-12" onClick={() => setPageNumber(pageNumber)} style={{paddingBottom: 15, marginTop: -15}}>
+        <div className="col-md-12 form__form-group">
             <span
               className="form__form-group-label" style={{color: 'rgb(140, 25, 25)'}}>Missing {missingFields.map(name =>
               <li key={name}> {name} </li>)}
@@ -783,9 +722,6 @@ class Summary extends PureComponent {
                   <hr/>
                 </Row>
                 {this.renderDeliveryCosts()}
-                <Row className="col-md-12" style={{marginTop: 15}}>
-                  <hr/>
-                </Row>
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
                     <h3 className="subhead">

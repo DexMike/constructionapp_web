@@ -99,7 +99,8 @@ class JobMaterials extends PureComponent {
               >
                 <Row className="col-md-12">
                   <div className="col-md-6 form__form-group">
-                    <span className="form__form-group-label">Material Type</span>
+                    <span className="form__form-group-label">Material Type <span
+                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span></span>
                     <SelectField
                       input={
                         {
@@ -165,10 +166,13 @@ class JobMaterials extends PureComponent {
                     >{data.quantityType === 'ton' ? 'tons' : 'hours'}</span>
                       {data.quantityType === 'ton' ? ' do you need delivered' : ' will be worked'}?
                       </span>
-                                  </div>
-                                  <div className="col-md-3 form__form-group">
+                  </div>
+                  <div className="col-md-3 form__form-group">
                     <span
-                      className="form__form-group-label">Estimated {data.quantityType === 'ton' ? 'Tons' : 'Hours'}</span>
+                      className="form__form-group-label">Estimated {data.quantityType === 'ton' ? 'Tons' : 'Hours'}
+                      <span
+                        style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
+                    </span>
                     <TField
                       input={
                         {
@@ -210,12 +214,12 @@ class JobMaterials extends PureComponent {
                       id="estimatedMaterialPricing"
                     />
                   </div>
-                  <div className="col-md-3 form__form-group">
-                    <span
-                      className="form__form-group-label">Total
-                    </span>
-                    <text>$</text>
-                  </div>
+                  {/*<div className="col-md-3 form__form-group">*/}
+                  {/*  <span*/}
+                  {/*    className="form__form-group-label">Total*/}
+                  {/*  </span>*/}
+                  {/*  <text>$</text>*/}
+                  {/*</div>*/}
                 </Row>
 
               </form>
