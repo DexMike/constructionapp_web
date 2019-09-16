@@ -981,6 +981,7 @@ class JobSavePage extends Component {
     newJob.status = 'Job Completed';
     newJob.startAddress = job.startAddress.id;
     newJob.endAddress = job.endAddress.id;
+    newJob.endTime = moment.utc().format();
     await JobService.updateJob(newJob);
 
     job.status = 'Job Completed';
@@ -1045,6 +1046,7 @@ class JobSavePage extends Component {
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
     const {profile, company, bids} = this.state;
+    console.log("TCL: JobSavePage -> renderActionButtons -> bids", bid)
     const companyProducer = job.company;
     const companyCarrier = company;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
