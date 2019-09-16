@@ -503,15 +503,16 @@ class Summary extends PureComponent {
     const {tabHaulRate, tabMaterials} = {...this.props};
     const {rateCalculator} = {...tabHaulRate};
 
-    let haulCostPerTonHour = 0;
+
+    const haulCostPerTonHour = tabHaulRate.ratePerPayType;
     let oneWayCostPerTonHourPerMile = 0;
     let deliveredPricePerTon = 0;
     let deliveredPriceJob = 0;
     let estimatedCostForJob = 0;
-    const sufficientInfo = (parseFloat(tabHaulRate.avgTimeEnroute) + parseFloat(tabHaulRate.avgTimeReturn)) * parseFloat(tabHaulRate.ratePerPayType);
-    if (sufficientInfo > 0) {
-      haulCostPerTonHour = ((sufficientInfo) / parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
-      oneWayCostPerTonHourPerMile = (parseFloat(haulCostPerTonHour) / parseFloat(tabHaulRate.avgDistanceEnroute)).toFixed(2);
+    // const sufficientInfo = (parseFloat(tabHaulRate.avgTimeEnroute) + parseFloat(tabHaulRate.avgTimeReturn)) * parseFloat(tabHaulRate.ratePerPayType);
+    if (haulCostPerTonHour > 0) {
+      // haulCostPerTonHour = ((sufficientInfo) / parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
+      oneWayCostPerTonHourPerMile = tabHaulRate.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabHaulRate.avgDistanceEnroute)).toFixed(2) : 0;
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
       if (tabMaterials.quantityType === 'ton') {
@@ -519,11 +520,12 @@ class Summary extends PureComponent {
       } else {
         const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
           + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-        const numTrips = Math.floor(parseFloat(tabHaulRate.rateCalculator.estimatedHours) / oneLoad);
+        const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
         const estimatedTons = (numTrips * parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
         deliveredPriceJob = (deliveredPricePerTon * estimatedTons).toFixed(2);
       }
     }
+
     return (
       <React.Fragment>
         <Row className="col-md-12">
@@ -609,7 +611,7 @@ class Summary extends PureComponent {
             <div className="col-md-6 form__form-group">
               <Row className="col-md-12">
                 <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">One way cost / {tabMaterials.quantityType} / mile</span>
+                  <span className="form__form-group-label">One way cost / {tabHaulRate.payType} / mile</span>
                 </div>
                 <div className="col-md-1 form__form-group">
                     <span style={{}}
@@ -626,7 +628,7 @@ class Summary extends PureComponent {
               </Row>
               <Row className="col-md-12">
                 <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Haul Cost per {tabMaterials.quantityType}</span>
+                  <span className="form__form-group-label">Haul Cost per {tabHaulRate.payType}</span>
                 </div>
                 <div className="col-md-1 form__form-group">
                     <span style={{}}
