@@ -320,9 +320,7 @@ class JobWizard extends Component {
   }
 
   validateMaterialsPage() {
-    debugger;
     this.clearValidationMaterialsPage();
-    debugger;
     const {tabMaterials} = {...this.state};
     let isValid = true;
     if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.length === 0) {
@@ -680,7 +678,6 @@ class JobWizard extends Component {
         isValid = false;
         goToAddressTab = true;
       }
-      debugger;
       this.setState({tabPickupDelivery});
     }
 
@@ -868,7 +865,6 @@ class JobWizard extends Component {
       tabTruckSpecs
     } = this.state;
 
-    debugger;
     let {jobStartDate} = this.state;
 
     let status = 'Published';
@@ -899,7 +895,6 @@ class JobWizard extends Component {
       } catch (err) {
         console.error(err);
       }
-      debugger;
     } else {
       startAddress.id = tabPickupDelivery.selectedStartAddressId;
     }
@@ -1032,7 +1027,6 @@ class JobWizard extends Component {
     let newJob;
     try {
       newJob = await JobService.createJob(job); // creating new saved job
-      debugger;
     } catch (err) {
       console.error(err);
     }
@@ -1043,12 +1037,10 @@ class JobWizard extends Component {
     // add materials
     if (newJob) {
       if (Object.keys(tabMaterials.selectedMaterial).length > 0) { // check if there's materials to add
-        const r = await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
-        debugger;
+        await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
       }
       if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
-        const r = await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
-        debugger;
+        await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
       }
     }
 
@@ -1121,7 +1113,6 @@ class JobWizard extends Component {
   // Used to either store a Copied or 'Saved' job to the database
   async saveJobDraft() {
     const {profile, tabPickupDelivery, tabHaulRate, tabMaterials, name, tabTruckSpecs, tabSummary} = this.state;
-    debugger;
     let {jobStartDate, jobEndDate} = this.state;
     // start location
     let startAddress = {
@@ -1152,7 +1143,6 @@ class JobWizard extends Component {
       } catch (err) {
         console.error(err);
       }
-      debugger;
     }
     // end location
     let endAddress = {
@@ -1179,7 +1169,6 @@ class JobWizard extends Component {
       } catch (err) {
         console.error(err);
       }
-      debugger;
     }
 
     // let rateType = '';
@@ -1266,12 +1255,10 @@ class JobWizard extends Component {
     // add material
     if (newJob) {
       if (Object.keys(tabMaterials.selectedMaterial).length > 0) { // check if there's materials to add
-        const r = await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
-        debugger;
+        await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
       }
       if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
-        const r = await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
-        debugger;
+        await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
       }
     }
 
