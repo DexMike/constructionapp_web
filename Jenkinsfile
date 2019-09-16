@@ -135,7 +135,13 @@ pipeline {
       label 'master'
     }
   }
-
+  stages {
+    stage("Install NPM packages") {
+      steps {
+        sh 'echo foobar'
+      }
+    }
+  }
   post {
     success {
       slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: '#devops', color: 'RED', message: "Stargate ${ENVIRONMENT} deploy finished successfully", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
