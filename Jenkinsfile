@@ -74,8 +74,7 @@ def user_pool_id(String lookup) {
 }
 
 def app_client_id(String lookup) {
-  def map = [
-
+  def id_map = [
     "master":  "7cqqgiu2booqasov3a5gc83lg8",
     "infra":   "4unlqtduk9rp9ed4idsc0v6p1c",
     "dev":     "52tgalb82hnrv338ambff0korj",
@@ -83,11 +82,11 @@ def app_client_id(String lookup) {
     "qa":      "6tlhjedvj2k9e50l98t930i4gu",
     "staging": "3sahkf5trdejfrrfujb0rdt1t9"
   ]
-  return map["${lookup}"]
+  return id_map["${lookup}"]
 }
 
 def pool_id(String lookup) {
-  def map = [
+  def id_map = [
 
     "master":  "us-east-1:4c25b22c-c79d-4d0c-9dfe-d76172741a33",
     "infra":   "us-east-1:adeb28bd-623a-4ca4-9497-f7e08b169c5d",
@@ -96,7 +95,7 @@ def pool_id(String lookup) {
     "qa":      "us-east-1:340c27b0-2315-48cf-9290-588039295b26",
     "staging": "us-east-1:2076fc41-91e6-4796-b306-ac52c6b24486"
   ]
-  return map["${lookup}"]
+  return id_map["${lookup}"]
 }
 
 def uploads_bucket() {
