@@ -1046,7 +1046,6 @@ class JobSavePage extends Component {
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
     const {profile, company, bids} = this.state;
-    console.log("TCL: JobSavePage -> renderActionButtons -> bids", bid)
     const companyProducer = job.company;
     const companyCarrier = company;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
