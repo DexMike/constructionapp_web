@@ -103,7 +103,7 @@ def uploads_bucket() {
     return "uploads.mytrelar.com"
   }
   else {
-    return "uploads.${env_shortname}.mytrelar.com"
+    return "uploads.${env_shortname()}.mytrelar.com"
   }
 }
 
