@@ -132,6 +132,11 @@ pipeline {
         sh 'npm install'
       }
     }
+    stage ("Build HTML") {
+      steps {
+        sh 'babel-node tools/buildHtml.js'
+      }
+    }
     stage("Build Bundle") {
       steps {
         sh 'npx babel-node --max_old_space_size=4096 tools/build.js'
