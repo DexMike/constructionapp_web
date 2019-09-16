@@ -52,7 +52,7 @@ def cloudfront_id() {
 }
 
 def api_endpoint() {
-  if ("${BRANCH_NAME}" == master) {
+  if ("${BRANCH_NAME}" == "master") {
     return "api.mytrelar.com"
   }
   else {
@@ -99,7 +99,7 @@ def pool_id() {
 }
 
 def uploads_bucket() {
-  if ("${BRANCH_NAME}" == master) {
+  if ("${BRANCH_NAME}" == "master") {
     return "uploads.mytrelar.com"
   }
   else {
@@ -122,8 +122,8 @@ pipeline {
     HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
     APP_ENV              = app_env()
     API_ENDPOINT         = api_endpoint()
-    AWS_USER_POOL_ID     = user_pool_id()
     /*
+    AWS_USER_POOL_ID     = user_pool_id()
     AWS_IDENTITY_POOL_ID = pool_id()
     AWS_UPLOADS_BUCKET   = uploads_bucket()
     AWS_UPLOADS_ENDPOINT = "https://${uploads_bucket()}"
