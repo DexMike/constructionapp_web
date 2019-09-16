@@ -122,7 +122,6 @@ pipeline {
     HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
     APP_ENV              = app_env()
     API_ENDPOINT         = api_endpoint()
-    /*
     AWS_USER_POOL_ID     = user_pool_id()
     AWS_IDENTITY_POOL_ID = pool_id()
     AWS_UPLOADS_BUCKET   = uploads_bucket()
@@ -130,7 +129,6 @@ pipeline {
     CLOUDFRONT_ID        = cloudfront_id()
 
     AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
-    */
   }
   agent {
     node {
