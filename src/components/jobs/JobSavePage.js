@@ -981,7 +981,7 @@ class JobSavePage extends Component {
     newJob.status = 'Job Completed';
     newJob.startAddress = job.startAddress.id;
     newJob.endAddress = job.endAddress.id;
-    newJob.endTime = moment.utc().format();
+    newJob.actualEndTime = moment.utc().format();
     await JobService.updateJob(newJob);
 
     job.status = 'Job Completed';
