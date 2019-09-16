@@ -51,7 +51,7 @@ def cloudfront_id(String lookup) {
   return name["${lookup}"]
 }
 
-def api_endpoint(String branch) {
+def api_endpoint() {
   if ("${BRANCH_NAME}" == master) {
     return "api.mytrelar.com"
   }
@@ -99,7 +99,7 @@ def pool_id(String lookup) {
   return name["${lookup}"]
 }
 
-def uploads_bucket(String branch) {
+def uploads_bucket() {
   if ("${BRANCH_NAME}" == master) {
     return "uploads.mytrelar.com"
   }
@@ -112,8 +112,9 @@ pipeline {
   options {
     disableConcurrentBuilds()
   }
+
   environment {
-    ENVIRONMENT          = env_fullname("${BRANCH_NAME}")
+    ENVIRONMENT = env_fullname("${BRANCH_NAME}")
     AWS_REGION           = "us-east-1"
     GOOGLE_MAPS_APII     = "AIzaSyDUwWVXa6msmVdA-oGjnvhFXtvTzkvw2Jg"
     MAPBOX_API           = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA"
@@ -121,11 +122,11 @@ pipeline {
     HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
     HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
     APP_ENV              = app_env("${BRANCH_NAME}")
-    API_ENDPOINT         = api_endpoint("${BRANCH_NAME}")
+    API_ENDPOINT         = api_endpoint()
     AWS_USER_POOL_ID     = user_pool_id("${BRANCH_NAME}")
     AWS_IDENTITY_POOL_ID = pool_id("${BRANCH_NAME}")
-    AWS_UPLOADS_BUCKET   = uploads_bucket("${BRANCH_NAME}")
-    AWS_UPLOADS_ENDPOINT = sprintf("https://%s", uploads_bucket("${BRANCH_NAME}"))
+    AWS_UPLOADS_BUCKET   = uploads_bucket()
+    AWS_UPLOADS_ENDPOINT = sprintf("https://%s", uploads_bucket())
     CLOUDFRONT_ID        = cloudfront_id("${BRANCH_NAME}")
 
     AWS_USER_POOL_WEB_CLIENT_ID = app_client_id("${BRANCH_NAME}")
