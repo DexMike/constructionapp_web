@@ -152,7 +152,9 @@ pipeline {
       }
     }
     stage("Invalidate cloudfront") {
-      sh "aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --paths '/*'"
+      steps {
+       sh "aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --paths '/*'"
+     }
     }
   }
   post {
