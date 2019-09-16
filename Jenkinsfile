@@ -134,7 +134,7 @@ pipeline {
     }
     stage ("Build HTML") {
       steps {
-        sh 'babel-node tools/buildHtml.js'
+        sh 'npx babel-node tools/buildHtml.js'
       }
     }
     stage("Build Bundle") {
