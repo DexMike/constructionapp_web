@@ -147,7 +147,6 @@ class PickupAndDelivery extends PureComponent {
     const {handleInputChange} = {...this.props};
     data.selectedStartAddressId = 0;
     handleInputChange('tabPickupDelivery', data);
-    debugger;
   }
 
   toggleNewEndAddress() {

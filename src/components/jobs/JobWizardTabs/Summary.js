@@ -549,7 +549,6 @@ class Summary extends PureComponent {
         deliveredPriceJob = (deliveredPricePerTon * estimatedTons).toFixed(2);
       }
     }
-    debugger;
     return (
       <React.Fragment>
         <Row className="col-md-12">
