@@ -1,5 +1,5 @@
 // All of these need to be dynamic and not hard coded.
-def env_fullname(String lookup) {
+def env_fullname() {
   def name = [
 
     "master":  "Production",
@@ -9,10 +9,10 @@ def env_fullname(String lookup) {
     "qa":      "QA",
     "staging": "Staging"
   ]
-  return name["${lookup}"]
+  return name["${BRANCH_NAME}"]
 }
 
-def app_env(String lookup) {
+def app_env() {
   def name = [
 
     "master":  "Prod",
@@ -22,10 +22,10 @@ def app_env(String lookup) {
     "qa":      "QA",
     "staging": "Staging"
   ]
-  return name["${lookup}"]
+  return name["${BRANCH_NAME}"]
 }
 
-def env_shortname(String lookup) {
+def env_shortname() {
   def name = [
 
     "master":  "prod",
@@ -35,10 +35,10 @@ def env_shortname(String lookup) {
     "qa":      "qa",
     "staging": "staging"
   ]
-  return name["${lookup}"]
+  return name["${BRANCH_NAME}"]
 }
 
-def cloudfront_id(String lookup) {
+def cloudfront_id() {
   def id_map = [
 
     "master":  "E1AHYHKY2WVINB",
@@ -48,7 +48,7 @@ def cloudfront_id(String lookup) {
     "qa":      "E2W2Q6ROFYLZDI",
     "staging": "E3KJAHZFANQPXC"
   ]
-  return id_map["${lookup}"]
+  return id_map["${BRANCH_NAME}"]
 }
 
 def api_endpoint() {
@@ -56,11 +56,11 @@ def api_endpoint() {
     return "api.mytrelar.com"
   }
   else {
-    return sprintf("api.%s.mytrelar.com", env_shortname("${BRANCH_NAME}"))
+    return "api.${env_shortname()}.mytrelar.com"
   }
 }
 
-def user_pool_id(String lookup) {
+def user_pool_id() {
   def id_map = [
 
     "master":  "us-east-1_K9gWgb955",
@@ -70,10 +70,10 @@ def user_pool_id(String lookup) {
     "qa":      "us-east-1_Yrq15MnQf",
     "staging": "us-east-1_GkxSiARkF"
   ]
-  return id_map["${lookup}"]
+  return id_map["${BRANCH_NAME}"]
 }
 
-def app_client_id(String lookup) {
+def app_client_id() {
   def id_map = [
     "master":  "7cqqgiu2booqasov3a5gc83lg8",
     "infra":   "4unlqtduk9rp9ed4idsc0v6p1c",
@@ -82,10 +82,10 @@ def app_client_id(String lookup) {
     "qa":      "6tlhjedvj2k9e50l98t930i4gu",
     "staging": "3sahkf5trdejfrrfujb0rdt1t9"
   ]
-  return id_map["${lookup}"]
+  return id_map["${BRANCH_NAME}"]
 }
 
-def pool_id(String lookup) {
+def pool_id() {
   def id_map = [
 
     "master":  "us-east-1:4c25b22c-c79d-4d0c-9dfe-d76172741a33",
@@ -95,7 +95,7 @@ def pool_id(String lookup) {
     "qa":      "us-east-1:340c27b0-2315-48cf-9290-588039295b26",
     "staging": "us-east-1:2076fc41-91e6-4796-b306-ac52c6b24486"
   ]
-  return id_map["${lookup}"]
+  return id_map["${BRANCH_NAME}"]
 }
 
 def uploads_bucket() {
@@ -103,7 +103,7 @@ def uploads_bucket() {
     return "uploads.mytrelar.com"
   }
   else {
-    return sprintf("uploads.%s.mytrelar.com", env_shortname("${BRANCH_NAME}"))
+    return "uploads.${env_shortname}.mytrelar.com"
   }
 }
 
@@ -113,22 +113,22 @@ pipeline {
   }
 
   environment {
-    ENVIRONMENT = env_fullname("${BRANCH_NAME}")
+    ENVIRONMENT = env_fullname()
     AWS_REGION           = "us-east-1"
     GOOGLE_MAPS_APII     = "AIzaSyDUwWVXa6msmVdA-oGjnvhFXtvTzkvw2Jg"
     MAPBOX_API           = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA"
     HERE_MAPS_APP_ID     = "FlTEFFbhzrFwU1InxRgH"
     HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
     HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
-    APP_ENV              = app_env("${BRANCH_NAME}")
+    APP_ENV              = app_env()
     API_ENDPOINT         = api_endpoint()
-    AWS_USER_POOL_ID     = user_pool_id("${BRANCH_NAME}")
-    AWS_IDENTITY_POOL_ID = pool_id("${BRANCH_NAME}")
+    AWS_USER_POOL_ID     = user_pool_id()
+    AWS_IDENTITY_POOL_ID = pool_id()
     AWS_UPLOADS_BUCKET   = uploads_bucket()
     AWS_UPLOADS_ENDPOINT = "https://${uploads_bucket()}"
-    CLOUDFRONT_ID        = cloudfront_id("${BRANCH_NAME}")
+    CLOUDFRONT_ID        = cloudfront_id()
 
-    AWS_USER_POOL_WEB_CLIENT_ID = app_client_id("${BRANCH_NAME}")
+    AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
   }
   agent {
     node {
