@@ -135,28 +135,7 @@ pipeline {
       label 'master'
     }
   }
-  stages {
-    stage("Install NPM packages") {
-      steps {
-        sh 'npm install'
-      }
-    }
-    stage("Build Bundle") {
-      steps {
-        sh 'npx babel-node --max_old_space_size=4096 tools/build.js'
-      }
-    }
-    stage("Sync to S3") {
-      steps {
-        sh "aws s3 sync dist/ s3://${API_ENDPOINT}"
-      }
-    }
-    stage("Invalidate cloudfront") {
-      steps {
-       sh "aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --paths '/*'"
-     }
-    }
-  }
+
   post {
     success {
       slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: '#devops', color: 'RED', message: "Stargate ${ENVIRONMENT} deploy finished successfully", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
