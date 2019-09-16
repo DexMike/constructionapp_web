@@ -139,7 +139,7 @@ pipeline {
     }
     stage("Sync to S3") {
       steps {
-        sh "aws s3 sync dist/ s3://app.${domain}"
+        sh "aws s3 sync dist/ s3://app.${domain()}"
       }
     }
     stage("Invalidate cloudfront") {
