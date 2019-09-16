@@ -1443,7 +1443,10 @@ class JobWizard extends Component {
               >
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Job Name</span>
+                    <span className="form__form-group-label">Job Name
+                    <span
+                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
+                    </span>
                     {
                       /*
                       <input
@@ -1474,6 +1477,8 @@ class JobWizard extends Component {
                 <Row className="col-md-12">
                   <div className="col-md-4 form__form-group">
                     <span className="form__form-group-label">Start Date / Time&nbsp;
+                      <span
+                        style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
                     </span>
                     <TDateTimePicker
                       input={
@@ -1496,6 +1501,8 @@ class JobWizard extends Component {
                   </div>
                   <div className="col-md-4 form__form-group">
                     <span className="form__form-group-label">End Date / Time&nbsp;
+                      <span
+                        style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
                     </span>
                     <TDateTimePicker
                       input={
