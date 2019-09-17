@@ -96,6 +96,7 @@ class DashboardCustomerPage extends Component {
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
+    this.sortFilters = this.sortFilters.bind(this);
   }
 
   async componentDidMount() {
@@ -124,7 +125,7 @@ class DashboardCustomerPage extends Component {
   }
 
   async handleFilterStatusChange({value, name}) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     if (filters[name] === value) {
       filters[name] = '';
     } else {
@@ -132,6 +133,7 @@ class DashboardCustomerPage extends Component {
     }
     // clearing filter fields for general jobs based on Status (Top cards)
     filters.equipmentType = [];
+    filters.materialType = [];
     filters.startAvailability = '';
     filters.endAvailability = '';
     delete filters.rateType;
@@ -146,6 +148,18 @@ class DashboardCustomerPage extends Component {
     this.setState({
       filters,
       page: 0
+    });
+  }
+
+  sortFilters(orderBy, order) {
+    const { filters } = this.state;
+    const newFilters = filters;
+    newFilters.sortBy = orderBy;
+    newFilters.order = order;
+    this.setState({
+      filters: newFilters
+    }, function wait() {
+      this.refs.filterChild.fetchJobs();
     });
   }
 
@@ -423,11 +437,11 @@ class DashboardCustomerPage extends Component {
               name="status"
               status={filters.status}
             />
-            <DashboardObjectStatic
-              title="% Completed"
-              displayVal={completedOffersPercent}
-              value="% Completed"
-            />
+            {/* <DashboardObjectStatic */}
+            {/* title="% Completed" */}
+            {/* displayVal={completedOffersPercent} */}
+            {/* value="% Completed" */}
+            {/* /> */}
           </div>
         </Container>
       );
@@ -521,7 +535,7 @@ class DashboardCustomerPage extends Component {
       return newJob;
     });
 
-    jobsCompleted = onOfferJobCount * 20;
+    // jobsCompleted = onOfferJobCount * 20;
     totalEarnings = TFormat.asMoney(potentialIncome * 3.14159);
     earningsPerJob = TFormat.asMoney((potentialIncome * 3.14159) / (jobsCompleted));
     cancelledJobs = 1;
@@ -569,10 +583,11 @@ class DashboardCustomerPage extends Component {
                           name: 'newStartDate',
                           displayName: 'Start Date'
                         },
-                        {
-                          name: 'distance',
-                          displayName: 'Distance to Zip (mi)'
-                        },
+                        // This is the producer they do not need to see distance to job
+                        // {
+                        //   name: 'distance',
+                        //   displayName: 'Distance to Zip (mi)'
+                        // },
                         {
                           name: 'haulDistance',
                           displayName: 'Haul Distance (One Way) (mi)'
@@ -591,6 +606,7 @@ class DashboardCustomerPage extends Component {
                     }
                     data={jobs}
                     handleIdClick={this.handleJobEdit}
+                    handleSortChange={this.sortFilters}
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}

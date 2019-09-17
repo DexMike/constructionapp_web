@@ -56,7 +56,7 @@ class TopbarProfile extends PureComponent {
           <div className="topbar__menu">
             {
               isAdmin ? (
-                <TopbarMenuLink title="Company Settings" icon="cog" path="/company/settings"/>
+                <TopbarMenuLink title="Company Settings" icon="cog" path="/company/settings" toggle={this.toggle}/>
               ) : null
             }
             {
@@ -64,7 +64,7 @@ class TopbarProfile extends PureComponent {
                 <div className="topbar__menu-divider"/>
               ) : null
             }
-            <TopbarMenuLink title="User Settings" icon="user" path="/settings"/>
+            <TopbarMenuLink title="User Settings" icon="user" path="/settings" toggle={this.toggle}/>
             <div className="topbar__menu-divider"/>
             <TopbarMenuLink title="Toggle Theme" icon="layers" path="/"/>
             <div className="topbar__menu-divider"/>

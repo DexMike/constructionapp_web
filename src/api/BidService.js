@@ -39,6 +39,11 @@ class BidService extends AgentService {
     return (response);
   }
 
+  static async updateUnfavoritedCompanyBids(id, companyId) {
+    const response = await this.post(`/companies/${id}/unfavorite/${companyId}${PATH}`, null);
+    return (response);
+  }
+
   static getDefaultBid() {
     return {
       jobId: 0,

@@ -135,12 +135,12 @@ class JobClosePopup extends Component {
     }
 
     // Set load's status as Job Ended
-    const loadsFinish = {
+    /* const loadsFinish = {
       id: 0,
       ids: loadsToFinish,
       status: 'Job Ended'
     };
-    LoadService.closeLoads(loadsFinish);
+    LoadService.closeLoads(loadsFinish); */
 
     // bubble to parent
     closeJobModalPopup();

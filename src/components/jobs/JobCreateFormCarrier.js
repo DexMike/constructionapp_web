@@ -537,7 +537,6 @@ class JobCreateFormCarrier extends Component {
         companiesId: profile.companyId,
         name,
         status: 'Published And Offered',
-        isFavorited: false,
         startAddress: startAddress.id,
         endAddress: endAddress.id,
         startTime: moment.tz(

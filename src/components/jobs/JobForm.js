@@ -318,6 +318,7 @@ class JobForm extends Component {
       carrier,
       allTruckTypes
     } = this.state;
+    const { bid } = this.props;
 
     const trucks = allTruckTypes.join(', ');
 
@@ -327,14 +328,25 @@ class JobForm extends Component {
     let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
-    if (job.status === 'Published And Offered' && companyType === 'Carrier') {
+    if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       displayStatus = 'On Offer';
+      if (bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
+        displayStatus = 'Requested';
+      }
     }
     if (job.status === 'Booked' || job.status === 'Allocated'
       || job.status === 'In Progress' || job.status === 'Job Complete'
     ) {
       // showPhone = `Telephone: ${TFormat.asPhoneText(job.company.phone)}`;
-      showPhone = TFormat.asPhoneText(job.company.phone);
+      if (companyType === 'Carrier') {
+        // showPhone = TFormat.asPhoneText(job.company.phone);
+        showPhone = job.company.phone;
+      }
+      if (companyType === 'Customer' && carrier) {
+        // showPhone = TFormat.asPhoneText(carrier.phone);
+        showPhone = carrier.phone;
+      }
+      showPhone = TFormat.asPhoneText(showPhone);
     }
     return (
       <React.Fragment>
@@ -342,13 +354,18 @@ class JobForm extends Component {
           <h3 className="subhead">
             Job: {job.name}
           </h3>
-          {carrier && (
+          {(carrier && companyType === 'Customer') && (
             <React.Fragment>
               Carrier: {carrier ? carrier.legalName : ''}
-              <br/>
             </React.Fragment>
           )}
-          Producer: {job.company.legalName}
+          {
+            (companyType === 'Carrier') && (
+              <React.Fragment>
+                Producer: {job.company.legalName}
+              </React.Fragment>
+            )
+          }
           {this.renderPhone(showPhone)}
           <br/>
           {this.renderMinimumInsurance()}
@@ -368,7 +385,7 @@ class JobForm extends Component {
         {companyType === 'Carrier' && (
           <div className="col-md-4">
             <h3 className="subhead">
-              Job Status: {job.status}
+              Job Status: {displayStatus}
             </h3>
             {
               // job.status === 'Job Completed'
@@ -908,12 +925,17 @@ JobForm.propTypes = {
   job: PropTypes.shape({
     id: PropTypes.number
   }),
+  bid: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array
+  ]),
   companyCarrier: PropTypes.number,
   handlePageClick: PropTypes.func.isRequired
 };
 
 JobForm.defaultProps = {
   job: null,
+  bid: null,
   companyCarrier: null
 };
 
