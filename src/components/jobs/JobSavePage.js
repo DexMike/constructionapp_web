@@ -981,7 +981,13 @@ class JobSavePage extends Component {
     newJob.status = 'Job Completed';
     newJob.startAddress = job.startAddress.id;
     newJob.endAddress = job.endAddress.id;
-    await JobService.updateJob(newJob);
+    newJob.actualEndTime = moment.utc().format();
+    try {
+      await JobService.updateJob(newJob);
+    } catch (e) {
+      // console.log(">> NOT SAVED TCL: JobSavePage -> closeJobModal -> e", e)  
+    }
+    
 
     job.status = 'Job Completed';
     this.setState({
