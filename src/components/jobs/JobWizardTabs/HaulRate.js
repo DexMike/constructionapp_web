@@ -13,6 +13,7 @@ import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
 import GeoUtils from '../../../utils/GeoUtils';
 import ReactTooltip from 'react-tooltip';
+import DeliveryCostsSummary from "./DeliveryCostsSummary";
 
 
 // import USstates from '../../utils/usStates';
@@ -265,7 +266,6 @@ class HaulRate extends PureComponent {
     const {data, tabMaterials} = {...this.props};
     const {rateCalculator} = {...data};
 
-
     const haulCostPerTonHour = data.ratePerPayType;
     let oneWayCostPerTonHourPerMile = 0;
     let deliveredPricePerTon = 0;
@@ -289,155 +289,15 @@ class HaulRate extends PureComponent {
     }
 
     return (
-      <React.Fragment>
-        <Row className="col-md-12">
-          <hr/>
-        </Row>
-        <Row className="col-md-12">
-          <Row className="col-md-12">
-            {tabMaterials.estMaterialPricing > 0 &&
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12 ">
-                <span className="form__form-group-label">Delivered Price</span>
-              </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
-              </Row>
-            </div>
-            }
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12 ">
-                <span className="form__form-group-label">Haul Costs</span>
-              </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
-              </Row>
-            </div>
-          </Row>
-          <Row className="col-md-12">
-            {tabMaterials.estMaterialPricing > 0 &&
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Material Price per ton</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      {tabMaterials.estMaterialPricing}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Delivered Price per ton</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      {deliveredPricePerTon}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Delivered Price for job</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      {deliveredPriceJob}
-                    </span>
-                </div>
-              </Row>
-            </div>
-            }
-            <div className="col-md-6 form__form-group">
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">One way cost / {data.payType} / mile</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      {oneWayCostPerTonHourPerMile}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Haul Cost per {data.payType}</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      {haulCostPerTonHour}
-                    </span>
-                </div>
-              </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Estimated Cost for Job</span>
-                </div>
-                <div className="col-md-1 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      $
-                    </span>
-                </div>
-                <div className="col-md-3 form__form-group">
-                    <span style={{
-                    }}
-                    >
-                      {estimatedCostForJob}
-                    </span>
-                </div>
-              </Row>
-            </div>
-          </Row>
-        </Row>
-      </React.Fragment>
+      <DeliveryCostsSummary
+        estMaterialPricing={tabMaterials.estMaterialPricing}
+        deliveredPricePerTon={deliveredPricePerTon}
+        deliveredPriceJob={deliveredPriceJob}
+        payType={data.payType}
+        oneWayCostPerTonHourPerMile={oneWayCostPerTonHourPerMile}
+        haulCostPerTonHour={haulCostPerTonHour}
+        estimatedCostForJob={estimatedCostForJob}
+      />
     );
   }
 
@@ -979,6 +839,9 @@ class HaulRate extends PureComponent {
                   <div className="dashboard">
                     <span style={{fontSize: 16, paddingLeft: 10, color: 'rgb(102, 102, 102)'}}>Rate Calculator</span>
                   </div>
+                </Row>
+                <Row className="col-md-12">
+                  <hr/>
                 </Row>
                 {rateCalculator.rateCalcOpen && this.renderRateCalc()}
                 {this.renderDeliveryCosts()}
