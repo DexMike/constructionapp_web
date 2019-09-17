@@ -42,46 +42,18 @@ class HaulRate extends PureComponent {
 
   async componentDidMount() {
     const {data, tabPickupDelivery, tabMaterials, handleInputChange} = {...this.props};
-    let startString;
-    if (tabPickupDelivery.selectedStartAddressId > 0) {
-      const startAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
-      startString = startAddress.label;
-    } else {
-      startString = `${tabPickupDelivery.startLocationAddress1} ${tabPickupDelivery.startLocationCity} ${tabPickupDelivery.startLocationState} ${tabPickupDelivery.startLocationZip}`;
-    }
-    let endString;
-    if (tabPickupDelivery.selectedEndAddressId > 0) {
-      const endAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
-      endString = endAddress.label;
-    } else {
-      endString = `${tabPickupDelivery.endLocationAddress1} ${tabPickupDelivery.endLocationCity} ${tabPickupDelivery.endLocationState} ${tabPickupDelivery.endLocationZip}`;
-    }
-    const startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
-    const endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
-    if (!endCoordinates.lat || !startCoordinates.lat
-      || !endCoordinates.lng || !startCoordinates.lng) {
+    if (!tabPickupDelivery.startLocationLatitude || !tabPickupDelivery.startLocationLongitude
+      || !tabPickupDelivery.endLocationLatitude || !tabPickupDelivery.endLocationLongitude) {
       data.rateCalculator.invalidAddress = true;
       if (tabMaterials.quantityType === 'ton') {
-        // data.rateCalculator.estimatedTons = tabMaterials.quantity;
-        // above has to be calculated with hours
+        data.rateCalculator.estimatedTons = tabMaterials.quantity;
       } else if (tabMaterials.quantityType === 'hour') {
         data.rateCalculator.estimatedHours = tabMaterials.quantity;
       }
-      handleInputChange('tabHaulRate', data);
     } else {
       data.rateCalculator.invalidAddress = false;
-      const waypoint0 = `${startCoordinates.lat},${startCoordinates.lng}`;
-      const waypoint1 = `${endCoordinates.lat},${endCoordinates.lng}`;
-      const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);
-      const travelInfoReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
-      data.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
-      data.avgDistanceReturn = (travelInfoReturn.distance * 0.000621371192).toFixed(2);
-      data.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
-      data.avgTimeReturn = (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
-      data.rateCalculator.travelTimeEnroute =
-        (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
-      data.rateCalculator.travelTimeReturn =
-        (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
+      data.rateCalculator.travelTimeEnroute = tabPickupDelivery.avgTimeEnroute;
+      data.rateCalculator.travelTimeReturn = tabPickupDelivery.avgTimeEnroute;
       data.rateCalculator.loadTime = 0.25;
       data.rateCalculator.unloadTime = 0.25;
       const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
@@ -95,15 +67,38 @@ class HaulRate extends PureComponent {
         const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
         data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
       }
-      handleInputChange('tabHaulRate', data);
-
-
     }
+    handleInputChange('tabHaulRate', data);
     this.setState({loaded: true});
   }
 
   componentWillReceiveProps(nextProps) {
-    const {data} = {...nextProps};
+    const {data, tabPickupDelivery, tabMaterials, handleInputChange} = {...nextProps};
+    if (tabPickupDelivery.startLocationLatitude && tabPickupDelivery.startLocationLongitude
+      && tabPickupDelivery.endLocationLatitude && tabPickupDelivery.endLocationLongitude) {
+      if (tabPickupDelivery.avgTimeEnroute !== data.rateCalculator.travelTimeEnroute
+        || tabPickupDelivery.avgTimeEnroute !== data.rateCalculator.travelTimeReturn) {
+        data.rateCalculator.invalidAddress = false;
+        data.rateCalculator.travelTimeEnroute = tabPickupDelivery.avgTimeEnroute;
+        data.rateCalculator.travelTimeReturn = tabPickupDelivery.avgTimeEnroute;
+        data.rateCalculator.loadTime = 0.25;
+        data.rateCalculator.unloadTime = 0.25;
+        const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
+          + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
+        if (tabMaterials.quantityType === 'hour') {
+          data.rateCalculator.estimatedHours = tabMaterials.quantity;
+          const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
+          data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
+        } else if (tabMaterials.quantityType === 'ton') {
+          data.rateCalculator.estimatedTons = tabMaterials.quantity;
+          const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
+          data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
+        }
+        debugger;
+        handleInputChange('tabHaulRate', data);
+        this.setState({data: {...data}});
+      }
+    }
     this.setState({data: {...data}});
   }
 
@@ -285,8 +280,9 @@ class HaulRate extends PureComponent {
   }
 
   renderDeliveryCosts() {
-    const {data, tabMaterials} = {...this.props};
-    const {rateCalculator} = {...data};
+    const {data, tabMaterials, tabPickupDelivery} = {...this.props};
+
+    const truckCapacity = 22;
 
     const haulCostPerTonHour = data.ratePerPayType;
     let oneWayCostPerTonHourPerMile = 0;
@@ -298,21 +294,19 @@ class HaulRate extends PureComponent {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
       // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
       if (data.payType === 'ton') {
-        oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
+        oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
       } else {
-        const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-          + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-        oneWayCostPerTonHourPerMile = oneLoad * (parseFloat(data.ratePerPayType)) / (parseFloat(data.rateCalculator.truckCapacity)) / (parseFloat(data.avgDistanceEnroute));
+        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.travelTimeReturn) + parseFloat(tabPickupDelivery.travelTimeEnroute);
+        oneWayCostPerTonHourPerMile = oneLoad * (parseFloat(data.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute));
       }
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
       if (tabMaterials.quantityType === 'ton') {
         deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
       } else {
-        const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-          + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
+        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.travelTimeReturn) + parseFloat(tabPickupDelivery.travelTimeEnroute);
         const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
-        const estimatedTons = (numTrips * parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
+        const estimatedTons = (numTrips * truckCapacity).toFixed(2);
         deliveredPriceJob = (deliveredPricePerTon * estimatedTons).toFixed(2);
       }
     }
@@ -873,6 +867,8 @@ class HaulRate extends PureComponent {
                   <hr/>
                 </Row>
                 {rateCalculator.rateCalcOpen && this.renderRateCalc()}
+                <Row className="col-md-12" style={{paddingTop: 20}}>
+                </Row>
                 {this.renderDeliveryCosts()}
               </form>
             </CardBody>

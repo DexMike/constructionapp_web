@@ -10,6 +10,7 @@ import SelectField from '../../common/TSelect';
 import '../jobs.css';
 import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
+import GeoUtils from "../../../utils/GeoUtils";
 
 
 class PickupAndDelivery extends PureComponent {
@@ -35,6 +36,45 @@ class PickupAndDelivery extends PureComponent {
   componentWillReceiveProps(nextProps) {
     const {data} = {...nextProps};
     this.setState({data: {...data}});
+  }
+
+  async componentWillUnmount() {
+    const {data, handleInputChange} = {...this.props};
+
+    let startString;
+    if (data.selectedStartAddressId > 0) {
+      const startAddress = data.allAddresses.find(item => item.value === data.selectedStartAddressId);
+      startString = startAddress.label;
+    } else {
+      startString = `${data.startLocationAddress1} ${data.startLocationCity} ${data.startLocationState} ${data.startLocationZip}`;
+    }
+    let endString;
+    if (data.selectedEndAddressId > 0) {
+      const endAddress = data.allAddresses.find(item => item.value === data.selectedEndAddressId);
+      endString = endAddress.label;
+    } else {
+      endString = `${data.endLocationAddress1} ${data.endLocationCity} ${data.endLocationState} ${data.endLocationZip}`;
+    }
+    const startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
+    const endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
+    data.startLocationLatitude = startCoordinates.lat;
+    data.startLocationLongitude = startCoordinates.lng;
+    data.endLocationLatitude = endCoordinates.lat;
+    data.endLocationLongitude = endCoordinates.lng;
+    debugger;
+    if (data.startLocationLatitude && data.startLocationLongitude
+      && data.endLocationLatitude && data.endLocationLongitude) {
+      debugger;
+      const waypoint0 = `${data.startLocationLatitude},${data.startLocationLongitude}`;
+      const waypoint1 = `${data.endLocationLatitude},${data.endLocationLongitude}`;
+      const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);
+      const travelInfoReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+      data.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
+      data.avgDistanceReturn = (travelInfoReturn.distance * 0.000621371192).toFixed(2);
+      data.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
+      data.avgTimeReturn = (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
+    }
+    handleInputChange('tabPickupDelivery', data);
   }
 
   handleStartAddressIdChange(e) {
