@@ -2,7 +2,17 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Row, Container, Col } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Row,
+  Container,
+  Col,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button } from 'reactstrap';
 import './jobs.css';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
@@ -16,6 +26,7 @@ import ProfileService from '../../api/ProfileService';
 import TMapLive from '../common/TMapLive';
 import TMap from '../common/TMap';
 import GeoUtils from '../../utils/GeoUtils';
+import TSpinner from '../common/TSpinner';
 
 class JobForm extends Component {
   constructor(props) {
@@ -56,12 +67,17 @@ class JobForm extends Component {
       shape: {},
       timeAndDistance: '',
       instructions: [],
-      markersGroup: []
+      markersGroup: [],
+      approveLoadsModal: false,
+      approvingLoads: false,
+      approvingLoadsError: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
     this.getLoads = this.getLoads.bind(this);
+    this.toggleApproveLoadsModal = this.toggleApproveLoadsModal.bind(this);
+    this.approveAllLoads = this.approveAllLoads.bind(this);
   }
 
   async componentDidMount() {
@@ -224,10 +240,36 @@ class JobForm extends Component {
     }
   }
 
+  toggleApproveLoadsModal() {
+    const {approveLoadsModal} = this.state;
+    this.setState({
+      approveLoadsModal: !approveLoadsModal,
+      approvingLoadsError: false
+    });
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
+  }
+
+  async approveAllLoads() {
+    const { job } = this.props;
+    let approvingLoadsError = false;
+    this.setState({ approvingLoads: true });
+    try {
+      const response = await LoadService.approveJobLoads(job);
+      if (response === true) {
+        window.location.reload();
+      } else {
+        approvingLoadsError = true;
+      }
+    } catch (e) {
+      approvingLoadsError = true;
+      // console.log(e);
+    }
+    this.setState({ approvingLoads: false, approvingLoadsError });
   }
 
   materialsAsString(materials) {
@@ -267,6 +309,84 @@ class JobForm extends Component {
       );
     }
     return false;
+  }
+
+  renderApproveAllLoadsButton() {
+    const { companyType, loads } = this.state;
+    let approvedLoads = 0;
+    loads.forEach((load) => {
+      if (load.loadStatus === 'Approved') approvedLoads += 1;
+    });
+    if (companyType !== 'Carrier' && loads.length > 0
+      && approvedLoads !== loads.length) {
+      return (
+        <Button
+          onClick={() => this.toggleApproveLoadsModal()}
+          className="secondaryButton"
+        >
+          Approve All Loads
+        </Button>
+      );
+    }
+    return false;
+  }
+
+  renderApproveAllLoadsModal() {
+    const { approveLoadsModal, approvingLoads, approvingLoadsError } = this.state;
+    return (
+      <React.Fragment>
+        <Modal isOpen={approveLoadsModal} toggle={this.toggleApproveLoadsModal} className="status-modal">
+          <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
+            <div style={{ fontSize: 16, color: '#FFF' }}>
+              { approvingLoadsError ? 'Error Message' : 'Confirmation' }
+            </div>
+          </ModalHeader>
+          <ModalBody className="text-left">
+            <p>
+              {
+                approvingLoadsError ? 'There was an error when trying to approve all the loads. Please try again now or after some time has passed.'
+                  : 'Are you sure you want to approve all of the submitted loads for this job?'
+              }
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Row>
+              <Col md={12} className="text-right">
+                <Button
+                  color="secondary"
+                  onClick={this.toggleApproveLoadsModal}
+                  disabled={approvingLoads}
+                >
+                  {
+                    approvingLoadsError ? 'Ok' : 'Cancel'
+                  }
+                </Button>
+                &nbsp;
+                {
+                  !approvingLoadsError && (
+                    <Button
+                      color="primary"
+                      onClick={() => this.approveAllLoads()}
+                      disabled={approvingLoads}
+                    >
+                      {
+                        approvingLoads ? (
+                          <TSpinner
+                            color="#808080"
+                            loaderSize={10}
+                            loading
+                          />
+                        ) : 'Yes, approve all'
+                      }
+                    </Button>
+                  )
+                }
+              </Col>
+            </Row>
+          </ModalFooter>
+        </Modal>
+      </React.Fragment>
+    );
   }
 
   renderMinimumInsurance() {
@@ -529,6 +649,10 @@ class JobForm extends Component {
         >
           Load Information
         </h3>
+        {this.renderApproveAllLoadsModal()}
+        {
+          this.renderApproveAllLoadsButton()
+        }
         {job && <LoadsTable loads={loads} job={job} expandedRow={this.onExpandedChanged} />}
       </React.Fragment>
     );
