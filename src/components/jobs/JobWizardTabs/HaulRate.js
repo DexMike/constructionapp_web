@@ -9,11 +9,11 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import '../jobs.css';
+import ReactTooltip from 'react-tooltip';
 import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
 import GeoUtils from '../../../utils/GeoUtils';
-import ReactTooltip from 'react-tooltip';
-import DeliveryCostsSummary from "./DeliveryCostsSummary";
+import DeliveryCostsSummary from './DeliveryCostsSummary';
 
 
 // import USstates from '../../utils/usStates';
@@ -122,6 +122,19 @@ class HaulRate extends PureComponent {
     data.rateCalculator.estimatedTons = value;
     const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
     data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
+
+    // update unselected rate
+    if (data.rateCalculator.rateTypeRadio === 'ton') {
+      const estimatedTotalPrice = (data.rateCalculator.estimatedTons * data.rateCalculator.ratePerTon).toFixed(2);
+      data.rateCalculator.ratePerHour = data.rateCalculator.estimatedHours > 0
+        ? (estimatedTotalPrice / data.rateCalculator.estimatedHours).toFixed(2)
+        : 0;
+    } else if (data.rateCalculator.rateTypeRadio === 'hour') {
+      const estimatedTotalPrice = (data.rateCalculator.estimatedHours * data.rateCalculator.ratePerHour).toFixed(2);
+      data.rateCalculator.ratePerTon = data.rateCalculator.estimatedTons > 0
+        ? (estimatedTotalPrice / data.rateCalculator.estimatedTons).toFixed(2)
+        : 0;
+    }
     handleInputChange('tabHaulRate', data);
   }
 
@@ -154,6 +167,15 @@ class HaulRate extends PureComponent {
     data.rateCalculator.estimatedHours = value;
     const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
     data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
+
+    // update unselected rate
+    if (data.rateCalculator.rateTypeRadio === 'hour') {
+      const estimatedTotalPrice = (data.rateCalculator.estimatedHours * data.rateCalculator.ratePerHour).toFixed(2);
+      data.rateCalculator.ratePerTon = data.rateCalculator.estimatedTons > 0
+        ? (estimatedTotalPrice / data.rateCalculator.estimatedTons).toFixed(2)
+        : 0;
+    }
+
     handleInputChange('tabHaulRate', data);
   }
 
@@ -274,7 +296,14 @@ class HaulRate extends PureComponent {
     // const sufficientInfo = (parseFloat(data.avgTimeEnroute) + parseFloat(data.avgTimeReturn)) * parseFloat(data.ratePerPayType);
     if (haulCostPerTonHour > 0) {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
-      oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
+      // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
+      if (data.payType === 'ton') {
+        oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
+      } else {
+        const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
+          + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
+        oneWayCostPerTonHourPerMile = oneLoad * (parseFloat(data.ratePerPayType)) / (parseFloat(data.rateCalculator.truckCapacity)) / (parseFloat(data.avgDistanceEnroute));
+      }
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
       if (tabMaterials.quantityType === 'ton') {
@@ -650,12 +679,12 @@ class HaulRate extends PureComponent {
             </div>
           </Row>
           <Row className="col-md-12">
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Load Time (hrs)</span>
                 </div>
-                <div className="col-md-5 form__form-group" style={{marginTop: 8}}>
+                <div className="col-md-5 form__form-group">
                   <TField
                     input={
                       {
@@ -671,11 +700,11 @@ class HaulRate extends PureComponent {
                   />
                 </div>
               </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+              <Row className="col-md-12" style={{paddingTop: 20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Unload Time (hrs)</span>
                 </div>
-                <div className="col-md-5 form__form-group" style={{marginTop: 8}}>
+                <div className="col-md-5 form__form-group">
                   <TField
                     input={
                       {
@@ -693,10 +722,10 @@ class HaulRate extends PureComponent {
                 </div>
               </Row>
             </div>
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label" style={{fontSize: 12, marginTop: -1}}>Enroute (hrs)</span>
+                <div className="col-md-7 form__form-group">
+                  <span className="form__form-group-label">Enroute (hrs)</span>
                 </div>
                 <div className="col-md-5 form__form-group">
                   <TField
@@ -714,8 +743,8 @@ class HaulRate extends PureComponent {
                   />
                 </div>
               </Row>
-              <Row className="col-md-12">
-                <div className="col-md-7 form__form-group" style={{marginLeft: -20}}>
+              <Row className="col-md-12" style={{paddingTop: 20}}>
+                <div className="col-md-7 form__form-group">
                   <span className="form__form-group-label">Return Trip Home (hrs)</span>
                 </div>
                 <div className="col-md-5 form__form-group">
@@ -735,12 +764,12 @@ class HaulRate extends PureComponent {
                 </div>
               </Row>
             </div>
-            <div className="col-md-4 form__form-group">
+            <div className="col-md-4">
               <Row className="col-md-12">
-                <div className="col-md-6 form__form-group" style={{marginLeft: -20}}>
-                  <span className="form__form-group-label" style={{marginTop: -5}}>Truck Capacity</span>
+                <div className="col-md-7 form__form-group">
+                  <span className="form__form-group-label">Truck Capacity</span>
                 </div>
-                <div className="col-md-6 form__form-group">
+                <div className="col-md-5 form__form-group">
                   <TField
                     input={
                       {

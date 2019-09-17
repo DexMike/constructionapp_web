@@ -439,7 +439,7 @@ class Summary extends PureComponent {
                       fontWeight: 'bold'
                     }}
                     >
-                      {tabHaulRate.ratePerPayType}
+                      $ {tabHaulRate.ratePerPayType}
                     </span>
           </div>
         </Row>
@@ -513,7 +513,13 @@ class Summary extends PureComponent {
     // const sufficientInfo = (parseFloat(tabHaulRate.avgTimeEnroute) + parseFloat(tabHaulRate.avgTimeReturn)) * parseFloat(tabHaulRate.ratePerPayType);
     if (haulCostPerTonHour > 0) {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
-      oneWayCostPerTonHourPerMile = tabHaulRate.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabHaulRate.avgDistanceEnroute)).toFixed(2) : 0;
+      if (tabHaulRate.payType === 'ton') {
+        oneWayCostPerTonHourPerMile = tabHaulRate.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabHaulRate.avgDistanceEnroute)).toFixed(2) : 0;
+      } else {
+        const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
+          + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
+        oneWayCostPerTonHourPerMile = oneLoad * (parseFloat(tabHaulRate.ratePerPayType)) / (parseFloat(tabHaulRate.rateCalculator.truckCapacity)) / (parseFloat(tabHaulRate.avgDistanceEnroute));
+      }
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
       if (tabMaterials.quantityType === 'ton') {
@@ -532,7 +538,7 @@ class Summary extends PureComponent {
           estMaterialPricing={tabMaterials.estMaterialPricing}
           deliveredPricePerTon={deliveredPricePerTon}
           deliveredPriceJob={deliveredPriceJob}
-          payType={tabMaterials.payType}
+          payType={tabHaulRate.payType}
           oneWayCostPerTonHourPerMile={oneWayCostPerTonHourPerMile}
           haulCostPerTonHour={haulCostPerTonHour}
           estimatedCostForJob={estimatedCostForJob}

@@ -91,7 +91,7 @@ const DeliveryCostsSummary = ({
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">One way cost / {payType} / mile</span>
+                <span className="form__form-group-label">One way cost / ton / mile</span>
               </div>
               <div className="col-md-1 form__form-group">
                       <span style={{}}
