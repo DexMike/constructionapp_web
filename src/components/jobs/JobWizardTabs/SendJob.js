@@ -47,7 +47,7 @@ class SendJob extends PureComponent {
       material: tabMaterials.selectedMaterial.value
     };
 
-    const allCompanies = await CompanyService.getFavoritesNonFavoritesCompaniesByUserId(
+    const allCompanies = await CompanyService.getFavoritesByUserId(
       profile.userId,
       filters
     );

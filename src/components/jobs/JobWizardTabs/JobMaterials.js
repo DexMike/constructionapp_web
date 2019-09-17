@@ -157,9 +157,9 @@ class JobMaterials extends PureComponent {
                     </Button>
                   </div>
                 </Row>
-                <Row className="col-md-12">
+                <Row className="col-md-12" style={{paddingTop: 15}}>
                   <div className="col-md-6 form__form-group">
-                    <span className="form__form-group-label">How many <span style={{
+                    <span className="form__form-group-label" style={{paddingTop: 20}}>How many <span style={{
                       fontWeight: 'bold',
                       color: 'black'
                     }}
