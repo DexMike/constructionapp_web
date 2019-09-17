@@ -61,10 +61,8 @@ class PickupAndDelivery extends PureComponent {
     data.startLocationLongitude = startCoordinates.lng;
     data.endLocationLatitude = endCoordinates.lat;
     data.endLocationLongitude = endCoordinates.lng;
-    debugger;
     if (data.startLocationLatitude && data.startLocationLongitude
       && data.endLocationLatitude && data.endLocationLongitude) {
-      debugger;
       const waypoint0 = `${data.startLocationLatitude},${data.startLocationLongitude}`;
       const waypoint1 = `${data.endLocationLatitude},${data.endLocationLongitude}`;
       const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);

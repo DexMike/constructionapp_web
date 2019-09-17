@@ -94,7 +94,6 @@ class HaulRate extends PureComponent {
           const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
           data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
         }
-        debugger;
         handleInputChange('tabHaulRate', data);
         this.setState({data: {...data}});
       }
