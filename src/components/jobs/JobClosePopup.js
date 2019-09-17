@@ -11,6 +11,8 @@ import {
   Container,
   Card
 } from 'reactstrap';
+import CloneDeep from 'lodash.clonedeep';
+import moment from 'moment';
 import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -26,6 +28,7 @@ class JobClosePopup extends Component {
 
     this.state = {
       loaded: false,
+      profile: null,
       loads: []
     };
 
@@ -73,6 +76,7 @@ class JobClosePopup extends Component {
     this.setState({
       loads,
       drivers,
+      profile,
       loaded: true
     });
   }
@@ -84,8 +88,11 @@ class JobClosePopup extends Component {
 
   async closeJob() {
     const { jobId, jobName, closeJobModalPopup } = this.props;
-    const { loads } = this.state;
+    const { loads, profile } = this.state;
     const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+
+    const job = await JobService.getJobById(jobId);
+    let newJob = [];
 
     // Specs at SG-811
     // 1) All existing loads get to finish
@@ -100,38 +107,58 @@ class JobClosePopup extends Component {
 
     // 3) All drivers need text notification
     let gpsTrackings = [];
-    try {
-      gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
-    } catch (error) {
-      // console.log('Unable to retrieve GPS for loads');
-    }
 
-    const allSms = [];
-    if (Object.entries(gpsTrackings).length > 0) {
-      // console.log('>>>GOT LOADS: ', gpsTrackings, typeof gpsTrackings);
-      for (const tracking of gpsTrackings) {
-        if (tracking.status !== 'Ended') {
-          // a) If they are in progress on load driver gets a text: “ Job <job name> is ending.
-        // Finish your load, and then you are done with the job.”
-          const notificationInProgress = {
-            to: UserUtils.phoneToNumberFormat(tracking.telephone),
-            body: `[${envString}] Job ${jobName} is ending. Finish your load, and then you are done with the job.`
-          };
-          allSms.push(TwilioService.createSms(notificationInProgress));
-        } else {
-          // b) If the driver does not have a load in progress they get text:
-          // “<job name> has ended. Do not pickup any more material.”
-          const notificationNotInProgress = {
-            to: UserUtils.phoneToNumberFormat(tracking.telephone),
-            body: `[${envString}] Job ${jobName} is ending. Finish your load, and then you are done with the job.`
-          };
-          allSms.push(TwilioService.createSms(notificationNotInProgress));
-        }
-        // Next step is performed by the parent:
-        // Carrier admin:  “<job name> has ended. Do not pickup any more material.”
+    if (allLoads.length > 0) { // there's loads
+      try {
+        gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
+      } catch (error) {
+        console.error('Unable to retrieve GPS for loads:', error);
       }
-      // send out all SMS
-      // await Promise.all(allSms); TEST DISABLED!!! (reenable pending)
+      const allSms = [];
+      if (Object.keys(gpsTrackings).length > 0) { // there's loads in progress, notify drivers
+        // console.log('>>>GOT LOADS: ', gpsTrackings, typeof gpsTrackings);
+        for (const tracking of gpsTrackings) {
+          if (tracking.status !== 'Ended' && tracking.status !== 'Returning') {
+            // a) If they are in progress on load driver gets a text: “ Job <job name> is ending.
+            // Finish your load, and then you are done with the job.”
+            const notificationInProgress = {
+              to: UserUtils.phoneToNumberFormat(tracking.telephone),
+              body: `${envString}Job ${jobName} is ending. Finish your load, and then you are done with the job.`
+            };
+            allSms.push(TwilioService.createSms(notificationInProgress));
+          } else {
+            // b) If the driver does not have a load in progress they get text:
+            // “<job name> has ended. Do not pickup any more material.”
+            const notificationNotInProgress = {
+              to: UserUtils.phoneToNumberFormat(tracking.telephone),
+              body: `${envString}${jobName} has ended. Do not pickup any more material.`
+            };
+            allSms.push(TwilioService.createSms(notificationNotInProgress));
+          }
+          // Next step is performed by the parent:
+          // Carrier admin:  “<job name> has ended. Do not pickup any more material.”
+        }
+        // send out all SMS
+        await Promise.all(allSms);
+
+        // changing job status to 'Job Ended'
+        newJob = CloneDeep(job);
+        newJob.status = 'Job Ended';
+        newJob.modifiedOn = moment.utc().format();
+        newJob.modifiedBy = profile.userId;
+      } else { // no loads in progress, set job status to 'Job Completed'
+        newJob = CloneDeep(job);
+        newJob.status = 'Job Completed';
+        newJob.actualEndTime = moment.utc().format();
+        newJob.modifiedOn = moment.utc().format();
+        newJob.modifiedBy = profile.userId;
+      }
+    } else { // there's no loads, just complete the job
+      newJob = CloneDeep(job);
+      newJob.status = 'Job Completed';
+      newJob.actualEndTime = moment.utc().format();
+      newJob.modifiedOn = moment.utc().format();
+      newJob.modifiedBy = profile.userId;
     }
 
     // Set load's status as Job Ended
@@ -141,6 +168,12 @@ class JobClosePopup extends Component {
       status: 'Job Ended'
     };
     LoadService.closeLoads(loadsFinish); */
+
+    try {
+      newJob = await JobService.updateJob(newJob);
+    } catch (e) {
+      console.error('>> NOT SAVED: JobClosePopup -> closeJob -> e', e)  ;
+    }
 
     // bubble to parent
     closeJobModalPopup();
