@@ -977,7 +977,6 @@ class JobSavePage extends Component {
     }
 
     this.loadSavePage();
-
     // TODO -> Graciously notify the user that we ended the job.
   }
 
