@@ -209,7 +209,7 @@ class Summary extends PureComponent {
       const startDestination = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
       return (
         <React.Fragment>
-          <Row className="col-md-12" style={{marginTop: -25}}>
+          <Row className="col-md-12" style={{marginTop: -15}}>
             <div className="col-md-12 form__form-group">
               <span className="form__form-group-label">{startDestination.label}</span>
             </div>
@@ -247,7 +247,7 @@ class Summary extends PureComponent {
     if (tabPickupDelivery.selectedEndAddressId > 0) {
       const endDestination = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
       return (
-        <Row className="col-md-12" style={{marginTop: -25}}>
+        <Row className="col-md-12" style={{marginTop: -15}}>
           <div className="col-md-12 form__form-group">
             <span className="form__form-group-label">{endDestination.label}</span>
           </div>
