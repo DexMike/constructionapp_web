@@ -1760,6 +1760,7 @@ class JobSavePage extends Component {
       accessForbidden
     } = this.state;
     // console.log('>>>CO:', companyType);
+    console.log(1763, job.status);
     if (accessForbidden) {
       return (
         <Container className="container">
@@ -1798,8 +1799,22 @@ class JobSavePage extends Component {
                 {companyType == 'Customer' && this.renderCloseButton()}
               </div>
             </div>
-            {this.renderBidsTable()}
-            {this.renderJobForm(companyType, job)}
+            {
+              job.status && (job.status === 'In Progress' || job.status === 'Job Completed' || job.status === 'Allocated') ? (
+                <React.Fragment>
+                  {this.renderJobForm(companyType, job)}
+                  {this.renderBidsTable()}
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  {this.renderBidsTable()}
+                  {this.renderJobForm(companyType, job)}
+                </React.Fragment>
+              )
+            }
+            {
+              // job.status && (job.status !== 'In Progress' || job.status !== 'Job Completed' || job.status !== 'Allocated') && 
+            }
           </div>
         );
       }
