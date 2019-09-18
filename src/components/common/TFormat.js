@@ -153,9 +153,13 @@ class TFormat {
 
   static asPhoneText(textValue) {
     // <NumberFormat format="+1 (###) ###-####" mask="_" />
+    let newTextValue = textValue;
+    if (newTextValue && newTextValue.includes('+1')) {
+      newTextValue = newTextValue.replace('+1', '');
+    }
     return (
       <NumberFormat
-        value={textValue}
+        value={newTextValue}
         displayType="text"
         format="(###) ###-####"
         mask=""

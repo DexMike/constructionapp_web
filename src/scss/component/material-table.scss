@@ -29,6 +29,8 @@
   transition: 0.3s;
   cursor: pointer;
 
+  white-space: normal;
+
   &[aria-checked="true"] {
 
     @include themify($themes) {
@@ -53,6 +55,8 @@
 }
 
 .material-table__cell.material-table__cell--sort {
+
+  white-space: normal;
 
   span {
     transition: 0.3s;

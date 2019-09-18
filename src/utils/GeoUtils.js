@@ -1,3 +1,6 @@
+const offsetFactor = 0.2;
+let smallFactor = 0;
+
 class GeoUtils {
   static getDistance(
     waypoint0,
@@ -88,6 +91,35 @@ class GeoUtils {
       data = location.Location.Address.Label;
     });
     return data;
+  }
+
+  // sets a margin for a group of markers
+  static setZoomBounds(allBounds) {
+    let bounds = allBounds;
+    const boundParams = {
+      top: bounds.getTop(),
+      left: bounds.getLeft(),
+      bottom: bounds.getBottom(),
+      right: bounds.getRight()
+    };
+    if ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom) <= 0.0001))) {
+      smallFactor = 0.01;
+    }
+    boundParams.top += ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
+      + smallFactor) * offsetFactor);
+    boundParams.left -= ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
+      + smallFactor) * offsetFactor);
+    // not needed since bottom pin fits
+    // boundParams.bottom -= (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
+    //   * offsetFactor);
+    boundParams.right += ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
+      + smallFactor) * offsetFactor);
+    this.boundingBoxDistance = Math.sqrt((((boundParams.top - boundParams.bottom) ** 2))
+      + (((boundParams.left - boundParams.right) ** 2)));
+    bounds = new H.geo.Rect(boundParams.top, boundParams.left, boundParams.bottom,
+      boundParams.right);
+
+    return bounds;
   }
 }
 

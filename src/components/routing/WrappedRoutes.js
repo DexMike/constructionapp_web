@@ -21,6 +21,7 @@ import FileUploadPage from '../FileUploadPage';
 import ReportsPage from '../reports/ReportsPage';
 import PaymentsPage from '../payments/PaymentsPage';
 import PaymentDetails from '../payments/PaymentDetails';
+import EquipmentGeneralMap from '../equipments/EquipmentGeneralMap';
 
 class WrappedRoutes extends PureComponent {
   render() {
@@ -162,6 +163,12 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/fileupload"
             component={FileUploadPage}
+          />
+
+          <Route
+            exact
+            path="/generalmap"
+            component={EquipmentGeneralMap}
           />
 
         </div>
