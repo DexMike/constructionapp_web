@@ -976,19 +976,7 @@ class JobSavePage extends Component {
       // console.log('Unable to notify admin');
     }
 
-    // change job status and cleanup
-    const newJob = CloneDeep(job);
-    newJob.status = 'Job Completed';
-    newJob.startAddress = job.startAddress.id;
-    newJob.endAddress = job.endAddress.id;
-    await JobService.updateJob(newJob);
-
-    job.status = 'Job Completed';
-    this.setState({
-      job
-    });
-
-    this.forceUpdate();
+    this.loadSavePage();
     // TODO -> Graciously notify the user that we ended the job.
   }
 
@@ -1257,7 +1245,9 @@ class JobSavePage extends Component {
 
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status !== 'Job Ended') {
+    if (job.status === 'Allocated'
+    || job.status === 'Booked'
+    || job.status === 'In Progress') {
       return (
         <TSubmitButton
           onClick={() => this.toggleCloseModal()}
@@ -1798,8 +1788,20 @@ class JobSavePage extends Component {
                 {companyType == 'Customer' && this.renderCloseButton()}
               </div>
             </div>
-            {this.renderBidsTable()}
-            {this.renderJobForm(companyType, job)}
+            {
+              job.status && (job.status === 'In Progress' || job.status === 'Job Completed' || job.status === 'Allocated'
+               || job.status === 'Booked' || job.status === 'Job Ended') ? (
+                <React.Fragment>
+                  {this.renderJobForm(companyType, job)}
+                  {this.renderBidsTable()}
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  {this.renderBidsTable()}
+                  {this.renderJobForm(companyType, job)}
+                </React.Fragment>
+              )
+            }
           </div>
         );
       }

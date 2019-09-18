@@ -25,7 +25,8 @@ class TField extends PureComponent {
 TField.propTypes = {
   input: PropTypes.shape({
     onChange: PropTypes.func,
-    name: PropTypes.string
+    name: PropTypes.string,
+    disabled: PropTypes.bool
   }).isRequired,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
