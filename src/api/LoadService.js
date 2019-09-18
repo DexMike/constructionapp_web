@@ -50,7 +50,7 @@ class LoadService extends AgentService {
     return (response);
   }
 
-  static async approveJobLoads(id) {
+  static async approveJobSubmittedLoads(id) {
     const load = {
       jobId: id
     };
