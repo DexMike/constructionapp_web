@@ -1799,7 +1799,8 @@ class JobSavePage extends Component {
               </div>
             </div>
             {
-              job.status && (job.status === 'In Progress' || job.status === 'Job Completed' || job.status === 'Allocated') ? (
+              job.status && (job.status === 'In Progress' || job.status === 'Job Completed' || job.status === 'Allocated'
+               || job.status === 'Booked' || job.status === 'Job Ended') ? (
                 <React.Fragment>
                   {this.renderJobForm(companyType, job)}
                   {this.renderBidsTable()}
