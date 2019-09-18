@@ -313,12 +313,12 @@ class JobForm extends Component {
 
   renderApproveAllLoadsButton() {
     const { companyType, loads } = this.state;
-    let approvedLoads = 0;
+    let submittedLoads = 0;
     loads.forEach((load) => {
-      if (load.loadStatus === 'Approved') approvedLoads += 1;
+      if (load.loadStatus === 'Submitted') submittedLoads += 1;
     });
     if (companyType !== 'Carrier' && loads.length > 0
-      && approvedLoads !== loads.length) {
+      && submittedLoads > 0) {
       return (
         <Button
           onClick={() => this.toggleApproveLoadsModal()}
