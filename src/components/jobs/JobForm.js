@@ -59,12 +59,49 @@ class JobForm extends Component {
       markersGroup: []
     };
 
+    this.loadJobForm = this.loadJobForm.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
     this.getLoads = this.getLoads.bind(this);
   }
 
   async componentDidMount() {
+    await this.loadJobForm();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    if (nextProps.job) {
+      await this.loadJobForm();
+    }
+    if (nextProps.companyCarrier) {
+      let { carrier } = this.state;
+      if (!carrier) {
+        carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
+        this.setState({
+          carrier
+        });
+      }
+    }
+  }
+
+  onExpandedChanged(rowId) {
+    if (rowId !== 0) {
+      this.setState({
+        showMainMap: false
+      });
+    } else {
+      this.setState({
+        showMainMap: true
+      });
+    }
+  }
+
+  getLoads() {
+    const { loads } = this.state;
+    return loads;
+  }
+
+  async loadJobForm() {
     const profile = await ProfileService.getProfile();
     const { job, companyCarrier } = this.props;
     let {
@@ -125,57 +162,6 @@ class JobForm extends Component {
       time,
       allTruckTypes
     });
-  }
-
-  async componentWillReceiveProps(nextProps) {
-    if (nextProps.job) {
-      const { job } = nextProps;
-      Object.keys(job)
-        .map((key) => {
-          if (job[key] === null) {
-            job[key] = '';
-          }
-          return true;
-        });
-      const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
-      this.setState({
-        ...job,
-        allTruckTypes,
-        loaded: true
-      });
-      if (nextProps.companyCarrier === null) { // we're copying/saving a new job
-        this.setState({
-          companyCarrier: null,
-          carrier: null
-        });
-      }
-    }
-    if (nextProps.companyCarrier) {
-      let { carrier } = this.state;
-      if (!carrier) {
-        carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
-        this.setState({
-          carrier
-        });
-      }
-    }
-  }
-
-  onExpandedChanged(rowId) {
-    if (rowId !== 0) {
-      this.setState({
-        showMainMap: false
-      });
-    } else {
-      this.setState({
-        showMainMap: true
-      });
-    }
-  }
-
-  getLoads() {
-    const { loads } = this.state;
-    return loads;
   }
 
   isFormValid() {
@@ -333,6 +319,9 @@ class JobForm extends Component {
       if (bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
         displayStatus = 'Requested';
       }
+    }
+    if (job.status === 'Job Ended') {
+      displayStatus = 'Job Finishing';
     }
     if (job.status === 'Booked' || job.status === 'Allocated'
       || job.status === 'In Progress' || job.status === 'Job Complete'

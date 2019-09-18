@@ -976,25 +976,7 @@ class JobSavePage extends Component {
       // console.log('Unable to notify admin');
     }
 
-    // change job status and cleanup
-    const newJob = CloneDeep(job);
-    newJob.status = 'Job Completed';
-    newJob.startAddress = job.startAddress.id;
-    newJob.endAddress = job.endAddress.id;
-    newJob.actualEndTime = moment.utc().format();
-    try {
-      await JobService.updateJob(newJob);
-    } catch (e) {
-      // console.log(">> NOT SAVED TCL: JobSavePage -> closeJobModal -> e", e)  
-    }
-    
-
-    job.status = 'Job Completed';
-    this.setState({
-      job
-    });
-
-    this.forceUpdate();
+    this.loadSavePage();
     // TODO -> Graciously notify the user that we ended the job.
   }
 
@@ -1263,7 +1245,9 @@ class JobSavePage extends Component {
 
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status !== 'Job Ended') {
+    if (job.status === 'Allocated'
+    || job.status === 'Booked'
+    || job.status === 'In Progress') {
       return (
         <TSubmitButton
           onClick={() => this.toggleCloseModal()}
