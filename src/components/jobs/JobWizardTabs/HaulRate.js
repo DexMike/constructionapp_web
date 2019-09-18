@@ -5,7 +5,8 @@ import {
   CardBody,
   // Container,
   Col,
-  Row
+  Row,
+  Input
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import '../jobs.css';
@@ -419,8 +420,8 @@ class HaulRate extends PureComponent {
           <div className="col-md-4 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
-                <input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18}}
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'ton'}
                        onClick={() => this.handleSetEstimateType('ton')}/>
               </div>
@@ -453,8 +454,8 @@ class HaulRate extends PureComponent {
           <div className="col-md-4 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
-                <input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
-                       style={{marginTop: 9, width: 18, height: 18}}
+                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
                        checked={rateCalculator.rateTypeRadio === 'ton'} onClick={() => this.handleSetRateType('ton')}/>
               </div>
               <div className="col-md-10 form__form-group">
@@ -550,8 +551,8 @@ class HaulRate extends PureComponent {
           <div className="col-md-4 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
-                <input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18}}
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'hour'}
                        onClick={() => this.handleSetEstimateType('hour')}/>
               </div>
@@ -585,8 +586,8 @@ class HaulRate extends PureComponent {
           <div className="col-md-4 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
-                <input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18}}
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
                        checked={rateCalculator.rateTypeRadio === 'hour'}
                        onClick={() => this.handleSetRateType('hour')}/>
               </div>
