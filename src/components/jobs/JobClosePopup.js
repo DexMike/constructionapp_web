@@ -139,7 +139,11 @@ class JobClosePopup extends Component {
           // Carrier admin:  “<job name> has ended. Do not pickup any more material.”
         }
         // send out all SMS
-        await Promise.all(allSms);
+        try {
+          await Promise.all(allSms);
+        } catch (err) {
+          console.error(err);
+        }
 
         // changing job status to 'Job Ended'
         newJob = CloneDeep(job);

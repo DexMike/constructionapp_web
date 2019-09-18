@@ -65,33 +65,13 @@ class JobForm extends Component {
     this.getLoads = this.getLoads.bind(this);
   }
 
-  componentDidMount() {
-    this.loadJobForm();
+  async componentDidMount() {
+    await this.loadJobForm();
   }
 
   async componentWillReceiveProps(nextProps) {
     if (nextProps.job) {
-      /* const { job } = nextProps;
-      Object.keys(job)
-        .map((key) => {
-          if (job[key] === null) {
-            job[key] = '';
-          }
-          return true;
-        });
-      const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
-      this.setState({
-        ...job,
-        allTruckTypes,
-        loaded: true
-      });
-      if (nextProps.companyCarrier === null) { // we're copying/saving a new job
-        this.setState({
-          companyCarrier: null,
-          carrier: null
-        });
-      } */
-      this.loadJobForm();
+      await this.loadJobForm();
     }
     if (nextProps.companyCarrier) {
       let { carrier } = this.state;
