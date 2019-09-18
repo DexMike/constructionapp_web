@@ -1496,7 +1496,7 @@ class JobWizard extends Component {
                       placeholder="Date and time of job"
                       defaultDate={jobStartDate}
                       onChange={this.jobStartDateChange}
-                      dateFormat="Y-m-d H:i"
+                      dateFormat="m/d/Y h:i K"
                       showTime
                       meta={reqHandlerStartDate}
                       id="jobstartdatetime"
@@ -1520,10 +1520,10 @@ class JobWizard extends Component {
                       placeholder="Date and time of job"
                       defaultDate={jobEndDate}
                       onChange={this.jobEndDateChange}
-                      dateFormat="Y-m-d H:i"
+                      dateFormat="m/d/Y h:i K"
                       showTime
                       meta={reqHandlerEndDate}
-                      id="jobstartdatetime"
+                      id="jobenddatetime"
                       profileTimeZone={profile.timeZone}
                     />
                   </div>
