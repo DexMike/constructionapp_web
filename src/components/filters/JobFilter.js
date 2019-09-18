@@ -19,7 +19,7 @@ import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
 import LookupsService from '../../api/LookupsService';
 import ProfileService from '../../api/ProfileService';
-
+import './Filters.css';
 // import GeoCodingService from '../../api/GeoCodingService';
 
 class JobFilter extends Component {
@@ -84,7 +84,8 @@ class JobFilter extends Component {
         equipmentType: [],
         isMarketplaceView: false,
         status: '',
-        sortBy: sortByList[0],
+        sortBy: '',
+        order: '',
         page: 0,
         rows: 5
       },
@@ -490,10 +491,9 @@ class JobFilter extends Component {
         <Col md={12}>
           <Card>
             <CardBody>
-              <form id="filter-form" className="form">
-                <Col lg={12}>
-                  <Row lg={12} id="filter-input-row">
-                    <Col md="2">
+              <form className="form">
+                <div className="flex-job-filters">
+                  <div>
                       <div className="filter-item-title">
                         Date Range
                       </div>
@@ -504,8 +504,8 @@ class JobFilter extends Component {
                         onChange={this.handleIntervalInputChange}
                         dateFormat="m/d/Y"
                       />
-                    </Col>
-                    <Col md="1">
+                    </div>
+                  <div>
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -533,8 +533,8 @@ class JobFilter extends Component {
                         }
                         placeholder={rateTypeList[0]}
                       />
-                    </Col>
-                    <Col md="1">
+                    </div>
+                  <div>
                       <div className="filter-item-title">
                         Min Rate
                       </div>
@@ -551,8 +551,8 @@ class JobFilter extends Component {
                         placeholder="Any"
                         currency
                       />
-                    </Col>
-                    <Col md="1">
+                    </div>
+                  <div>
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
@@ -567,8 +567,8 @@ class JobFilter extends Component {
                         className="filter-text"
                         placeholder="#"
                       />
-                    </Col>
-                    <Col md="2" id="truckTypeSelect">
+                    </div>
+                  <div id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -600,8 +600,8 @@ class JobFilter extends Component {
                         horizontalScroll="true"
                         selectedItems={filters.equipmentType.length}
                       />
-                    </Col>
-                    <Col md="1">
+                    </div>
+                  <div>
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
@@ -616,8 +616,8 @@ class JobFilter extends Component {
                         className="filter-text"
                         placeholder="Any"
                       />
-                    </Col>
-                    <Col md="1">
+                    </div>
+                  <div>
                       <div className="filter-item-title">
                         Zip Code
                       </div>
@@ -634,8 +634,8 @@ class JobFilter extends Component {
                         placeholder={companyZipCode}
                         type="number"
                       />
-                    </Col>
-                    <Col md="1">
+                    </div>
+                  <div>
                       <div className="filter-item-title">
                         Range (mi)
                       </div>
@@ -652,8 +652,8 @@ class JobFilter extends Component {
                         placeholder="Any"
                         type="number"
                       />
-                    </Col>
-                    <Col md="2" id="materialTypeSelect">
+                    </div>
+                  <div id="materialTypeSelect" >
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -685,10 +685,9 @@ class JobFilter extends Component {
                         horizontalScroll="true"
                         selectedItems={filters.materialType.length}
                       />
-                    </Col>
-                  </Row>
-                </Col>
-                <Col lg={12} style={{background: '#F9F9F7'}}>
+                    </div>
+                </div>
+                <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
                   <Row>
                     <Col lg={9}/>
                     <Col lg={3}>

@@ -16,10 +16,7 @@ import carrierCustomerMetrics from '../../img/Carrier_CustomerMetrics.png';
 import carrierProductMetrics from '../../img/Carrier_ProductMetrics.png';
 import carrierProjectMetrics from '../../img/Carrier_ProjectMetrics.png';
 
-import './Reports.css';
-import customerProductMetrics from '../../img/Customer_ProductMetrics.png';
-import customerCarrierMetrics from '../../img/Customer_CarrierMetrics.png';
-import customerProjectMetrics from '../../img/Customer_ProjectMetrics.png';
+import TSimpleGraph from '../common/TSimpleGraph';
 
 
 class ReportsCarrierPage extends Component {
@@ -1374,6 +1371,18 @@ class ReportsCarrierPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
+          <React.Fragment>
+            <Row>
+              <Col md={3}>
+                <TSimpleGraph
+                  type="baseline"
+                  value={50}
+                  threshold={75}
+                  asMoney={false}
+                />
+              </Col>
+            </Row>
+          </React.Fragment>
           {/*{this.renderNewJobModal()}*/}
           {this.renderGoTo()}
           {this.renderTitle()}
