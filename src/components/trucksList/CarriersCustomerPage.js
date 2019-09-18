@@ -31,6 +31,7 @@ import CarrierRow from './CarrierRow';
 // import GeoCodingService from '../../api/GeoCodingService';
 import GeoUtils from '../../utils/GeoUtils';
 import BidService from '../../api/BidService';
+import JobWizard from "../jobs/JobWizard";
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -542,7 +543,7 @@ class CarriersCustomerPage extends Component {
         return null;
       });
       // if we got a group with companyId
-      if (group.length > 0) { 
+      if (group.length > 0) {
         // delete
         this.toggleUnfavoriteModal(group[0], companyId);
       } else { // create "Favorite" Group record
@@ -555,7 +556,7 @@ class CarriersCustomerPage extends Component {
       }
     } catch (error) {
       this.setState({ carriers });
-    }    
+    }
   }
 
   handleCarrierEdit(selectedCarrier) {
@@ -779,27 +780,18 @@ class CarriersCustomerPage extends Component {
       return false;
       // alert('Please select a material type for this job');
     } */
-
     return (
       <Modal
         isOpen={modal}
         toggle={this.toggleAddJobModal}
-        className="modal-dialog--primary modal-dialog--header form"
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
-        <div className="modal__header">
-          <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleAddJobModal}
-          />
-          <div className="bold-text modal__title">Job Request</div>
-        </div>
-        <div className="modal__body" style={{ paddingTop: '25px', paddingRight: '0px' }}>
-          <JobCreateFormCarrier
+          <JobWizard
+            toggle={this.toggleAddJobModal}
             selectedCarrierId={selectedCarrier}
-            closeModal={this.toggleAddJobModal}
-            selectedMaterials={this.returnSelectedMaterials}
-            // getAllMaterials={this.retrieveAllMaterials}
+            jobRequest
           />
-        </div>
       </Modal>
     );
   }
