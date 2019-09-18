@@ -1804,8 +1804,20 @@ class JobSavePage extends Component {
                 {companyType == 'Customer' && this.renderCloseButton()}
               </div>
             </div>
-            {this.renderBidsTable()}
-            {this.renderJobForm(companyType, job)}
+            {
+              job.status && (job.status === 'In Progress' || job.status === 'Job Completed' || job.status === 'Allocated'
+               || job.status === 'Booked' || job.status === 'Job Ended') ? (
+                <React.Fragment>
+                  {this.renderJobForm(companyType, job)}
+                  {this.renderBidsTable()}
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  {this.renderBidsTable()}
+                  {this.renderJobForm(companyType, job)}
+                </React.Fragment>
+              )
+            }
           </div>
         );
       }
