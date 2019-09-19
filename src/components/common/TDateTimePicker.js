@@ -1,9 +1,7 @@
 import React, { PureComponent } from 'react';
 import moment from 'moment';
-import DatePicker from 'react-datepicker';
 import PropTypes from 'prop-types';
-import ProfileService from '../../api/ProfileService';
-import Flatpickr from "react-flatpickr";
+import Flatpickr from 'react-flatpickr';
 
 class TDateTimePickerField extends PureComponent {
   constructor(props) {

@@ -1680,7 +1680,7 @@ class JobCreateFormCarrier extends Component {
                       placeholder="Date and time of job"
                       defaultDate={jobDate}
                       onChange={this.jobDateChange}
-                      dateFormat="Y-m-d H:i"
+                      dateFormat="m/d/Y h:i K"
                       showTime
                       meta={reqHandlerDate}
                       id="jobstartdatetime"
