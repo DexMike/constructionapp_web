@@ -1245,8 +1245,7 @@ class JobSavePage extends Component {
 
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status === 'Allocated'
-    || job.status === 'Booked'
+    if (job.status === 'Booked'
     || job.status === 'In Progress') {
       return (
         <TSubmitButton
@@ -1785,7 +1784,7 @@ class JobSavePage extends Component {
                 {companyType !== 'Carrier' && this.renderCopyButton()}
               </div>
               <div className="col-md-3">
-                {companyType == 'Customer' && this.renderCloseButton()}
+                {companyType === 'Customer' && this.renderCloseButton()}
               </div>
             </div>
             {

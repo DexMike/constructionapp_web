@@ -200,17 +200,17 @@ class JobClosePopup extends Component {
           </ModalHeader>
           <ModalBody className="text-left">
             <p style={{ fontSize: 14 }}>
-              Please confirm that you want to close this job
+              Are you sure you want to end this job?
             </p>
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter style={{marginRight: 30}}>
             <Row>
               <Col md={6} className="text-left">
                 &nbsp;
               </Col>
               <Col md={6}>
                 <Button color="secondary" onClick={this.closeNow}>
-                  Cancel
+                  No
                 </Button>
                 &nbsp;
                 <Button
@@ -220,7 +220,7 @@ class JobClosePopup extends Component {
                   }
                 }
                 >
-                  Close
+                  Yes, end this job
                 </Button>
               </Col>
             </Row>
