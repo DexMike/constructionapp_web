@@ -53,29 +53,19 @@ class SendJob extends PureComponent {
     );
 
     // get favorite companies for this carrier
-    data.favoriteCompanies = allCompanies.filter(x => x.isFavorite === 'Favorite');
-
-    // get non favorite companies for this carrier
-    const biddersIdsNotFavorites = allCompanies.filter(x => x.isFavorite === 'Non Favorite');
+    data.favoriteCompanies = allCompanies;
 
     // are there any favorite companies?
     if (data.favoriteCompanies.length > 0) {
       // get the phone numbers from the admins
-      data.favoriteAdminTels = data.favoriteCompanies.map(x => (x.adminPhone ? x.adminPhone : null));
+      data.favoriteAdminTels = data.favoriteCompanies.map(
+        x => (x.adminPhone ? x.adminPhone : null)
+      );
       // remove null values
       Object.keys(data.favoriteAdminTels).forEach(
         key => (data.favoriteAdminTels[key] === null) && delete data.favoriteAdminTels[key]
       );
       data.showSendtoFavorites = true;
-    }
-
-    if (biddersIdsNotFavorites.length > 0) {
-      // get the phone numbers from the admins
-      data.nonFavoriteAdminTels = biddersIdsNotFavorites.map(x => (x.adminPhone ? x.adminPhone : null));
-      // remove null values
-      Object.keys(data.nonFavoriteAdminTels).forEach(
-        key => (data.nonFavoriteAdminTels[key] === null) && delete data.nonFavoriteAdminTels[key]
-      );
     }
 
     handleInputChange('tabSend', data);

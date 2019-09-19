@@ -27,6 +27,7 @@ import GeoCodingService from "../../api/GeoCodingService";
 import SendJob from "./JobWizardTabs/SendJob";
 import BidService from "../../api/BidService";
 import TwilioService from "../../api/TwilioService";
+import CompanyService from '../../api/CompanyService';
 import UserUtils from "../../api/UtilsService";
 import BookingService from "../../api/BookingService";
 import UserService from "../../api/UserService";
@@ -79,8 +80,7 @@ class JobWizard extends Component {
         sendToFavorites: true,
         showSendtoFavorites: false,
         favoriteCompanies: [],
-        favoriteAdminTels: [],
-        nonFavoriteAdminTels: []
+        favoriteAdminTels: []
       },
       tabSummary: {
         instructions: '',
@@ -1167,7 +1167,30 @@ class JobWizard extends Component {
       // if sending to mktplace, let's send SMS to everybody
       if (tabSend.sendToMkt) {
         const allBiddersSms = [];
-        for (const bidderTel of tabSend.nonFavoriteAdminTels) {
+        let nonFavoriteAdminTels = [];
+
+        // Get non-favorites carriers admin phone numbers based on each
+        // carrier company_settings.operatingRange setting.
+        // startAddressId is used to calculate distance between carrier address and job start address.
+        // If distance <= operatingRange then we sent the SMS
+        const filters = {
+          material: tabMaterials.selectedMaterial.value,
+          startAddressId: startAddress.id
+        };
+        const nonFavoriteCarriers = await CompanyService.getNonFavoritesByUserId(
+          profile.userId,
+          filters
+        );
+        if (nonFavoriteCarriers.length > 0) {
+          // get the phone numbers from the admins
+          nonFavoriteAdminTels = nonFavoriteCarriers.map(x => (x.adminPhone ? x.adminPhone : null));
+          // remove null values
+          Object.keys(nonFavoriteAdminTels).forEach(
+            key => (nonFavoriteAdminTels[key] === null) && delete nonFavoriteAdminTels[key]
+          );
+        }
+
+        for (const bidderTel of nonFavoriteAdminTels) {
           if (bidderTel && this.checkPhoneFormat(bidderTel)) {
             const notification = {
               to: this.phoneToNumberFormat(bidderTel),
