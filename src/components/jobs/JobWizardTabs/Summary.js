@@ -570,7 +570,7 @@ class Summary extends PureComponent {
 
   render() {
     const {loaded} = {...this.state};
-    const {data, goBack, saveJob, closeModal} = {...this.props};
+    const {data, goBack, saveJob, closeModal, jobRequest} = {...this.props};
     const {
       materialTabValidations,
       truckSpecsTabValidations,
@@ -639,6 +639,7 @@ class Summary extends PureComponent {
                   >
                     Back
                   </Button>
+                  {!jobRequest &&
                   <Button
                     color="outline-primary"
                     className="next"
@@ -646,6 +647,7 @@ class Summary extends PureComponent {
                   >
                     Save Job & Close
                   </Button>
+                  }
                   <Button
                     color="primary"
                     className="next"
