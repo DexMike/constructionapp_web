@@ -58,7 +58,7 @@ class LoadsExpandableRow extends Component {
     const date = new Date();
     const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
     disputeEmail = {
-      toEmail: 'csr@trelar.net',
+      toEmail: 'csr@trelar.com',
       toName: 'Trelar CSR',
       subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
       isHTML: true,
@@ -68,7 +68,7 @@ class LoadsExpandableRow extends Component {
         + `Job: ${props.job.name}<br>`
         + `Load Ticket Number: ${load.ticketNumber}`,
       recipients: [
-        {name: 'CSR', email: 'csr@trelar.net'}
+        {name: 'CSR', email: 'csr@trelar.com'}
       ],
       attachments: []
     };
