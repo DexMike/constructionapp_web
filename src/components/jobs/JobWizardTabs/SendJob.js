@@ -137,7 +137,7 @@ class SendJob extends PureComponent {
       loaded,
       btnSubmitting
     } = this.state;
-    const {data, saveJob, sendJob, goBack, onClose} = {...this.props};
+    const {data, saveJob, sendJob, goBack, onClose, jobRequest} = {...this.props};
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -148,53 +148,61 @@ class SendJob extends PureComponent {
               >
                 <Row className="col-md-12">
                   <h3 className="subhead">
-                    Thanks for creating a new job! How do you want to send this?
+                    {!jobRequest
+                      ? 'Thanks for creating a new job! How do you want to send this?'
+                      : 'Thanks for requesting a new job! The requested carrier will be notified after you press send job.'
+                    }
                   </h3>
                 </Row>
+                {!jobRequest
+                && (
+                  <React.Fragment>
+                    <Row className="col-md-12">
+                      <div className="row">
+                        <div
+                          className={data.showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}
+                        >
+                          <TCheckBox
+                            onChange={this.handleSendToFavorites}
+                            name="sendToFavorites"
+                            value={!!data.sendToFavorites}
+                            meta={reqCheckABox}
+                          />
+                        </div>
+                        <div
+                          className={data.showSendtoFavorites ? 'col-md-10 form__form-group' : 'hidden'}
+                        >
+                          <h3 className="subhead">
+                            Send to Favorites
+                          </h3>
+                        </div>
+                      </div>
+                      <hr/>
+                    </Row>
 
-                <Row className="col-md-12">
-                  <div className="row">
-                    <div
-                      className={data.showSendtoFavorites ? 'col-md-1 form__form-group' : 'hidden'}
-                    >
-                      <TCheckBox
-                        onChange={this.handleSendToFavorites}
-                        name="sendToFavorites"
-                        value={!!data.sendToFavorites}
-                        meta={reqCheckABox}
-                      />
-                    </div>
-                    <div
-                      className={data.showSendtoFavorites ? 'col-md-10 form__form-group' : 'hidden'}
-                    >
-                      <h3 className="subhead">
-                        Send to Favorites
-                      </h3>
-                    </div>
-                  </div>
-                  <hr/>
-                </Row>
-
-                <Row className="col-md-12">
-                  <div className="row">
-                    <div className="col-md-1 form__form-group">
-                      <TCheckBox
-                        onChange={this.handleSendToMkt}
-                        name="sendToMkt"
-                        value={!!data.sendToMkt}
-                      />
-                    </div>
-                    <div
-                      // className="col-md-6 form__form-group"
-                      className={data.showSendtoFavorites ? 'col-md-11 form__form-group' : 'col-md-11 form__form-group'}
-                    >
-                      <h3 className="subhead">
-                        Send this job to the Trelar Marketplace
-                      </h3>
-                    </div>
-                  </div>
-                  <br/>
-                </Row>
+                    <Row className="col-md-12">
+                      <div className="row">
+                        <div className="col-md-1 form__form-group">
+                          <TCheckBox
+                            onChange={this.handleSendToMkt}
+                            name="sendToMkt"
+                            value={!!data.sendToMkt}
+                          />
+                        </div>
+                        <div
+                          // className="col-md-6 form__form-group"
+                          className={data.showSendtoFavorites ? 'col-md-11 form__form-group' : 'col-md-11 form__form-group'}
+                        >
+                          <h3 className="subhead">
+                            Send this job to the Trelar Marketplace
+                          </h3>
+                        </div>
+                      </div>
+                      <br/>
+                    </Row>
+                  </React.Fragment>
+                )
+                }
               </form>
               <Row className="col-md-12">
                 <hr/>
@@ -218,6 +226,7 @@ class SendJob extends PureComponent {
                   >
                     Back
                   </Button>
+                  {!jobRequest &&
                   <Button
                     color="outline-primary"
                     className="next"
@@ -225,6 +234,7 @@ class SendJob extends PureComponent {
                   >
                     Save Job & Close
                   </Button>
+                  }
                   <TSubmitButton
                     onClick={sendJob}
                     className="primaryButton"
