@@ -78,7 +78,7 @@ class JobForm extends Component {
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
     this.getLoads = this.getLoads.bind(this);
     this.toggleApproveLoadsModal = this.toggleApproveLoadsModal.bind(this);
-    this.approveAllLoads = this.approveAllLoads.bind(this);
+    this.approveAllSubmittedLoads = this.approveAllSubmittedLoads.bind(this);
   }
 
   async componentDidMount() {
@@ -240,12 +240,12 @@ class JobForm extends Component {
     }
   }
 
-  async approveAllLoads() {
+  async approveAllSubmittedLoads() {
     const { job } = this.props;
     let approvingLoadsError = false;
     this.setState({ approvingLoads: true });
     try {
-      const response = await LoadService.approveJobLoads(job);
+      const response = await LoadService.approveJobSubmittedLoads(job.id);
       if (response === true) {
         window.location.reload();
       } else {
@@ -310,7 +310,7 @@ class JobForm extends Component {
           onClick={() => this.toggleApproveLoadsModal()}
           className="secondaryButton"
         >
-          Approve All Loads
+          Approve All Submitted Loads
         </Button>
       );
     }
@@ -352,7 +352,7 @@ class JobForm extends Component {
                   !approvingLoadsError && (
                     <Button
                       color="primary"
-                      onClick={() => this.approveAllLoads()}
+                      onClick={() => this.approveAllSubmittedLoads()}
                       disabled={approvingLoads}
                     >
                       {

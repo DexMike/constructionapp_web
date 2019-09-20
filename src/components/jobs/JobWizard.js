@@ -27,7 +27,10 @@ import GeoCodingService from "../../api/GeoCodingService";
 import SendJob from "./JobWizardTabs/SendJob";
 import BidService from "../../api/BidService";
 import TwilioService from "../../api/TwilioService";
+import CompanyService from '../../api/CompanyService';
 import UserUtils from "../../api/UtilsService";
+import BookingService from "../../api/BookingService";
+import UserService from "../../api/UserService";
 
 class JobWizard extends Component {
   constructor(props) {
@@ -77,8 +80,7 @@ class JobWizard extends Component {
         sendToFavorites: true,
         showSendtoFavorites: false,
         favoriteCompanies: [],
-        favoriteAdminTels: [],
-        nonFavoriteAdminTels: []
+        favoriteAdminTels: []
       },
       tabSummary: {
         instructions: '',
@@ -544,23 +546,23 @@ class JobWizard extends Component {
       isValid = false;
     }
 
-    if (jobEndDate && (new Date(jobEndDate).getTime() < currDate.getTime())) {
+    if (jobEndDate && (new Date(jobEndDate).getTime() <= currDate.getTime())) {
       this.setState({
         reqHandlerEndDate: {
           ...reqHandlerEndDate,
           touched: true,
-          error: 'The end date of the job can not be set in the past or as the current date and time'
+          error: 'The end date of the job can not be set in the past or equivalent to the current date and time'
         }
       });
       isValid = false;
     }
 
-    if (jobEndDate && (new Date(jobEndDate).getTime() < new Date(jobStartDate).getTime())) {
+    if (jobEndDate && (new Date(jobEndDate).getTime() <= new Date(jobStartDate).getTime())) {
       this.setState({
         reqHandlerEndDate: {
           ...reqHandlerEndDate,
           touched: true,
-          error: 'The end date of the job can not be set in the past of start date'
+          error: 'The end date of the job can not be set in the past of or equivalent to the start date'
         }
       });
       isValid = false;
@@ -848,7 +850,7 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    // const {updateJobView} = this.props;
+    const {jobRequest, selectedCarrierId} = this.props;
     this.setState({btnSubmitting: true});
     // All validations happen by the summary page
 
@@ -952,9 +954,10 @@ class JobWizard extends Component {
     const rateEstimate = tabMaterials.quantity;
 
     // if both checks (Send to Mkt and Send to All Favorites) are selected
-    if (tabSend.showSendtoFavorites
+    if ((tabSend.showSendtoFavorites
       && (tabSend.sendToMkt === true || tabSend.sendToMkt === 1)
-      && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1)
+      && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1))
+      || jobRequest
     ) {
       status = 'Published And Offered';
     } else if (tabSend.showSendtoFavorites
@@ -969,36 +972,6 @@ class JobWizard extends Component {
 
     jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
 
-    // let newJob = [];
-    // let savedJob = false;
-    // if (job && Object.keys(job).length > 0 && !copyJob) { // Job exists, from a 'Saved' job
-    //   job = {
-    //     id: job.id,
-    //     companiesId: profile.companyId,
-    //     name: d.name,
-    //     status,
-    //     isFavorited,
-    //     startAddress: startAddress.id,
-    //     endAddress: endAddress.id,
-    //     startTime: moment.tz(
-    //       d.jobDate,
-    //       profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-    //     ).utc().format(),
-    //     equipmentType: '',
-    //     numEquipments: d.hourTrucksNumber,
-    //     rateType,
-    //     rate,
-    //     rateEstimate: d.rateEstimate,
-    //     rateTotal,
-    //     notes: d.instructions,
-    //     createdOn: moment.utc().format(),
-    //     modifiedBy: profile.userId,
-    //     modifiedOn: moment.utc().format()
-    //   };
-    //
-    //   newJob = await JobService.updateJob(job);
-    //   savedJob = true;
-    // } else { // new job
     const job = {
       companiesId: profile.companyId,
       name,
@@ -1028,6 +1001,7 @@ class JobWizard extends Component {
     };
 
 
+
     let newJob;
     try {
       newJob = await JobService.createJob(job); // creating new saved job
@@ -1048,69 +1022,197 @@ class JobWizard extends Component {
       }
     }
 
-    // create bids if this user has favorites:
-    if (tabSend.showSendtoFavorites && tabSend.sendToFavorites && newJob) {
-      const results = [];
-      for (const favCompany of tabSend.favoriteCompanies) {
-        // bid
-        const bid = {
-          jobId: newJob.id,
-          userId: profile.userId,
-          companyCarrierId: favCompany.id,
-          hasCustomerAccepted: 1,
-          hasSchedulerAccepted: 0,
-          status: 'New',
-          rateType,
-          rate: 0,
-          rateEstimate,
-          notes: tabSummary.instructions,
-          createdBy: profile.userId,
-          createdOn: moment.utc().format(),
-          modifiedBy: profile.userId,
-          modifiedOn: moment.utc().format()
+    if (jobRequest) {
+      const bid = {};
+      const booking = {};
+      // const bookingEquipment = {};
+
+      // final steps
+      bid.jobId = newJob.id;
+      bid.userId = profile.userId;
+      // bid.startAddress = createdJob.startAddress;
+      // bid.endAddress = createdJob.endAddress;
+      bid.companyCarrierId = selectedCarrierId;
+      bid.rate = rate;
+      bid.rateType = rateType;
+      bid.rateEstimate = rateEstimate;
+      bid.hasCustomerAccepted = 1;
+      bid.hasSchedulerAccepted = 0;
+      bid.status = 'Pending';
+      bid.notes = tabSummary.instructions;
+      bid.createdBy = profile.userId;
+      bid.createdOn = moment.utc().format();
+      bid.modifiedBy = profile.userId;
+      bid.modifiedOn = moment.utc().format();
+      const createdBid = await BidService.createBid(bid);
+
+      // Now we need to create a Booking
+      booking.bidId = createdBid.id;
+      booking.schedulersCompanyId = selectedCarrierId.companyId;
+      booking.rateType = newJob.rateType;
+      booking.schedulersCompanyId = selectedCarrierId;
+      booking.startTime = newJob.startTime;
+
+      // if the startaddress is the actual ID
+      if (Number.isInteger(newJob.startAddress)) {
+        booking.sourceAddressId = newJob.startAddress;
+        booking.startAddressId = newJob.startAddress;
+      } else {
+        booking.sourceAddressId = newJob.startAddress.id;
+        booking.startAddressId = newJob.startAddress.id;
+      }
+
+      if (Number.isInteger(newJob.endAddress)) {
+        booking.endAddressId = newJob.endAddress;
+      } else {
+        booking.endAddressId = newJob.endAddress.id;
+      }
+
+
+      // const createdBooking = await BookingService.createBooking(booking);
+
+      /*
+      // now we need to create a BookingEquipment record
+      // Since in this scenario we are only allowing 1 truck for one booking
+      // we are going to create one BookingEquipment.  NOTE: the idea going forward is
+      // to allow multiple trucks per booking
+      bookingEquipment.bookingId = createdBooking.id;
+
+      // const carrierCompany = await CompanyService.getCompanyById(createdBid.companyCarrierId);
+
+      // this needs to be createdBid.carrierCompanyId.adminId
+      bookingEquipment.schedulerId = createdBid.userId;
+      // bookingEquipment.driverId = selectedCarrierId.driversId; // check out
+      // bookingEquipment.equipmentId = selectedCarrierId.id; // check out
+      bookingEquipment.rateType = createdBid.rateType;
+      // At this point we do not know what rateActual is, this will get set upon completion
+      // of the job
+      bookingEquipment.rateActual = 0;
+      // Lets copy the bid info
+      bookingEquipment.startTime = createdBooking.startTime;
+      bookingEquipment.endTime = createdBooking.endTime;
+      bookingEquipment.startAddressId = createdBooking.startAddressId;
+      bookingEquipment.endAddressId = createdBooking.endAddressId;
+
+      // Since this is booking method 1, we do not have any notes as this is getting created
+      // automatically and not by a user
+      bookingEquipment.notes = '';
+
+      // this needs to be createdBid.carrierCompanyId.adminId
+      bookingEquipment.createdBy = selectedCarrierId.driversId; // check out
+      bookingEquipment.modifiedBy = selectedCarrierId.driversId; // check out
+      bookingEquipment.modifiedOn = moment()
+        .unix() * 1000;
+      bookingEquipment.createdOn = moment()
+        .unix() * 1000;
+      await BookingEquipmentService.createBookingEquipments(bookingEquipment);
+      */
+
+      // Let's make a call to Twilio to send an SMS
+      // We need to get the phone number from the carrier co
+      // Sending SMS to Truck's company's admin
+      const carrierAdmin = await UserService.getAdminByCompanyId(selectedCarrierId);
+      if (carrierAdmin.length > 0) { // check if we get a result
+        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
+          const notification = {
+            to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
+            body: 'You have a new job offer, please log in to https://www.mytrelar.com'
+          };
+          await TwilioService.createSms(notification);
+        }
+      }
+
+      alert('Job Sent to carrier');
+    } else {
+      // create bids if this user has favorites:
+      if (tabSend.showSendtoFavorites && tabSend.sendToFavorites && newJob) {
+        const results = [];
+        for (const favCompany of tabSend.favoriteCompanies) {
+          // bid
+          const bid = {
+            jobId: newJob.id,
+            userId: profile.userId,
+            companyCarrierId: favCompany.id,
+            hasCustomerAccepted: 1,
+            hasSchedulerAccepted: 0,
+            status: 'New',
+            rateType,
+            rate: 0,
+            rateEstimate,
+            notes: tabSummary.instructions,
+            createdBy: profile.userId,
+            createdOn: moment.utc().format(),
+            modifiedBy: profile.userId,
+            modifiedOn: moment.utc().format()
+          };
+          results.push(BidService.createBid(bid));
+        }
+        await Promise.all(results);
+
+        // now let's send them an SMS to all favorites
+        const allSms = [];
+        for (const adminIdTel of tabSend.favoriteAdminTels) {
+          if (adminIdTel && this.checkPhoneFormat(adminIdTel)) {
+            // console.log('>>Sending SMS to Jake...');
+            const notification = {
+              to: this.phoneToNumberFormat(adminIdTel),
+              body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.com'
+            };
+            allSms.push(TwilioService.createSms(notification));
+          }
+        }
+        await Promise.all(allSms);
+      }
+
+      // if sending to mktplace, let's send SMS to everybody
+      if (tabSend.sendToMkt) {
+        const allBiddersSms = [];
+        let nonFavoriteAdminTels = [];
+
+        // Get non-favorites carriers admin phone numbers based on each
+        // carrier company_settings.operatingRange setting.
+        // startAddressId is used to calculate distance between carrier address and job start address.
+        // If distance <= operatingRange then we sent the SMS
+        const filters = {
+          material: tabMaterials.selectedMaterial.value,
+          startAddressId: startAddress.id
         };
-        results.push(BidService.createBid(bid));
-      }
-      await Promise.all(results);
+        const nonFavoriteCarriers = await CompanyService.getNonFavoritesByUserId(
+          profile.userId,
+          filters
+        );
+        if (nonFavoriteCarriers.length > 0) {
+          // get the phone numbers from the admins
+          nonFavoriteAdminTels = nonFavoriteCarriers.map(x => (x.adminPhone ? x.adminPhone : null));
+          // remove null values
+          Object.keys(nonFavoriteAdminTels).forEach(
+            key => (nonFavoriteAdminTels[key] === null) && delete nonFavoriteAdminTels[key]
+          );
+        }
 
-      // now let's send them an SMS to all favorites
-      const allSms = [];
-      for (const adminIdTel of tabSend.favoriteAdminTels) {
-        if (adminIdTel && this.checkPhoneFormat(adminIdTel)) {
-          // console.log('>>Sending SMS to Jake...');
-          const notification = {
-            to: this.phoneToNumberFormat(adminIdTel),
-            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
-          };
-          allSms.push(TwilioService.createSms(notification));
+        for (const bidderTel of nonFavoriteAdminTels) {
+          if (bidderTel && this.checkPhoneFormat(bidderTel)) {
+            const notification = {
+              to: this.phoneToNumberFormat(bidderTel),
+              body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.com'
+            };
+            allBiddersSms.push(TwilioService.createSms(notification));
+          }
         }
       }
-      await Promise.all(allSms);
-    }
 
-    // if sending to mktplace, let's send SMS to everybody
-    if (tabSend.sendToMkt) {
-      const allBiddersSms = [];
-      for (const bidderTel of tabSend.nonFavoriteAdminTels) {
-        if (bidderTel && this.checkPhoneFormat(bidderTel)) {
-          const notification = {
-            to: this.phoneToNumberFormat(bidderTel),
-            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.net'
-          };
-          allBiddersSms.push(TwilioService.createSms(notification));
-        }
-      }
+      // const {onClose} = this.props;
+      // if (savedJob) { // we have to update the view
+      //   updateJobView(newJob);
+      // }
+      //
+      // if (copyJob) { // we're making a duplicate of a job we have to update the view
+      //   newJob.copiedJob = true;
+      //   updateJobView(newJob);
+      // }
     }
+    this.setState({ btnSubmitting: false });
 
-    // const {onClose} = this.props;
-    // if (savedJob) { // we have to update the view
-    //   updateJobView(newJob);
-    // }
-    //
-    // if (copyJob) { // we're making a duplicate of a job we have to update the view
-    //   newJob.copiedJob = true;
-    //   updateJobView(newJob);
-    // }
     this.closeNow();
   }
 
@@ -1496,7 +1598,7 @@ class JobWizard extends Component {
                       placeholder="Date and time of job"
                       defaultDate={jobStartDate}
                       onChange={this.jobStartDateChange}
-                      dateFormat="Y-m-d H:i"
+                      dateFormat="m/d/Y h:i K"
                       showTime
                       meta={reqHandlerStartDate}
                       id="jobstartdatetime"
@@ -1520,10 +1622,10 @@ class JobWizard extends Component {
                       placeholder="Date and time of job"
                       defaultDate={jobEndDate}
                       onChange={this.jobEndDateChange}
-                      dateFormat="Y-m-d H:i"
+                      dateFormat="m/d/Y h:i K"
                       showTime
                       meta={reqHandlerEndDate}
-                      id="jobstartdatetime"
+                      id="jobenddatetime"
                       profileTimeZone={profile.timeZone}
                     />
                   </div>
@@ -1586,7 +1688,7 @@ class JobWizard extends Component {
   }
 
   render() {
-    const {equipmentId, companyId, editDriverId, updateJobView, copyJob, toggle} = this.props;
+    const {jobRequest} = this.props;
     const {
       page,
       loaded,
@@ -1612,7 +1714,7 @@ class JobWizard extends Component {
                       <div
                         className="wizard__step wizard__step--active"
                       >
-                        <p>Create Job</p>
+                        <p>{jobRequest ? 'Request' : 'Create'} Job</p>
                       </div>
                     </div>
                     <div className="wizard__form-wrapper">
@@ -1662,6 +1764,7 @@ class JobWizard extends Component {
                             setPageNumber={this.setPageNumber}
                             handleInputChange={this.handleChildInputChange}
                             validateSend={this.validateSend}
+                            jobRequest={jobRequest}
                           />}
                           {page === 6
                           && <SendJob
@@ -1672,6 +1775,7 @@ class JobWizard extends Component {
                             goBack={this.goBack}
                             sendJob={this.saveJob}
                             onClose={this.closeNow}
+                            jobRequest={jobRequest}
                           />}
                         </div>
                       </div>
@@ -1690,6 +1794,7 @@ class JobWizard extends Component {
                             </Button>
                           </ButtonToolbar>
                           <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                            {!jobRequest &&
                             <Button
                               color="outline-primary"
                               className="next"
@@ -1697,6 +1802,7 @@ class JobWizard extends Component {
                             >
                               Save Job & Close
                             </Button>
+                            }
                             {page !== 1 &&
                             <Button color="outline-primary" type="button"
                                     className="previous"
@@ -1740,17 +1846,13 @@ class JobWizard extends Component {
 
 JobWizard.propTypes = {
   toggle: PropTypes.func.isRequired,
-  jobId: PropTypes.number,
-  updateJobView: PropTypes.func,
-  copyJob: PropTypes.bool,
-  updateCopiedJob: PropTypes.func
+  selectedCarrierId: PropTypes.number,
+  jobRequest: PropTypes.bool
 };
 
 JobWizard.defaultProps = {
-  jobId: null,
-  updateJobView: null,
-  copyJob: false,
-  updateCopiedJob: null
+  selectedCarrierId: null,
+  jobRequest: false
 };
 
 
