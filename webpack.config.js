@@ -31,6 +31,9 @@ export default {
     // }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
+    new Dotenv({
+      path: "./.env.".concat(process.env.BRANCH_NAME)
+    }),
     new MiniCssExtractPlugin({
       filename: 'style.css'
     })
