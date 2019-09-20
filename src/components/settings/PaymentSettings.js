@@ -198,7 +198,7 @@ class PaymentSettings extends Component {
           <br/>
           <strong>Need to change your Payment Method?</strong><br/>
           <span>Contact our team to get help.</span><br/>
-          <a href="mailto:support@trelar.net" target="_top">support@trelar.net</a>
+          <a href="mailto:support@trelar.com" target="_top">support@trelar.com</a>
         </Col>
       </Row>
     );
@@ -315,7 +315,7 @@ Trelar (i) to verify my bank account information using bank information and cons
         <br />
         <Row>
           <Col md={5} className="mx-auto text-center mb-4">
-            <a href="mailto:support@trelar.net">
+            <a href="mailto:support@trelar.com">
               Having problems signing up? Please contact our team to get help.
             </a>
           </Col>

@@ -278,7 +278,7 @@ class LoginPage extends SignIn {
     return (
       <h6> Thank you for checking back with us. Your account is still in review.
         This normally takes 1-2 business days.
-        If you have not been contact you can email us at csr@trelar.net. Thank you.
+        If you have not been contact you can email us at csr@trelar.com. Thank you.
       </h6>
     );
   }
@@ -347,7 +347,7 @@ class LoginPage extends SignIn {
             >
               <EyeIcon/>
             </button>
-          </div>          
+          </div>
         </div>
         <Row className="col-12">
           <Col>
