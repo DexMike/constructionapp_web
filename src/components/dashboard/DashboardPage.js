@@ -10,6 +10,7 @@ import ProfileService from '../../api/ProfileService';
 // import EquipmentsService from '../../api/EquipmentService';
 // import AddTruckForm from '../addTruck/AddTruckForm';
 import '../addTruck/AddTruck.css';
+import CompanyService from '../../api/CompanyService';
 
 class DashboardPage extends Component {
   constructor(props) {
@@ -27,6 +28,12 @@ class DashboardPage extends Component {
 
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
+    if (profile && profile.isAdmin && profile.companyType === 'Customer') {
+      const company = await CompanyService.getCompanyById(profile.companyId);
+      if (company && !company.btCustomerId) {
+        alert('Please go to the company settings and save your payment information.');
+      }
+    }
     this.setState({ companyType: profile.companyType });
     await this.fetchCompanyTrucks();
   }

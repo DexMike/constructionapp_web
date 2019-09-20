@@ -2,7 +2,17 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { Card, CardBody, Row, Container, Col } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Row,
+  Container,
+  Col,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button } from 'reactstrap';
 import './jobs.css';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
@@ -16,6 +26,7 @@ import ProfileService from '../../api/ProfileService';
 import TMapLive from '../common/TMapLive';
 import TMap from '../common/TMap';
 import GeoUtils from '../../utils/GeoUtils';
+import TSpinner from '../common/TSpinner';
 
 class JobForm extends Component {
   constructor(props) {
@@ -56,15 +67,57 @@ class JobForm extends Component {
       shape: {},
       timeAndDistance: '',
       instructions: [],
-      markersGroup: []
+      markersGroup: [],
+      approveLoadsModal: false,
+      approvingLoads: false,
+      approvingLoadsError: false
     };
 
+    this.loadJobForm = this.loadJobForm.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
     this.getLoads = this.getLoads.bind(this);
+    this.toggleApproveLoadsModal = this.toggleApproveLoadsModal.bind(this);
+    this.approveAllSubmittedLoads = this.approveAllSubmittedLoads.bind(this);
   }
 
   async componentDidMount() {
+    await this.loadJobForm();
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    if (nextProps.job) {
+      await this.loadJobForm();
+    }
+    if (nextProps.companyCarrier) {
+      let { carrier } = this.state;
+      if (!carrier) {
+        carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
+        this.setState({
+          carrier
+        });
+      }
+    }
+  }
+
+  onExpandedChanged(rowId) {
+    if (rowId !== 0) {
+      this.setState({
+        showMainMap: false
+      });
+    } else {
+      this.setState({
+        showMainMap: true
+      });
+    }
+  }
+
+  getLoads() {
+    const { loads } = this.state;
+    return loads;
+  }
+
+  async loadJobForm() {
     const profile = await ProfileService.getProfile();
     const { job, companyCarrier } = this.props;
     let {
@@ -127,57 +180,6 @@ class JobForm extends Component {
     });
   }
 
-  async componentWillReceiveProps(nextProps) {
-    if (nextProps.job) {
-      const { job } = nextProps;
-      Object.keys(job)
-        .map((key) => {
-          if (job[key] === null) {
-            job[key] = '';
-          }
-          return true;
-        });
-      const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
-      this.setState({
-        ...job,
-        allTruckTypes,
-        loaded: true
-      });
-      if (nextProps.companyCarrier === null) { // we're copying/saving a new job
-        this.setState({
-          companyCarrier: null,
-          carrier: null
-        });
-      }
-    }
-    if (nextProps.companyCarrier) {
-      let { carrier } = this.state;
-      if (!carrier) {
-        carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
-        this.setState({
-          carrier
-        });
-      }
-    }
-  }
-
-  onExpandedChanged(rowId) {
-    if (rowId !== 0) {
-      this.setState({
-        showMainMap: false
-      });
-    } else {
-      this.setState({
-        showMainMap: true
-      });
-    }
-  }
-
-  getLoads() {
-    const { loads } = this.state;
-    return loads;
-  }
-
   isFormValid() {
     const job = this.state;
     return !!(
@@ -224,10 +226,36 @@ class JobForm extends Component {
     }
   }
 
+  toggleApproveLoadsModal() {
+    const {approveLoadsModal} = this.state;
+    this.setState({
+      approveLoadsModal: !approveLoadsModal,
+      approvingLoadsError: false
+    });
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
+  }
+
+  async approveAllSubmittedLoads() {
+    const { job } = this.props;
+    let approvingLoadsError = false;
+    this.setState({ approvingLoads: true });
+    try {
+      const response = await LoadService.approveJobSubmittedLoads(job.id);
+      if (response === true) {
+        window.location.reload();
+      } else {
+        approvingLoadsError = true;
+      }
+    } catch (e) {
+      approvingLoadsError = true;
+      // console.log(e);
+    }
+    this.setState({ approvingLoads: false, approvingLoadsError });
   }
 
   materialsAsString(materials) {
@@ -267,6 +295,84 @@ class JobForm extends Component {
       );
     }
     return false;
+  }
+
+  renderApproveAllLoadsButton() {
+    const { companyType, loads } = this.state;
+    let submittedLoads = 0;
+    loads.forEach((load) => {
+      if (load.loadStatus === 'Submitted') submittedLoads += 1;
+    });
+    if (companyType !== 'Carrier' && loads.length > 0
+      && submittedLoads > 0) {
+      return (
+        <Button
+          onClick={() => this.toggleApproveLoadsModal()}
+          className="secondaryButton"
+        >
+          Approve All Submitted Loads
+        </Button>
+      );
+    }
+    return false;
+  }
+
+  renderApproveAllLoadsModal() {
+    const { approveLoadsModal, approvingLoads, approvingLoadsError } = this.state;
+    return (
+      <React.Fragment>
+        <Modal isOpen={approveLoadsModal} toggle={this.toggleApproveLoadsModal} className="status-modal">
+          <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
+            <div style={{ fontSize: 16, color: '#FFF' }}>
+              { approvingLoadsError ? 'Error Message' : 'Confirmation' }
+            </div>
+          </ModalHeader>
+          <ModalBody className="text-left">
+            <p>
+              {
+                approvingLoadsError ? 'There was an error when trying to approve all the loads. Please try again now or after some time has passed.'
+                  : 'Are you sure you want to approve all of the submitted loads for this job?'
+              }
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Row>
+              <Col md={12} className="text-right">
+                <Button
+                  color="secondary"
+                  onClick={this.toggleApproveLoadsModal}
+                  disabled={approvingLoads}
+                >
+                  {
+                    approvingLoadsError ? 'Ok' : 'Cancel'
+                  }
+                </Button>
+                &nbsp;
+                {
+                  !approvingLoadsError && (
+                    <Button
+                      color="primary"
+                      onClick={() => this.approveAllSubmittedLoads()}
+                      disabled={approvingLoads}
+                    >
+                      {
+                        approvingLoads ? (
+                          <TSpinner
+                            color="#808080"
+                            loaderSize={10}
+                            loading
+                          />
+                        ) : 'Yes, approve all'
+                      }
+                    </Button>
+                  )
+                }
+              </Col>
+            </Row>
+          </ModalFooter>
+        </Modal>
+      </React.Fragment>
+    );
   }
 
   renderMinimumInsurance() {
@@ -333,6 +439,9 @@ class JobForm extends Component {
       if (bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
         displayStatus = 'Requested';
       }
+    }
+    if (job.status === 'Job Ended') {
+      displayStatus = 'Job Finishing';
     }
     if (job.status === 'Booked' || job.status === 'Allocated'
       || job.status === 'In Progress' || job.status === 'Job Complete'
@@ -529,6 +638,10 @@ class JobForm extends Component {
         >
           Load Information
         </h3>
+        {this.renderApproveAllLoadsModal()}
+        {
+          this.renderApproveAllLoadsButton()
+        }
         {job && <LoadsTable loads={loads} job={job} expandedRow={this.onExpandedChanged} />}
       </React.Fragment>
     );
