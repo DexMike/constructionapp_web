@@ -1261,9 +1261,7 @@ class JobSavePage extends Component {
 
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status === 'Allocated'
-    || job.status === 'Booked'
-    || job.status === 'In Progress') {
+    if (job.status === 'In Progress') {
       return (
         <TSubmitButton
           onClick={() => this.toggleCloseModal()}

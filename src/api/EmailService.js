@@ -2,14 +2,14 @@ import AgentService from './AgentService';
 
 /* const date = new Date();
 const email = {
-  toEmail: 'mike@trelar.net',
+  toEmail: 'mike@trelar.com',
   toName: 'Test Subject #326',
   subject: `Test | ${date.getHours()}:${date.getMinutes()}`,
   isHTML: true,
   body: '<strong>BOLD TEXT!</strong><br><br>Testing...',
   recipients: [
-    {name: 'Trelar Customer #1', email: 'mike@trelar.net'},
-    {name: 'Trelar Customer #2', email: 'mike@trelar.net'}
+    {name: 'Trelar Customer #1', email: 'mike@trelar.com'},
+    {name: 'Trelar Customer #2', email: 'mike@trelar.com'}
   ],
   attachments: [
     'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
