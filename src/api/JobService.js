@@ -115,6 +115,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getRequestersByCancelledJobId(jobId) {
+    const response = await super.get(`${PATH}/${jobId}/cancelledrequesters`);
+    return (response);
+  }
+
   static getDefaultJob() {
     return {
       companiesId: 0,
