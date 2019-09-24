@@ -36,6 +36,7 @@ import JobCreatePopup from './JobCreatePopup';
 import JobCreateFormCarrier from './JobCreateFormCarrier';
 import EmailService from '../../api/EmailService';
 import JobClosePopup from './JobClosePopup';
+import JobDeletePopup from './JobDeletePopup';
 import UserUtils from '../../api/UtilsService';
 
 class JobSavePage extends Component {
@@ -92,7 +93,8 @@ class JobSavePage extends Component {
         touched: false,
         error: ''
       },
-      closeModal: false
+      closeModal: false,
+      deleteModal: false
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -115,12 +117,14 @@ class JobSavePage extends Component {
     this.handleCancelInputChange = this.handleCancelInputChange.bind(this);
     this.handleCancelReasonInputChange = this.handleCancelReasonInputChange.bind(this);
     this.toggleCloseModal = this.toggleCloseModal.bind(this);
+    this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
     this.closeJobModal = this.closeJobModal.bind(this);
+    this.deleteJobModal = this.deleteJobModal.bind(this);
     this.notifyAdminViaSms = this.notifyAdminViaSms.bind(this);
   }
 
-  componentDidMount() {
-    this.loadSavePage();
+  async componentDidMount() {
+    await this.loadSavePage();
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -336,6 +340,13 @@ class JobSavePage extends Component {
     const {closeModal} = this.state;
     this.setState({
       closeModal: !closeModal
+    });
+  }
+
+  toggleDeleteModal() {
+    const {deleteModal} = this.state;
+    this.setState({
+      deleteModal: !deleteModal
     });
   }
 
@@ -976,8 +987,13 @@ class JobSavePage extends Component {
       // console.log('Unable to notify admin');
     }
 
-    this.loadSavePage();
+    await this.loadSavePage();
     // TODO -> Graciously notify the user that we ended the job.
+  }
+
+  async deleteJobModal() {
+    await this.loadSavePage();
+    // TODO -> Graciously notify the user that we deleted the job.
   }
 
   renderGoTo() {
@@ -1020,7 +1036,7 @@ class JobSavePage extends Component {
 
   renderBidsTable() {
     const {job, companyType} = this.state;
-    if (companyType === 'Customer') {
+    if (companyType === 'Customer' && job.status !== 'Job Deleted') {
       return (
         <BidsTable
           job={job}
@@ -1259,6 +1275,25 @@ class JobSavePage extends Component {
     return false;
   }
 
+  renderDeleteButton() {
+    const {job} = this.state;
+    if (job.status === 'Published'
+    || job.status === 'Published And Offered'
+    || job.status === 'On Offer'
+    || job.status === 'Saved') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleDeleteModal()}
+          className="secondaryButton"
+          loading={false}
+          loaderSize={10}
+          bntText="Delete Job"
+        />
+      );
+    }
+    return false;
+  }
+
   renderCloseJobModal() {
     const {closeModal, job} = this.state;
     return (
@@ -1275,7 +1310,24 @@ class JobSavePage extends Component {
         />
       </Modal>
     );
-    /**/
+  }
+
+  renderDeleteJobModal() {
+    const {deleteModal, job} = this.state;
+    return (
+      <Modal
+        isOpen={deleteModal}
+        toggle={this.toggleDeleteModal}
+        className="status-modal"
+      >
+        <JobDeletePopup
+          toggle={this.toggleDeleteModal}
+          deleteJobModalPopup={this.deleteJobModal}
+          jobName={job.name}
+          jobId={job.id}
+        />
+      </Modal>
+    );
   }
 
   renderNewJobModal() {
@@ -1775,30 +1827,30 @@ class JobSavePage extends Component {
             {this.renderCancelModal1()}
             {this.renderCancelModal2()}
             {this.renderCloseJobModal()}
+            {this.renderDeleteJobModal()}
             <div className="row">
               <div className="col-md-6">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
-              <div className="col-md-3 text-right">
+              <div className="col-md-6 text-right">
                 {companyType !== 'Carrier' && this.renderCopyButton()}
-              </div>
-              <div className="col-md-3">
                 {companyType === 'Customer' && this.renderCloseButton()}
+                {companyType === 'Customer' && this.renderDeleteButton()}
               </div>
             </div>
             {
               job.status && (job.status === 'In Progress' || job.status === 'Job Completed' || job.status === 'Allocated'
                || job.status === 'Booked' || job.status === 'Job Ended') ? (
-                <React.Fragment>
-                  {this.renderJobForm(companyType, job)}
-                  {this.renderBidsTable()}
-                </React.Fragment>
-              ) : (
-                <React.Fragment>
-                  {this.renderBidsTable()}
-                  {this.renderJobForm(companyType, job)}
-                </React.Fragment>
-              )
+                 <React.Fragment>
+                   {this.renderJobForm(companyType, job)}
+                   {this.renderBidsTable()}
+                 </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    {this.renderBidsTable()}
+                    {this.renderJobForm(companyType, job)}
+                  </React.Fragment>
+                )
             }
           </div>
         );
