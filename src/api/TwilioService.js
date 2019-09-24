@@ -12,6 +12,11 @@ class TwilioService extends AgentService {
     const response = await super.post(`${PATH}/invite`, notification);
     return (response);
   }
+
+  static async smsBatchSending(notification) {
+    const response = await super.post(`${PATH}/smsbatchsending`, notification);
+    return (response);
+  }
 }
 
 export default TwilioService;

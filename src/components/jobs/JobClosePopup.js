@@ -107,42 +107,43 @@ class JobClosePopup extends Component {
 
     // 3) All drivers need text notification
     let gpsTrackings = [];
-
     if (allLoads.length > 0) { // there's loads
       try {
         gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
       } catch (error) {
         console.error('Unable to retrieve GPS for loads:', error);
       }
-      const allSms = [];
+      const usersWithLoad = [];
+      const usersWithoutLoad = [];
+
       if (Object.keys(gpsTrackings).length > 0) { // there's loads in progress, notify drivers
         // console.log('>>>GOT LOADS: ', gpsTrackings, typeof gpsTrackings);
         for (const tracking of gpsTrackings) {
           if (tracking.status !== 'Ended' && tracking.status !== 'Returning') {
             // a) If they are in progress on load driver gets a text: “ Job <job name> is ending.
             // Finish your load, and then you are done with the job.”
-            const notificationInProgress = {
-              to: UserUtils.phoneToNumberFormat(tracking.telephone),
-              body: `${envString}Job ${jobName} is ending. Finish your load, and then you are done with the job.`
-            };
-            allSms.push(TwilioService.createSms(notificationInProgress));
+            usersWithLoad.push(tracking.userId);
           } else {
             // b) If the driver does not have a load in progress they get text:
             // “<job name> has ended. Do not pickup any more material.”
-            const notificationNotInProgress = {
-              to: UserUtils.phoneToNumberFormat(tracking.telephone),
-              body: `${envString}${jobName} has ended. Do not pickup any more material.`
-            };
-            allSms.push(TwilioService.createSms(notificationNotInProgress));
+            usersWithoutLoad.push(tracking.userId);
           }
-          // Next step is performed by the parent:
-          // Carrier admin:  “<job name> has ended. Do not pickup any more material.”
         }
-        // send out all SMS
-        try {
-          await Promise.all(allSms);
-        } catch (err) {
-          console.error(err);
+
+        if (usersWithLoad.length > 0) {
+          const notification = {
+            usersIds: usersWithLoad,
+            body: `${envString}Job ${jobName} is ending. Finish your load, and then you are done with the job.`
+          };
+          await TwilioService.smsBatchSending(notification);
+        }
+
+        if (usersWithoutLoad.length > 0) {
+          const notification = {
+            usersIds: usersWithoutLoad,
+            body: `${envString}${jobName} has ended. Do not pickup any more material.`
+          };
+          await TwilioService.smsBatchSending(notification);
         }
 
         // changing job status to 'Job Ended'
