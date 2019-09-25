@@ -48,11 +48,13 @@ class TMap extends Component {
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
 
     if (startAddress && endAddress) {
-      /**/
       this.calculateRouteFromAtoB();
       this.addMarkersToMap();
     }
 
+    // https://trelar.atlassian.net/browse/SG-930
+    // don't delete commented code, please
+    /*
     if (trackings && trackings.length > 0) {
       const lineString = new H.geo.LineString();
       for (const tracking of trackings) {
@@ -69,6 +71,7 @@ class TMap extends Component {
         }
       ));
     }
+    */
   }
 
   onRouteSuccess(result) {
