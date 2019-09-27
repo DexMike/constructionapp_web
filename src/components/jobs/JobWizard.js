@@ -1156,7 +1156,7 @@ class JobWizard extends Component {
             // console.log('>>Sending SMS to Jake...');
             const notification = {
               to: this.phoneToNumberFormat(adminIdTel),
-              body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.com'
+              body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. https://app.mytrelar.com'
             };
             allSms.push(TwilioService.createSms(notification));
           }
@@ -1194,7 +1194,7 @@ class JobWizard extends Component {
           if (bidderTel && this.checkPhoneFormat(bidderTel)) {
             const notification = {
               to: this.phoneToNumberFormat(bidderTel),
-              body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.com'
+              body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. https://app.mytrelar.com'
             };
             allBiddersSms.push(TwilioService.createSms(notification));
           }
