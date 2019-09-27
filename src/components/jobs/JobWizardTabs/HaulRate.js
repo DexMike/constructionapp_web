@@ -46,9 +46,9 @@ class HaulRate extends PureComponent {
     if (!tabPickupDelivery.startLocationLatitude || !tabPickupDelivery.startLocationLongitude
       || !tabPickupDelivery.endLocationLatitude || !tabPickupDelivery.endLocationLongitude) {
       data.rateCalculator.invalidAddress = true;
-      if (tabMaterials.quantityType === 'ton') {
+      if (tabMaterials.quantityType === 'Ton') {
         data.rateCalculator.estimatedTons = tabMaterials.quantity;
-      } else if (tabMaterials.quantityType === 'hour') {
+      } else if (tabMaterials.quantityType === 'Hour') {
         data.rateCalculator.estimatedHours = tabMaterials.quantity;
       }
     } else {
@@ -59,11 +59,11 @@ class HaulRate extends PureComponent {
       data.rateCalculator.unloadTime = 0.25;
       const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
         + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
-      if (tabMaterials.quantityType === 'hour') {
+      if (tabMaterials.quantityType === 'Hour') {
         data.rateCalculator.estimatedHours = tabMaterials.quantity;
         const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
         data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
-      } else if (tabMaterials.quantityType === 'ton') {
+      } else if (tabMaterials.quantityType === 'Ton') {
         data.rateCalculator.estimatedTons = tabMaterials.quantity;
         const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
         data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
@@ -86,11 +86,11 @@ class HaulRate extends PureComponent {
         data.rateCalculator.unloadTime = 0.25;
         const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
           + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
-        if (tabMaterials.quantityType === 'hour') {
+        if (tabMaterials.quantityType === 'Hour') {
           data.rateCalculator.estimatedHours = tabMaterials.quantity;
           const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
           data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
-        } else if (tabMaterials.quantityType === 'ton') {
+        } else if (tabMaterials.quantityType === 'Ton') {
           data.rateCalculator.estimatedTons = tabMaterials.quantity;
           const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
           data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
@@ -180,11 +180,11 @@ class HaulRate extends PureComponent {
     let {value} = ratePerPayType.target;
     value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     data.ratePerPayType = value;
-    if (data.payType === 'ton') {
+    if (data.payType === 'Ton') {
       rateCalculator.ratePerTon = value;
       rateCalculator.ratePerHour =
         ((rateCalculator.ratePerTon * rateCalculator.estimatedTons) / rateCalculator.estimatedHours).toFixed(2);
-    } else if (data.payType === 'hour') {
+    } else if (data.payType === 'Hour') {
       rateCalculator.ratePerHour = value;
       rateCalculator.ratePerTon =
         ((rateCalculator.ratePerHour * rateCalculator.estimatedHours) / rateCalculator.estimatedTons).toFixed(2);
@@ -293,7 +293,7 @@ class HaulRate extends PureComponent {
     if (haulCostPerTonHour > 0) {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
       // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
-      if (data.payType === 'ton') {
+      if (data.payType === 'Ton') {
         oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
       } else {
         const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
@@ -301,7 +301,7 @@ class HaulRate extends PureComponent {
       }
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
-      if (tabMaterials.quantityType === 'ton') {
+      if (tabMaterials.quantityType === 'Ton') {
         deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
       } else {
         const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
@@ -341,21 +341,21 @@ class HaulRate extends PureComponent {
       estimatedTotalPrice = (estHours * rateCalculator.ratePerHour).toFixed(2);
     }
 
-    const estimatedTonsInfo = tabMaterials.quantityType === 'ton' ?
+    const estimatedTonsInfo = tabMaterials.quantityType === 'Ton' ?
       'Any changes in tonnage to take final affect must be modified on the Materials ( tab ).' :
       'This number is calculated by Trelar using mapping data from your pickup and delivery addresses, and your other inputted values.';
 
 
-    const estimatedHoursInfo = tabMaterials.quantityType === 'hour' ?
+    const estimatedHoursInfo = tabMaterials.quantityType === 'Hour' ?
       'Any changes in hours to take final affect must be modified on the Materials ( tab ).' :
       'This number is calculated by Trelar using mapping data from your pickup and delivery addresses, and your other inputted values.';
 
-    const ratePerTonInfo = data.payType === 'ton' ?
+    const ratePerTonInfo = data.payType === 'Ton' ?
       'Any changes in rate per ton to take final affect must be modified above.' :
       'This number is calculated by Trelar using mapping data from your pickup and delivery addresses, and your other inputted values.';
 
 
-    const ratePerHourInfo = data.payType === 'hour' ?
+    const ratePerHourInfo = data.payType === 'Hour' ?
       'Any changes in rate per hour to take final affect must be modified above.' :
       'This number is calculated by Trelar using mapping data from your pickup and delivery addresses, and your other inputted values.';
 
@@ -805,16 +805,16 @@ class HaulRate extends PureComponent {
                     <span className="form__form-group-label">Pay Type</span>
                     <Button
                       color="primary"
-                      className={data.payType === 'hour' ? 'toggle__button' : 'toggle__button-active'}
-                      onClick={() => this.handlePayTypeChange('ton')}
+                      className={data.payType === 'Hour' ? 'toggle__button' : 'toggle__button-active'}
+                      onClick={() => this.handlePayTypeChange('Ton')}
 
                     >
                       <p>tons</p>
                     </Button>
                     <Button
                       color="primary"
-                      className={data.payType === 'ton' ? 'toggle__button' : 'toggle__button-active'}
-                      onClick={() => this.handlePayTypeChange('hour')}
+                      className={data.payType === 'Ton' ? 'toggle__button' : 'toggle__button-active'}
+                      onClick={() => this.handlePayTypeChange('Hour')}
 
                     >
                       <p>hours</p>
