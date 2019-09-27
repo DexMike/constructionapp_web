@@ -31,6 +31,11 @@ class BrainTreeClient {
       return company.btCustomerId;
     } catch (err) {
       console.error(err);
+      if (err.details) {
+        return {
+          error: err.details
+        };
+      }
     }
     return null;
   }
