@@ -296,18 +296,18 @@ class HaulRate extends PureComponent {
       if (data.payType === 'ton') {
         oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.travelTimeReturn) + parseFloat(tabPickupDelivery.travelTimeEnroute);
-        oneWayCostPerTonHourPerMile = oneLoad * (parseFloat(data.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute));
+        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
+        oneWayCostPerTonHourPerMile = (oneLoad * (parseFloat(data.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute))).toFixed(2);
       }
       deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
       estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
       if (tabMaterials.quantityType === 'ton') {
         deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.travelTimeReturn) + parseFloat(tabPickupDelivery.travelTimeEnroute);
+        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
         const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
         const estimatedTons = (numTrips * truckCapacity).toFixed(2);
-        deliveredPriceJob = (deliveredPricePerTon * estimatedTons).toFixed(2);
+        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * estimatedTons).toFixed(2);
       }
     }
 
