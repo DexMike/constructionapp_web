@@ -83,6 +83,7 @@ class LoadsTable extends Component {
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Rate</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Total Cost</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Status</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Ticket Number</TableCell>            
             </TableRow>
           </TableHead>
           {loads && (
