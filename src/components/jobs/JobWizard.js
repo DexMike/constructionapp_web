@@ -54,7 +54,7 @@ class JobWizard extends Component {
         error: ''
       },
       tabMaterials: {
-        quantityType: 'ton',
+        quantityType: 'Ton',
         estMaterialPricing: 0,
         quantity: 0,
         allMaterials: [],
@@ -170,7 +170,7 @@ class JobWizard extends Component {
         }
       },
       tabHaulRate: {
-        payType: 'ton',
+        payType: 'Ton',
         ratePerPayType: 0,
         rateCalcOpen: false,
         avgDistanceEnroute: 0,
@@ -1280,7 +1280,7 @@ class JobWizard extends Component {
     // let rateType = '';
     // let rate = 0;
     // if (tabHaulRate.payType && tabHaulRate.payType.length > 0) {
-    //   if (tabHaulRate.payType === 'ton') {
+    //   if (tabHaulRate.payType === 'Ton') {
     //     rateType = 'Ton';
     //     rate = Number(tabHaulRate.ratePerPayType);
     //     // d.rateEstimate = d.rateEstimate;

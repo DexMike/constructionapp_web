@@ -141,16 +141,16 @@ class JobMaterials extends PureComponent {
                   <div className="col-md-6 form__form-group">
                     <Button
                       color="primary"
-                      className={data.quantityType === 'hour' ? 'toggle__button' : 'toggle__button-active'}
-                      onClick={() => this.handleQuantityTypeChange('ton')}
+                      className={data.quantityType === 'Hour' ? 'toggle__button' : 'toggle__button-active'}
+                      onClick={() => this.handleQuantityTypeChange('Ton')}
 
                     >
                       <p>tons</p>
                     </Button>
                     <Button
                       color="primary"
-                      className={data.quantityType === 'ton' ? 'toggle__button' : 'toggle__button-active'}
-                      onClick={() => this.handleQuantityTypeChange('hour')}
+                      className={data.quantityType === 'Ton' ? 'toggle__button' : 'toggle__button-active'}
+                      onClick={() => this.handleQuantityTypeChange('Hour')}
 
                     >
                       <p>hours</p>
@@ -163,13 +163,13 @@ class JobMaterials extends PureComponent {
                       fontWeight: 'bold',
                       color: 'black'
                     }}
-                    >{data.quantityType === 'ton' ? 'tons' : 'hours'}</span>
-                      {data.quantityType === 'ton' ? ' do you need delivered' : ' will be worked'}?
+                    >{data.quantityType === 'Ton' ? 'tons' : 'hours'}</span>
+                      {data.quantityType === 'Ton' ? ' do you need delivered' : ' will be worked'}?
                       </span>
                   </div>
                   <div className="col-md-3 form__form-group">
                     <span
-                      className="form__form-group-label">Estimated {data.quantityType === 'ton' ? 'Tons' : 'Hours'}
+                      className="form__form-group-label">Estimated {data.quantityType === 'Ton' ? 'Tons' : 'Hours'}
                       <span
                         style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
                     </span>
@@ -197,7 +197,7 @@ class JobMaterials extends PureComponent {
                 <Row className="col-md-12">
                   <div className="col-md-3 form__form-group">
                     <span
-                      className="form__form-group-label">Price / ton
+                      className="form__form-group-label">Price ($ / ton)
                     </span>
 
                     <TField

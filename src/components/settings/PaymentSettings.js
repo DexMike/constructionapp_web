@@ -35,7 +35,9 @@ class PaymentSettings extends Component {
         last4: ''
       },
       address: null,
-      isSavingAccount: false
+      isSavingAccount: false,
+      formError: '',
+      successMessage: '',
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -116,8 +118,15 @@ class PaymentSettings extends Component {
       reqHandlerAccount,
       reqHandlerRouting
     } = this.state;
+    let isSavingAccount = true;
     let isValid = true;
-
+    if (!/^[0-9]{7,10}$/.test(account)) {
+      reqHandlerAccount = {
+        touched: true,
+        error: 'Account number is not valid'
+      };
+      isValid = false;
+    }
     if (account === null || account.length === 0) {
       reqHandlerAccount = {
         touched: true,
@@ -125,7 +134,13 @@ class PaymentSettings extends Component {
       };
       isValid = false;
     }
-
+    if (!/^[0-9]{9}$/.test(routing)) {
+      reqHandlerRouting = {
+        touched: true,
+        error: 'Routing number is not valid'
+      };
+      isValid = false;
+    }
     if (routing === null || routing.length === 0) {
       reqHandlerRouting = {
         touched: true,
@@ -134,20 +149,22 @@ class PaymentSettings extends Component {
       isValid = false;
     }
 
-    this.setState({
-      reqHandlerAccount,
-      reqHandlerRouting
-    });
-    if (isValid) {
-      return true;
+    if (isValid === false) {
+      isSavingAccount = false;
     }
 
-    return false;
+    this.setState({
+      reqHandlerAccount,
+      reqHandlerRouting,
+      isSavingAccount
+    });
+    return isValid;
   }
 
   async saveAccount() {
     const { company } = {...this.props};
-    const { account, routing, address } = {...this.state};
+    const { address } = {...this.state};
+    let { formError, account, routing, reqHandlerAccount, reqHandlerRouting } = { ...this.state };
     this.setState({ isSavingAccount: true });
     if (!this.isFormValid()) {
       return;
@@ -169,24 +186,61 @@ class PaymentSettings extends Component {
             postalCode: address.zipCode
           }
         };
-        const btCustomerId = await brainTreeClient.addCustomer(bankDetails, company.id);
-        const result = await this.btAccountCreated(btCustomerId);
-        this.setState({
-          hasPaymentMethod: result.hasPaymentMethod,
-          btCustomerInfo: result.btCustomerInfo
-        });
+        const response = await brainTreeClient.addCustomer(bankDetails, company.id);
+        if (response.error) {
+          // set error message
+          // const e = response.error;
+          // if (e.originalError && e.originalError.details && e.originalError.details.originalError
+          //   && e.originalError.details.originalError.error
+          //   && e.originalError.details.originalError.error.details
+          //   && e.originalError.details.originalError.error.details.length > 0
+          //   && e.originalError.details.originalError.error.details[0]
+          //   && e.originalError.details.originalError.error.details[0].code === 'unknown_value'
+          //   && e.originalError.details.originalError.error.details[0].at === '/routing_number') {
+          //   formError = 'Unknown routing number.';
+          // } else {
+          formError = 'We were unable to verify your account information, please update with'
+              + ' the correct banking info or contact Trelar support';
+          account = '';
+          routing = '';
+          reqHandlerAccount = {
+            touched: false,
+            error: ''
+          };
+          reqHandlerRouting = {
+            touched: false,
+            error: ''
+          };
+          // }
+        } else {
+          const result = await this.btAccountCreated(response);
+          this.setState({
+            successMessage: 'Congrats! Your account was approved for ACH debits. '
+              + 'You can start using Trelar now.',
+            hasPaymentMethod: result.hasPaymentMethod,
+            btCustomerInfo: result.btCustomerInfo
+          });
+        }
       }
     } catch (err) {
-      console.error(err.messsage);
+      console.error(err.message);
     }
-    this.setState({ isSavingAccount: false });
+    this.setState({
+      isSavingAccount: false,
+      formError,
+      account,
+      routing,
+      reqHandlerRouting,
+      reqHandlerAccount
+    });
   }
 
   renderSummary() {
-    const { btCustomerInfo } = { ...this.state };
+    const { btCustomerInfo, successMessage } = { ...this.state };
     return (
       <Row>
         <Col md={12}>
+          { successMessage && <p>{successMessage}</p> }
           <strong>Account Holder Name</strong><br/>
           <span>{btCustomerInfo.accountHolderName}</span><br/>
           <br />
@@ -211,7 +265,8 @@ class PaymentSettings extends Component {
       routing,
       reqHandlerAccount,
       reqHandlerRouting,
-      isSavingAccount
+      isSavingAccount,
+      formError
     } = this.state;
     return (
       <React.Fragment>
@@ -229,31 +284,9 @@ class PaymentSettings extends Component {
         <br/>
         <Row>
           <Col md={5} className="account-card mx-auto mt-4" style={{paddingBottom: 10}}>
+            <span className="form__form-group-error">{formError}</span>
             <br />
             <h3>Enter your company bank information:</h3>
-            <br/>
-            <span>
-              Account #
-            </span>
-            <br/>
-            <TField
-              input={
-                {
-                  onChange: this.handleInputChange,
-                  name: 'account',
-                  value: account
-                }
-              }
-            />
-            {
-              reqHandlerAccount.touched
-                ? (
-                  <span style={{color: '#D32F2F'}}>
-                    * Please enter account number
-                  </span>
-                )
-                : null
-            }
             <br/>
             <span>
               Routing #
@@ -271,7 +304,30 @@ class PaymentSettings extends Component {
               reqHandlerRouting.touched
                 ? (
                   <span style={{color: '#D32F2F'}}>
-                    * Please enter routing number
+                    * {reqHandlerRouting.error}
+                  </span>
+                )
+                : null
+            }
+            <br />
+            <span>
+              Account #
+            </span>
+            <br/>
+            <TField
+              input={
+                {
+                  onChange: this.handleInputChange,
+                  name: 'account',
+                  value: account
+                }
+              }
+            />
+            {
+              reqHandlerAccount.touched
+                ? (
+                  <span style={{color: '#D32F2F'}}>
+                    * {reqHandlerAccount.error}
                   </span>
                 )
                 : null
