@@ -481,7 +481,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
+    
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -490,6 +490,12 @@ class DashboardCustomerPage extends Component {
       }
       if ((newJob.status === 'Published And Offered' || newJob.status === 'Published') && (newJob.bidStatus === 'Pending' && newJob.bidHasSchedulerAccepted === 1)) {
         requestedJobCount += 1;
+        if (newJob.status === 'Published And Offered') {
+          newJob.status = 'Requested And Offered';
+        }
+        if (newJob.status === 'Published') {
+          newJob.status = 'Requested';
+        }
       }
       if (newJob.status === 'Published') {
         publishedJobCount += 1;
