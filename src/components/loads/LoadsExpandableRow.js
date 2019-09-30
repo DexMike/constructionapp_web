@@ -206,7 +206,6 @@ class LoadsExpandableRow extends Component {
         profile,
         job
       } = {...this.state};
-
       let startCoords = job.startAddress;
       let endCoords = job.endAddress;
 
@@ -279,6 +278,7 @@ class LoadsExpandableRow extends Component {
             <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoneyByHour(job.rate) : TFormat.asMoneyByTons(job.rate)}</TableCell>
             <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoney(job.rate * load.hoursEntered) : TFormat.asMoney(job.rate * load.tonsEntered)}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
+            <TableCell align="left" style={{color: statusColor}}>{load.ticketNumber || 'N/A'}</TableCell>
           </TableRow>
           {isExpanded && (
             <TableRow>
