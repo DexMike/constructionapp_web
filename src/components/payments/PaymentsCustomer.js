@@ -6,8 +6,10 @@ import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
 import PaymentsService from '../../api/PaymentsService';
-import AddressService from '../../api/AddressService';
 import PaymentsFilter from './PaymentsFilter';
+import ProfileService from '../../api/ProfileService';
+import CompanyService from '../../api/CompanyService';
+
 
 class PaymentsCustomer extends Component {
   constructor(props) {
@@ -19,10 +21,7 @@ class PaymentsCustomer extends Component {
       goToPaymentDetails: false,
       payments: [],
       page: 0,
-      rows: 10,
-      btCustomer: null,
-      btTransactions: [],
-      address: null
+      rows: 10
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -34,24 +33,6 @@ class PaymentsCustomer extends Component {
     await this.fetchPayments();
     this.setState({ loaded: true });
   }
-
-  async componentWillReceiveProps(nextProps) {
-    let { btCustomer, btTransactions, address } = { ...this.state };
-    try {
-      if (!btCustomer && nextProps.company && nextProps.company.btCustomerId) {
-        const response = await this.btAccountCreated(nextProps.company.btCustomerId);
-        btCustomer = response.btCustomer;
-        btTransactions = response.btTransactions;
-      }
-      if (!btCustomer && nextProps.company && nextProps.company.addressId) {
-        address = await AddressService.getAddressById(nextProps.company.addressId);
-      }
-    } catch (err) {
-      console.error(err.message);
-    }
-    this.setState({ btCustomer, btTransactions });
-  }
-
 
   handlePaymentId(id) {
     this.setState({
@@ -74,58 +55,34 @@ class PaymentsCustomer extends Component {
     }
   }
 
-  async fetchPayments(btCustomerId) {
-    // const response = await PaymentsService.searchTransactions({});
-    // const payments = response.data.map((payment) => {
-    //   const newPayment = {};
-    //   newPayment.id = payment.id;
-    //
-    //   newPayment.amount = payment.amount;
-    //   newPayment.amountF = TFormat.getValue(
-    //     TFormat.asMoney(payment.amount)
-    //   );
-    //
-    //   newPayment.type = payment.type;
-    //   newPayment.status = payment.status;
-    //   newPayment.createdAt = TFormat.asDate(payment.createdAt);
-    //   newPayment.company = (payment.customer && payment.customer.company)
-    //     ? payment.customer.company : '';
-    //   newPayment.paymentMethod = (payment.usBankAccountDetails
-    //     && payment.usBankAccountDetails.last4) ? payment.usBankAccountDetails.last4 : '';
-    //   return newPayment;
-    // });
+  async fetchPayments() {
+    const profileCompany = await ProfileService.getProfile();
+    const {companyId} = profileCompany;
+    const company = await CompanyService.getCompanyById(companyId);
+    const {btCustomerId} = company;
+    const response = await PaymentsService.searchTransactions({
+      customerId: btCustomerId
+    });
+    const payments = response.data.map((payment) => {
+      const newPayment = {};
+      newPayment.id = payment.id;
 
-    // this.setState({ payments });
+      newPayment.amount = payment.amount;
+      newPayment.amountF = TFormat.getValue(
+        TFormat.asMoney(payment.amount)
+      );
 
-    let btTransactions = {};
-    let btCustomer = {};
-    console.log('Trying to get btCustomerId');
-    try {
-      btCustomer = await PaymentsService.findCustomer(btCustomerId);
-      console.log('btCustomerId');
-      console.log(btCustomerId);
+      newPayment.type = payment.type;
+      newPayment.status = payment.status;
+      newPayment.createdAt = TFormat.asDate(payment.createdAt);
+      newPayment.company = (payment.customer && payment.customer.company)
+        ? payment.customer.company : '';
+      newPayment.paymentMethod = (payment.usBankAccountDetails
+        && payment.usBankAccountDetails.last4) ? payment.usBankAccountDetails.last4 : '';
+      return newPayment;
+    });
 
-      if (!btCustomerId) {
-        btTransactions = (await PaymentsService.searchTransactions({
-          customerId: btCustomerId
-        })).data;
-        console.log('btTransactions');
-        console.log(btTransactions);      }
-      btTransactions = (await PaymentsService.searchTransactions({
-        customerId: btCustomerId
-      })).data;
-      console.log('btTransactions');
-      console.log(btTransactions);
-      // const btCustomer = await PaymentService.findCustomer(btCustomerId);
-      // if (btCustomer && btCustomer.usBankAccounts && btCustomer.usBankAccounts.length > 0) {
-      //   btCustomerInfo.accountHolderName = btCustomer.usBankAccounts[0].accountHolderName;
-      //   btCustomerInfo.routingNumber = btCustomer.usBankAccounts[0].routingNumber;
-      //   btCustomerInfo.last4 = btCustomer.usBankAccounts[0].last4;
-      // }
-    } catch (err) {
-      console.error(err.message);
-    }
-    return { btCustomer, btTransactions };
+    this.setState({ payments });
   }
 
   renderGoTo() {
@@ -162,7 +119,7 @@ class PaymentsCustomer extends Component {
               <h3 className="page-title">Customer Charges</h3>
             </Col>
           </Row>
-          <PaymentsFilter />
+          {/* <PaymentsFilter /> */}
           <Row>
             <Col md={12}>
               <Card>
