@@ -56,33 +56,36 @@ class PaymentsCustomer extends Component {
   }
 
   async fetchPayments() {
-    const profileCompany = await ProfileService.getProfile();
-    const {companyId} = profileCompany;
-    const company = await CompanyService.getCompanyById(companyId);
-    const {btCustomerId} = company;
-    const response = await PaymentsService.searchTransactions({
-      customerId: btCustomerId
-    });
-    const payments = response.data.map((payment) => {
-      const newPayment = {};
-      newPayment.id = payment.id;
+    try {
+      const profileCompany = await ProfileService.getProfile();
+      const {companyId} = profileCompany;
+      const company = await CompanyService.getCompanyById(companyId);
+      const {btCustomerId} = company;
+      const response = await PaymentsService.searchTransactions({
+        customerId: btCustomerId
+      });
+      const payments = response.data.map((payment) => {
+        const newPayment = {};
+        newPayment.id = payment.id;
 
-      newPayment.amount = payment.amount;
-      newPayment.amountF = TFormat.getValue(
-        TFormat.asMoney(payment.amount)
-      );
+        newPayment.amount = payment.amount;
+        newPayment.amountF = TFormat.getValue(
+          TFormat.asMoney(payment.amount)
+        );
 
-      newPayment.type = payment.type;
-      newPayment.status = payment.status;
-      newPayment.createdAt = TFormat.asDate(payment.createdAt);
-      newPayment.company = (payment.customer && payment.customer.company)
-        ? payment.customer.company : '';
-      newPayment.paymentMethod = (payment.usBankAccountDetails
-        && payment.usBankAccountDetails.last4) ? payment.usBankAccountDetails.last4 : '';
-      return newPayment;
-    });
-
-    this.setState({ payments });
+        newPayment.type = payment.type;
+        newPayment.status = payment.status;
+        newPayment.createdAt = TFormat.asDate(payment.createdAt);
+        newPayment.company = (payment.customer && payment.customer.company)
+          ? payment.customer.company : '';
+        newPayment.paymentMethod = (payment.usBankAccountDetails
+          && payment.usBankAccountDetails.last4) ? payment.usBankAccountDetails.last4 : '';
+        return newPayment;
+      });
+      this.setState({ payments });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   renderGoTo() {
