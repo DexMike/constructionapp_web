@@ -57,7 +57,7 @@ class IntervalDatePickerField extends PureComponent {
   }
 
   render() {
-    const { startDate, endDate } = this.state;
+    const { startDate, endDate } = this.props;
     const { name, dateFormat } = this.props;
     return (
       <div className="date-picker date-picker--interval" style={{backgroundColor: 'transparent'}}>
@@ -81,6 +81,7 @@ class IntervalDatePickerField extends PureComponent {
             // enableTime: true,
             onChange: this.handleChangeStart
           }}
+          value={startDate}
         />
         <MinusIcon className="date-picker__svg" />
         <Flatpickr
@@ -93,6 +94,7 @@ class IntervalDatePickerField extends PureComponent {
             // enableTime: true,
             onChange: this.handleChangeEnd
           }}
+          value={endDate}
         />
         {/*<DatePicker*/}
         {/*  name={name}*/}
