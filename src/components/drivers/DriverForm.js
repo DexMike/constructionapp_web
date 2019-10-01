@@ -252,7 +252,6 @@ class DriverForm extends Component {
     }
     const user = await UserService.getUserByMobile(`+1${mobilePhone}`);
 
-    // const user = await UserService.getUserByMobile(`+1${mobilePhone}`);
     if (userStatusResponse || user.id) {
       this.setState({
         reqHandlerPhone: {
