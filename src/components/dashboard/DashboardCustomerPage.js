@@ -317,6 +317,7 @@ class DashboardCustomerPage extends Component {
     const {loaded, filters, jobsInfo, totalJobs} = this.state;
     let jobs = jobsInfo;
     let onOfferJobCount = 0;
+    let requestedJobCount = 0;
     let publishedJobCount = 0;
     let bookedJobCount = 0;
     let inProgressJobCount = 0;
@@ -338,6 +339,9 @@ class DashboardCustomerPage extends Component {
         if (newJob.status === 'On Offer') {
           // onOfferJobCount += 1;
           onOfferJobCount = newJob.countJobs;
+        }
+        if (newJob.status === 'Requested') {
+          requestedJobCount = newJob.countJobs;
         }
         if (newJob.status === 'Published') {
           // publishedJobCount += 1;
@@ -406,6 +410,14 @@ class DashboardCustomerPage extends Component {
               status={filters.status}
             />
             <DashboardObjectClickable
+              title="Requested by a Carrier"
+              displayVal={requestedJobCount}
+              value="Requested"
+              handle={this.handleFilterStatusChange}
+              name="status"
+              status={filters.status}
+            />
+            <DashboardObjectClickable
               title="Posted Jobs"
               displayVal={publishedJobCount}
               value="Published"
@@ -456,6 +468,7 @@ class DashboardCustomerPage extends Component {
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
+    let requestedJobCount = 0;
     let bookedJobCount = 0;
     let inProgressJobCount = 0;
     let completedJobCount = 0;
@@ -468,12 +481,21 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
+    
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
       if (newJob.status === 'On Offer') {
         onOfferJobCount += 1;
+      }
+      if ((newJob.status === 'Published And Offered' || newJob.status === 'Published') && (newJob.bidStatus === 'Pending' && newJob.bidHasSchedulerAccepted === 1)) {
+        requestedJobCount += 1;
+        if (newJob.status === 'Published And Offered') {
+          newJob.status = 'Requested And Offered';
+        }
+        if (newJob.status === 'Published') {
+          newJob.status = 'Requested';
+        }
       }
       if (newJob.status === 'Published') {
         publishedJobCount += 1;

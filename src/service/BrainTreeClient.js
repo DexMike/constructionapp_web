@@ -1,6 +1,7 @@
 import braintree from 'braintree-web';
 import PaymentsService from '../api/PaymentsService';
 import CompanyService from '../api/CompanyService';
+import BTLogsService from '../api/BTLogsService';
 
 class BrainTreeClient {
   constructor() {
@@ -24,6 +25,14 @@ class BrainTreeClient {
         businessName: bankDetails.businessName,
         nonceToken: tokenizeEtokenizedPayload.nonce
       });
+      const btLog = {
+        companyId,
+        type: 'Add BT Customer',
+        request: JSON.stringify(bankDetails),
+        response: JSON.stringify(vaultResponse),
+        status: 'Success'
+      };
+      await BTLogsService.createBTLog(btLog);
       // const { vaultToken } = { ...vaultResponse };
       const company = await CompanyService.getCompanyById(companyId);
       company.btCustomerId = vaultResponse.customerId;
@@ -31,6 +40,19 @@ class BrainTreeClient {
       return company.btCustomerId;
     } catch (err) {
       console.error(err);
+      const btLog = {
+        companyId,
+        type: 'Add BT Customer',
+        request: JSON.stringify(bankDetails),
+        response: JSON.stringify(err),
+        status: 'Fail'
+      };
+      await BTLogsService.createBTLog(btLog);
+      if (err.details) {
+        return {
+          error: err.details
+        };
+      }
     }
     return null;
   }
