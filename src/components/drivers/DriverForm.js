@@ -244,7 +244,7 @@ class DriverForm extends Component {
     }
 
     const userStatusRequest = {phone: `+1${mobilePhone}`, driverFlow: true};
-    let userStatusResponse;
+    let userStatusResponse = false;
     try {
       userStatusResponse = await UserManagementService.findCognito(userStatusRequest);
     } catch (err) {
