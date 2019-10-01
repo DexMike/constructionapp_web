@@ -132,6 +132,14 @@ pipeline {
         sh 'npm install'
       }
     }
+    stage("Clean dist") {
+      steps {
+        dir('dist') {
+          deleteDir()
+        }
+        sh 'mkdir dist'
+      }
+    }
     stage ("Build HTML") {
       steps {
         sh 'npx babel-node tools/buildHtml.js'
