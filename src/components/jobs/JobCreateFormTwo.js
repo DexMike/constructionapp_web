@@ -22,6 +22,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import TSpinner from '../common/TSpinner';
 import TSubmitButton from '../common/TSubmitButton';
 import CompanyService from '../../api/CompanyService';
+import GeoUtils from '../../utils/GeoUtils';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -286,9 +287,16 @@ class JobCreateFormTwo extends PureComponent {
 
     d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
 
+    // get distance
+    const startingPoint = `${job.startAddress.latitude},${job.startAddress.longitude}`;
+    const endingPoint = `${job.endAddress.latitude},${job.endAddress.longitude}`;
+    const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
+    const distance = ((geo.distance / 1.609) / 1000);
+
     let newJob = [];
     let savedJob = false;
     if (job && Object.keys(job).length > 0 && !copyJob) { // Job exists, from a 'Saved' job
+
       job = {
         id: job.id,
         companiesId: profile.companyId,
@@ -297,6 +305,7 @@ class JobCreateFormTwo extends PureComponent {
         isFavorited,
         startAddress: startAddress.id,
         endAddress: endAddress.id,
+        avgDistance: distance,
         startTime: moment.tz(
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -323,6 +332,7 @@ class JobCreateFormTwo extends PureComponent {
         isFavorited,
         startAddress: startAddress.id,
         endAddress: endAddress.id,
+        avgDistance: distance,
         startTime: moment.tz(
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone

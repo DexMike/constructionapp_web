@@ -21,6 +21,8 @@ import LoadService from '../../api/LoadService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
 import UserUtils from '../../api/UtilsService';
+import GeoUtils from '../../utils/GeoUtils';
+import AddressService from '../../api/AddressService';
 
 class JobClosePopup extends Component {
   constructor(props) {
@@ -166,13 +168,13 @@ class JobClosePopup extends Component {
       newJob.modifiedBy = profile.userId;
     }
 
-    // Set load's status as Job Ended
-    /* const loadsFinish = {
-      id: 0,
-      ids: loadsToFinish,
-      status: 'Job Ended'
-    };
-    LoadService.closeLoads(loadsFinish); */
+    // get distance
+    const startAddress = await AddressService.getAddressById(newJob.startAddress);
+    const endAddress = await AddressService.getAddressById(newJob.endAddress);
+    const startingPoint = `${startAddress.latitude},${startAddress.longitude}`;
+    const endingPoint = `${endAddress.latitude},${endAddress.longitude}`;
+    const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
+    newJob.avgDistance = ((geo.distance / 1.609) / 1000);
 
     try {
       newJob = await JobService.updateJob(newJob);
