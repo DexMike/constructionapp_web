@@ -49,6 +49,14 @@ class LoadService extends AgentService {
     const response = await this.put(url, loadsFinish);
     return (response);
   }
+
+  static async approveJobSubmittedLoads(id) {
+    const load = {
+      jobId: id
+    };
+    const response = await this.post(`/job${PATH}/approve`, load);
+    return (response);
+  }
 }
 
 export default LoadService;

@@ -78,7 +78,7 @@ describe('<LoadsExpandableRow />', () => {
       addressId: 78,
       adminId: 4,
       phone: '6129990787',
-      url: 'www.trelar.net',
+      url: 'https://app.mytrelar.com',
       fax: null,
       rating: null,
       createdBy: null,

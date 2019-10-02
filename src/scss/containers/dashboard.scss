@@ -2,6 +2,97 @@
 
   //default
 
+  .dashboard__job-create {
+    background-color: rgb(229, 229, 224);
+  }
+
+  .triangle-right {
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-left: 18px solid rgb(102, 102, 102);
+    border-bottom: 10px solid transparent;
+  }
+
+  .triangle-down {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 18px solid rgb(102, 102, 102);
+  }
+
+  .infoCircle {
+    border-radius: 50%;
+    width: 6px;
+    height: 6px;
+    padding: 1px;
+    background: #666;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    text-align: center;
+    font: 13px Arial, sans-serif;
+  }
+
+  .dashboard__job-create-section-title {
+    margin: 15px;
+    span {
+      font-size: 14px;
+    }
+  }
+
+  .toggle__button {
+    margin: 0px;
+    border-color: #006f53;
+    border-width: 1px;
+    background-color: rgb(203, 203, 203);
+    border-radius: 0px;
+    p {
+      color: rgb(120, 120, 120);
+      font-style: italic;
+    }
+
+    //.left {
+    //  border-bottom-left-radius: 3px;
+    //  border-top-left-radius: 3px;
+    //}
+    //
+    //.right {
+    //  border-bottom-right-radius: 3px;
+    //  border-top-right-radius: 3px;
+    //}
+
+  }
+
+  .toggle__button-active {
+    margin: 0px;
+    border-color: #006f53;
+    border-width: 1px;
+    background-color: #006f53;
+    border-radius: 0px;
+    p {
+      color: white;
+      font-style: italic;
+    }
+
+  }
+
+  .dashboard__job-create-section {
+    background-color: rgb(245, 245, 245);
+    border-color: rgb(223, 223, 223);
+    border-width: 4px;
+    border-radius: 2px;
+    margin: 15px;
+  }
+
+  .dashboard__job-create-section-secondary {
+    background-color: rgb(241, 241, 237);
+    border-color: rgb(223, 223, 223);
+    border-width: 4px;
+    border-radius: 2px;
+    margin: 15px;
+  }
+
   .dashboard__visitors-chart-title {
 
     span {

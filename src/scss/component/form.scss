@@ -2,6 +2,19 @@
 @import '~react-datepicker/dist/react-datepicker.css';
 @import '~rc-time-picker/assets/index.css';
 
+
+.customTooltip .__react_component_tooltip.place-top{
+  margin-top:0 !important;
+}
+.customTooltip .__react_component_tooltip.type-dark{
+  background-color: #2d6145;
+}
+.customTooltip .__react_component_tooltip.type-dark.place-top:after {
+  border-top-color: #2d6145;
+  border-top-style: solid;
+  border-top-width: 6px;
+}
+
 .form {
   display: flex;
   flex-wrap: wrap;

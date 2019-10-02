@@ -47,7 +47,6 @@ class LoadsExpandableRow extends Component {
     let { loadInvoices, disputeEmail } = {...this.state};
 
     this.getTrackings(load.id);
-
     loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
     // This throws an error
@@ -58,7 +57,7 @@ class LoadsExpandableRow extends Component {
     const date = new Date();
     const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
     disputeEmail = {
-      toEmail: 'csr@trelar.net',
+      toEmail: 'csr@trelar.com',
       toName: 'Trelar CSR',
       subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
       isHTML: true,
@@ -68,7 +67,7 @@ class LoadsExpandableRow extends Component {
         + `Job: ${props.job.name}<br>`
         + `Load Ticket Number: ${load.ticketNumber}`,
       recipients: [
-        {name: 'CSR', email: 'csr@trelar.net'}
+        {name: 'CSR', email: 'csr@trelar.com'}
       ],
       attachments: []
     };
@@ -207,9 +206,12 @@ class LoadsExpandableRow extends Component {
         profile,
         job
       } = {...this.state};
-
       let startCoords = job.startAddress;
       let endCoords = job.endAddress;
+
+      // According to https://trelar.atlassian.net/browse/SG-930
+      // please do not delete code commented
+      /*
       // if there are tracking points use those instead of job address.
       if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
         startCoords = {
@@ -221,6 +223,17 @@ class LoadsExpandableRow extends Component {
           longitude: gpsTrackings[gpsTrackings.length - 1][0]
         };
       }
+      */
+
+      startCoords = {
+        latitude: job.startAddress.latitude,
+        longitude: job.startAddress.longitude
+      };
+
+      endCoords = {
+        latitude: job.endAddress.latitude,
+        longitude: job.endAddress.longitude
+      };
 
       const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
@@ -265,6 +278,7 @@ class LoadsExpandableRow extends Component {
             <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoneyByHour(job.rate) : TFormat.asMoneyByTons(job.rate)}</TableCell>
             <TableCell align="left">{job.rateType === 'Hour' ? TFormat.asMoney(job.rate * load.hoursEntered) : TFormat.asMoney(job.rate * load.tonsEntered)}</TableCell>
             <TableCell align="left" style={{color: statusColor}}>{loadStatus}</TableCell>
+            <TableCell align="left" style={{color: statusColor}}>{load.ticketNumber || 'N/A'}</TableCell>
           </TableRow>
           {isExpanded && (
             <TableRow>

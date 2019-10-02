@@ -387,7 +387,7 @@ class JobCreateFormTwo extends PureComponent {
           // console.log('>>Sending SMS to Jake...');
           const notification = {
             to: this.phoneToNumberFormat(adminIdTel),
-            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
+            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. https://app.mytrelar.com'
           };
           allSms.push(TwilioService.createSms(notification));
         }
@@ -426,7 +426,7 @@ class JobCreateFormTwo extends PureComponent {
         if (bidderTel && this.checkPhoneFormat(bidderTel)) {
           const notification = {
             to: this.phoneToNumberFormat(bidderTel),
-            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.net'
+            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. https://app.mytrelar.com'
           };
           allBiddersSms.push(TwilioService.createSms(notification));
         }
