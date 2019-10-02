@@ -12,6 +12,7 @@ import NumberFormat from 'react-number-format';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
+import UserManagementService from '../../api/UserManagementService';
 import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
 import TSubmitButton from '../common/TSubmitButton';
@@ -197,6 +198,7 @@ class DriverForm extends Component {
 
   async isFormValid() {
     const {firstName, lastName, mobilePhone} = this.state;
+    this.setState({btnSubmitting: true});
     let isValid = true;
 
     if (firstName === null || firstName.length === 0) {
@@ -241,8 +243,16 @@ class DriverForm extends Component {
       isValid = false;
     }
 
+    const userStatusRequest = {phone: `+1${mobilePhone}`, driverFlow: true};
+    let userStatusResponse = false;
+    try {
+      userStatusResponse = await UserManagementService.findCognito(userStatusRequest);
+    } catch (err) {
+      console.log(err);
+    }
     const user = await UserService.getUserByMobile(`+1${mobilePhone}`);
-    if (user.id) {
+
+    if (userStatusResponse || user.id) {
       this.setState({
         reqHandlerPhone: {
           touched: true,
@@ -251,6 +261,7 @@ class DriverForm extends Component {
       });
       isValid = false;
     }
+    this.setState({btnSubmitting: false});
     return isValid;
   }
 
@@ -371,7 +382,8 @@ class DriverForm extends Component {
       reqHandlerLName,
       reqHandlerEmail,
       reqHandlerPhone,
-      userStatus
+      userStatus,
+      btnSubmitting
     } = this.state;
     const {driverId, toggle} = this.props;
     return (
@@ -480,7 +492,7 @@ class DriverForm extends Component {
               <TSubmitButton
                 onClick={this.saveUser}
                 className="primaryButton"
-                // loading={btnSubmitting}
+                loading={btnSubmitting}
                 // loaderSize={10}
                 bntText={driverId && userStatus !== 'Driver Invited' ? 'Update' : 'Send Invite'}
               />

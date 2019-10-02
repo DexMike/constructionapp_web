@@ -833,7 +833,10 @@ class JobForm extends Component {
       endAddress = this.renderEndAddress(job.endAddress);
     }
 
-    if (job.status === 'Job Completed') {
+    if (job.status === 'In Progress'
+    || job.status === 'Job Ended'
+    || job.status === 'Job Completed'
+    ) {
       return (
         <Container>
           <Card>
@@ -989,7 +992,10 @@ class JobForm extends Component {
               </div>
             </Row>
             {
-              (job.status !== 'Published And Offered' && job.status !== 'Job Deleted') && (
+              (job.status !== 'Published And Offered'
+              && job.status !== 'Job Deleted'
+              && job.status !== 'Cancelled'
+              ) && (
                 <React.Fragment>
                   <hr/>
                   {this.renderLoads(loads, job)}
