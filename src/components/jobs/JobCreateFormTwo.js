@@ -288,10 +288,16 @@ class JobCreateFormTwo extends PureComponent {
     d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
 
     // get distance
-    const startingPoint = `${job.startAddress.latitude},${job.startAddress.longitude}`;
-    const endingPoint = `${job.endAddress.latitude},${job.endAddress.longitude}`;
-    const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
-    const distance = ((geo.distance / 1.609) / 1000);
+    let distance = 0;
+    try {
+      const startingPoint = `${job.startAddress.latitude},${job.startAddress.longitude}`;
+      const endingPoint = `${job.endAddress.latitude},${job.endAddress.longitude}`;
+      const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
+      distance = ((geo.distance / 1.609) / 1000);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
+    
 
     let newJob = [];
     let savedJob = false;

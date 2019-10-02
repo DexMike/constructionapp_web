@@ -169,12 +169,16 @@ class JobClosePopup extends Component {
     }
 
     // get distance
-    const startAddress = await AddressService.getAddressById(newJob.startAddress);
-    const endAddress = await AddressService.getAddressById(newJob.endAddress);
-    const startingPoint = `${startAddress.latitude},${startAddress.longitude}`;
-    const endingPoint = `${endAddress.latitude},${endAddress.longitude}`;
-    const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
-    newJob.avgDistance = ((geo.distance / 1.609) / 1000);
+    try {
+      const startAddress = await AddressService.getAddressById(newJob.startAddress);
+      const endAddress = await AddressService.getAddressById(newJob.endAddress);
+      const startingPoint = `${startAddress.latitude},${startAddress.longitude}`;
+      const endingPoint = `${endAddress.latitude},${endAddress.longitude}`;
+      const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
+      newJob.avgDistance = ((geo.distance / 1.609) / 1000);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
 
     try {
       newJob = await JobService.updateJob(newJob);
