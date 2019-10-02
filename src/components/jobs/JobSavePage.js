@@ -242,7 +242,11 @@ class JobSavePage extends Component {
           }
 
           if (companyCarrier) {
-            companyCarrierData = await CompanyService.getCompanyById(companyCarrier);
+            try {
+              companyCarrierData = await CompanyService.getCompanyById(companyCarrier);
+            } catch (err) {
+              console.error(err);
+            }
           }
 
           // Check if a carrier is late when cancelling a job (after 3pm one day before job.startTime)
@@ -502,7 +506,11 @@ class JobSavePage extends Component {
       The reason for cancellation is: ${newJob.cancelReason}.`; // TODO: do we need to check for this field's length?
 
       // Notify Carrier about cancelled job
-      await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id);
+      try {
+        await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id);
+      } catch (err) {
+        console.error(err);
+      }
 
       // get allocated drivers for this job, and send sms to those drivers
       const allocatedDrivers = await JobService.getAllocatedDriversInfoByJobId(job.id);
@@ -608,7 +616,11 @@ class JobSavePage extends Component {
     newJob.dateCancelled = moment.utc().format();
     newJob.modifiedBy = profile.userId;
     newJob.modifiedOn = moment.utc().format();
-    newJob = await JobService.updateJob(newJob);
+    try {
+      newJob = await JobService.updateJob(newJob);
+    } catch (err) {
+      console.error(err);
+    }
 
     const cancelledSms = `${envString}The carrier ${companyCarrierData.legalName} has cancelled working on job `
       + `${job.company.legalName} for ${TFormat.asDateTime(newJob.startTime)}.`
@@ -636,7 +648,11 @@ class JobSavePage extends Component {
       ],
       attachments: []
     };
-    await EmailService.sendEmail(cancelJobEmail);
+    try {
+      await EmailService.sendEmail(cancelJobEmail);
+    } catch (err) {
+      console.error(err);
+    }    
 
     // sending an email to Producer
     const cancelJobEmailProducer = {
@@ -655,7 +671,11 @@ class JobSavePage extends Component {
       ],
       attachments: []
     };
-    await EmailService.sendEmail(cancelJobEmailProducer);
+    try {
+      await EmailService.sendEmail(cancelJobEmailProducer);
+    } catch (err) {
+      console.error(err);
+    }    
 
     this.updateJobView(newJob);
     this.setState({btnSubmitting: false});
