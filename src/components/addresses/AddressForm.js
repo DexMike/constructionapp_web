@@ -84,17 +84,20 @@ class AddressForm extends Component {
   }
 
   async fetchLookupsValues() {
-    const lookups = await LookupsService.getLookups();
+    let lookups;
+    try {
+      lookups = await LookupsService.getLookupsByType('States');
+    } catch (e) {
+      // console.log(e);
+    }
 
     let states = [];
-    Object.values(lookups).forEach((itm) => {
-      if (itm.key === 'States') states.push(itm);
-    });
-
-    states = states.map(state => ({
-      value: String(state.val1),
-      label: state.val1
-    }));
+    if (lookups && lookups.length > 0) {
+      states = lookups.map(state => ({
+        value: String(state.val1),
+        label: state.val1
+      }));
+    }
 
     if (this.mounted) {
       this.setState({
