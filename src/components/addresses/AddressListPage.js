@@ -278,27 +278,27 @@ class AddressListPage extends Component {
                     addresses
                   </p>
                   <TTable
-                    columns={[{
-                      name: 'id', displayName: 'ID'
-                    }, {
-                      name: 'name',
-                      displayName: 'Name'
-                    }, {
-                      name: 'type',
-                      displayName: 'Type'
-                    }, {
-                      name: 'address1',
-                      displayName: 'Address'
-                    }, {
-                      name: 'city',
-                      displayName: 'City'
-                    }, {
-                      name: 'state',
-                      displayName: 'State'
-                    }, {
-                      name: 'updatedBy',
-                      displayName: 'Modified By'
-                    }]}
+                    columns={[
+                      {
+                        name: 'name',
+                        displayName: 'Name'
+                      }, {
+                        name: 'type',
+                        displayName: 'Type'
+                      }, {
+                        name: 'address1',
+                        displayName: 'Address'
+                      }, {
+                        name: 'city',
+                        displayName: 'City'
+                      }, {
+                        name: 'state',
+                        displayName: 'State'
+                      }, {
+                        name: 'zipCode',
+                        displayName: 'Zip Code'
+                      }
+                    ]}
                     data={addresses}
                     handleIdClick={this.handleAddressEdit}
                     handleSortChange={this.sortFilters}

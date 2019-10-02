@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
 import { Col, Row, Button, Container } from 'reactstrap';
-import TFormat from '../common/TFormat';
 import TSpinner from '../common/TSpinner';
 import GeoUtils from '../../utils/GeoUtils';
 import AddressService from '../../api/AddressService';
-import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import SelectField from '../common/TSelect';
 import TField from '../common/TField';
@@ -103,34 +100,6 @@ class AddressForm extends Component {
       this.setState({
         loaded: true,
         states
-      });
-    }
-  }
-
-  async fetchForeignValues(address) {
-    let createdByName = 'Not defined';
-    let modifiedByName = 'Not defined';
-    if (address.createdBy) {
-      try {
-        const user = await UserService.getUserById(address.createdBy);
-        createdByName = `${user.firstName} ${user.lastName}`;
-      } catch (e) {
-        createdByName = address.createdBy;
-      }
-    }
-    if (address.modifiedBy) {
-      try {
-        const user = await UserService.getUserById(address.modifiedBy);
-        modifiedByName = `${user.firstName} ${user.lastName}`;
-      } catch (e) {
-        modifiedByName = address.modifiedBy;
-      }
-    }
-
-    if (this.mounted) {
-      this.setState({
-        createdByName,
-        modifiedByName
       });
     }
   }
@@ -333,8 +302,6 @@ class AddressForm extends Component {
       actionStatus,
       address,
       states,
-      createdByName,
-      modifiedByName,
       reqHandlerName,
       reqHandlerAddress,
       reqHandlerType,
@@ -525,48 +492,6 @@ class AddressForm extends Component {
               onChange={this.handleInputChange}
             />
           </Col>
-          {
-            addressId ? (
-              <React.Fragment>
-                <Col md={12} className="form-details">
-                  <Row>
-                    <Col md={6}>
-                      <span className="form__form-group-label">Created On</span>
-                      <input
-                        disabled
-                        readOnly
-                        value={TFormat.asDateTime(address.createdOn, profile.timeZone)}
-                      />
-                    </Col>
-                    <Col md={6}>
-                      <span className="form__form-group-label">Created By</span>
-                      <input
-                        disabled
-                        readOnly
-                        value={createdByName}
-                      />
-                    </Col>
-                    <Col md={6}>
-                      <span className="form__form-group-label">Last Modified</span>
-                      <input
-                        disabled
-                        readOnly
-                        value={TFormat.asDateTime(address.modifiedOn, profile.timeZone)}
-                      />
-                    </Col>
-                    <Col md={6}>
-                      <span className="form__form-group-label">Modified By</span>
-                      <input
-                        disabled
-                        readOnly
-                        value={modifiedByName}
-                      />
-                    </Col>
-                  </Row>
-                </Col>
-              </React.Fragment>
-            ) : ''
-          }
           <Col md={12} className="form-controls">
             <Row>
               <Col md={6}>
@@ -636,13 +561,11 @@ class AddressForm extends Component {
 }
 
 AddressForm.propTypes = {
-  addressId: PropTypes.number,
-  companyId: PropTypes.number
+  addressId: PropTypes.number
 };
 
 AddressForm.defaultProps = {
-  addressId: null,
-  companyId: null
+  addressId: null
 };
 
 export default AddressForm;
