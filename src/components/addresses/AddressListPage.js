@@ -173,7 +173,7 @@ class AddressListPage extends Component {
     const { modal, addressId, profile } = this.state;
     return (
       <React.Fragment>
-        <Modal isOpen={modal} toggle={this.toggle}>
+        <Modal isOpen={modal} toggle={this.toggle} backdrop="static">
           <AddressForm
             toggle={this.toggle}
             addressId={addressId}
