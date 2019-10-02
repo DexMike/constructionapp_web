@@ -43,6 +43,7 @@ class AddressListPage extends Component {
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleResetFilters = this.handleResetFilters.bind(this);
     this.sortFilters = this.sortFilters.bind(this);
     this.toggle = this.toggle.bind(this);
   }
@@ -112,6 +113,16 @@ class AddressListPage extends Component {
     function wait() {
       this.handleFilterChange(newFilters);
     });
+  }
+
+  async handleResetFilters() {
+    const { filters } = this.state;
+    const newFilters = filters;
+    newFilters.searchValue = '';
+    newFilters.zipCode = '';
+    newFilters.orderBy = '';
+    newFilters.order = '';
+    await this.handleFilterChange(newFilters);
   }
 
   async handleInputChange(e) {
@@ -215,7 +226,7 @@ class AddressListPage extends Component {
                   <Button
                     className="btn btn-secondary"
                     type="button"
-                    // onClick={this.toggle}
+                    onClick={this.handleResetFilters}
                   >
                     Reset
                   </Button>
