@@ -79,6 +79,12 @@ class SidebarCarrierContent extends Component {
                       route="/payments"
                       onClick={this.hideSidebar}
               />
+              <SideElement
+                title="Addresses"
+                icon="ic_home_work"
+                route="/company/addresses"
+                handle={this.hideSidebar}
+              />
               <SideElement title="Reports"
                      icon="ic_timeline"
                      route="/Reports"

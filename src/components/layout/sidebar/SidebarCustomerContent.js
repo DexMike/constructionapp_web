@@ -54,7 +54,7 @@ class SidebarCustomerContent extends Component {
           handle={this.hideSidebar}
         />
         {
-          isAdmin ? (
+          isAdmin && (
             <React.Fragment>
               <SideElement
                 title="Truck Locator"
@@ -68,8 +68,14 @@ class SidebarCustomerContent extends Component {
                 route="/payments"
                 handle={this.hideSidebar}
               />
+              <SideElement
+                title="Addresses"
+                icon="ic_home_work"
+                route="/company/addresses"
+                handle={this.hideSidebar}
+              />
             </React.Fragment>
-          ) : null
+          )
         }
         <SideElement
           title="Reporting"

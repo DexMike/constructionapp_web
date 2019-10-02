@@ -29,6 +29,11 @@ class AddressService extends AgentService {
     return (response);
   }
 
+  static async getAddressesByFilters(filters) {
+    const response = await super.post(`${PATH}/filters`, filters);
+    return (response);
+  }
+
   static async createAddress(address) {
     const response = await super.post(PATH, address);
     return (response);
@@ -39,7 +44,7 @@ class AddressService extends AgentService {
     return (response);
   }
 
-  static async deleteAddressbById(id) {
+  static async deleteAddressById(id) {
     const response = await this.delete(PATH, id);
     return (response);
   }
@@ -59,10 +64,10 @@ class AddressService extends AgentService {
       note: '',
       latitude: 0.0,
       longitude: 0.0,
-      createdBy: 1,
-      createdOn: moment.utc().format(),
+      createdBy: 0,
+      createdOn: null,
       modifiedBy: 0,
-      modifiedOn: moment.utc().format(),
+      modifiedOn: null,
       isArchived: 0
     };
   }
