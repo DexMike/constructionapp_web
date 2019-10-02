@@ -564,13 +564,13 @@ class Summary extends PureComponent {
     const {validateSend, goToSend} = {...this.props};
     const isValid = await validateSend();
     if (isValid) {
-      goToSend();
+      await goToSend();
     }
   }
 
   render() {
     const {loaded} = {...this.state};
-    const {data, goBack, saveJob, closeModal, jobRequest} = {...this.props};
+    const {data, goBack, saveJob, closeModal, jobRequest, jobEdit} = {...this.props};
     const {
       materialTabValidations,
       truckSpecsTabValidations,
@@ -639,7 +639,7 @@ class Summary extends PureComponent {
                   >
                     Back
                   </Button>
-                  {!jobRequest &&
+                  {(!jobRequest && !jobEdit) &&
                   <Button
                     color="outline-primary"
                     className="next"
@@ -654,7 +654,7 @@ class Summary extends PureComponent {
                     onClick={this.validateTopForm}
                     disabled={sendIsDisabled}
                   >
-                    Send
+                    {jobEdit ? 'Update job' : 'Send'}
                   </Button>
                 </ButtonToolbar>
               </Row>

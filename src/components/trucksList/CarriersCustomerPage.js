@@ -17,7 +17,6 @@ import moment from 'moment';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
-import JobCreateFormCarrier from '../jobs/JobCreateFormCarrier';
 
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
