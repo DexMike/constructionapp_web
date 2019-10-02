@@ -285,7 +285,6 @@ class JobFilter extends Component {
           const geoCode = await GeoUtils.getCoordsFromAddress(`${filters.zipCode}, US`);
           filters.companyLatitude = geoCode.lat;
           filters.companyLongitude = geoCode.lng;
-          console.log(288, geoCode);
         } catch (e) {
           this.setState({
             reqHandlerZip: {
