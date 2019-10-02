@@ -144,10 +144,6 @@ class Summary extends PureComponent {
     const val = [];
 
     if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
-      if (!tabPickupDelivery.startLocationAddressName || tabPickupDelivery.startLocationAddressName === '') {
-        val.push('Missing start address name');
-      }
-
       if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
         && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
         val.push('Same start and end addresses');
@@ -178,10 +174,6 @@ class Summary extends PureComponent {
     // const {endGPS} = {...this.state};
 
     if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
-
-      if (!tabPickupDelivery.endLocationAddressName || tabPickupDelivery.endLocationAddressName === '') {
-        val.push('Missing end address name');
-      }
 
       if (tabPickupDelivery.endLocationAddress1.length === 0
         || tabPickupDelivery.endLocationCity.length === 0

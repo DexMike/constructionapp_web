@@ -699,20 +699,10 @@ class JobWizard extends Component {
 
     // START ADDRESS VALIDATION
     if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
-      && (tabPickupDelivery.startLocationAddressName.length > 0
-        || tabPickupDelivery.startLocationAddress1.length > 0
+      && (tabPickupDelivery.startLocationAddress1.length > 0
         || tabPickupDelivery.startLocationCity.length > 0
         || tabPickupDelivery.startLocationZip.length > 0
         || tabPickupDelivery.startLocationState.length > 0)) {
-      if (tabPickupDelivery.startLocationAddressName.length === 0) {
-        tabPickupDelivery.reqHandlerStartAddressName = {
-          ...reqHandlerStartAddressName,
-          touched: true,
-          error: 'Missing starting address name'
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
 
       if (tabPickupDelivery.startLocationAddress1.length === 0) {
         tabPickupDelivery.reqHandlerStartAddress = {
@@ -758,8 +748,7 @@ class JobWizard extends Component {
     }
 
     if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
-      && (tabPickupDelivery.startLocationAddressName.length > 0
-        || tabPickupDelivery.startLocationAddress1.length > 0
+      && (tabPickupDelivery.startLocationAddress1.length > 0
         || tabPickupDelivery.startLocationCity.length > 0
         || tabPickupDelivery.startLocationZip.length > 0
         || tabPickupDelivery.startLocationState.length > 0)) {
@@ -801,20 +790,10 @@ class JobWizard extends Component {
 
     // END ADDRESS VALIDATION
     if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
-      && (tabPickupDelivery.endLocationAddressName.length > 0
-        || tabPickupDelivery.endLocationAddress1.length > 0
+      && (tabPickupDelivery.endLocationAddress1.length > 0
         || tabPickupDelivery.endLocationCity.length > 0
         || tabPickupDelivery.endLocationZip.length > 0
         || tabPickupDelivery.endLocationState.length > 0)) {
-      if (tabPickupDelivery.endLocationAddressName.length === 0) {
-        tabPickupDelivery.reqHandlerEndAddressName = {
-          ...reqHandlerEndAddressName,
-          touched: true,
-          error: 'Missing ending address name'
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
 
       if (tabPickupDelivery.endLocationAddress1.length === 0) {
         tabPickupDelivery.reqHandlerEndAddress = {
@@ -861,8 +840,7 @@ class JobWizard extends Component {
     }
 
     if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
-      && (tabPickupDelivery.endLocationAddressName.length > 0
-        || tabPickupDelivery.endLocationAddress1.length > 0
+      && (tabPickupDelivery.endLocationAddress1.length > 0
         || tabPickupDelivery.endLocationCity.length > 0
         || tabPickupDelivery.endLocationZip.length > 0
         || tabPickupDelivery.endLocationState.length > 0)) {
@@ -1308,7 +1286,7 @@ class JobWizard extends Component {
     if (tabPickupDelivery.selectedStartAddressId > 0) {
       startAddress.id = tabPickupDelivery.selectedStartAddressId;
     }
-    if (tabPickupDelivery.selectedStartAddressId === 0 && tabPickupDelivery.startLocationAddressName.length > 0) {
+    if (tabPickupDelivery.selectedStartAddressId === 0) {
       const address1 = {
         type: 'Delivery',
         name: tabPickupDelivery.startLocationAddressName,
@@ -1338,7 +1316,7 @@ class JobWizard extends Component {
     if (tabPickupDelivery.selectedEndAddressId > 0) {
       endAddress.id = tabPickupDelivery.selectedEndAddressId;
     }
-    if (tabPickupDelivery.selectedEndAddressId === 0 && tabPickupDelivery.endLocationAddressName.length > 0) {
+    if (tabPickupDelivery.selectedEndAddressId === 0) {
       const address2 = {
         type: 'Delivery',
         name: tabPickupDelivery.endLocationAddressName,
