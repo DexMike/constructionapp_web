@@ -1039,7 +1039,7 @@ class JobSavePage extends Component {
       // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
-      this.setState({job});
+      this.setState({job, booking});
     } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
