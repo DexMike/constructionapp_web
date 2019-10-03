@@ -34,11 +34,11 @@ import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
 import JobCreatePopup from './JobCreatePopup';
-import JobCreateFormCarrier from './JobCreateFormCarrier';
 import EmailService from '../../api/EmailService';
 import JobClosePopup from './JobClosePopup';
 import JobDeletePopup from './JobDeletePopup';
 import UserUtils from '../../api/UtilsService';
+import JobWizard from "./JobWizard";
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -1039,7 +1039,7 @@ class JobSavePage extends Component {
       // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
-      this.setState({job});
+      this.setState({job, booking});
     } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
@@ -1548,21 +1548,15 @@ class JobSavePage extends Component {
       <Modal
         isOpen={modalEditJob}
         toggle={this.toggleEditExistingJobModal}
-        className="modal-dialog--primary modal-dialog--header form"
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
-        <div className="modal__header">
-          <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleEditExistingJobModal}
-          />
-          <div className="bold-text modal__title">Edit Job</div>
-        </div>
-        <div className="modal__body" style={{paddingTop: '25px', paddingRight: '0px'}}>
-          <JobCreateFormCarrier
-            job={job}
-            closeModal={this.toggleEditExistingJobModal}
-            updateJobView={this.updateJobView}
-          />
-        </div>
+        <JobWizard
+          toggle={this.toggleEditExistingJobModal}
+          updateJobView={this.updateJobView}
+          jobEdit
+          job={job}
+        />
       </Modal>
     );
   }

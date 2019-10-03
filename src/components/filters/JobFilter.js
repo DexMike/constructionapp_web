@@ -14,6 +14,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
+import GeoUtils from '../../utils/GeoUtils';
 import AddressService from '../../api/AddressService';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
@@ -278,13 +279,12 @@ class JobFilter extends Component {
     // or we don't have any coordinates on our db
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
-        try { // Search for that new zip code's coordinates with MapBox API
-          // TODO -> do this without MapBox
-          /*
-          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-          filters.companyLatitude = geoLocation.features[0].center[1];
-          filters.companyLongitude = geoLocation.features[0].center[0];
-          */
+        try {
+          // Search for that new zip code's coordinates with Here.com API,
+          // had to add 'US' to specify country
+          const geoCode = await GeoUtils.getCoordsFromAddress(`${filters.zipCode}, US`);
+          filters.companyLatitude = geoCode.lat;
+          filters.companyLongitude = geoCode.lng;
         } catch (e) {
           this.setState({
             reqHandlerZip: {
