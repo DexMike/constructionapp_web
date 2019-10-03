@@ -535,7 +535,7 @@ class JobForm extends Component {
             Material: {job.materials}
           </div>
         )}
-        {companyType === 'Customer' && (
+        {(companyType === 'Customer' || companyType === 'Producer') && (
           <div className="col-md-4">
             <h3 className="subhead">
               Job Status: {displayStatus}
