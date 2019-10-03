@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {Link, Redirect} from 'react-router-dom';
 import moment from 'moment';
-import CloneDeep from 'lodash.clonedeep';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -23,14 +22,13 @@ import TField from '../common/TField';
 import TDateTimePicker from '../common/TDateTimePicker';
 import TSpinner from '../common/TSpinner';
 import LookupsService from '../../api/LookupsService';
-import GeoCodingService from "../../api/GeoCodingService";
-import SendJob from "./JobWizardTabs/SendJob";
-import BidService from "../../api/BidService";
-import TwilioService from "../../api/TwilioService";
+import GeoCodingService from '../../api/GeoCodingService';
+import SendJob from './JobWizardTabs/SendJob';
+import BidService from '../../api/BidService';
+import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
-import UserUtils from "../../api/UtilsService";
-import BookingService from "../../api/BookingService";
-import UserService from "../../api/UserService";
+import UserUtils from '../../api/UtilsService';
+import UserService from '../../api/UserService';
 
 class JobWizard extends Component {
   constructor(props) {
@@ -234,7 +232,12 @@ class JobWizard extends Component {
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
     const {jobEdit} = this.props;
 
-    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    let truckTypes;
+    try {
+      truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    } catch (err) {
+      console.error(err);
+    }
     const allTruckTypes = [];
     Object.values(truckTypes)
       .forEach((itm) => {
@@ -258,7 +261,12 @@ class JobWizard extends Component {
         poNumber = job.poNumber;
 
         // populate tabMaterials
-        const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        let materials;
+        try {
+          materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        } catch (err) {
+          console.error(err);
+        }
         tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
         tabMaterials.estMaterialPricing = job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
@@ -270,7 +278,12 @@ class JobWizard extends Component {
 
         // populate truck specs
         tabTruckSpecs.truckQuantity = job.numEquipments;
-        const selectedTruckTypes = await JobService.getMaterialsByJobId(job.id);
+        let selectedTruckTypes;
+        try {
+          selectedTruckTypes = await JobService.getMaterialsByJobId(job.id);
+        } catch (err) {
+          console.error(err);
+        }
         const mapSelectedTruckTypes = [];
         Object.values(selectedTruckTypes)
           .forEach((itm) => {
@@ -288,10 +301,21 @@ class JobWizard extends Component {
         tabHaulRate.ratePerPayType = job.rate;
       }
     }
-    const profile = await ProfileService.getProfile();
+
+    let profile;
+    try {
+      profile = await ProfileService.getProfile();
+    } catch (err) {
+      console.error(err);
+    }
 
     // MATERIAL TAB DATA
-    let allMaterials = await LookupsService.getLookupsByType('MaterialType');
+    let allMaterials;
+    try {
+      allMaterials = await LookupsService.getLookupsByType('MaterialType');
+    } catch (err) {
+      console.error(err);
+    }
     allMaterials = allMaterials.map(material => ({
       value: material.val1,
       label: material.val1
@@ -301,14 +325,24 @@ class JobWizard extends Component {
 
     // PICKUP AND DELIVERY TAB DATA
     // addresses
-    const addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
+    let addressesResponse;
+    try {
+      addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
+    } catch (err) {
+      console.error(err);
+    }
     const allAddresses = addressesResponse.data.map(address => ({
       value: String(address.id),
       label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
     }));
     tabPickupDelivery.allAddresses = allAddresses;
     // US states
-    let states = await LookupsService.getLookupsByType('States');
+    let states;
+    try {
+      states = await LookupsService.getLookupsByType('States');
+    } catch (err) {
+      console.error(err);
+    }
     states = states.map(state => ({
       value: String(state.val1),
       label: state.val1
@@ -352,7 +386,12 @@ class JobWizard extends Component {
   }
 
   async getTruckTypes() {
-    const truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    let truckTypes;
+    try {
+      truckTypes = await LookupsService.getLookupsByType('EquipmentType');
+    } catch (err) {
+      console.error(err);
+    }
     const allTruckTypes = [];
     Object.values(truckTypes).forEach((itm) => {
       const inside = {
@@ -478,7 +517,11 @@ class JobWizard extends Component {
         modifiedOn: moment.utc().format()
       };
       /* eslint-disable no-await-in-loop */
-      await JobMaterialsService.createJobMaterials(newMaterial);
+      try {
+        await JobMaterialsService.createJobMaterials(newMaterial);
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 
@@ -885,8 +928,12 @@ class JobWizard extends Component {
       };
       allTrucks.push(equipmentMaterial);
     }
-    await JobMaterialsService.deleteJobEquipmentsByJobId(jobId);
-    await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+    try {
+      await JobMaterialsService.deleteJobEquipmentsByJobId(jobId);
+      await JobMaterialsService.createJobEquipments(jobId, allTrucks);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   checkPhoneFormat(phone) {
@@ -1103,7 +1150,12 @@ class JobWizard extends Component {
       bid.createdOn = moment.utc().format();
       bid.modifiedBy = profile.userId;
       bid.modifiedOn = moment.utc().format();
-      const createdBid = await BidService.createBid(bid);
+      let createdBid;
+      try {
+        createdBid = await BidService.createBid(bid);
+      } catch (err) {
+        console.error(err);
+      }
 
       // Now we need to create a Booking
       booking.bidId = createdBid.id;
@@ -1170,14 +1222,23 @@ class JobWizard extends Component {
       // Let's make a call to Twilio to send an SMS
       // We need to get the phone number from the carrier co
       // Sending SMS to Truck's company's admin
-      const carrierAdmin = await UserService.getAdminByCompanyId(selectedCarrierId);
+      let carrierAdmin;
+      try {
+        carrierAdmin = await UserService.getAdminByCompanyId(selectedCarrierId);
+      } catch (err) {
+        console.error(err);
+      }
       if (carrierAdmin.length > 0) { // check if we get a result
         if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
           const notification = {
             to: this.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
             body: 'You have a new job offer, please log in to https://www.mytrelar.com'
           };
-          await TwilioService.createSms(notification);
+          try {
+            await TwilioService.createSms(notification);
+          } catch (err) {
+            console.error(err);
+          }
         }
       }
 
@@ -1204,7 +1265,11 @@ class JobWizard extends Component {
             modifiedBy: profile.userId,
             modifiedOn: moment.utc().format()
           };
-          results.push(BidService.createBid(bid));
+          try {
+            results.push(BidService.createBid(bid));
+          } catch (err) {
+            console.error(err);
+          }
         }
         await Promise.all(results);
 
@@ -1217,7 +1282,11 @@ class JobWizard extends Component {
               to: this.phoneToNumberFormat(adminIdTel),
               body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. https://app.mytrelar.com'
             };
-            allSms.push(TwilioService.createSms(notification));
+            try {
+              allSms.push(TwilioService.createSms(notification));
+            } catch (err) {
+              console.error(err);
+            }
           }
         }
         await Promise.all(allSms);
@@ -1236,10 +1305,15 @@ class JobWizard extends Component {
           material: tabMaterials.selectedMaterial.value,
           startAddressId: startAddress.id
         };
-        const nonFavoriteCarriers = await CompanyService.getNonFavoritesByUserId(
-          profile.userId,
-          filters
-        );
+        let nonFavoriteCarriers;
+        try {
+          nonFavoriteCarriers = await CompanyService.getNonFavoritesByUserId(
+            profile.userId,
+            filters
+          );
+        } catch (err) {
+          console.error(err);
+        }
         if (nonFavoriteCarriers.length > 0) {
           // get the phone numbers from the admins
           nonFavoriteAdminTels = nonFavoriteCarriers.map(x => (x.adminPhone ? x.adminPhone : null));
@@ -1255,7 +1329,11 @@ class JobWizard extends Component {
               to: this.phoneToNumberFormat(bidderTel),
               body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. https://app.mytrelar.com'
             };
-            allBiddersSms.push(TwilioService.createSms(notification));
+            try {
+              allBiddersSms.push(TwilioService.createSms(notification));
+            } catch (err) {
+              console.error(err);
+            }
           }
         }
       }
