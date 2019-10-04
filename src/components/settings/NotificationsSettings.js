@@ -27,16 +27,17 @@ class NotificationsSettings extends Component {
   }
 
   async componentDidMount() {
-    const { user } = this.props;
-    try {
-      await this.getUserSettings(user.id);
-    } catch (e) {
-      // console.log(e);
-    }
+    const { user } = this.props;    
+    this.getUserSettings(user.id);
   }
 
   async getUserSettings(userId) {
-    const settings = await UserNotificationsService.getUserNotifications(userId);
+    let settings = [];
+    try {
+      settings = await UserNotificationsService.getUserNotifications(userId);
+    } catch (e) {
+      // console.log(e);
+    }
     this.setState({
       settings
     });
