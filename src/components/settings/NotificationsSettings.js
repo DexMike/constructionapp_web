@@ -96,7 +96,7 @@ class NotificationsSettings extends Component {
     }
   }
 
-  setAllNotificationOptionState(key, method, checkBoxId, e) {
+  async setAllNotificationOptionState(key, method, checkBoxId, e) {
     const {user} = this.props;
     const { settings } = this.state;
     const newSettings = settings;
@@ -118,10 +118,15 @@ class NotificationsSettings extends Component {
         notificationsToUpdate.push(newSettings[i]);
       }
     }
-    UserNotificationsService.updateUserNotificationSection(notificationsToUpdate);
-    this.setState({
-      settings: newSettings
-    });
+
+    try {
+      await UserNotificationsService.updateUserNotificationSection(notificationsToUpdate);
+      this.setState({
+        settings: newSettings
+      });
+    } catch (error) {
+      // console.log(error);
+    }
   }
 
   async setNotificationOptionState(notificationId, key) {
