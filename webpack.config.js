@@ -65,6 +65,9 @@ export default {
         include: [path.resolve(__dirname, './src')],
         exclude: /node_modules/,
         loader: 'babel-loader',
+        options: {
+          cacheDirectory: true
+        },
         query: {
           presets: ['react', 'es2015']
         }
