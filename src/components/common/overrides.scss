@@ -9,28 +9,32 @@
 }
 
 .flatpickr-months .flatpickr-month {
-  background: rgb(23, 112, 83) !important;
+  background: rgb(0, 111, 83) !important;
 }
 
 .flatpickr-current-month .flatpickr-monthDropdown-months {
-  color: rgb(62, 110, 85) !important;
+  color: rgb(0, 111, 83) !important;
   background: white !important;
   font-weight: 400 !important;
 }
 
 .flatpickr-weekdays {
-  background: rgb(62, 110, 85) !important;
+  background: rgb(0, 111, 83) !important;
 }
 
 .flatpickr-weekday {
-  background: rgb(62, 110, 85) !important;
+  background: rgb(0, 111, 83) !important;
   color: white !important;
+}
+
+.flatpickr-calendar.arrowTop:after {
+  border-bottom-color: rgb(0, 111, 83) !important;
 }
 
 .flatpickr-day {
   &.selected {
-    background: rgb(62, 110, 85) !important;
-    border-color: rgb(62, 110, 85) !important;
+    background: rgb(0, 111, 83) !important;
+    border-color: rgb(0, 111, 83) !important;
   }
 }
 
