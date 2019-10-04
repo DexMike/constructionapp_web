@@ -42,7 +42,7 @@ def cloudfront_id() {
   def id_map = [
 
     "master":  "E1AHYHKY2WVINB",
-    "infra":   "ELIUNX04399Z7",
+    "infra":   "E1EGZGUUXJ1IES",
     "dev":     "E1LAYT176RPT8J",
     "demo":    "E3VLWJXIOSHO30",
     "qa":      "E2W2Q6ROFYLZDI",
