@@ -18,6 +18,11 @@ class LookupsService extends AgentService {
     return (response);
   }
 
+  static async getLookupsCarrierCancelReasons() {
+    const response = await super.get(`${PATH}/carriercancelreasons`);
+    return (response);
+  }
+
   static async createLookup(lookup) {
     const response = await super.post(PATH, lookup);
     return (response);
