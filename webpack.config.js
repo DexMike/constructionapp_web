@@ -12,9 +12,14 @@ const GLOBALS = {
 
 process.traceDeprecation = true;
 
+var TerserPlugin = require('terser-webpack-plugin')
+
 export default {
   devtool: 'source-map',
   entry: './src/index.js',
+  optimization: {
+    minimizer: [new TerserPlugin()]
+  },
   // target: 'web',
   output: {
     path: path.resolve(__dirname, 'dist'),
