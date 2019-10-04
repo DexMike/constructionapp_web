@@ -22,6 +22,7 @@ import JobMaterialsService from '../../api/JobMaterialsService';
 import TSpinner from '../common/TSpinner';
 import TSubmitButton from '../common/TSubmitButton';
 import CompanyService from '../../api/CompanyService';
+import GeoUtils from '../../utils/GeoUtils';
 
 class JobCreateFormTwo extends PureComponent {
   constructor(props) {
@@ -286,9 +287,22 @@ class JobCreateFormTwo extends PureComponent {
 
     d.jobDate = moment(d.jobDate).format('YYYY-MM-DD HH:mm');
 
+    // get distance
+    let distance = 0;
+    try {
+      const startingPoint = `${job.startAddress.latitude},${job.startAddress.longitude}`;
+      const endingPoint = `${job.endAddress.latitude},${job.endAddress.longitude}`;
+      const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
+      distance = ((geo.distance / 1.609) / 1000);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
+    
+
     let newJob = [];
     let savedJob = false;
     if (job && Object.keys(job).length > 0 && !copyJob) { // Job exists, from a 'Saved' job
+
       job = {
         id: job.id,
         companiesId: profile.companyId,
@@ -297,6 +311,7 @@ class JobCreateFormTwo extends PureComponent {
         isFavorited,
         startAddress: startAddress.id,
         endAddress: endAddress.id,
+        avgDistance: distance,
         startTime: moment.tz(
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -323,6 +338,7 @@ class JobCreateFormTwo extends PureComponent {
         isFavorited,
         startAddress: startAddress.id,
         endAddress: endAddress.id,
+        avgDistance: distance,
         startTime: moment.tz(
           d.jobDate,
           profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -387,7 +403,7 @@ class JobCreateFormTwo extends PureComponent {
           // console.log('>>Sending SMS to Jake...');
           const notification = {
             to: this.phoneToNumberFormat(adminIdTel),
-            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. www.trelar.net'
+            body: '🚚 You have a new Trelar Job Offer available. Log into your Trelar account to review and accept. https://app.mytrelar.com'
           };
           allSms.push(TwilioService.createSms(notification));
         }
@@ -426,7 +442,7 @@ class JobCreateFormTwo extends PureComponent {
         if (bidderTel && this.checkPhoneFormat(bidderTel)) {
           const notification = {
             to: this.phoneToNumberFormat(bidderTel),
-            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. www.trelar.net'
+            body: '👷 A new Trelar Job is posted in your area. Log into your account to review and apply. https://app.mytrelar.com'
           };
           allBiddersSms.push(TwilioService.createSms(notification));
         }

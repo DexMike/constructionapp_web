@@ -15,6 +15,7 @@ import * as PropTypes from 'prop-types';
 import {Link, Redirect} from 'react-router-dom';
 import TFormat from '../common/TFormat';
 import TField from '../common/TField';
+import TSelect from '../common/TSelect';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
@@ -33,10 +34,12 @@ import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
 import JobCreatePopup from './JobCreatePopup';
-import JobCreateFormCarrier from './JobCreateFormCarrier';
 import EmailService from '../../api/EmailService';
 import JobClosePopup from './JobClosePopup';
+import JobDeletePopup from './JobDeletePopup';
 import UserUtils from '../../api/UtilsService';
+import JobWizard from './JobWizard';
+import LookupsService from '../../api/LookupsService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -66,7 +69,9 @@ class JobSavePage extends Component {
       booking: null,
       favoriteCompany: [],
       profile: {},
+      customerAdmin: null,
       companyCarrier: null,
+      companyCarrierData: null,
       // moved companyType to the first level
       // for some reason I couldn't set it when nested
       companyType: null,
@@ -83,7 +88,14 @@ class JobSavePage extends Component {
       modalCancel2: false,
       driversWithLoads: [],
       approveCancel: '',
+      cancelReason: '',
       approveCancelReason: '',
+      showOtherReasonInput: false,
+      showLateCancelNotice: false,
+      reqHandlerCarrierCancel: {
+        touched: false,
+        error: ''
+      },
       reqHandlerCancel: {
         touched: false,
         error: ''
@@ -92,7 +104,9 @@ class JobSavePage extends Component {
         touched: false,
         error: ''
       },
-      closeModal: false
+      closeModal: false,
+      deleteModal: false,
+      carrierCancelReasons: []
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -108,19 +122,24 @@ class JobSavePage extends Component {
     this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
     this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
     this.toggleCancelRequest = this.toggleCancelRequest.bind(this);
+    this.toggleCarrierCancelModal = this.toggleCarrierCancelModal.bind(this);
     this.toggleCancelModal1 = this.toggleCancelModal1.bind(this);
     this.toggleCancelModal2 = this.toggleCancelModal2.bind(this);
     this.loadSavePage = this.loadSavePage.bind(this);
     this.handleCancelJob = this.handleCancelJob.bind(this);
+    this.handleCarrierCancelJob = this.handleCarrierCancelJob.bind(this);
     this.handleCancelInputChange = this.handleCancelInputChange.bind(this);
     this.handleCancelReasonInputChange = this.handleCancelReasonInputChange.bind(this);
     this.toggleCloseModal = this.toggleCloseModal.bind(this);
+    this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
     this.closeJobModal = this.closeJobModal.bind(this);
+    this.deleteJobModal = this.deleteJobModal.bind(this);
     this.notifyAdminViaSms = this.notifyAdminViaSms.bind(this);
+    this.handleSelectCancelReason = this.handleSelectCancelReason.bind(this);
   }
 
-  componentDidMount() {
-    this.loadSavePage();
+  async componentDidMount() {
+    await this.loadSavePage();
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -141,9 +160,13 @@ class JobSavePage extends Component {
       profile,
       favoriteCompany,
       selectedDrivers,
-      companyCarrier
+      companyCarrier,
+      companyCarrierData,
+      customerAdmin,
+      showLateCancelNotice
     } = this.state;
-    let driversWithLoads = [];
+    const {carrierCancelReasons} = this.state;
+    const driversWithLoads = [];
     try {
       profile = await ProfileService.getProfile();
 
@@ -166,6 +189,7 @@ class JobSavePage extends Component {
         if (job) {
           // company
           job.company = await CompanyService.getCompanyById(job.companiesId);
+          customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
           // start address
           let startAddress = null;
           if (job.startAddress) {
@@ -218,10 +242,58 @@ class JobSavePage extends Component {
               // [bid] = bids;
               return bid;
             });
-            // companyCarrier = bid.companyCarrierId;
-            /* } else { // There is just one bid
-              [bid] = bids;
-            } */
+          }
+
+          if (companyCarrier) {
+            try {
+              companyCarrierData = await CompanyService.getCompanyById(companyCarrier);
+            } catch (err) {
+              console.error(err);
+            }
+          }
+
+          // Check if a carrier is late when cancelling a job (after 3pm one day before job.startTime)
+          if (profile.companyType === 'Carrier'
+          && (job.status === 'Booked' || job.status === 'Allocated')) {
+            // dayBeforeJobDate is a day before job.startTime
+            const dayBeforeJobDate = moment(job.startTime).tz(
+              profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+            ).subtract(1, 'days').format('MM/DD/YYYY HH:mm:ss');
+            // console.log('1 day before job date: ', dayBeforeJobDate);
+
+            // cancelDueDate is a day before at 15:00:00
+            const cancelDueDate = `${moment().tz(
+              profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+            ).subtract(1, 'days').format('MM/DD/YYYY')} 15:00:00`;
+            // console.log('cancel due date: ', cancelDueDate);
+
+            const timeFormat = 'MM/DD/YYYY hh:mm:ss';
+
+            // Check if dayBeforeJobDate is after cancelDueDate with moment's isAfter().
+            // If true, a carrier will see a late cancelling warning notice when trying to cancel
+            showLateCancelNotice = moment(dayBeforeJobDate, timeFormat).tz(
+              profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+            ).isBefore(moment(cancelDueDate, timeFormat).tz(
+              profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+            ));
+
+            try {
+              const lookups = await LookupsService.getLookupsCarrierCancelReasons();
+              if (Object.keys(lookups).length > 0) {
+                Object.values(lookups).forEach((itm) => {
+                  carrierCancelReasons.push({
+                    value: itm.val1,
+                    label: itm.val1
+                  });
+                });
+              }
+            } catch (err) {
+              console.error(err);
+            }
+            carrierCancelReasons.push({
+              value: 'Other',
+              label: 'Other'
+            });
           }
 
           // bookings
@@ -291,11 +363,15 @@ class JobSavePage extends Component {
             bid,
             bids,
             companyCarrier,
+            companyCarrierData,
             booking,
             profile,
             companyType: profile.companyType,
             favoriteCompany,
-            drivers: enabledDrivers
+            customerAdmin,
+            drivers: enabledDrivers,
+            showLateCancelNotice,
+            carrierCancelReasons
           });
         }
       }
@@ -339,6 +415,13 @@ class JobSavePage extends Component {
     });
   }
 
+  toggleDeleteModal() {
+    const {deleteModal} = this.state;
+    this.setState({
+      deleteModal: !deleteModal
+    });
+  }
+
   toggleLiabilityModal() {
     const {modalLiability} = this.state;
     this.setState({
@@ -350,6 +433,15 @@ class JobSavePage extends Component {
     const {modalCancelRequest} = this.state;
     this.setState({
       modalCancelRequest: !modalCancelRequest
+    });
+  }
+
+  toggleCarrierCancelModal() {
+    const {modalCarrierCancel, reqHandlerCarrierCancel} = this.state;
+    reqHandlerCarrierCancel.touched = false;
+    this.setState({
+      modalCarrierCancel: !modalCarrierCancel,
+      reqHandlerCarrierCancel
     });
   }
 
@@ -401,12 +493,13 @@ class JobSavePage extends Component {
   async handleCancelJob() {
     const {
       job,
-      companyCarrier,
+      companyCarrierData,
       approveCancelReason,
       reqHandlerCancelReason,
       profile
     } = this.state;
     let newJob = [];
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     if (approveCancelReason === '') {
       this.setState({
@@ -418,34 +511,27 @@ class JobSavePage extends Component {
       });
     } else {
       this.setState({btnSubmitting: true});
-      const companyCarrierData = await CompanyService.getCompanyById(companyCarrier);
 
       // updating job
       newJob = CloneDeep(job);
       delete newJob.company;
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
-      newJob.cancelReason = approveCancelReason;
       newJob.status = 'Cancelled';
-      newJob.cancelReason = approveCancelReason;
+      newJob.cancelReason = `[Cancelled by ${profile.companyType}] ${approveCancelReason}`;;
       newJob.dateCancelled = moment.utc().format();
       newJob.modifiedBy = profile.userId;
       newJob.modifiedOn = moment.utc().format();
       newJob = await JobService.updateJob(newJob);
 
-      const cancelledSms = `Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
+      const cancelledSms = `${envString}Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
       The reason for cancellation is: ${newJob.cancelReason}.`; // TODO: do we need to check for this field's length?
 
       // Notify Carrier about cancelled job
-      const carrierAdmin = await UserService.getAdminByCompanyId(companyCarrierData.id);
-      if (carrierAdmin.length > 0) { // check if we get a result
-        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
-          const notification = {
-            to: UserUtils.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-            body: cancelledSms
-          };
-          await TwilioService.createSms(notification);
-        }
+      try {
+        await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id);
+      } catch (err) {
+        console.error(err);
       }
 
       // get allocated drivers for this job, and send sms to those drivers
@@ -469,7 +555,6 @@ class JobSavePage extends Component {
       }
 
       // sending an email to CSR
-      const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
       const cancelJobEmail = {
         toEmail: 'csr@trelar.com',
         toName: 'Trelar CSR',
@@ -497,6 +582,128 @@ class JobSavePage extends Component {
     }
   }
 
+  async handleCarrierCancelJob() {
+    const {
+      job,
+      customerAdmin,
+      showOtherReasonInput,
+      approveCancelReason,
+      reqHandlerCancel,
+      reqHandlerCancelReason,
+      companyCarrierData,
+      profile
+    } = this.state;
+    let {cancelReason} = this.state;
+    let newJob = [];
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+
+    reqHandlerCancel.touched = false;
+    reqHandlerCancelReason.touched = false;
+
+    if (cancelReason === '') {
+      this.setState({
+        reqHandlerCancel: {
+          ...reqHandlerCancel,
+          touched: true,
+          error: 'You must provide the reason for the cancellation of the job'
+        }
+      });
+      return;
+    }
+
+    if (showOtherReasonInput && approveCancelReason === '') {
+      this.setState({
+        reqHandlerCancelReason: {
+          ...reqHandlerCancelReason,
+          touched: true,
+          error: 'You must provide the reason for the cancellation of the job'
+        }
+      });
+      return;
+    }
+
+    if (cancelReason === 'Other') {
+      cancelReason = approveCancelReason;
+    }
+
+    this.setState({btnSubmitting: true});
+
+    // updating job
+    newJob = CloneDeep(job);
+    delete newJob.company;
+    newJob.startAddress = newJob.startAddress.id;
+    newJob.endAddress = newJob.endAddress.id;
+    newJob.status = 'Cancelled';
+    newJob.cancelReason = `[Cancelled by ${profile.companyType}] ${cancelReason}`;
+    newJob.dateCancelled = moment.utc().format();
+    newJob.modifiedBy = profile.userId;
+    newJob.modifiedOn = moment.utc().format();
+    try {
+      newJob = await JobService.updateJob(newJob);
+    } catch (err) {
+      console.error(err);
+    }
+
+    const cancelledSms = `${envString}The carrier ${companyCarrierData.legalName} has cancelled working on job `
+      + `${job.company.legalName} for ${TFormat.asDateTime(newJob.startTime)}.`
+      + `The reason for cancellation is: ${cancelReason}.`; // TODO: do we need to check for this field's length?
+
+    // Notify Producer about cancelled job
+    await this.notifyAdminViaSms(cancelledSms, job.company.id);
+
+    // sending an email to CSR
+    const cancelJobEmail = {
+      toEmail: 'csr@trelar.com',
+      toName: 'Trelar CSR',
+      subject: `${envString}Trelar Job Cancelled`,
+      isHTML: true,
+      body: 'A carrier cancelled a job on Trelar.<br><br>'
+        + `Carrier Company Name: ${companyCarrierData.legalName}<br>`
+        + `Producer Company Name: ${job.company.legalName}<br>`
+        + `Cancel Reason: ${cancelReason}<br>`
+        + `Job Name: ${newJob.name}<br>`
+        // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
+        + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
+        + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}`,
+      recipients: [
+        {name: 'CSR', email: 'csr@trelar.com'}
+      ],
+      attachments: []
+    };
+    try {
+      await EmailService.sendEmail(cancelJobEmail);
+    } catch (err) {
+      console.error(err);
+    }    
+
+    // sending an email to Producer
+    const cancelJobEmailProducer = {
+      toEmail: customerAdmin.email,
+      toName: `${customerAdmin.firstName} ${customerAdmin.lastName}`,
+      subject: `${envString}Trelar Job Cancelled`,
+      isHTML: true,
+      body: `The carrier ${companyCarrierData.legalName} has cancelled working `
+      + `on job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)}. `
+      + 'Log onto Trelar to find a different carrier for this job: https://app.mytrelar.com.<br><br>'
+      + `The reason for cancellation is: ${cancelReason}.<br><br>`
+      + 'If you need any assistance, please contact <a href="mailto:csr@trelar.com">csr@trelar.com</a>.<br><br>'
+      + 'Thanks,<br>The Trelar Team',
+      recipients: [
+        {name: `${customerAdmin.firstName} ${customerAdmin.lastName}`, email: customerAdmin.email}
+      ],
+      attachments: []
+    };
+    try {
+      await EmailService.sendEmail(cancelJobEmailProducer);
+    } catch (err) {
+      console.error(err);
+    }    
+
+    this.updateJobView(newJob);
+    this.setState({btnSubmitting: false});
+    this.toggleCarrierCancelModal();
+  }
+
   handleCancelInputChange(e) {
     const {reqHandlerCancel} = this.state;
     reqHandlerCancel.touched = false;
@@ -513,6 +720,20 @@ class JobSavePage extends Component {
       approveCancelReason: e.target.value,
       reqHandlerCancelReason
     });
+  }
+
+  async handleSelectCancelReason(option) {
+    const {value} = option;
+    const {reqHandlerCancel} = this.state;
+    let {cancelReason, showOtherReasonInput} = this.state;
+    reqHandlerCancel.touched = false;
+    cancelReason = value;
+    if (cancelReason === 'Other') {
+      showOtherReasonInput = true;
+    } else {
+      showOtherReasonInput = false;
+    }
+    this.setState({cancelReason, showOtherReasonInput, reqHandlerCancel});
   }
 
   goToSecondCancelJobModal() {
@@ -709,10 +930,10 @@ class JobSavePage extends Component {
     }
   }
 
-  async notifyAdminViaSms(message, jobId) {
+  async notifyAdminViaSms(message, companyId) {
     const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
     // Sending SMS to customer's Admin from the company who created the Job
-    const customerAdmin = await UserService.getAdminByCompanyId(jobId);
+    const customerAdmin = await UserService.getAdminByCompanyId(companyId);
     let notification = '';
     if (customerAdmin.length > 0) { // check if we get a result
       if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
@@ -731,6 +952,7 @@ class JobSavePage extends Component {
 
     const {
       job,
+      customerAdmin,
       profile
     } = this.state;
     let {bid} = this.state;
@@ -839,7 +1061,7 @@ class JobSavePage extends Component {
       // alert('You have accepted this job request! Congratulations.');
 
       job.status = 'Booked';
-      this.setState({job});
+      this.setState({job, booking});
     } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
       // console.log('requesting');
       const newJob = CloneDeep(job);
@@ -871,8 +1093,7 @@ class JobSavePage extends Component {
       await BidService.createBid(bid);
 
       // Sending SMS to customer's Admin from the company who created the Job
-      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
-      if (customerAdmin.length > 0) { // check if we get a result
+      if (customerAdmin && customerAdmin.length > 0) { // check if we get a result
         if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
           notification = {
             to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
@@ -899,8 +1120,7 @@ class JobSavePage extends Component {
       bid = await BidService.updateBid(newBid);
 
       // Sending SMS to customer's Admin from the company who created the Job
-      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
-      if (customerAdmin.length > 0) { // check if we get a result
+      if (customerAdmin && customerAdmin.length > 0) { // check if we get a result
         if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
           notification = {
             to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
@@ -976,20 +1196,13 @@ class JobSavePage extends Component {
       // console.log('Unable to notify admin');
     }
 
-    // change job status and cleanup
-    const newJob = CloneDeep(job);
-    newJob.status = 'Job Completed';
-    newJob.startAddress = job.startAddress.id;
-    newJob.endAddress = job.endAddress.id;
-    await JobService.updateJob(newJob);
-
-    job.status = 'Job Completed';
-    this.setState({
-      job
-    });
-
-    this.forceUpdate();
+    await this.loadSavePage();
     // TODO -> Graciously notify the user that we ended the job.
+  }
+
+  async deleteJobModal() {
+    await this.loadSavePage();
+    // TODO -> Graciously notify the user that we deleted the job.
   }
 
   renderGoTo() {
@@ -1032,7 +1245,7 @@ class JobSavePage extends Component {
 
   renderBidsTable() {
     const {job, companyType} = this.state;
-    if (companyType === 'Customer') {
+    if (companyType === 'Customer' && job.status !== 'Job Deleted') {
       return (
         <BidsTable
           job={job}
@@ -1225,20 +1438,6 @@ class JobSavePage extends Component {
         />
       );
     }
-    if ((companyType === 'Customer') // 'Cancel' button: show only to customers
-      // For Booked  or Allocated jobs
-      && (job.status === 'Booked' || job.status === 'Allocated')
-    ) {
-      return (
-        <TSubmitButton
-          onClick={() => this.toggleCancelModal1()}
-          className="secondaryButton"
-          loading={btnSubmitting}
-          loaderSize={10}
-          bntText="Cancel Job"
-        />
-      );
-    }
     return (<React.Fragment/>);
   }
 
@@ -1257,7 +1456,7 @@ class JobSavePage extends Component {
 
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status !== 'Job Ended') {
+    if (job.status === 'In Progress') {
       return (
         <TSubmitButton
           onClick={() => this.toggleCloseModal()}
@@ -1265,6 +1464,41 @@ class JobSavePage extends Component {
           loading={false}
           loaderSize={10}
           bntText="End Job"
+        />
+      );
+    }
+    return false;
+  }
+
+  renderDeleteButton() {
+    const {job} = this.state;
+    if (job.status === 'Published'
+    || job.status === 'Published And Offered'
+    || job.status === 'On Offer'
+    || job.status === 'Saved') {
+      return (
+        <TSubmitButton
+          onClick={() => this.toggleDeleteModal()}
+          className="secondaryButton"
+          loading={false}
+          loaderSize={10}
+          bntText="Delete Job"
+        />
+      );
+    }
+    return false;
+  }
+
+  renderCancelButton() {
+    const {job, profile, btnSubmitting} = this.state;
+    if (job.status === 'Booked' || job.status === 'Allocated') {
+      return (
+        <TSubmitButton
+          onClick={profile.companyType === 'Carrier' ? () => this.toggleCarrierCancelModal() : () => this.toggleCancelModal1()}
+          className="secondaryButton"
+          loading={btnSubmitting}
+          loaderSize={10}
+          bntText="Cancel Job"
         />
       );
     }
@@ -1287,7 +1521,24 @@ class JobSavePage extends Component {
         />
       </Modal>
     );
-    /**/
+  }
+
+  renderDeleteJobModal() {
+    const {deleteModal, job} = this.state;
+    return (
+      <Modal
+        isOpen={deleteModal}
+        toggle={this.toggleDeleteModal}
+        className="status-modal"
+      >
+        <JobDeletePopup
+          toggle={this.toggleDeleteModal}
+          deleteJobModalPopup={this.deleteJobModal}
+          jobName={job.name}
+          jobId={job.id}
+        />
+      </Modal>
+    );
   }
 
   renderNewJobModal() {
@@ -1319,21 +1570,15 @@ class JobSavePage extends Component {
       <Modal
         isOpen={modalEditJob}
         toggle={this.toggleEditExistingJobModal}
-        className="modal-dialog--primary modal-dialog--header form"
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
-        <div className="modal__header">
-          <button type="button" className="lnr lnr-cross modal__close-btn"
-                  onClick={this.toggleEditExistingJobModal}
-          />
-          <div className="bold-text modal__title">Edit Job</div>
-        </div>
-        <div className="modal__body" style={{paddingTop: '25px', paddingRight: '0px'}}>
-          <JobCreateFormCarrier
-            job={job}
-            closeModal={this.toggleEditExistingJobModal}
-            updateJobView={this.updateJobView}
-          />
-        </div>
+        <JobWizard
+          toggle={this.toggleEditExistingJobModal}
+          updateJobView={this.updateJobView}
+          jobEdit
+          job={job}
+        />
       </Modal>
     );
   }
@@ -1580,6 +1825,116 @@ class JobSavePage extends Component {
     return null;
   }
 
+  renderCancelCarrierModal() {
+    const {
+      modalCarrierCancel,
+      btnSubmitting,
+      job,
+      reqHandlerCancelReason,
+      reqHandlerCancel,
+      cancelReason,
+      approveCancelReason,
+      showOtherReasonInput,
+      showLateCancelNotice,
+      carrierCancelReasons
+    } = this.state;
+
+    if (modalCarrierCancel) {
+      return (
+        <Modal
+          isOpen={modalCarrierCancel}
+          toggle={this.toggleCarrierCancelModal}
+          className="modal-dialog--primary modal-dialog--header"
+        >
+          <div className="modal__header">
+            <button type="button" className="lnr lnr-cross modal__close-btn"
+                    onClick={this.toggleCarrierCancelModal}
+            />
+            <div className="bold-text modal__title">Cancel Job</div>
+          </div>
+          <div className="modal__body" style={{padding: '10px 25px 0px 25px'}}>
+            <Container className="dashboard">
+              <Row>
+                <Col md={12} lg={12}>
+                  <Card style={{paddingBottom: 0}}>
+                    <CardBody
+                      className="form form--horizontal addtruck__form"
+                    >
+                      <Row className="col-md-12">
+                        Are you sure you want to cancel this job&nbsp;
+                        <span style={{fontWeight: 'bold'}}>{job.name}</span>?
+                      </Row>
+                      <Row className="col-md-12" style={{display: showLateCancelNotice ? null : 'none', color: 'red'}}>
+                        You are canceling this job after 3pm the previous day of a job.
+                        If you cancel short notice too many times on a posting that is posted
+                        before 3pm the day before a job, you may face suspension from
+                        the platform and a Trelar CSR will be in contact with you.
+                      </Row>
+                      <Row className="col-md-12" style={{paddingTop: 15, paddingBottom: 15}}>
+                        <span className="form__form-group-label">
+                          Reason for cancelling&nbsp;
+                          <span className="form-small-label">This will be shared with the producer {job.company.legalName} who posted this job.</span>
+                        </span>
+                        <TSelect
+                          input={
+                            {
+                              onChange: this.handleSelectCancelReason,
+                              name: 'cancelReason',
+                              value: cancelReason
+                            }
+                          }
+                          meta={reqHandlerCancel}
+                          value={cancelReason}
+                          options={carrierCancelReasons}
+                          placeholder="Please select your reason for cancelling this job"
+                        />
+                      </Row>
+                      <Row className="col-md-12 form__form-group" style={{paddingBottom: 15, display: showOtherReasonInput ? 'flex' : 'none'}} display="none">
+                        <span className="form__form-group-label">
+                          Please type in the reason of your cancellation
+                        </span>
+                        <TField
+                          input={
+                            {
+                              onChange: this.handleCancelReasonInputChange,
+                              name: 'approveCancelReason',
+                              value: approveCancelReason
+                            }
+                          }
+                          type="text"
+                          meta={reqHandlerCancelReason}
+                        />
+                      </Row>
+                      <Row className="col-md-12">
+                        <ButtonToolbar className="col-md-12 wizard__toolbar right-buttons">
+                          <TSubmitButton
+                            onClick={this.toggleCarrierCancelModal}
+                            className="secondaryButton float-right"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="No"
+                          />
+                          <TSubmitButton
+                            onClick={() => this.handleCarrierCancelJob()}
+                            className="primaryButton float-right"
+                            loading={btnSubmitting}
+                            loaderSize={10}
+                            bntText="Yes"
+                          />
+                        </ButtonToolbar>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        </Modal>
+      );
+    }
+    return null;
+  }
+
   renderCancelModal1() {
     const {
       modalCancel1,
@@ -1784,22 +2139,42 @@ class JobSavePage extends Component {
             {this.renderAllocateDriversModal(profile)}
             {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
+            {this.renderCancelCarrierModal()}
             {this.renderCancelModal1()}
             {this.renderCancelModal2()}
             {this.renderCloseJobModal()}
+            {this.renderDeleteJobModal()}
             <div className="row">
               <div className="col-md-6">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
-              <div className="col-md-3 text-right">
+              <div className="col-md-6 text-right">
                 {companyType !== 'Carrier' && this.renderCopyButton()}
-              </div>
-              <div className="col-md-3">
-                {companyType == 'Customer' && this.renderCloseButton()}
+                {companyType === 'Customer' && this.renderCloseButton()}
+                {companyType === 'Customer' && this.renderDeleteButton()}
+                {this.renderCancelButton()}
               </div>
             </div>
-            {this.renderBidsTable()}
-            {this.renderJobForm(companyType, job)}
+            {
+              job.status && (
+                job.status === 'In Progress'
+                || job.status === 'Job Completed'
+                || job.status === 'Allocated'
+                || job.status === 'Booked'
+                || job.status === 'Job Ended'
+                || job.status === 'Cancelled'
+              ) ? (
+                <React.Fragment>
+                  {this.renderJobForm(companyType, job)}
+                  {this.renderBidsTable()}
+                </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    {this.renderBidsTable()}
+                    {this.renderJobForm(companyType, job)}
+                  </React.Fragment>
+                )
+            }
           </div>
         );
       }

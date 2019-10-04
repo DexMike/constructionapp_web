@@ -46,7 +46,6 @@ export const history = createBrowserHistory();
 class App extends Component {
   constructor(props) {
     super(props);
-
     this.toggleTheme = () => {
       this.setState(state => ({
         theme: state.theme === 'dark' ? 'light' : 'dark'

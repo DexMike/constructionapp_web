@@ -35,6 +35,17 @@ class AgentService {
     return response.json();
   }
 
+  static async getText(path) {
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = await this.getHeaders();
+    const init = {
+      method: 'GET',
+      headers
+    };
+    const response = await fetch(input, init);
+    return response.text();
+  }
+
   static async post(path, entity) {
     const input = `${API_ENDPOINT}${path}`;
     const headers = await this.getHeaders();

@@ -14,6 +14,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
+import GeoUtils from '../../utils/GeoUtils';
 import AddressService from '../../api/AddressService';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
@@ -57,6 +58,10 @@ class JobFilter extends Component {
         startInterval: startDate,
         endInterval: endDate
       },
+      resetIntervals: {
+        startInterval: startDate,
+        endInterval: endDate
+      },
       address: {},
       company: {},
       profile: {},
@@ -70,8 +75,8 @@ class JobFilter extends Component {
       filters: {
         rateType: '',
         searchType: 'Carrier Job',
-        startAvailability: null,
-        endAvailability: null,
+        startAvailability: startDate,
+        endAvailability: endDate,
         rate: '',
         minTons: '',
         minHours: '',
@@ -132,13 +137,18 @@ class JobFilter extends Component {
         filters.companyLongitude = address.longitude;
       }
     }
-
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
     }
-
-    this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
+    this.setState({
+      companyZipCode,
+      lastZipCode,
+      company,
+      address,
+      filters,
+      profile
+    });
 
     await this.fetchJobs();
     this.fetchFilterLists();
@@ -243,7 +253,6 @@ class JobFilter extends Component {
     let {company, address, profile} = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
-
     if (!profile) {
       profile = await ProfileService.getProfile();
       if (!company) {
@@ -270,13 +279,12 @@ class JobFilter extends Component {
     // or we don't have any coordinates on our db
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
-        try { // Search for that new zip code's coordinates with MapBox API
-          // TODO -> do this without MapBox
-          /*
-          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-          filters.companyLatitude = geoLocation.features[0].center[1];
-          filters.companyLongitude = geoLocation.features[0].center[0];
-          */
+        try {
+          // Search for that new zip code's coordinates with Here.com API,
+          // had to add 'US' to specify country
+          const geoCode = await GeoUtils.getCoordsFromAddress(`${filters.zipCode}, US`);
+          filters.companyLatitude = geoCode.lat;
+          filters.companyLongitude = geoCode.lng;
         } catch (e) {
           this.setState({
             reqHandlerZip: {
@@ -321,7 +329,6 @@ class JobFilter extends Component {
     const jobs = result.data;
     const {metadata} = result;
     const {returnJobs} = this.props;
-
     returnJobs(jobs, filters, metadata);
     this.setState({lastZipCode: filters.zipCode});
     return jobs;
@@ -461,15 +468,34 @@ class JobFilter extends Component {
   }
 
   async handleResetFilters() {
-    // set values to default or last saved filter
-    if (localStorage.getItem('filters')) {
-      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
-        async () => this.fetchJobs());
-    } else {
-      // defaults
+    const { filters, companyZipCode } = this.state;
+    const resetFilters = filters;
+    const resetIntervals = {
+      startInterval: moment().startOf('week').add(-1, 'weeks').hours(0).minutes(0).seconds(0).toDate(),
+      endInterval: moment().endOf('week').add(1, 'weeks').hours(23).minutes(59).seconds(59).toDate()
+    };
+    resetFilters.startAvailability = resetIntervals.startInterval;
+    resetFilters.endAvailability = resetIntervals.endInterval;
+    resetFilters.rate = '';
+    resetFilters.rateType = 'Any';
+    resetFilters.minCapacity = '';
+    resetFilters.minTons = '';
+    resetFilters.minHours = '';
+    resetFilters.materials = '';
+    resetFilters.materialType = [];
+    resetFilters.equipmentType = [];
+    resetFilters.numEquipments = '';
+    resetFilters.range = '50';
+    resetFilters.zipCode = companyZipCode;
+
+    this.setState({
+      filters: resetFilters,
+      intervals: resetIntervals
+    }, function saved() {
       this.saveFilters();
-      await this.fetchJobs();
-    }
+    });
+
+    await this.fetchJobs();
   }
 
   render() {
@@ -494,198 +520,198 @@ class JobFilter extends Component {
               <form className="form">
                 <div className="flex-job-filters">
                   <div>
-                      <div className="filter-item-title">
-                        Date Range
-                      </div>
-                      <TIntervalDatePicker
-                        startDate={intervals.startInterval}
-                        endDate={intervals.endInterval}
-                        name="dateInterval"
-                        onChange={this.handleIntervalInputChange}
-                        dateFormat="m/d/Y"
-                      />
+                    <div className="filter-item-title">
+                      Date Range
                     </div>
+                    <TIntervalDatePicker
+                      startDate={intervals.startInterval}
+                      endDate={intervals.endInterval}
+                      name="dateInterval"
+                      onChange={this.handleIntervalInputChange}
+                      dateFormat="m/d/Y"
+                    />
+                  </div>
                   <div>
-                      <div className="filter-item-title">
-                        Rate Type
-                      </div>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleSelectFilterChange,
-                            name: 'rateType',
-                            value: filters.rateType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        value={filters.rateType}
-                        options={
-                          rateTypeList.map(rateType => ({
-                            name: 'rateType',
-                            value: rateType,
-                            label: rateType
-                          }))
-                        }
-                        placeholder={rateTypeList[0]}
-                      />
+                    <div className="filter-item-title">
+                      Rate Type
                     </div>
+                    <TSelect
+                      input={
+                        {
+                          onChange: this.handleSelectFilterChange,
+                          name: 'rateType',
+                          value: filters.rateType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      value={filters.rateType}
+                      options={
+                        rateTypeList.map(rateType => ({
+                          name: 'rateType',
+                          value: rateType,
+                          label: rateType
+                        }))
+                      }
+                      placeholder={rateTypeList[0]}
+                    />
+                  </div>
                   <div>
-                      <div className="filter-item-title">
-                        Min Rate
-                      </div>
-                      <TFieldNumber
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'rate',
-                            value: filters.rate
-                          }
-                        }
-                        decimal
-                        className="filter-text"
-                        placeholder="Any"
-                        currency
-                      />
+                    <div className="filter-item-title">
+                      Min Rate
                     </div>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'rate',
+                          value: filters.rate
+                        }
+                      }
+                      decimal
+                      className="filter-text"
+                      placeholder="Any"
+                      currency
+                    />
+                  </div>
                   <div>
-                      <div className="filter-item-title">
-                        Min Capacity
-                      </div>
-                      <TFieldNumber
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'minTons',
-                            value: filters.minTons
-                          }
-                        }
-                        className="filter-text"
-                        placeholder="#"
-                      />
+                    <div className="filter-item-title">
+                      Min Capacity
                     </div>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'minTons',
+                          value: filters.minTons
+                        }
+                      }
+                      className="filter-text"
+                      placeholder="#"
+                    />
+                  </div>
                   <div id="truckTypeSelect">
-                      <div className="filter-item-title">
-                        Truck Type
-                      </div>
-                      <MultiSelect
-                        input={
-                          {
-                            onChange: this.handleMultiTruckChange,
-                            // onChange: this.handleSelectFilterChange,
-                            name: 'equipmentType',
-                            value: filters.equipmentType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        options={
-                          equipmentTypeList.map(equipmentType => ({
-                            name: 'equipmentType',
-                            value: equipmentType.trim(),
-                            label: equipmentType.trim()
-                          }))
-                        }
-                        // placeholder="Materials"
-                        placeholder="Any"
-                        id="truckTypeSelect"
-                        horizontalScroll="true"
-                        selectedItems={filters.equipmentType.length}
-                      />
+                    <div className="filter-item-title">
+                      Truck Type
                     </div>
+                    <MultiSelect
+                      input={
+                        {
+                          onChange: this.handleMultiTruckChange,
+                          // onChange: this.handleSelectFilterChange,
+                          name: 'equipmentType',
+                          value: filters.equipmentType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      options={
+                        equipmentTypeList.map(equipmentType => ({
+                          name: 'equipmentType',
+                          value: equipmentType.trim(),
+                          label: equipmentType.trim()
+                        }))
+                      }
+                      // placeholder="Materials"
+                      placeholder="Any"
+                      id="truckTypeSelect"
+                      horizontalScroll="true"
+                      selectedItems={filters.equipmentType.length}
+                    />
+                  </div>
                   <div>
-                      <div className="filter-item-title">
-                        # of Trucks
-                      </div>
-                      <TFieldNumber
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'numEquipments',
-                            value: filters.numEquipments
-                          }
-                        }
-                        className="filter-text"
-                        placeholder="Any"
-                      />
+                    <div className="filter-item-title">
+                      # of Trucks
                     </div>
+                    <TFieldNumber
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'numEquipments',
+                          value: filters.numEquipments
+                        }
+                      }
+                      className="filter-text"
+                      placeholder="Any"
+                    />
+                  </div>
                   <div>
-                      <div className="filter-item-title">
-                        Zip Code
-                      </div>
-                      <TField
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'zipCode',
-                            value: filters.zipCode
-                          }
-                        }
-                        meta={reqHandlerZip}
-                        className="filter-text"
-                        placeholder={companyZipCode}
-                        type="number"
-                      />
+                    <div className="filter-item-title">
+                      Zip Code
                     </div>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'zipCode',
+                          value: filters.zipCode
+                        }
+                      }
+                      meta={reqHandlerZip}
+                      className="filter-text"
+                      placeholder={companyZipCode}
+                      type="number"
+                    />
+                  </div>
                   <div>
-                      <div className="filter-item-title">
-                        Range (mi)
-                      </div>
-                      <TField
-                        input={
-                          {
-                            onChange: this.handleFilterChangeDelayed,
-                            name: 'range',
-                            value: filters.range
-                          }
-                        }
-                        meta={reqHandlerRange}
-                        className="filter-text"
-                        placeholder="Any"
-                        type="number"
-                      />
+                    <div className="filter-item-title">
+                      Range (mi)
                     </div>
+                    <TField
+                      input={
+                        {
+                          onChange: this.handleFilterChangeDelayed,
+                          name: 'range',
+                          value: filters.range
+                        }
+                      }
+                      meta={reqHandlerRange}
+                      className="filter-text"
+                      placeholder="Any"
+                      type="number"
+                    />
+                  </div>
                   <div id="materialTypeSelect" >
-                      <div className="filter-item-title">
-                        Materials
-                      </div>
-                      <MultiSelect
-                        input={
-                          {
-                            onChange: this.handleMultiChange,
-                            // onChange: this.handleSelectFilterChange,
-                            name: 'materialType',
-                            value: filters.materialType
-                          }
-                        }
-                        meta={
-                          {
-                            touched: false,
-                            error: 'Unable to select'
-                          }
-                        }
-                        options={
-                          materialTypeList.map(materialType => ({
-                            name: 'materialType',
-                            value: materialType.trim(),
-                            label: materialType.trim()
-                          }))
-                        }
-                        placeholder="Any"
-                        // placeholder={materialTypeList[0]}
-                        id="materialTypeSelect"
-                        horizontalScroll="true"
-                        selectedItems={filters.materialType.length}
-                      />
+                    <div className="filter-item-title">
+                      Materials
                     </div>
+                    <MultiSelect
+                      input={
+                        {
+                          onChange: this.handleMultiChange,
+                          // onChange: this.handleSelectFilterChange,
+                          name: 'materialType',
+                          value: filters.materialType
+                        }
+                      }
+                      meta={
+                        {
+                          touched: false,
+                          error: 'Unable to select'
+                        }
+                      }
+                      options={
+                        materialTypeList.map(materialType => ({
+                          name: 'materialType',
+                          value: materialType.trim(),
+                          label: materialType.trim()
+                        }))
+                      }
+                      placeholder="Any"
+                      // placeholder={materialTypeList[0]}
+                      id="materialTypeSelect"
+                      horizontalScroll="true"
+                      selectedItems={filters.materialType.length}
+                    />
+                  </div>
                 </div>
                 <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
                   <Row>

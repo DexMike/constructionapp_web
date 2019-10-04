@@ -395,7 +395,7 @@ class BidsTable extends Component {
     const {totalBids} = this.state;
     return (
       <div className="ml-4 mt-4">
-        Total number of offers: {totalBids}
+        Total number of requests: {totalBids}
       </div>
     );
   }
@@ -432,7 +432,7 @@ class BidsTable extends Component {
                   }, */
                   {
                     name: 'loadsNumber',
-                    displayName: 'Loads Completed'
+                    displayName: 'Total Hauls Delivered on Trelar'
                   },
                   {
                     name: 'dateF',
