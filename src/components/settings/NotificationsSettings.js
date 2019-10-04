@@ -15,10 +15,10 @@ class NotificationsSettings extends Component {
     this.state = {
       settings: [],
       communicationTypes: [
-        { title: 'In App', name: 'app', enabled: false},
-        { title: 'Mobile', name: 'mobile', enabled: false },
-        { title: 'SMS', name: 'sms', enabled: true },
-        { title: 'Email', name: 'email', enabled: false}
+        // { title: 'In App', name: 'app', enabled: false},
+        { title: 'Push Notifications', name: 'mobile', enabled: true },
+        { title: 'SMS', name: 'sms', enabled: true }
+        // { title: 'Email', name: 'email', enabled: false}
       ]
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -27,12 +27,17 @@ class NotificationsSettings extends Component {
   }
 
   async componentDidMount() {
-    const { user } = this.props;
-    await this.getUserSettings(user.id);
+    const { user } = this.props;    
+    this.getUserSettings(user.id);
   }
 
   async getUserSettings(userId) {
-    const settings = await UserNotificationsService.getUserNotifications(userId);
+    let settings = [];
+    try {
+      settings = await UserNotificationsService.getUserNotifications(userId);
+    } catch (e) {
+      // console.log(e);
+    }
     this.setState({
       settings
     });
@@ -91,7 +96,7 @@ class NotificationsSettings extends Component {
     }
   }
 
-  setAllNotificationOptionState(key, method, checkBoxId, e) {
+  async setAllNotificationOptionState(key, method, checkBoxId, e) {
     const {user} = this.props;
     const { settings } = this.state;
     const newSettings = settings;
@@ -113,10 +118,15 @@ class NotificationsSettings extends Component {
         notificationsToUpdate.push(newSettings[i]);
       }
     }
-    UserNotificationsService.updateUserNotificationSection(notificationsToUpdate);
-    this.setState({
-      settings: newSettings
-    });
+
+    try {
+      await UserNotificationsService.updateUserNotificationSection(notificationsToUpdate);
+      this.setState({
+        settings: newSettings
+      });
+    } catch (error) {
+      // console.log(error);
+    }
   }
 
   async setNotificationOptionState(notificationId, key) {
@@ -236,52 +246,61 @@ class NotificationsSettings extends Component {
                   </label>
                 </td>
                 <td>{notification.description}</td>
+                {
+                  /*
+                  <td className="text-center">
+                    <label className="checkbox-container" htmlFor={`${notification.id}-InApp`}>
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        disabled
+                        id={`${notification.id}-InApp`}
+                      />
+                      <span className="checkmark centered disabled-checkbox"/>
+                    </label>
+                  </td>
+                  */
+                }
                 <td className="text-center">
-                  <label className="checkbox-container" htmlFor={`${notification.id}-InApp`}>
+                  <label className="checkbox-container" htmlFor={`${notification.id}-mobile`}>
                     <input
                       type="checkbox"
-                      checked={false}
-                      disabled
-                      id={`${notification.id}-InApp`}
-                    />
-                    <span className="checkmark centered disabled-checkbox"/>
-                  </label>
-                </td>
-                <td className="text-center">
-                  <label className="checkbox-container" htmlFor={`${notification.id}-Mobile`}>
-                    <input
-                      type="checkbox"
-                      checked={false}
-                      disabled
-                      id={`${notification.id}-Mobile`}
-                    />
-                    <span className="checkmark centered disabled-checkbox"/>
-                  </label>
-                </td>
-                <td className="text-center">
-                  <label className="checkbox-container" htmlFor={`${notification.id}-${notification.sms}`}>
-                    <input
-                      type="checkbox"
-                      value={notification.sms}
-                      checked={notification.sms}
-                      // disabled={!objectSettings.communicationTypes[i].enabled}
-                      id={`${notification.id}-${notification.sms}`}
-                      onChange={() => this.setNotificationOptionState(notification.id, 'sms')}
+                      value={notification.mobile}
+                      checked={notification.mobile}
+                      id={`${notification.id}-mobile`}
+                      onChange={() => this.setNotificationOptionState(notification.id, 'mobile')}
                     />
                     <span className="checkmark centered"/>
                   </label>
                 </td>
                 <td className="text-center">
-                  <label className="checkbox-container" htmlFor={`${notification.id}-Email`}>
+                  <label className="checkbox-container" htmlFor={`${notification.id}-sms`}>
                     <input
                       type="checkbox"
-                      checked={false}
-                      disabled
-                      id={`${notification.id}-Email`}
+                      value={notification.sms}
+                      checked={notification.sms}
+                      // disabled={!objectSettings.communicationTypes[i].enabled}
+                      id={`${notification.id}-sms`}
+                      onChange={() => this.setNotificationOptionState(notification.id, 'sms')}
                     />
-                    <span className="checkmark centered disabled-checkbox"/>
+                    <span className="checkmark centered"/>
                   </label>
                 </td>
+                {
+                  /*
+                  <td className="text-center">
+                    <label className="checkbox-container" htmlFor={`${notification.id}-Email`}>
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        disabled
+                        id={`${notification.id}-Email`}
+                      />
+                      <span className="checkmark centered disabled-checkbox"/>
+                    </label>
+                  </td>
+                  */
+                }
               </tr>
             )))
           }
