@@ -55,7 +55,7 @@ def user_pool_id() {
   def id_map = [
 
     "master":  "us-east-1_K9gWgb955",
-    "infra":   "us-east-1_oY1N1XICr",
+    "infra":   "us-east-1_zBOM7p33c",
     "dev":     "us-east-1_ztq1xhttu",
     "demo":    "us-east-1_32MZPld6o",
     "qa":      "us-east-1_Yrq15MnQf",
@@ -67,7 +67,7 @@ def user_pool_id() {
 def app_client_id() {
   def id_map = [
     "master":  "7cqqgiu2booqasov3a5gc83lg8",
-    "infra":   "4unlqtduk9rp9ed4idsc0v6p1c",
+    "infra":   "48keajv6u26cccennps27qhs8",
     "dev":     "52tgalb82hnrv338ambff0korj",
     "demo":    "5p0qgf8n9ldmhaup4q0qba84j3",
     "qa":      "6tlhjedvj2k9e50l98t930i4gu",
@@ -80,7 +80,7 @@ def pool_id() {
   def id_map = [
 
     "master":  "us-east-1:4c25b22c-c79d-4d0c-9dfe-d76172741a33",
-    "infra":   "us-east-1:adeb28bd-623a-4ca4-9497-f7e08b169c5d",
+    "infra":   "us-east-1:d17c2c38-300b-40af-be60-986cf16e3a70",
     "dev":     "us-east-1:602b5b90-1686-47cd-aaa9-39cf385699bd",
     "demo":    "us-east-1:f96db308-49c5-4fc0-95b1-c3ff9513faa3",
     "qa":      "us-east-1:340c27b0-2315-48cf-9290-588039295b26",
