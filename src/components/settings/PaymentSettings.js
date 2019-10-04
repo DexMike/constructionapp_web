@@ -120,7 +120,7 @@ class PaymentSettings extends Component {
     } = this.state;
     let isSavingAccount = true;
     let isValid = true;
-    if (!/^[0-9]{7,10}$/.test(account)) {
+    if (!/^[0-9]{7,14}$/.test(account)) {
       reqHandlerAccount = {
         touched: true,
         error: 'Account number is not valid'
