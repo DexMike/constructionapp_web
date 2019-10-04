@@ -18,7 +18,7 @@ export default {
   devtool: 'source-map',
   entry: './src/index.js',
   optimization: {
-    minimizer: [new TerserPlugin()]
+    minimizer: [ new TerserPlugin( parallel: true, sourceMap: true, ) ]
   },
   // target: 'web',
   output: {
