@@ -66,9 +66,7 @@ export default {
         exclude: /node_modules/,
         loader: 'babel-loader',
         options: {
-          cacheDirectory: true
-        },
-        query: {
+          cacheDirectory: true,
           presets: ['react', 'es2015']
         }
       },
