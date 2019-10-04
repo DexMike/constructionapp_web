@@ -38,7 +38,8 @@ import EmailService from '../../api/EmailService';
 import JobClosePopup from './JobClosePopup';
 import JobDeletePopup from './JobDeletePopup';
 import UserUtils from '../../api/UtilsService';
-import JobWizard from "./JobWizard";
+import JobWizard from './JobWizard';
+import LookupsService from '../../api/LookupsService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -104,7 +105,8 @@ class JobSavePage extends Component {
         error: ''
       },
       closeModal: false,
-      deleteModal: false
+      deleteModal: false,
+      carrierCancelReasons: []
     };
 
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -163,7 +165,8 @@ class JobSavePage extends Component {
       customerAdmin,
       showLateCancelNotice
     } = this.state;
-    let driversWithLoads = [];
+    const {carrierCancelReasons} = this.state;
+    const driversWithLoads = [];
     try {
       profile = await ProfileService.getProfile();
 
@@ -273,6 +276,24 @@ class JobSavePage extends Component {
             ).isBefore(moment(cancelDueDate, timeFormat).tz(
               profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
             ));
+
+            try {
+              const lookups = await LookupsService.getLookupsCarrierCancelReasons();
+              if (Object.keys(lookups).length > 0) {
+                Object.values(lookups).forEach((itm) => {
+                  carrierCancelReasons.push({
+                    value: itm.val1,
+                    label: itm.val1
+                  });
+                });
+              }
+            } catch (err) {
+              console.error(err);
+            }
+            carrierCancelReasons.push({
+              value: 'Other',
+              label: 'Other'
+            });
           }
 
           // bookings
@@ -349,7 +370,8 @@ class JobSavePage extends Component {
             favoriteCompany,
             customerAdmin,
             drivers: enabledDrivers,
-            showLateCancelNotice
+            showLateCancelNotice,
+            carrierCancelReasons
           });
         }
       }
@@ -1813,7 +1835,8 @@ class JobSavePage extends Component {
       cancelReason,
       approveCancelReason,
       showOtherReasonInput,
-      showLateCancelNotice
+      showLateCancelNotice,
+      carrierCancelReasons
     } = this.state;
 
     if (modalCarrierCancel) {
@@ -1862,14 +1885,7 @@ class JobSavePage extends Component {
                           }
                           meta={reqHandlerCancel}
                           value={cancelReason}
-                          options={
-                            [
-                              { value: 'Mechanical Issues', label: 'Mechanical Issues' },
-                              { value: 'Scheduling Conflict', label: 'Scheduling Conflict' },
-                              { value: 'Found a Higher Paying Load', label: 'Found a Higher Paying Load' },
-                              { value: 'Other', label: 'Other' }
-                            ]
-                          }
+                          options={carrierCancelReasons}
                           placeholder="Please select your reason for cancelling this job"
                         />
                       </Row>
