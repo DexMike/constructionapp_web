@@ -27,6 +27,7 @@ import TMapLive from '../common/TMapLive';
 import TMap from '../common/TMap';
 import GeoUtils from '../../utils/GeoUtils';
 import TSpinner from '../common/TSpinner';
+import RatesDeliveryService from '../../api/RatesDeliveryService';
 
 class JobForm extends Component {
   constructor(props) {
@@ -70,7 +71,8 @@ class JobForm extends Component {
       markersGroup: [],
       approveLoadsModal: false,
       approvingLoads: false,
-      approvingLoadsError: false
+      approvingLoadsError: false,
+      trelarFee: 0
     };
 
     this.loadJobForm = this.loadJobForm.bind(this);
@@ -126,7 +128,8 @@ class JobForm extends Component {
       images,
       distance,
       time,
-      company
+      company,
+      trelarFee
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
@@ -155,6 +158,19 @@ class JobForm extends Component {
       }
     }
 
+    if (profile.companyType === 'Customer' || profile.companyType === 'Producer') {
+      const companyRates = {
+        companyId: profile.companyId,
+        rate: job.rate,
+        rateEstimate: job.rateEstimate
+      };
+      try {
+        trelarFee = await RatesDeliveryService.calculateTrelarFee(companyRates);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     if (bookings && bookings.length > 0) {
       const booking = bookings[0];
       const bookingInvoices = await BookingInvoiceService.getBookingInvoicesByBookingId(booking.id);
@@ -176,7 +192,8 @@ class JobForm extends Component {
       company,
       distance,
       time,
-      allTruckTypes
+      allTruckTypes,
+      trelarFee
     });
   }
 
@@ -422,7 +439,8 @@ class JobForm extends Component {
       profile,
       companyType,
       carrier,
-      allTruckTypes
+      allTruckTypes,
+      trelarFee
     } = this.state;
     const { bid } = this.props;
 
@@ -430,7 +448,6 @@ class JobForm extends Component {
 
     let estimatedCost = TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate);
     estimatedCost = estimatedCost.props ? estimatedCost.props.value : 0;
-    const fee = estimatedCost * 0.1;
     let showPhone = null;
     // A Carrier will see 'Published And Offered' as 'On Offer' in the Dashboard
     let displayStatus = job.status;
@@ -518,7 +535,7 @@ class JobForm extends Component {
             Material: {job.materials}
           </div>
         )}
-        {companyType === 'Customer' && (
+        {(companyType === 'Customer' || companyType === 'Producer') && (
           <div className="col-md-4">
             <h3 className="subhead">
               Job Status: {displayStatus}
@@ -530,12 +547,12 @@ class JobForm extends Component {
             <br/>
             Trelar Fee:&nbsp;
             {
-              TFormat.asMoney(fee)
+              TFormat.asMoney(trelarFee)
             }
             <br/>
             Estimated Total Cost:&nbsp;
             {
-              TFormat.asMoney(estimatedCost + fee)
+              TFormat.asMoney(estimatedCost + trelarFee)
             }
             <br/>
             Estimated Amount: {job.rateEstimate} {job.rateType}(s)
