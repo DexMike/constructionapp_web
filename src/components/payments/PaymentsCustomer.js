@@ -57,13 +57,7 @@ class PaymentsCustomer extends Component {
 
   async fetchPayments() {
     try {
-      const profileCompany = await ProfileService.getProfile();
-      const {companyId} = profileCompany;
-      const company = await CompanyService.getCompanyById(companyId);
-      const {btCustomerId} = company;
-      const response = await PaymentsService.searchTransactions({
-        customerId: btCustomerId
-      });
+      const response = await PaymentsService.searchTransactions();
       const payments = response.data.map((payment) => {
         const newPayment = {};
         newPayment.id = payment.id;

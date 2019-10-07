@@ -1491,7 +1491,7 @@ class JobSavePage extends Component {
 
   renderCancelButton() {
     const {job, profile, btnSubmitting} = this.state;
-    if (job.status === 'Booked' || job.status === 'Allocated') {
+    if ((job.status === 'Booked' || job.status === 'Allocated') && profile.isAdmin) {
       return (
         <TSubmitButton
           onClick={profile.companyType === 'Carrier' ? () => this.toggleCarrierCancelModal() : () => this.toggleCancelModal1()}

@@ -18,6 +18,7 @@ import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import DriverForm from './DriverForm';
 // import moment from "moment";
+import TFormat from '../common/TFormat';
 import './Driver.css';
 
 class DriverListPage extends Component {
@@ -51,8 +52,8 @@ class DriverListPage extends Component {
     const currentUser = await UserService.getUserById(profile.userId);
     if (profile.isAdmin) {
       await this.fetchDrivers(profile.companyId);
-    }    
-    this.setState({       
+    }
+    this.setState({
       isAdmin: profile.isAdmin,
       currentUser,
       loaded: true
@@ -70,7 +71,7 @@ class DriverListPage extends Component {
             id: driver.driverId,
             firstName: driver.firstName,
             lastName: driver.lastName,
-            mobilePhone: driver.mobilePhone,
+            mobilePhone: TFormat.mobileAmericanNumber(driver.mobilePhone),
             userStatus: driver.userStatus,
             driverStatus: driver.driverStatus,
             email: driver.email,
@@ -78,7 +79,7 @@ class DriverListPage extends Component {
           };
           // Do not know what other user statuses we would consider enabled??
           // Should we have an actual driver driver status???
-          // IF we add a driver status we will need to change this 
+          // IF we add a driver status we will need to change this
           // if (newDriver.userStatus === 'New' || newDriver.userStatus === 'First Login') {
           //   newDriver.userStatus = 'Enabled';
           // }
@@ -87,7 +88,6 @@ class DriverListPage extends Component {
           const newDriver = driver;
           return newDriver;
         }
-
       });
     }
     this.setState({
