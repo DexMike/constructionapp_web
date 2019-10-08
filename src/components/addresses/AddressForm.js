@@ -60,10 +60,10 @@ class AddressForm extends Component {
     this.mounted = true;
     await this.fetchLookupsValues();
     if (addressId) {
-      address = await AddressService.getAddressById(addressId); 
-      this.fetchForeignValues(address);
+      address = await AddressService.getAddressById(addressId);
     } else {
       address = AddressService.getDefaultAddress();
+      address.type = 'Delivery';
     }
     address.companyId = profile.companyId;
     this.setState({
@@ -232,13 +232,13 @@ class AddressForm extends Component {
       isValid = false;
     }
 
-    // if (address.state === null || address.state.length === 0) {
-    //   reqHandlerState = {
-    //     touched: true,
-    //     error: 'Please select a State'
-    //   };
-    //   isValid = false;
-    // }
+    if (address.state === null || address.state.length === 0) {
+      reqHandlerState = {
+        touched: true,
+        error: 'Please select a State'
+      };
+      isValid = false;
+    }
 
     if (address.zipCode === null || address.zipCode.length === 0) {
       reqHandlerZipCode = {
@@ -336,7 +336,7 @@ class AddressForm extends Component {
             addressId ? (
               <Col md={12} className="text-right">
                 <span className="form__form-group-label">
-                  ( latitude: {address.latitude}, longitude: {address.longitude} )
+                  ( latitude: {address.latitude || 'Not Set'}, longitude: {address.longitude || 'Not Set'} )
                 </span>
               </Col>
             ) : ''
@@ -467,22 +467,26 @@ class AddressForm extends Component {
               meta={reqHandlerZipCode}
             />
           </Col>
-          <Col md={6}>
-            <div>
-              <span className="form__form-group-label">Address Type&nbsp;</span>
-              <span className="form-group-label-min">( required )</span>
-            </div>
-            <TField
-              input={{
-                onChange: this.handleInputChange,
-                name: 'type',
-                value: address.type
-              }}
-              placeholder="Type"
-              type="text"
-              meta={reqHandlerType}
-            />
-          </Col>
+          {
+            /*
+            <Col md={6}>
+              <div>
+                <span className="form__form-group-label">Address Type&nbsp;</span>
+                <span className="form-group-label-min">( required )</span>
+              </div>
+              <TField
+                input={{
+                  onChange: this.handleInputChange,
+                  name: 'type',
+                  value: address.type
+                }}
+                placeholder="Type"
+                type="text"
+                meta={reqHandlerType}
+              />
+            </Col>
+            */
+          }
           <Col md={12}>
             <span className="form__form-group-label">Notes</span>
             <textarea
