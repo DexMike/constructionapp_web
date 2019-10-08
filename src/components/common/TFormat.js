@@ -151,6 +151,28 @@ class TFormat {
     );
   }
 
+  static mobileAmericanNumber(phoneNumberString) {
+    let input = phoneNumberString.replace(/\D/g, '');
+
+    if (phoneNumberString.length < 10) {
+      return phoneNumberString;
+    }
+
+    input = input.substring(0, 10);
+
+    const size = input.length;
+    if (size == 0) {
+      input = input;
+    } else if (size < 4) {
+      input = '(' + input;
+    } else if (size < 7) {
+      input = '(' + input.substring(0, 3) + ') ' + input.substring(3, 6);
+    } else {
+      input = '(' + input.substring(0, 3) + ') ' + input.substring(3, 6) + ' - ' + input.substring(6, 10);
+    }
+    return input;
+  }
+
   static asPhoneText(textValue) {
     // <NumberFormat format="+1 (###) ###-####" mask="_" />
     let newTextValue = textValue;

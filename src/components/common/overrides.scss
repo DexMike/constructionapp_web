@@ -1,0 +1,72 @@
+.form .form__form-group-select .Select-multi-value-wrapper .Select-input input {
+  background-color: transparent !important;
+}
+
+.cool-date {
+  /*color: violet !important;*/
+  /*background-color: violet !important;*/
+
+}
+
+.flatpickr-months .flatpickr-month {
+  background: rgb(0, 111, 83) !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  color: rgb(0, 111, 83) !important;
+  background: white !important;
+  font-weight: 400 !important;
+}
+
+.flatpickr-weekdays {
+  background: rgb(0, 111, 83) !important;
+}
+
+.flatpickr-weekday {
+  background: rgb(0, 111, 83) !important;
+  color: white !important;
+}
+
+.flatpickr-calendar.arrowTop:after {
+  border-bottom-color: rgb(0, 111, 83) !important;
+}
+
+.flatpickr-day {
+  &.selected {
+    background: rgb(0, 111, 83) !important;
+    border-color: rgb(0, 111, 83) !important;
+  }
+}
+
+.Select--multi .Select-multi-value-wrapper {
+  height: 50px !important;
+  width: 1500px !important;
+  /*overflow-y: scroll;*/
+  overflow-x: scroll;
+  position: absolute;
+}
+
+.Select-clear, .Select-arrow {
+  display: none !important;
+}
+
+.select-navigator:hover {
+  cursor: pointer;
+}
+
+/*Remove arrows from input type number*/
+
+.input-number input::-webkit-outer-spin-button,
+.input-number input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-number input[type=number] {
+  -moz-appearance: textfield;
+}
+
+@font-face {
+  font-family: Interstate;
+  src: url('../../fonts/interstate-regular-webfont.woff');
+}

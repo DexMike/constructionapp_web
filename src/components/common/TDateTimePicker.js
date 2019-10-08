@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import Flatpickr from 'react-flatpickr';
+import './overrides.scss';
 
 class TDateTimePickerField extends PureComponent {
   constructor(props) {
