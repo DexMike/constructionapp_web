@@ -30,6 +30,7 @@ class AddressListPage extends Component {
         companyId: '',
         searchValue: '',
         zipCode: '',
+        types: "'Delivery', 'PickUp'",
         page: 0,
         rows: 15,
         orderBy: '',
@@ -200,7 +201,7 @@ class AddressListPage extends Component {
             >
               <Row className="form">
                 <Col md={8}>
-                  <span className="form__form-group-label">Search By Value (Name, Address, City, State, Type)</span>
+                  <span className="form__form-group-label">Search By Value (Name, Address, City, State, Delivery/PickUp)</span>
                   <input
                     name="searchValue"
                     value={filters.searchValue}
@@ -241,7 +242,7 @@ class AddressListPage extends Component {
 
   render() {
     const { addresses, loaded, totalCount, profile } = this.state;
-    if (profile.isAdmin === false) {
+    if (loaded && (profile.isAdmin === false || profile.companyType !== 'Customer')) {
       return <Redirect push to="/" />;
     }
     if (loaded) {
@@ -250,7 +251,7 @@ class AddressListPage extends Component {
           {this.renderModal()}
           <Row>
             <Col md={6}>
-              <h3 className="page-title">Addresses</h3>
+              <h3 className="page-title">Pickup/Delivery Addresses</h3>
             </Col>
             <Col md={6} className="text-right">
               <Button
@@ -282,10 +283,12 @@ class AddressListPage extends Component {
                       {
                         name: 'name',
                         displayName: 'Name'
-                      }, {
+                      },
+                      /* {
                         name: 'type',
                         displayName: 'Type'
-                      }, {
+                      }, */
+                      {
                         name: 'address1',
                         displayName: 'Address'
                       }, {

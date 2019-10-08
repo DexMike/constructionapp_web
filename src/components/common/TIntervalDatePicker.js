@@ -4,7 +4,7 @@ import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import MinusIcon from 'mdi-react/MinusIcon';
 import PropTypes from 'prop-types';
-import './overrides.css';
+import './overrides.scss';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/themes/material_green.css';
 

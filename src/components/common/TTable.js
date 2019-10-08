@@ -16,13 +16,13 @@ import truckImage from '../../img/default_truck.png';
 class TTable extends Component {
   constructor(props) {
     super(props);
-    const { order, orderBy, selected } = this.props;
+    const { order, orderBy, selected, defaultRows } = this.props;
     this.state = {
       order,
       orderBy,
       selected,
       page: 0,
-      rowsPerPage: 10
+      rowsPerPage: defaultRows
     };
     this.handleRequestSort = this.handleRequestSort.bind(this);
     this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
@@ -292,6 +292,7 @@ class TTable extends Component {
 TTable.propTypes = {
   order: PropTypes.string, // could be 'asc' or 'desc'
   orderBy: PropTypes.string,
+  defaultRows: PropTypes.number,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
@@ -325,6 +326,7 @@ TTable.propTypes = {
 };
 
 TTable.defaultProps = {
+  defaultRows: 10,
   totalCount: 5,
   order: 'asc',
   orderBy: 'id',
