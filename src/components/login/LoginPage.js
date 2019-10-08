@@ -125,7 +125,7 @@ class LoginPage extends SignIn {
     const { password } = this.state;
     username = username.toLowerCase(); // Workaround for mobile safari uppercasing the first letter
     username = username.trim();
-    this.setState({loading: true, btnSubmitting: true});
+    this.setState({loading: true, btnSubmitting: true, error: null, errorCode: null});
     try {
       if (!username || username.length <= 0
         || !password || password.length <= 0) {
