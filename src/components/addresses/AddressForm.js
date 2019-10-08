@@ -63,6 +63,7 @@ class AddressForm extends Component {
       address = await AddressService.getAddressById(addressId);
     } else {
       address = AddressService.getDefaultAddress();
+      address.type = 'Delivery';
     }
     address.companyId = profile.companyId;
     this.setState({
@@ -466,22 +467,26 @@ class AddressForm extends Component {
               meta={reqHandlerZipCode}
             />
           </Col>
-          <Col md={6}>
-            <div>
-              <span className="form__form-group-label">Address Type&nbsp;</span>
-              <span className="form-group-label-min">( required )</span>
-            </div>
-            <TField
-              input={{
-                onChange: this.handleInputChange,
-                name: 'type',
-                value: address.type
-              }}
-              placeholder="Type"
-              type="text"
-              meta={reqHandlerType}
-            />
-          </Col>
+          {
+            /*
+            <Col md={6}>
+              <div>
+                <span className="form__form-group-label">Address Type&nbsp;</span>
+                <span className="form-group-label-min">( required )</span>
+              </div>
+              <TField
+                input={{
+                  onChange: this.handleInputChange,
+                  name: 'type',
+                  value: address.type
+                }}
+                placeholder="Type"
+                type="text"
+                meta={reqHandlerType}
+              />
+            </Col>
+            */
+          }
           <Col md={12}>
             <span className="form__form-group-label">Notes</span>
             <textarea
