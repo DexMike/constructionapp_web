@@ -15,6 +15,7 @@ import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
 import GeoUtils from '../../../utils/GeoUtils';
 import DeliveryCostsSummary from './DeliveryCostsSummary';
+import TFormat from "../../common/TFormat";
 
 
 // import USstates from '../../utils/usStates';
@@ -39,6 +40,7 @@ class HaulRate extends PureComponent {
     this.handleRateTonsChange = this.handleRateTonsChange.bind(this);
     this.handleEstimatedTonsChange = this.handleEstimatedTonsChange.bind(this);
     this.handleEstimatedHoursChange = this.handleEstimatedHoursChange.bind(this);
+    this.handleOffClick = this.handleOffClick.bind(this);
   }
 
   async componentDidMount() {
@@ -111,7 +113,8 @@ class HaulRate extends PureComponent {
   handleEstimatedTonsChange(estTons) {
     const {data, handleInputChange} = {...this.props};
     let {value} = estTons.target;
-    value = value.replace(/\D/g, '');
+    // value = value.replace(/\D/g, '');
+    value = TFormat.asIntegerNoLeadingZeros(value);
     const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
       + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
     data.rateCalculator.estimatedTons = value;
@@ -136,7 +139,8 @@ class HaulRate extends PureComponent {
   handleRateTonsChange(rateTon) {
     const {data, handleInputChange} = {...this.props};
     let {value} = rateTon.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerTon = value;
     data.rateCalculator.ratePerHour =
       ((data.rateCalculator.ratePerTon * data.rateCalculator.estimatedTons) / data.rateCalculator.estimatedHours).toFixed(2);
@@ -146,7 +150,8 @@ class HaulRate extends PureComponent {
   handleRateHoursChange(rateHour) {
     const {data, handleInputChange} = {...this.props};
     let {value} = rateHour.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerHour = value;
     data.rateCalculator.ratePerTon =
       ((data.rateCalculator.ratePerHour * data.rateCalculator.estimatedHours) / data.rateCalculator.estimatedTons).toFixed(2);
@@ -158,7 +163,8 @@ class HaulRate extends PureComponent {
     const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
       + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
     let {value} = estHours.target;
-    value = value.replace(/\D/g, '');
+    // value = value.replace(/\D/g, '');
+    value = TFormat.asIntegerNoLeadingZeros(value);
     data.rateCalculator.estimatedHours = value;
     const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
     data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
@@ -178,7 +184,8 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     let {value} = ratePerPayType.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     data.ratePerPayType = value;
     if (data.payType === 'Ton') {
       rateCalculator.ratePerTon = value;
@@ -201,7 +208,8 @@ class HaulRate extends PureComponent {
 
   handleLoadTimeChange(loadTime) {
     let {value} = loadTime.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.loadTime = value;
@@ -214,7 +222,8 @@ class HaulRate extends PureComponent {
 
   handleUnloadTimeChange(unloadTime) {
     let {value} = unloadTime.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.unloadTime = value;
@@ -227,7 +236,8 @@ class HaulRate extends PureComponent {
 
   handleEnrouteTravelTimeChange(travelTimeEnroute) {
     let {value} = travelTimeEnroute.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeEnroute = value;
@@ -240,7 +250,8 @@ class HaulRate extends PureComponent {
 
   handleReturnTravelTimeChange(travelTimeReturn) {
     let {value} = travelTimeReturn.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeReturn = value;
@@ -253,7 +264,8 @@ class HaulRate extends PureComponent {
 
   handleTruckCapacityChange(truckCapacity) {
     let {value} = truckCapacity.target;
-    value = value.replace(/\D/g, '');
+    // value = value.replace(/\D/g, '');
+    value = TFormat.asIntegerNoLeadingZeros(value);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.truckCapacity = value;
@@ -279,16 +291,42 @@ class HaulRate extends PureComponent {
     handleInputChange('tabHaulRate', data);
   }
 
+  handleOffClick(e) {
+    const {data, handleInputChange} = {...this.props};
+    if (e === 'ratePerPayType') {
+      data.ratePerPayType = TFormat.asFloatTwoDecimals(data.ratePerPayType);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'ratePerTon') {
+      data.rateCalculator.ratePerTon = TFormat.asFloatTwoDecimals(data.rateCalculator.ratePerTon);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'ratePerHour') {
+      data.rateCalculator.ratePerHour = TFormat.asFloatTwoDecimals(data.rateCalculator.ratePerHour);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'travelTimeEnroute') {
+      data.rateCalculator.travelTimeEnroute = TFormat.asFloatTwoDecimals(data.rateCalculator.travelTimeEnroute);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'travelTimeReturn') {
+      data.rateCalculator.travelTimeReturn = TFormat.asFloatTwoDecimals(data.rateCalculator.travelTimeReturn);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'loadTime') {
+      data.rateCalculator.loadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.loadTime);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'unloadTime') {
+      data.rateCalculator.unloadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.unloadTime);
+      handleInputChange('tabHaulRate', data);
+    }
+  }
+
   renderDeliveryCosts() {
     const {data, tabMaterials, tabPickupDelivery} = {...this.props};
 
     const truckCapacity = 22;
 
     const haulCostPerTonHour = data.ratePerPayType;
-    let oneWayCostPerTonHourPerMile = 0;
-    let deliveredPricePerTon = 0;
-    let deliveredPriceJob = 0;
-    let estimatedCostForJob = 0;
+    let oneWayCostPerTonHourPerMile = '0.00';
+    let deliveredPricePerTon = '0.00';
+    let deliveredPriceJob = '0.00';
+    let estimatedCostForJob = '0.00';
     // const sufficientInfo = (parseFloat(data.avgTimeEnroute) + parseFloat(data.avgTimeReturn)) * parseFloat(data.ratePerPayType);
     if (haulCostPerTonHour > 0) {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
@@ -310,13 +348,13 @@ class HaulRate extends PureComponent {
         deliveredPriceJob = (parseFloat(deliveredPricePerTon) * estimatedTons).toFixed(2);
       }
     }
-
     return (
       <DeliveryCostsSummary
         estMaterialPricing={tabMaterials.estMaterialPricing}
         deliveredPricePerTon={deliveredPricePerTon}
         deliveredPriceJob={deliveredPriceJob}
         payType={data.payType}
+        quantityType={tabMaterials.quantityType}
         oneWayCostPerTonHourPerMile={oneWayCostPerTonHourPerMile}
         haulCostPerTonHour={haulCostPerTonHour}
         estimatedCostForJob={estimatedCostForJob}
@@ -477,6 +515,7 @@ class HaulRate extends PureComponent {
                     placeholder=""
                     type="text"
                     id="rateTypeRadio"
+                    offClick={this.handleOffClick}
                   />
                 )
               }
@@ -610,6 +649,7 @@ class HaulRate extends PureComponent {
                         placeholder=""
                         type="text"
                         id="rateTypeRadio"
+                        offClick={this.handleOffClick}
                       />
                     )
                   }
@@ -691,6 +731,7 @@ class HaulRate extends PureComponent {
                     placeholder=""
                     type="text"
                     id="loadTime"
+                    offClick={this.handleOffClick}
                   />
                 </div>
               </Row>
@@ -712,6 +753,7 @@ class HaulRate extends PureComponent {
                     placeholder=""
                     type="text"
                     id="unloadTime"
+                    offClick={this.handleOffClick}
                   />
                 </div>
               </Row>
@@ -734,6 +776,7 @@ class HaulRate extends PureComponent {
                     placeholder=""
                     type="text"
                     id="travelTimeEnroute"
+                    offClick={this.handleOffClick}
                   />
                 </div>
               </Row>
@@ -754,6 +797,7 @@ class HaulRate extends PureComponent {
                     placeholder=""
                     type="text"
                     id="travelTimeReturn"
+                    offClick={this.handleOffClick}
                   />
                 </div>
               </Row>
@@ -838,6 +882,7 @@ class HaulRate extends PureComponent {
                       placeholder=""
                       type="text"
                       id="ratePerPayType"
+                      offClick={this.handleOffClick}
                     />
                   </div>
                   <div className="col-md-4 form__form-group">
