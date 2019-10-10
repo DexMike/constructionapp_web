@@ -125,13 +125,13 @@ class LoginPage extends SignIn {
     const { password } = this.state;
     username = username.toLowerCase(); // Workaround for mobile safari uppercasing the first letter
     username = username.trim();
-    this.setState({loading: true, btnSubmitting: true});
+    this.setState({loading: true, btnSubmitting: true, error: null, errorCode: null});
     try {
       if (!username || username.length <= 0
         || !password || password.length <= 0) {
         await this.createLoginLog(false);
         this.setState({
-          error: 'Invalid username or password.',
+          error: 'Incorrect username or password.',
           btnSubmitting: false,
           loading: false
         });
@@ -207,7 +207,7 @@ class LoginPage extends SignIn {
       if (err.code === 'UserNotFoundException') {
         await this.createLoginLog(false);
         this.setState({
-          error: 'Invalid username or password.',
+          error: 'Incorrect username or password.',
           loading: false,
           btnSubmitting: false,
           errorCode: err.code,
