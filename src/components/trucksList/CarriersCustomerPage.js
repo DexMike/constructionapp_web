@@ -236,15 +236,15 @@ class CarriersCustomerPage extends Component {
       return newCarrier;
     });
 
-    if (groupsFavorites) {
-      // if we find the equipment's companyId in
-      // groupsFavorites we favorite it
-      carriers.map((carrier) => {
-        const newCarrier = carrier;
-        if (groupsFavorites.includes(newCarrier.id)) {
-          newCarrier.favorite = true;
-        }
-        return newCarrier;
+    if (groupsFavorites && Object.keys(groupsFavorites).length > 0) {
+      Object.keys(groupsFavorites).forEach((key) => {
+        carriers.map((carrier) => {
+          const newCarrier = carrier;
+          if (groupsFavorites[key].companyId === newCarrier.id) {
+            newCarrier.favorite = true;
+          }
+          return newCarrier;
+        });
       });
     }
 
