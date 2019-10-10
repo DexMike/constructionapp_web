@@ -53,7 +53,7 @@ class JobWizard extends Component {
       },
       tabMaterials: {
         quantityType: 'Ton',
-        estMaterialPricing: 0,
+        estMaterialPricing: '0.00',
         quantity: 0,
         allMaterials: [],
         selectedMaterial: {
@@ -82,11 +82,6 @@ class JobWizard extends Component {
       },
       tabSummary: {
         instructions: '',
-        startGPS: null,
-        endGPS: null,
-        avgDistanceEnroute: 0,
-        avgTimeEnroute: 0,
-
       },
       tabPickupDelivery: {
         allUSstates: [],
@@ -109,10 +104,12 @@ class JobWizard extends Component {
         startLocationZip: '',
         startLocationLatitude: null,
         startLocationLongitude: null,
-        avgDistanceEnroute: 0,
-        avgDistanceReturn: 0,
-        avgTimeEnroute: 0,
-        avgTimeReturn: 0,
+        avgDistanceEnroute: 0.00,
+        avgDistanceReturn: 0.00,
+        avgTimeEnroute: 0.00,
+        avgTimeReturn: 0.00,
+        startGPS: null,
+        endGPS: null,
         reqHandlerSameAddresses: {
           touched: false,
           error: ''
@@ -169,25 +166,25 @@ class JobWizard extends Component {
       },
       tabHaulRate: {
         payType: 'Ton',
-        ratePerPayType: 0,
+        ratePerPayType: '0.00',
         rateCalcOpen: false,
-        avgDistanceEnroute: 0,
-        avgDistanceReturn: 0,
-        avgTimeEnroute: 0,
-        avgTimeReturn: 0,
+        avgDistanceEnroute: 0.00,
+        avgDistanceReturn: 0.00,
+        avgTimeEnroute: 0.00,
+        avgTimeReturn: 0.00,
         rateCalculator: {
           estimateTypeRadio: 'ton',
           rateTypeRadio: 'ton',
           estimatedTons: 0,
           estimatedHours: 10,
-          ratePerTon: 0,
-          ratePerHour: 0,
+          ratePerTon: '0.00',
+          ratePerHour: '0.00',
           invalidAddress: false,
           truckCapacity: 22,
-          travelTimeEnroute: 0,
-          travelTimeReturn: 0,
-          loadTime: 0,
-          unloadTime: 0
+          travelTimeEnroute: '0.00',
+          travelTimeReturn: '0.00',
+          loadTime: '0.00',
+          unloadTime: '0.00'
         }
       },
       page: 1,
@@ -225,6 +222,13 @@ class JobWizard extends Component {
     this.clearValidationLabels = this.clearValidationLabels.bind(this);
     this.checkPhoneFormat = this.checkPhoneFormat.bind(this);
     this.phoneToNumberFormat = this.phoneToNumberFormat.bind(this);
+    this.validateMaterialsTab = this.validateMaterialsTab.bind(this);
+    this.validateTruckSpecsTab = this.validateTruckSpecsTab.bind(this);
+    this.validateHaulRateTab = this.validateHaulRateTab.bind(this);
+    this.validateStartAddress = this.validateStartAddress.bind(this);
+    this.validateEndAddress = this.validateEndAddress.bind(this);
+    this.validateForm = this.validateForm.bind(this);
+    this.validateTopForm = this.validateTopForm.bind(this);
   }
 
   async componentDidMount() {
@@ -426,6 +430,13 @@ class JobWizard extends Component {
     });
   }
 
+  async validateTopForm() {
+    const isValid = await this.validateSend();
+    if (isValid) {
+      await this.sixthPage();
+    }
+  }
+
   validateMaterialsPage() {
     this.clearValidationMaterialsPage();
     const {tabMaterials} = {...this.state};
@@ -455,6 +466,96 @@ class JobWizard extends Component {
     }
 
     return isValid;
+  }
+
+  validateMaterialsTab() {
+    const {tabMaterials} = {...this.state};
+    const val = [];
+    if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.value === '') {
+      val.push('Material Type');
+    }
+    if (!tabMaterials.quantity || tabMaterials.quantity <= 0) {
+      if (tabMaterials.quantityType === 'Hour') {
+        val.push('Estimated Hours');
+      } else {
+        val.push('Estimated Tons');
+      }
+    }
+    return val;
+  }
+
+  validateTruckSpecsTab() {
+    const {tabTruckSpecs} = {...this.state};
+    const val = [];
+    if (!tabTruckSpecs.selectedTruckTypes || tabTruckSpecs.selectedTruckTypes.length === 0) {
+      val.push('At least one truck type');
+    }
+    return val;
+  }
+
+  validateHaulRateTab() {
+    const {tabHaulRate} = {...this.state};
+    const val = [];
+    if (!tabHaulRate.ratePerPayType || tabHaulRate.ratePerPayType <= 0) {
+      val.push('Missing haul rate');
+    }
+    return val;
+  }
+
+  validateStartAddress() {
+    const {tabPickupDelivery} = {...this.state};
+    // const {startGPS} = {...this.state};
+    const val = [];
+
+    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
+      if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
+        && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
+        val.push('Same start and end addresses');
+      }
+      if (tabPickupDelivery.startLocationAddress1.length === 0
+        || tabPickupDelivery.startLocationCity.length === 0
+        || tabPickupDelivery.startLocationZip.length === 0
+        || tabPickupDelivery.startLocationState.length === 0) {
+        val.push('Missing start address fields');
+      }
+    }
+
+    if (val.length > 0) {
+      return val;
+    }
+
+    if (!tabPickupDelivery.startGPS || !tabPickupDelivery.startGPS.lat
+      || !tabPickupDelivery.startGPS.lng) {
+      val.push('Invalid start address');
+    }
+    return val;
+  }
+
+  validateEndAddress() {
+    const {tabPickupDelivery} = {...this.state};
+    const val = [];
+    // const {endGPS} = {...this.state};
+
+    if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
+
+      if (tabPickupDelivery.endLocationAddress1.length === 0
+        || tabPickupDelivery.endLocationCity.length === 0
+        || tabPickupDelivery.endLocationZip.length === 0
+        || tabPickupDelivery.endLocationState.length === 0) {
+        val.push('Missing end address fields');
+      }
+    }
+
+    if (val.length > 0) {
+      return val;
+    }
+
+    if (!tabPickupDelivery.endGPS || !tabPickupDelivery.endGPS.lat
+      || !tabPickupDelivery.endGPS.lng) {
+      val.push('Invalid end address');
+    }
+
+    return val;
   }
 
   clearValidationMaterialsPage() {
@@ -1540,8 +1641,30 @@ class JobWizard extends Component {
     this.setState({page});
   }
 
+  validateForm() {
+    const materialTabValidations = this.validateMaterialsTab();
+    const truckSpecsTabValidations = this.validateTruckSpecsTab();
+    const haulRateTabValidations = this.validateHaulRateTab();
+    const startAddressValidations = this.validateStartAddress();
+    const endAddressValidations = this.validateEndAddress();
+    const valid = materialTabValidations.length === 0
+      && truckSpecsTabValidations.length === 0
+      && haulRateTabValidations.length === 0
+      && startAddressValidations.length === 0
+      && endAddressValidations.length === 0;
+    const validationResponse = {
+      valid,
+      materialTabValidations,
+      truckSpecsTabValidations,
+      haulRateTabValidations,
+      startAddressValidations,
+      endAddressValidations
+    };
+    return validationResponse;
+  }
+
   goBack() {
-    const {page} = this.state
+    const {page} = this.state;
     this.setState({page: page - 1});
   }
 
@@ -1595,6 +1718,7 @@ class JobWizard extends Component {
       page,
       loaded
     } = this.state;
+    const validateResponse = this.validateForm();
     if (loaded) {
       return (
         <div className="wizard__steps">
@@ -1649,8 +1773,8 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            // onClick={this.sixthPage}
-            className={`wizard__step${page === 6 ? ' wizard__step--active' : ''}`}
+            onClick={validateResponse.valid ? this.validateTopForm : null}
+            className={`wizard__step${!validateResponse.valid ? ' wizard__step--disabled' : ''}${page === 6 ? ' wizard__step--active ' : ''}`}
           >
             <p>Send</p>
           </div>
@@ -1911,6 +2035,13 @@ class JobWizard extends Component {
                             validateSend={this.validateSend}
                             jobRequest={jobRequest}
                             jobEdit={jobEdit}
+                            validateMaterialsTab={this.validateMaterialsTab}
+                            validateTruckSpecsTab={this.validateTruckSpecsTab}
+                            validateHaulRateTab={this.validateHaulRateTab}
+                            validateStartAddress={this.validateStartAddress}
+                            validateEndAddress={this.validateEndAddress}
+                            validateForm={this.validateForm}
+                            validateTopForm={this.validateTopForm}
                           />}
                           {(page === 6 && !jobEdit)
                           && <SendJob

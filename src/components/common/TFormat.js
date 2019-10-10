@@ -21,6 +21,61 @@ class TFormat {
     );
   }
 
+  // returns float with one leadings zero if no value before decimal point
+  // and two 0s as decimal values if no decimal specified
+  static asFloatOneLeadingZero(inputValue) {
+    let value = inputValue;
+    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    const subject = /^0+$/;
+    if (!value.match(subject)) {
+      value = value.replace(/^0+/, '');
+      if (value.charAt(0) === '.') {
+        value = `0${value}`;
+      }
+    } else {
+      value = '0';
+    }
+    return value;
+  }
+
+  // gives a value (that is already a valid float) two decimals if none are found
+  // or cuts to two decimals points
+  static asFloatTwoDecimals(inputValue) {
+    let value = inputValue;
+    if (!value.toString().includes('.')) {
+      if (value.toString() === '') {
+        value = '0.00';
+      } else {
+        value = `${value}.00`;
+      }
+    } else {
+      const afterPeriod = value.split('.').pop();
+      if (afterPeriod.length === 0) {
+        value = `${value}00`;
+      } else if (afterPeriod.length === 1) {
+        value = `${value}0`;
+      } else if (afterPeriod.length > 2) {
+        value = parseFloat(value).toFixed(2);
+      }
+    }
+    return value;
+  }
+
+  static asIntegerNoLeadingZeros(inputValue) {
+    let value = inputValue;
+    value = value.replace(/\D/g, '');
+    const subject = /^0+$/;
+    if (!value.match(subject)) {
+      value = value.replace(/^0+/, '');
+      if (value.charAt(0) === '.') {
+        value = `0${value}`;
+      }
+    } else {
+      value = '0';
+    }
+    return value;
+  }
+
   static asMoneyNoDecimals(inputValue) {
     return (
       <NumberFormat
