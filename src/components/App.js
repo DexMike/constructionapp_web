@@ -24,6 +24,7 @@ import RequireNewPasswordPage from './forgotPassword/RequireNewPasswordPage';
 import ProfileService from "../api/ProfileService";
 import UserService from "../api/UserService";
 import i18n from "i18next";
+import EquipmentService from '../api/EquipmentService';
 
 Amplify.configure({
   Auth: {
@@ -71,6 +72,12 @@ class App extends Component {
     const profile = await ProfileService.getProfile();
     const user = await UserService.getUserById(profile.userId);
     i18n.changeLanguage(user.preferredLanguage);
+    if (profile.companyType === 'Carrier') {
+      const { data } = await EquipmentService.getEquipmentByCompanyId(profile.companyId, 50, 0);
+      if (data.length <= 0 && window.location.pathname !== '/first-truck') {
+        window.location.href = '/first-truck';
+      }
+    }
     window.addEventListener('load', () => {
       this.setState({ loading: false });
       setTimeout(() => this.setState({ loaded: true }), 500);
