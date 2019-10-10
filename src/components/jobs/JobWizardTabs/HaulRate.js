@@ -364,7 +364,7 @@ class HaulRate extends PureComponent {
 
 
   renderRateCalc() {
-    const {data, tabMaterials} = {...this.props};
+    const {data, tabMaterials, tabPickupDelivery} = {...this.props};
     const {rateCalculator} = {...data};
     let estimatedTotalPrice = 0;
     if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'ton') {
@@ -697,7 +697,24 @@ class HaulRate extends PureComponent {
             </div>
             <div className="col-md-4 form__form-group">
               <Row className="col-md-12 ">
-                <span className="form__form-group-label">Travel Time</span>
+                <div className='col-md-8 form__form-group'>
+                  <span className="form__form-group-label">Travel Time</span>
+                </div>
+                <div className="col-md-4 form__form-group">
+                        <span className="form__form-group-label">
+                          <span className="infoCircle">
+                            <span style={{padding: 6, color: 'white'}} data-tip data-for='travelTimeInfo'>i</span>
+                          </span>
+                        </span>
+                </div>
+                <div className="customTooltip">
+                  <ReactTooltip id='travelTimeInfo' effect='solid'>
+                    <p style={{color: 'white'}}>
+                      This number is calculated by Trelar using
+                      mapping data from your pickup and delivery addresses.
+                    </p>
+                  </ReactTooltip>
+                </div>
               </Row>
               <Row className="col-md-12" style={{marginTop: -20}}>
                 <hr/>
@@ -760,46 +777,75 @@ class HaulRate extends PureComponent {
             </div>
             <div className="col-md-4">
               <Row className="col-md-12">
-                <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Enroute (hrs)</span>
+                <div className="col-md-8 form__form-group">
+                  <span className="form__form-group-label">Miles one way</span>
                 </div>
-                <div className="col-md-5 form__form-group">
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleEnrouteTravelTimeChange,
-                        name: 'travelTimeEnroute',
-                        value: rateCalculator.travelTimeEnroute,
-                        disabled: rateCalculator.estimateTypeRadio === 'hour'
-                      }
-                    }
-                    placeholder=""
-                    type="text"
-                    id="travelTimeEnroute"
-                    offClick={this.handleOffClick}
-                  />
+                <div className="col-md-4 form__form-group">
+                  <span style={{
+                    position: 'absolute'
+                  }}
+                  >
+                    {TFormat.asFloatTwoDecimals(tabPickupDelivery.avgDistanceEnroute)}
+                  </span>
                 </div>
               </Row>
               <Row className="col-md-12" style={{paddingTop: 20}}>
-                <div className="col-md-7 form__form-group">
+                <div className="col-md-8 form__form-group">
+                  <span className="form__form-group-label">Enroute (hrs)</span>
+                </div>
+                <div className="col-md-4 form__form-group">
+                  <span style={{
+                    position: 'absolute'
+                  }}
+                  >
+                    {rateCalculator.travelTimeEnroute}
+                  </span>
+                </div>
+                {/*<div className="col-md-5 form__form-group">*/}
+                {/*  <TField*/}
+                {/*    input={*/}
+                {/*      {*/}
+                {/*        onChange: this.handleEnrouteTravelTimeChange,*/}
+                {/*        name: 'travelTimeEnroute',*/}
+                {/*        value: rateCalculator.travelTimeEnroute,*/}
+                {/*        disabled: rateCalculator.estimateTypeRadio === 'hour'*/}
+                {/*      }*/}
+                {/*    }*/}
+                {/*    placeholder=""*/}
+                {/*    type="text"*/}
+                {/*    id="travelTimeEnroute"*/}
+                {/*    offClick={this.handleOffClick}*/}
+                {/*  />*/}
+                {/*</div>*/}
+              </Row>
+              <Row className="col-md-12" style={{paddingTop: 20}}>
+                <div className="col-md-8 form__form-group">
                   <span className="form__form-group-label">Return Trip Home (hrs)</span>
                 </div>
-                <div className="col-md-5 form__form-group">
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleReturnTravelTimeChange,
-                        name: 'travelTimeReturn',
-                        value: rateCalculator.travelTimeReturn,
-                        disabled: rateCalculator.estimateTypeRadio === 'hour'
-                      }
-                    }
-                    placeholder=""
-                    type="text"
-                    id="travelTimeReturn"
-                    offClick={this.handleOffClick}
-                  />
+                <div className="col-md-4 form__form-group">
+                  <span style={{
+                    position: 'absolute'
+                  }}
+                  >
+                    {rateCalculator.travelTimeReturn}
+                  </span>
                 </div>
+                {/*<div className="col-md-5 form__form-group">*/}
+                {/*  <TField*/}
+                {/*    input={*/}
+                {/*      {*/}
+                {/*        onChange: this.handleReturnTravelTimeChange,*/}
+                {/*        name: 'travelTimeReturn',*/}
+                {/*        value: rateCalculator.travelTimeReturn,*/}
+                {/*        disabled: rateCalculator.estimateTypeRadio === 'hour'*/}
+                {/*      }*/}
+                {/*    }*/}
+                {/*    placeholder=""*/}
+                {/*    type="text"*/}
+                {/*    id="travelTimeReturn"*/}
+                {/*    offClick={this.handleOffClick}*/}
+                {/*  />*/}
+                {/*</div>*/}
               </Row>
             </div>
             <div className="col-md-4">
@@ -901,20 +947,27 @@ class HaulRate extends PureComponent {
                 <Row className="col-md-12">
                   <hr/>
                 </Row>
-                <Row className="col-md-12" style={{paddingTop: 15}} onClick={this.toggleRateCalc}>
-                <span className={rateCalculator.rateCalcOpen ? 'triangle-down' : 'triangle-right'}
-          style={{marginTop: 3}}/>
-                  <div className="dashboard">
-                    <span style={{fontSize: 16, paddingLeft: 10, color: 'rgb(102, 102, 102)'}}>Rate Calculator</span>
-                  </div>
-                </Row>
+                {this.renderDeliveryCosts()}
                 <Row className="col-md-12">
                   <hr/>
                 </Row>
-                {rateCalculator.rateCalcOpen && this.renderRateCalc()}
+                <Row className="col-md-12" style={{paddingTop: 15}} onClick={this.toggleRateCalc}>
+                  <span className={rateCalculator.rateCalcOpen ? 'triangle-down' : 'triangle-right'}
+                        style={{marginTop: 3}}
+                  />
+                  <div className="dashboard">
+                    <span style={{fontSize: 16, paddingLeft: 10, color: 'rgb(102, 102, 102)'}}>Rate Calculator {' '}
+                      <span
+                        style={{fontSize: 14, color: 'rgb(101, 104, 119)'}}
+                      >
+                        ( Expand this section to estimate rate calculations )
+                      </span>
+                    </span>
+                  </div>
+                </Row>
                 <Row className="col-md-12" style={{paddingTop: 20}}>
                 </Row>
-                {this.renderDeliveryCosts()}
+                {rateCalculator.rateCalcOpen && this.renderRateCalc()}
               </form>
             </CardBody>
           </Card>
