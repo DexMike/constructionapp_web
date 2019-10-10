@@ -155,7 +155,7 @@ class MultiEquipmentsForm extends PureComponent {
       minTons,
       minOperatingTime
     } = this.state;
-    const { userId, companyId, toggle } = this.props;
+    const { userId, companyId, toggle, onSuccess } = this.props;
     let rateType;
     if ((isRatedHour && isRatedTon) || (!isRatedHour && !isRatedTon)) {
       rateType = 'Any';
@@ -175,8 +175,8 @@ class MultiEquipmentsForm extends PureComponent {
         type: truckType,
         image: '',
         description: '',
-        driversId: 1,
-        defaultDriverId: 1,
+        driversId: 0,
+        defaultDriverId: 0,
         equipmentAddressId: 77,
         maxCapacity,
         maxDistance: maxDistanceToPickup,
@@ -209,6 +209,7 @@ class MultiEquipmentsForm extends PureComponent {
     } catch (e) {
       // console.log(e);
     }
+    onSuccess();
     toggle();
   }
 
@@ -500,11 +501,13 @@ class MultiEquipmentsForm extends PureComponent {
 MultiEquipmentsForm.propTypes = {
   userId: PropTypes.number,
   companyId: PropTypes.number,
-  toggle: PropTypes.func.isRequired
+  toggle: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func
 };
 
 MultiEquipmentsForm.defaultProps = {
   userId: 0,
-  companyId: 0
+  companyId: 0,
+  onSuccess: () => {}
 };
 export default MultiEquipmentsForm;
