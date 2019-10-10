@@ -595,7 +595,7 @@ class CarriersCustomerPage extends Component {
       await this.fetchCarriers();
     }); */
     const self = this;
-    const { value } = e.target;
+    let { value } = e.target;
     const { filters, reqHandlerZip, reqHandlerRange } = this.state;
     const filter = e.target.name;
     let invalidZip = false;
@@ -615,15 +615,16 @@ class CarriersCustomerPage extends Component {
       invalidZip = false;
     }
 
-    if (filter === 'range' && (value.length > 3 || value < 0)) {
-      this.setState({
-        reqHandlerRange: {
-          ...reqHandlerRange,
-          error: 'Range can not be more than 999 and less than 0',
-          touched: true
-        }
-      });
-      invalidRange = true;
+    if (filter === 'range' && (value > 999 || value < 0 || value.length === 0)) {
+      value = '999';
+      // this.setState({
+      //   reqHandlerRange: {
+      //     ...reqHandlerRange,
+      //     error: 'Range can not be more than 999 and less than 0',
+      //     touched: true
+      //   }
+      // });
+      // invalidRange = true;
     } else {
       this.setState({
         reqHandlerRange: {
