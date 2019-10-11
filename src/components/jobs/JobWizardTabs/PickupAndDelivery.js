@@ -55,8 +55,16 @@ class PickupAndDelivery extends PureComponent {
     } else {
       endString = `${data.endLocationAddress1} ${data.endLocationCity} ${data.endLocationState} ${data.endLocationZip}`;
     }
-    const startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
-    const endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
+    let startCoordinates;
+    let endCoordinates;
+    try {
+      startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
+      endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
+    } catch (err) {
+      console.error(err);
+    }
+    data.endGPS = endCoordinates;
+    data.startGPS = startCoordinates;
     data.startLocationLatitude = startCoordinates.lat;
     data.startLocationLongitude = startCoordinates.lng;
     data.endLocationLatitude = endCoordinates.lat;
