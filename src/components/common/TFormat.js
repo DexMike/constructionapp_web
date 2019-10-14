@@ -21,13 +21,19 @@ class TFormat {
     );
   }
 
+  // takes an integer (no floats) and separates thousands with commas
+  static asIntegerCommaSeperated(input) {
+    return input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   // returns float with one leadings zero if no value before decimal point
   // and two 0s as decimal values if no decimal specified
   static asFloatOneLeadingZero(inputValue) {
     let value = inputValue;
     value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    const subject = /^0+$/;
-    if (!value.match(subject)) {
+    // debugger;
+    const onlyZeros = /^0+$/;
+    if (!value.match(onlyZeros)) {
       value = value.replace(/^0+/, '');
       if (value.charAt(0) === '.') {
         value = `0${value}`;
@@ -35,6 +41,21 @@ class TFormat {
     } else {
       value = '0';
     }
+    // if (value.includes('.')) {
+    //   const intSub = value.substring(0, value.indexOf('.'));
+    //   // format integer part for thousands
+    //   debugger;
+    //
+    //   const intSubFormatted = TFormat.asIntegerCommaSeperated(intSub);
+    //   debugger;
+    //   const decimals = value.split('.').pop();
+    //   debugger;
+    //   value = `${intSubFormatted}.${decimals}`;
+    //   debugger;
+    // } else {
+    //   value = TFormat.asIntegerCommaSeperated(value);
+    //   debugger;
+    // }
     return value;
   }
 
@@ -64,8 +85,8 @@ class TFormat {
   static asIntegerNoLeadingZeros(inputValue) {
     let value = inputValue;
     value = value.replace(/\D/g, '');
-    const subject = /^0+$/;
-    if (!value.match(subject)) {
+    const onlyZeros = /^0+$/;
+    if (!value.match(onlyZeros)) {
       value = value.replace(/^0+/, '');
       if (value.charAt(0) === '.') {
         value = `0${value}`;

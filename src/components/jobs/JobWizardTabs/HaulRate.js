@@ -16,6 +16,7 @@ import TSpinner from '../../common/TSpinner';
 import GeoUtils from '../../../utils/GeoUtils';
 import DeliveryCostsSummary from './DeliveryCostsSummary';
 import TFormat from "../../common/TFormat";
+import TCalculator from "../../common/TCalculator";
 
 
 // import USstates from '../../utils/usStates';
@@ -113,25 +114,33 @@ class HaulRate extends PureComponent {
   handleEstimatedTonsChange(estTons) {
     const {data, handleInputChange} = {...this.props};
     let {value} = estTons.target;
-    // value = value.replace(/\D/g, '');
+
     value = TFormat.asIntegerNoLeadingZeros(value);
-    const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
-      + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
+
     data.rateCalculator.estimatedTons = value;
-    const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
-    data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
+
+    data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedTons), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
 
     // update unselected rate
     if (data.rateCalculator.rateTypeRadio === 'ton') {
-      const estimatedTotalPrice = (data.rateCalculator.estimatedTons * data.rateCalculator.ratePerTon).toFixed(2);
-      data.rateCalculator.ratePerHour = data.rateCalculator.estimatedHours > 0
-        ? (estimatedTotalPrice / data.rateCalculator.estimatedHours).toFixed(2)
-        : 0;
+      data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
+        parseFloat(data.rateCalculator.estimatedHours),
+        parseFloat(data.rateCalculator.estimatedTons),
+        parseFloat(data.rateCalculator.ratePerTon)
+      );
     } else if (data.rateCalculator.rateTypeRadio === 'hour') {
-      const estimatedTotalPrice = (data.rateCalculator.estimatedHours * data.rateCalculator.ratePerHour).toFixed(2);
-      data.rateCalculator.ratePerTon = data.rateCalculator.estimatedTons > 0
-        ? (estimatedTotalPrice / data.rateCalculator.estimatedTons).toFixed(2)
-        : 0;
+      data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+        parseFloat(data.rateCalculator.estimatedHours),
+        parseFloat(data.rateCalculator.estimatedTons),
+        parseFloat(data.rateCalculator.ratePerHour)
+      );
     }
     handleInputChange('tabHaulRate', data);
   }
@@ -142,8 +151,11 @@ class HaulRate extends PureComponent {
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerTon = value;
-    data.rateCalculator.ratePerHour =
-      ((data.rateCalculator.ratePerTon * data.rateCalculator.estimatedTons) / data.rateCalculator.estimatedHours).toFixed(2);
+    data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
+      parseFloat(data.rateCalculator.estimatedHours),
+      parseFloat(data.rateCalculator.estimatedTons),
+      parseFloat(data.rateCalculator.ratePerTon)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
@@ -153,28 +165,38 @@ class HaulRate extends PureComponent {
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerHour = value;
-    data.rateCalculator.ratePerTon =
-      ((data.rateCalculator.ratePerHour * data.rateCalculator.estimatedHours) / data.rateCalculator.estimatedTons).toFixed(2);
+    data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+      parseFloat(data.rateCalculator.estimatedHours),
+      parseFloat(data.rateCalculator.estimatedTons),
+      parseFloat(data.rateCalculator.ratePerHour)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
   handleEstimatedHoursChange(estHours) {
     const {data, handleInputChange} = {...this.props};
-    const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
-      + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
     let {value} = estHours.target;
-    // value = value.replace(/\D/g, '');
+
     value = TFormat.asIntegerNoLeadingZeros(value);
+
     data.rateCalculator.estimatedHours = value;
-    const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
-    data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
+
+    data.rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
 
     // update unselected rate
     if (data.rateCalculator.rateTypeRadio === 'hour') {
-      const estimatedTotalPrice = (data.rateCalculator.estimatedHours * data.rateCalculator.ratePerHour).toFixed(2);
-      data.rateCalculator.ratePerTon = data.rateCalculator.estimatedTons > 0
-        ? (estimatedTotalPrice / data.rateCalculator.estimatedTons).toFixed(2)
-        : 0;
+      data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+        parseFloat(data.rateCalculator.estimatedHours),
+        parseFloat(data.rateCalculator.estimatedTons),
+        parseFloat(data.rateCalculator.ratePerHour)
+      );
     }
 
     handleInputChange('tabHaulRate', data);
@@ -189,13 +211,18 @@ class HaulRate extends PureComponent {
     data.ratePerPayType = value;
     if (data.payType === 'Ton') {
       rateCalculator.ratePerTon = value;
-      rateCalculator.ratePerHour =
-        ((rateCalculator.ratePerTon * rateCalculator.estimatedTons) / rateCalculator.estimatedHours).toFixed(2);
+      rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
+        parseFloat(data.rateCalculator.estimatedHours),
+        parseFloat(data.rateCalculator.estimatedTons),
+        parseFloat(data.rateCalculator.ratePerTon)
+      );
     } else if (data.payType === 'Hour') {
       rateCalculator.ratePerHour = value;
-      rateCalculator.ratePerTon =
-        ((rateCalculator.ratePerHour * rateCalculator.estimatedHours) / rateCalculator.estimatedTons).toFixed(2);
-
+      rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+        parseFloat(data.rateCalculator.estimatedHours),
+        parseFloat(data.rateCalculator.estimatedTons),
+        parseFloat(data.rateCalculator.ratePerHour)
+      );
     }
     handleInputChange('tabHaulRate', data);
   }
@@ -213,10 +240,14 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.loadTime = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
@@ -227,13 +258,18 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.unloadTime = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
+  // due to new requirements these fields are no longer editable but keeping methods for the future
   handleEnrouteTravelTimeChange(travelTimeEnroute) {
     let {value} = travelTimeEnroute.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -241,13 +277,18 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeEnroute = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
+  // due to new requirements these fields are no longer editable but keeping methods for the future
   handleReturnTravelTimeChange(travelTimeReturn) {
     let {value} = travelTimeReturn.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -255,10 +296,14 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeReturn = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
@@ -269,10 +314,14 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.truckCapacity = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
@@ -332,20 +381,83 @@ class HaulRate extends PureComponent {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
       // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
       if (data.payType === 'Ton') {
-        oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByTonRate(haulCostPerTonHour, tabPickupDelivery.avgDistanceEnroute);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        oneWayCostPerTonHourPerMile = (oneLoad * (parseFloat(data.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute))).toFixed(2);
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByHourRate(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(data.ratePerPayType),
+          truckCapacity,
+          tabPickupDelivery.avgDistanceEnroute
+        );
       }
-      deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
-      estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
+      if (data.payType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByTonRate(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (data.payType === 'Hour' && tabMaterials.quantityType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByTonAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (data.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      }
+      if ((tabMaterials.quantityType === 'Ton' && data.payType === 'Ton')
+      || (tabMaterials.quantityType === 'Hour' && data.payType === 'Hour')) {
+        estimatedCostForJob = TCalculator.getJobCostSameRateAndAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabMaterials.quantity)
+        );
+      } else if (tabMaterials.quantityType === 'Ton' && data.payType === 'Hour') {
+        estimatedCostForJob = TCalculator.getJobCostHourRateTonAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabMaterials.quantity)
+        );
+      } else if (tabMaterials.quantityType === 'Hour' && data.payType === 'Ton') {
+        estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
+        );
+      }
+
       if (tabMaterials.quantityType === 'Ton') {
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByTonAmount(tabMaterials.quantity, deliveredPricePerTon);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
-        const estimatedTons = (numTrips * truckCapacity).toFixed(2);
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * estimatedTons).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByHourAmount(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity,
+          deliveredPricePerTon
+        );
       }
     }
     return (

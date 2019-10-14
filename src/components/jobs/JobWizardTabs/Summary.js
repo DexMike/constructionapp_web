@@ -12,6 +12,7 @@ import TSpinner from '../../common/TSpinner';
 import DeliveryCostsSummary from './DeliveryCostsSummary';
 import GeoUtils from "../../../utils/GeoUtils";
 import ReactTooltip from 'react-tooltip'
+import TCalculator from "../../common/TCalculator";
 
 class Summary extends PureComponent {
   constructor(props) {
@@ -405,23 +406,86 @@ class Summary extends PureComponent {
     let estimatedCostForJob = '0.00';
     // const sufficientInfo = (parseFloat(tabHaulRate.avgTimeEnroute) + parseFloat(tabHaulRate.avgTimeReturn)) * parseFloat(tabHaulRate.ratePerPayType);
     if (haulCostPerTonHour > 0) {
-      // haulCostPerTonHour = ((sufficientInfo) / parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
+      // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
+      // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
       if (tabHaulRate.payType === 'Ton') {
-        oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
-
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByTonRate(haulCostPerTonHour, tabPickupDelivery.avgDistanceEnroute);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        oneWayCostPerTonHourPerMile = (oneLoad * (parseFloat(tabHaulRate.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute))).toFixed(2);
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByHourRate(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabHaulRate.ratePerPayType),
+          truckCapacity,
+          tabPickupDelivery.avgDistanceEnroute
+        );
       }
-      deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
-      estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
+      if (tabHaulRate.payType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByTonRate(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByTonAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      }
+      if ((tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Ton')
+        || (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Hour')) {
+        estimatedCostForJob = TCalculator.getJobCostSameRateAndAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabMaterials.quantity)
+        );
+      } else if (tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Hour') {
+        estimatedCostForJob = TCalculator.getJobCostHourRateTonAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabMaterials.quantity)
+        );
+      } else if (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Ton') {
+        estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
+        );
+      }
+
       if (tabMaterials.quantityType === 'Ton') {
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByTonAmount(tabMaterials.quantity, deliveredPricePerTon);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
-        const estimatedTons = (numTrips * truckCapacity).toFixed(2);
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * estimatedTons).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByHourAmount(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity,
+          deliveredPricePerTon
+        );
       }
     }
 

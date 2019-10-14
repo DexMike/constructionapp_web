@@ -303,7 +303,36 @@ class TCalculator {
     return parseFloat(estimatedCostForJob);
   }
 
+  static getDelPricePerJobByTonAmount(
+    estimatedTons,
+    deliveredPricePerTon
+  ) {
+    const delPricePerJob = (parseFloat(deliveredPricePerTon)
+      * parseFloat(estimatedTons)).toFixed(2);
+    return delPricePerJob;
+  }
 
+  static getDelPricePerJobByHourAmount(
+    travelTimeEnroute,
+    travelTimeReturn,
+    loadTime,
+    unloadTime,
+    estimatedHours,
+    truckCapacity,
+    deliveredPricePerTon
+  ) {
+    const estimatedTons = this.getTonsByHourAmount(
+      travelTimeEnroute,
+      travelTimeReturn,
+      loadTime,
+      unloadTime,
+      estimatedHours,
+      truckCapacity,
+    );
+    const delPricePerJob = (parseFloat(deliveredPricePerTon)
+      * estimatedTons).toFixed(2);
+    return delPricePerJob;
+  }
 }
 
 export default TCalculator;
