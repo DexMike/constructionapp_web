@@ -125,7 +125,7 @@ class JobService extends AgentService {
     return (response);
   }
 
-  static async cancelJob(id) {
+  static async closeJob(id) {
     const response = await super.post(`${PATH}/${id}/close`, null);
     return (response);
   }

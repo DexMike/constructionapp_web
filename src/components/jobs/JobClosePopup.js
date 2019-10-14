@@ -90,7 +90,6 @@ class JobClosePopup extends Component {
 
   async closeJob() {
     const { jobId, closeJobModalPopup } = this.props;
-
     try {
       await JobService.closeJob(jobId);
     } catch (e) {
