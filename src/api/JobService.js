@@ -120,6 +120,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async deleteJob(id) {
+    const response = await super.post(`${PATH}/${id}/delete`, null);
+    return (response);
+  }
+
+  static async cancelJob(id) {
+    const response = await super.post(`${PATH}/${id}/close`, null);
+    return (response);
+  }
+
   static getDefaultJob() {
     return {
       companiesId: 0,
