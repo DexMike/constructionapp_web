@@ -209,7 +209,19 @@ class MultiEquipmentsForm extends PureComponent {
     } catch (e) {
       // console.log(e);
     }
-    onSuccess();
+
+    onSuccess({numberOfTrucks,
+      truckType,
+      selectedMaterials,
+      isRatedHour,
+      isRatedTon,
+      maxCapacity,
+      maxDistanceToPickup,
+      ratesCostPerHour,
+      ratesCostPerTon,
+      minTons,
+      minOperatingTime});
+
     toggle();
   }
 
