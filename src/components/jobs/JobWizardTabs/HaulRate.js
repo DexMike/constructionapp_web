@@ -132,7 +132,6 @@ class HaulRate extends PureComponent {
   handleUpdateRates(currData) {
     const {tabPickupDelivery, handleInputChange} = {...this.props};
     const data = currData;
-    debugger;
     // update unselected rates
 
     // if tonnage is selected
@@ -288,7 +287,6 @@ class HaulRate extends PureComponent {
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerHour = value;
     this.handleUpdateRates(data);
-
   }
 
   handleEstimatedHoursChange(estHours) {
@@ -774,12 +772,11 @@ class HaulRate extends PureComponent {
           {/*)}*/}
         </Row>
 
-        <Row className="col-md-12">
+        <Row className="col-md-12" style={{paddingTop: 20}}>
           <div className="col-md-12 dashboard dashboard__job-create-section-title">
             <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>RATES</span>
           </div>
         </Row>
-
         <Row className="col-md-12" style={{paddingTop: 15}}>
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">

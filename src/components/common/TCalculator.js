@@ -29,7 +29,9 @@ class TCalculator {
     estimatedTons,
     truckCapacity
   ) {
-    const numTrips = Math.ceil(estimatedTons / truckCapacity);
+    const numTrips = (estimatedTons > 0 && truckCapacity > 0)
+      ? Math.ceil(estimatedTons / truckCapacity)
+      : 0;
     return numTrips;
   }
 
@@ -43,7 +45,9 @@ class TCalculator {
     estimatedHours,
     roundTripTime
   ) {
-    const numTrips = Math.ceil(estimatedHours / roundTripTime);
+    const numTrips = (estimatedHours > 0 && roundTripTime > 0)
+      ? Math.ceil(estimatedHours / roundTripTime)
+      : 0;
     return numTrips;
   }
 
@@ -61,7 +65,6 @@ class TCalculator {
     estimatedTons,
     truckCapacity,
   ) {
-    debugger;
     const oneLoad = this.getRoundTripTime(
       travelTimeEnroute,
       travelTimeReturn,
@@ -108,8 +111,10 @@ class TCalculator {
     estimatedTons,
     rateTon
   ) {
-    const hourRate = parseFloat((
-      (rateTon * estimatedTons) / estimatedHours).toFixed(2));
+    const hourRate = estimatedHours > 0
+      ? parseFloat((
+        (rateTon * estimatedTons) / estimatedHours).toFixed(2))
+      : 0;
     return hourRate;
   }
 
@@ -128,7 +133,6 @@ class TCalculator {
       : 0;
     return tonRate;
   }
-
 
 
   /* returns ton rate from one way cost / ton / mile.
@@ -160,7 +164,9 @@ class TCalculator {
       loadTime,
       unloadTime
     );
-    const rate = ((oneWayCost * truckCapacity * avgDistanceEnroute) / oneLoad).toFixed(2);
+    const rate = oneLoad > 0
+      ? ((oneWayCost * truckCapacity * avgDistanceEnroute) / oneLoad).toFixed(2)
+      : 0;
     return parseFloat(rate);
   }
 
