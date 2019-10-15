@@ -9,6 +9,7 @@ class TCalculator {
     Uses default load and unload times.
   */
 
+  /* returns one way cost / ton / mile (per ton per mile) for rate type of ton */
   static getRoundTripTime(
     travelTimeEnroute,
     travelTimeReturn,
