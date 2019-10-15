@@ -453,31 +453,40 @@ class HaulRate extends PureComponent {
   handleOffClick(e) {
     const {data, handleInputChange} = {...this.props};
     if (e === 'ratePerPayType') {
-      data.ratePerPayType = TFormat.asFloatTwoDecimals(data.ratePerPayType);
+      data.ratePerPayType = TFormat
+        .asFloatTwoDecimals(data.ratePerPayType);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'ratePerTon') {
-      data.rateCalculator.ratePerTon = TFormat.asFloatTwoDecimals(data.rateCalculator.ratePerTon);
+      data.rateCalculator.ratePerTon = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.ratePerTon);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'ratePerHour') {
-      data.rateCalculator.ratePerHour = TFormat.asFloatTwoDecimals(data.rateCalculator.ratePerHour);
+      data.rateCalculator.ratePerHour = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.ratePerHour);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'travelTimeEnroute') {
-      data.rateCalculator.travelTimeEnroute = TFormat.asFloatTwoDecimals(data.rateCalculator.travelTimeEnroute);
+      data.rateCalculator.travelTimeEnroute = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.travelTimeEnroute);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'travelTimeReturn') {
-      data.rateCalculator.travelTimeReturn = TFormat.asFloatTwoDecimals(data.rateCalculator.travelTimeReturn);
+      data.rateCalculator.travelTimeReturn = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.travelTimeReturn);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'loadTime') {
-      data.rateCalculator.loadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.loadTime);
+      data.rateCalculator.loadTime = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.loadTime);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'unloadTime') {
-      data.rateCalculator.unloadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.unloadTime);
+      data.rateCalculator.unloadTime = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.unloadTime);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'oneWay') {
-      data.rateCalculator.oneWayCostTonMile = TFormat.asFloatTwoDecimals(data.rateCalculator.oneWayCostTonMile);
+      data.rateCalculator.oneWayCostTonMile = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.oneWayCostTonMile);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'twoWay') {
-      data.rateCalculator.twoWayCostMile = TFormat.asFloatTwoDecimals(data.rateCalculator.twoWayCostMile);
+      data.rateCalculator.twoWayCostMile = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.twoWayCostMile);
       handleInputChange('tabHaulRate', data);
     }
   }
