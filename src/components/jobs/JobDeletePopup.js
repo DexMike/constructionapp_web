@@ -55,36 +55,12 @@ class JobDeletePopup extends Component {
   }
 
   async deleteJob() {
-    const { jobId, jobName, deleteJobModalPopup } = this.props;
-    const { profile } = this.state;
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
-
-    const job = await JobService.getJobById(jobId);
-    let newJob = [];
-    const requesterCarriersIds = [];
-
-    const requesterCarriers = await JobService.getRequestersByCancelledJobId(jobId);
-    if (requesterCarriers.length > 0) {
-      for (const requesterCarrier of requesterCarriers) {
-        requesterCarriersIds.push(requesterCarrier.id);
-      }
-      const notification = {
-        usersIds: requesterCarriersIds,
-        body: `${envString}The job ${jobName} you requested has been deleted.`
-      };
-      await TwilioService.smsBatchSending(notification);
-    }
-
-    newJob = CloneDeep(job);
-    newJob.status = 'Job Deleted';
-    newJob.actualEndTime = moment.utc().format();
-    newJob.modifiedOn = moment.utc().format();
-    newJob.modifiedBy = profile.userId;
+    const { jobId, deleteJobModalPopup } = this.props;
 
     try {
-      newJob = await JobService.updateJob(newJob);
+      await JobService.deleteJob(jobId);
     } catch (e) {
-      console.error('>> NOT SAVED: JobDeletePopup -> deleteJob -> e', e)  ;
+      console.error('>> NOT SAVED: JobDeletePopup -> deleteJob -> e', e);
     }
 
     // bubble to parent
