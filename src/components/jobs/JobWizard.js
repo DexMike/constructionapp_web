@@ -184,13 +184,15 @@ class JobWizard extends Component {
           travelTimeEnroute: '0.00',
           travelTimeReturn: '0.00',
           loadTime: '0.00',
-          unloadTime: '0.00'
+          unloadTime: '0.00',
+          oneWayCostTonMile: '0.00',
+          twoWayCostMile: '0.00'
         }
       },
       page: 1,
       job: [],
       loaded: false,
-      profile: [],
+      profile: []
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);

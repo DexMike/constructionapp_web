@@ -13,10 +13,9 @@ import '../jobs.css';
 import ReactTooltip from 'react-tooltip';
 import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
-import GeoUtils from '../../../utils/GeoUtils';
 import DeliveryCostsSummary from './DeliveryCostsSummary';
-import TFormat from "../../common/TFormat";
-import TCalculator from "../../common/TCalculator";
+import TFormat from '../../common/TFormat';
+import TCalculator from '../../common/TCalculator';
 
 
 // import USstates from '../../utils/usStates';
@@ -25,7 +24,7 @@ class HaulRate extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      loaded: false,
+      loaded: false
     };
     this.handlePayTypeChange = this.handlePayTypeChange.bind(this);
     this.handleRatePerPayType = this.handleRatePerPayType.bind(this);
@@ -42,6 +41,9 @@ class HaulRate extends PureComponent {
     this.handleEstimatedTonsChange = this.handleEstimatedTonsChange.bind(this);
     this.handleEstimatedHoursChange = this.handleEstimatedHoursChange.bind(this);
     this.handleOffClick = this.handleOffClick.bind(this);
+    this.handleOneWayCostChange = this.handleOneWayCostChange.bind(this);
+    this.handleTwoWayCostChange = this.handleTwoWayCostChange.bind(this);
+    this.handleUpdateRates = this.handleUpdateRates.bind(this);
   }
 
   async componentDidMount() {
@@ -111,10 +113,147 @@ class HaulRate extends PureComponent {
     handleInputChange('tabHaulRate', data);
   }
 
+  handleOneWayCostChange(oneWay) {
+    const {data} = {...this.props};
+    let {value} = oneWay.target;
+    value = TFormat.asFloatOneLeadingZero(value);
+    data.rateCalculator.oneWayCostTonMile = value;
+    this.handleUpdateRates(data);
+  }
+
+  handleTwoWayCostChange(oneWay) {
+    const {data} = {...this.props};
+    let {value} = oneWay.target;
+    value = TFormat.asFloatOneLeadingZero(value);
+    data.rateCalculator.twoWayCostMile = value;
+    this.handleUpdateRates(data);
+  }
+
+  handleUpdateRates(currData) {
+    const {tabPickupDelivery, handleInputChange} = {...this.props};
+    const data = currData;
+    debugger;
+    // update unselected rates
+
+    // if tonnage is selected
+    switch (data.rateCalculator.rateTypeRadio) {
+      case 'ton':
+        // update hour rate
+        data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
+          parseFloat(data.rateCalculator.estimatedHours),
+          parseFloat(data.rateCalculator.estimatedTons),
+          parseFloat(data.rateCalculator.ratePerTon)
+        );
+        // update one way cost
+        data.rateCalculator.oneWayCostTonMile = TCalculator.getOneWayCostByTonRate(
+          parseFloat(data.rateCalculator.ratePerTon),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update two way cost
+        data.rateCalculator.twoWayCostMile = TCalculator.getTwoWayCostByTonRate(
+          parseFloat(data.rateCalculator.ratePerTon),
+          parseFloat(data.rateCalculator.truckCapacity),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      case 'hour': // if hourly rate is selected
+        // update ton rate
+        data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+          parseFloat(data.rateCalculator.estimatedHours),
+          parseFloat(data.rateCalculator.estimatedTons),
+          parseFloat(data.rateCalculator.ratePerHour)
+        );
+        // update one way cost
+        data.rateCalculator.oneWayCostTonMile = TCalculator.getOneWayCostByHourRate(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.ratePerHour), // this is the value change by user
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update two way cost
+        data.rateCalculator.twoWayCostMile = TCalculator.getTwoWayCostByHourRate(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.ratePerHour), // this is the value change by user
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      case 'oneWay':
+        // update hour rate
+        data.rateCalculator.ratePerHour = TCalculator.getHourRateByOneWayCost(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.oneWayCostTonMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update ton rate
+        data.rateCalculator.ratePerTon = TCalculator.getTonRateByOneWayCost(
+          parseFloat(data.rateCalculator.oneWayCostTonMile),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update two way cost
+        data.rateCalculator.twoWayCostMile = TCalculator.getTwoWayCostByOneWayCost(
+          parseFloat(data.rateCalculator.oneWayCostTonMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      case 'twoWay':
+        // update hour rate
+        data.rateCalculator.ratePerHour = TCalculator.getHourRateByTwoWayCost(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.twoWayCostMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        // update ton rate
+        data.rateCalculator.ratePerTon = TCalculator.getTonRateByTwoWayCost(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.twoWayCostMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        // update one way cost
+        data.rateCalculator.oneWayCostTonMile = TCalculator.getOneWayCostByTwoWayCost(
+          parseFloat(data.rateCalculator.twoWayCostMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      default:
+    }
+
+    handleInputChange('tabHaulRate', data);
+  }
+
   handleEstimatedTonsChange(estTons) {
     const {data, handleInputChange} = {...this.props};
     let {value} = estTons.target;
-
+    if (value === '') {
+      data.rateCalculator.estimatedTons = value;
+      handleInputChange('tabHaulRate', data);
+      return;
+    }
     value = TFormat.asIntegerNoLeadingZeros(value);
 
     data.rateCalculator.estimatedTons = value;
@@ -128,55 +267,38 @@ class HaulRate extends PureComponent {
       parseInt(data.rateCalculator.truckCapacity, 10)
     );
 
-    // update unselected rate
-    if (data.rateCalculator.rateTypeRadio === 'ton') {
-      data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
-        parseFloat(data.rateCalculator.estimatedHours),
-        parseFloat(data.rateCalculator.estimatedTons),
-        parseFloat(data.rateCalculator.ratePerTon)
-      );
-    } else if (data.rateCalculator.rateTypeRadio === 'hour') {
-      data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
-        parseFloat(data.rateCalculator.estimatedHours),
-        parseFloat(data.rateCalculator.estimatedTons),
-        parseFloat(data.rateCalculator.ratePerHour)
-      );
-    }
-    handleInputChange('tabHaulRate', data);
+    // update unselected rates
+    this.handleUpdateRates(data);
+    // handleInputChange('tabHaulRate', data);
   }
 
   handleRateTonsChange(rateTon) {
-    const {data, handleInputChange} = {...this.props};
+    const {data} = {...this.props};
     let {value} = rateTon.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerTon = value;
-    data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
-      parseFloat(data.rateCalculator.estimatedHours),
-      parseFloat(data.rateCalculator.estimatedTons),
-      parseFloat(data.rateCalculator.ratePerTon)
-    );
-    handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
   }
 
   handleRateHoursChange(rateHour) {
-    const {data, handleInputChange} = {...this.props};
+    const {data} = {...this.props};
     let {value} = rateHour.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerHour = value;
-    data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
-      parseFloat(data.rateCalculator.estimatedHours),
-      parseFloat(data.rateCalculator.estimatedTons),
-      parseFloat(data.rateCalculator.ratePerHour)
-    );
-    handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
+
   }
 
   handleEstimatedHoursChange(estHours) {
     const {data, handleInputChange} = {...this.props};
     let {value} = estHours.target;
-
+    if (value === '') {
+      data.rateCalculator.estimatedHours = value;
+      handleInputChange('tabHaulRate', data);
+      return;
+    }
     value = TFormat.asIntegerNoLeadingZeros(value);
 
     data.rateCalculator.estimatedHours = value;
@@ -189,17 +311,7 @@ class HaulRate extends PureComponent {
       parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
       parseInt(data.rateCalculator.truckCapacity, 10)
     );
-
-    // update unselected rate
-    if (data.rateCalculator.rateTypeRadio === 'hour') {
-      data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
-        parseFloat(data.rateCalculator.estimatedHours),
-        parseFloat(data.rateCalculator.estimatedTons),
-        parseFloat(data.rateCalculator.ratePerHour)
-      );
-    }
-
-    handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
   }
 
   handleRatePerPayType(ratePerPayType) {
@@ -363,6 +475,12 @@ class HaulRate extends PureComponent {
     } else if (e === 'unloadTime') {
       data.rateCalculator.unloadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.unloadTime);
       handleInputChange('tabHaulRate', data);
+    } else if (e === 'oneWay') {
+      data.rateCalculator.oneWayCostTonMile = TFormat.asFloatTwoDecimals(data.rateCalculator.oneWayCostTonMile);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'twoWay') {
+      data.rateCalculator.twoWayCostMile = TFormat.asFloatTwoDecimals(data.rateCalculator.twoWayCostMile);
+      handleInputChange('tabHaulRate', data);
     }
   }
 
@@ -478,18 +596,18 @@ class HaulRate extends PureComponent {
   renderRateCalc() {
     const {data, tabMaterials, tabPickupDelivery} = {...this.props};
     const {rateCalculator} = {...data};
-    let estimatedTotalPrice = 0;
-    if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'ton') {
-      estimatedTotalPrice = (rateCalculator.estimatedTons * rateCalculator.ratePerTon).toFixed(2);
-    } else if (rateCalculator.estimateTypeRadio === 'hour' && rateCalculator.rateTypeRadio === 'hour') {
-      estimatedTotalPrice = (rateCalculator.estimatedHours * rateCalculator.ratePerHour).toFixed(2);
-    } else if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'hour') {
-      const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-        + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-      const numTrips = Math.ceil(rateCalculator.estimatedTons / rateCalculator.truckCapacity);
-      const estHours = numTrips * oneLoad;
-      estimatedTotalPrice = (estHours * rateCalculator.ratePerHour).toFixed(2);
-    }
+    // let estimatedTotalPrice = 0;
+    // if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'ton') {
+    //   estimatedTotalPrice = (rateCalculator.estimatedTons * rateCalculator.ratePerTon).toFixed(2);
+    // } else if (rateCalculator.estimateTypeRadio === 'hour' && rateCalculator.rateTypeRadio === 'hour') {
+    //   estimatedTotalPrice = (rateCalculator.estimatedHours * rateCalculator.ratePerHour).toFixed(2);
+    // } else if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'hour') {
+    //   const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
+    //     + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
+    //   const numTrips = Math.ceil(rateCalculator.estimatedTons / rateCalculator.truckCapacity);
+    //   const estHours = numTrips * oneLoad;
+    //   estimatedTotalPrice = (estHours * rateCalculator.ratePerHour).toFixed(2);
+    // }
 
     const estimatedTonsInfo = tabMaterials.quantityType === 'Ton' ?
       'Any changes in tonnage to take final affect must be modified on the Materials ( tab ).' :
@@ -517,8 +635,13 @@ class HaulRate extends PureComponent {
                 This does not affect the actual haul rate you decide on above.</span>
           </div>
         </Row>
+        <Row className="col-md-12">
+          <div className="col-md-12 dashboard dashboard__job-create-section-title">
+              <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>QUANTITIES</span>
+          </div>
+        </Row>
         <Row className="col-md-12" style={{paddingTop: 15}}>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
                 <span className="form__form-group-label">Estimated Tons
@@ -538,40 +661,40 @@ class HaulRate extends PureComponent {
               <p style={{color: 'white'}}>{estimatedTonsInfo}</p>
             </ReactTooltip>
           </div>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Rate per ton
+                <span className="form__form-group-label">Estimated Hours
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
                   <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerTonInfo'>i</span>
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='estimatedHoursInfo'>i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
           <div className="customTooltip">
-            <ReactTooltip id='ratePerTonInfo' effect='solid'>
-              <p style={{color: 'white'}}>{ratePerTonInfo}</p>
+            <ReactTooltip id='estimatedHoursInfo' effect='solid'>
+              <p style={{color: 'white'}}>{estimatedHoursInfo}</p>
             </ReactTooltip>
           </div>
-          {rateCalculator.rateTypeRadio === 'ton'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span className="form__form-group-label">Estimated Total Price</span>
-            </div>
-          )
-          }
+          {/*{rateCalculator.rateTypeRadio === 'ton'*/}
+          {/*&& (*/}
+          {/*  <div className="col-md-4 form__form-group">*/}
+          {/*    <span className="form__form-group-label">Estimated Total Price</span>*/}
+          {/*  </div>*/}
+          {/*)*/}
+          {/*}*/}
         </Row>
         <Row className="col-md-12">
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       style={{marginTop: 9, width: 25, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'ton'}
                        onClick={() => this.handleSetEstimateType('ton')}/>
               </div>
@@ -601,109 +724,11 @@ class HaulRate extends PureComponent {
               </div>
             </Row>
           </div>
-          <div className="col-md-4 form__form-group">
-            <Row className="col-md-12">
-              <div className="col-md-2 form__form-group">
-                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
-                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
-                       checked={rateCalculator.rateTypeRadio === 'ton'} onClick={() => this.handleSetRateType('ton')}/>
-              </div>
-              <div className="col-md-10 form__form-group">
-            <span style={{
-              marginLeft: 15,
-              marginTop: rateCalculator.rateTypeRadio === 'hour' ? 9 : 0
-            }}
-            >
-              {rateCalculator.rateTypeRadio === 'hour' ? rateCalculator.ratePerTon
-                : (
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleRateTonsChange,
-                        name: 'ratePerTon',
-                        value: rateCalculator.ratePerTon
-                      }
-                    }
-                    placeholder=""
-                    type="text"
-                    id="rateTypeRadio"
-                    offClick={this.handleOffClick}
-                  />
-                )
-              }
-            </span>
-              </div>
-            </Row>
-          </div>
-          {rateCalculator.rateTypeRadio === 'ton'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span style={{
-                marginTop: rateCalculator.rateTypeRadio === 'ton' ? 0 : 6,
-                marginLeft: 40,
-                position: 'absolute'
-              }}
-              >
-              $ {estimatedTotalPrice}
-            </span>
-            </div>
-          )}
-        </Row>
-        <Row className="col-md-12" style={{paddingTop: 15}}>
-        <div className="col-md-4 form__form-group">
-            <Row className="col-md-12">
-              <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Estimated Hours
-                </span>
-              </div>
-              <div className="col-md-4 form__form-group">
-                <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='estimatedHoursInfo'>i</span>
-                  </span>
-                </span>
-              </div>
-            </Row>
-          </div>
-          <div className="customTooltip">
-            <ReactTooltip id='estimatedHoursInfo' effect='solid'>
-              <p style={{color: 'white'}}>{estimatedHoursInfo}</p>
-            </ReactTooltip>
-          </div>
-          <div className="col-md-4 form__form-group">
-            <Row className="col-md-12">
-              <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Rate per hour
-                </span>
-              </div>
-              <div className="col-md-4 form__form-group">
-                <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerHourInfo'>i</span>
-                  </span>
-                </span>
-              </div>
-            </Row>
-          </div>
-          <div className="customTooltip">
-            <ReactTooltip id='ratePerHourInfo' effect='solid'>
-              <p style={{color: 'white'}}>{ratePerHourInfo}</p>
-            </ReactTooltip>
-          </div>
-          {rateCalculator.rateTypeRadio === 'hour'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span className="form__form-group-label">Estimated Total Price</span>
-            </div>
-          )
-          }
-        </Row>
-        <Row className="col-md-12">
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       style={{marginTop: 9, width: 25, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'hour'}
                        onClick={() => this.handleSetEstimateType('hour')}/>
               </div>
@@ -734,7 +759,188 @@ class HaulRate extends PureComponent {
               </div>
             </Row>
           </div>
-          <div className="col-md-4 form__form-group">
+          {/*{rateCalculator.rateTypeRadio === 'ton'*/}
+          {/*&& (*/}
+          {/*  <div className="col-md-4 form__form-group">*/}
+          {/*    <span style={{*/}
+          {/*      marginTop: rateCalculator.rateTypeRadio === 'ton' ? 0 : 6,*/}
+          {/*      marginLeft: 40,*/}
+          {/*      position: 'absolute'*/}
+          {/*    }}*/}
+          {/*    >*/}
+          {/*    $ {estimatedTotalPrice}*/}
+          {/*  </span>*/}
+          {/*  </div>*/}
+          {/*)}*/}
+        </Row>
+
+        <Row className="col-md-12">
+          <div className="col-md-12 dashboard dashboard__job-create-section-title">
+            <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>RATES</span>
+          </div>
+        </Row>
+
+        <Row className="col-md-12" style={{paddingTop: 15}}>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">Rate per ton
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerTonInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='ratePerTonInfo' effect='solid'>
+              <p style={{color: 'white'}}>{ratePerTonInfo}</p>
+            </ReactTooltip>
+          </div>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">One way cost / ton / mile
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='oneWayCostInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='oneWayCostInfo' effect='solid'>
+              <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery tab.</p>
+            </ReactTooltip>
+          </div>
+        </Row>
+        <Row className="col-md-12">
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-2 form__form-group">
+                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       checked={rateCalculator.rateTypeRadio === 'ton'} onClick={() => this.handleSetRateType('ton')}
+                />
+              </div>
+              <div className="col-md-10 form__form-group">
+            <span style={{
+              marginLeft: 15,
+              marginTop: rateCalculator.rateTypeRadio !== 'ton' ? 9 : 0
+            }}
+            >
+              {rateCalculator.rateTypeRadio !== 'ton' ? rateCalculator.ratePerTon
+                : (
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleRateTonsChange,
+                        name: 'ratePerTon',
+                        value: rateCalculator.ratePerTon
+                      }
+                    }
+                    placeholder=""
+                    type="text"
+                    id="rateTypeRadio"
+                    offClick={this.handleOffClick}
+                  />
+                )
+              }
+            </span>
+              </div>
+            </Row>
+          </div>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-2 form__form-group">
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       checked={rateCalculator.rateTypeRadio === 'oneWay'} onClick={() => this.handleSetRateType('oneWay')}
+                />
+              </div>
+              <div className="col-md-10 form__form-group">
+            <span style={{
+              marginLeft: 15,
+              marginTop: rateCalculator.rateTypeRadio !== 'oneWay' ? 9 : 0
+            }}
+            >
+              {rateCalculator.rateTypeRadio !== 'oneWay' ? rateCalculator.oneWayCostTonMile
+                : (
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleOneWayCostChange,
+                        name: 'oneWay',
+                        value: rateCalculator.oneWayCostTonMile
+                      }
+                    }
+                    placeholder=""
+                    type="text"
+                    id="rateTypeRadio"
+                    offClick={this.handleOffClick}
+                  />
+                )
+              }
+            </span>
+              </div>
+            </Row>
+          </div>
+        </Row>
+
+
+
+        <Row className="col-md-12" style={{paddingTop: 15}}>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">Rate per hour
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerHourInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='ratePerHourInfo' effect='solid'>
+              <p style={{color: 'white'}}>{ratePerHourInfo}</p>
+            </ReactTooltip>
+          </div>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">Two way cost / mile
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='twoWayCostInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='twoWayCostInfo' effect='solid'>
+              <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery tab.</p>
+            </ReactTooltip>
+          </div>
+        </Row>
+        <Row className="col-md-12">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
@@ -745,10 +951,10 @@ class HaulRate extends PureComponent {
               <div className="col-md-10 form__form-group">
                 <span style={{
                   marginLeft: 15,
-                  marginTop: rateCalculator.rateTypeRadio === 'ton' ? 9 : 0
+                  marginTop: rateCalculator.rateTypeRadio !== 'hour' ? 9 : 0
                 }}
                 >
-                  {rateCalculator.rateTypeRadio === 'ton' ? rateCalculator.ratePerHour
+                  {rateCalculator.rateTypeRadio !== 'hour' ? rateCalculator.ratePerHour
                     : (
                       <TField
                         input={
@@ -769,19 +975,41 @@ class HaulRate extends PureComponent {
               </div>
             </Row>
           </div>
-          {rateCalculator.rateTypeRadio === 'hour'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span style={{
-                marginTop: rateCalculator.rateTypeRadio === 'ton' ? 0 : 6,
-                marginLeft: 40,
-                position: 'absolute'
-              }}
-              >
-              $ {estimatedTotalPrice}
-            </span>
-            </div>
-          )}
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-2 form__form-group">
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       checked={rateCalculator.rateTypeRadio === 'twoWay'}
+                       onClick={() => this.handleSetRateType('twoWay')}/>
+              </div>
+              <div className="col-md-10 form__form-group">
+                <span style={{
+                  marginLeft: 15,
+                  marginTop: rateCalculator.rateTypeRadio !== 'twoWay' ? 9 : 0
+                }}
+                >
+                  {rateCalculator.rateTypeRadio !== 'twoWay' ? rateCalculator.twoWayCostMile
+                    : (
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleTwoWayCostChange,
+                            name: 'twoWay',
+                            value: rateCalculator.twoWayCostMile
+                          }
+                        }
+                        placeholder=""
+                        type="text"
+                        id="rateTypeRadio"
+                        offClick={this.handleOffClick}
+                      />
+                    )
+                  }
+                </span>
+              </div>
+            </Row>
+          </div>
         </Row>
         {rateCalculator.invalidAddress &&
         <Row className="col-md-12">

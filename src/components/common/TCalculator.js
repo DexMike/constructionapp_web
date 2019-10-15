@@ -1,12 +1,9 @@
 import React, { /* Component */} from 'react';
-import moment from 'moment-timezone';
-import NumberFormat from 'react-number-format';
 
 const defaultUnloadTime = 0.25;
 const defaultLoadTime = 0.25;
 
 class TCalculator {
-
   /*
     Calculates round trip time of a load.
     Uses default load and unload times.
@@ -64,6 +61,7 @@ class TCalculator {
     estimatedTons,
     truckCapacity,
   ) {
+    debugger;
     const oneLoad = this.getRoundTripTime(
       travelTimeEnroute,
       travelTimeReturn,
@@ -133,10 +131,93 @@ class TCalculator {
 
 
 
+  /* returns ton rate from one way cost / ton / mile.
+  Rate type: ton */
 
+  static getTonRateByOneWayCost(
+    oneWayCost,
+    avgDistance
+  ) {
+    const rate = (oneWayCost * avgDistance).toFixed(2);
+    return parseFloat(rate);
+  }
 
+  /* returns hour rate from one way cost / ton / mile.
+  Rate type: ton */
 
+  static getHourRateByOneWayCost(
+    travelTimeEnroute,
+    travelTimeReturn,
+    loadTime,
+    unloadTime,
+    oneWayCost,
+    truckCapacity,
+    avgDistanceEnroute
+  ) {
+    const oneLoad = this.getRoundTripTime(
+      travelTimeEnroute,
+      travelTimeReturn,
+      loadTime,
+      unloadTime
+    );
+    const rate = ((oneWayCost * truckCapacity * avgDistanceEnroute) / oneLoad).toFixed(2);
+    return parseFloat(rate);
+  }
 
+  /* returns hour rate from two way cost / mile. */
+
+  static getHourRateByTwoWayCost(
+    travelTimeEnroute,
+    travelTimeReturn,
+    loadTime,
+    unloadTime,
+    twoWayCost,
+    truckCapacity,
+    avgDistanceEnroute,
+    avgDistanceReturn
+  ) {
+    const oneWayCost = TCalculator.getOneWayCostByTwoWayCost(
+      twoWayCost,
+      truckCapacity,
+      avgDistanceEnroute,
+      avgDistanceReturn
+    );
+    const hourRate = this.getHourRateByOneWayCost(
+      travelTimeEnroute,
+      travelTimeReturn,
+      loadTime,
+      unloadTime,
+      oneWayCost,
+      truckCapacity,
+      avgDistanceEnroute
+    );
+    return hourRate;
+  }
+
+  /* returns ton rate from two way cost / mile. */
+
+  static getTonRateByTwoWayCost(
+    travelTimeEnroute,
+    travelTimeReturn,
+    loadTime,
+    unloadTime,
+    twoWayCost,
+    truckCapacity,
+    avgDistanceEnroute,
+    avgDistanceReturn
+  ) {
+    const oneWayCost = TCalculator.getOneWayCostByTwoWayCost(
+      twoWayCost,
+      truckCapacity,
+      avgDistanceEnroute,
+      avgDistanceReturn
+    );
+    const tonRate = this.getTonRateByOneWayCost(
+      oneWayCost,
+      avgDistanceEnroute
+    );
+    return tonRate;
+  }
 
 
   /* returns one way cost / ton / mile (per ton per mile).
@@ -145,6 +226,85 @@ class TCalculator {
   static getOneWayCostByTonRate(ratePerTon, avgDistance) {
     const cost = (avgDistance > 0 && ratePerTon > 0)
       ? (ratePerTon / avgDistance).toFixed(2)
+      : 0;
+    return parseFloat(cost);
+  }
+
+  /* returns two way cost / mile by ton rate.
+  Rate type: ton */
+
+  static getTwoWayCostByTonRate(
+    tonRate,
+    truckCapacity,
+    distanceEnroute,
+    distanceReturn
+  ) {
+    const cost = (
+      tonRate > 0
+      && truckCapacity > 0
+      && distanceEnroute > 0
+      && distanceReturn > 0
+    )
+      ? ((tonRate * truckCapacity) / (distanceEnroute + distanceReturn)).toFixed(2)
+      : 0;
+    return parseFloat(cost);
+  }
+
+  /* returns two way cost / mile by one way cost / ton / mile . */
+
+  static getTwoWayCostByOneWayCost(
+    oneWayCost,
+    truckCapacity,
+    avgDistanceEnroute,
+    avgDistanceReturn
+  ) {
+    const twoWay = ((avgDistanceEnroute + avgDistanceReturn) > 0)
+      ? ((oneWayCost * truckCapacity * avgDistanceEnroute)
+        / (avgDistanceEnroute + avgDistanceReturn)).toFixed(2)
+      : 0;
+    return parseFloat(twoWay);
+  }
+
+  /* returns one way cost / ton / mile by two way cost / mile. */
+
+  static getOneWayCostByTwoWayCost(
+    twoWayCost,
+    truckCapacity,
+    avgDistanceEnroute,
+    avgDistanceReturn
+  ) {
+    const twoWay = ((truckCapacity * avgDistanceEnroute) > 0)
+      ? ((twoWayCost * (avgDistanceEnroute + avgDistanceReturn))
+        / (truckCapacity * avgDistanceEnroute)).toFixed(2)
+      : 0;
+    return parseFloat(twoWay);
+  }
+
+  /* returns two way cost / mile by hour rate.
+  Rate type: hour */
+
+  static getTwoWayCostByHourRate(
+    travelTimeEnroute,
+    travelTimeReturn,
+    loadTime,
+    unloadTime,
+    hourRate,
+    distanceEnroute,
+    distanceReturn
+  ) {
+    const oneLoad = this.getRoundTripTime(
+      travelTimeEnroute,
+      travelTimeReturn,
+      loadTime,
+      unloadTime
+    );
+
+    const cost = (
+      hourRate > 0
+      && distanceEnroute > 0
+      && distanceReturn > 0
+    )
+      ? ((hourRate * oneLoad) / (distanceEnroute + distanceReturn)).toFixed(2)
       : 0;
     return parseFloat(cost);
   }
