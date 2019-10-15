@@ -89,101 +89,11 @@ class JobClosePopup extends Component {
   }
 
   async closeJob() {
-    const { jobId, jobName, closeJobModalPopup } = this.props;
-    const { loads, profile } = this.state;
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
-
-    const job = await JobService.getJobById(jobId);
-    let newJob = [];
-
-    // Specs at SG-811
-    // 1) All existing loads get to finish
-    const loadsToFinish = [];
-    const allLoads = [];
-    for (const load of loads) {
-      loadsToFinish.push(load.id);
-      allLoads.push(String(load.id));
-    }
-
-    // 2) No new loads can be started?
-
-    // 3) All drivers need text notification
-    let gpsTrackings = [];
-    if (allLoads.length > 0) { // there's loads
-      try {
-        gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
-      } catch (error) {
-        console.error('Unable to retrieve GPS for loads:', error);
-      }
-      const usersWithLoad = [];
-      const usersWithoutLoad = [];
-
-      if (Object.keys(gpsTrackings).length > 0) { // there's loads in progress, notify drivers
-        // console.log('>>>GOT LOADS: ', gpsTrackings, typeof gpsTrackings);
-        for (const tracking of gpsTrackings) {
-          if (tracking.status !== 'Ended' && tracking.status !== 'Returning') {
-            // a) If they are in progress on load driver gets a text: “ Job <job name> is ending.
-            // Finish your load, and then you are done with the job.”
-            usersWithLoad.push(tracking.userId);
-          } else {
-            // b) If the driver does not have a load in progress they get text:
-            // “<job name> has ended. Do not pickup any more material.”
-            usersWithoutLoad.push(tracking.userId);
-          }
-        }
-
-        if (usersWithLoad.length > 0) {
-          const notification = {
-            usersIds: usersWithLoad,
-            body: `${envString}Job ${jobName} is ending. Finish your load, and then you are done with the job.`
-          };
-          await TwilioService.smsBatchSending(notification);
-        }
-
-        if (usersWithoutLoad.length > 0) {
-          const notification = {
-            usersIds: usersWithoutLoad,
-            body: `${envString}${jobName} has ended. Do not pickup any more material.`
-          };
-          await TwilioService.smsBatchSending(notification);
-        }
-
-        // changing job status to 'Job Ended'
-        newJob = CloneDeep(job);
-        newJob.status = 'Job Ended';
-        newJob.modifiedOn = moment.utc().format();
-        newJob.modifiedBy = profile.userId;
-      } else { // no loads in progress, set job status to 'Job Completed'
-        newJob = CloneDeep(job);
-        newJob.status = 'Job Completed';
-        newJob.actualEndTime = moment.utc().format();
-        newJob.modifiedOn = moment.utc().format();
-        newJob.modifiedBy = profile.userId;
-      }
-    } else { // there's no loads, just complete the job
-      newJob = CloneDeep(job);
-      newJob.status = 'Job Completed';
-      newJob.actualEndTime = moment.utc().format();
-      newJob.modifiedOn = moment.utc().format();
-      newJob.modifiedBy = profile.userId;
-    }
-
-    // get distance
+    const { jobId, closeJobModalPopup } = this.props;
     try {
-      const startAddress = await AddressService.getAddressById(newJob.startAddress);
-      const endAddress = await AddressService.getAddressById(newJob.endAddress);
-      const startingPoint = `${startAddress.latitude},${startAddress.longitude}`;
-      const endingPoint = `${endAddress.latitude},${endAddress.longitude}`;
-      const geo = await GeoUtils.getDistance(startingPoint, endingPoint);
-      newJob.avgDistance = ((geo.distance / 1.609) / 1000);
+      await JobService.closeJob(jobId);
     } catch (e) {
-      console.log('ERROR: ', e);
-    }
-
-    try {
-      newJob = await JobService.updateJob(newJob);
-    } catch (e) {
-      console.error('>> NOT SAVED: JobClosePopup -> closeJob -> e', e)  ;
+      console.error('>> NOT SAVED: JobClosePopup -> closeJob -> e', e);
     }
 
     // bubble to parent
