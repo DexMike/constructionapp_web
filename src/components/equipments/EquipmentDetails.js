@@ -452,19 +452,18 @@ class EquipmentDetails extends PureComponent {
                 </h3>
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck Type</span>
-                <SelectField
+                <span>Truck Number</span>
+                <TField
                   input={
                     {
-                      onChange: this.selectChange,
-                      name: 'type',
-                      value: type
+                      onChange: this.handleInputChange,
+                      name: 'externalEquipmentNumber',
+                      value: externalEquipmentNumber
                     }
                   }
-                  value={type}
-                  options={truckTypes}
-                  placeholder="Truck Type"
-                  meta={reqHandlerTruckType}
+                  value={externalEquipmentNumber}
+                  placeholder="0"
+                  meta={reqHandlerExternalEquipmentNumber}
                 />
               </Col>
               <Col md={6} className="pt-2">
@@ -484,26 +483,21 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck name</span>
-                <input
-                  name="name"
-                  type="text"
-                  value={name}
-                  onChange={this.handleInputChange}
+                <span>Truck Type</span>
+                <SelectField
+                  input={
+                    {
+                      onChange: this.selectChange,
+                      name: 'type',
+                      value: type
+                    }
+                  }
+                  value={type}
+                  options={truckTypes}
+                  placeholder="Truck Type"
+                  meta={reqHandlerTruckType}
                 />
               </Col>
-              <Col md={6} className="pt-2">
-                <span>Truck description</span>
-                <input
-                  name="description"
-                  type="text"
-                  value={description}
-                  onChange={this.handleInputChange}
-                />
-              </Col>
-            </Row>
-
-            <Row className="col-12">
               <Col md={6} className="pt-2">
                 <span>
                   Materials Hauled
@@ -522,18 +516,21 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck Number</span>
-                <TField
-                  input={
-                    {
-                      onChange: this.handleInputChange,
-                      name: 'externalEquipmentNumber',
-                      value: externalEquipmentNumber
-                    }
-                  }
-                  value={externalEquipmentNumber}
-                  placeholder="0"
-                  meta={reqHandlerExternalEquipmentNumber}
+                <span>Truck name</span>
+                <input
+                  name="name"
+                  type="text"
+                  value={name}
+                  onChange={this.handleInputChange}
+                />
+              </Col>
+              <Col md={6} className="pt-2">
+                <span>Truck description</span>
+                <input
+                  name="description"
+                  type="text"
+                  value={description}
+                  onChange={this.handleInputChange}
                 />
               </Col>
             </Row>
