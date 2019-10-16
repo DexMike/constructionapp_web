@@ -17,7 +17,7 @@ import EquipmentService from '../../api/EquipmentService';
 import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import EquipmentDetails from './EquipmentDetails';
-import MultiEquipmentsForm from './MultiEquipmentsForm';
+import EquipmentsShortForm from './EquipmentsShortForm';
 import '../addTruck/AddTruck.css';
 import './Equipment.css';
 
@@ -197,7 +197,7 @@ class EquipmentListPage extends Component {
         className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__body">
-          <MultiEquipmentsForm
+          <EquipmentsShortForm
             userId={userId}
             companyId={companyId}
             toggle={this.toggleAddMultiTrucksModal}

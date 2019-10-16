@@ -1,6 +1,6 @@
 import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
 import React, { Component } from 'react';
-import MultiEquipmentsForm from './MultiEquipmentsForm';
+import EquipmentsShortForm from './EquipmentsShortForm';
 import AuthService from '../../utils/AuthService';
 import ProfileService from '../../api/ProfileService';
 import TTable from '../common/TTable';
@@ -42,7 +42,7 @@ class AddFirstEquipmentPage extends Component {
   }
 
   handleAddedTruck(equipment) {
-    // const { numberOfTrucks,
+    // const { externalEquipmentNumber,
     //   truckType,
     //   selectedMaterials,
     //   isRatedHour,
@@ -81,7 +81,7 @@ class AddFirstEquipmentPage extends Component {
         className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__body">
-          <MultiEquipmentsForm
+          <EquipmentsShortForm
             userId={userId}
             companyId={companyId}
             toggle={this.toggleAddMultiTrucksModal}
