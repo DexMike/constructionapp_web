@@ -171,7 +171,6 @@ class JobForm extends Component {
         rate: job.rate,
         rateEstimate: job.rateEstimate
       };
-      console.log(companyRates);
       try {
         trelarFee = await RatesDeliveryService.calculateTrelarFee(companyRates);
       } catch (err) {
@@ -484,7 +483,6 @@ class JobForm extends Component {
       }
       showPhone = TFormat.asPhoneText(showPhone);
     }
-    console.log('job: ', job);
     return (
       <React.Fragment>
         <div className="col-md-4">
