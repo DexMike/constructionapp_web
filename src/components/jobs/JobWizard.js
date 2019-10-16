@@ -1188,11 +1188,11 @@ class JobWizard extends Component {
       ).utc().format(),
       numEquipments: tabTruckSpecs.truckQuantity,
       rateType,
-      rate,
+      rate: rate.replace(/,/g, ''),
       amountType,
-      rateEstimate,
+      rateEstimate: rateEstimate.replace(/,/g, ''),
       poNumber,
-      estMaterialPricing: tabMaterials.estMaterialPricing,
+      estMaterialPricing: tabMaterials.estMaterialPricing.replace(/,/g, ''),
       notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
@@ -1242,9 +1242,9 @@ class JobWizard extends Component {
       // bid.startAddress = createdJob.startAddress;
       // bid.endAddress = createdJob.endAddress;
       bid.companyCarrierId = selectedCarrierId;
-      bid.rate = rate;
+      bid.rate = rate.replace(/,/g, '');
       bid.rateType = rateType;
-      bid.rateEstimate = rateEstimate;
+      bid.rateEstimate = rateEstimate.replace(/,/g, '');
       bid.hasCustomerAccepted = 1;
       bid.hasSchedulerAccepted = 0;
       bid.status = 'Pending';
@@ -1361,7 +1361,7 @@ class JobWizard extends Component {
             status: 'New',
             rateType,
             rate: 0,
-            rateEstimate,
+            rateEstimate: rateEstimate.replace(/,/g, ''),
             notes: tabSummary.instructions,
             createdBy: profile.userId,
             createdOn: moment.utc().format(),
@@ -1569,11 +1569,11 @@ class JobWizard extends Component {
       startTime: jobStartDate,
       endTime: jobEndDate,
       numEquipments: tabTruckSpecs.truckQuantity,
-      estMaterialPricing: tabMaterials.estMaterialPricing,
+      estMaterialPricing: tabMaterials.estMaterialPricing.replace(/,/g, ''),
       rateType,
-      rate,
+      rate: rate.replace(/,/g, ''),
       amountType,
-      rateEstimate,
+      rateEstimate: rateEstimate.replace(/,/g, ''),
       notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),

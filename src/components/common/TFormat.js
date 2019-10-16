@@ -41,22 +41,9 @@ class TFormat {
     } else {
       value = '0';
     }
-    // if (value.includes('.')) {
-    //   const intSub = value.substring(0, value.indexOf('.'));
-    //   // format integer part for thousands
-    //   debugger;
-    //
-    //   const intSubFormatted = TFormat.asIntegerCommaSeperated(intSub);
-    //   debugger;
-    //   const decimals = value.split('.').pop();
-    //   debugger;
-    //   value = `${intSubFormatted}.${decimals}`;
-    //   debugger;
-    // } else {
-    //   value = TFormat.asIntegerCommaSeperated(value);
-    //   debugger;
-    // }
-    return value;
+    const parts = value.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
   }
 
   // gives a value (that is already a valid float) two decimals if none are found
@@ -94,7 +81,8 @@ class TFormat {
     } else {
       value = '0';
     }
-    return value;
+    const formattedWithCommas = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return formattedWithCommas;
   }
 
   static asMoneyNoDecimals(inputValue) {

@@ -441,7 +441,6 @@ class Summary extends PureComponent {
       } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
         deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
           parseFloat(tabMaterials.estMaterialPricing),
-          parseFloat(haulCostPerTonHour),
           parseFloat(tabPickupDelivery.avgTimeEnroute),
           parseFloat(tabPickupDelivery.avgTimeReturn),
           0.25,
@@ -460,7 +459,12 @@ class Summary extends PureComponent {
       } else if (tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Hour') {
         estimatedCostForJob = TCalculator.getJobCostHourRateTonAmount(
           parseFloat(haulCostPerTonHour),
-          parseFloat(tabMaterials.quantity)
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
         );
       } else if (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Ton') {
         estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
