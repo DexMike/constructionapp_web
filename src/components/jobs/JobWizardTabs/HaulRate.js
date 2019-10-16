@@ -13,9 +13,9 @@ import '../jobs.css';
 import ReactTooltip from 'react-tooltip';
 import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
-import GeoUtils from '../../../utils/GeoUtils';
 import DeliveryCostsSummary from './DeliveryCostsSummary';
-import TFormat from "../../common/TFormat";
+import TFormat from '../../common/TFormat';
+import TCalculator from '../../common/TCalculator';
 
 
 // import USstates from '../../utils/usStates';
@@ -24,7 +24,7 @@ class HaulRate extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      loaded: false,
+      loaded: false
     };
     this.handlePayTypeChange = this.handlePayTypeChange.bind(this);
     this.handleRatePerPayType = this.handleRatePerPayType.bind(this);
@@ -41,6 +41,9 @@ class HaulRate extends PureComponent {
     this.handleEstimatedTonsChange = this.handleEstimatedTonsChange.bind(this);
     this.handleEstimatedHoursChange = this.handleEstimatedHoursChange.bind(this);
     this.handleOffClick = this.handleOffClick.bind(this);
+    this.handleOneWayCostChange = this.handleOneWayCostChange.bind(this);
+    this.handleTwoWayCostChange = this.handleTwoWayCostChange.bind(this);
+    this.handleUpdateRates = this.handleUpdateRates.bind(this);
   }
 
   async componentDidMount() {
@@ -71,12 +74,13 @@ class HaulRate extends PureComponent {
         data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
       }
     }
-    handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
+    // handleInputChange('tabHaulRate', data);
     this.setState({loaded: true});
   }
 
   componentWillReceiveProps(nextProps) {
-    const {data, tabPickupDelivery, tabMaterials, handleInputChange} = {...nextProps};
+    const {data, tabPickupDelivery, tabMaterials} = {...nextProps};
     if (tabPickupDelivery.startLocationLatitude && tabPickupDelivery.startLocationLongitude
       && tabPickupDelivery.endLocationLatitude && tabPickupDelivery.endLocationLongitude) {
       if (tabPickupDelivery.avgTimeEnroute !== data.rateCalculator.travelTimeEnroute
@@ -86,18 +90,29 @@ class HaulRate extends PureComponent {
         data.rateCalculator.travelTimeReturn = tabPickupDelivery.avgTimeEnroute;
         data.rateCalculator.loadTime = 0.25;
         data.rateCalculator.unloadTime = 0.25;
-        const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
-          + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
         if (tabMaterials.quantityType === 'Hour') {
           data.rateCalculator.estimatedHours = tabMaterials.quantity;
-          const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
-          data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
+          data.rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+            parseFloat(data.rateCalculator.travelTimeEnroute),
+            parseFloat(data.rateCalculator.travelTimeReturn),
+            parseFloat(data.rateCalculator.loadTime),
+            parseFloat(data.rateCalculator.unloadTime),
+            parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+            parseInt(data.rateCalculator.truckCapacity, 10)
+          );
         } else if (tabMaterials.quantityType === 'Ton') {
           data.rateCalculator.estimatedTons = tabMaterials.quantity;
-          const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
-          data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
+          data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
+            parseFloat(data.rateCalculator.travelTimeEnroute),
+            parseFloat(data.rateCalculator.travelTimeReturn),
+            parseFloat(data.rateCalculator.loadTime),
+            parseFloat(data.rateCalculator.unloadTime),
+            parseFloat(data.rateCalculator.estimatedTons), // this is the value change by user
+            parseInt(data.rateCalculator.truckCapacity, 10)
+          );
         }
-        handleInputChange('tabHaulRate', data);
+        this.handleUpdateRates(data);
+        // handleInputChange('tabHaulRate', data);
         this.setState({data: {...data}});
       }
     }
@@ -110,74 +125,203 @@ class HaulRate extends PureComponent {
     handleInputChange('tabHaulRate', data);
   }
 
-  handleEstimatedTonsChange(estTons) {
-    const {data, handleInputChange} = {...this.props};
-    let {value} = estTons.target;
-    // value = value.replace(/\D/g, '');
-    value = TFormat.asIntegerNoLeadingZeros(value);
-    const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
-      + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
-    data.rateCalculator.estimatedTons = value;
-    const numTrips = Math.ceil(data.rateCalculator.estimatedTons / data.rateCalculator.truckCapacity);
-    data.rateCalculator.estimatedHours = (numTrips * oneLoad).toFixed(2);
+  handleOneWayCostChange(oneWay) {
+    const {data} = {...this.props};
+    let {value} = oneWay.target;
+    value = TFormat.asFloatOneLeadingZero(value);
+    data.rateCalculator.oneWayCostTonMile = value;
+    this.handleUpdateRates(data);
+  }
 
-    // update unselected rate
-    if (data.rateCalculator.rateTypeRadio === 'ton') {
-      const estimatedTotalPrice = (data.rateCalculator.estimatedTons * data.rateCalculator.ratePerTon).toFixed(2);
-      data.rateCalculator.ratePerHour = data.rateCalculator.estimatedHours > 0
-        ? (estimatedTotalPrice / data.rateCalculator.estimatedHours).toFixed(2)
-        : 0;
-    } else if (data.rateCalculator.rateTypeRadio === 'hour') {
-      const estimatedTotalPrice = (data.rateCalculator.estimatedHours * data.rateCalculator.ratePerHour).toFixed(2);
-      data.rateCalculator.ratePerTon = data.rateCalculator.estimatedTons > 0
-        ? (estimatedTotalPrice / data.rateCalculator.estimatedTons).toFixed(2)
-        : 0;
+  handleTwoWayCostChange(oneWay) {
+    const {data} = {...this.props};
+    let {value} = oneWay.target;
+    value = TFormat.asFloatOneLeadingZero(value);
+    data.rateCalculator.twoWayCostMile = value;
+    this.handleUpdateRates(data);
+  }
+
+  handleUpdateRates(currData) {
+    const {tabPickupDelivery, handleInputChange} = {...this.props};
+    const data = currData;
+    // update unselected rates
+
+    // if tonnage is selected
+    switch (data.rateCalculator.rateTypeRadio) {
+      case 'ton':
+        // update hour rate
+        data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
+          parseFloat(data.rateCalculator.estimatedHours),
+          parseFloat(data.rateCalculator.estimatedTons),
+          parseFloat(data.rateCalculator.ratePerTon)
+        );
+        // update one way cost
+        data.rateCalculator.oneWayCostTonMile = TCalculator.getOneWayCostByTonRate(
+          parseFloat(data.rateCalculator.ratePerTon),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update two way cost
+        data.rateCalculator.twoWayCostMile = TCalculator.getTwoWayCostByTonRate(
+          parseFloat(data.rateCalculator.ratePerTon),
+          parseFloat(data.rateCalculator.truckCapacity),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      case 'hour': // if hourly rate is selected
+        // update ton rate
+        data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+          parseFloat(data.rateCalculator.estimatedHours),
+          parseFloat(data.rateCalculator.estimatedTons),
+          parseFloat(data.rateCalculator.ratePerHour)
+        );
+        // update one way cost
+        data.rateCalculator.oneWayCostTonMile = TCalculator.getOneWayCostByHourRate(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.ratePerHour), // this is the value change by user
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update two way cost
+        data.rateCalculator.twoWayCostMile = TCalculator.getTwoWayCostByHourRate(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.ratePerHour), // this is the value change by user
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      case 'oneWay':
+        // update hour rate
+        data.rateCalculator.ratePerHour = TCalculator.getHourRateByOneWayCost(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.oneWayCostTonMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update ton rate
+        data.rateCalculator.ratePerTon = TCalculator.getTonRateByOneWayCost(
+          parseFloat(data.rateCalculator.oneWayCostTonMile),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute)
+        );
+        // update two way cost
+        data.rateCalculator.twoWayCostMile = TCalculator.getTwoWayCostByOneWayCost(
+          parseFloat(data.rateCalculator.oneWayCostTonMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      case 'twoWay':
+        // update hour rate
+        data.rateCalculator.ratePerHour = TCalculator.getHourRateByTwoWayCost(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.twoWayCostMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        // update ton rate
+        data.rateCalculator.ratePerTon = TCalculator.getTonRateByTwoWayCost(
+          parseFloat(data.rateCalculator.travelTimeEnroute),
+          parseFloat(data.rateCalculator.travelTimeReturn),
+          parseFloat(data.rateCalculator.loadTime),
+          parseFloat(data.rateCalculator.unloadTime),
+          parseFloat(data.rateCalculator.twoWayCostMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        // update one way cost
+        data.rateCalculator.oneWayCostTonMile = TCalculator.getOneWayCostByTwoWayCost(
+          parseFloat(data.rateCalculator.twoWayCostMile),
+          parseInt(data.rateCalculator.truckCapacity, 10),
+          parseFloat(tabPickupDelivery.avgDistanceEnroute),
+          parseFloat(tabPickupDelivery.avgDistanceReturn)
+        );
+        break;
+      default:
     }
+
     handleInputChange('tabHaulRate', data);
   }
 
-  handleRateTonsChange(rateTon) {
+  handleEstimatedTonsChange(estTons) {
     const {data, handleInputChange} = {...this.props};
+    let {value} = estTons.target;
+    if (value === '') {
+      data.rateCalculator.estimatedTons = value;
+      handleInputChange('tabHaulRate', data);
+      return;
+    }
+    value = TFormat.asIntegerNoLeadingZeros(value);
+
+    data.rateCalculator.estimatedTons = value;
+
+    data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedTons), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
+
+    // update unselected rates
+    this.handleUpdateRates(data);
+    // handleInputChange('tabHaulRate', data);
+  }
+
+  handleRateTonsChange(rateTon) {
+    const {data} = {...this.props};
     let {value} = rateTon.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerTon = value;
-    data.rateCalculator.ratePerHour =
-      ((data.rateCalculator.ratePerTon * data.rateCalculator.estimatedTons) / data.rateCalculator.estimatedHours).toFixed(2);
-    handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
   }
 
   handleRateHoursChange(rateHour) {
-    const {data, handleInputChange} = {...this.props};
+    const {data} = {...this.props};
     let {value} = rateHour.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     data.rateCalculator.ratePerHour = value;
-    data.rateCalculator.ratePerTon =
-      ((data.rateCalculator.ratePerHour * data.rateCalculator.estimatedHours) / data.rateCalculator.estimatedTons).toFixed(2);
-    handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
   }
 
   handleEstimatedHoursChange(estHours) {
     const {data, handleInputChange} = {...this.props};
-    const oneLoad = parseFloat(data.rateCalculator.loadTime) + parseFloat(data.rateCalculator.unloadTime)
-      + parseFloat(data.rateCalculator.travelTimeReturn) + parseFloat(data.rateCalculator.travelTimeEnroute);
     let {value} = estHours.target;
-    // value = value.replace(/\D/g, '');
-    value = TFormat.asIntegerNoLeadingZeros(value);
-    data.rateCalculator.estimatedHours = value;
-    const numTrips = Math.floor(data.rateCalculator.estimatedHours / oneLoad);
-    data.rateCalculator.estimatedTons = (numTrips * data.rateCalculator.truckCapacity).toFixed(2);
-
-    // update unselected rate
-    if (data.rateCalculator.rateTypeRadio === 'hour') {
-      const estimatedTotalPrice = (data.rateCalculator.estimatedHours * data.rateCalculator.ratePerHour).toFixed(2);
-      data.rateCalculator.ratePerTon = data.rateCalculator.estimatedTons > 0
-        ? (estimatedTotalPrice / data.rateCalculator.estimatedTons).toFixed(2)
-        : 0;
+    if (value === '') {
+      data.rateCalculator.estimatedHours = value;
+      handleInputChange('tabHaulRate', data);
+      return;
     }
+    value = TFormat.asIntegerNoLeadingZeros(value);
 
-    handleInputChange('tabHaulRate', data);
+    data.rateCalculator.estimatedHours = value;
+
+    data.rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
+    this.handleUpdateRates(data);
   }
 
   handleRatePerPayType(ratePerPayType) {
@@ -189,15 +333,21 @@ class HaulRate extends PureComponent {
     data.ratePerPayType = value;
     if (data.payType === 'Ton') {
       rateCalculator.ratePerTon = value;
-      rateCalculator.ratePerHour =
-        ((rateCalculator.ratePerTon * rateCalculator.estimatedTons) / rateCalculator.estimatedHours).toFixed(2);
+      // rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
+      //   parseFloat(data.rateCalculator.estimatedHours),
+      //   parseFloat(data.rateCalculator.estimatedTons),
+      //   parseFloat(data.rateCalculator.ratePerTon)
+      // );
     } else if (data.payType === 'Hour') {
       rateCalculator.ratePerHour = value;
-      rateCalculator.ratePerTon =
-        ((rateCalculator.ratePerHour * rateCalculator.estimatedHours) / rateCalculator.estimatedTons).toFixed(2);
-
+      // rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
+      //   parseFloat(data.rateCalculator.estimatedHours),
+      //   parseFloat(data.rateCalculator.estimatedTons),
+      //   parseFloat(data.rateCalculator.ratePerHour)
+      // );
     }
-    handleInputChange('tabHaulRate', data);
+    // handleInputChange('tabHaulRate', data);
+    this.handleUpdateRates(data);
   }
 
   handlePayTypeChange(quantityType) {
@@ -210,14 +360,33 @@ class HaulRate extends PureComponent {
     let {value} = loadTime.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
-    const {data, handleInputChange} = {...this.props};
-    const {rateCalculator} = {...data};
-    rateCalculator.loadTime = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
-    handleInputChange('tabHaulRate', data);
+    const {data} = {...this.props};
+    // const {rateCalculator} = {...data};
+    data.rateCalculator.loadTime = value;
+    if (data.rateCalculator.estimateTypeRadio === 'hour') {
+      data.rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.travelTimeReturn),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime),
+        parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+        parseInt(data.rateCalculator.truckCapacity, 10)
+      );
+    } else if (data.rateCalculator.estimateTypeRadio === 'ton') {
+      data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.travelTimeReturn),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime),
+        parseFloat(data.rateCalculator.estimatedTons), // this is the value change by user
+        parseInt(data.rateCalculator.truckCapacity, 10)
+      );
+    }
+
+    // need to update estimated hours too -> make a Tcalc function for that
+
+    this.handleUpdateRates(data);
+    // handleInputChange('tabHaulRate', data);
   }
 
   handleUnloadTimeChange(unloadTime) {
@@ -225,15 +394,34 @@ class HaulRate extends PureComponent {
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     value = TFormat.asFloatOneLeadingZero(value);
     const {data, handleInputChange} = {...this.props};
-    const {rateCalculator} = {...data};
-    rateCalculator.unloadTime = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
-    handleInputChange('tabHaulRate', data);
+    // const {rateCalculator} = {...data};
+    data.rateCalculator.unloadTime = value;
+    if (data.rateCalculator.estimateTypeRadio === 'hour') {
+      data.rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.travelTimeReturn),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime),
+        parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+        parseInt(data.rateCalculator.truckCapacity, 10)
+      );
+    } else if (data.rateCalculator.estimateTypeRadio === 'ton') {
+      data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.travelTimeReturn),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime),
+        parseFloat(data.rateCalculator.estimatedTons), // this is the value change by user
+        parseInt(data.rateCalculator.truckCapacity, 10)
+      );
+    }
+    // need to update estimated hours too -> make a Tcalc function for that
+    this.handleUpdateRates(data);
+
+    // handleInputChange('tabHaulRate', data);
   }
 
+  // due to new requirements these fields are no longer editable but keeping methods for the future
   handleEnrouteTravelTimeChange(travelTimeEnroute) {
     let {value} = travelTimeEnroute.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -241,13 +429,18 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeEnroute = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
+  // due to new requirements these fields are no longer editable but keeping methods for the future
   handleReturnTravelTimeChange(travelTimeReturn) {
     let {value} = travelTimeReturn.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -255,10 +448,14 @@ class HaulRate extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeReturn = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
+    rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
+      parseFloat(data.rateCalculator.travelTimeEnroute),
+      parseFloat(data.rateCalculator.travelTimeReturn),
+      parseFloat(data.rateCalculator.loadTime),
+      parseFloat(data.rateCalculator.unloadTime),
+      parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+      parseInt(data.rateCalculator.truckCapacity, 10)
+    );
     handleInputChange('tabHaulRate', data);
   }
 
@@ -266,14 +463,31 @@ class HaulRate extends PureComponent {
     let {value} = truckCapacity.target;
     // value = value.replace(/\D/g, '');
     value = TFormat.asIntegerNoLeadingZeros(value);
-    const {data, handleInputChange} = {...this.props};
-    const {rateCalculator} = {...data};
-    rateCalculator.truckCapacity = value;
-    const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-      + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-    const numTrips = Math.floor(rateCalculator.estimatedHours / oneLoad);
-    rateCalculator.estimatedTons = numTrips * rateCalculator.truckCapacity;
-    handleInputChange('tabHaulRate', data);
+    const {data} = {...this.props};
+    data.rateCalculator.truckCapacity = value;
+    if (data.rateCalculator.estimateTypeRadio === 'hour') {
+      data.rateCalculator.estimatedTons = data.rateCalculator.truckCapacity === ''
+        ? 0
+        : TCalculator
+          .getTonsByHourAmount(
+            parseFloat(data.rateCalculator.travelTimeEnroute),
+            parseFloat(data.rateCalculator.travelTimeReturn),
+            parseFloat(data.rateCalculator.loadTime),
+            parseFloat(data.rateCalculator.unloadTime),
+            parseFloat(data.rateCalculator.estimatedHours), // this is the value change by user
+            parseInt(data.rateCalculator.truckCapacity, 10)
+          );
+    } else if (data.rateCalculator.estimateTypeRadio === 'ton') {
+      data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.travelTimeReturn),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime),
+        parseFloat(data.rateCalculator.estimatedTons), // this is the value change by user
+        parseInt(data.rateCalculator.truckCapacity, 10)
+      );
+    }
+    this.handleUpdateRates(data);
   }
 
   handleSetEstimateType(e) {
@@ -294,25 +508,40 @@ class HaulRate extends PureComponent {
   handleOffClick(e) {
     const {data, handleInputChange} = {...this.props};
     if (e === 'ratePerPayType') {
-      data.ratePerPayType = TFormat.asFloatTwoDecimals(data.ratePerPayType);
+      data.ratePerPayType = TFormat
+        .asFloatTwoDecimals(data.ratePerPayType);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'ratePerTon') {
-      data.rateCalculator.ratePerTon = TFormat.asFloatTwoDecimals(data.rateCalculator.ratePerTon);
+      data.rateCalculator.ratePerTon = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.ratePerTon);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'ratePerHour') {
-      data.rateCalculator.ratePerHour = TFormat.asFloatTwoDecimals(data.rateCalculator.ratePerHour);
+      data.rateCalculator.ratePerHour = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.ratePerHour);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'travelTimeEnroute') {
-      data.rateCalculator.travelTimeEnroute = TFormat.asFloatTwoDecimals(data.rateCalculator.travelTimeEnroute);
+      data.rateCalculator.travelTimeEnroute = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.travelTimeEnroute);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'travelTimeReturn') {
-      data.rateCalculator.travelTimeReturn = TFormat.asFloatTwoDecimals(data.rateCalculator.travelTimeReturn);
+      data.rateCalculator.travelTimeReturn = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.travelTimeReturn);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'loadTime') {
-      data.rateCalculator.loadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.loadTime);
+      data.rateCalculator.loadTime = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.loadTime);
       handleInputChange('tabHaulRate', data);
     } else if (e === 'unloadTime') {
-      data.rateCalculator.unloadTime = TFormat.asFloatTwoDecimals(data.rateCalculator.unloadTime);
+      data.rateCalculator.unloadTime = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.unloadTime);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'oneWay') {
+      data.rateCalculator.oneWayCostTonMile = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.oneWayCostTonMile);
+      handleInputChange('tabHaulRate', data);
+    } else if (e === 'twoWay') {
+      data.rateCalculator.twoWayCostMile = TFormat
+        .asFloatTwoDecimals(data.rateCalculator.twoWayCostMile);
       handleInputChange('tabHaulRate', data);
     }
   }
@@ -332,20 +561,87 @@ class HaulRate extends PureComponent {
       // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
       // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
       if (data.payType === 'Ton') {
-        oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByTonRate(haulCostPerTonHour, tabPickupDelivery.avgDistanceEnroute);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        oneWayCostPerTonHourPerMile = (oneLoad * (parseFloat(data.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute))).toFixed(2);
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByHourRate(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(data.ratePerPayType),
+          truckCapacity,
+          tabPickupDelivery.avgDistanceEnroute
+        );
       }
-      deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
-      estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
+      if (data.payType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByTonRate(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (data.payType === 'Hour' && tabMaterials.quantityType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByTonAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (data.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      }
+      if ((tabMaterials.quantityType === 'Ton' && data.payType === 'Ton')
+      || (tabMaterials.quantityType === 'Hour' && data.payType === 'Hour')) {
+        estimatedCostForJob = TCalculator.getJobCostSameRateAndAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabMaterials.quantity)
+        );
+      } else if (tabMaterials.quantityType === 'Ton' && data.payType === 'Hour') {
+        estimatedCostForJob = TCalculator.getJobCostHourRateTonAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
+        );
+      } else if (tabMaterials.quantityType === 'Hour' && data.payType === 'Ton') {
+        estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
+        );
+      }
+
       if (tabMaterials.quantityType === 'Ton') {
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByTonAmount(tabMaterials.quantity, deliveredPricePerTon);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
-        const estimatedTons = (numTrips * truckCapacity).toFixed(2);
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * estimatedTons).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByHourAmount(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity,
+          deliveredPricePerTon
+        );
       }
     }
     return (
@@ -366,18 +662,18 @@ class HaulRate extends PureComponent {
   renderRateCalc() {
     const {data, tabMaterials, tabPickupDelivery} = {...this.props};
     const {rateCalculator} = {...data};
-    let estimatedTotalPrice = 0;
-    if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'ton') {
-      estimatedTotalPrice = (rateCalculator.estimatedTons * rateCalculator.ratePerTon).toFixed(2);
-    } else if (rateCalculator.estimateTypeRadio === 'hour' && rateCalculator.rateTypeRadio === 'hour') {
-      estimatedTotalPrice = (rateCalculator.estimatedHours * rateCalculator.ratePerHour).toFixed(2);
-    } else if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'hour') {
-      const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
-        + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
-      const numTrips = Math.ceil(rateCalculator.estimatedTons / rateCalculator.truckCapacity);
-      const estHours = numTrips * oneLoad;
-      estimatedTotalPrice = (estHours * rateCalculator.ratePerHour).toFixed(2);
-    }
+    // let estimatedTotalPrice = 0;
+    // if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'ton') {
+    //   estimatedTotalPrice = (rateCalculator.estimatedTons * rateCalculator.ratePerTon).toFixed(2);
+    // } else if (rateCalculator.estimateTypeRadio === 'hour' && rateCalculator.rateTypeRadio === 'hour') {
+    //   estimatedTotalPrice = (rateCalculator.estimatedHours * rateCalculator.ratePerHour).toFixed(2);
+    // } else if (rateCalculator.estimateTypeRadio === 'ton' && rateCalculator.rateTypeRadio === 'hour') {
+    //   const oneLoad = parseFloat(rateCalculator.loadTime) + parseFloat(rateCalculator.unloadTime)
+    //     + parseFloat(rateCalculator.travelTimeReturn) + parseFloat(rateCalculator.travelTimeEnroute);
+    //   const numTrips = Math.ceil(rateCalculator.estimatedTons / rateCalculator.truckCapacity);
+    //   const estHours = numTrips * oneLoad;
+    //   estimatedTotalPrice = (estHours * rateCalculator.ratePerHour).toFixed(2);
+    // }
 
     const estimatedTonsInfo = tabMaterials.quantityType === 'Ton' ?
       'Any changes in tonnage to take final affect must be modified on the Materials ( tab ).' :
@@ -405,8 +701,13 @@ class HaulRate extends PureComponent {
                 This does not affect the actual haul rate you decide on above.</span>
           </div>
         </Row>
+        <Row className="col-md-12">
+          <div className="col-md-12 dashboard dashboard__job-create-section-title">
+              <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>QUANTITIES</span>
+          </div>
+        </Row>
         <Row className="col-md-12" style={{paddingTop: 15}}>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
                 <span className="form__form-group-label">Estimated Tons
@@ -426,40 +727,40 @@ class HaulRate extends PureComponent {
               <p style={{color: 'white'}}>{estimatedTonsInfo}</p>
             </ReactTooltip>
           </div>
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Rate per ton
+                <span className="form__form-group-label">Estimated Hours
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
                   <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerTonInfo'>i</span>
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='estimatedHoursInfo'>i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
           <div className="customTooltip">
-            <ReactTooltip id='ratePerTonInfo' effect='solid'>
-              <p style={{color: 'white'}}>{ratePerTonInfo}</p>
+            <ReactTooltip id='estimatedHoursInfo' effect='solid'>
+              <p style={{color: 'white'}}>{estimatedHoursInfo}</p>
             </ReactTooltip>
           </div>
-          {rateCalculator.rateTypeRadio === 'ton'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span className="form__form-group-label">Estimated Total Price</span>
-            </div>
-          )
-          }
+          {/*{rateCalculator.rateTypeRadio === 'ton'*/}
+          {/*&& (*/}
+          {/*  <div className="col-md-4 form__form-group">*/}
+          {/*    <span className="form__form-group-label">Estimated Total Price</span>*/}
+          {/*  </div>*/}
+          {/*)*/}
+          {/*}*/}
         </Row>
         <Row className="col-md-12">
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       style={{marginTop: 9, width: 25, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'ton'}
                        onClick={() => this.handleSetEstimateType('ton')}/>
               </div>
@@ -489,109 +790,11 @@ class HaulRate extends PureComponent {
               </div>
             </Row>
           </div>
-          <div className="col-md-4 form__form-group">
-            <Row className="col-md-12">
-              <div className="col-md-2 form__form-group">
-                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
-                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
-                       checked={rateCalculator.rateTypeRadio === 'ton'} onClick={() => this.handleSetRateType('ton')}/>
-              </div>
-              <div className="col-md-10 form__form-group">
-            <span style={{
-              marginLeft: 15,
-              marginTop: rateCalculator.rateTypeRadio === 'hour' ? 9 : 0
-            }}
-            >
-              {rateCalculator.rateTypeRadio === 'hour' ? rateCalculator.ratePerTon
-                : (
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleRateTonsChange,
-                        name: 'ratePerTon',
-                        value: rateCalculator.ratePerTon
-                      }
-                    }
-                    placeholder=""
-                    type="text"
-                    id="rateTypeRadio"
-                    offClick={this.handleOffClick}
-                  />
-                )
-              }
-            </span>
-              </div>
-            </Row>
-          </div>
-          {rateCalculator.rateTypeRadio === 'ton'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span style={{
-                marginTop: rateCalculator.rateTypeRadio === 'ton' ? 0 : 6,
-                marginLeft: 40,
-                position: 'absolute'
-              }}
-              >
-              $ {estimatedTotalPrice}
-            </span>
-            </div>
-          )}
-        </Row>
-        <Row className="col-md-12" style={{paddingTop: 15}}>
-        <div className="col-md-4 form__form-group">
-            <Row className="col-md-12">
-              <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Estimated Hours
-                </span>
-              </div>
-              <div className="col-md-4 form__form-group">
-                <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='estimatedHoursInfo'>i</span>
-                  </span>
-                </span>
-              </div>
-            </Row>
-          </div>
-          <div className="customTooltip">
-            <ReactTooltip id='estimatedHoursInfo' effect='solid'>
-              <p style={{color: 'white'}}>{estimatedHoursInfo}</p>
-            </ReactTooltip>
-          </div>
-          <div className="col-md-4 form__form-group">
-            <Row className="col-md-12">
-              <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Rate per hour
-                </span>
-              </div>
-              <div className="col-md-4 form__form-group">
-                <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerHourInfo'>i</span>
-                  </span>
-                </span>
-              </div>
-            </Row>
-          </div>
-          <div className="customTooltip">
-            <ReactTooltip id='ratePerHourInfo' effect='solid'>
-              <p style={{color: 'white'}}>{ratePerHourInfo}</p>
-            </ReactTooltip>
-          </div>
-          {rateCalculator.rateTypeRadio === 'hour'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span className="form__form-group-label">Estimated Total Price</span>
-            </div>
-          )
-          }
-        </Row>
-        <Row className="col-md-12">
-          <div className="col-md-4 form__form-group">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
-                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       style={{marginTop: 9, width: 25, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'hour'}
                        onClick={() => this.handleSetEstimateType('hour')}/>
               </div>
@@ -622,7 +825,187 @@ class HaulRate extends PureComponent {
               </div>
             </Row>
           </div>
-          <div className="col-md-4 form__form-group">
+          {/*{rateCalculator.rateTypeRadio === 'ton'*/}
+          {/*&& (*/}
+          {/*  <div className="col-md-4 form__form-group">*/}
+          {/*    <span style={{*/}
+          {/*      marginTop: rateCalculator.rateTypeRadio === 'ton' ? 0 : 6,*/}
+          {/*      marginLeft: 40,*/}
+          {/*      position: 'absolute'*/}
+          {/*    }}*/}
+          {/*    >*/}
+          {/*    $ {estimatedTotalPrice}*/}
+          {/*  </span>*/}
+          {/*  </div>*/}
+          {/*)}*/}
+        </Row>
+
+        <Row className="col-md-12" style={{paddingTop: 20}}>
+          <div className="col-md-12 dashboard dashboard__job-create-section-title">
+            <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>RATES</span>
+          </div>
+        </Row>
+        <Row className="col-md-12" style={{paddingTop: 15}}>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">Rate per ton
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerTonInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='ratePerTonInfo' effect='solid'>
+              <p style={{color: 'white'}}>{ratePerTonInfo}</p>
+            </ReactTooltip>
+          </div>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">One way cost / ton / mile
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='oneWayCostInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='oneWayCostInfo' effect='solid'>
+              <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery tab.</p>
+            </ReactTooltip>
+          </div>
+        </Row>
+        <Row className="col-md-12">
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-2 form__form-group">
+                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       checked={rateCalculator.rateTypeRadio === 'ton'} onClick={() => this.handleSetRateType('ton')}
+                />
+              </div>
+              <div className="col-md-10 form__form-group">
+            <span style={{
+              marginLeft: 15,
+              marginTop: rateCalculator.rateTypeRadio !== 'ton' ? 9 : 0
+            }}
+            >
+              {rateCalculator.rateTypeRadio !== 'ton' ? rateCalculator.ratePerTon
+                : (
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleRateTonsChange,
+                        name: 'ratePerTon',
+                        value: rateCalculator.ratePerTon
+                      }
+                    }
+                    placeholder=""
+                    type="text"
+                    id="rateTypeRadio"
+                    offClick={this.handleOffClick}
+                  />
+                )
+              }
+            </span>
+              </div>
+            </Row>
+          </div>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-2 form__form-group">
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       checked={rateCalculator.rateTypeRadio === 'oneWay'} onClick={() => this.handleSetRateType('oneWay')}
+                />
+              </div>
+              <div className="col-md-10 form__form-group">
+            <span style={{
+              marginLeft: 15,
+              marginTop: rateCalculator.rateTypeRadio !== 'oneWay' ? 9 : 0
+            }}
+            >
+              {rateCalculator.rateTypeRadio !== 'oneWay' ? rateCalculator.oneWayCostTonMile
+                : (
+                  <TField
+                    input={
+                      {
+                        onChange: this.handleOneWayCostChange,
+                        name: 'oneWay',
+                        value: rateCalculator.oneWayCostTonMile
+                      }
+                    }
+                    placeholder=""
+                    type="text"
+                    id="rateTypeRadio"
+                    offClick={this.handleOffClick}
+                  />
+                )
+              }
+            </span>
+              </div>
+            </Row>
+          </div>
+        </Row>
+
+
+
+        <Row className="col-md-12" style={{paddingTop: 15}}>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">Rate per hour
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerHourInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='ratePerHourInfo' effect='solid'>
+              <p style={{color: 'white'}}>{ratePerHourInfo}</p>
+            </ReactTooltip>
+          </div>
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-8 form__form-group">
+                <span className="form__form-group-label">Two way cost / mile
+                </span>
+              </div>
+              <div className="col-md-4 form__form-group">
+                <span className="form__form-group-label">
+                  <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for='twoWayCostInfo'>i</span>
+                  </span>
+                </span>
+              </div>
+            </Row>
+          </div>
+          <div className="customTooltip">
+            <ReactTooltip id='twoWayCostInfo' effect='solid'>
+              <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery tab.</p>
+            </ReactTooltip>
+          </div>
+        </Row>
+        <Row className="col-md-12">
+          <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
@@ -633,10 +1016,10 @@ class HaulRate extends PureComponent {
               <div className="col-md-10 form__form-group">
                 <span style={{
                   marginLeft: 15,
-                  marginTop: rateCalculator.rateTypeRadio === 'ton' ? 9 : 0
+                  marginTop: rateCalculator.rateTypeRadio !== 'hour' ? 9 : 0
                 }}
                 >
-                  {rateCalculator.rateTypeRadio === 'ton' ? rateCalculator.ratePerHour
+                  {rateCalculator.rateTypeRadio !== 'hour' ? rateCalculator.ratePerHour
                     : (
                       <TField
                         input={
@@ -657,19 +1040,41 @@ class HaulRate extends PureComponent {
               </div>
             </Row>
           </div>
-          {rateCalculator.rateTypeRadio === 'hour'
-          && (
-            <div className="col-md-4 form__form-group">
-              <span style={{
-                marginTop: rateCalculator.rateTypeRadio === 'ton' ? 0 : 6,
-                marginLeft: 40,
-                position: 'absolute'
-              }}
-              >
-              $ {estimatedTotalPrice}
-            </span>
-            </div>
-          )}
+          <div className="col-md-6 form__form-group">
+            <Row className="col-md-12">
+              <div className="col-md-2 form__form-group">
+                <Input type="radio"
+                       style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       checked={rateCalculator.rateTypeRadio === 'twoWay'}
+                       onClick={() => this.handleSetRateType('twoWay')}/>
+              </div>
+              <div className="col-md-10 form__form-group">
+                <span style={{
+                  marginLeft: 15,
+                  marginTop: rateCalculator.rateTypeRadio !== 'twoWay' ? 9 : 0
+                }}
+                >
+                  {rateCalculator.rateTypeRadio !== 'twoWay' ? rateCalculator.twoWayCostMile
+                    : (
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleTwoWayCostChange,
+                            name: 'twoWay',
+                            value: rateCalculator.twoWayCostMile
+                          }
+                        }
+                        placeholder=""
+                        type="text"
+                        id="rateTypeRadio"
+                        offClick={this.handleOffClick}
+                      />
+                    )
+                  }
+                </span>
+              </div>
+            </Row>
+          </div>
         </Row>
         {rateCalculator.invalidAddress &&
         <Row className="col-md-12">
@@ -688,27 +1093,28 @@ class HaulRate extends PureComponent {
         <Row className="col-md-12">
           <Row className="col-md-12">
             <div className="col-md-4 form__form-group">
-              <Row className="col-md-12 ">
-                <span className="form__form-group-label">Load / Unload / Delivery</span>
-              </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
+              <Row className="col-md-12">
+                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                  Load / Unload / Delivery
+                </span>
               </Row>
             </div>
             <div className="col-md-4 form__form-group">
-              <Row className="col-md-12 ">
-                <div className='col-md-8 form__form-group'>
-                  <span className="form__form-group-label">Travel Time</span>
+              <Row className="col-md-12">
+                <div className="col-md-8 form__form-group">
+                  <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                    Travel Time
+                  </span>
                 </div>
                 <div className="col-md-4 form__form-group">
-                        <span className="form__form-group-label">
-                          <span className="infoCircle">
-                            <span style={{padding: 6, color: 'white'}} data-tip data-for='travelTimeInfo'>i</span>
-                          </span>
-                        </span>
+                  <span className="form__form-group-label">
+                    <span className="infoCircle">
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for="travelTimeInfo">i</span>
+                    </span>
+                  </span>
                 </div>
                 <div className="customTooltip">
-                  <ReactTooltip id='travelTimeInfo' effect='solid'>
+                  <ReactTooltip id="travelTimeInfo" effect="solid">
                     <p style={{color: 'white'}}>
                       This number is calculated by Trelar using
                       mapping data from your pickup and delivery addresses.
@@ -716,16 +1122,12 @@ class HaulRate extends PureComponent {
                   </ReactTooltip>
                 </div>
               </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
-              </Row>
             </div>
             <div className="col-md-4 form__form-group">
-              <Row className="col-md-12 ">
-                <span className="form__form-group-label">Truck Capacity</span>
-              </Row>
-              <Row className="col-md-12" style={{marginTop: -20}}>
-                <hr/>
+              <Row className="col-md-12">
+                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                  Truck Capacity
+                </span>
               </Row>
             </div>
           </Row>
@@ -742,7 +1144,7 @@ class HaulRate extends PureComponent {
                         onChange: this.handleLoadTimeChange,
                         name: 'loadTime',
                         value: rateCalculator.loadTime,
-                        disabled: rateCalculator.estimateTypeRadio === 'hour'
+                        // disabled: rateCalculator.estimateTypeRadio === 'hour'
                       }
                     }
                     placeholder=""
@@ -763,7 +1165,7 @@ class HaulRate extends PureComponent {
                         onChange: this.handleUnloadTimeChange,
                         name: 'unloadTime',
                         value: rateCalculator.unloadTime,
-                        disabled: rateCalculator.estimateTypeRadio === 'hour'
+                        // disabled: rateCalculator.estimateTypeRadio === 'hour'
 
                       }
                     }
@@ -860,7 +1262,7 @@ class HaulRate extends PureComponent {
                         onChange: this.handleTruckCapacityChange,
                         name: 'truckCapacity',
                         value: rateCalculator.truckCapacity,
-                        disabled: rateCalculator.estimateTypeRadio === 'hour'
+                        // disabled: rateCalculator.estimateTypeRadio === 'hour'
                       }
                     }
                     placeholder=""

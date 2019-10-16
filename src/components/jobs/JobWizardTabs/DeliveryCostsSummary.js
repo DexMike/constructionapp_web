@@ -39,8 +39,9 @@ const DeliveryCostsSummary = ({
             <Row className="col-md-12 ">
               <div className={`col-md-${(quantityType === 'Hour'
                      && payType === 'Ton') ? '12' : '8'} form__form-group`}>
-              <span className="form__form-group-label">Delivered Price
-              </span>
+                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                  Delivered Price
+                </span>
               </div>
               { !(quantityType === 'Hour'
                 && payType === 'Ton') &&
@@ -60,15 +61,15 @@ const DeliveryCostsSummary = ({
                 </div>
               }
             </Row>
-            <Row className="col-md-12" style={{marginTop: -20}}>
-              <hr/>
-            </Row>
           </div>
           }
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12 ">
               <div className={`col-md-${payType === 'Hour' ? '8' : '12'} form__form-group`}>
-                <span className="form__form-group-label">Haul Costs</span></div>
+                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                  Haul Costs
+                </span>
+              </div>
                   { payType === 'Hour' &&
                   <div>
                     <div className="col-md-4 form__form-group">
@@ -89,9 +90,6 @@ const DeliveryCostsSummary = ({
                     </div>
                   </div>
                   }
-            </Row>
-            <Row className="col-md-12" style={{marginTop: -20}}>
-              <hr/>
             </Row>
           </div>
         </Row>

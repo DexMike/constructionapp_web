@@ -21,13 +21,19 @@ class TFormat {
     );
   }
 
+  // takes an integer (no floats) and separates thousands with commas
+  static asIntegerCommaSeperated(input) {
+    return input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   // returns float with one leadings zero if no value before decimal point
   // and two 0s as decimal values if no decimal specified
   static asFloatOneLeadingZero(inputValue) {
     let value = inputValue;
     value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    const subject = /^0+$/;
-    if (!value.match(subject)) {
+    // debugger;
+    const onlyZeros = /^0+$/;
+    if (!value.match(onlyZeros)) {
       value = value.replace(/^0+/, '');
       if (value.charAt(0) === '.') {
         value = `0${value}`;
@@ -35,7 +41,9 @@ class TFormat {
     } else {
       value = '0';
     }
-    return value;
+    const parts = value.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
   }
 
   // gives a value (that is already a valid float) two decimals if none are found
@@ -64,8 +72,8 @@ class TFormat {
   static asIntegerNoLeadingZeros(inputValue) {
     let value = inputValue;
     value = value.replace(/\D/g, '');
-    const subject = /^0+$/;
-    if (!value.match(subject)) {
+    const onlyZeros = /^0+$/;
+    if (!value.match(onlyZeros)) {
       value = value.replace(/^0+/, '');
       if (value.charAt(0) === '.') {
         value = `0${value}`;
@@ -73,7 +81,8 @@ class TFormat {
     } else {
       value = '0';
     }
-    return value;
+    const formattedWithCommas = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return formattedWithCommas;
   }
 
   static asMoneyNoDecimals(inputValue) {
