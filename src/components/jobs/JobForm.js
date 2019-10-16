@@ -28,6 +28,7 @@ import TMap from '../common/TMap';
 import GeoUtils from '../../utils/GeoUtils';
 import TSpinner from '../common/TSpinner';
 import RatesDeliveryService from '../../api/RatesDeliveryService';
+import TCalculator from '../common/TCalculator';
 
 class JobForm extends Component {
   constructor(props) {
@@ -60,7 +61,10 @@ class JobForm extends Component {
       loads: [],
       loaded: false,
       distance: 0,
+      distanceEnRoute: 0,
+      distanceReturn: 0,
       time: 0,
+      timeReturning: 0,
       showMainMap: false,
       cachedOrigin: '',
       cachedDestination: '',
@@ -128,6 +132,7 @@ class JobForm extends Component {
       images,
       distance,
       time,
+      timeReturning,
       company,
       trelarFee
     } = this.state;
@@ -139,8 +144,10 @@ class JobForm extends Component {
       const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
       const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
       const summary = await GeoUtils.getDistance(waypoint0, waypoint1);
+      const summaryReturn = await GeoUtils.getDistance(waypoint0, waypoint1);
       distance = summary.distance;
-      time = summary.travelTime;
+      time = summary.travelTime; // time "en route"
+      timeReturning = summaryReturn.travelTime; // time "returning"
     }
 
     if (companyCarrier) {
@@ -164,6 +171,7 @@ class JobForm extends Component {
         rate: job.rate,
         rateEstimate: job.rateEstimate
       };
+      console.log(companyRates);
       try {
         trelarFee = await RatesDeliveryService.calculateTrelarFee(companyRates);
       } catch (err) {
@@ -440,7 +448,9 @@ class JobForm extends Component {
       companyType,
       carrier,
       allTruckTypes,
-      trelarFee
+      trelarFee,
+      time,
+      timeReturning
     } = this.state;
     const { bid } = this.props;
 
@@ -453,7 +463,7 @@ class JobForm extends Component {
     let displayStatus = job.status;
     if ((job.status === 'Published' || job.status === 'Published And Offered') && companyType === 'Carrier') {
       displayStatus = 'On Offer';
-      if (bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
+      if (bid && bid.status === 'Pending' && bid.hasSchedulerAccepted === 1) {
         displayStatus = 'Requested';
       }
     }
@@ -474,12 +484,26 @@ class JobForm extends Component {
       }
       showPhone = TFormat.asPhoneText(showPhone);
     }
+    console.log('job: ', job);
     return (
       <React.Fragment>
         <div className="col-md-4">
           <h3 className="subhead">
             Job: {job.name}
           </h3>
+          {(((companyType === 'Customer' || companyType === 'Producer')
+            || (companyType === 'Carrier'
+              && (job.status !== 'Published'
+              && job.status !== 'On Offer'
+              && job.status !== 'Published And Offered'
+              && job.status !== 'Saved'
+              && job.status !== 'Cancelled')))
+            && job.poNumber) && (
+            <React.Fragment>
+              PO Number: {job.poNumber}
+              {((bid && bid.status === 'Accepted') || companyType === 'Carrier') && (<br/>)}
+            </React.Fragment>
+          )}
           {(carrier && companyType === 'Customer') && (
             <React.Fragment>
               Carrier: {carrier ? carrier.legalName : ''}
@@ -499,6 +523,7 @@ class JobForm extends Component {
           <br/>
           Truck Types: {trucks}
           <br/>
+          Material: {job.materials}
         </div>
         <div className="col-md-4">
           <h3 className="subhead">
@@ -506,6 +531,12 @@ class JobForm extends Component {
           </h3>
           Start Date: {job.startTime && TFormat.asDayWeek(job.startTime, profile.timeZone)}
           <br/>
+          {job.endTime && (
+            <React.Fragment>
+            End Date: {job.endTime && TFormat.asDayWeek(job.endTime, profile.timeZone)}
+              <br/>
+            </React.Fragment>
+          )}
           Created On: {TFormat.asDayWeek(job.createdOn, profile.timeZone)}
         </div>
         {companyType === 'Carrier' && (
@@ -531,8 +562,6 @@ class JobForm extends Component {
             &nbsp;Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
             Rate: {job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
-            <br/>
-            Material: {job.materials}
           </div>
         )}
         {(companyType === 'Customer' || companyType === 'Producer') && (
@@ -540,26 +569,48 @@ class JobForm extends Component {
             <h3 className="subhead">
               Job Status: {displayStatus}
             </h3>
-            Delivery Cost:&nbsp;
-            {
-              TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
-            }
-            <br/>
-            Trelar Fee:&nbsp;
-            {
-              TFormat.asMoney(trelarFee)
-            }
-            <br/>
-            Estimated Total Cost:&nbsp;
-            {
-              TFormat.asMoney(estimatedCost + trelarFee)
-            }
-            <br/>
             Estimated Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
             Rate:&nbsp;{job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Material: {job.materials}
+            Estimated Costs:
+            <br/>
+            {(job.rateType === 'Hour') && (
+              <React.Fragment>
+                &nbsp;&nbsp;- One Way cost / ton / mile: ${TCalculator.getOneWayCostByHourRate(
+                time,
+                timeReturning,
+                0.25,
+                0.25,
+                job.rate,
+                22,
+                job.avgDistance
+              )}
+              </React.Fragment>
+            )}
+            {(job.rateType === 'Ton') && (
+              <React.Fragment>
+                &nbsp;&nbsp;- One Way cost / ton / mile: $ {TCalculator.getOneWayCostByTonRate(
+                job.rate,
+                job.avgDistance
+              )}
+              </React.Fragment>
+            )}
+            <br/>
+            &nbsp;&nbsp;- Delivery Cost&nbsp;
+            {
+              TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+            }
+            <br/>
+            &nbsp;&nbsp;- Trelar Fee&nbsp;
+            {
+              TFormat.asMoney(trelarFee)
+            }
+            <br/>
+            &nbsp;&nbsp;- Total Cost&nbsp;
+            {
+              TFormat.asMoney(estimatedCost + trelarFee)
+            }
           </div>
         )}
       </React.Fragment>
