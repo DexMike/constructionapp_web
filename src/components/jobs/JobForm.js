@@ -571,8 +571,6 @@ class JobForm extends Component {
             <br/>
             Rate:&nbsp;{job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
-            Estimated Costs:
-            <br/>
             {(job.rateType === 'Hour') && (
               <React.Fragment>
                 &nbsp;&nbsp;- One Way cost / ton / mile: ${TCalculator.getOneWayCostByHourRate(
@@ -588,24 +586,24 @@ class JobForm extends Component {
             )}
             {(job.rateType === 'Ton') && (
               <React.Fragment>
-                &nbsp;&nbsp;- One Way cost / ton / mile: $ {TCalculator.getOneWayCostByTonRate(
+                Estimated One Way cost / ton / mile: $ {TCalculator.getOneWayCostByTonRate(
                 job.rate,
                 job.avgDistance
               )}
               </React.Fragment>
             )}
             <br/>
-            &nbsp;&nbsp;- Delivery Cost&nbsp;
+            Estimated Delivery Cost:&nbsp;
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }
             <br/>
-            &nbsp;&nbsp;- Trelar Fee&nbsp;
+            Estimated Trelar Fee:&nbsp;
             {
               TFormat.asMoney(trelarFee)
             }
             <br/>
-            &nbsp;&nbsp;- Total Cost&nbsp;
+            Estimated Total Cost:&nbsp;
             {
               TFormat.asMoney(estimatedCost + trelarFee)
             }
