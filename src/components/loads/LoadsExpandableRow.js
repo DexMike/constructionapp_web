@@ -358,8 +358,8 @@ class LoadsExpandableRow extends Component {
                       {loadInvoices.map(item => (
                         <img
                           key={item}
-                          src={`${item[2]}`}
-                          alt={`${item[2]}`}
+                          src={`${item.image}`}
+                          alt={`${item.image}`}
                           style={{
                             width: '100%'
                           }}
