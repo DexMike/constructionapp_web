@@ -61,10 +61,11 @@ class JobForm extends Component {
       loads: [],
       loaded: false,
       distance: 0,
-      distanceEnRoute: 0,
+      distanceEnroute: 0,
       distanceReturn: 0,
       time: 0,
-      timeReturning: 0,
+      timeEnroute: 0,
+      timeReturn: 0,
       showMainMap: false,
       cachedOrigin: '',
       cachedDestination: '',
@@ -76,7 +77,9 @@ class JobForm extends Component {
       approveLoadsModal: false,
       approvingLoads: false,
       approvingLoadsError: false,
-      trelarFee: 0
+      trelarFees: 0,
+      summary: [],
+      summaryReturn: []
     };
 
     this.loadJobForm = this.loadJobForm.bind(this);
@@ -131,10 +134,15 @@ class JobForm extends Component {
       carrier,
       images,
       distance,
+      distanceEnroute,
+      distanceReturn,
       time,
-      timeReturning,
+      timeEnroute,
+      timeReturn,
       company,
-      trelarFee
+      trelarFees,
+      summary,
+      summaryReturn
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
@@ -143,17 +151,27 @@ class JobForm extends Component {
     if (job.startAddress) {
       const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
       const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
-      const summary = await GeoUtils.getDistance(waypoint0, waypoint1);
-      const summaryReturn = await GeoUtils.getDistance(waypoint0, waypoint1);
+
+      summary = await GeoUtils.getDistance(waypoint0, waypoint1);
+      summaryReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+
+      distanceEnroute = (summary.distance * 0.000621371192).toFixed(2);
+      distanceReturn = (summaryReturn.distance * 0.000621371192).toFixed(2);
+      timeEnroute = (parseInt(summary.travelTime) / 3600).toFixed(2);
+      timeReturn = (parseInt(summaryReturn.travelTime) / 3600).toFixed(2);
+
+      // baseTime: value in seconds, does not consider traffic conditions
+      // travelTime:  value in seconds, considers traffic conditions
+      // ref: https://developer.here.com/documentation/routing/topics/resource-type-route-summary.html
+
       distance = summary.distance;
-      time = summary.travelTime; // time "en route"
-      timeReturning = summaryReturn.travelTime; // time "returning"
+      time = summary.travelTime;
     }
 
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
-    company = await CompanyService.getCompanyById(job.companiesId);
+    company = await CompanyService.getCompanyById(job.companiesId); // Producer
     if (bookings.length > 0) {
       const bookingEquipments = await BookingEquipmentService
         .getBookingEquipmentsByBookingId(bookings[0].id);
@@ -165,17 +183,15 @@ class JobForm extends Component {
       }
     }
 
-    if (profile.companyType === 'Customer' || profile.companyType === 'Producer') {
-      const companyRates = {
-        companyId: profile.companyId,
-        rate: job.rate,
-        rateEstimate: job.rateEstimate
-      };
-      try {
-        trelarFee = await RatesDeliveryService.calculateTrelarFee(companyRates);
-      } catch (err) {
-        console.error(err);
-      }
+    const companyRates = {
+      companyId: company.id,
+      rate: job.rate,
+      rateEstimate: job.rateEstimate
+    };
+    try {
+      trelarFees = await RatesDeliveryService.calculateTrelarFee(companyRates);
+    } catch (err) {
+      console.error(err);
     }
 
     if (bookings && bookings.length > 0) {
@@ -200,7 +216,11 @@ class JobForm extends Component {
       distance,
       time,
       allTruckTypes,
-      trelarFee
+      trelarFees,
+      distanceEnroute,
+      distanceReturn,
+      timeEnroute,
+      timeReturn
     });
   }
 
@@ -447,9 +467,10 @@ class JobForm extends Component {
       companyType,
       carrier,
       allTruckTypes,
-      trelarFee,
-      time,
-      timeReturning
+      trelarFees,
+      timeEnroute,
+      timeReturn,
+      distanceEnroute
     } = this.state;
     const { bid } = this.props;
 
@@ -549,7 +570,7 @@ class JobForm extends Component {
             }
             Potential Earnings:&nbsp;
             {
-              TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+              TFormat.asMoneyByRate(job.rateType, job.rate - trelarFees.perTonPerHourFee, job.rateEstimate)
             }
             <br/>
             {
@@ -559,7 +580,7 @@ class JobForm extends Component {
             }
             &nbsp;Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
-            Rate: {job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
+            Rate: {job.rate > 0 ? TFormat.asMoney(job.rate - trelarFees.perTonPerHourFee) : 0.00} / {job.rateType}
           </div>
         )}
         {(companyType === 'Customer' || companyType === 'Producer') && (
@@ -571,42 +592,45 @@ class JobForm extends Component {
             <br/>
             Rate:&nbsp;{job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
+            Trelar Fee per&nbsp;
+              {job.rateType}: {TFormat.asMoney(trelarFees.perTonPerHourFee)} / {job.rateType}
+            <br/>
             {(job.rateType === 'Hour') && (
               <React.Fragment>
-                &nbsp;&nbsp;- One Way cost / ton / mile: ${TCalculator.getOneWayCostByHourRate(
-                time,
-                timeReturning,
+                Estimated One Way Cost / Ton / Mile: ${TCalculator.getOneWayCostByHourRate(
+                timeEnroute,
+                timeReturn,
                 0.25,
                 0.25,
                 job.rate,
                 22,
-                job.avgDistance
+                distanceEnroute
               )}
               </React.Fragment>
             )}
             {(job.rateType === 'Ton') && (
               <React.Fragment>
-                Estimated One Way cost / ton / mile: $ {TCalculator.getOneWayCostByTonRate(
+                Estimated One Way Cost / Ton / Mile: $ {TCalculator.getOneWayCostByTonRate(
                 job.rate,
-                job.avgDistance
+                distanceEnroute
               )}
               </React.Fragment>
             )}
+            <br/>
+            Estimated Trelar Fee:&nbsp;
+            {
+              TFormat.asMoney(trelarFees.totalFee)
+            }
             <br/>
             Estimated Delivery Cost:&nbsp;
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }
-            <br/>
-            Estimated Trelar Fee:&nbsp;
-            {
-              TFormat.asMoney(trelarFee)
-            }
-            <br/>
+            {/* <br/>
             Estimated Total Cost:&nbsp;
             {
-              TFormat.asMoney(estimatedCost + trelarFee)
-            }
+              TFormat.asMoney(estimatedCost + trelarFees.totalFee)
+            } */}
           </div>
         )}
       </React.Fragment>
