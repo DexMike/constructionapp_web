@@ -54,7 +54,7 @@ class JobWizard extends Component {
       tabMaterials: {
         quantityType: 'Ton',
         estMaterialPricing: '0.00',
-        quantity: 0,
+        quantity: '0',
         allMaterials: [],
         selectedMaterial: {
           value: '',
