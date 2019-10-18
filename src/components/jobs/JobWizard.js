@@ -9,6 +9,7 @@ import {
   Card,
   CardBody, ButtonToolbar, Button
 } from 'reactstrap';
+import CloneDeep from 'lodash.clonedeep';
 import JobMaterials from './JobWizardTabs/JobMaterials';
 import PickupAndDelivery from './JobWizardTabs/PickupAndDelivery';
 import TruckSpecs from './JobWizardTabs/TruckSpecs';
@@ -54,7 +55,7 @@ class JobWizard extends Component {
       tabMaterials: {
         quantityType: 'Ton',
         estMaterialPricing: '0.00',
-        quantity: 0,
+        quantity: '0',
         allMaterials: [],
         selectedMaterial: {
           value: '',
@@ -184,13 +185,15 @@ class JobWizard extends Component {
           travelTimeEnroute: '0.00',
           travelTimeReturn: '0.00',
           loadTime: '0.00',
-          unloadTime: '0.00'
+          unloadTime: '0.00',
+          oneWayCostTonMile: '0.00',
+          twoWayCostMile: '0.00'
         }
       },
       page: 1,
       job: [],
       loaded: false,
-      profile: [],
+      profile: []
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -234,7 +237,7 @@ class JobWizard extends Component {
   async componentDidMount() {
     const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
-    const {jobEdit} = this.props;
+    const {jobEdit, jobEditSaved} = this.props;
 
     let truckTypes;
     try {
@@ -254,7 +257,7 @@ class JobWizard extends Component {
     tabTruckSpecs.allTruckTypes = allTruckTypes;
 
 
-    if (jobEdit) {
+    if (jobEdit || jobEditSaved) {
       const {job} = this.props;
       // populate form with job data
       if (job) {
@@ -263,7 +266,6 @@ class JobWizard extends Component {
         jobStartDate = job.startTime;
         jobEndDate = job.endTime;
         poNumber = job.poNumber;
-
         // populate tabMaterials
         let materials;
         try {
@@ -271,7 +273,9 @@ class JobWizard extends Component {
         } catch (err) {
           console.error(err);
         }
-        tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
+        if (materials && materials.length > 0) {
+          tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
+        }
         tabMaterials.estMaterialPricing = job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
         tabMaterials.quantity = job.rateEstimate;
@@ -373,7 +377,6 @@ class JobWizard extends Component {
     //     });
     //     mapSelectedTruckTypes.push(inside);
     //   });
-
 
     this.setState({
       profile,
@@ -1168,7 +1171,6 @@ class JobWizard extends Component {
     // const rateTotal = Math.round(calcTotal * 100) / 100;
 
     jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
-
     const jobCreate = {
       companiesId: profile.companyId,
       name,
@@ -1186,11 +1188,11 @@ class JobWizard extends Component {
       ).utc().format(),
       numEquipments: tabTruckSpecs.truckQuantity,
       rateType,
-      rate,
+      rate: rate.toString().replace(/,/g, ''),
       amountType,
-      rateEstimate,
+      rateEstimate: rateEstimate.toString().replace(/,/g, ''),
       poNumber,
-      estMaterialPricing: tabMaterials.estMaterialPricing,
+      estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
       notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
@@ -1226,6 +1228,7 @@ class JobWizard extends Component {
 
     if (jobEdit) {
       this.setState({ btnSubmitting: false });
+      this.updateJobView(newJob);
       this.closeNow();
       return;
     }
@@ -1240,9 +1243,9 @@ class JobWizard extends Component {
       // bid.startAddress = createdJob.startAddress;
       // bid.endAddress = createdJob.endAddress;
       bid.companyCarrierId = selectedCarrierId;
-      bid.rate = rate;
+      bid.rate = rate.toString().replace(/,/g, '');
       bid.rateType = rateType;
-      bid.rateEstimate = rateEstimate;
+      bid.rateEstimate = rateEstimate.toString().replace(/,/g, '');
       bid.hasCustomerAccepted = 1;
       bid.hasSchedulerAccepted = 0;
       bid.status = 'Pending';
@@ -1359,7 +1362,7 @@ class JobWizard extends Component {
             status: 'New',
             rateType,
             rate: 0,
-            rateEstimate,
+            rateEstimate: rateEstimate.toString().replace(/,/g, ''),
             notes: tabSummary.instructions,
             createdBy: profile.userId,
             createdOn: moment.utc().format(),
@@ -1450,12 +1453,13 @@ class JobWizard extends Component {
       // }
     }
     this.setState({ btnSubmitting: false });
-
+    this.updateJobView(newJob);
     this.closeNow();
   }
 
   // Used to either store a Copied or 'Saved' job to the database
   async saveJobDraft() {
+    const {jobEdit, jobEditSaved, job} = this.props;
     const {profile, tabPickupDelivery, tabHaulRate, tabMaterials, name, tabTruckSpecs, tabSummary} = this.state;
     let {jobStartDate, jobEndDate} = this.state;
     // start location
@@ -1537,8 +1541,17 @@ class JobWizard extends Component {
 
     // const calcTotal = d.rateEstimate * rate;
     // const rateTotal = Math.round(calcTotal * 100) / 100;
+    let jobStartDateForm = null;
+    if (jobStartDate) {
+      jobStartDateForm = new Date(jobStartDate);
+    }
 
-    if (jobStartDate && Object.prototype.toString.call(jobStartDate) === '[object Date]') {
+    let jobEndDateForm = null;
+    if (jobEndDate) {
+      jobEndDateForm = new Date(jobEndDate);
+    }
+
+    if (jobStartDate && jobStartDateForm && Date.parse(jobStartDateForm)) {
       jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
       jobStartDate = moment.tz(
         jobStartDate,
@@ -1548,7 +1561,7 @@ class JobWizard extends Component {
       jobStartDate = '';
     }
 
-    if (jobEndDate && Object.prototype.toString.call(jobStartDate) === '[object Date]') {
+    if (jobEndDate && jobEndDateForm && Date.parse(jobEndDateForm)) {
       jobEndDate = moment(jobEndDate).format('YYYY-MM-DD HH:mm');
       jobEndDate = moment.tz(
         jobEndDate,
@@ -1558,7 +1571,7 @@ class JobWizard extends Component {
       jobEndDate = '';
     }
 
-    const job = {
+    const jobDraft = {
       companiesId: profile.companyId,
       name,
       status: 'Saved',
@@ -1567,11 +1580,11 @@ class JobWizard extends Component {
       startTime: jobStartDate,
       endTime: jobEndDate,
       numEquipments: tabTruckSpecs.truckQuantity,
-      estMaterialPricing: tabMaterials.estMaterialPricing,
+      estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
       rateType,
-      rate,
+      rate: rate.toString().replace(/,/g, ''),
       amountType,
-      rateEstimate,
+      rateEstimate: rateEstimate.toString().replace(/,/g, ''),
       notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
@@ -1579,22 +1592,21 @@ class JobWizard extends Component {
       modifiedOn: moment.utc().format()
     };
 
-    // let newJob = [];
-    // if (d.job.id) { // UPDATING 'Saved' JOB
-    //   newJob = CloneDeep(job);
-    //   newJob.id = d.job.id;
-    //   delete newJob.createdBy;
-    //   delete newJob.createdOn;
-    //   await JobService.updateJob(newJob);
-    // } else { // CREATING NEW 'Saved' JOB
-    //   newJob = await JobService.createJob(job);
-    // }
-    let newJob;
-    try {
-      newJob = await JobService.createJob(job); // creating new saved job
-    } catch (err) {
-      console.error(err);
+    let newJob = [];
+    if (jobEdit || jobEditSaved) { // UPDATING 'Saved' JOB
+      newJob = CloneDeep(jobDraft);
+      newJob.id = job.id;
+      delete newJob.createdBy;
+      delete newJob.createdOn;
+      newJob = await JobService.updateJob(newJob);
+    } else { // CREATING NEW 'Saved' JOB
+      try {
+        newJob = await JobService.createJob(jobDraft); // creating new saved job
+      } catch (err) {
+        console.error(err);
+      }
     }
+
 
     // add material
     if (newJob) {
@@ -1606,6 +1618,7 @@ class JobWizard extends Component {
       }
     }
 
+    this.updateJobView(newJob);
     this.closeNow();
 
     // GO TO NEW JOB
@@ -2126,13 +2139,16 @@ JobWizard.propTypes = {
   selectedCarrierId: PropTypes.number,
   jobRequest: PropTypes.bool,
   jobEdit: PropTypes.bool,
-  job: PropTypes.object
+  jobEditSaved: PropTypes.bool,
+  job: PropTypes.object,
+  updateJobView: PropTypes.func.isRequired
 };
 
 JobWizard.defaultProps = {
   selectedCarrierId: null,
   jobRequest: false,
   jobEdit: false,
+  jobEditSaved: false,
   job: null
 };
 

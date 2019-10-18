@@ -1,8 +1,9 @@
 import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
 import React, { Component } from 'react';
-import MultiEquipmentsForm from './MultiEquipmentsForm';
+import EquipmentsShortForm from './EquipmentsShortForm';
 import AuthService from '../../utils/AuthService';
 import ProfileService from '../../api/ProfileService';
+import TTable from '../common/TTable';
 
 class AddFirstEquipmentPage extends Component {
 
@@ -12,10 +13,12 @@ class AddFirstEquipmentPage extends Component {
     this.state = {
       equipmentsModal: false,
       userId: 0,
-      companyId: 0
+      companyId: 0,
+      equipments: []
     };
 
     this.toggleAddMultiTrucksModal = this.toggleAddMultiTrucksModal.bind(this);
+    this.handleAddedTruck = this.handleAddedTruck.bind(this);
   }
 
   async componentDidMount() {
@@ -38,7 +41,27 @@ class AddFirstEquipmentPage extends Component {
     await AuthService.logOut();
   }
 
-  handleAddedTruck() {
+  handleAddedTruck(equipment) {
+    // const { externalEquipmentNumber,
+    //   truckType,
+    //   selectedMaterials,
+    //   isRatedHour,
+    //   isRatedTon,
+    //   maxCapacity,
+    //   maxDistanceToPickup,
+    //   ratesCostPerHour,
+    //   ratesCostPerTon,
+    //   minTons,
+    //   minOperatingTime } = { ...equipments };
+    const {equipments} = { ...this.state };
+    const newEquipment = {...equipment};
+    newEquipment.materials = equipment.selectedMaterials.map(mat => mat.label).join(', ');
+    delete newEquipment.selectedMaterials;
+    equipments.push(newEquipment);
+    this.setState({equipments});
+  }
+
+  continueToApp() {
     window.location.href = '/';
   }
 
@@ -58,7 +81,7 @@ class AddFirstEquipmentPage extends Component {
         className="equipments-modal modal-dialog--primary modal-dialog--header"
       >
         <div className="modal__body">
-          <MultiEquipmentsForm
+          <EquipmentsShortForm
             userId={userId}
             companyId={companyId}
             toggle={this.toggleAddMultiTrucksModal}
@@ -70,6 +93,7 @@ class AddFirstEquipmentPage extends Component {
   }
 
   render() {
+    const { equipments } = { ...this.state };
     return (
       <React.Fragment>
         { this.renderEquipmentsModal() }
@@ -95,8 +119,32 @@ class AddFirstEquipmentPage extends Component {
                         Add your trucks to your profile to start using the app.
                       </Col>
                     </Row>
+                    <Row>
+                      <Col lg={12} style={{ marginBottom: 30 }}>
+                        { equipments.length > 0 && (
+                          <TTable
+                          data={equipments}
+                          columns={[
+                            {
+                              name: 'truckType',
+                              displayName: 'Type of Truck'
+                            }, {
+                              name: 'materials',
+                              displayName: 'Materials'
+                            }, {
+                              name: 'maxCapacity',
+                              displayName: 'Capacity    '
+                            }
+                          ]}
+                          handleIdClick={() => {}}
+                          handlePageChange={() => {}}
+                          handleRowsChange={() => {}}
+                          />
+                        )}
+                      </Col>
+                    </Row>
                     <Row className="col-12 pt-4">
-                      <Col md={6}>
+                      <Col md={4}>
                         <Button
                           style={{width: 120}}
                           onClick={this.toggleAddMultiTrucksModal}
@@ -106,8 +154,25 @@ class AddFirstEquipmentPage extends Component {
                           Add a Truck
                         </Button>
                       </Col>
-                      <Col md={6} className="text-right">
-                        <Button className="tertiaryButton" type="button" onClick={this.logOut}>
+                      <Col md={4}>
+                        { equipments.length > 0 && (
+                        <Button
+                          style={{width: 120}}
+                          onClick={this.continueToApp}
+                          type="button"
+                          className="primaryButton"
+                        >
+                          Continue
+                        </Button>
+                        )}
+                      </Col>
+                      <Col md={4} className="text-right">
+                        <Button
+                          className="tertiaryButton"
+                          style={{width: 100}}
+                          type="button"
+                          onClick={this.logOut}
+                        >
                           Log Out
                         </Button>
                       </Col>
