@@ -82,6 +82,7 @@ class JobSavePage extends Component {
       accessForbidden: false,
       modalAddJob: false,
       modalEditJob: false,
+      modalEditSavedJob: false,
       modalLiability: false,
       modalCancelRequest: false,
       modalCancel1: false,
@@ -119,6 +120,7 @@ class JobSavePage extends Component {
     this.updateCopiedJob = this.updateCopiedJob.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
     this.toggleEditExistingJobModal = this.toggleEditExistingJobModal.bind(this);
+    this.toggleEditSavedJobModal = this.toggleEditSavedJobModal.bind(this);
     this.toggleCopyJobModal = this.toggleCopyJobModal.bind(this);
     this.toggleLiabilityModal = this.toggleLiabilityModal.bind(this);
     this.toggleCancelRequest = this.toggleCancelRequest.bind(this);
@@ -401,6 +403,13 @@ class JobSavePage extends Component {
     });
   }
 
+  toggleEditSavedJobModal() {
+    const {modalEditSavedJob} = this.state;
+    this.setState({
+      modalEditSavedJob: !modalEditSavedJob
+    });
+  }
+
   toggleCopyJobModal() {
     const {modalCopyJob} = this.state;
     this.setState({
@@ -482,8 +491,10 @@ class JobSavePage extends Component {
       endAddress = await AddressService.getAddressById(job.endAddress);
     }
     const materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-    const latestMaterial = materials[0];
-    job.materials = latestMaterial.value;
+    if (materials.length > 0) {
+      const latestMaterial = materials[0];
+      job.materials = latestMaterial.value;
+    }
     job.company = company;
     job.startAddress = startAddress;
     job.endAddress = endAddress;
@@ -674,7 +685,7 @@ class JobSavePage extends Component {
       await EmailService.sendEmail(cancelJobEmail);
     } catch (err) {
       console.error(err);
-    }    
+    }
 
     // sending an email to Producer
     const cancelJobEmailProducer = {
@@ -697,7 +708,7 @@ class JobSavePage extends Component {
       await EmailService.sendEmail(cancelJobEmailProducer);
     } catch (err) {
       console.error(err);
-    }    
+    }
 
     this.updateJobView(newJob);
     this.setState({btnSubmitting: false});
@@ -1430,7 +1441,7 @@ class JobSavePage extends Component {
       // this is to edit a 'saved' job
       return (
         <TSubmitButton
-          onClick={() => this.toggleNewJobModal()}
+          onClick={() => this.toggleEditSavedJobModal()}
           className="secondaryButton"
           loading={btnSubmitting}
           loaderSize={10}
@@ -1542,6 +1553,7 @@ class JobSavePage extends Component {
   }
 
   renderNewJobModal() {
+    // this is for editing a job
     const {
       job,
       modalAddJob
@@ -1577,6 +1589,28 @@ class JobSavePage extends Component {
           toggle={this.toggleEditExistingJobModal}
           updateJobView={this.updateJobView}
           jobEdit
+          job={job}
+        />
+      </Modal>
+    );
+  }
+
+  renderEditSavedJobModal() {
+    const {
+      job,
+      modalEditSavedJob
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalEditSavedJob}
+        toggle={this.toggleEditSavedJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobWizard
+          toggle={this.toggleEditSavedJobModal}
+          updateJobView={this.updateJobView}
+          jobEditSaved
           job={job}
         />
       </Modal>
@@ -2136,6 +2170,7 @@ class JobSavePage extends Component {
             {this.renderNewJobModal()}
             {this.renderCopyJobModal()}
             {this.renderEditExistingJobModal()}
+            {this.renderEditSavedJobModal()}
             {this.renderAllocateDriversModal(profile)}
             {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
