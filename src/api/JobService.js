@@ -120,6 +120,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async requestJob(id) {
+    const response = await super.post(`${PATH}/${id}/request`);
+    return (response);
+  }
+
+  static async acceptJob(id) {
+    const response = await super.post(`${PATH}/${id}/accept`);
+    return (response);
+  }
+
   static async deleteJob(id) {
     const response = await super.post(`${PATH}/${id}/delete`, null);
     return (response);

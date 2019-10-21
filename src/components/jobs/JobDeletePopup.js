@@ -4,31 +4,20 @@ import {
   Row,
   Col,
   Button,
-  Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Container,
   Card
 } from 'reactstrap';
-import CloneDeep from 'lodash.clonedeep';
-import moment from 'moment';
-import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
-import BookingService from '../../api/BookingService';
-import BookingEquipmentService from '../../api/BookingEquipmentService';
-import LoadService from '../../api/LoadService';
-import UserService from '../../api/UserService';
-import TwilioService from '../../api/TwilioService';
-import UserUtils from '../../api/UtilsService';
 
 class JobDeletePopup extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loaded: false,
-      profile: null
+      loaded: false
     };
 
     this.closeNow = this.closeNow.bind(this);
@@ -36,15 +25,7 @@ class JobDeletePopup extends Component {
   }
 
   async componentDidMount() {
-    let profile = [];
-    try {
-      profile = await ProfileService.getProfile();
-    } catch (error) {
-      console.error('Unable to obtain profile');
-    }
-
     this.setState({
-      profile,
       loaded: true
     });
   }
@@ -99,7 +80,7 @@ class JobDeletePopup extends Component {
                 &nbsp;
                 <Button
                   color="primary"
-                  onClick={(e) => {
+                  onClick={() => {
                     this.deleteJob();
                   }
                 }

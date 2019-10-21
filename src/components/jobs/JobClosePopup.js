@@ -4,25 +4,16 @@ import {
   Row,
   Col,
   Button,
-  Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Container,
   Card
 } from 'reactstrap';
-import CloneDeep from 'lodash.clonedeep';
-import moment from 'moment';
-import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import LoadService from '../../api/LoadService';
-import UserService from '../../api/UserService';
-import TwilioService from '../../api/TwilioService';
-import UserUtils from '../../api/UtilsService';
-import GeoUtils from '../../utils/GeoUtils';
-import AddressService from '../../api/AddressService';
 
 class JobClosePopup extends Component {
   constructor(props) {
@@ -30,7 +21,6 @@ class JobClosePopup extends Component {
 
     this.state = {
       loaded: false,
-      profile: null,
       loads: []
     };
 
@@ -59,26 +49,8 @@ class JobClosePopup extends Component {
         loads = loads.reverse();
       }
     }
-
-    // get drivers
-    let profile = [];
-    let drivers = [];
-    try {
-      profile = await ProfileService.getProfile();
-    } catch (error) {
-      // console.log('Unable to obtain profile');
-    }
-
-    try {
-      drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-    } catch (error) {
-      // console.log('Unable to obtain drivers');
-    }
-
     this.setState({
       loads,
-      drivers,
-      profile,
       loaded: true
     });
   }
