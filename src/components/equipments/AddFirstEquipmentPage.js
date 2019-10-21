@@ -62,7 +62,7 @@ class AddFirstEquipmentPage extends Component {
   }
 
   continueToApp() {
-    window.location.href = '/';
+    window.location.href = '/first-driver';
   }
 
   toggleAddMultiTrucksModal() {
