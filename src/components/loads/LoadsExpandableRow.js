@@ -86,13 +86,8 @@ class LoadsExpandableRow extends Component {
   }
 
   async getTrackings(loadId) {
-    const gpsTrackings = await this.fetchGPSPoints(loadId);
+    const gpsTrackings = await GPSTrackingService.getGPSTrackingByLoadId(loadId);
     this.setState({ gpsTrackings });
-  }
-
-  async fetchGPSPoints(loadId) {
-    return GPSTrackingService.getGPSTrackingByLoadId(loadId);
-    // return GPSTrackingService.getGPSTrackingByLoadId(315);
   }
 
   toggle() {
@@ -210,8 +205,6 @@ class LoadsExpandableRow extends Component {
       let endCoords = job.endAddress;
 
       // According to https://trelar.atlassian.net/browse/SG-930
-      // please do not delete code commented
-      /*
       // if there are tracking points use those instead of job address.
       if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
         startCoords = {
@@ -223,9 +216,9 @@ class LoadsExpandableRow extends Component {
           longitude: gpsTrackings[gpsTrackings.length - 1][0]
         };
       }
-      */
 
-      startCoords = {
+      // please do not delete code commented
+      /* startCoords = {
         latitude: job.startAddress.latitude,
         longitude: job.startAddress.longitude
       };
@@ -233,7 +226,7 @@ class LoadsExpandableRow extends Component {
       endCoords = {
         latitude: job.endAddress.latitude,
         longitude: job.endAddress.longitude
-      };
+      }; */
 
       const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
