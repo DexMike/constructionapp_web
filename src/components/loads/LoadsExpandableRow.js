@@ -5,6 +5,7 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
+import ImageZoom from 'react-medium-image-zoom'
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -14,6 +15,7 @@ import CompanyService from '../../api/CompanyService';
 import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
 import TMap from '../common/TMap';
+import '../common/ImageZoom.scss';
 
 const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;
@@ -33,6 +35,7 @@ class LoadsExpandableRow extends Component {
       loadInvoices: [],
       disputeEmail: null,
       profile: null,
+      company: null,
       toggledId: 0
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
@@ -44,36 +47,40 @@ class LoadsExpandableRow extends Component {
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let { loadInvoices, disputeEmail } = {...this.state};
+    let { driver, company, profile, loadInvoices, disputeEmail } = {...this.state};
 
     this.getTrackings(load.id);
-    loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
-    // This throws an error
-    const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+    try {
+      loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
+      driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+      profile = await ProfileService.getProfile();
+      company = await CompanyService.getCompanyById(profile.companyId);
 
-    const profile = await ProfileService.getProfile();
-    const company = await CompanyService.getCompanyById(profile.companyId);
-    const date = new Date();
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
-    disputeEmail = {
-      toEmail: 'csr@trelar.com',
-      toName: 'Trelar CSR',
-      subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
-      isHTML: true,
-      body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
-        + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
-        + `Company: ${company.legalName}<br>`
-        + `Job: ${props.job.name}<br>`
-        + `Load Ticket Number: ${load.ticketNumber}`,
-      recipients: [
-        {name: 'CSR', email: 'csr@trelar.com'}
-      ],
-      attachments: []
-    };
-    this.setState({driver, loaded: true});
-    this.handleApproveLoad = this.handleApproveLoad.bind(this);
-    this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
+      const date = new Date();
+      const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
+      disputeEmail = {
+        toEmail: 'csr@trelar.com',
+        toName: 'Trelar CSR',
+        subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
+        isHTML: true,
+        body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
+          + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
+          + `Company: ${company.legalName}<br>`
+          + `Job: ${props.job.name}<br>`
+          + `Load Ticket Number: ${load.ticketNumber}`,
+        recipients: [
+          {name: 'CSR', email: 'csr@trelar.com'}
+        ],
+        attachments: []
+      };
+      this.setState({driver, loaded: true});
+      this.handleApproveLoad = this.handleApproveLoad.bind(this);
+      this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
+    } catch (err) {
+      console.log(err);
+    }
+
     this.setState({
       disputeEmail,
       profile,
@@ -354,18 +361,19 @@ class LoadsExpandableRow extends Component {
                         trackings={gpsTrackings}
                       />
                     </Col>
-                    <Col md={4}>
-                      {loadInvoices.map(item => (
-                        <img
-                          key={item}
-                          src={`${item.image}`}
-                          alt={`${item.image}`}
-                          style={{
-                            width: '100%'
-                          }}
-                        />
-                      ))
-                      }
+                    <Col md={8}>
+                      <Row>
+                        {loadInvoices.map(item => (
+                          <Col key={item.id} sm className="loadTicketCol">
+                            <ImageZoom
+                              image={{
+                                src: `${item.image}`
+                              }}
+                            />
+                          </Col>
+                        ))
+                        }
+                      </Row>
                     </Col>
                   </Row>
                 </Container>
