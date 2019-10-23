@@ -1,0 +1,11 @@
+// to be used alongside ImageZoom component when showing an image grid
+.loadTicketCol {
+    flex-basis: 100%;
+    max-width: 18em;
+    padding-bottom: 2em;
+}
+.loadTicketCol img {
+    object-fit: cover;
+    max-width: 350px;
+    max-height: 800px;
+}
