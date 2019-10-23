@@ -10,7 +10,6 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
-import CloneDeep from 'lodash.clonedeep';
 import * as PropTypes from 'prop-types';
 import {Link, Redirect} from 'react-router-dom';
 import TFormat from '../common/TFormat';
@@ -24,20 +23,16 @@ import ProfileService from '../../api/ProfileService';
 import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
-import EquipmentService from '../../api/EquipmentService';
 import UserService from '../../api/UserService';
 import LoadService from '../../api/LoadService';
-import TwilioService from '../../api/TwilioService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
 import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
 import JobCreatePopup from './JobCreatePopup';
-import EmailService from '../../api/EmailService';
 import JobClosePopup from './JobClosePopup';
 import JobDeletePopup from './JobDeletePopup';
-import UserUtils from '../../api/UtilsService';
 import JobWizard from './JobWizard';
 import LookupsService from '../../api/LookupsService';
 
@@ -112,7 +107,6 @@ class JobSavePage extends Component {
 
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
-    this.handleConfirmRequest = this.handleConfirmRequest.bind(this);
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
     this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
@@ -136,7 +130,6 @@ class JobSavePage extends Component {
     this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
     this.closeJobModal = this.closeJobModal.bind(this);
     this.deleteJobModal = this.deleteJobModal.bind(this);
-    this.notifyAdminViaSms = this.notifyAdminViaSms.bind(this);
     this.handleSelectCancelReason = this.handleSelectCancelReason.bind(this);
   }
 
@@ -193,12 +186,12 @@ class JobSavePage extends Component {
           job.company = await CompanyService.getCompanyById(job.companiesId);
           customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
           // start address
-          let startAddress = null;
+          // let startAddress = null;
           if (job.startAddress) {
             job.startAddress = await AddressService.getAddressById(job.startAddress);
           }
           // end address
-          let endAddress = null;
+          // let endAddress = null;
           if (job.endAddress) {
             job.endAddress = await AddressService.getAddressById(job.endAddress);
           }
@@ -254,7 +247,8 @@ class JobSavePage extends Component {
             }
           }
 
-          // Check if a carrier is late when cancelling a job (after 3pm one day before job.startTime)
+          // Check if a carrier is late when cancelling a job
+          // (after 3pm one day before job.startTime)
           if (profile.companyType === 'Carrier'
           && (job.status === 'Booked' || job.status === 'Allocated')) {
             // dayBeforeJobDate is a day before job.startTime
@@ -504,13 +498,11 @@ class JobSavePage extends Component {
   async handleCancelJob() {
     const {
       job,
-      companyCarrierData,
       approveCancelReason,
       reqHandlerCancelReason,
       profile
     } = this.state;
     let newJob = [];
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     if (approveCancelReason === '') {
       this.setState({
@@ -521,74 +513,23 @@ class JobSavePage extends Component {
         }
       });
     } else {
-      this.setState({btnSubmitting: true});
+      this.setState({
+        btnSubmitting: true
+      });
 
-      // updating job
-      newJob = CloneDeep(job);
-      delete newJob.company;
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
-      newJob.status = 'Cancelled';
-      newJob.cancelReason = `[Cancelled by ${profile.companyType}] ${approveCancelReason}`;;
-      newJob.dateCancelled = moment.utc().format();
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      newJob = await JobService.updateJob(newJob);
 
-      const cancelledSms = `${envString}Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
-      The reason for cancellation is: ${newJob.cancelReason}.`; // TODO: do we need to check for this field's length?
-
-      // Notify Carrier about cancelled job
+      const cancelReason = `[Cancelled by ${profile.companyType}] ${approveCancelReason}`;
       try {
-        await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id);
-      } catch (err) {
-        console.error(err);
+        await JobService.cancelJobAsProducer(job.id, cancelReason);
+        newJob = await JobService.getJobById(job.id);
+      } catch (e) {
+        // console.log(e);
       }
-
-      // get allocated drivers for this job, and send sms to those drivers
-      const allocatedDrivers = await JobService.getAllocatedDriversInfoByJobId(job.id);
-      let allocatedDriversNames = '';
-      if (allocatedDrivers.length > 0) {
-        allocatedDriversNames = allocatedDrivers.map(driver => `${driver.firstName} ${driver.lastName}`);
-        allocatedDriversNames = `Drivers affected: ${allocatedDriversNames.join(', ')}`;
-
-        const cancelledDriversSms = [];
-        for (const driver of allocatedDrivers) {
-          if (this.checkPhoneFormat(driver.mobilePhone)) {
-            const notification = {
-              to: UserUtils.phoneToNumberFormat(driver.mobilePhone),
-              body: cancelledSms
-            };
-            cancelledDriversSms.push(TwilioService.createSms(notification));
-          }
-        }
-        await Promise.all(cancelledDriversSms);
-      }
-
-      // sending an email to CSR
-      const cancelJobEmail = {
-        toEmail: 'csr@trelar.com',
-        toName: 'Trelar CSR',
-        subject: `${envString}Trelar Job Cancelled`,
-        isHTML: true,
-        body: 'A producer cancelled a job on Trelar.<br><br>'
-          + `Producer Company Name: ${job.company.legalName}<br>`
-          + `Cancel Reason: ${newJob.cancelReason}<br>`
-          + `Job Name: ${newJob.name}<br>`
-          // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
-          + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
-          + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}<br>`
-          + `Carrier(s) Affected: ${companyCarrierData.legalName}<br>`
-          + `${allocatedDriversNames}`,
-        recipients: [
-          {name: 'CSR', email: 'csr@trelar.com'}
-        ],
-        attachments: []
-      };
-      await EmailService.sendEmail(cancelJobEmail);
 
       this.updateJobView(newJob);
-      this.setState({btnSubmitting: false});
+      this.setState({
+        btnSubmitting: false
+      });
       this.toggleCancelModal2();
     }
   }
@@ -596,17 +537,13 @@ class JobSavePage extends Component {
   async handleCarrierCancelJob() {
     const {
       job,
-      customerAdmin,
       showOtherReasonInput,
       approveCancelReason,
       reqHandlerCancel,
-      reqHandlerCancelReason,
-      companyCarrierData,
-      profile
+      reqHandlerCancelReason
     } = this.state;
     let {cancelReason} = this.state;
     let newJob = [];
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
 
     reqHandlerCancel.touched = false;
     reqHandlerCancelReason.touched = false;
@@ -637,81 +574,21 @@ class JobSavePage extends Component {
       cancelReason = approveCancelReason;
     }
 
-    this.setState({btnSubmitting: true});
+    this.setState({
+      btnSubmitting: true
+    });
 
-    // updating job
-    newJob = CloneDeep(job);
-    delete newJob.company;
-    newJob.startAddress = newJob.startAddress.id;
-    newJob.endAddress = newJob.endAddress.id;
-    newJob.status = 'Cancelled';
-    newJob.cancelReason = `[Cancelled by ${profile.companyType}] ${cancelReason}`;
-    newJob.dateCancelled = moment.utc().format();
-    newJob.modifiedBy = profile.userId;
-    newJob.modifiedOn = moment.utc().format();
     try {
-      newJob = await JobService.updateJob(newJob);
-    } catch (err) {
-      console.error(err);
-    }
-
-    const cancelledSms = `${envString}The carrier ${companyCarrierData.legalName} has cancelled working on job `
-      + `${job.company.legalName} for ${TFormat.asDateTime(newJob.startTime)}.`
-      + `The reason for cancellation is: ${cancelReason}.`; // TODO: do we need to check for this field's length?
-
-    // Notify Producer about cancelled job
-    await this.notifyAdminViaSms(cancelledSms, job.company.id);
-
-    // sending an email to CSR
-    const cancelJobEmail = {
-      toEmail: 'csr@trelar.com',
-      toName: 'Trelar CSR',
-      subject: `${envString}Trelar Job Cancelled`,
-      isHTML: true,
-      body: 'A carrier cancelled a job on Trelar.<br><br>'
-        + `Carrier Company Name: ${companyCarrierData.legalName}<br>`
-        + `Producer Company Name: ${job.company.legalName}<br>`
-        + `Cancel Reason: ${cancelReason}<br>`
-        + `Job Name: ${newJob.name}<br>`
-        // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
-        + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
-        + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}`,
-      recipients: [
-        {name: 'CSR', email: 'csr@trelar.com'}
-      ],
-      attachments: []
-    };
-    try {
-      await EmailService.sendEmail(cancelJobEmail);
-    } catch (err) {
-      console.error(err);
-    }
-
-    // sending an email to Producer
-    const cancelJobEmailProducer = {
-      toEmail: customerAdmin.email,
-      toName: `${customerAdmin.firstName} ${customerAdmin.lastName}`,
-      subject: `${envString}Trelar Job Cancelled`,
-      isHTML: true,
-      body: `The carrier ${companyCarrierData.legalName} has cancelled working `
-      + `on job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)}. `
-      + 'Log onto Trelar to find a different carrier for this job: https://app.mytrelar.com.<br><br>'
-      + `The reason for cancellation is: ${cancelReason}.<br><br>`
-      + 'If you need any assistance, please contact <a href="mailto:csr@trelar.com">csr@trelar.com</a>.<br><br>'
-      + 'Thanks,<br>The Trelar Team',
-      recipients: [
-        {name: `${customerAdmin.firstName} ${customerAdmin.lastName}`, email: customerAdmin.email}
-      ],
-      attachments: []
-    };
-    try {
-      await EmailService.sendEmail(cancelJobEmailProducer);
-    } catch (err) {
-      console.error(err);
+      await JobService.cancelJobAsCarrier(job.id, cancelReason);
+      newJob = await JobService.getJobById(job.id);
+    } catch (e) {
+      // console.log(e);
     }
 
     this.updateJobView(newJob);
-    this.setState({btnSubmitting: false});
+    this.setState({
+      btnSubmitting: false
+    });
     this.toggleCarrierCancelModal();
   }
 
@@ -816,339 +693,30 @@ class JobSavePage extends Component {
     this.handlePageClick('Job');
   }
 
-  async handleConfirmRequest(action) { // Customer 'Accepts' or 'Rejects' Job request
-    this.setState({btnSubmitting: true});
-    const {
-      job,
-      bid,
-      profile
-    } = this.state;
-    let {booking, bookingEquipment} = this.state;
-
-    if (action === 'Approve') { // Customer is accepting the job request
-      // console.log('accepting');
-      const newJob = CloneDeep(job);
-      const newBid = CloneDeep(bid);
-
-      // UPDATING JOB
-      newJob.status = 'Booked';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      delete newJob.materials;
-      await JobService.updateJob(newJob);
-
-      // UPDATING BID
-      newBid.hasCustomerAccepted = 1;
-      newBid.hasSchedulerAccepted = 1;
-      newBid.status = 'Accepted';
-      newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment.utc().format();
-      await BidService.updateBid(newBid);
-
-      // CREATING BOOKING
-      // see if we have a booking first
-      const bookings = await BookingService.getBookingsByJobId(job.id);
-      if (!bookings || bookings.length <= 0) {
-        // TODO create a booking
-        booking = {};
-        booking.bidId = newBid.id;
-        booking.rateType = newBid.rateType;
-        booking.startTime = newJob.startTime;
-        booking.schedulersCompanyId = newBid.companyCarrierId;
-        booking.sourceAddressId = newJob.startAddress.id;
-        booking.startAddressId = newJob.startAddress.id;
-        booking.endAddressId = newJob.endAddress.id;
-        booking.bookingStatus = 'New';
-        booking.createdBy = profile.userId;
-        booking.createdOn = moment.utc().format();
-        booking.modifiedOn = moment.utc().format();
-        booking.modifiedBy = profile.userId;
-        booking = await BookingService.createBooking(booking);
-      }
-
-      // CREATING BOOKING EQUIPMENT
-      // see if we have a booking equipment first
-      let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-      bookingEquipments = bookingEquipments.filter((bookingEq) => {
-        if (bookingEq.bookingId === booking.id) {
-          return bookingEq;
-        }
-        return null;
-      });
-      if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const response = await EquipmentService.getEquipments();
-        const equipments = response.data;
-        if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now.
-          // Ideally this should be the carrier/driver's truck
-          bookingEquipment = {};
-          bookingEquipment.bookingId = booking.id;
-          bookingEquipment.schedulerId = newBid.userId;
-          bookingEquipment.driverId = equipment.driversId;
-          bookingEquipment.equipmentId = equipment.id;
-          bookingEquipment.rateType = newBid.rateType;
-          bookingEquipment.rateActual = 0;
-          bookingEquipment.startTime = booking.startTime;
-          bookingEquipment.endTime = booking.endTime;
-          bookingEquipment.startAddressId = booking.startAddressId;
-          bookingEquipment.endAddressId = booking.endAddressId;
-          bookingEquipment.notes = '';
-          bookingEquipment.createdBy = equipment.driversId;
-          bookingEquipment.modifiedBy = equipment.driversId;
-          bookingEquipment.modifiedOn = moment.utc().format();
-          bookingEquipment.createdOn = moment.utc().format();
-          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
-            bookingEquipment
-          );
-        }
-      }
-
-      // Let's make a call to Twilio to send an SMS
-      // We need to change later get the body from the lookups table
-      // Sending SMS to Truck's company
-      try {
-        await this.notifyAdminViaSms('Your request for the job has been rejected', newBid.companyCarrierId);
-      } catch (error) {
-        // console.log('Unable to notify user.');
-      }
-
-      job.status = 'Booked';
-      this.setState({job, companyCarrier: newBid.companyCarrierId});
-    } else { // Customer is rejecting the job request
-      const newBid = CloneDeep(bid);
-
-      // UPDATING BID
-      newBid.hasCustomerAccepted = 0;
-      newBid.hasSchedulerAccepted = 1;
-      newBid.status = 'Declined';
-      newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment.utc().format();
-      await BidService.updateBid(newBid);
-
-      // Let's make a call to Twilio to send an SMS
-      // We need to change later get the body from the lookups table
-      // Sending SMS to Truck's company
-      try {
-        await this.notifyAdminViaSms('Your request for the job has been rejected', job.id);
-      } catch (error) {
-        // console.log('Unable to notify user.');
-      }
-
-      // eslint-disable-next-line no-alert
-      // alert('You have accepted this job request! Congratulations.');
-    }
-  }
-
-  async notifyAdminViaSms(message, companyId) {
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
-    // Sending SMS to customer's Admin from the company who created the Job
-    const customerAdmin = await UserService.getAdminByCompanyId(companyId);
-    let notification = '';
-    if (customerAdmin.length > 0) { // check if we get a result
-      if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
-        notification = {
-          to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
-          body: `${envString} ${message}`
-        };
-        await TwilioService.createSms(notification);
-      }
-    }
-  }
-
   // Carrier clicks on 'Accept Job' or 'Request Job'
   async handleConfirmRequestCarrier(action) {
-    this.setState({btnSubmitting: true});
+    this.setState({
+      btnSubmitting: true
+    });
 
-    const {
-      job,
-      customerAdmin,
-      profile
-    } = this.state;
-    let {bid} = this.state;
-    let {booking} = this.state;
-    let notification;
+    const {job, bid} = this.state;
     // A favorite Carrier "accepts" the job
     if (action === 'Accept') {
-      // console.log('accepting');
-      // console.log(bid);
-      const newJob = CloneDeep(job);
-
-      // Updating the Job
-      newJob.status = 'Booked';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      delete newJob.materials;
-      await JobService.updateJob(newJob);
-
-      // Since the Job was sent to all favorites there's a bid, update existing bid
-      const newBid = CloneDeep(bid);
-      newBid.companyCarrierId = profile.companyId;
-      newBid.hasSchedulerAccepted = 1;
-      newBid.hasCustomerAccepted = 1;
-      newBid.status = 'Accepted';
-      newBid.rateEstimate = newJob.rateEstimate;
-      newBid.notes = newJob.notes;
-      newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment.utc().format();
-      bid = await BidService.updateBid(newBid);
-
-      // Create a Booking
-      // Check if we have a booking first
-      const bookings = await BookingService.getBookingsByJobId(job.id);
-      if (!bookings || bookings.length <= 0) {
-        booking = {};
-        booking.bidId = bid.id;
-        booking.rateType = bid.rateType;
-        booking.startTime = job.startTime;
-        booking.schedulersCompanyId = bid.companyCarrierId;
-        booking.sourceAddressId = job.startAddress.id;
-        booking.startAddressId = job.startAddress.id;
-        booking.endAddressId = job.endAddress.id;
-        booking.bookingStatus = 'New';
-        booking.createdBy = profile.userId;
-        booking.createdOn = moment.utc().format();
-        booking.modifiedOn = moment.utc().format();
-        booking.modifiedBy = profile.userId;
-        booking = await BookingService.createBooking(booking);
+      try {
+        await BidService.acceptBid(job.id, bid.id);
+      } catch (e) {
+        // console.log(e);
       }
-
-      // Create Booking Equipment
-      // Check if we have a booking equipment first
-      /* let bookingEquipments = await BookingEquipmentService.getBookingEquipments();
-      bookingEquipments = bookingEquipments.filter((bookingEq) => {
-        if (bookingEq.bookingId === booking.id) {
-          return bookingEq;
-        }
-        return null;
-      });
-
-      if (!bookingEquipments || bookingEquipments.length <= 0) {
-        const response = await EquipmentService.getEquipments();
-        const equipments = response.data;
-        if (equipments && equipments.length > 0) {
-          const equipment = equipments[0]; // temporary for now.
-          // Ideally this should be the carrier/driver's truck
-          bookingEquipment = {};
-          bookingEquipment.bookingId = booking.id;
-          bookingEquipment.schedulerId = bid.userId;
-          bookingEquipment.driverId = equipment.driversId;
-          bookingEquipment.equipmentId = equipment.id;
-          bookingEquipment.rateType = bid.rateType;
-          bookingEquipment.rateActual = 0;
-          bookingEquipment.startTime = booking.startTime;
-          bookingEquipment.endTime = booking.endTime;
-          bookingEquipment.startAddressId = booking.startAddressId;
-          bookingEquipment.endAddressId = booking.endAddressId;
-          bookingEquipment.notes = '';
-          bookingEquipment.createdBy = equipment.driversId;
-          bookingEquipment.modifiedBy = equipment.driversId;
-          bookingEquipment.modifiedOn = moment().unix() * 1000;
-          bookingEquipment.createdOn = moment().unix() * 1000;
-          bookingEquipment = await BookingEquipmentService.createBookingEquipment(
-            bookingEquipment
-          );
-        }
-      } */
-
-      // Let's make a call to Twilio to send an SMS
-      // We need to change later get the body from the lookups table
-      // Sending SMS to Truck's company
-      const carrierAdmin = await UserService.getAdminByCompanyId(bid.companyCarrierId);
-      if (carrierAdmin.length > 0) { // check if we get a result
-        if (carrierAdmin[0].mobilePhone && this.checkPhoneFormat(carrierAdmin[0].mobilePhone)) {
-          notification = {
-            to: UserUtils.phoneToNumberFormat(carrierAdmin[0].mobilePhone),
-            body: 'Your request for the job has been accepted.'
-          };
-          await TwilioService.createSms(notification);
-        }
-      }
-
-      // eslint-disable-next-line no-alert
-      // alert('You have accepted this job request! Congratulations.');
-
-      job.status = 'Booked';
-      this.setState({job, booking});
-    } else if (action === 'Request') { // A non-favorite Carrier "requests" the job
-      // console.log('requesting');
-      const newJob = CloneDeep(job);
-      // Updating the Job
-      // newJob.status = 'Requested';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      delete newJob.materials;
-      await JobService.updateJob(newJob);
-
-      // Creating a bid
-      bid = {};
-      bid.jobId = job.id;
-      bid.userId = profile.userId;
-      bid.companyCarrierId = profile.companyId;
-      bid.hasCustomerAccepted = 0;
-      bid.hasSchedulerAccepted = 1;
-      bid.status = 'Pending';
-      bid.rateType = job.rateType;
-      bid.rate = job.rate;
-      bid.rateEstimate = job.rateEstimate;
-      bid.notes = job.notes;
-      bid.createdBy = profile.userId;
-      bid.modifiedBy = profile.userId;
-      bid.modifiedOn = moment.utc().format();
-      bid.createdOn = moment.utc().format();
-      await BidService.createBid(bid);
-
-      // Sending SMS to customer's Admin from the company who created the Job
-      if (customerAdmin && customerAdmin.length > 0) { // check if we get a result
-        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
-          notification = {
-            to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
-            body: 'You have a new job request.'
-          };
-          await TwilioService.createSms(notification);
-        }
-      }
-
-      // eslint-disable-next-line no-alert
-      // alert('Your request has been sent.');
-      job.status = newJob.status;
-      this.setState({job, bid});
     } else if (action === 'Decline') { // A Carrier "declines" a job request
-      // Update existing bid
-      const newBid = CloneDeep(bid);
-      newBid.companyCarrierId = profile.companyId;
-      newBid.hasCustomerAccepted = 1;
-      newBid.hasSchedulerAccepted = 0;
-      newBid.status = 'Declined';
-      newBid.modifiedBy = profile.userId;
-      newBid.modifiedOn = moment.utc().format();
-      bid = {};
-      bid = await BidService.updateBid(newBid);
-
-      // Sending SMS to customer's Admin from the company who created the Job
-      if (customerAdmin && customerAdmin.length > 0) { // check if we get a result
-        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
-          notification = {
-            to: UserUtils.phoneToNumberFormat(customerAdmin[0].mobilePhone),
-            body: 'Your job request has been declined.'
-          };
-          await TwilioService.createSms(notification);
-        }
+      try {
+        await BidService.declineBid(job.id, bid.id);
+      } catch (e) {
+        // console.log(e);
       }
-      this.setState({bid});
-
-      // eslint-disable-next-line no-alert
-      // alert('Your request has been sent.');
     } else if (action === 'Cancel Request') {
       try {
         await BidService.deleteBidbById(bid.id);
         this.setState({bid: null});
-        // return <Redirect push to="/marketplace"/>;
       } catch (err) {
         console.error(err);
       }
@@ -1156,17 +724,6 @@ class JobSavePage extends Component {
     }
 
     this.setState({btnSubmitting: false});
-  }
-
-  // check format ok
-  checkPhoneFormat(phone) {
-    const phoneNotParents = String(UserUtils.phoneToNumberFormat(phone));
-    const areaCode3 = phoneNotParents.substring(0, 3);
-    const areaCode4 = phoneNotParents.substring(0, 4);
-    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
-      return false;
-    }
-    return true;
   }
 
   async handleAllocateDrivers() {
@@ -1286,7 +843,8 @@ class JobSavePage extends Component {
               bntText="Decline Job"
             />
             {(companyProducer.liabilityGeneral > 0.01 || companyProducer.liabilityAuto > 0.01)
-            && ((companyCarrier.liabilityGeneral < companyProducer.liabilityGeneral) || (companyCarrier.liabilityAuto < companyProducer.liabilityAuto))
+            && ((companyCarrier.liabilityGeneral < companyProducer.liabilityGeneral)
+              || (companyCarrier.liabilityAuto < companyProducer.liabilityAuto))
             && ( // Carrier has not enough liability insurance, show confirmation modal
               <TSubmitButton
                 onClick={() => this.toggleLiabilityModal()}
@@ -1298,7 +856,8 @@ class JobSavePage extends Component {
             )}
             {(((!companyProducer.liabilityGeneral || companyProducer.liabilityGeneral === 0)
               && (!companyProducer.liabilityAuto || companyProducer.liabilityAuto === 0))
-              || ((companyCarrier.liabilityGeneral > companyProducer.liabilityGeneral) && (companyCarrier.liabilityAuto > companyProducer.liabilityAuto)))
+              || ((companyCarrier.liabilityGeneral > companyProducer.liabilityGeneral)
+                && (companyCarrier.liabilityAuto > companyProducer.liabilityAuto)))
             && ( // Carrier has enough liability insurance OR Producer has not set up Insurance
               <TSubmitButton
                 onClick={() => this.handleConfirmRequestCarrier('Accept')}
@@ -1311,18 +870,6 @@ class JobSavePage extends Component {
           </div>
         );
       }
-      // the carrier is not a favorite (We're not showing this button here, only through the Marketplace)
-      /* if (bid === null || (bid && (bid.status !== 'Pending' && bid.status !== 'Declined'))) {
-        return (
-          <TSubmitButton
-            onClick={() => this.handleConfirmRequestCarrier('Request')}
-            className="primaryButton"
-            loading={btnSubmitting}
-            loaderSize={10}
-            bntText="Request Job"
-          />
-        );
-      } */
 
       // the carrier is not a favorite
       if (bid && bid.status === 'Declined') {
@@ -1351,7 +898,7 @@ class JobSavePage extends Component {
     // If a Customer is 'Offering' a Job, the Carrier can Accept or Decline it
     if ((job.status === 'On Offer' || job.status === 'Published And Offered')
       && companyType === 'Carrier'
-      && bid.status !== 'Declined'
+      && (bid && bid.status !== 'Declined')
       // Check if the carrier is a favorite OR the Customer is 'Requesting' this particular Carrier
       && (favoriteCompany.length > 0 || (bid.status === 'Pending' && bid.companyCarrierId === profile.companyId))
     ) {
@@ -1374,31 +921,7 @@ class JobSavePage extends Component {
         </div>
       );
     }
-    // If a Carrier is 'Requesting' a Job, the Customer can approve or reject it
-    /* if (companyType === 'Customer'
-      && (bid.hasSchedulerAccepted && !bid.hasCustomerAccepted)
-      && bid.status !== 'Declined') {
-      // console.log('We are a customer and we have a Carrier's job request');
-      return (
-        <div>
-          <TSubmitButton
-            onClick={() => this.handleConfirmRequest('Reject')}
-            className="secondaryButton"
-            loading={btnSubmitting}
-            loaderSize={10}
-            bntText="Reject Job Request"
-          />
 
-          <TSubmitButton
-            onClick={() => this.handleConfirmRequest('Approve')}
-            className="primaryButton"
-            loading={btnSubmitting}
-            loaderSize={10}
-            bntText="Approve Job Request"
-          />
-        </div>
-      );
-    } */
     if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress')
       && companyType === 'Carrier' && profile.isAdmin) {
       return (
@@ -1453,7 +976,7 @@ class JobSavePage extends Component {
   }
 
   renderCopyButton() {
-    const {job, profile, btnSubmitting} = this.state;
+    const {btnSubmitting} = this.state;
     return (
       <TSubmitButton
         onClick={() => this.toggleCopyJobModal()}
@@ -1640,7 +1163,13 @@ class JobSavePage extends Component {
   }
 
   renderAllocateDriversModal() {
-    const {allocateDriversModal, drivers, selectedDrivers, btnSubmitting, driversWithLoads} = this.state;
+    const {
+      allocateDriversModal,
+      drivers,
+      selectedDrivers,
+      btnSubmitting,
+      driversWithLoads
+    } = this.state;
     const driverData = drivers;
     const driverColumns = [
       {
@@ -2000,8 +1529,8 @@ class JobSavePage extends Component {
                       className="form form--horizontal addtruck__form"
                     >
                       <Row className="col-md-12">
-                        Are you sure you want to cancel this job&nbsp;<span
-                        style={{fontWeight: 'bold'}}>{job.name}</span>?
+                        Are you sure you want to cancel this job&nbsp;
+                        <span style={{fontWeight: 'bold'}}>{job.name}</span>?
                       </Row>
                       <hr/>
                       <Row className="col-md-12" style={{paddingBottom: 50}}>

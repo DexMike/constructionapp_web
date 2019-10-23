@@ -140,6 +140,22 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async cancelJobAsProducer(id, reason) {
+    const response = await super.post(`/producer${PATH}/${id}/cancel`, reason);
+    return (response);
+  }
+
+  static async cancelJobAsCarrier(id, reason) {
+    const response = await super.post(`/carrier${PATH}/${id}/cancel`, reason);
+    return (response);
+  }
+
+  static async createNewJob(jobRequest) {
+    console.log(154, jobRequest);
+    const response = await super.post(`${PATH}/create`, jobRequest);
+    return (response);
+  }
+
   static getDefaultJob() {
     return {
       companiesId: 0,
