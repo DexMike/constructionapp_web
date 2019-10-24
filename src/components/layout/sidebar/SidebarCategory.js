@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Collapse } from 'reactstrap';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import './Sidebar.css';
 
 class SidebarCategory extends Component {
   constructor(props) {
@@ -29,8 +30,8 @@ class SidebarCategory extends Component {
     return (
       <div className={categoryClass}>
         <button type="button" className="sidebar__link sidebar__category" onClick={this.toggle}>
-          {icon ? <span className={`sidebar__link-icon lnr lnr-${icon}`}/> : ''}
-          <p className="sidebar__link-title">
+          {icon ? <i className="material-icons iconSet">{icon}</i> : ''}
+          <p className="sidebar__link-title top_title">
             {title}
             {isNew && <span className="sidebar__category-new"/>}
           </p>

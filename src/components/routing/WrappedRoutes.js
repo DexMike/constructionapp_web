@@ -23,6 +23,7 @@ import PaymentsPage from '../payments/PaymentsPage';
 import PaymentDetails from '../payments/PaymentDetails';
 import EquipmentGeneralMap from '../equipments/EquipmentGeneralMap';
 import AddressListPage from '../addresses/AddressListPage';
+import ReportRoutes from './ReportRoutes';
 
 class WrappedRoutes extends PureComponent {
   render() {
@@ -176,6 +177,11 @@ class WrappedRoutes extends PureComponent {
             exact
             path="/company/addresses"
             component={AddressListPage}
+          />
+
+          <Route
+            path="/reports"
+            component={ReportRoutes}
           />
 
         </div>
