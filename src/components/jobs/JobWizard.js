@@ -83,7 +83,7 @@ class JobWizard extends Component {
         favoriteAdminTels: []
       },
       tabSummary: {
-        instructions: '',
+        instructions: ''
       },
       tabPickupDelivery: {
         allUSstates: [],
@@ -236,7 +236,7 @@ class JobWizard extends Component {
   }
 
   async componentDidMount() {
-    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate} = this.state;
+    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate, tabSummary} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
     const {jobEdit, jobEditSaved, copyJob} = this.props;
 
@@ -283,6 +283,9 @@ class JobWizard extends Component {
         if (materials && materials.length > 0) {
           tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
         }
+
+        tabSummary.instructions = !job.notes ? '' : job.notes;
+
         tabMaterials.estMaterialPricing = !job.estMaterialPricing ? '0.00' : job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
         tabMaterials.quantity = !job.rateEstimate ? '0.00' : job.rateEstimate;
