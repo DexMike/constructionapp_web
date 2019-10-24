@@ -304,6 +304,10 @@ class EquipmentListPage extends Component {
                                 displayName: 'Truck Image'
                               },
                               {
+                                name: 'externalEquipmentNumber',
+                                displayName: 'Number'
+                              },
+                              {
                                 name: 'name',
                                 displayName: 'Name'
                               },

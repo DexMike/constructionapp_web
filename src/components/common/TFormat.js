@@ -222,18 +222,8 @@ class TFormat {
       return phoneNumberString;
     }
 
-    input = input.substring(0, 10);
-
-    const size = input.length;
-    if (size == 0) {
-      input = input;
-    } else if (size < 4) {
-      input = '(' + input;
-    } else if (size < 7) {
-      input = '(' + input.substring(0, 3) + ') ' + input.substring(3, 6);
-    } else {
-      input = '(' + input.substring(0, 3) + ') ' + input.substring(3, 6) + ' - ' + input.substring(6, 10);
-    }
+    input = input.substring(input.length - 10, input.length); // remove the country code 1
+    input = `(${input.substring(0, 3)}) ${input.substring(3, 6)} -  ${input.substring(6, 10)}`;
     return input;
   }
 
