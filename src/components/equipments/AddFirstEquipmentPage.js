@@ -62,7 +62,7 @@ class AddFirstEquipmentPage extends Component {
   }
 
   continueToApp() {
-    window.location.href = '/';
+    window.location.href = '/first-driver';
   }
 
   toggleAddMultiTrucksModal() {
@@ -127,13 +127,10 @@ class AddFirstEquipmentPage extends Component {
                           columns={[
                             {
                               name: 'truckType',
-                              displayName: 'Type of Truck'
+                              displayName: 'Type'
                             }, {
-                              name: 'materials',
-                              displayName: 'Materials'
-                            }, {
-                              name: 'maxCapacity',
-                              displayName: 'Capacity    '
+                              name: 'externalEquipmentNumber',
+                              displayName: 'Number'
                             }
                           ]}
                           handleIdClick={() => {}}
