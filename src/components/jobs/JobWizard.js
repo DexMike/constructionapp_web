@@ -30,6 +30,7 @@ import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
 import UserUtils from '../../api/UtilsService';
 import UserService from '../../api/UserService';
+import GeoUtils from "../../utils/GeoUtils";
 
 class JobWizard extends Component {
   constructor(props) {
@@ -82,7 +83,7 @@ class JobWizard extends Component {
         favoriteAdminTels: []
       },
       tabSummary: {
-        instructions: '',
+        instructions: ''
       },
       tabPickupDelivery: {
         allUSstates: [],
@@ -235,9 +236,9 @@ class JobWizard extends Component {
   }
 
   async componentDidMount() {
-    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate} = this.state;
+    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate, tabSummary} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
-    const {jobEdit, jobEditSaved} = this.props;
+    const {jobEdit, jobEditSaved, copyJob} = this.props;
 
     let truckTypes;
     try {
@@ -256,8 +257,14 @@ class JobWizard extends Component {
       });
     tabTruckSpecs.allTruckTypes = allTruckTypes;
 
+    let profile;
+    try {
+      profile = await ProfileService.getProfile();
+    } catch (err) {
+      console.error(err);
+    }
 
-    if (jobEdit || jobEditSaved) {
+    if (jobEdit || jobEditSaved || copyJob) {
       const {job} = this.props;
       // populate form with job data
       if (job) {
@@ -276,13 +283,82 @@ class JobWizard extends Component {
         if (materials && materials.length > 0) {
           tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
         }
-        tabMaterials.estMaterialPricing = job.estMaterialPricing;
+
+        tabSummary.instructions = !job.notes ? '' : job.notes;
+
+        tabMaterials.estMaterialPricing = !job.estMaterialPricing ? '0.00' : job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
-        tabMaterials.quantity = job.rateEstimate;
+        tabMaterials.quantity = !job.rateEstimate ? '0.00' : job.rateEstimate;
+
+        // PICKUP AND DELIVERY TAB DATA
+        // addresses
+        let addressesResponse;
+        try {
+          addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
+        } catch (err) {
+          console.error(err);
+        }
+        const allAddresses = addressesResponse.data.map(address => ({
+          value: String(address.id),
+          label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
+        }));
+        tabPickupDelivery.allAddresses = allAddresses;
+        // US states
+        let states;
+        try {
+          states = await LookupsService.getLookupsByType('States');
+        } catch (err) {
+          console.error(err);
+        }
+        states = states.map(state => ({
+          value: String(state.val1),
+          label: state.val1
+        }));
+
+        tabPickupDelivery.allUSstates = states;
 
         // populate pickup/delivery tab
         tabPickupDelivery.selectedStartAddressId = job.startAddress.id.toString();
         tabPickupDelivery.selectedEndAddressId = job.endAddress.id.toString();
+
+        const startAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
+        const startString = startAddress.label;
+
+        const endAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
+        const endString = endAddress.label;
+
+        let startCoordinates;
+        let endCoordinates;
+        try {
+          startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
+          endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
+        } catch (err) {
+          console.error(err);
+        }
+
+        if (startCoordinates) {
+          tabPickupDelivery.startGPS = startCoordinates;
+          tabPickupDelivery.startLocationLatitude = startCoordinates.lat;
+          tabPickupDelivery.startLocationLongitude = startCoordinates.lng;
+        }
+
+        if (endCoordinates) {
+          tabPickupDelivery.endGPS = endCoordinates;
+          tabPickupDelivery.endLocationLatitude = endCoordinates.lat;
+          tabPickupDelivery.endLocationLongitude = endCoordinates.lng;
+        }
+
+        if (tabPickupDelivery.startLocationLatitude && tabPickupDelivery.startLocationLongitude
+          && tabPickupDelivery.endLocationLatitude && tabPickupDelivery.endLocationLongitude) {
+          const waypoint0 = `${tabPickupDelivery.startLocationLatitude},${tabPickupDelivery.startLocationLongitude}`;
+          const waypoint1 = `${tabPickupDelivery.endLocationLatitude},${tabPickupDelivery.endLocationLongitude}`;
+          const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);
+          const travelInfoReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+          tabPickupDelivery.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
+          tabPickupDelivery.avgDistanceReturn = (travelInfoReturn.distance * 0.000621371192).toFixed(2);
+          tabPickupDelivery.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
+          tabPickupDelivery.avgTimeReturn = (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
+        }
 
         // populate truck specs
         tabTruckSpecs.truckQuantity = job.numEquipments;
@@ -306,15 +382,8 @@ class JobWizard extends Component {
 
         // populate haul rate tab
         tabHaulRate.payType = job.rateType;
-        tabHaulRate.ratePerPayType = job.rate;
+        tabHaulRate.ratePerPayType = !job.rate ? '0.00' : job.rate;
       }
-    }
-
-    let profile;
-    try {
-      profile = await ProfileService.getProfile();
-    } catch (err) {
-      console.error(err);
     }
 
     // MATERIAL TAB DATA
@@ -330,33 +399,6 @@ class JobWizard extends Component {
     }));
 
     tabMaterials.allMaterials = allMaterials;
-
-    // PICKUP AND DELIVERY TAB DATA
-    // addresses
-    let addressesResponse;
-    try {
-      addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
-    } catch (err) {
-      console.error(err);
-    }
-    const allAddresses = addressesResponse.data.map(address => ({
-      value: String(address.id),
-      label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
-    }));
-    tabPickupDelivery.allAddresses = allAddresses;
-    // US states
-    let states;
-    try {
-      states = await LookupsService.getLookupsByType('States');
-    } catch (err) {
-      console.error(err);
-    }
-    states = states.map(state => ({
-      value: String(state.val1),
-      label: state.val1
-    }));
-
-    tabPickupDelivery.allUSstates = states;
 
     // TRUCK SPECS TAB DATA
 
@@ -509,7 +551,6 @@ class JobWizard extends Component {
     const {tabPickupDelivery} = {...this.state};
     // const {startGPS} = {...this.state};
     const val = [];
-
     if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
       if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
         && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
@@ -572,23 +613,23 @@ class JobWizard extends Component {
     });
   }
 
-  // updateJobView(newJob) {
-  //   const {updateJobView, updateCopiedJob} = this.props;
-  //   if (newJob.copiedJob) {
-  //     updateCopiedJob(newJob);
-  //   }
-  //   if (updateJobView) {
-  //     updateJobView(newJob, null);
-  //   }
-  // }
-  //
-  //
   updateJobView(newJob) {
-    const {updateJobView} = this.props;
+    const {updateJobView, updateCopiedJob} = this.props;
+    if (newJob.copiedJob) {
+      updateCopiedJob(newJob);
+    }
     if (updateJobView) {
       updateJobView(newJob, null);
     }
   }
+
+  //
+  // updateJobView(newJob) {
+  //   const {updateJobView} = this.props;
+  //   if (updateJobView) {
+  //     updateJobView(newJob, null);
+  //   }
+  // }
 
   handleInputChange(e) {
     if (e.target.name === 'name') {
@@ -1049,7 +1090,7 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, selectedCarrierId, job} = this.props;
+    const {jobRequest, jobEdit, selectedCarrierId, job, copyJob} = this.props;
     this.setState({btnSubmitting: true});
     // All validations happen by the summary page
 
@@ -1199,7 +1240,6 @@ class JobWizard extends Component {
       modifiedBy: profile.userId,
       modifiedOn: moment.utc().format()
     };
-
     let newJob;
     try {
       if (jobEdit) {
@@ -1228,6 +1268,12 @@ class JobWizard extends Component {
 
     if (jobEdit) {
       this.setState({ btnSubmitting: false });
+      this.updateJobView(newJob);
+      this.closeNow();
+      return;
+    }
+    if (copyJob) {
+      newJob.copiedJob = true;
       this.updateJobView(newJob);
       this.closeNow();
       return;
@@ -2139,9 +2185,11 @@ JobWizard.propTypes = {
   selectedCarrierId: PropTypes.number,
   jobRequest: PropTypes.bool,
   jobEdit: PropTypes.bool,
+  copyJob: PropTypes.bool,
   jobEditSaved: PropTypes.bool,
   job: PropTypes.object,
-  updateJobView: PropTypes.func.isRequired
+  updateJobView: PropTypes.func.isRequired,
+  updateCopiedJob: PropTypes.func.isRequired
 };
 
 JobWizard.defaultProps = {
@@ -2149,6 +2197,7 @@ JobWizard.defaultProps = {
   jobRequest: false,
   jobEdit: false,
   jobEditSaved: false,
+  copyJob: false,
   job: null
 };
 

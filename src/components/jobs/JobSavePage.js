@@ -1622,18 +1622,18 @@ class JobSavePage extends Component {
       job,
       modalCopyJob
     } = this.state;
-    const copyJob = true;
     return (
       <Modal
         isOpen={modalCopyJob}
         toggle={this.toggleCopyJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
-        <JobCreatePopup
+        <JobWizard
           toggle={this.toggleCopyJobModal}
-          jobId={job.id}
-          copyJob={copyJob}
           updateCopiedJob={this.updateCopiedJob}
+          copyJob
+          job={job}
         />
       </Modal>
     );
