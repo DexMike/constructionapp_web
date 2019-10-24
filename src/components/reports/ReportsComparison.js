@@ -190,7 +190,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }*/, {
           field: 'avgEarningsJobComparison',
-          headerName: 'Avg. Earnings/Job',
+          headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
           // renderer
           // enableValue: true,
@@ -198,7 +198,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }, {
           field: 'avgEarningsTonComparison',
-          headerName: 'Avg. Earnings/Ton',
+          headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
           // renderer
           // enableValue: true,
@@ -266,7 +266,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }*/, {
           field: 'avgEarningsJobComparison',
-          headerName: 'Avg. Earnings/Job',
+          headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
           // renderer
           // enableValue: true,
@@ -274,7 +274,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }, {
           field: 'avgEarningsTonComparison',
-          headerName: 'Avg. Earnings/Ton',
+          headerName: 'Avg. Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
           // renderer
           // enableValue: true,
@@ -319,7 +319,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }, {
           field: 'totalJobsComparison',
-          headerName: '# of Jobs',
+          headerName: '# of Loads',
           headerTooltip: "Total number of jobs for this time period",
           // renderer
           // enableValue: true,
@@ -343,7 +343,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }*/, {
           field: 'avgEarningsJobComparison',
-          headerName: 'Avg. Earnings/Job',
+          headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
           // renderer
           // enableValue: true,
@@ -351,7 +351,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }, {
           field: 'avgEarningsTonComparison',
-          headerName: 'Avg. Earnings/Ton',
+          headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
           // renderer
           // enableValue: true,
@@ -492,7 +492,8 @@ class ReportsComparison extends Component {
       obj.headerTooltip = 'Average costs per hour for this time period';
     }*/
     if (obj.field === 'avgEarningsJobComparison') {
-      obj.headerName = 'Avg. Cost/Job';
+      // obj.headerName = 'Avg. Cost/Job';
+      obj.headerName = 'Cost per Ton Mile';
       obj.headerTooltip = 'Average costs per job for this time period';
     }
     if (obj.field === 'avgEarningsTonComparison') {
@@ -805,6 +806,11 @@ class ReportsComparison extends Component {
 
   renderTable(columns, defaultData, data, onGridReady) {
     let newData = data;
+    let colHeight = 28;
+    const { activeTab } = this.state;
+    if (Number(activeTab) !== 3) {
+      colHeight = 60;
+    }
     return (
       <AgGridReact
         columnDefs={columns}
@@ -815,7 +821,7 @@ class ReportsComparison extends Component {
         paginationPageSize={15}
         pagination
         domLayout="print"
-        rowHeight={60}
+        rowHeight={colHeight}
         style={{ width: '2000px' }}
       />
     )

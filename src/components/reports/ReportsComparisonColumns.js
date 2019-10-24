@@ -206,7 +206,7 @@ const columnsProjects = [
     filterFramework: BarFilter
   }, {
     field: 'totalJobsComparison',
-    headerName: '# of Jobs',
+    headerName: '# of Loads',
     headerTooltip: "Total number of jobs for this time period",
     // renderer
     enableValue: true,
