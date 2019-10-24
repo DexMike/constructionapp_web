@@ -527,7 +527,7 @@ class ReportsComparison extends Component {
 
   hideAvg (show, caller) {
     let { columnsProducts } = this.state;
-    console.log("TCL: ReportsComparison -> CALL", columnsProducts, caller)
+    // console.log("TCL: ReportsComparison -> CALL", columnsProducts, caller)
     if (show) {
       const avgMiles = {
         field: 'avgMilesTraveledComparison',

@@ -428,7 +428,6 @@ class ReportsCarrierPage extends Component {
   // Helper function to do date comparison in sorting
   // Move to TFormat?
   numberComparator(num) {
-    console.log("*** numberComparator");
     return Number(String(num).replace(/[^0-9-\.]+/g, ""));
   }
 
