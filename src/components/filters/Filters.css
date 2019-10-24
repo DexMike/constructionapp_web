@@ -72,6 +72,77 @@
     padding-right: 0px !important;
 }
 
+.flex-daily-report-container-1,
+.flex-daily-report-container-2
+{
+    display: flex !important;
+    display: -webkit-flex !important;
+    flex-wrap: wrap;
+    background-color: #F9F9F7;
+    width: 100% !important;
+}
+
+/* Container 1: First filters row */
+.flex-daily-report-container-1>.filter-item:nth-child(n+1):nth-child(-n+2) {
+    flex: 0 0 35% !important;
+    padding-right: 16px !important;
+}
+
+.flex-daily-report-container-1>.filter-item:nth-child(3) {
+    flex: 0 0 15% !important;
+    padding-right: 16px !important
+}
+
+.flex-daily-report-container-1>.filter-item:nth-child(4) {
+    flex: 0 0 15% !important;
+    padding-right: 0px !important;
+}
+
+/* Container 2: Second and third filters row */
+.flex-daily-report-container-2>.filter-item:nth-child(1) {
+    flex: 0 0 15% !important;
+    padding-right: 16px !important;
+}
+
+.flex-daily-report-container-2>.filter-item:nth-child(2) {
+    flex: 0 0 27.5% !important;
+    padding-right: 16px !important;
+}
+
+.flex-daily-report-container-2>.filter-item:nth-child(3) {
+    flex: 0 0 10% !important;
+    padding-right: 16px !important;
+}
+
+.flex-daily-report-container-2>.filter-item:nth-child(n+4):nth-child(-n+5) {
+    flex: 0 0 10% !important;
+    padding-right: 16px !important;
+}
+
+.flex-daily-report-container-2>.filter-item:nth-child(6) {
+    flex: 0 0 27.5% !important;
+}
+
+.flex-daily-report-container-2>.filter-item:nth-child(n+7):nth-child(-n+9) {
+    flex: 0 0 25% !important;
+    padding-right: 16px !important;
+}
+
+.flex-daily-report-container-2>.filter-item:nth-child(10) {
+    flex: 0 0 25% !important;
+    padding-right: 0px !important;
+}
+
+.flex-daily-report-container-2>.filter-item-button {
+    display: flex;
+    flex: 1;
+    flex-direction: column !important;
+    flex-direction: row;
+    padding-right: 0px !important;
+    align-items: flex-end !important;
+    padding-top: 24px !important;
+}
+
 @media (min-width: 801px) and (max-width:1485px) {
     .flex-job-filters {
         justify-content: space-between;

@@ -4,9 +4,8 @@ import ReactCountryFlag from 'react-country-flag';
 import i18n from 'i18next';
 import { useTranslation } from 'react-i18next';
 import SidebarLink from './SidebarLink';
-// import SidebarCategory from './SidebarCategory';
-// import ThemeTogglerButton from '../../App';
-// import ThemeContext from '../../ThemeContext';
+import SidebarCategory from './SidebarCategory';
+import './Sidebar.css';
 
 
 function SideElement ({title, icon, route, custom, handle}) {
@@ -31,7 +30,6 @@ class SidebarCustomerContent extends Component {
     this.hideSidebar = this.hideSidebar.bind(this);
   }
 
-
   hideSidebar() {
     const { onClick } = this.props;
     onClick();
@@ -39,51 +37,72 @@ class SidebarCustomerContent extends Component {
 
   render() {
     let { isAdmin } = this.props;
+    isAdmin = true;
+    console.log("TCL: render -> isAdmin", isAdmin);
     return (
-      <div className="sidebar__content">
-        <SideElement
-          title="Job Dashboard"
-          icon="ic_assignment"
-          route="/"
-          handle={this.hideSidebar}
-        />
-        <SideElement
-          title="Carrier Search"
-          icon="ic_supervised_user_circle"
-          route="/carrierslist"
-          handle={this.hideSidebar}
-        />
+      <React.Fragment>
+        <div className="sidebar__content">
+          <SideElement
+            title="Job Dashboard"
+            icon="ic_assignment"
+            route="/"
+            handle={this.hideSidebar}
+          />
+          <SideElement
+            title="Carrier Search"
+            icon="ic_supervised_user_circle"
+            route="/carrierslist"
+            handle={this.hideSidebar}
+          />
+          {
+            isAdmin && (
+              <React.Fragment>
+                <SideElement
+                  title="Truck Locator"
+                  icon="ic_map"
+                  route="/generalmap"
+                  onClick={this.hideSidebar}
+                />
+                <SideElement
+                  title="Charges"
+                  icon="ic_attach_money"
+                  route="/payments"
+                  handle={this.hideSidebar}
+                />
+                <SideElement
+                  title="Addresses"
+                  icon="ic_home_work"
+                  route="/company/addresses"
+                  handle={this.hideSidebar}
+                />
+              </React.Fragment>
+            )
+          }
+        </div>
         {
           isAdmin && (
-            <React.Fragment>
-              <SideElement
-                title="Truck Locator"
-                icon="ic_map"
-                route="/generalmap"
-                onClick={this.hideSidebar}
-              />
-              <SideElement
-                title="Charges"
-                icon="ic_attach_money"
-                route="/payments"
-                handle={this.hideSidebar}
-              />
-              <SideElement
-                title="Addresses"
-                icon="ic_home_work"
-                route="/company/addresses"
-                handle={this.hideSidebar}
-              />
-            </React.Fragment>
+            <div className="sidebar__content reports">
+              <ul className="sidebar__block">
+                <SidebarCategory
+                  title="Reporting"
+                  icon="ic_assessment"
+                >
+                  <SidebarLink
+                    title="Daily Report"
+                    route="/reports/dailyreport"
+                    onClick={this.hideSidebar}
+                  />
+                  <SidebarLink
+                    title="Comparison Report"
+                    route="/reports/comparison"
+                    onClick={this.hideSidebar}
+                  />
+                </SidebarCategory>
+              </ul>
+            </div>
           )
         }
-        <SideElement
-          title="Reporting"
-          icon="ic_timeline"
-          route="/Reports"
-          handle={this.hideSidebar}
-        />
-      </div>
+      </React.Fragment>
     );
   }
 }
