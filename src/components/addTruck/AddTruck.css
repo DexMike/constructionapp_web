@@ -69,11 +69,18 @@ p, h1, h2, h3, h4, h5, h6 {
 */
 
 .wizard__step{
-    cursor: pointer;
+  cursor: pointer;
 }
-.wizard__step--active{
-    cursor: default;
+
+.wizard__step--disabled {
+  cursor: pointer;
+  background-color: rgb(203, 203, 203);
 }
+
+.wizard__step--active {
+  cursor: default;
+}
+
 .btn-toolbar:last-child {
     margin-top: 0px !important;
 }

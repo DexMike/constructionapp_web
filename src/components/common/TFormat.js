@@ -21,6 +21,70 @@ class TFormat {
     );
   }
 
+  // takes an integer (no floats) and separates thousands with commas
+  static asIntegerCommaSeperated(input) {
+    return input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // returns float with one leadings zero if no value before decimal point
+  // and two 0s as decimal values if no decimal specified
+  static asFloatOneLeadingZero(inputValue) {
+    let value = inputValue;
+    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    // debugger;
+    const onlyZeros = /^0+$/;
+    if (!value.match(onlyZeros)) {
+      value = value.replace(/^0+/, '');
+      if (value.charAt(0) === '.') {
+        value = `0${value}`;
+      }
+    } else {
+      value = '0';
+    }
+    const parts = value.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  }
+
+  // gives a value (that is already a valid float) two decimals if none are found
+  // or cuts to two decimals points
+  static asFloatTwoDecimals(inputValue) {
+    let value = inputValue;
+    if (!value.toString().includes('.')) {
+      if (value.toString() === '') {
+        value = '0.00';
+      } else {
+        value = `${value}.00`;
+      }
+    } else {
+      const afterPeriod = value.split('.').pop();
+      if (afterPeriod.length === 0) {
+        value = `${value}00`;
+      } else if (afterPeriod.length === 1) {
+        value = `${value}0`;
+      } else if (afterPeriod.length > 2) {
+        value = parseFloat(value).toFixed(2);
+      }
+    }
+    return value;
+  }
+
+  static asIntegerNoLeadingZeros(inputValue) {
+    let value = inputValue;
+    value = value.replace(/\D/g, '');
+    const onlyZeros = /^0+$/;
+    if (!value.match(onlyZeros)) {
+      value = value.replace(/^0+/, '');
+      if (value.charAt(0) === '.') {
+        value = `0${value}`;
+      }
+    } else {
+      value = '0';
+    }
+    const formattedWithCommas = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return formattedWithCommas;
+  }
+
   static asMoneyNoDecimals(inputValue) {
     return (
       <NumberFormat
@@ -158,18 +222,8 @@ class TFormat {
       return phoneNumberString;
     }
 
-    input = input.substring(0, 10);
-
-    const size = input.length;
-    if (size == 0) {
-      input = input;
-    } else if (size < 4) {
-      input = '(' + input;
-    } else if (size < 7) {
-      input = '(' + input.substring(0, 3) + ') ' + input.substring(3, 6);
-    } else {
-      input = '(' + input.substring(0, 3) + ') ' + input.substring(3, 6) + ' - ' + input.substring(6, 10);
-    }
+    input = input.substring(input.length - 10, input.length); // remove the country code 1
+    input = `(${input.substring(0, 3)}) ${input.substring(3, 6)} -  ${input.substring(6, 10)}`;
     return input;
   }
 
@@ -337,17 +391,6 @@ class TFormat {
     );
   }
 
-  static asSecondsToHms(inputValue) {
-    const h = Math.floor(inputValue / 3600);
-    const m = Math.floor((inputValue % 3600) / 60);
-    const s = Math.floor(inputValue % 3600 % 60);
-
-    const hDisplay = h > 0 ? h + (h === 1 ? ' hour, ' : ' hours, ') : '';
-    const mDisplay = m > 0 ? m + (m === 1 ? ' minute, ' : ' minutes, ') : '';
-    const sDisplay = s > 0 ? s + (s === 1 ? ' second' : ' seconds') : '';
-    return hDisplay + mDisplay + sDisplay;
-  }
-
   materialsAsString(materials) {
     let materialsString = '';
     if (materials) {
@@ -369,6 +412,104 @@ class TFormat {
       return `${formatted.props.prefix}${formatted.props.value}${formatted.props.suffix}`;
     }
     return '';
+  }
+
+  static formatNumber(number) {
+    if (number) {
+      return Math.floor(number)
+        .toString()
+        .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+    } else {
+      return "0";
+    }
+  }
+
+  static formatPercent(number) {
+    if (number) {
+      let n = parseFloat(number)
+        .toFixed(2)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return String(n) + " %";
+    } else {
+      return "0.00 %";
+    }
+  }
+
+  static formatNumberDecimal(number) {
+    if (number) {
+      return parseFloat(number)
+        .toFixed(2)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    } else {
+      return "0.00";
+    }
+  }
+
+  // AG-Grid formatters
+  static formatCurrency(
+    num,
+    locale = 'en-US',
+    currency = 'USD',
+    minimumFractionDigits = 2) {
+    if (isNaN(num)) {
+      return num;
+    }
+    return num.toLocaleString(locale, {style: 'currency', currency, minimumFractionDigits});
+  }
+
+  static currencyFormatter(value) {
+    if (value) {
+      return '$ ' + value.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    } else {
+      return "$ 0.00";
+    }
+  }
+
+  static currencyFormatterRound(value) {
+    if (value) {
+      const val = Math.round(value);
+      try {
+        return '$ ' + String(val).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+      } catch (e) {
+        console.log("TCL: ERROR:", e);
+      }
+    }
+    return '$ 0';
+  }
+
+  static asSecondsToHms(inputValue) {
+    const h = Math.floor(inputValue / 3600);
+    const m = Math.floor((inputValue % 3600) / 60);
+    const s = Math.floor(inputValue % 3600 % 60);
+
+    const hDisplay = h > 0 ? h + (h === 1 ? ' hour ' : ' hours ') : '';
+    const mDisplay = m > 0 ? m + (m === 1 ? ' minute ' : ' minutes ') : '';
+    const sDisplay = s > 0 ? s + (s === 1 ? ' second' : ' seconds') : '';
+
+    return hDisplay + mDisplay + sDisplay;
+  }
+
+  static asMinutesToHms(inputValue) {
+    let t = this.asSecondsToHms(inputValue * 60);
+    return (this.asSecondsToHms(inputValue * 60));
+  }
+
+  static asMinutesToDHms(seconds) {
+    if (seconds) {
+      seconds = Number(seconds);
+      const d = Math.floor(seconds / (3600 * 24));
+      const h = Math.floor(seconds % (3600*24) / 3600);
+      const m = Math.floor(seconds % 3600 / 60);
+
+      const dDisplay = d > 0 ? d + (d === 1 ? ' day ' : ' days ') : '';
+      const hDisplay = h > 0 ? h + (h === 1 ? ' hour ' : ' hours ') : '';
+      const mDisplay = m > 0 ? m + (m === 1 ? ' minute ' : ' minutes ') : '';
+      // const sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+      return dDisplay + hDisplay + mDisplay;
+    }
+    return '0';
   }
 }
 

@@ -1,0 +1,12 @@
+.sidebar__content > div:last-child div {
+  opacity: 1 !important;
+}
+
+.top_title {
+  top: 6px !important;
+}
+
+.reports {
+  padding-top: 0px !important;
+}
+

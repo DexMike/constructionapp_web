@@ -9,6 +9,7 @@ import {
   Card,
   CardBody, ButtonToolbar, Button
 } from 'reactstrap';
+import CloneDeep from 'lodash.clonedeep';
 import JobMaterials from './JobWizardTabs/JobMaterials';
 import PickupAndDelivery from './JobWizardTabs/PickupAndDelivery';
 import TruckSpecs from './JobWizardTabs/TruckSpecs';
@@ -29,6 +30,7 @@ import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
 import UserUtils from '../../api/UtilsService';
 import UserService from '../../api/UserService';
+import GeoUtils from "../../utils/GeoUtils";
 
 class JobWizard extends Component {
   constructor(props) {
@@ -53,8 +55,8 @@ class JobWizard extends Component {
       },
       tabMaterials: {
         quantityType: 'Ton',
-        estMaterialPricing: 0,
-        quantity: 0,
+        estMaterialPricing: '0.00',
+        quantity: '0',
         allMaterials: [],
         selectedMaterial: {
           value: '',
@@ -81,12 +83,7 @@ class JobWizard extends Component {
         favoriteAdminTels: []
       },
       tabSummary: {
-        instructions: '',
-        startGPS: null,
-        endGPS: null,
-        avgDistanceEnroute: 0,
-        avgTimeEnroute: 0,
-
+        instructions: ''
       },
       tabPickupDelivery: {
         allUSstates: [],
@@ -109,10 +106,12 @@ class JobWizard extends Component {
         startLocationZip: '',
         startLocationLatitude: null,
         startLocationLongitude: null,
-        avgDistanceEnroute: 0,
-        avgDistanceReturn: 0,
-        avgTimeEnroute: 0,
-        avgTimeReturn: 0,
+        avgDistanceEnroute: 0.00,
+        avgDistanceReturn: 0.00,
+        avgTimeEnroute: 0.00,
+        avgTimeReturn: 0.00,
+        startGPS: null,
+        endGPS: null,
         reqHandlerSameAddresses: {
           touched: false,
           error: ''
@@ -169,31 +168,33 @@ class JobWizard extends Component {
       },
       tabHaulRate: {
         payType: 'Ton',
-        ratePerPayType: 0,
+        ratePerPayType: '0.00',
         rateCalcOpen: false,
-        avgDistanceEnroute: 0,
-        avgDistanceReturn: 0,
-        avgTimeEnroute: 0,
-        avgTimeReturn: 0,
+        avgDistanceEnroute: 0.00,
+        avgDistanceReturn: 0.00,
+        avgTimeEnroute: 0.00,
+        avgTimeReturn: 0.00,
         rateCalculator: {
           estimateTypeRadio: 'ton',
           rateTypeRadio: 'ton',
           estimatedTons: 0,
           estimatedHours: 10,
-          ratePerTon: 0,
-          ratePerHour: 0,
+          ratePerTon: '0.00',
+          ratePerHour: '0.00',
           invalidAddress: false,
           truckCapacity: 22,
-          travelTimeEnroute: 0,
-          travelTimeReturn: 0,
-          loadTime: 0,
-          unloadTime: 0
+          travelTimeEnroute: '0.00',
+          travelTimeReturn: '0.00',
+          loadTime: '0.00',
+          unloadTime: '0.00',
+          oneWayCostTonMile: '0.00',
+          twoWayCostMile: '0.00'
         }
       },
       page: 1,
       job: [],
       loaded: false,
-      profile: [],
+      profile: []
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -225,12 +226,19 @@ class JobWizard extends Component {
     this.clearValidationLabels = this.clearValidationLabels.bind(this);
     this.checkPhoneFormat = this.checkPhoneFormat.bind(this);
     this.phoneToNumberFormat = this.phoneToNumberFormat.bind(this);
+    this.validateMaterialsTab = this.validateMaterialsTab.bind(this);
+    this.validateTruckSpecsTab = this.validateTruckSpecsTab.bind(this);
+    this.validateHaulRateTab = this.validateHaulRateTab.bind(this);
+    this.validateStartAddress = this.validateStartAddress.bind(this);
+    this.validateEndAddress = this.validateEndAddress.bind(this);
+    this.validateForm = this.validateForm.bind(this);
+    this.validateTopForm = this.validateTopForm.bind(this);
   }
 
   async componentDidMount() {
-    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate} = this.state;
+    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate, tabSummary} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
-    const {jobEdit} = this.props;
+    const {jobEdit, jobEditSaved, copyJob} = this.props;
 
     let truckTypes;
     try {
@@ -249,8 +257,14 @@ class JobWizard extends Component {
       });
     tabTruckSpecs.allTruckTypes = allTruckTypes;
 
+    let profile;
+    try {
+      profile = await ProfileService.getProfile();
+    } catch (err) {
+      console.error(err);
+    }
 
-    if (jobEdit) {
+    if (jobEdit || jobEditSaved || copyJob) {
       const {job} = this.props;
       // populate form with job data
       if (job) {
@@ -259,7 +273,6 @@ class JobWizard extends Component {
         jobStartDate = job.startTime;
         jobEndDate = job.endTime;
         poNumber = job.poNumber;
-
         // populate tabMaterials
         let materials;
         try {
@@ -267,14 +280,85 @@ class JobWizard extends Component {
         } catch (err) {
           console.error(err);
         }
-        tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
-        tabMaterials.estMaterialPricing = job.estMaterialPricing;
+        if (materials && materials.length > 0) {
+          tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
+        }
+
+        tabSummary.instructions = !job.notes ? '' : job.notes;
+
+        tabMaterials.estMaterialPricing = !job.estMaterialPricing ? '0.00' : job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
-        tabMaterials.quantity = job.rateEstimate;
+        tabMaterials.quantity = !job.rateEstimate ? '0.00' : job.rateEstimate;
+
+        // PICKUP AND DELIVERY TAB DATA
+        // addresses
+        let addressesResponse;
+        try {
+          addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
+        } catch (err) {
+          console.error(err);
+        }
+        const allAddresses = addressesResponse.data.map(address => ({
+          value: String(address.id),
+          label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
+        }));
+        tabPickupDelivery.allAddresses = allAddresses;
+        // US states
+        let states;
+        try {
+          states = await LookupsService.getLookupsByType('States');
+        } catch (err) {
+          console.error(err);
+        }
+        states = states.map(state => ({
+          value: String(state.val1),
+          label: state.val1
+        }));
+
+        tabPickupDelivery.allUSstates = states;
 
         // populate pickup/delivery tab
         tabPickupDelivery.selectedStartAddressId = job.startAddress.id.toString();
         tabPickupDelivery.selectedEndAddressId = job.endAddress.id.toString();
+
+        const startAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
+        const startString = startAddress.label;
+
+        const endAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
+        const endString = endAddress.label;
+
+        let startCoordinates;
+        let endCoordinates;
+        try {
+          startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
+          endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
+        } catch (err) {
+          console.error(err);
+        }
+
+        if (startCoordinates) {
+          tabPickupDelivery.startGPS = startCoordinates;
+          tabPickupDelivery.startLocationLatitude = startCoordinates.lat;
+          tabPickupDelivery.startLocationLongitude = startCoordinates.lng;
+        }
+
+        if (endCoordinates) {
+          tabPickupDelivery.endGPS = endCoordinates;
+          tabPickupDelivery.endLocationLatitude = endCoordinates.lat;
+          tabPickupDelivery.endLocationLongitude = endCoordinates.lng;
+        }
+
+        if (tabPickupDelivery.startLocationLatitude && tabPickupDelivery.startLocationLongitude
+          && tabPickupDelivery.endLocationLatitude && tabPickupDelivery.endLocationLongitude) {
+          const waypoint0 = `${tabPickupDelivery.startLocationLatitude},${tabPickupDelivery.startLocationLongitude}`;
+          const waypoint1 = `${tabPickupDelivery.endLocationLatitude},${tabPickupDelivery.endLocationLongitude}`;
+          const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);
+          const travelInfoReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+          tabPickupDelivery.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
+          tabPickupDelivery.avgDistanceReturn = (travelInfoReturn.distance * 0.000621371192).toFixed(2);
+          tabPickupDelivery.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
+          tabPickupDelivery.avgTimeReturn = (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
+        }
 
         // populate truck specs
         tabTruckSpecs.truckQuantity = job.numEquipments;
@@ -298,15 +382,8 @@ class JobWizard extends Component {
 
         // populate haul rate tab
         tabHaulRate.payType = job.rateType;
-        tabHaulRate.ratePerPayType = job.rate;
+        tabHaulRate.ratePerPayType = !job.rate ? '0.00' : job.rate;
       }
-    }
-
-    let profile;
-    try {
-      profile = await ProfileService.getProfile();
-    } catch (err) {
-      console.error(err);
     }
 
     // MATERIAL TAB DATA
@@ -322,33 +399,6 @@ class JobWizard extends Component {
     }));
 
     tabMaterials.allMaterials = allMaterials;
-
-    // PICKUP AND DELIVERY TAB DATA
-    // addresses
-    let addressesResponse;
-    try {
-      addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
-    } catch (err) {
-      console.error(err);
-    }
-    const allAddresses = addressesResponse.data.map(address => ({
-      value: String(address.id),
-      label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
-    }));
-    tabPickupDelivery.allAddresses = allAddresses;
-    // US states
-    let states;
-    try {
-      states = await LookupsService.getLookupsByType('States');
-    } catch (err) {
-      console.error(err);
-    }
-    states = states.map(state => ({
-      value: String(state.val1),
-      label: state.val1
-    }));
-
-    tabPickupDelivery.allUSstates = states;
 
     // TRUCK SPECS TAB DATA
 
@@ -369,7 +419,6 @@ class JobWizard extends Component {
     //     });
     //     mapSelectedTruckTypes.push(inside);
     //   });
-
 
     this.setState({
       profile,
@@ -426,6 +475,13 @@ class JobWizard extends Component {
     });
   }
 
+  async validateTopForm() {
+    const isValid = await this.validateSend();
+    if (isValid) {
+      await this.sixthPage();
+    }
+  }
+
   validateMaterialsPage() {
     this.clearValidationMaterialsPage();
     const {tabMaterials} = {...this.state};
@@ -457,6 +513,95 @@ class JobWizard extends Component {
     return isValid;
   }
 
+  validateMaterialsTab() {
+    const {tabMaterials} = {...this.state};
+    const val = [];
+    if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.value === '') {
+      val.push('Material Type');
+    }
+    if (!tabMaterials.quantity || tabMaterials.quantity <= 0) {
+      if (tabMaterials.quantityType === 'Hour') {
+        val.push('Estimated Hours');
+      } else {
+        val.push('Estimated Tons');
+      }
+    }
+    return val;
+  }
+
+  validateTruckSpecsTab() {
+    const {tabTruckSpecs} = {...this.state};
+    const val = [];
+    if (!tabTruckSpecs.selectedTruckTypes || tabTruckSpecs.selectedTruckTypes.length === 0) {
+      val.push('At least one truck type');
+    }
+    return val;
+  }
+
+  validateHaulRateTab() {
+    const {tabHaulRate} = {...this.state};
+    const val = [];
+    if (!tabHaulRate.ratePerPayType || tabHaulRate.ratePerPayType <= 0) {
+      val.push('Missing haul rate');
+    }
+    return val;
+  }
+
+  validateStartAddress() {
+    const {tabPickupDelivery} = {...this.state};
+    // const {startGPS} = {...this.state};
+    const val = [];
+    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
+      if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
+        && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
+        val.push('Same start and end addresses');
+      }
+      if (tabPickupDelivery.startLocationAddress1.length === 0
+        || tabPickupDelivery.startLocationCity.length === 0
+        || tabPickupDelivery.startLocationZip.length === 0
+        || tabPickupDelivery.startLocationState.length === 0) {
+        val.push('Missing start address fields');
+      }
+    }
+
+    if (val.length > 0) {
+      return val;
+    }
+
+    if (!tabPickupDelivery.startGPS || !tabPickupDelivery.startGPS.lat
+      || !tabPickupDelivery.startGPS.lng) {
+      val.push('Invalid start address');
+    }
+    return val;
+  }
+
+  validateEndAddress() {
+    const {tabPickupDelivery} = {...this.state};
+    const val = [];
+    // const {endGPS} = {...this.state};
+
+    if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
+
+      if (tabPickupDelivery.endLocationAddress1.length === 0
+        || tabPickupDelivery.endLocationCity.length === 0
+        || tabPickupDelivery.endLocationZip.length === 0
+        || tabPickupDelivery.endLocationState.length === 0) {
+        val.push('Missing end address fields');
+      }
+    }
+
+    if (val.length > 0) {
+      return val;
+    }
+
+    if (!tabPickupDelivery.endGPS || !tabPickupDelivery.endGPS.lat
+      || !tabPickupDelivery.endGPS.lng) {
+      val.push('Invalid end address');
+    }
+
+    return val;
+  }
+
   clearValidationMaterialsPage() {
     const {
       tabMaterials
@@ -468,23 +613,23 @@ class JobWizard extends Component {
     });
   }
 
-  // updateJobView(newJob) {
-  //   const {updateJobView, updateCopiedJob} = this.props;
-  //   if (newJob.copiedJob) {
-  //     updateCopiedJob(newJob);
-  //   }
-  //   if (updateJobView) {
-  //     updateJobView(newJob, null);
-  //   }
-  // }
-  //
-  //
   updateJobView(newJob) {
-    const {updateJobView} = this.props;
+    const {updateJobView, updateCopiedJob} = this.props;
+    if (newJob.copiedJob) {
+      updateCopiedJob(newJob);
+    }
     if (updateJobView) {
       updateJobView(newJob, null);
     }
   }
+
+  //
+  // updateJobView(newJob) {
+  //   const {updateJobView} = this.props;
+  //   if (updateJobView) {
+  //     updateJobView(newJob, null);
+  //   }
+  // }
 
   handleInputChange(e) {
     if (e.target.name === 'name') {
@@ -945,7 +1090,7 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, selectedCarrierId, job} = this.props;
+    const {jobRequest, jobEdit, selectedCarrierId, job, copyJob} = this.props;
     this.setState({btnSubmitting: true});
     // All validations happen by the summary page
 
@@ -1067,7 +1212,6 @@ class JobWizard extends Component {
     // const rateTotal = Math.round(calcTotal * 100) / 100;
 
     jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
-
     const jobCreate = {
       companiesId: profile.companyId,
       name,
@@ -1085,18 +1229,17 @@ class JobWizard extends Component {
       ).utc().format(),
       numEquipments: tabTruckSpecs.truckQuantity,
       rateType,
-      rate,
+      rate: rate.toString().replace(/,/g, ''),
       amountType,
-      rateEstimate,
+      rateEstimate: rateEstimate.toString().replace(/,/g, ''),
       poNumber,
-      estMaterialPricing: tabMaterials.estMaterialPricing,
+      estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
       notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
       modifiedOn: moment.utc().format()
     };
-
     let newJob;
     try {
       if (jobEdit) {
@@ -1125,6 +1268,13 @@ class JobWizard extends Component {
 
     if (jobEdit) {
       this.setState({ btnSubmitting: false });
+      this.updateJobView(newJob);
+      this.closeNow();
+      return;
+    }
+    if (copyJob) {
+      newJob.copiedJob = true;
+      this.updateJobView(newJob);
       this.closeNow();
       return;
     }
@@ -1139,9 +1289,9 @@ class JobWizard extends Component {
       // bid.startAddress = createdJob.startAddress;
       // bid.endAddress = createdJob.endAddress;
       bid.companyCarrierId = selectedCarrierId;
-      bid.rate = rate;
+      bid.rate = rate.toString().replace(/,/g, '');
       bid.rateType = rateType;
-      bid.rateEstimate = rateEstimate;
+      bid.rateEstimate = rateEstimate.toString().replace(/,/g, '');
       bid.hasCustomerAccepted = 1;
       bid.hasSchedulerAccepted = 0;
       bid.status = 'Pending';
@@ -1258,7 +1408,7 @@ class JobWizard extends Component {
             status: 'New',
             rateType,
             rate: 0,
-            rateEstimate,
+            rateEstimate: rateEstimate.toString().replace(/,/g, ''),
             notes: tabSummary.instructions,
             createdBy: profile.userId,
             createdOn: moment.utc().format(),
@@ -1349,12 +1499,13 @@ class JobWizard extends Component {
       // }
     }
     this.setState({ btnSubmitting: false });
-
+    this.updateJobView(newJob);
     this.closeNow();
   }
 
   // Used to either store a Copied or 'Saved' job to the database
   async saveJobDraft() {
+    const {jobEdit, jobEditSaved, job} = this.props;
     const {profile, tabPickupDelivery, tabHaulRate, tabMaterials, name, tabTruckSpecs, tabSummary} = this.state;
     let {jobStartDate, jobEndDate} = this.state;
     // start location
@@ -1436,8 +1587,17 @@ class JobWizard extends Component {
 
     // const calcTotal = d.rateEstimate * rate;
     // const rateTotal = Math.round(calcTotal * 100) / 100;
+    let jobStartDateForm = null;
+    if (jobStartDate) {
+      jobStartDateForm = new Date(jobStartDate);
+    }
 
-    if (jobStartDate && Object.prototype.toString.call(jobStartDate) === '[object Date]') {
+    let jobEndDateForm = null;
+    if (jobEndDate) {
+      jobEndDateForm = new Date(jobEndDate);
+    }
+
+    if (jobStartDate && jobStartDateForm && Date.parse(jobStartDateForm)) {
       jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
       jobStartDate = moment.tz(
         jobStartDate,
@@ -1447,7 +1607,7 @@ class JobWizard extends Component {
       jobStartDate = '';
     }
 
-    if (jobEndDate && Object.prototype.toString.call(jobStartDate) === '[object Date]') {
+    if (jobEndDate && jobEndDateForm && Date.parse(jobEndDateForm)) {
       jobEndDate = moment(jobEndDate).format('YYYY-MM-DD HH:mm');
       jobEndDate = moment.tz(
         jobEndDate,
@@ -1457,7 +1617,7 @@ class JobWizard extends Component {
       jobEndDate = '';
     }
 
-    const job = {
+    const jobDraft = {
       companiesId: profile.companyId,
       name,
       status: 'Saved',
@@ -1466,11 +1626,11 @@ class JobWizard extends Component {
       startTime: jobStartDate,
       endTime: jobEndDate,
       numEquipments: tabTruckSpecs.truckQuantity,
-      estMaterialPricing: tabMaterials.estMaterialPricing,
+      estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
       rateType,
-      rate,
+      rate: rate.toString().replace(/,/g, ''),
       amountType,
-      rateEstimate,
+      rateEstimate: rateEstimate.toString().replace(/,/g, ''),
       notes: tabSummary.instructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
@@ -1478,22 +1638,21 @@ class JobWizard extends Component {
       modifiedOn: moment.utc().format()
     };
 
-    // let newJob = [];
-    // if (d.job.id) { // UPDATING 'Saved' JOB
-    //   newJob = CloneDeep(job);
-    //   newJob.id = d.job.id;
-    //   delete newJob.createdBy;
-    //   delete newJob.createdOn;
-    //   await JobService.updateJob(newJob);
-    // } else { // CREATING NEW 'Saved' JOB
-    //   newJob = await JobService.createJob(job);
-    // }
-    let newJob;
-    try {
-      newJob = await JobService.createJob(job); // creating new saved job
-    } catch (err) {
-      console.error(err);
+    let newJob = [];
+    if (jobEdit || jobEditSaved) { // UPDATING 'Saved' JOB
+      newJob = CloneDeep(jobDraft);
+      newJob.id = job.id;
+      delete newJob.createdBy;
+      delete newJob.createdOn;
+      newJob = await JobService.updateJob(newJob);
+    } else { // CREATING NEW 'Saved' JOB
+      try {
+        newJob = await JobService.createJob(jobDraft); // creating new saved job
+      } catch (err) {
+        console.error(err);
+      }
     }
+
 
     // add material
     if (newJob) {
@@ -1505,6 +1664,7 @@ class JobWizard extends Component {
       }
     }
 
+    this.updateJobView(newJob);
     this.closeNow();
 
     // GO TO NEW JOB
@@ -1540,8 +1700,30 @@ class JobWizard extends Component {
     this.setState({page});
   }
 
+  validateForm() {
+    const materialTabValidations = this.validateMaterialsTab();
+    const truckSpecsTabValidations = this.validateTruckSpecsTab();
+    const haulRateTabValidations = this.validateHaulRateTab();
+    const startAddressValidations = this.validateStartAddress();
+    const endAddressValidations = this.validateEndAddress();
+    const valid = materialTabValidations.length === 0
+      && truckSpecsTabValidations.length === 0
+      && haulRateTabValidations.length === 0
+      && startAddressValidations.length === 0
+      && endAddressValidations.length === 0;
+    const validationResponse = {
+      valid,
+      materialTabValidations,
+      truckSpecsTabValidations,
+      haulRateTabValidations,
+      startAddressValidations,
+      endAddressValidations
+    };
+    return validationResponse;
+  }
+
   goBack() {
-    const {page} = this.state
+    const {page} = this.state;
     this.setState({page: page - 1});
   }
 
@@ -1595,6 +1777,7 @@ class JobWizard extends Component {
       page,
       loaded
     } = this.state;
+    const validateResponse = this.validateForm();
     if (loaded) {
       return (
         <div className="wizard__steps">
@@ -1649,8 +1832,8 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            // onClick={this.sixthPage}
-            className={`wizard__step${page === 6 ? ' wizard__step--active' : ''}`}
+            onClick={validateResponse.valid ? this.validateTopForm : null}
+            className={`wizard__step${!validateResponse.valid ? ' wizard__step--disabled' : ''}${page === 6 ? ' wizard__step--active ' : ''}`}
           >
             <p>Send</p>
           </div>
@@ -1911,6 +2094,13 @@ class JobWizard extends Component {
                             validateSend={this.validateSend}
                             jobRequest={jobRequest}
                             jobEdit={jobEdit}
+                            validateMaterialsTab={this.validateMaterialsTab}
+                            validateTruckSpecsTab={this.validateTruckSpecsTab}
+                            validateHaulRateTab={this.validateHaulRateTab}
+                            validateStartAddress={this.validateStartAddress}
+                            validateEndAddress={this.validateEndAddress}
+                            validateForm={this.validateForm}
+                            validateTopForm={this.validateTopForm}
                           />}
                           {(page === 6 && !jobEdit)
                           && <SendJob
@@ -1995,13 +2185,19 @@ JobWizard.propTypes = {
   selectedCarrierId: PropTypes.number,
   jobRequest: PropTypes.bool,
   jobEdit: PropTypes.bool,
-  job: PropTypes.object
+  copyJob: PropTypes.bool,
+  jobEditSaved: PropTypes.bool,
+  job: PropTypes.object,
+  updateJobView: PropTypes.func.isRequired,
+  updateCopiedJob: PropTypes.func.isRequired
 };
 
 JobWizard.defaultProps = {
   selectedCarrierId: null,
   jobRequest: false,
   jobEdit: false,
+  jobEditSaved: false,
+  copyJob: false,
   job: null
 };
 

@@ -66,6 +66,11 @@ class EquipmentService extends AgentService {
     const response = await this.delete(PATH, id);
     return (response);
   }
+
+  static async checkExternalEquipmentNumber(equipment) {
+    const response = await this.post(`${PATH}/check-external-number`, equipment);
+    return response;
+  }
 }
 
 export default EquipmentService;

@@ -142,7 +142,7 @@ class DriverForm extends Component {
   }
 
   async saveUser() {
-    const {toggle, currentUser} = this.props;
+    const {toggle, currentUser, onSuccess} = this.props;
     this.setState({btnSubmitting: true});
     const isValid = await this.isFormValid();
     if (!isValid) {
@@ -189,9 +189,14 @@ class DriverForm extends Component {
       driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
       driver.createdOn = moment.utc().format();
-      // we are not seeting driver id to user record.. we should do that here
-      await DriverService.createDriver(driver);
-      this.sendDriverInvite(user);
+      // we are not seeing driver id to user record.. we should do that here
+      try {
+        await DriverService.createDriver(driver);
+        await this.sendDriverInvite(user);
+      } catch (err) {
+        console.error('Failed to created driver / notify driver invited');
+      }
+      onSuccess(user, driver);
       this.setState({step: 2, selectedUser: user});
     }
   }
@@ -551,7 +556,8 @@ DriverForm.propTypes = {
       id: PropTypes.string
     })
   }),
-  driverId: PropTypes.number
+  driverId: PropTypes.number,
+  onSuccess: PropTypes.func
 };
 
 DriverForm.defaultProps = {
@@ -559,7 +565,8 @@ DriverForm.defaultProps = {
   match: {
     params: {}
   },
-  driverId: 0
+  driverId: 0,
+  onSuccess: () => {}
 };
 
 export default DriverForm;
