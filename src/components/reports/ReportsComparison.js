@@ -492,7 +492,8 @@ class ReportsComparison extends Component {
       obj.headerTooltip = 'Average costs per hour for this time period';
     }*/
     if (obj.field === 'avgEarningsJobComparison') {
-      obj.headerName = 'Avg. Cost/Job';
+      // obj.headerName = 'Avg. Cost/Job';
+      obj.headerName = 'Cost per Ton Mile';
       obj.headerTooltip = 'Average costs per job for this time period';
     }
     if (obj.field === 'avgEarningsTonComparison') {
@@ -805,6 +806,11 @@ class ReportsComparison extends Component {
 
   renderTable(columns, defaultData, data, onGridReady) {
     let newData = data;
+    let colHeight = 28;
+    const { activeTab } = this.state;
+    if (Number(activeTab) !== 1) {
+      colHeight = 60;
+    }
     return (
       <AgGridReact
         columnDefs={columns}
@@ -815,7 +821,7 @@ class ReportsComparison extends Component {
         paginationPageSize={15}
         pagination
         domLayout="print"
-        rowHeight={60}
+        rowHeight={colHeight}
         style={{ width: '2000px' }}
       />
     )
