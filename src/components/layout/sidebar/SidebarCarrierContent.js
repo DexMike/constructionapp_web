@@ -36,7 +36,7 @@ class SidebarCarrierContent extends Component {
 
   render() {
     const { isAdmin } = this.props;
-    console.log("TCL: render -> isAdmin", isAdmin)
+    // console.log("TCL: render -> isAdmin", isAdmin)
     return (
       <React.Fragment>
         <div className="sidebar__content">
