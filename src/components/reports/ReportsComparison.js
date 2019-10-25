@@ -173,6 +173,14 @@ class ReportsComparison extends Component {
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
         }, {
+          field: 'totalLoadsComparison',
+          headerName: '# of Loads',
+          headerTooltip: "Total number of loads for this time period",
+          // renderer
+          // enableValue: true,
+          cellRendererFramework: BarRenderer,
+          filterFramework: BarFilter
+        }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
           headerTooltip: "Total number of tons delivered for this time period",
@@ -188,7 +196,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }*/, {
+        }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
@@ -196,7 +204,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }, {
+        }*/, {
           field: 'avgEarningsTonComparison',
           headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
@@ -318,7 +326,7 @@ class ReportsComparison extends Component {
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
         }, {
-          field: 'totalJobsComparison',
+          field: 'totalLoadsComparison',
           headerName: '# of Loads',
           headerTooltip: "Total number of jobs for this time period",
           // renderer
@@ -478,13 +486,14 @@ class ReportsComparison extends Component {
   }
 
   setLabelsCustomer (obj) {
+    const newObj = obj;
     if (obj.field === 'name') {
-      obj.headerName = 'Carrier Name';
-      obj.headerTooltip = 'Carrier of Producer';
+      newObj.headerName = 'Carrier Name';
+      newObj.headerTooltip = 'Carrier of Producer';
     }
     if (obj.field === 'avgTotEarningsComparison') {
-      obj.headerName = 'Total Costs';
-      obj.headerTooltip = 'Total Cost for this time period';
+      newObj.headerName = 'Total Cost';
+      newObj.headerTooltip = 'Total Cost for this time period';
     }
     /*
     if (obj.field === 'avgEarningsHourComparison') {
@@ -493,14 +502,14 @@ class ReportsComparison extends Component {
     }*/
     if (obj.field === 'avgEarningsJobComparison') {
       // obj.headerName = 'Avg. Cost/Job';
-      obj.headerName = 'Cost per Ton Mile';
-      obj.headerTooltip = 'Average costs per job for this time period';
+      newObj.headerName = 'Cost per Ton Mile';
+      newObj.headerTooltip = 'Average costs per job for this time period';
     }
     if (obj.field === 'avgEarningsTonComparison') {
-      obj.headerName = 'Avg. Costs/Ton';
-      obj.headerTooltip = 'Average costs per ton for this time period';
+      newObj.headerName = 'Rate per Ton';
+      newObj.headerTooltip = 'Average rate per ton for this time period';
     }
-    return obj;
+    return newObj;
   }
 
   hideShowPie (show) {
@@ -751,6 +760,7 @@ class ReportsComparison extends Component {
     const newData = data.map(d => ({
       'Total Earnings': d.totEarnings,
       'Total # of Jobs': d.numJobs,
+      'Total # of Loads': d.numLoads,
       'Total Tons delivered': d.tonsDelivered,
       'Average Earnings per Job': d.avgEarningsJob,
       'Average Earnings per Ton': d.avgEarningsTon,
@@ -783,6 +793,8 @@ class ReportsComparison extends Component {
           name: "--",
           numJobs: 0,
           numJobsComp: 0,
+          numLoads: 0,
+          numLoadsComp: 0,
           page: null,
           rows: null,
           startAvailDateComp: null,
