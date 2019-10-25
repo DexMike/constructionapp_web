@@ -198,7 +198,7 @@ class ReportsDailyReportPage extends Component {
   setLabelsCustomer (obj) {
     const newObj = obj;
     if (obj.field === 'avgRevenuePerDay') {
-      newObj.headerName = 'Cost / Day';
+      newObj.headerName = 'Cost per Day';
       newObj.headerTooltip = 'Carrier of Producer';
     }
     return newObj;
@@ -296,6 +296,7 @@ class ReportsDailyReportPage extends Component {
     const newData = data.map(d => ({
       'Date': d.date,
       'Completed': d.numJobs,
+      'loads': d.numLoads,
       'Not completed': d.notCompletedJobs,
       'In progress': d.jobsInProgress,
       'Total': d.totalJobs,

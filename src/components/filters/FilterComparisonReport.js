@@ -739,6 +739,7 @@ class FilterComparisonReport extends Component {
     
     let maxTotEarnings = 0;
     let maxNumJobs = 0;
+    let maxNumLoads = 0;
     let maxTonsDelivered = 0;
     let maxAvgEarningsHours = 0;
     let maxAvgEarningsJob = 0;
@@ -753,6 +754,9 @@ class FilterComparisonReport extends Component {
       }
       if (Number(obj.numJobs) > maxNumJobs) {
         maxNumJobs = obj.numJobs;
+      }
+      if (Number(obj.numLoads) > maxNumLoads) {
+        maxNumLoads = obj.numLoads;
       }
       if (Number(obj.tonsDelivered) > maxTonsDelivered) {
         maxTonsDelivered = obj.tonsDelivered;
@@ -780,6 +784,9 @@ class FilterComparisonReport extends Component {
       }
       if (Number(obj.numJobsComp) > maxNumJobs) {
         maxNumJobs = obj.numJobsComp;
+      }
+      if (Number(obj.numLoadsComp) > maxNumLoads) {
+        maxNumLoads = obj.numLoadsComp;
       }
       if (Number(obj.tonsDeliveredComp) > maxTonsDelivered) {
         maxTonsDelivered = obj.tonsDeliveredComp;
@@ -830,6 +837,14 @@ class FilterComparisonReport extends Component {
         total: newObject.numJobs,
         totalComp: newObject.numJobsComp,
         max: maxNumJobs,
+        type: 'integer'
+      };
+      
+      // totalJobs
+      newObject.totalLoadsComparison = {
+        total: newObject.numLoads,
+        totalComp: newObject.numLoadsComp,
+        max: maxNumLoads,
         type: 'integer'
       };
 
