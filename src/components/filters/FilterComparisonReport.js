@@ -20,7 +20,6 @@ import {
   Row
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
-import CloneDeep from "lodash.clonedeep";
 import moment from 'moment';
 import GeoUtils from "../utils/GeoUtils";
 import TField from '../common/TField';
@@ -593,7 +592,6 @@ class FilterComparisonReport extends Component {
 
     // for multifields we have to extract just the values
     // WE MUST clone the object if we are going to change the info
-    // const allFilters = CloneDeep(filters);
     const allFilters = {...filters};
    
     //extract ids from collections
@@ -603,7 +601,6 @@ class FilterComparisonReport extends Component {
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
     allFilters.compare = true;
-    console.log("TCL: FilterComparisonReport -> fetchCarrierData -> allFilters", allFilters)
     
 
     if (type === 'Carrier') {
