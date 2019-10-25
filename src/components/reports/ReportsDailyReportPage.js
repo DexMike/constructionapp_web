@@ -171,6 +171,13 @@ class ReportsDailyReportPage extends Component {
     columnsJobs = ReportsDailyReportsColumns.getJobsColumns();
     columnsLoads = ReportsDailyReportsColumns.getLoadsColumns();
 
+    //change labels according to user type
+    if (profile.companyType === 'Customer') {
+      for (const obj of columnsJobs[1].children) {
+        this.setLabelsCustomer(obj);
+      }
+    }
+
     this.setState({ 
       columnsJobs,
       columnsLoads,
@@ -186,6 +193,15 @@ class ReportsDailyReportPage extends Component {
   onGridReadyLoads(params) {
     this.gridApiLoads = params.api;
     this.gridColumnApi = params.columnApi;
+  }
+
+  setLabelsCustomer (obj) {
+    const newObj = obj;
+    if (obj.field === 'avgRevenuePerDay') {
+      newObj.headerName = 'Cost / Day';
+      newObj.headerTooltip = 'Carrier of Producer';
+    }
+    return newObj;
   }
 
   async fetchJobsInfo() {

@@ -478,13 +478,14 @@ class ReportsComparison extends Component {
   }
 
   setLabelsCustomer (obj) {
+    const newObj = obj;
     if (obj.field === 'name') {
-      obj.headerName = 'Carrier Name';
-      obj.headerTooltip = 'Carrier of Producer';
+      newObj.headerName = 'Carrier Name';
+      newObj.headerTooltip = 'Carrier of Producer';
     }
     if (obj.field === 'avgTotEarningsComparison') {
-      obj.headerName = 'Total Costs';
-      obj.headerTooltip = 'Total Cost for this time period';
+      newObj.headerName = 'Total Costs';
+      newObj.headerTooltip = 'Total Cost for this time period';
     }
     /*
     if (obj.field === 'avgEarningsHourComparison') {
@@ -493,14 +494,18 @@ class ReportsComparison extends Component {
     }*/
     if (obj.field === 'avgEarningsJobComparison') {
       // obj.headerName = 'Avg. Cost/Job';
-      obj.headerName = 'Cost per Ton Mile';
-      obj.headerTooltip = 'Average costs per job for this time period';
+      newObj.headerName = 'Cost per Ton Mile';
+      newObj.headerTooltip = 'Average costs per job for this time period';
     }
     if (obj.field === 'avgEarningsTonComparison') {
-      obj.headerName = 'Avg. Costs/Ton';
-      obj.headerTooltip = 'Average costs per ton for this time period';
+      newObj.headerName = 'Avg. Costs/Ton';
+      newObj.headerTooltip = 'Average costs per ton for this time period';
     }
-    return obj;
+    if (obj.field === 'avgEarningsTonComparison') {
+      newObj.headerName = 'Avg. Costs/Ton';
+      newObj.headerTooltip = 'Average costs per ton for this time period';
+    }
+    return newObj;
   }
 
   hideShowPie (show) {

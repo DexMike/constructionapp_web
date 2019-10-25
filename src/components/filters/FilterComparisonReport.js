@@ -20,10 +20,9 @@ import {
   Row
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
-import GeoUtils from "../utils/GeoUtils";
 import CloneDeep from "lodash.clonedeep";
-
 import moment from 'moment';
+import GeoUtils from "../utils/GeoUtils";
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
@@ -39,7 +38,6 @@ import ReportsService from "../../api/ReportsService";
 
 import './Filters.css';
 
-// import GeoCodingService from '../../api/GeoCodingService';
 function formatNumber(number) {
   return Math.floor(number)
     .toString()
@@ -595,7 +593,8 @@ class FilterComparisonReport extends Component {
 
     // for multifields we have to extract just the values
     // WE MUST clone the object if we are going to change the info
-    const allFilters = CloneDeep(filters);
+    // const allFilters = CloneDeep(filters);
+    const allFilters = {...filters};
    
     //extract ids from collections
     allFilters.companies = this.getIds(allFilters.companies);
@@ -603,6 +602,9 @@ class FilterComparisonReport extends Component {
     allFilters.materials = this.getValues(allFilters.materials);
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
+    allFilters.compare = true;
+    console.log("TCL: FilterComparisonReport -> fetchCarrierData -> allFilters", allFilters)
+    
 
     if (type === 'Carrier') {
       
@@ -610,19 +612,21 @@ class FilterComparisonReport extends Component {
         allFilters.companyType = 'Carrier';
         
         let resultCarriers = [];
-        let resultProducers = [];
+        // let resultProducers = [];
         let resultProducts = [];
         let resultProjects = [];
 
         resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
-        resultProducers = await ReportsService.getProducersComparisonReport(allFilters);
+        // resultProducers = await ReportsService.getProducersComparisonReport(allFilters);
         resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
+        //projects should NOT have comparisonData
+        allFilters.compare = false;
         resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
 
         let carriers = resultCarriers.data;
         const metadataCarriers = resultCarriers;
-        let producers = resultProducers.data;
-        const metadataProducer = resultProducers.metadata;
+        // let producers = resultProducers.data;
+        // const metadataProducer = resultProducers.metadata;
         let products = resultProducts.data;
         const metadataProduct = resultProducts.metadata;
         let projects = resultProjects.data;
@@ -630,12 +634,12 @@ class FilterComparisonReport extends Component {
 
         //Maping comparison
         carriers = this.mapObject(carriers);
-        producers = this.mapObject(producers);
+        // producers = this.mapObject(producers);
         products = this.mapObject(products);
         projects = this.mapObject(projects);
 
         returnCarriers(carriers, allFilters, metadataCarriers);
-        returnProducers(producers, allFilters, metadataProducer);
+        // returnProducers(producers, allFilters, metadataProducer);
         returnProducts(products, allFilters, metadataProduct);
         returnProjects(projects, allFilters, metadataProject);
 
@@ -654,6 +658,8 @@ class FilterComparisonReport extends Component {
         resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
         // resultProducers = await ReportsService.getProducersComparisonReport(filters);
         resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
+        //projects should NOT have comparisonData
+        allFilters.compare = false;
         resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
 
         let carriers = resultCarriers.data;
@@ -681,32 +687,34 @@ class FilterComparisonReport extends Component {
       allFilters.companyType = 'Contractor';        
       try {
         let resultCarriers = [];
-        let resultProducers = [];
+        // let resultProducers = [];
         let resultProducts = [];
         let resultProjects = [];
 
         resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
-        resultProducers = await ReportsService.getProducersComparisonReport(allFilters);
+        // resultProducers = await ReportsService.getProducersComparisonReport(allFilters);
         resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
+        //projects should NOT have comparisonData
+        allFilters.compare = false;
         resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
 
         let carriers = resultCarriers.data;
         const metadataCarriers = resultCarriers.metadata;
-        let producers = resultProducers.data;
-        const metadataProducer = resultProducers.metadata;
+        // let producers = resultProducers.data;
+        // const metadataProducer = resultProducers.metadata;
         let products = resultProducts.data;
         const metadataProduct = resultProducts.metadata;
         let projects = resultProjects.data;
         const metadataProject = resultProjects.metadata;
 
         //Maping comparison
-        producers = this.mapObject(producers);
+        // producers = this.mapObject(producers);
         carriers = this.mapObject(carriers);
         products = this.mapObject(products);
         projects = this.mapObject(projects);
 
         returnCarriers(carriers, allFilters, metadataCarriers);
-        returnProducers(producers, allFilters, metadataProducer);
+        // returnProducers(producers, allFilters, metadataProducer);
         returnProducts(products, allFilters, metadataProduct);
         returnProjects(projects, allFilters, metadataProject);
       } catch (err) {
