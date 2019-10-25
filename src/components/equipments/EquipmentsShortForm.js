@@ -199,7 +199,7 @@ class EquipmentsShortForm extends PureComponent {
       description: '',
       driversId: 0,
       defaultDriverId: 0,
-      equipmentAddressId: 77,
+      equipmentAddressId: null,
       maxCapacity,
       maxDistance: maxDistanceToPickup,
       rateType,
