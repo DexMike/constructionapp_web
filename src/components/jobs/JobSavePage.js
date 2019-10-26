@@ -345,7 +345,7 @@ class JobSavePage extends Component {
           let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
             const newDriver = {...itm};
-            if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled') {
+            if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled' || newDriver.userStatus === 'Enabled') {
               newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
               enabledDrivers.push(newDriver);
             }
@@ -780,7 +780,7 @@ class JobSavePage extends Component {
     let enabledDrivers = [];
     Object.values(drivers).forEach((itm) => {
       const newDriver = {...itm};
-      if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled') {
+      if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled' || newDriver.userStatus === 'Enabled') {
         newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
         enabledDrivers.push(newDriver);
       }

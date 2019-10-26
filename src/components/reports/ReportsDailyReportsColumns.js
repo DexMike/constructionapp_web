@@ -83,7 +83,7 @@ const columnsJobs = [
         width: 100
       }, {
         field: 'notCompletedJobs',
-        headerName: 'Not completed',
+        headerName: 'Not Completed',
         headerTooltip: '# of not completed jobs',
         filter: true,
         sortable: true,
@@ -93,7 +93,7 @@ const columnsJobs = [
         width: 125
       }, {
         field: 'jobsInProgress',
-        headerName: 'In progress',
+        headerName: 'In Progress',
         headerTooltip: '# of jobs in progress',
         filter: true,
         sortable: true,
@@ -121,8 +121,8 @@ const columnsJobs = [
         width: 75
       }, {
         field: 'rateTon',
-        headerName: 'Rate: $/Ton',
-        headerTooltip: 'Rate $/Ton',
+        headerName: 'Rate per Ton',
+        headerTooltip: 'Rate $ per Ton',
         comparator: numberComparator,
         filter: 'agNumberColumnFilter',
         valueFormatter: currencyFormatter
@@ -153,7 +153,7 @@ const columnsJobs = [
       } */
     ]
   }, {
-    headerName: 'Average',
+    headerName: '',
     children: [
       /*
       { // Not visible for carriers
@@ -167,7 +167,7 @@ const columnsJobs = [
         width: 170
       }, */{
         field: 'avgRevenuePerDay',
-        headerName: 'Revenue / Day',
+        headerName: 'Revenue per Day',
         headerTooltip: 'Average revenue per day',
         filter: true,
         sortable: true,

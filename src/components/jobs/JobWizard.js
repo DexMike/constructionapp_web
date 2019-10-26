@@ -2188,8 +2188,8 @@ JobWizard.propTypes = {
   copyJob: PropTypes.bool,
   jobEditSaved: PropTypes.bool,
   job: PropTypes.object,
-  updateJobView: PropTypes.func.isRequired,
-  updateCopiedJob: PropTypes.func.isRequired
+  updateJobView: PropTypes.func,
+  updateCopiedJob: PropTypes.func
 };
 
 JobWizard.defaultProps = {

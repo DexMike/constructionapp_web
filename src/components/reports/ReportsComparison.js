@@ -173,6 +173,14 @@ class ReportsComparison extends Component {
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
         }, {
+          field: 'totalLoadsComparison',
+          headerName: '# of Loads',
+          headerTooltip: "Total number of loads for this time period",
+          // renderer
+          // enableValue: true,
+          cellRendererFramework: BarRenderer,
+          filterFramework: BarFilter
+        }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
           headerTooltip: "Total number of tons delivered for this time period",
@@ -188,17 +196,17 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }*/, {
+        }, {
           field: 'avgEarningsJobComparison',
-          headerName: 'Avg. Earnings/Job',
+          headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
           // renderer
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }, {
+        }*/, {
           field: 'avgEarningsTonComparison',
-          headerName: 'Avg. Earnings/Ton',
+          headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
           // renderer
           // enableValue: true,
@@ -266,7 +274,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }*/, {
           field: 'avgEarningsJobComparison',
-          headerName: 'Avg. Earnings/Job',
+          headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
           // renderer
           // enableValue: true,
@@ -274,7 +282,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }, {
           field: 'avgEarningsTonComparison',
-          headerName: 'Avg. Earnings/Ton',
+          headerName: 'Avg. Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
           // renderer
           // enableValue: true,
@@ -318,8 +326,8 @@ class ReportsComparison extends Component {
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
         }, {
-          field: 'totalJobsComparison',
-          headerName: '# of Jobs',
+          field: 'totalLoadsComparison',
+          headerName: '# of Loads',
           headerTooltip: "Total number of jobs for this time period",
           // renderer
           // enableValue: true,
@@ -343,7 +351,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }*/, {
           field: 'avgEarningsJobComparison',
-          headerName: 'Avg. Earnings/Job',
+          headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
           // renderer
           // enableValue: true,
@@ -351,7 +359,7 @@ class ReportsComparison extends Component {
           filterFramework: BarFilter
         }, {
           field: 'avgEarningsTonComparison',
-          headerName: 'Avg. Earnings/Ton',
+          headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
           // renderer
           // enableValue: true,
@@ -478,13 +486,14 @@ class ReportsComparison extends Component {
   }
 
   setLabelsCustomer (obj) {
+    const newObj = obj;
     if (obj.field === 'name') {
-      obj.headerName = 'Carrier Name';
-      obj.headerTooltip = 'Carrier of Producer';
+      newObj.headerName = 'Carrier Name';
+      newObj.headerTooltip = 'Carrier of Producer';
     }
     if (obj.field === 'avgTotEarningsComparison') {
-      obj.headerName = 'Total Costs';
-      obj.headerTooltip = 'Total Cost for this time period';
+      newObj.headerName = 'Total Cost';
+      newObj.headerTooltip = 'Total Cost for this time period';
     }
     /*
     if (obj.field === 'avgEarningsHourComparison') {
@@ -492,14 +501,15 @@ class ReportsComparison extends Component {
       obj.headerTooltip = 'Average costs per hour for this time period';
     }*/
     if (obj.field === 'avgEarningsJobComparison') {
-      obj.headerName = 'Avg. Cost/Job';
-      obj.headerTooltip = 'Average costs per job for this time period';
+      // obj.headerName = 'Avg. Cost/Job';
+      newObj.headerName = 'Cost per Ton Mile';
+      newObj.headerTooltip = 'Average costs per job for this time period';
     }
     if (obj.field === 'avgEarningsTonComparison') {
-      obj.headerName = 'Avg. Costs/Ton';
-      obj.headerTooltip = 'Average costs per ton for this time period';
+      newObj.headerName = 'Rate per Ton';
+      newObj.headerTooltip = 'Average rate per ton for this time period';
     }
-    return obj;
+    return newObj;
   }
 
   hideShowPie (show) {
@@ -750,6 +760,7 @@ class ReportsComparison extends Component {
     const newData = data.map(d => ({
       'Total Earnings': d.totEarnings,
       'Total # of Jobs': d.numJobs,
+      'Total # of Loads': d.numLoads,
       'Total Tons delivered': d.tonsDelivered,
       'Average Earnings per Job': d.avgEarningsJob,
       'Average Earnings per Ton': d.avgEarningsTon,
@@ -782,6 +793,8 @@ class ReportsComparison extends Component {
           name: "--",
           numJobs: 0,
           numJobsComp: 0,
+          numLoads: 0,
+          numLoadsComp: 0,
           page: null,
           rows: null,
           startAvailDateComp: null,
@@ -805,6 +818,11 @@ class ReportsComparison extends Component {
 
   renderTable(columns, defaultData, data, onGridReady) {
     let newData = data;
+    let colHeight = 28;
+    const { activeTab } = this.state;
+    if (Number(activeTab) !== 3) {
+      colHeight = 60;
+    }
     return (
       <AgGridReact
         columnDefs={columns}
@@ -815,7 +833,7 @@ class ReportsComparison extends Component {
         paginationPageSize={15}
         pagination
         domLayout="print"
-        rowHeight={60}
+        rowHeight={colHeight}
         style={{ width: '2000px' }}
       />
     )
