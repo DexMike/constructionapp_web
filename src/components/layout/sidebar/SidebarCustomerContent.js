@@ -37,6 +37,7 @@ class SidebarCustomerContent extends Component {
 
   render() {
     let { isAdmin } = this.props;
+    isAdmin = true;
     return (
       <React.Fragment>
         <div className="sidebar__content">
