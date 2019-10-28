@@ -264,6 +264,33 @@ class JobWizard extends Component {
       console.error(err);
     }
 
+    // PICKUP AND DELIVERY TAB DATA
+    // addresses
+    let addressesResponse;
+    try {
+      addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
+    } catch (err) {
+      console.error(err);
+    }
+    const allAddresses = addressesResponse.data.map(address => ({
+      value: String(address.id),
+      label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
+    }));
+    tabPickupDelivery.allAddresses = allAddresses;
+    // US states
+    let states;
+    try {
+      states = await LookupsService.getLookupsByType('States');
+    } catch (err) {
+      console.error(err);
+    }
+    states = states.map(state => ({
+      value: String(state.val1),
+      label: state.val1
+    }));
+
+    tabPickupDelivery.allUSstates = states;
+
     if (jobEdit || jobEditSaved || copyJob) {
       const {job} = this.props;
       // populate form with job data
@@ -289,33 +316,6 @@ class JobWizard extends Component {
         tabMaterials.estMaterialPricing = !job.estMaterialPricing ? '0.00' : job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
         tabMaterials.quantity = !job.rateEstimate ? '0.00' : job.rateEstimate;
-
-        // PICKUP AND DELIVERY TAB DATA
-        // addresses
-        let addressesResponse;
-        try {
-          addressesResponse = await AddressService.getAddressesByCompanyId(profile.companyId);
-        } catch (err) {
-          console.error(err);
-        }
-        const allAddresses = addressesResponse.data.map(address => ({
-          value: String(address.id),
-          label: `${address.name} - ${address.address1} ${address.city} ${address.zipCode}`
-        }));
-        tabPickupDelivery.allAddresses = allAddresses;
-        // US states
-        let states;
-        try {
-          states = await LookupsService.getLookupsByType('States');
-        } catch (err) {
-          console.error(err);
-        }
-        states = states.map(state => ({
-          value: String(state.val1),
-          label: state.val1
-        }));
-
-        tabPickupDelivery.allUSstates = states;
 
         // populate pickup/delivery tab
         tabPickupDelivery.selectedStartAddressId = job.startAddress.id.toString();
