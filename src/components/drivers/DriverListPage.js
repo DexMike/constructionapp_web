@@ -34,6 +34,7 @@ class DriverListPage extends Component {
       goToAddDriver: false,
       goToUpdateDriver: false,
       driverId: 0,
+      companyId: 0,
       modal: false,
       page: 0,
       rows: 10,
@@ -51,7 +52,8 @@ class DriverListPage extends Component {
     const profile = await ProfileService.getProfile();
     const currentUser = await UserService.getUserById(profile.userId);
     if (profile.isAdmin) {
-      await this.fetchDrivers(profile.companyId);
+      this.setState({ companyId: profile.companyId });
+      await this.fetchDrivers();
     }
     this.setState({
       isAdmin: profile.isAdmin,
@@ -60,12 +62,20 @@ class DriverListPage extends Component {
     });
   }
 
-  async fetchDrivers(companyId) {
-    const drivers = await UserService.getDriversWithUserInfoByCompanyId(companyId);
-    let driversWithInfo = [];
+  async fetchDrivers() {
+    const { companyId, page, rows } = this.state;
+    let { totalCount } = this.state;
+    let drivers;
+    try {
+      const response = await UserService.getCompanyDrivers(companyId, page, rows);
+      drivers = response.data;
+      totalCount = response.metadata.totalCount;
+    } catch (e) {
+      // console.log(e);
+    }
 
-    if (drivers) {
-      driversWithInfo = drivers.map((driver) => {
+    if (drivers && drivers.length > 0) {
+      drivers = drivers.map((driver) => {
         try {
           const newDriver = {
             id: driver.driverId,
@@ -77,12 +87,6 @@ class DriverListPage extends Component {
             email: driver.email,
             userId: driver.id
           };
-          // Do not know what other user statuses we would consider enabled??
-          // Should we have an actual driver driver status???
-          // IF we add a driver status we will need to change this
-          // if (newDriver.userStatus === 'New' || newDriver.userStatus === 'First Login') {
-          //   newDriver.userStatus = 'Enabled';
-          // }
           return newDriver;
         } catch (error) {
           const newDriver = driver;
@@ -91,7 +95,8 @@ class DriverListPage extends Component {
       });
     }
     this.setState({
-      drivers: driversWithInfo
+      drivers,
+      totalCount
     });
   }
 
@@ -179,7 +184,7 @@ class DriverListPage extends Component {
   }
 
   render() {
-    const { drivers, loaded, isAdmin } = this.state;
+    const { drivers, loaded, isAdmin, totalCount } = this.state;
     if (isAdmin === false) {
       return <Redirect push to="/" />;
     }
@@ -204,6 +209,9 @@ class DriverListPage extends Component {
             <Col md={12}>
               <Card>
                 <CardBody>
+                  <div className="ml-4 mt-4">
+                    Displaying {drivers.length} out of {totalCount} Trucks
+                  </div>
                   <TTable
                     columns={[
                       /* {
@@ -235,6 +243,7 @@ class DriverListPage extends Component {
                     handleIdClick={this.handleDriverEdit}
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
+                    totalCount={totalCount}
                   />
                 </CardBody>
               </Card>
