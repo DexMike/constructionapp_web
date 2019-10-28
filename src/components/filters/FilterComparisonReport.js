@@ -1003,7 +1003,7 @@ class FilterComparisonReport extends Component {
   }
 
   async handleMultiChange(data, name) {
-    console.log("TCL: handleMultiChange -> data", data)
+    // console.log("TCL: handleMultiChange -> data", data)
     const {filters} = this.state;
     switch(name) {
       case 'status':
@@ -1064,7 +1064,7 @@ class FilterComparisonReport extends Component {
   }
 
   async handleIntervalComparisonInputChange(e) {
-    console.log("TCL: handleIntervalComparisonInputChange -> e", e)
+    // console.log("TCL: handleIntervalComparisonInputChange -> e", e)
     const {filters, intervals} = {...this.state};
     let sAv = null;
     if (e.start) {
