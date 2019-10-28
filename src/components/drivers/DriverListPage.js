@@ -159,6 +159,7 @@ class DriverListPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddDriverModal}
         className="driver-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body" style={{ padding: '0px' }}>
           <DriverForm

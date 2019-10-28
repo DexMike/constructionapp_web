@@ -375,7 +375,7 @@ class JobForm extends Component {
     const { approveLoadsModal, approvingLoads, approvingLoadsError } = this.state;
     return (
       <React.Fragment>
-        <Modal isOpen={approveLoadsModal} toggle={this.toggleApproveLoadsModal} className="status-modal">
+        <Modal isOpen={approveLoadsModal} toggle={this.toggleApproveLoadsModal} className="status-modal" backdrop="static">
           <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
             <div style={{ fontSize: 16, color: '#FFF' }}>
               { approvingLoadsError ? 'Error Message' : 'Confirmation' }

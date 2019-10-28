@@ -271,6 +271,7 @@ class DashboardCustomerPage extends Component {
         isOpen={modalAddJob}
         toggle={this.toggleNewJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <JobCreatePopup
           toggle={this.toggleNewJobModal}
