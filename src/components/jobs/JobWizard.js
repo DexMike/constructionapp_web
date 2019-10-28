@@ -290,7 +290,7 @@ class JobWizard extends Component {
     }));
 
     tabPickupDelivery.allUSstates = states;
-    
+
     if (jobEdit || jobEditSaved || copyJob) {
       const {job} = this.props;
       // populate form with job data
