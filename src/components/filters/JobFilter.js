@@ -67,8 +67,7 @@ class JobFilter extends Component {
       profile: {},
       companyZipCode: '',
       lastZipCode: '',
-      // Rate Type Button toggle
-      // isAvailable: true,
+      loaded: false,
 
       // TODO: Refactor to a single filter object
       // Filter defaults
@@ -141,17 +140,20 @@ class JobFilter extends Component {
       filters = JSON.parse(localStorage.getItem('filters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
     }
+    
+
+    await this.fetchJobs();
+    await this.fetchFilterLists();
+    
     this.setState({
       companyZipCode,
       lastZipCode,
       company,
       address,
       filters,
-      profile
+      profile,
+      loaded: true
     });
-
-    await this.fetchJobs();
-    this.fetchFilterLists();
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -510,230 +512,238 @@ class JobFilter extends Component {
       companyZipCode,
       filters,
       reqHandlerZip,
-      reqHandlerRange
+      reqHandlerRange,
+      loaded
     } = this.state;
     // let start = filters.startAvailability;
+    if (loaded) {
+      return (
+        <Row>
+          <Col md={12}>
+            <Card>
+              <CardBody>
+                <form className="form">
+                  <div className="flex-job-filters">
+                    <div>
+                      <div className="filter-item-title">
+                        Date Range
+                      </div>
+                      <TIntervalDatePicker
+                        startDate={intervals.startInterval}
+                        endDate={intervals.endInterval}
+                        name="dateInterval"
+                        onChange={this.handleIntervalInputChange}
+                        dateFormat="m/d/Y"
+                      />
+                    </div>
+                    <div>
+                      <div className="filter-item-title">
+                        Rate Type
+                      </div>
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleSelectFilterChange,
+                            name: 'rateType',
+                            value: filters.rateType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        value={filters.rateType}
+                        options={
+                          rateTypeList.map(rateType => ({
+                            name: 'rateType',
+                            value: rateType,
+                            label: rateType
+                          }))
+                        }
+                        placeholder={rateTypeList[0]}
+                      />
+                    </div>
+                    <div>
+                      <div className="filter-item-title">
+                        Min Rate
+                      </div>
+                      <TFieldNumber
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'rate',
+                            value: filters.rate
+                          }
+                        }
+                        decimal
+                        className="filter-text"
+                        placeholder="Any"
+                        currency
+                      />
+                    </div>
+                    <div>
+                      <div className="filter-item-title">
+                        Min Capacity
+                      </div>
+                      <TFieldNumber
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'minTons',
+                            value: filters.minTons
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="#"
+                      />
+                    </div>
+                    <div id="truckTypeSelect">
+                      <div className="filter-item-title">
+                        Truck Type
+                      </div>
+                      <MultiSelect
+                        input={
+                          {
+                            onChange: this.handleMultiTruckChange,
+                            // onChange: this.handleSelectFilterChange,
+                            name: 'equipmentType',
+                            value: filters.equipmentType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        options={
+                          equipmentTypeList.map(equipmentType => ({
+                            name: 'equipmentType',
+                            value: equipmentType.trim(),
+                            label: equipmentType.trim()
+                          }))
+                        }
+                        // placeholder="Materials"
+                        placeholder="Any"
+                        id="truckTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.equipmentType}
+                      />
+                    </div>
+                    <div>
+                      <div className="filter-item-title">
+                        # of Trucks
+                      </div>
+                      <TFieldNumber
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'numEquipments',
+                            value: filters.numEquipments
+                          }
+                        }
+                        className="filter-text"
+                        placeholder="Any"
+                      />
+                    </div>
+                    <div>
+                      <div className="filter-item-title">
+                        Zip Code
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'zipCode',
+                            value: filters.zipCode
+                          }
+                        }
+                        meta={reqHandlerZip}
+                        className="filter-text"
+                        placeholder={companyZipCode}
+                        type="number"
+                      />
+                    </div>
+                    <div>
+                      <div className="filter-item-title">
+                        Range (mi)
+                      </div>
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleFilterChangeDelayed,
+                            name: 'range',
+                            value: filters.range
+                          }
+                        }
+                        meta={reqHandlerRange}
+                        className="filter-text"
+                        placeholder="Any"
+                        type="number"
+                      />
+                    </div>
+                    <div id="materialTypeSelect" >
+                      <div className="filter-item-title">
+                        Materials
+                      </div>
+                      <MultiSelect
+                        input={
+                          {
+                            onChange: this.handleMultiChange,
+                            // onChange: this.handleSelectFilterChange,
+                            name: 'materialType',
+                            value: filters.materialType
+                          }
+                        }
+                        meta={
+                          {
+                            touched: false,
+                            error: 'Unable to select'
+                          }
+                        }
+                        options={
+                          materialTypeList.map(materialType => ({
+                            name: 'materialType',
+                            value: materialType.trim(),
+                            label: materialType.trim()
+                          }))
+                        }
+                        placeholder="Any"
+                        // placeholder={materialTypeList[0]}
+                        id="materialTypeSelect"
+                        horizontalScroll="true"
+                        selectedItems={filters.materialType}
+                      />
+                    </div>
+                  </div>
+                  <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
+                    <Row>
+                      <Col lg={9}/>
+                      <Col lg={3}>
+                        <ButtonToolbar className="wizard__toolbar right-buttons">
+                          <Button className="btn btn-secondary"
+                                  type="button"
+                                  onClick={this.handleResetFilters}
+                          >
+                            Reset
+                          </Button>
+                        </ButtonToolbar>
+                      </Col>
+                    </Row>
+                  </Col>
+                </form>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      );
+    }
     return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-              <form className="form">
-                <div className="flex-job-filters">
-                  <div>
-                    <div className="filter-item-title">
-                      Date Range
-                    </div>
-                    <TIntervalDatePicker
-                      startDate={intervals.startInterval}
-                      endDate={intervals.endInterval}
-                      name="dateInterval"
-                      onChange={this.handleIntervalInputChange}
-                      dateFormat="m/d/Y"
-                    />
-                  </div>
-                  <div>
-                    <div className="filter-item-title">
-                      Rate Type
-                    </div>
-                    <TSelect
-                      input={
-                        {
-                          onChange: this.handleSelectFilterChange,
-                          name: 'rateType',
-                          value: filters.rateType
-                        }
-                      }
-                      meta={
-                        {
-                          touched: false,
-                          error: 'Unable to select'
-                        }
-                      }
-                      value={filters.rateType}
-                      options={
-                        rateTypeList.map(rateType => ({
-                          name: 'rateType',
-                          value: rateType,
-                          label: rateType
-                        }))
-                      }
-                      placeholder={rateTypeList[0]}
-                    />
-                  </div>
-                  <div>
-                    <div className="filter-item-title">
-                      Min Rate
-                    </div>
-                    <TFieldNumber
-                      input={
-                        {
-                          onChange: this.handleFilterChangeDelayed,
-                          name: 'rate',
-                          value: filters.rate
-                        }
-                      }
-                      decimal
-                      className="filter-text"
-                      placeholder="Any"
-                      currency
-                    />
-                  </div>
-                  <div>
-                    <div className="filter-item-title">
-                      Min Capacity
-                    </div>
-                    <TFieldNumber
-                      input={
-                        {
-                          onChange: this.handleFilterChangeDelayed,
-                          name: 'minTons',
-                          value: filters.minTons
-                        }
-                      }
-                      className="filter-text"
-                      placeholder="#"
-                    />
-                  </div>
-                  <div id="truckTypeSelect">
-                    <div className="filter-item-title">
-                      Truck Type
-                    </div>
-                    <MultiSelect
-                      input={
-                        {
-                          onChange: this.handleMultiTruckChange,
-                          // onChange: this.handleSelectFilterChange,
-                          name: 'equipmentType',
-                          value: filters.equipmentType
-                        }
-                      }
-                      meta={
-                        {
-                          touched: false,
-                          error: 'Unable to select'
-                        }
-                      }
-                      options={
-                        equipmentTypeList.map(equipmentType => ({
-                          name: 'equipmentType',
-                          value: equipmentType.trim(),
-                          label: equipmentType.trim()
-                        }))
-                      }
-                      // placeholder="Materials"
-                      placeholder="Any"
-                      id="truckTypeSelect"
-                      horizontalScroll="true"
-                      selectedItems={filters.equipmentType.length}
-                    />
-                  </div>
-                  <div>
-                    <div className="filter-item-title">
-                      # of Trucks
-                    </div>
-                    <TFieldNumber
-                      input={
-                        {
-                          onChange: this.handleFilterChangeDelayed,
-                          name: 'numEquipments',
-                          value: filters.numEquipments
-                        }
-                      }
-                      className="filter-text"
-                      placeholder="Any"
-                    />
-                  </div>
-                  <div>
-                    <div className="filter-item-title">
-                      Zip Code
-                    </div>
-                    <TField
-                      input={
-                        {
-                          onChange: this.handleFilterChangeDelayed,
-                          name: 'zipCode',
-                          value: filters.zipCode
-                        }
-                      }
-                      meta={reqHandlerZip}
-                      className="filter-text"
-                      placeholder={companyZipCode}
-                      type="number"
-                    />
-                  </div>
-                  <div>
-                    <div className="filter-item-title">
-                      Range (mi)
-                    </div>
-                    <TField
-                      input={
-                        {
-                          onChange: this.handleFilterChangeDelayed,
-                          name: 'range',
-                          value: filters.range
-                        }
-                      }
-                      meta={reqHandlerRange}
-                      className="filter-text"
-                      placeholder="Any"
-                      type="number"
-                    />
-                  </div>
-                  <div id="materialTypeSelect" >
-                    <div className="filter-item-title">
-                      Materials
-                    </div>
-                    <MultiSelect
-                      input={
-                        {
-                          onChange: this.handleMultiChange,
-                          // onChange: this.handleSelectFilterChange,
-                          name: 'materialType',
-                          value: filters.materialType
-                        }
-                      }
-                      meta={
-                        {
-                          touched: false,
-                          error: 'Unable to select'
-                        }
-                      }
-                      options={
-                        materialTypeList.map(materialType => ({
-                          name: 'materialType',
-                          value: materialType.trim(),
-                          label: materialType.trim()
-                        }))
-                      }
-                      placeholder="Any"
-                      // placeholder={materialTypeList[0]}
-                      id="materialTypeSelect"
-                      horizontalScroll="true"
-                      selectedItems={filters.materialType.length}
-                    />
-                  </div>
-                </div>
-                <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
-                  <Row>
-                    <Col lg={9}/>
-                    <Col lg={3}>
-                      <ButtonToolbar className="wizard__toolbar right-buttons">
-                        <Button className="btn btn-secondary"
-                                type="button"
-                                onClick={this.handleResetFilters}
-                        >
-                          Reset
-                        </Button>
-                      </ButtonToolbar>
-                    </Col>
-                  </Row>
-                </Col>
-              </form>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+      <React.Fragment>
+        Loading...
+      </React.Fragment>
     );
   }
 }

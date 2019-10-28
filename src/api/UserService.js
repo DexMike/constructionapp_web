@@ -1,4 +1,5 @@
 import AgentService from './AgentService';
+import { request } from 'https';
 
 const PATH = '/users';
 
@@ -45,6 +46,15 @@ class UserService extends AgentService {
 
   static async getDriversWithUserInfoByCompanyId(companyId) {
     const response = await this.get(`/companies/${companyId}/drivers`);
+    return (response);
+  }
+
+  static async getCompanyDrivers(companyId, pageNumber, pageSize) {
+    const data = {
+      pageNumber,
+      pageSize
+    };
+    const response = await this.post(`/companies/${companyId}/users/drivers`, data);
     return (response);
   }
 
