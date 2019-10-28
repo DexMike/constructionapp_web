@@ -96,6 +96,10 @@ class FilterComparisonReport extends Component {
 
     this.timeRangesComp = [
       {
+        name: 'Disabled',
+        value: -1
+      },
+      {
         name: 'Custom',
         value: 0
       },
@@ -999,6 +1003,7 @@ class FilterComparisonReport extends Component {
   }
 
   async handleMultiChange(data, name) {
+    console.log("TCL: handleMultiChange -> data", data)
     const {filters} = this.state;
     switch(name) {
       case 'status':
@@ -1059,6 +1064,7 @@ class FilterComparisonReport extends Component {
   }
 
   async handleIntervalComparisonInputChange(e) {
+    console.log("TCL: handleIntervalComparisonInputChange -> e", e)
     const {filters, intervals} = {...this.state};
     let sAv = null;
     if (e.start) {
@@ -1202,6 +1208,7 @@ class FilterComparisonReport extends Component {
       materialTypeList,
       rateTypeList,
       intervals,
+      
       statesTypeList,
       statusTypeList,
       companiesTypelist,
@@ -1217,6 +1224,8 @@ class FilterComparisonReport extends Component {
       showComparison,
     } = this.props;
     // let start = filters.startAvailability;
+    
+    // console.log("TCL: render -> intervals", intervals)
 
     // Row 1: Company, State, Zip, Range
     // Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
@@ -1258,7 +1267,8 @@ class FilterComparisonReport extends Component {
                       // placeholder={materialTypeList[0]}
                       id="companySelect"
                       horizontalScroll="true"
-                      // selectedItems={filters.materialType.length}
+                      selectedItems={filters.materialType}
+                      name="companies"
                     />
 
                   </div>
@@ -1352,7 +1362,7 @@ class FilterComparisonReport extends Component {
                       // placeholder={materialTypeList[0]}
                       id="statusSelect"
                       horizontalScroll="true"
-                      // selectedItems={filters.materialType.length}
+                      selectedItems={filters.materialType}
                     />
 
                   </div>
@@ -1379,7 +1389,7 @@ class FilterComparisonReport extends Component {
                       // placeholder={materialTypeList[0]}
                       id="materialTypeSelect"
                       horizontalScroll="true"
-                      // selectedItems={filters.materialType.length}
+                      selectedItems={filters.materialType}
                     />
                   </div>
                   <div className="filter-item">
@@ -1468,7 +1478,7 @@ class FilterComparisonReport extends Component {
                       placeholder="Any"
                       id="truckTypeSelect"
                       horizontalScroll="true"
-                      // selectedItems={filters.equipmentType.length}
+                      selectedItems={filters.equipmentType}
                     />
                   </div>
 

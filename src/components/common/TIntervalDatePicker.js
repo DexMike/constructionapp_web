@@ -58,19 +58,10 @@ class IntervalDatePickerField extends PureComponent {
 
   render() {
     const { startDate, endDate } = this.props;
+    // console.log("TCL: render -> startDate", startDate, endDate)
     const { name, dateFormat } = this.props;
     return (
       <div className="date-picker date-picker--interval" style={{backgroundColor: 'transparent'}}>
-        {/*<DatePicker*/}
-        {/*  name={name}*/}
-        {/*  selected={startDate}*/}
-        {/*  selectsStart*/}
-        {/*  startDate={startDate}*/}
-        {/*  endDate={endDate}*/}
-        {/*  onChange={this.handleChangeStart}*/}
-        {/*  dateFormat={dateFormat}*/}
-        {/*  placeholderText="From"*/}
-        {/*/>*/}
         <Flatpickr
           className="c-date-picker"
           name={name}
@@ -96,16 +87,6 @@ class IntervalDatePickerField extends PureComponent {
           }}
           value={endDate}
         />
-        {/*<DatePicker*/}
-        {/*  name={name}*/}
-        {/*  selected={endDate}*/}
-        {/*  selectsEnd*/}
-        {/*  startDate={startDate}*/}
-        {/*  endDate={endDate}*/}
-        {/*  onChange={this.handleChangeEnd}*/}
-        {/*  dateFormat={dateFormat}*/}
-        {/*  placeholderText="To"*/}
-        {/*/>*/}
       </div>
     );
   }

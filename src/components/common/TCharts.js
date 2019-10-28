@@ -69,7 +69,7 @@ class TCharts extends PureComponent {
 
   render() {
     const {
-      data, type, visType
+      data, type, visType, profile
     } = this.props;
 
     // PIE CHART data massaging
@@ -87,6 +87,11 @@ class TCharts extends PureComponent {
     const costPerTon = [];
     const costPerTonComp = [];
     let colorLoop = 0;
+    let totalLabel = 'Cost';
+
+    if (profile === 'Carrier') {
+      totalLabel = 'Earnings';
+    }
 
     if (type === 'pie') {
       for (const item of data) {
@@ -178,7 +183,11 @@ class TCharts extends PureComponent {
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
-              <Bar dataKey="totEarningsNum" name="Total Earnings" fill={colors[0]} />
+              <Bar
+                dataKey="totEarningsNum"
+                name={`Total ${totalLabel}`}
+                fill={colors[0]}
+              />
               <Bar dataKey="totEarningsNumComp" name="Comparison dates" fill={colors[1]} />
             </BarChart>
           </ResponsiveContainer>
@@ -221,8 +230,16 @@ class TCharts extends PureComponent {
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="avgEarningsHour" height={30} stroke={colors[0]}/>
-              <Bar dataKey="avgEarningsHour" name="Average Earnings per Hour" fill={colors[0]} />
-              <Bar dataKey="avgEarningsTon" name="Average Earnings per Ton" fill={colors[2]} />
+              <Bar
+                dataKey="avgEarningsHour"
+                name={`Average ${totalLabel} per Hour`}
+                fill={colors[0]}
+              />
+              <Bar
+                dataKey="avgEarningsTon"
+                name={`Average ${totalLabel} per Ton`}
+                fill={colors[2]}
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -264,7 +281,11 @@ class TCharts extends PureComponent {
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="avgEarningsJob" height={30} stroke={colors[0]}/>
-              <Bar dataKey="avgEarningsJob" name="Average Earnings per Job" fill={colors[1]} />
+              <Bar
+                dataKey="avgEarningsJob"
+                name={`Average ${totalLabel} per Job`}
+                fill={colors[1]}
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -343,7 +364,14 @@ class TCharts extends PureComponent {
               <Legend />
               <CartesianGrid />
               <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
-              <Area name="Total Earnings" type="monotone" dataKey="totEarningsNum" fill={colors[0]} stroke={colors[0]} fillOpacity={0.2} />
+              <Area
+                name={`Total ${totalLabel}`}
+                type="monotone"
+                dataKey="totEarningsNum"
+                fill={colors[0]}
+                stroke={colors[0]}
+                fillOpacity={0.2}
+              />
               <Area name="Comparison Dates" type="monotone" dataKey="totEarningsNumComp" fill={colors[1]} stroke={colors[1]} fillOpacity={0.2} />
             </AreaChart>
           </ResponsiveContainer>
@@ -359,8 +387,22 @@ class TCharts extends PureComponent {
               <Legend />
               <CartesianGrid />
               <Brush dataKey="avgEarningsHourNum" height={30} stroke={colors[0]}/>
-              <Area name="Average Earnings per Hour" type="monotone" dataKey="avgEarningsHourNum" fill={colors[0]} stroke={colors[0]} fillOpacity={0.2} />
-              <Area name="Average Earnings per Ton" type="monotone" dataKey="avgEarningsTonNum" fill={colors[1]} stroke={colors[1]} fillOpacity={0.2} />
+              <Area
+                name={`Average ${totalLabel} per Hour`}
+                type="monotone"
+                dataKey="avgEarningsHourNum"
+                fill={colors[0]}
+                stroke={colors[0]}
+                fillOpacity={0.2}
+              />
+              <Area
+                name={`Average ${totalLabel} per Ton`}
+                type="monotone"
+                dataKey="avgEarningsTonNum"
+                fill={colors[1]}
+                stroke={colors[1]}
+                fillOpacity={0.2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         );
@@ -375,7 +417,14 @@ class TCharts extends PureComponent {
               <Legend />
               <CartesianGrid />
               <Brush dataKey="avgEarningsJobNum" height={30} stroke={colors[0]}/>
-              <Area name="Average Earnings per Job" type="monotone" dataKey="avgEarningsJobNum" fill={colors[2]} stroke={colors[2]} fillOpacity={0.2} />
+              <Area
+                name={`Average ${totalLabel} per Job`}
+                type="monotone"
+                dataKey="avgEarningsJobNum"
+                fill={colors[2]}
+                stroke={colors[2]}
+                fillOpacity={0.2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         );
@@ -408,7 +457,7 @@ class TCharts extends PureComponent {
               <Pie
                 data={earnings}
                 dataKey="value"
-                name="Total Earnings"
+                name={`Total ${totalLabel}`}
                 cy={120}
                 cx={530}
                 innerRadius={70}
@@ -509,13 +558,15 @@ class TCharts extends PureComponent {
 TCharts.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape()),
   type: PropTypes.string,
-  visType: PropTypes.string
+  visType: PropTypes.string,
+  profile: PropTypes.string
 };
 
 TCharts.defaultProps = {
   data: null,
   type: null,
-  visType: null
+  visType: null,
+  profile: null
 };
 
 export default TCharts;

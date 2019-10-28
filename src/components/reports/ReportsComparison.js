@@ -772,7 +772,7 @@ class ReportsComparison extends Component {
   }
 
   renderChart(type, data) {
-    const { chartVisType } = this.state;
+    const { chartVisType, companyType } = this.state;
     
     // set some dummy data so that the graph doesn't crash
     if (data.length === 0) {
@@ -812,6 +812,7 @@ class ReportsComparison extends Component {
         type={type}
         visType={chartVisType}
         style={{ width: '100%' }}
+        profile={companyType}
       />
     )
   }
