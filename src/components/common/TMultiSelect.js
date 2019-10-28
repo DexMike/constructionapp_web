@@ -6,12 +6,14 @@ import ReactDOM from 'react-dom';
 class MultiSelectField extends PureComponent {
   constructor(props) {
     super(props);
+    // console.log('>>>PROPOS:', props)
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(value) {
-    const { onChange } = this.props;
-    onChange(value);
+    const { onChange, name } = this.props;
+    // console.log("TCL: MultiSelectField -> handleChange -> ONCHANGE", value, name)
+    onChange(value, name);
   }
 
   render() {
@@ -48,6 +50,7 @@ const renderMultiSelectField = function renderMultiSelectField(
   if (selectedItems !== undefined) {
     selected = selectedItems.length;
   }
+  
   function slideTo(direction) {
     const selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
     if (direction) {
@@ -116,6 +119,7 @@ renderMultiSelectField.propTypes = {
     error: PropTypes.string
   }),
   options: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.number,
     value: PropTypes.string,
     label: PropTypes.string
   })),
@@ -136,6 +140,7 @@ MultiSelectField.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.number,
     value: PropTypes.string,
     label: PropTypes.string
   })),
