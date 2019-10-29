@@ -211,7 +211,7 @@ class DriverListPage extends Component {
               <Card>
                 <CardBody>
                   <div className="ml-4 mt-4">
-                    Displaying {drivers.length} out of {totalCount} Trucks
+                    Displaying {drivers.length} out of {totalCount} drivers
                   </div>
                   <TTable
                     columns={[
