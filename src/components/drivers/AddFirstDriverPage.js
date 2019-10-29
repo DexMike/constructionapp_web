@@ -1,10 +1,10 @@
-import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
+import { Button, Col, Modal, Row } from 'reactstrap';
 import React, { Component } from 'react';
 // import EquipmentsShortForm from './EquipmentsShortForm';
 // import AuthService from '../../utils/AuthService';
 // import ProfileService from '../../api/ProfileService';
+import { withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
-import EquipmentsShortForm from '../equipments/EquipmentsShortForm';
 import DriverForm from './DriverForm';
 import ProfileService from '../../api/ProfileService';
 import UserService from '../../api/UserService';
@@ -29,7 +29,9 @@ class AddFirstDriverPage extends Component {
     try {
       const profile = await ProfileService.getProfile();
       user = await UserService.getUserById(profile.userId);
+      // eslint-disable-next-line prefer-destructuring
       userId = profile.userId;
+      // eslint-disable-next-line prefer-destructuring
       companyId = profile.companyId;
       drivers = [
         {
@@ -95,6 +97,7 @@ class AddFirstDriverPage extends Component {
 
   render() {
     const { drivers } = { ...this.state };
+    const { t } = { ...this.props };
     return (
       <React.Fragment>
         { this.renderDriversModal() }
@@ -103,10 +106,10 @@ class AddFirstDriverPage extends Component {
             <main>
               <div className="account" style={{ background: 'rgb(231, 231, 226)' }}>
                 <div className="account__wrapper">
-                  <div className="account__card">
+                  <div className="account__card" style={{width: '600px', maxWidth: '600px'}}>
                     <div className="account__head">
                       <h3 className="account__title">
-                        Welcome to&nbsp;
+                        {t('Welcome to')}&nbsp;
                         <span className="account__logo">
                         TRE
                           <span className="account__logo-accent">
@@ -117,7 +120,7 @@ class AddFirstDriverPage extends Component {
                     </div>
                     <Row>
                       <Col lg={12} style={{ marginBottom: 30 }}>
-                        Do you want to add another driver?
+                        {t('ADD_DRIVER_ASK')}
                       </Col>
                     </Row>
                     <Row>
@@ -128,10 +131,10 @@ class AddFirstDriverPage extends Component {
                             columns={[
                               {
                                 name: 'driverName',
-                                displayName: 'Name'
+                                displayName: t('Name')
                               }, {
                                 name: 'driverStatus',
-                                displayName: 'Status'
+                                displayName: t('Status')
                               }
                             ]}
                             handleIdClick={() => {}}
@@ -144,33 +147,30 @@ class AddFirstDriverPage extends Component {
                     <Row className="col-12 pt-4">
                       <Col md={6}>
                         <Button
-                          style={{width: 130}}
                           onClick={this.toggleAddDriversModal}
                           type="button"
                           className="primaryButton"
                         >
-                          Add a Driver
+                          {t('Add Driver')}
                         </Button>
                       </Col>
                       <Col md={6}>
                         { drivers.length > 0 && (
                           <Button
-                            style={{width: 100}}
                             onClick={this.continueToApp}
                             type="button"
                             className="primaryButton"
                           >
-                            Continue
+                            {t('Continue')}
                           </Button>
                         )}
                         { drivers.length <= 0 && (
                           <Button
-                            style={{width: 100}}
                             onClick={this.continueToApp}
                             type="button"
                             className="primaryButton"
                           >
-                            Skip
+                            {t('Skip')}
                           </Button>
                         )}
                       </Col>
@@ -186,4 +186,4 @@ class AddFirstDriverPage extends Component {
   }
 }
 
-export default AddFirstDriverPage;
+export default withTranslation()(AddFirstDriverPage);
