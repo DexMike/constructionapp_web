@@ -730,6 +730,7 @@ class DailyReportFilter extends Component {
       materialTypeList,
       rateTypeList,
       intervals,
+      
       statesTypeList,
       statusTypeList,
       companiesTypelist,
@@ -1052,6 +1053,7 @@ class DailyReportFilter extends Component {
                       name="dateInterval"
                       onChange={this.handleIntervalInputChange}
                       dateFormat="m/d/Y"
+                      isCustom
                     />
                   </div>
                   <div className="filter-item-button">

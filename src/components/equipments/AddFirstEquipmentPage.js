@@ -1,12 +1,12 @@
-import { Button, Card, CardBody, Col, Container, Modal, Row } from 'reactstrap';
+import { Button, Col, Modal, Row } from 'reactstrap';
 import React, { Component } from 'react';
+import { withTranslation } from 'react-i18next';
 import EquipmentsShortForm from './EquipmentsShortForm';
 import AuthService from '../../utils/AuthService';
 import ProfileService from '../../api/ProfileService';
 import TTable from '../common/TTable';
 
 class AddFirstEquipmentPage extends Component {
-
   constructor(props) {
     super(props);
 
@@ -25,12 +25,13 @@ class AddFirstEquipmentPage extends Component {
     let { userId, companyId } = { ...this.state };
     try {
       const profile = await ProfileService.getProfile();
+      // eslint-disable-next-line prefer-destructuring
       userId = profile.userId;
+      // eslint-disable-next-line prefer-destructuring
       companyId = profile.companyId;
     } catch (e) {
       console.error(e);
     }
-
     this.setState({
       companyId,
       userId
@@ -79,6 +80,7 @@ class AddFirstEquipmentPage extends Component {
         isOpen={equipmentsModal}
         toggle={this.toggleAddMultiTrucksModal}
         className="equipments-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body">
           <EquipmentsShortForm
@@ -94,6 +96,7 @@ class AddFirstEquipmentPage extends Component {
 
   render() {
     const { equipments } = { ...this.state };
+    const { t } = { ...this.props };
     return (
       <React.Fragment>
         { this.renderEquipmentsModal() }
@@ -102,10 +105,10 @@ class AddFirstEquipmentPage extends Component {
             <main>
               <div className="account" style={{ background: 'rgb(231, 231, 226)' }}>
                 <div className="account__wrapper">
-                  <div className="account__card">
+                  <div className="account__card" style={{width: '600px', maxWidth: '600px'}}>
                     <div className="account__head">
                       <h3 className="account__title">
-                        Welcome to&nbsp;
+                        {t('Welcome to')}&nbsp;
                         <span className="account__logo">
                         TRE
                           <span className="account__logo-accent">
@@ -116,7 +119,7 @@ class AddFirstEquipmentPage extends Component {
                     </div>
                     <Row>
                       <Col lg={12} style={{ marginBottom: 30 }}>
-                        Add your trucks to your profile to start using the app.
+                        {t('ADD_YOUR_TRUCK')}
                       </Col>
                     </Row>
                     <Row>
@@ -127,10 +130,10 @@ class AddFirstEquipmentPage extends Component {
                           columns={[
                             {
                               name: 'truckType',
-                              displayName: 'Type'
+                              displayName: t('Type')
                             }, {
                               name: 'externalEquipmentNumber',
-                              displayName: 'Number'
+                              displayName: t('Number')
                             }
                           ]}
                           handleIdClick={() => {}}
@@ -143,34 +146,31 @@ class AddFirstEquipmentPage extends Component {
                     <Row className="col-12 pt-4">
                       <Col md={4}>
                         <Button
-                          style={{width: 120}}
                           onClick={this.toggleAddMultiTrucksModal}
                           type="button"
                           className="primaryButton"
                         >
-                          Add a Truck
+                          {t('Add Truck')}
                         </Button>
                       </Col>
                       <Col md={4}>
                         { equipments.length > 0 && (
                         <Button
-                          style={{width: 120}}
                           onClick={this.continueToApp}
                           type="button"
                           className="primaryButton"
                         >
-                          Continue
+                          {t('Continue')}
                         </Button>
                         )}
                       </Col>
                       <Col md={4} className="text-right">
                         <Button
                           className="tertiaryButton"
-                          style={{width: 100}}
                           type="button"
                           onClick={this.logOut}
                         >
-                          Log Out
+                          {t('Logout')}
                         </Button>
                       </Col>
                     </Row>
@@ -185,4 +185,4 @@ class AddFirstEquipmentPage extends Component {
   }
 }
 
-export default AddFirstEquipmentPage;
+export default withTranslation()(AddFirstEquipmentPage);

@@ -729,6 +729,7 @@ class CarriersCustomerPage extends Component {
         isOpen={modalSelectMaterials}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__header">
           <button
@@ -1019,7 +1020,7 @@ class CarriersCustomerPage extends Component {
     const { unfavoriteModal, selectedFavoriteCompanyId, selectedFavoriteCompanyName } = this.state;
     return (
       <React.Fragment>
-        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal">
+        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal" backdrop="static">
           <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
             <div style={{ fontSize: 16, color: '#FFF' }}>
               Are you sure you want to unfavorite &apos;{selectedFavoriteCompanyName}&apos;?
