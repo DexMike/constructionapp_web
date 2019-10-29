@@ -156,6 +156,7 @@ class LoadsExpandableRow extends Component {
         isOpen={modal}
         toggle={this.toggleDisputeModal}
         className="modal-dialog--primary modal-dialog--header form"
+        backdrop="static"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"

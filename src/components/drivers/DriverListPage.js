@@ -159,6 +159,7 @@ class DriverListPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddDriverModal}
         className="driver-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body" style={{ padding: '0px' }}>
           <DriverForm
@@ -210,7 +211,7 @@ class DriverListPage extends Component {
               <Card>
                 <CardBody>
                   <div className="ml-4 mt-4">
-                    Displaying {drivers.length} out of {totalCount} Trucks
+                    Displaying {drivers.length} out of {totalCount} drivers
                   </div>
                   <TTable
                     columns={[

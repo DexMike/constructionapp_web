@@ -54,8 +54,6 @@ import BarFilter from '../../utils/BarFilter';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-// import ReportsComparisonColumns from './ReportsComparisonColumns';
-
 function PageTitle() {
   const {t} = useTranslation();
   return (
@@ -127,6 +125,7 @@ class ReportsComparison extends Component {
       goToUpdateJob: false,
 
       chartOpts: [],
+      compEnabled: false,
 
       // profile: null
       // Rate Type Button toggle
@@ -188,23 +187,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }/*, {
-          field: 'avgEarningsHourComparison',
-          headerName: 'Avg. Earnings/Hour',
-          headerTooltip: "Average earnings per hour for this time period",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
         }, {
-          field: 'avgEarningsJobComparison',
-          headerName: 'Earnings per Ton Mile',
-          headerTooltip: "Average earnings per job for this time period",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
-        }*/, {
           field: 'avgEarningsTonComparison',
           headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
@@ -212,17 +195,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        },/*{
-          field: 'costPerTonMileComparison',
-          headerName: 'Cost per Ton/Mile',
-          headerTooltip: "Total Cost per Ton/Mile for this time period",
-          sort: "desc",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter,
-          valueFormatter: currencyFormatter
-        },*/{
+        }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
           headerTooltip: "Average miles traveled for this time period",
@@ -264,15 +237,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }/*, {
-          field: 'avgEarningsHourComparison',
-          headerName: 'Avg. Earnings/Hour',
-          headerTooltip: "Average earnings per hour for this time period",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
-        }*/, {
+        }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
@@ -288,17 +253,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }/*, {
-          field: 'costPerTonMileComparison',
-          headerName: 'Cost per Ton/Mile',
-          headerTooltip: "Total Cost per Ton/Mile for this time period",
-          sort: "desc",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter,
-          valueFormatter: currencyFormatter
-        }*/, {
+        }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
           headerTooltip: "Average miles traveled for this time period",
@@ -341,15 +296,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }/*, {
-          field: 'avgEarningsHourComparison',
-          headerName: 'Avg. Earnings/Hour',
-          headerTooltip: "Average earnings per hour for this time period",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
-        }*/, {
+        }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
@@ -365,17 +312,7 @@ class ReportsComparison extends Component {
           // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter
-        }/*, {
-          field: 'costPerTonMileComparison',
-          headerName: 'Cost per Ton/Mile',
-          headerTooltip: "Total Cost per Ton/Mile for this time period",
-          sort: "desc",
-          // renderer
-          // enableValue: true,
-          cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter,
-          valueFormatter: currencyFormatter
-        }*/, {
+        }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
           headerTooltip: "Average miles traveled for this time period",
@@ -406,7 +343,7 @@ class ReportsComparison extends Component {
     this.returnFilters = this.returnFilters.bind(this);
 
     this.returnCarriers = this.returnCarriers.bind(this);
-    this.returnProducers = this.returnProducers.bind(this);
+    // this.returnProducers = this.returnProducers.bind(this);
 
     this.returnProducts = this.returnProducts.bind(this);
     this.returnProjects = this.returnProjects.bind(this);
@@ -642,44 +579,53 @@ class ReportsComparison extends Component {
   }
 
   // get data
-  returnProducers(producers, filters, metadata) {
+  /*
+  returnProducers(producers, filters, metadata, enabled) {
+    console.log("TCL: ReportsComparison -> returnProducers -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       producers,
       filters,
-      totalProducers: totalCount
+      totalProducers: totalCount,
+      compEnabled: enabled
     });
   }
+  */
 
-  returnCarriers(carriers, filters, metadata) {
+  returnCarriers(carriers, filters, metadata, enabled) {
+    // console.log("TCL: ReportsComparison -> returnCarriers -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       carriers,
       filters,
-      totalCarriers: totalCount
+      totalCarriers: totalCount,
+      compEnabled: enabled
     });
   }
 
-  returnProducts(products, filters, metadata) {
+  returnProducts(products, filters, metadata, enabled) {
+    // console.log("TCL: ReportsComparison -> returnProducts -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       products,
       filters,
-      totalProducts: totalCount
+      totalProducts: totalCount,
+      compEnabled: enabled
     });
   }
 
-  returnProjects(projects, filters, metadata) {
+  returnProjects(projects, filters, metadata, enabled) {
+    // console.log("TCL: ReportsComparison -> returnProjects -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       projects,
       filters,
-      totalProject: totalCount
+      totalProject: totalCount,
+      compEnabled: enabled
     });
   }
 
   // get filters
-
   returnFilters(
     carriers,
     producers,
@@ -772,7 +718,8 @@ class ReportsComparison extends Component {
   }
 
   renderChart(type, data) {
-    const { chartVisType } = this.state;
+    const { chartVisType, companyType, compEnabled } = this.state;
+    // console.log("TCL: renderChart -> compEnabled", compEnabled)
     
     // set some dummy data so that the graph doesn't crash
     if (data.length === 0) {
@@ -812,17 +759,23 @@ class ReportsComparison extends Component {
         type={type}
         visType={chartVisType}
         style={{ width: '100%' }}
+        profile={companyType}
+        compEnabled={compEnabled}
       />
     )
   }
 
   renderTable(columns, defaultData, data, onGridReady) {
+    const { activeTab, compEnabled } = this.state;
+    //console.log("TCL: renderTable -> compEnabled", compEnabled)
+    
     let newData = data;
-    let colHeight = 28;
-    const { activeTab } = this.state;
-    if (Number(activeTab) !== 3) {
-      colHeight = 60;
+    let colHeight = 60;
+    if (Number(activeTab) === 3 || !compEnabled) {
+      colHeight = 28;
     }
+    // this.compHeight(showComp)
+    // console.log("TCL: renderTable -> data", activeTab, colHeight)
     return (
       <AgGridReact
         columnDefs={columns}
@@ -844,7 +797,6 @@ class ReportsComparison extends Component {
       carriers,
       products,
       projects,
-      loading,
       chartType,
       chartVisType,
       activeTab,
@@ -855,11 +807,13 @@ class ReportsComparison extends Component {
       defaultColumnDef,
       chartOpts
     } = this.state;  
+
     let dataToPrint = [];
     let dataToRender = [];
     let dataToRenderA = [];
     let columnsToRender = [];
 
+    // console.log("TCL: renderVisualizations -> filters", filters)
     // prepare data for CSV printing
     if (activeTab === '1') {
       dataToPrint = this.extractCSVInfo(carriers);
@@ -1078,7 +1032,7 @@ class ReportsComparison extends Component {
             showComparison
             ref="filterChild"
             onReturnFilters={this.returnFilters}
-            returnProducers={this.returnProducers}
+            // returnProducers={this.returnProducers}
             returnCarriers={this.returnCarriers}
             returnProducts={this.returnProducts}
             returnProjects={this.returnProjects}

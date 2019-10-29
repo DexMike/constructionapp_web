@@ -115,7 +115,7 @@ class JobClosePopup extends Component {
               {jobName}
             </div>
           </ModalHeader>
-          <ModalBody className="text-left">
+          <ModalBody className="text-left" backdrop="static">
             <p style={{ fontSize: 14 }}>
               Are you sure you want to end this job?
             </p>
