@@ -1198,7 +1198,11 @@ class FilterComparisonReport extends Component {
       
     }, async function saved() {
       this.saveFilters();
-      await this.fetchCarrierData();
+      try {
+        await this.fetchCarrierData();
+      } catch(e) {
+        console.log('ERROR: unable to fetch carrier or customer data: ', e);
+      }
     });
   }
 
