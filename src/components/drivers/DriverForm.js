@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
+import { withTranslation } from 'react-i18next';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
@@ -316,13 +317,13 @@ class DriverForm extends Component {
 
   renderDriverInvite() {
     const {inviteStatus, inviteMessage, selectedUser, sendingSMS} = this.state;
-    const {toggle} = this.props;
+    const {toggle, t} = this.props;
     if (sendingSMS) {
       return (
         <Row>
           <Col md={12} className="text-center">
             <div className="spinner-border text-success" role="status">
-              <span className="sr-only">Loading...</span>
+              <span className="sr-only">{t('Loading...')}</span>
             </div>
           </Col>
         </Row>
@@ -333,7 +334,7 @@ class DriverForm extends Component {
         <Col md={12}>
           {/* <span>Invite a Driver</span> */}
           <br/>
-          <h3>{inviteStatus ? 'Success!' : 'Warning'}</h3>
+          <h3>{inviteStatus ? `${t('Success')}!` : t('Warning')}</h3>
           <p>
             {inviteMessage}
           </p>
@@ -349,7 +350,7 @@ class DriverForm extends Component {
                 }
                 className="primaryButton"
               >
-                Return
+                {t('Return')}
               </Button>
             </Col>
           ) : null
@@ -361,13 +362,13 @@ class DriverForm extends Component {
                 onClick={() => this.setState({step: 1, updateNewDriver: true})}
                 className="secondaryButton"
               >
-                Edit
+                {t('Edit')}
               </Button>
               <Button
                 onClick={() => this.sendDriverInvite(selectedUser)}
                 className="primaryButton"
               >
-                Resend Invite
+                {t('Resend Invite')}
               </Button>
             </Col>
           ) : null
@@ -390,7 +391,7 @@ class DriverForm extends Component {
       userStatus,
       btnSubmitting
     } = this.state;
-    const {driverId, toggle} = this.props;
+    const {driverId, toggle, t} = this.props;
     return (
       <Row className="form">
         {this.renderGoTo()}
@@ -399,20 +400,20 @@ class DriverForm extends Component {
             className="page-title pl-4 pr-4 pt-2 pb-2"
             style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
           >
-            {driverId ? 'Edit Driver' : 'Add Driver'}
+            {driverId ? t('Edit Driver') : t('Add Driver')}
           </h3>
         </Col>
         <Col md={12}>
           <Row className="pl-4 pr-4">
             <Col md={6} className="pt-2">
               <span>
-                First Name
+                {t('First Name')}
               </span>
               <TField
                 input={{
                   onChange: this.handleInputChange,
                   name: 'firstName',
-                  value: firstName
+                  value: t(firstName)
                 }}
                 placeholder="First Name"
                 type="text"
@@ -421,7 +422,7 @@ class DriverForm extends Component {
             </Col>
             <Col md={6} className="pt-2">
               <span>
-                Last Name
+                {t('Last Name')}
               </span>
               <TField
                 input={{
@@ -429,7 +430,7 @@ class DriverForm extends Component {
                   name: 'lastName',
                   value: lastName
                 }}
-                placeholder="Last Name"
+                placeholder={t('Last Name')}
                 type="text"
                 meta={reqHandlerLName}
               />
@@ -451,7 +452,7 @@ class DriverForm extends Component {
             {/* </Col> */}
             <Col md={6} className="pt-2">
               <span>
-                Mobile Phone
+                {t('Mobile Phone')}
               </span>
               {
                 /*
@@ -469,7 +470,7 @@ class DriverForm extends Component {
               }
               <NumberFormat
                 name="mobilePhone"
-                placeholder="Mobile Phone"
+                placeholder={t('Mobile Phone')}
                 type="text"
                 format="##########"
                 // mask="_"
@@ -492,14 +493,14 @@ class DriverForm extends Component {
                       onClick={toggle}
                       className="secondaryButton"
               >
-                Cancel
+                {t('Cancel')}
               </Button>
               <TSubmitButton
                 onClick={this.saveUser}
                 className="primaryButton"
                 loading={btnSubmitting}
                 // loaderSize={10}
-                bntText={driverId && userStatus !== 'Driver Invited' ? 'Update' : 'Send Invite'}
+                bntText={driverId && userStatus !== 'Driver Invited' ? t('Update') : t('Send Invite')}
               />
             </Col>
           </Row>
@@ -525,6 +526,7 @@ class DriverForm extends Component {
       loaded,
       step
     } = this.state;
+    const { t } = { ...this.props };
     if (loaded) {
       return (
         <React.Fragment>
@@ -538,7 +540,7 @@ class DriverForm extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Edit Driver</h3>
+            <h3 className="page-title">{t('Edit Driver')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -557,7 +559,8 @@ DriverForm.propTypes = {
     })
   }),
   driverId: PropTypes.number,
-  onSuccess: PropTypes.func
+  onSuccess: PropTypes.func,
+  t: PropTypes.func
 };
 
 DriverForm.defaultProps = {
@@ -566,7 +569,8 @@ DriverForm.defaultProps = {
     params: {}
   },
   driverId: 0,
-  onSuccess: () => {}
+  onSuccess: () => {},
+  t: () => {}
 };
 
-export default DriverForm;
+export default withTranslation()(DriverForm);
