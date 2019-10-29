@@ -684,9 +684,10 @@ class EquipmentDetails extends PureComponent {
                 </Button>
               </ButtonToolbar>
               <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.archiveTruck()}>
-                  Delete
-                </Button><Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
+                {/*<Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.archiveTruck()}>*/}
+                {/*  Delete*/}
+                {/*</Button>*/}
+                <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
                   Save
                 </Button>
               </ButtonToolbar>
