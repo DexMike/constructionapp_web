@@ -140,7 +140,7 @@ class JobFilter extends Component {
       filters = JSON.parse(localStorage.getItem('filters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
     }
-    
+
 
     await this.fetchJobs();
     await this.fetchFilterLists();
@@ -255,11 +255,11 @@ class JobFilter extends Component {
     let {company, address, profile} = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
-    if (!profile) {
+    if (Object.keys(profile).length === 0) {
       profile = await ProfileService.getProfile();
-      if (!company) {
+      if (Object.keys(company).length === 0) {
         company = await CompanyService.getCompanyById(profile.companyId);
-        if (!address) {
+        if (Object.keys(address).length === 0) {
           address = await AddressService.getAddressById(company.addressId);
         }
       }
