@@ -1163,41 +1163,42 @@ class FilterComparisonReport extends Component {
       comp = true;
     }
     selectedRangeComp = value;
-    const currentDateComp = moment(new Date())
-      .hours(0)
-      .minutes(0)
-      .seconds(0)
-      .toDate();
-    let startDateComp = moment(new Date())
-      .hours(0)
-      .minutes(0)
-      .seconds(0)
-      .toDate();
-    let endDateComp = currentDateComp;
 
-    startDateComp.setDate(intervals.startInterval.getDate() - selectedRangeComp);
+    // substract days
+    const dateOffset = (24*60*60*1000) * Number(selectedRangeComp);
+    const endDate = intervals.startInterval;
+
+    let startDate = new Date();
+    startDate.setTime(endDate.getTime() - dateOffset);
+
+    // console.log(endDate, '|', startDate, selectedRangeComp)
+    // console.log(endDate, '|', startDate, '>', selectedRangeComp)
+    
     if (name === 'Custom') {
-      intervals.startIntervalComp = this.startDate;
-      intervals.endIntervalComp = this.endDate;
-      filters.startAvailDateComp = this.startDate;
-      filters.endAvailDateComp = this.endDate;
+      intervals.startIntervalComp = startDate;
+      intervals.endIntervalComp = endDate;
+      filters.startAvailabilityComp = startDate;
+      filters.endAvailabilityComp = endDate;
     } else {
-      intervals.startIntervalComp = startDateComp;
-      intervals.endIntervalComp = endDateComp;
-      filters.startAvailDateComp = startDateComp;
-      filters.endAvailDateComp = endDateComp;
-    }
+      intervals.startIntervalComp = startDate;
+      intervals.endIntervalComp = endDate;
 
+      filters.startAvailabilityComp = startDate;
+      filters.endAvailabilityComp = endDate;
+    }
     this.setState({
       intervals,
       filters,
-      selectedRangeComp,
       selectIndexComp,
       compEnabled: comp,
       compActualValue: selectIndexComp
-      
     }, async function saved() {
       this.saveFilters();
+      const dates = {
+        end: endDate,
+        start: startDate
+      }
+      this.handleIntervalComparisonInputChange(dates);
       try {
         await this.fetchCarrierData();
       } catch(e) {

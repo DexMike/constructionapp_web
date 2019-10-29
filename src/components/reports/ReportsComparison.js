@@ -719,6 +719,7 @@ class ReportsComparison extends Component {
 
   renderChart(type, data) {
     const { chartVisType, companyType, compEnabled } = this.state;
+    // console.log("TCL: renderChart -> compEnabled", compEnabled)
     
     // set some dummy data so that the graph doesn't crash
     if (data.length === 0) {
