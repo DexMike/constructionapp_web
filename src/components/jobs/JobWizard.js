@@ -2032,138 +2032,133 @@ class JobWizard extends Component {
         <Container className="dashboard">
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
             {/*{this.renderGoTo()}*/}
-            <Row>
-              {/* <h1>TEST</h1> */}
-              <Col md={12} lg={12}>
-                <Card style={{paddingBottom: 0}}>
+            <Card style={{paddingBottom: 0}}>
+              <div className="wizard">
+                <div className="wizard__steps">
+                  {/* onClick={this.gotoPage(1)} */}
+                  <div
+                    className="wizard__step wizard__step--active"
+                  >
+                    <p>{jobRequest ? 'Request' : jobEdit ? 'Edit' : 'Create'} Job</p>
+                  </div>
+                </div>
+                <div className="wizard__form-wrapper">
+                  <div className="dashboard dashboard__job-create-section">
+                    {this.renderJobDetails()}
+                  </div>
+                </div>
+                <div className="dashboard dashboard__job-create-section">
                   <div className="wizard">
-                    <div className="wizard__steps">
-                      {/* onClick={this.gotoPage(1)} */}
-                      <div
-                        className="wizard__step wizard__step--active"
-                      >
-                        <p>{jobRequest ? 'Request' : jobEdit ? 'Edit' : 'Create'} Job</p>
-                      </div>
-                    </div>
+
+                    {this.renderTabs()}
                     <div className="wizard__form-wrapper">
-                      <div className="dashboard dashboard__job-create-section">
-                        {this.renderJobDetails()}
-                      </div>
-                    </div>
-                    <div className="dashboard dashboard__job-create-section">
-                      <div className="wizard">
 
-                        {this.renderTabs()}
-                        <div className="wizard__form-wrapper">
-
-                          {page === 1
-                          && <JobMaterials
-                            data={tabMaterials}
-                            handleInputChange={this.handleChildInputChange}
-                          />}
-                          {page === 2
-                          && <PickupAndDelivery
-                            data={tabPickupDelivery}
-                            handleInputChange={this.handleChildInputChange}
-                          />}
-                          {page === 3
-                          && <TruckSpecs
-                            data={tabTruckSpecs}
-                            handleInputChange={this.handleChildInputChange}
-                          />}
-                          {page === 4
-                          && <HaulRate
-                            data={tabHaulRate}
-                            tabMaterials={tabMaterials}
-                            tabPickupDelivery={tabPickupDelivery}
-                            handleInputChange={this.handleChildInputChange}
-                          />}
-                          {page === 5
-                          && <Summary
-                            tabHaulRate={tabHaulRate}
-                            tabMaterials={tabMaterials}
-                            tabPickupDelivery={tabPickupDelivery}
-                            tabTruckSpecs={tabTruckSpecs}
-                            data={tabSummary}
-                            closeModal={this.closeNow}
-                            saveJob={this.validateAndSaveJobDraft}
-                            goBack={this.goBack}
-                            goToSend={this.sixthPage}
-                            setPageNumber={this.setPageNumber}
-                            handleInputChange={this.handleChildInputChange}
-                            validateSend={this.validateSend}
-                            jobRequest={jobRequest}
-                            jobEdit={jobEdit}
-                            validateMaterialsTab={this.validateMaterialsTab}
-                            validateTruckSpecsTab={this.validateTruckSpecsTab}
-                            validateHaulRateTab={this.validateHaulRateTab}
-                            validateStartAddress={this.validateStartAddress}
-                            validateEndAddress={this.validateEndAddress}
-                            validateForm={this.validateForm}
-                            validateTopForm={this.validateTopForm}
-                          />}
-                          {(page === 6 && !jobEdit)
-                          && <SendJob
-                            data={tabSend}
-                            handleInputChange={this.handleChildInputChange}
-                            tabMaterials={tabMaterials}
-                            saveJob={this.validateAndSaveJobDraft}
-                            goBack={this.goBack}
-                            sendJob={this.saveJob}
-                            onClose={this.closeNow}
-                            jobRequest={jobRequest}
-                          />}
-                        </div>
-                      </div>
-                      {page < 5 &&
-                      <React.Fragment>
-                        <Row className="col-md-12">
-                          <hr/>
-                        </Row>
-                        <Row className="col-md-12">
-                          <ButtonToolbar className="col-md-6 wizard__toolbar">
-                            <Button color="minimal" className="btn btn-outline-secondary"
-                                    type="button"
-                                    onClick={this.closeNow}
-                            >
-                              Cancel
-                            </Button>
-                          </ButtonToolbar>
-                          <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                            {(!jobRequest && !jobEdit) &&
-                            <Button
-                              color="outline-primary"
-                              className="next"
-                              onClick={this.validateAndSaveJobDraft}
-                            >
-                              Save Job & Close
-                            </Button>
-                            }
-                            {page !== 1 &&
-                            <Button color="outline-primary" type="button"
-                                    className="previous"
-                                    onClick={this.goBack}
-                            >
-                              Back
-                            </Button>
-                            }
-                            <Button
-                              color="primary"
-                              className="next"
-                              onClick={this.nextPage}
-                            >
-                              Next
-                            </Button>
-                          </ButtonToolbar>
-                        </Row>
-                      </React.Fragment>
-                      }
-
+                      {page === 1
+                      && <JobMaterials
+                        data={tabMaterials}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 2
+                      && <PickupAndDelivery
+                        data={tabPickupDelivery}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 3
+                      && <TruckSpecs
+                        data={tabTruckSpecs}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 4
+                      && <HaulRate
+                        data={tabHaulRate}
+                        tabMaterials={tabMaterials}
+                        tabPickupDelivery={tabPickupDelivery}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 5
+                      && <Summary
+                        tabHaulRate={tabHaulRate}
+                        tabMaterials={tabMaterials}
+                        tabPickupDelivery={tabPickupDelivery}
+                        tabTruckSpecs={tabTruckSpecs}
+                        data={tabSummary}
+                        closeModal={this.closeNow}
+                        saveJob={this.validateAndSaveJobDraft}
+                        goBack={this.goBack}
+                        goToSend={this.sixthPage}
+                        setPageNumber={this.setPageNumber}
+                        handleInputChange={this.handleChildInputChange}
+                        validateSend={this.validateSend}
+                        jobRequest={jobRequest}
+                        jobEdit={jobEdit}
+                        validateMaterialsTab={this.validateMaterialsTab}
+                        validateTruckSpecsTab={this.validateTruckSpecsTab}
+                        validateHaulRateTab={this.validateHaulRateTab}
+                        validateStartAddress={this.validateStartAddress}
+                        validateEndAddress={this.validateEndAddress}
+                        validateForm={this.validateForm}
+                        validateTopForm={this.validateTopForm}
+                      />}
+                      {(page === 6 && !jobEdit)
+                      && <SendJob
+                        data={tabSend}
+                        handleInputChange={this.handleChildInputChange}
+                        tabMaterials={tabMaterials}
+                        saveJob={this.validateAndSaveJobDraft}
+                        goBack={this.goBack}
+                        sendJob={this.saveJob}
+                        onClose={this.closeNow}
+                        jobRequest={jobRequest}
+                      />}
                     </div>
                   </div>
-                </Card>
-              </Col>
-            </Row>
+                  {page < 5 &&
+                  <React.Fragment>
+                    <Row className="col-md-12">
+                      <hr/>
+                    </Row>
+                    <Row className="col-md-12">
+                      <ButtonToolbar className="col-md-6 wizard__toolbar">
+                        <Button color="minimal" className="btn btn-outline-secondary"
+                                type="button"
+                                onClick={this.closeNow}
+                        >
+                          Cancel
+                        </Button>
+                      </ButtonToolbar>
+                      <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                        {(!jobRequest && !jobEdit) &&
+                        <Button
+                          color="outline-primary"
+                          className="next"
+                          onClick={this.validateAndSaveJobDraft}
+                        >
+                          Save Job & Close
+                        </Button>
+                        }
+                        {page !== 1 &&
+                        <Button color="outline-primary" type="button"
+                                className="previous"
+                                onClick={this.goBack}
+                        >
+                          Back
+                        </Button>
+                        }
+                        <Button
+                          color="primary"
+                          className="next"
+                          onClick={this.nextPage}
+                        >
+                          Next
+                        </Button>
+                      </ButtonToolbar>
+                    </Row>
+                  </React.Fragment>
+                  }
+
+                </div>
+              </div>
+            </Card>
           </div>
         </Container>
       );
