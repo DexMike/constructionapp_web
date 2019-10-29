@@ -129,7 +129,7 @@ class LoginPage extends SignIn {
     try {
       if (!username || username.length <= 0
         || !password || password.length <= 0) {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
           btnSubmitting: false,
@@ -142,7 +142,7 @@ class LoginPage extends SignIn {
       const user = await UserService.getUserByEmail(userCheck);
 
       if (!user || !user.id || !user.cognitoId || user.cognitoId === '') {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
           btnSubmitting: false,
@@ -216,7 +216,7 @@ class LoginPage extends SignIn {
     } catch (err) {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
       if (err.code === 'UserNotFoundException') {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
           loading: false,
@@ -225,7 +225,7 @@ class LoginPage extends SignIn {
           confirmUsername: null
         });
       } else if (err.code === 'UserNotConfirmedException') {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
@@ -234,7 +234,7 @@ class LoginPage extends SignIn {
           confirmUsername: username
         });
       } else {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
