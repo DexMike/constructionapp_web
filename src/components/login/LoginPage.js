@@ -141,6 +141,16 @@ class LoginPage extends SignIn {
       const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
 
+      if (!user || !user.id || !user.cognitoId || user.cognitoId === '') {
+        await this.createLoginLog(false);
+        this.setState({
+          error: 'Incorrect username or password.',
+          btnSubmitting: false,
+          loading: false
+        });
+        return;
+      }
+
       if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
         return;
@@ -170,7 +180,8 @@ class LoginPage extends SignIn {
         browserVersion,
         screenSize
       });
-      const data = await Auth.signIn(username, password);
+
+      const data = await Auth.signIn(user.cognitoId, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
