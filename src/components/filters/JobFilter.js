@@ -534,6 +534,7 @@ class JobFilter extends Component {
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
                         dateFormat="m/d/Y"
+                        isCustom
                       />
                     </div>
                     <div>

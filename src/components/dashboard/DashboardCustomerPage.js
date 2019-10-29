@@ -207,21 +207,6 @@ class DashboardCustomerPage extends Component {
     this.setState({ rows });
   }
 
-  // handleJobEdit(id) {
-  //   const { jobs } = this.state;
-  //   const [selectedJob] = jobs.filter((job) => {
-  //     if (id === job.id) {
-  //       return job;
-  //     }
-  //     return false;
-  //   }, id);
-  //   selectedJob.materials = ['Any'];
-  //   this.setState({
-  //     selectedJob,
-  //     modal: true
-  //   });
-  // }
-
   async toggleNewJobModal() {
     const {modalAddJob, filters} = this.state;
     if (modalAddJob) {
@@ -303,9 +288,6 @@ class DashboardCustomerPage extends Component {
         <Col md={10}>
           <PageTitle />
         </Col>
-        {/*<Col md={2}>*/}
-        {/*  <AddJobButton handle={this.toggleNewJobModal}/>*/}
-        {/*</Col>*/}
         <Col md={2}>
           <AddJobButton handle={this.toggleNewJobWizardModal}/>
         </Col>
