@@ -69,8 +69,10 @@ class TCharts extends PureComponent {
 
   render() {
     const {
-      data, type, visType, profile
+      data, type, visType, profile, compEnabled
     } = this.props;
+    const compToggled = !compEnabled;
+    // console.log("TCL: TCharts -> render -> compEnabled", compEnabled, compToggled)
 
     // PIE CHART data massaging
     const style = {
@@ -188,7 +190,12 @@ class TCharts extends PureComponent {
                 name={`Total ${totalLabel}`}
                 fill={colors[0]}
               />
-              <Bar dataKey="totEarningsNumComp" name="Comparison dates" fill={colors[1]} />
+              <Bar
+                dataKey="totEarningsNumComp"
+                name="Comparison dates"
+                fill={colors[1]}
+                hide={compToggled}
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -345,7 +352,12 @@ class TCharts extends PureComponent {
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="costPerTonMile" height={30} stroke={colors[0]}/>
               <Bar dataKey="costPerTonMile" name="Cost per Ton/Mile" fill={colors[0]} />
-              <Bar dataKey="costPerTonMileComp" name="Comparison dates" fill={colors[1]} />
+              <Bar
+                dataKey="costPerTonMileComp"
+                name="Comparison dates"
+                fill={colors[1]}
+                hide={compToggled}
+              />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -372,7 +384,15 @@ class TCharts extends PureComponent {
                 stroke={colors[0]}
                 fillOpacity={0.2}
               />
-              <Area name="Comparison Dates" type="monotone" dataKey="totEarningsNumComp" fill={colors[1]} stroke={colors[1]} fillOpacity={0.2} />
+              <Area
+                name="Comparison Dates"
+                type="monotone"
+                dataKey="totEarningsNumComp"
+                fill={colors[1]}
+                stroke={colors[1]}
+                fillOpacity={0.2}
+                hide={compToggled}
+              />
             </AreaChart>
           </ResponsiveContainer>
         );
@@ -439,14 +459,29 @@ class TCharts extends PureComponent {
               <Legend />
               <CartesianGrid />
               <Brush dataKey="costPerTonMile" height={30} stroke={colors[0]}/>
-              <Area name="Cost per Ton/Mile" type="monotone" dataKey="costPerTonMile" fill={colors[0]} stroke={colors[0]} fillOpacity={0.2} />
-              <Area name="Comparison Dates" type="monotone" dataKey="costPerTonMileComp" fill={colors[1]} stroke={colors[1]} fillOpacity={0.2} />
+              <Area
+                name="Cost per Ton/Mile"
+                type="monotone"
+                dataKey="costPerTonMile"
+                fill={colors[0]}
+                stroke={colors[0]}
+                fillOpacity={0.2}
+              />
+              <Area
+                name="Comparison Dates"
+                type="monotone"
+                dataKey="costPerTonMileComp"
+                fill={colors[1]}
+                stroke={colors[1]}
+                fillOpacity={0.2}
+                hide={compToggled}
+              />
             </AreaChart>
           </ResponsiveContainer>
         );
       }
     }
-    
+
     // PIE
     if (type === 'pie') {
       if (visType === 'totals') {
@@ -470,6 +505,7 @@ class TCharts extends PureComponent {
                 cy={120}
                 cx={530}
                 outerRadius={65}
+                hide={compToggled}
               />
               <Legend layout="vertical" verticalAlign="bottom" wrapperStyle={style} content={this.renderLegend} />
             </PieChart>
@@ -543,6 +579,7 @@ class TCharts extends PureComponent {
                 cy={120}
                 cx={530}
                 outerRadius={65}
+                hide={compToggled}
               />
               <Legend layout="vertical" verticalAlign="bottom" wrapperStyle={style} content={this.renderLegend} />
             </PieChart>
@@ -559,14 +596,16 @@ TCharts.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape()),
   type: PropTypes.string,
   visType: PropTypes.string,
-  profile: PropTypes.string
+  profile: PropTypes.string,
+  compEnabled: PropTypes.bool
 };
 
 TCharts.defaultProps = {
   data: null,
   type: null,
   visType: null,
-  profile: null
+  profile: null,
+  compEnabled: null
 };
 
 export default TCharts;

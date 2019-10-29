@@ -636,7 +636,6 @@ class DailyReportFilter extends Component {
   }
 
   async handleIntervalInputChange(e) {
-    console.log("TCL: handleIntervalInputChange -> e", e)
     const {filters, intervals} = {...this.state};
     let sAv = null;
     if (e.start) {
@@ -744,7 +743,7 @@ class DailyReportFilter extends Component {
       selectIndexComp
     } = this.state;
     // let start = filters.startAvailability;
-console.log("TCL: render -> intervals", intervals)
+
     // Row 1: Company, State, Zip, Range
     // Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
     // Row 3: Time Range, Range, Reset
@@ -1054,6 +1053,7 @@ console.log("TCL: render -> intervals", intervals)
                       name="dateInterval"
                       onChange={this.handleIntervalInputChange}
                       dateFormat="m/d/Y"
+                      isCustom
                     />
                   </div>
                   <div className="filter-item-button">

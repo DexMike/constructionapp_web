@@ -96,7 +96,7 @@ class FilterComparisonReport extends Component {
 
     this.timeRangesComp = [
       {
-        name: 'Disabled',
+        name: 'None',
         value: -1
       },
       {
@@ -182,6 +182,8 @@ class FilterComparisonReport extends Component {
       selectedRange: 0, // Parameter for setting startDate.
       selectIndexComp: 0, // Parameter for setting the dropdown default option.
       selectedRangeComp: 0, // Parameter for setting startDate.
+      compEnabled: false,
+      compActualValue: -1,
 
       // TODO: Refactor to a single filter object
       // Filter defaults
@@ -532,19 +534,26 @@ class FilterComparisonReport extends Component {
       lastZipCode,
       companyZipCode,
       filters,
-      reqHandlerZip
+      reqHandlerZip,
+      compEnabled,
+      compActualValue
     } = this.state;
     const {
       type,
       returnCarriers,
-      returnProducers,
+      // returnProducers,
       returnProducts,
       returnProjects,
       onReturnFilters,
-      fetching
+      fetching,
+      // timeRangesComp
     } = this.props;
     fetching(true);
     
+    let comp = false;
+    if(compActualValue !== -1) {
+      comp = true;
+    }
 
     let {company, address, profile} = this.state;
     const marketplaceUrl = '/marketplace';
@@ -605,7 +614,6 @@ class FilterComparisonReport extends Component {
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
     allFilters.compare = true;
-    
 
     if (type === 'Carrier') {
       
@@ -639,10 +647,10 @@ class FilterComparisonReport extends Component {
         products = this.mapObject(products);
         projects = this.mapObject(projects);
 
-        returnCarriers(carriers, allFilters, metadataCarriers);
+        returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
         // returnProducers(producers, allFilters, metadataProducer);
-        returnProducts(products, allFilters, metadataProduct);
-        returnProjects(projects, allFilters, metadataProject);
+        returnProducts(products, allFilters, metadataProduct, compEnabled);
+        returnProjects(projects, allFilters, metadataProject, compEnabled);
 
       } catch (err) {
         fetching(false);
@@ -676,10 +684,10 @@ class FilterComparisonReport extends Component {
         products = this.mapObject(products);
         projects = this.mapObject(projects);
 
-        returnCarriers(carriers, allFilters, metadataCarriers);
+        returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
         // returnProducers(producers, filters, metadataProducer);
-        returnProducts(products, allFilters, metadataProduct);
-        returnProjects(projects, allFilters, metadataProject);
+        returnProducts(products, allFilters, metadataProduct, compEnabled);
+        returnProjects(projects, allFilters, metadataProject, compEnabled);
       } catch (err) {
         fetching(false);
         return null;
@@ -714,10 +722,10 @@ class FilterComparisonReport extends Component {
         products = this.mapObject(products);
         projects = this.mapObject(projects);
 
-        returnCarriers(carriers, allFilters, metadataCarriers);
+        returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
         // returnProducers(producers, allFilters, metadataProducer);
-        returnProducts(products, allFilters, metadataProduct);
-        returnProjects(projects, allFilters, metadataProject);
+        returnProducts(products, allFilters, metadataProduct, compEnabled);
+        returnProjects(projects, allFilters, metadataProject, compEnabled);
       } catch (err) {
         fetching(false);
         return null;
@@ -1003,7 +1011,6 @@ class FilterComparisonReport extends Component {
   }
 
   async handleMultiChange(data, name) {
-    // console.log("TCL: handleMultiChange -> data", data)
     const {filters} = this.state;
     switch(name) {
       case 'status':
@@ -1064,7 +1071,6 @@ class FilterComparisonReport extends Component {
   }
 
   async handleIntervalComparisonInputChange(e) {
-    // console.log("TCL: handleIntervalComparisonInputChange -> e", e)
     const {filters, intervals} = {...this.state};
     let sAv = null;
     if (e.start) {
@@ -1152,6 +1158,10 @@ class FilterComparisonReport extends Component {
     } = this.state;
 
     selectIndexComp = this.timeRangesComp.findIndex(x => x.name === name);
+    let comp = false;
+    if(name !== 'None') {
+      comp = true;
+    }
     selectedRangeComp = value;
     const currentDateComp = moment(new Date())
       .hours(0)
@@ -1182,10 +1192,14 @@ class FilterComparisonReport extends Component {
       intervals,
       filters,
       selectedRangeComp,
-      selectIndexComp}, function saved() {
+      selectIndexComp,
+      compEnabled: comp,
+      compActualValue: selectIndexComp
+      
+    }, async function saved() {
       this.saveFilters();
+      await this.fetchCarrierData();
     });
-    await this.fetchCarrierData();
   }
 
   async handleResetFilters() {
@@ -1224,8 +1238,6 @@ class FilterComparisonReport extends Component {
       showComparison,
     } = this.props;
     // let start = filters.startAvailability;
-    
-    // console.log("TCL: render -> intervals", intervals)
 
     // Row 1: Company, State, Zip, Range
     // Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
@@ -1524,7 +1536,7 @@ class FilterComparisonReport extends Component {
                       onChange={this.handleIntervalInputChange}
                       dateFormat="m/d/Y"
                       isCustom={
-                        this.timeRanges[selectIndex].name !== 'Custom'
+                        this.timeRanges[selectIndex].name === 'Custom'
                       }
                     />
                   </div>
@@ -1565,7 +1577,7 @@ class FilterComparisonReport extends Component {
                           onChange={this.handleIntervalComparisonInputChange}
                           dateFormat="m/d/Y"
                           isCustom={
-                            this.timeRangesComp[selectIndexComp].name !== 'Custom'
+                            this.timeRangesComp[selectIndexComp].name === 'Custom'
                           }
                         />
                       </div>
