@@ -66,10 +66,10 @@
   justify-content: center;
 }
 
-.col-md-4 {
+/*.col-md-4 {
   padding-left: 0px !important;
   padding-right: 0px !important;
-}
+}*/
 
 .ag-theme-balham .ag-row {
   border-width: 0px !important;
@@ -143,11 +143,15 @@
   overflow: auto !important;
 }
 
-.row {
+/*.row {
   margin: 0 !important;
-}
+}*/
 
 .noSidePadding {
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+.noSidePadding .row {
+  margin: 0 !important;
 }

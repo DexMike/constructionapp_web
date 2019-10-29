@@ -393,17 +393,17 @@ class DriverForm extends Component {
     } = this.state;
     const {driverId, toggle, t} = this.props;
     return (
-      <div className="form">
+      <Row className="form">
         {this.renderGoTo()}
-        <div style={{ width: '100%' }}>
+        <Col md={12}>
           <h3
             className="page-title pl-4 pr-4 pt-2 pb-2"
             style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
           >
             {driverId ? t('Edit Driver') : t('Add Driver')}
           </h3>
-        </div>
-        <div>
+        </Col>
+        <Col md={12}>
           <Row className="pl-4 pr-4">
             <Col md={6} className="pt-2">
               <span>
@@ -504,8 +504,8 @@ class DriverForm extends Component {
               />
             </Col>
           </Row>
-        </div>
-      </div>
+        </Col>
+      </Row>
     );
   }
 
