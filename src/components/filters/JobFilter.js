@@ -255,11 +255,11 @@ class JobFilter extends Component {
     let {company, address, profile} = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
-    if (Object.keys(profile).length === 0) {
+    if (!profile || Object.keys(profile).length === 0) {
       profile = await ProfileService.getProfile();
-      if (Object.keys(company).length === 0) {
+      if (!company || Object.keys(company).length === 0) {
         company = await CompanyService.getCompanyById(profile.companyId);
-        if (Object.keys(address).length === 0) {
+        if (!address || Object.keys(address).length === 0) {
           address = await AddressService.getAddressById(company.addressId);
         }
       }
