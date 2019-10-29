@@ -346,7 +346,7 @@ class EquipmentsShortForm extends PureComponent {
                   {t('Tell us about your truck')}
                 </h3>
               </Col>
-              <Col md={4}>
+              <Col md={4} className="row-item">
                 <span>{t('Truck Type')}</span>
                 <SelectField
                   input={
@@ -362,7 +362,7 @@ class EquipmentsShortForm extends PureComponent {
                   placeholder={t('Truck Type')}
                 />
               </Col>
-              <Col md={4}>
+              <Col md={4} className="row-item">
                 <span>
                   {`${t('Maximum Capacity')} (${t('Tons')})`}
                 </span>
@@ -378,7 +378,7 @@ class EquipmentsShortForm extends PureComponent {
                   meta={reqHandlerMaxCapacity}
                 />
               </Col>
-              <Col md={4}>
+              <Col md={4} className="row-item">
                 <span>{t('Truck Number')}</span>
                 <TField
                   input={{
