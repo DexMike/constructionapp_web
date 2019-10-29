@@ -636,7 +636,7 @@ class UserSettings extends Component {
       errorMessage
     } = this.state;
     return (
-      <Modal isOpen={modal} toggle={this.toggle} className="password-reset-modal">
+      <Modal isOpen={modal} toggle={this.toggle} className="password-reset-modal" backdrop="static">
         <form autoComplete="new-password" className="form">
           <Row>
             <Col className="text-left" md={12} style={{fontSize: 16}}>

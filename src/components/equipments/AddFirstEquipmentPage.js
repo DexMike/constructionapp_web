@@ -80,6 +80,7 @@ class AddFirstEquipmentPage extends Component {
         isOpen={equipmentsModal}
         toggle={this.toggleAddMultiTrucksModal}
         className="equipments-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body">
           <EquipmentsShortForm
