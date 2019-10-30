@@ -44,6 +44,7 @@ import TSelectField from '../common/TSelect';
 import TCharts from '../common/TCharts';
 import FilterComparisonReport from "../filters/FilterComparisonReport";
 import ProfileService from '../../api/ProfileService';
+import TFormat from '../common/TFormat';
 
 import './Reports.css';
 import '../addresses/Address.css';
@@ -73,6 +74,13 @@ function formatNumber(number) {
 
 function currencyFormatter(params) {
   return `$ ${formatNumber(params.value)}`;
+}
+
+function currencyFormatterRound(params) {
+  if (params) {
+    return TFormat.currencyFormatterRound(params.value);
+  }
+  return '$ 0';
 }
 
 function percentFormatter(params) {
@@ -162,7 +170,8 @@ class ReportsComparison extends Component {
           // renderer
           // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          valueFormatter: currencyFormatterRound
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
@@ -220,7 +229,8 @@ class ReportsComparison extends Component {
           // renderer
           // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          valueFormatter: currencyFormatterRound
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
@@ -279,7 +289,8 @@ class ReportsComparison extends Component {
           // renderer
           // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          valueFormatter: currencyFormatterRound
         }, {
           field: 'totalLoadsComparison',
           headerName: '# of Loads',
@@ -816,13 +827,13 @@ class ReportsComparison extends Component {
     // console.log("TCL: renderVisualizations -> filters", filters)
     // prepare data for CSV printing
     if (activeTab === '1') {
-      dataToPrint = this.extractCSVInfo(carriers);
-      dataToRender = carriers;
-      columnsToRender = columnsCarrier;
-    } else if (activeTab === '2') {
       dataToPrint = this.extractCSVInfo(products);
       dataToRender = products;
       columnsToRender = columnsProducts;
+    } else if (activeTab === '2') {
+      dataToPrint = this.extractCSVInfo(carriers);
+      dataToRender = carriers;
+      columnsToRender = columnsCarrier;
     } else if (activeTab === '3') {
       dataToPrint = this.extractCSVInfo(projects);
       dataToRender = projects;
@@ -890,6 +901,9 @@ class ReportsComparison extends Component {
                       }, {
                         value: 'costTonMile',
                         label: 'Cost per Ton/Mile'
+                      }, {
+                        value: 'tonsDelivered',
+                        label: 'Tons Delivered'
                       }
                     ]}
                     placeholder="Visualization type"
@@ -920,10 +934,7 @@ class ReportsComparison extends Component {
                           this.toggle('1');
                         }}
                       >
-                        {
-                          (companyType === 'Customer') 
-                            ? 'Carrier' : 'Producers'
-                        }
+                        Materials 
                       </NavLink>
                     </NavItem>
                     <NavItem>
@@ -933,7 +944,10 @@ class ReportsComparison extends Component {
                           this.toggle('2');
                         }}
                       >
-                        Materials
+                        {
+                          (companyType === 'Customer') 
+                            ? 'Carrier' : 'Producers'
+                        }
                       </NavLink>
                     </NavItem>
                     <NavItem>
@@ -950,12 +964,12 @@ class ReportsComparison extends Component {
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
                       <div style={{ width: '100%', height: '400px' }}>
-                        {this.renderChart(chartType, carriers)}
+                        {this.renderChart(chartType, products)}
                       </div>
                     </TabPane>
                     <TabPane tabId="2">
                       <div style={{ width: '100%', height: '400px' }}>
-                        {this.renderChart(chartType, products)}
+                        {this.renderChart(chartType, carriers)}
                       </div>
                     </TabPane>
                     <TabPane tabId="3">

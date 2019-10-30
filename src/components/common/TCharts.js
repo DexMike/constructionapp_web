@@ -88,6 +88,8 @@ class TCharts extends PureComponent {
     const avgTon = [];
     const costPerTon = [];
     const costPerTonComp = [];
+    const tonsDelivered = [];
+    const tonsDeliveredComp = [];
     let colorLoop = 0;
     let totalLabel = 'Cost';
 
@@ -132,6 +134,16 @@ class TCharts extends PureComponent {
           value: item.costPerTonMileComp,
           fill: colors[colorLoop]
         };
+        const newTonsDelivered = {
+          name: item.name,
+          value: item.tonsDelivered,
+          fill: colors[colorLoop]
+        };
+        const newTonsDeliveredComp = {
+          name: item.name,
+          value: item.tonsDeliveredComp,
+          fill: colors[colorLoop]
+        };
         colorLoop += 1;
         if (colorLoop === 3) {
           colorLoop = 0;
@@ -143,6 +155,8 @@ class TCharts extends PureComponent {
         avgTon.push(newItemAvgTon);
         costPerTon.push(costTon);
         costPerTonComp.push(costTonComp);
+        tonsDelivered.push(newTonsDelivered);
+        tonsDeliveredComp.push(newTonsDeliveredComp);
       }
     }
 
@@ -362,6 +376,57 @@ class TCharts extends PureComponent {
           </ResponsiveContainer>
         );
       }
+      if (visType === 'tonsDelivered') {
+        return (
+          <ResponsiveContainer height={350} className="dashboard__area">
+            <BarChart
+              width={400}
+              height={250}
+              data={data}
+              layout="horizontal"
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <XAxis type="category" dataKey="name">
+                <Label
+                  value="Tons"
+                  position="bottom"
+                  offset={0}
+                  content={props => {
+                    return (
+                    <text
+                        style={{ fontSize: '12px'}}
+                        x={17}
+                        y={props.viewBox.y + props.viewBox.height - 10}
+                        fill="#176A55"
+                    >
+                        {props.value}
+                    </text>
+                    );
+                  }}
+                />
+              </XAxis>
+              
+              <YAxis type="number" />
+              <CartesianGrid strokeDasharray="3 3"/>
+              <CartesianGrid strokeDasharray="3 3"/>
+              <Legend />
+              <ReferenceLine y={0} stroke="#000"/>
+              <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
+              <Bar
+                dataKey="tonsDelivered"
+                name={`Total ${totalLabel}`}
+                fill={colors[0]}
+              />
+              <Bar
+                dataKey="tonsDeliveredComp"
+                name="Comparison dates"
+                fill={colors[1]}
+                hide={compToggled}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      }
     }
     
     // AREA
@@ -480,6 +545,37 @@ class TCharts extends PureComponent {
           </ResponsiveContainer>
         );
       }
+      if (visType === 'tonsDelivered') {
+        return (
+          <ResponsiveContainer>
+            <AreaChart data={data} margin={{ top: 20, left: -15, bottom: 20 }}>
+              <XAxis dataKey="name" tickLine={false} />
+              <YAxis tickLine={false} />
+              <Tooltip />
+              <Legend />
+              <CartesianGrid />
+              <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
+              <Area
+                name={`Total ${totalLabel}`}
+                type="monotone"
+                dataKey="tonsDelivered"
+                fill={colors[0]}
+                stroke={colors[0]}
+                fillOpacity={0.2}
+              />
+              <Area
+                name="Comparison Dates"
+                type="monotone"
+                dataKey="tonsDeliveredComp"
+                fill={colors[1]}
+                stroke={colors[1]}
+                fillOpacity={0.2}
+                hide={compToggled}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+      }
     }
 
     // PIE
@@ -574,6 +670,34 @@ class TCharts extends PureComponent {
               />
               <Pie
                 data={costPerTonComp}
+                dataKey="value"
+                name="Comparison Dates"
+                cy={120}
+                cx={530}
+                outerRadius={65}
+                hide={compToggled}
+              />
+              <Legend layout="vertical" verticalAlign="bottom" wrapperStyle={style} content={this.renderLegend} />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+      }
+      if (visType === 'tonsDelivered') {
+        return (
+          <ResponsiveContainer>
+            <PieChart className="dashboard__chart-pie-container">
+              <Tooltip />
+              <Pie
+                data={tonsDelivered}
+                dataKey="value"
+                name={`Total ${totalLabel}`}
+                cy={120}
+                cx={530}
+                innerRadius={70}
+                outerRadius={85}
+              />
+              <Pie
+                data={tonsDeliveredComp}
                 dataKey="value"
                 name="Comparison Dates"
                 cy={120}
