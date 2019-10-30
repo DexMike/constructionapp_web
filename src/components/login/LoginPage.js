@@ -129,7 +129,7 @@ class LoginPage extends SignIn {
     try {
       if (!username || username.length <= 0
         || !password || password.length <= 0) {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
           btnSubmitting: false,
@@ -140,6 +140,16 @@ class LoginPage extends SignIn {
 
       const userCheck = {email: username};
       const user = await UserService.getUserByEmail(userCheck);
+
+      if (!user || !user.id || !user.cognitoId || user.cognitoId === '') {
+        // await this.createLoginLog(false);
+        this.setState({
+          error: 'Incorrect username or password.',
+          btnSubmitting: false,
+          loading: false
+        });
+        return;
+      }
 
       if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
@@ -170,7 +180,8 @@ class LoginPage extends SignIn {
         browserVersion,
         screenSize
       });
-      const data = await Auth.signIn(username, password);
+
+      const data = await Auth.signIn(user.cognitoId, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
       // If the user session is not null, then we are authenticated
@@ -205,7 +216,7 @@ class LoginPage extends SignIn {
     } catch (err) {
       // console.log(`Error: ${JSON.stringify(err, null, 2)}`);
       if (err.code === 'UserNotFoundException') {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
           loading: false,
@@ -214,7 +225,7 @@ class LoginPage extends SignIn {
           confirmUsername: null
         });
       } else if (err.code === 'UserNotConfirmedException') {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
@@ -223,7 +234,7 @@ class LoginPage extends SignIn {
           confirmUsername: username
         });
       } else {
-        await this.createLoginLog(false);
+        // await this.createLoginLog(false);
         this.setState({
           error: err.message,
           loading: false,
