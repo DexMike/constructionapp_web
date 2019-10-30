@@ -613,128 +613,54 @@ class FilterComparisonReport extends Component {
     allFilters.materials = this.getValues(allFilters.materials);
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
-    allFilters.compare = true;
+    
+    //if comp is disabled, do not get comp data
+    allFilters.compare = compEnabled;
 
     if (type === 'Carrier') {
-      
-      try {        
-        allFilters.companyType = 'Carrier';
-        
-        let resultCarriers = [];
-        // let resultProducers = [];
-        let resultProducts = [];
-        let resultProjects = [];
-
-        resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
-        // resultProducers = await ReportsService.getProducersComparisonReport(allFilters);
-        resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
-        //projects should NOT have comparisonData
-        allFilters.compare = false;
-        resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
-
-        let carriers = resultCarriers.data;
-        const metadataCarriers = resultCarriers;
-        // let producers = resultProducers.data;
-        // const metadataProducer = resultProducers.metadata;
-        let products = resultProducts.data;
-        const metadataProduct = resultProducts.metadata;
-        let projects = resultProjects.data;
-        const metadataProject = resultProjects.metadata;
-
-        //Maping comparison
-        carriers = this.mapObject(carriers);
-        // producers = this.mapObject(producers);
-        products = this.mapObject(products);
-        projects = this.mapObject(projects);
-
-        returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
-        // returnProducers(producers, allFilters, metadataProducer);
-        returnProducts(products, allFilters, metadataProduct, compEnabled);
-        returnProjects(projects, allFilters, metadataProject, compEnabled);
-
-      } catch (err) {
-        fetching(false);
-        return null;
-      }
+      allFilters.companyType = 'Carrier';
     } else if (type === 'Producer' || type === 'Customer') {
       allFilters.companyType = 'Customer';
-      try {
-        let resultCarriers = [];
-        // let resultProducers = [];
-        let resultProducts = [];
-        let resultProjects = [];
-
-        resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
-        // resultProducers = await ReportsService.getProducersComparisonReport(filters);
-        resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
-        //projects should NOT have comparisonData
-        allFilters.compare = false;
-        resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
-
-        let carriers = resultCarriers.data;
-        const metadataCarriers = resultCarriers.metadata;
-        // const producers = resultProducers.data;
-        // const {metadataProducer} = resultProducers;
-        let products = resultProducts.data;
-        const metadataProduct = resultProducts.metadata;
-        let projects = resultProjects.data;
-        const metadataProject = resultProjects.metadata;
-        //Maping comparison
-        carriers = this.mapObject(carriers);
-        products = this.mapObject(products);
-        projects = this.mapObject(projects);
-
-        returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
-        // returnProducers(producers, filters, metadataProducer);
-        returnProducts(products, allFilters, metadataProduct, compEnabled);
-        returnProjects(projects, allFilters, metadataProject, compEnabled);
-      } catch (err) {
-        fetching(false);
-        return null;
-      }
     } else if (type === 'Contractor') {
-      allFilters.companyType = 'Contractor';        
-      try {
-        let resultCarriers = [];
-        // let resultProducers = [];
-        let resultProducts = [];
-        let resultProjects = [];
-
-        resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
-        // resultProducers = await ReportsService.getProducersComparisonReport(allFilters);
-        resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
-        //projects should NOT have comparisonData
-        allFilters.compare = false;
-        resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
-
-        let carriers = resultCarriers.data;
-        const metadataCarriers = resultCarriers.metadata;
-        // let producers = resultProducers.data;
-        // const metadataProducer = resultProducers.metadata;
-        let products = resultProducts.data;
-        const metadataProduct = resultProducts.metadata;
-        let projects = resultProjects.data;
-        const metadataProject = resultProjects.metadata;
-
-        //Maping comparison
-        // producers = this.mapObject(producers);
-        carriers = this.mapObject(carriers);
-        products = this.mapObject(products);
-        projects = this.mapObject(projects);
-
-        returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
-        // returnProducers(producers, allFilters, metadataProducer);
-        returnProducts(products, allFilters, metadataProduct, compEnabled);
-        returnProjects(projects, allFilters, metadataProject, compEnabled);
-      } catch (err) {
-        fetching(false);
-        return null;
-      }
+      allFilters.companyType = 'Contractor';
     } else {
       const {metadata} = result;
       onReturnFilters(result, resultLoads, allFilters/*, metadata*/);
     }
+      
+    try {
+      
+      let resultCarriers = [];
+      let resultProducts = [];
+      let resultProjects = [];
+      
+      resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
+      resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
+      
+      //projects should NOT have comparisonData
+      allFilters.compare = false;
+      resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
 
+      let carriers = resultCarriers.data;
+      const metadataCarriers = resultCarriers;
+      let products = resultProducts.data;
+      const metadataProduct = resultProducts.metadata;
+      let projects = resultProjects.data;
+      const metadataProject = resultProjects.metadata;
+
+      //Maping comparison
+      carriers = this.mapObject(carriers);
+      products = this.mapObject(products);
+      projects = this.mapObject(projects);
+
+      returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
+      returnProducts(products, allFilters, metadataProduct, compEnabled);
+      returnProjects(projects, allFilters, metadataProject, compEnabled);
+
+    } catch (err) {
+      fetching(false);
+      return null;
+    }
     const jobs = result.data;
     const {metadata} = result;
 
