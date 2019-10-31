@@ -21,6 +21,8 @@ import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
 import NumberFormatting from '../../utils/NumberFormatting';
 import GeoUtils from '../../utils/GeoUtils';
+import JobResumePopup from '../jobs/JobResumePopup';
+import JobListResumePopup from '../jobs/JobListResumePopup';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -71,12 +73,15 @@ class DashboardCustomerPage extends Component {
       loaded: false,
       jobs: [],
       jobsInfo: [],
+      pausedJobs: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
       modalAddJob: false,
       modalAddJobWizard: false,
+      modalResumeJob: false,
+      modalResumeJobList: false,
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
@@ -92,6 +97,8 @@ class DashboardCustomerPage extends Component {
     this.handleJobEdit = this.handleJobEdit.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
     this.toggleNewJobWizardModal = this.toggleNewJobWizardModal.bind(this);
+    this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
+    this.toggleResumeJobListModal = this.toggleResumeJobListModal.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
@@ -100,9 +107,20 @@ class DashboardCustomerPage extends Component {
   }
 
   async componentDidMount() {
+    let { pausedJobs } = this.state;
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo(profile);
+
+    if (profile.companyType === 'Customer') {
+      pausedJobs = await JobService.getCustomerPausedJobs(profile.companyId);
+    } else if (profile.companyType === 'Carrier') {
+      pausedJobs = await JobService.getCarrierPausedJobs(profile.companyId);
+    }
+
+    this.toggleResumeJobListModal();
+
     this.setState({
+      pausedJobs,
       profile,
       loaded: true
     });
@@ -233,6 +251,20 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  toggleResumeJobModal() {
+    const {modalResumeJob} = this.state;
+    this.setState({
+      modalResumeJob: !modalResumeJob
+    });
+  }
+
+  toggleResumeJobListModal() {
+    const {modalResumeJobList} = this.state;
+    this.setState({
+      modalResumeJobList: !modalResumeJobList
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -245,6 +277,50 @@ class DashboardCustomerPage extends Component {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
+  }
+
+  renderResumeJobListModal() {
+    const {
+      modalResumeJobList,
+      pausedJobs,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalResumeJobList}
+        toggle={this.toggleResumeJobListModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobListResumePopup
+          jobs={pausedJobs}
+          profile={profile}
+          toggle={this.toggleResumeJobListModal}
+        />
+      </Modal>
+    );
+  }
+
+  renderResumeJobModal() {
+    const {
+      modalResumeJob,
+      job,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalResumeJob}
+        toggle={this.toggleResumeJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobResumePopup
+          job={job}
+          profile={profile}
+          toggle={this.toggleResumeJobModal}
+        />
+      </Modal>
+    );
   }
 
   renderNewJobModal() {
@@ -464,6 +540,9 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
+
+    console.log(typeof jobs);
+    console.log(jobs);
     
     jobs = jobs.map((job) => {
       const newJob = job;
@@ -650,6 +729,8 @@ class DashboardCustomerPage extends Component {
           {/* {this.renderModal()} */}
           {this.renderNewJobModal()}
           {this.renderNewJobWizardModal()}
+          {this.renderResumeJobModal()}
+          {this.renderResumeJobListModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}

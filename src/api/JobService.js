@@ -60,6 +60,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getCarrierPausedJobs(companyId) {
+    const response = await super.get(`/carrier/${companyId}/pausedjobs`);
+    return (response);
+  }
+
+  static async getCustomerPausedJobs(companyId) {
+    const response = await super.get(`/customer/${companyId}/pausedjobs`);
+    return (response);
+  }
+
   static async getMarketplaceJobsInfo() {
     const response = await super.get('/marketplace/jobs');
     return (response);
