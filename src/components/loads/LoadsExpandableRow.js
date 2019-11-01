@@ -5,7 +5,7 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
-import ImageZoom from 'react-medium-image-zoom'
+import ImageZoom from 'react-medium-image-zoom';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -14,7 +14,7 @@ import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
 import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
-import TMap from '../common/TMap';
+import TMapGPS from '../common/TMapGPS';
 import '../common/ImageZoom.scss';
 
 const refreshInterval = 15; // refresh every 15 seconds
@@ -346,13 +346,13 @@ class LoadsExpandableRow extends Component {
                   </Row>
                   <Row>
                     <Col md={4}>
-                      <TMap
+                      <TMapGPS
                         id={`load${load.id}`}
                         width="100%"
                         height={400}
                         startAddress={startCoords}
                         endAddress={endCoords}
-                        trackings={gpsTrackings}
+                        loadId={load.id}
                       />
                     </Col>
                     <Col md={8}>
