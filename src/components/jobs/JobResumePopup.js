@@ -13,6 +13,7 @@ import {
   Button
 } from 'reactstrap';
 import TField from '../common/TField';
+import TDateTimePicker from '../common/TDateTimePicker';
 import JobCreateFormOne from './JobCreateFormOne';
 import JobCreateFormTwo from './JobCreateFormTwo';
 import ProfileService from '../../api/ProfileService';
@@ -26,7 +27,14 @@ class JobResumePopup extends Component {
 
     this.state = {
       page: 1,
-      job: [],
+      // job: [],
+      job: {
+        rate: 0,
+        rateType: '',
+        endTime: Date()
+      },
+      jobEndDate: null,
+      jobId: null,
       loaded: false,
       validateFormOne: false,
       firstTabInfo: {},
@@ -35,16 +43,114 @@ class JobResumePopup extends Component {
     };
     this.closeNow = this.closeNow.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.jobEndDateChange = this.jobEndDateChange.bind(this);
   }
 
   async componentDidMount() {
-    const { job, profile } = this.props;
-    this.setState({ job, profile, loaded: true });
+    const { profile } = this.props;
+    this.setState({ profile, loaded: true });
+  }
+
+  async componentDidUpdate(prevProps, prevState) {
+    console.log(prevProps);
+    if ((prevProps.jobId !== this.state.jobId)) {
+      const job = await JobService.getJobById(prevProps.jobId);
+      console.log(job);
+      const jobEndDate = job.endTime;
+      console.log(jobEndDate);
+      const jobStartDate = job.startTime;
+      this.setState({ job, jobEndDate, jobStartDate, jobId: job.id });
+    }
   }
 
   closeNow() {
     const { toggle } = this.props;
     toggle();
+  }
+
+  handleInputChange(e) {
+    const { value } = e.target;
+    this.setState({ [e.target.name]: value });
+  }
+
+  jobEndDateChange(data) {
+    // return false;
+    const {reqHandlerEndDate} = this.state;
+    this.setState({
+      jobEndDate: data,
+      reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
+        touched: false
+      })
+    });
+  }
+
+  clearValidationLabels() {
+    const {
+      reqHandlerRate,
+      reqHandlerEndDate
+    } = this.state;
+    reqHandlerRate.touched = false;
+    reqHandlerEndDate.touched = false;
+    this.setState({
+      reqHandlerRate,
+      reqHandlerEndDate
+    });
+  }
+
+  async validateSend() {
+    this.clearValidationLabels();
+    const {
+      jobStartDate,
+      jobEndDate,
+      reqHandlerRate,
+      reqHandlerEndDate
+    } = {...this.state};
+    let isValid = true;
+    if (!reqHandlerRate || reqHandlerRate > '0') {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+    if (!jobEndDate) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+      isValid = false;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() <= currDate.getTime())) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'The end date of the job can not be set in the past or equivalent to the current date and time'
+        }
+      });
+      isValid = false;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() <= new Date(jobStartDate).getTime())) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'The end date of the job can not be set in the past of or equivalent to the start date'
+        }
+      });
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   renderGoTo() {
@@ -59,8 +165,10 @@ class JobResumePopup extends Component {
     const { profile } = this.props;
     const {
       job,
+      jobEndDate,
       loaded
     } = this.state;
+    console.log(jobEndDate);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -72,7 +180,7 @@ class JobResumePopup extends Component {
                   <div
                     className="wizard__step wizard__step--active"
                   >
-                    <p>Resume a Job</p>
+                    <p>Resume a Job: {job.name}</p>
                   </div>
                 </div>
                 <div className="wizard__form-wrapper">
@@ -87,13 +195,13 @@ class JobResumePopup extends Component {
                           >
                             <Row className="col-md-12">
                               <div className="col-md-6 form__form-group">
-                                <span className="form__form-group-label">Tonnage</span>
+                                <span className="form__form-group-label">{job && job.rateType === 'Ton' ? 'Tonnage' : 'Hours'}</span>
                                 <TField
                                   input={
                                     {
                                       onChange: this.handleInputChange,
                                       name: 'name',
-                                      // value: name
+                                      value: job.rate
                                     }
                                   }
                                   placeholder="Job Name"
@@ -103,19 +211,24 @@ class JobResumePopup extends Component {
                                 />
                               </div>
                               <div className="col-md-6 form__form-group">
-                                <span className="form__form-group-label">End Date</span>
-                                <TField
+                                <span className="form__form-group-label">End Date / Time</span>
+                                <TDateTimePicker
                                   input={
                                     {
-                                      onChange: this.handleInputChange,
-                                      name: 'name',
-                                      // value: name
+                                      onChange: this.jobEndDateChange,
+                                      name: 'jobEndDate',
+                                      value: jobEndDate,
+                                      givenDate: jobEndDate
                                     }
                                   }
-                                  placeholder="Job Name"
-                                  type="text"
-                                  // meta={reqHandlerJobName}
-                                  id="jobname"
+                                  placeholder="Date and time of job"
+                                  defaultDate={jobEndDate}
+                                  onChange={this.jobEndDateChange}
+                                  dateFormat="m/d/Y h:i K"
+                                  showTime
+                                  // meta={reqHandlerEndDate}
+                                  id="jobenddatetime"
+                                  profileTimeZone={profile.timeZone}
                                 />
                               </div>
                             </Row>
@@ -138,7 +251,7 @@ class JobResumePopup extends Component {
                                 className="next"
                                 // onClick={this.nextPage}
                               >
-                                Next
+                                Resume Job
                               </Button>
                             </ButtonToolbar>
                           </Row>
@@ -166,13 +279,13 @@ class JobResumePopup extends Component {
 }
 
 JobResumePopup.propTypes = {
-  job: PropTypes.object,
+  jobId: PropTypes.number,
   profile: PropTypes.object,
   toggle: PropTypes.func.isRequired
 };
 
 JobResumePopup.defaultProps = {
-  job: null,
+  jobId: null,
   profile: null
 };
 

@@ -45,6 +45,20 @@ function AddJobButton({handle}) {
   );
 }
 
+function PausedJobsButton({handle}) {
+  const {t} = useTranslation();
+  return (
+    <Button
+      onClick={handle}
+      type="button"
+      className="secondaryButton"
+      id="pausedJobsButton"
+    >
+      {t('PAUSED JOBS')}
+    </Button>
+  );
+}
+
 function DashboardLoading () {
   const {t} = useTranslation();
   return (
@@ -90,7 +104,8 @@ class DashboardCustomerPage extends Component {
       page: 0,
       rows: 10,
       totalCount: 10,
-      totalJobs: 0
+      totalJobs: 0,
+      pausedJobId: null
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -104,23 +119,26 @@ class DashboardCustomerPage extends Component {
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
     this.sortFilters = this.sortFilters.bind(this);
+    this.handleEditPausedJob = this.handleEditPausedJob.bind(this);
+    this.handleGoToPausedJobList = this.handleGoToPausedJobList.bind(this);
   }
 
   async componentDidMount() {
-    let { pausedJobs } = this.state;
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo(profile);
 
-    if (profile.companyType === 'Customer') {
+    /* if (profile.companyType === 'Customer') {
       pausedJobs = await JobService.getCustomerPausedJobs(profile.companyId);
     } else if (profile.companyType === 'Carrier') {
       pausedJobs = await JobService.getCarrierPausedJobs(profile.companyId);
-    }
+    } */
+
+    // console.log(pausedJobs);
 
     this.toggleResumeJobListModal();
 
     this.setState({
-      pausedJobs,
+      // pausedJobs,
       profile,
       loaded: true
     });
@@ -133,10 +151,11 @@ class DashboardCustomerPage extends Component {
     this.setState({ totalJobs, jobsInfo });
   }
 
-  returnJobs(jobs, filters, metadata) {
+  returnJobs(jobs, filters, metadata, pausedJobsList) {
     const { totalCount } = metadata;
     this.setState({
       jobs,
+      pausedJobs: pausedJobsList,
       filters,
       totalCount
     });
@@ -217,6 +236,19 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  handleEditPausedJob(pausedJobId) {
+    this.toggleResumeJobListModal();
+    this.toggleResumeJobModal();
+    this.setState({
+      pausedJobId
+    });
+  }
+
+  handleGoToPausedJobList() {
+    this.toggleResumeJobModal();
+    this.toggleResumeJobListModal();
+  }
+
   handlePageChange(page) {
     this.setState({ page });
   }
@@ -293,9 +325,10 @@ class DashboardCustomerPage extends Component {
         backdrop="static"
       >
         <JobListResumePopup
-          jobs={pausedJobs}
+          pausedJobs={pausedJobs}
           profile={profile}
           toggle={this.toggleResumeJobListModal}
+          onJobSelect={this.handleEditPausedJob}
         />
       </Modal>
     );
@@ -304,7 +337,7 @@ class DashboardCustomerPage extends Component {
   renderResumeJobModal() {
     const {
       modalResumeJob,
-      job,
+      pausedJobId,
       profile
     } = this.state;
     return (
@@ -315,7 +348,7 @@ class DashboardCustomerPage extends Component {
         backdrop="static"
       >
         <JobResumePopup
-          job={job}
+          jobId={pausedJobId}
           profile={profile}
           toggle={this.toggleResumeJobModal}
         />
@@ -362,11 +395,12 @@ class DashboardCustomerPage extends Component {
   renderTitle() {
     return (
       <Row>
-        <Col md={10}>
+        <Col md={9}>
           <PageTitle />
         </Col>
-        <Col md={2}>
+        <Col md={3} style={{textAlign: 'right'}}>
           <AddJobButton handle={this.toggleNewJobWizardModal}/>
+          <PausedJobsButton handle={this.toggleResumeJobListModal}/>
         </Col>
       </Row>
     );
@@ -540,9 +574,6 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
-    console.log(typeof jobs);
-    console.log(jobs);
     
     jobs = jobs.map((job) => {
       const newJob = job;

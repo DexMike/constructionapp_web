@@ -12,7 +12,10 @@ import {
   ButtonToolbar,
   Button
 } from 'reactstrap';
+import TTable from '../common/TTable';
 import TField from '../common/TField';
+import TFormat from '../common/TFormat';
+import NumberFormatting from '../../utils/NumberFormatting';
 import JobCreateFormOne from './JobCreateFormOne';
 import JobCreateFormTwo from './JobCreateFormTwo';
 import ProfileService from '../../api/ProfileService';
@@ -25,7 +28,8 @@ class JobListResumePopup extends Component {
     super(props);
 
     this.state = {
-      page: 1,
+      page: 0,
+      rows: 10,
       jobs: [],
       loaded: false,
       validateFormOne: false,
@@ -35,17 +39,56 @@ class JobListResumePopup extends Component {
     };
     this.closeNow = this.closeNow.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
+    this.handleJobClick = this.handleJobClick.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
   }
 
   async componentDidMount() {
-    const { jobs, profile } = this.props;
-    console.log(jobs);
-    this.setState({ jobs, profile, loaded: true });
+    const { pausedJobs, profile } = this.props;
+    this.setState({ jobs: pausedJobs, profile, loaded: true });
   }
+
+  /* componentDidUpdate(prevProps) {
+    const {pausedJobs} = this.props;
+    console.log(pausedJobs);
+    this.setState({ jobs: pausedJobs });
+    if (prevProps.color !== this.props.color) {
+      // 😔 Extra re-render for every update
+      this.setState({
+        textColor: slowlyCalculateTextColor(this.props.color),
+      });
+    }
+  } */
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.pausedJobs !== this.state.jobs) {
+      this.setState({ jobs: prevProps.pausedJobs });
+    }
+  }
+
+  /* componentWillReceiveProps(nextProps) {
+    const {pausedJobs} = this.props;
+    this.setState({ jobs: pausedJobs });
+  } */
 
   closeNow() {
     const { toggle } = this.props;
     toggle();
+  }
+
+  handlePageChange(page) {
+    this.setState({ page });
+  }
+
+  handleRowsPerPage(rows) {
+    this.setState({ rows });
+  }
+
+  handleJobClick(pausedJobId) {
+    const { onJobSelect } = this.props;
+    console.log('clicking a row in child component: ', pausedJobId);
+    onJobSelect(pausedJobId);
   }
 
   renderGoTo() {
@@ -58,15 +101,30 @@ class JobListResumePopup extends Component {
 
   render() {
     const { profile } = this.props;
+    let { jobs } = this.state;
+
+    jobs = jobs.map((job) => {
+      const newJob = job;
+      const tempRate = newJob.rate;
+
+      newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
+      newJob.newEndDate = TFormat.asDateTime(job.endTime, profile.timeZone);
+
+      if (!job.companyCarrierLegalName) {
+        newJob.companyCarrierLegalName = 'Unassigned';
+      }
+
+      return newJob;
+    });
+
     const {
-      jobs,
       loaded
     } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
           {/* {this.renderGoTo()} */}
-          <div className="dashboard dashboard__job-create">
+          <div className="dashboard dashboard__job-create" style={{width: 900}}>
             <Card style={{paddingBottom: 0}}>
               <div className="wizard">
                 <div className="wizard__steps">
@@ -81,46 +139,33 @@ class JobListResumePopup extends Component {
                     <Col md={12} lg={12}>
                       <Card>
                         <CardBody>
-                          <form
-                            className="form form--horizontal addtruck__form"
-                            // onSubmit={e => this.saveTruck(e)}
-                            autoComplete="off"
-                          >
-                            <Row className="col-md-12">
-                              <div className="col-md-6 form__form-group">
-                                <span className="form__form-group-label">Tonnage</span>
-                                <TField
-                                  input={
-                                    {
-                                      onChange: this.handleInputChange,
-                                      name: 'name',
-                                      // value: name
-                                    }
+                          <Row className="col-md-12">
+                            <TTable
+                              columns={
+                                [
+                                  {
+                                    name: 'name',
+                                    displayName: 'Job Name'
+                                  },
+                                  {
+                                    name: 'companyCarrierLegalName',
+                                    displayName: 'Carrier'
+                                  },
+                                  {
+                                    name: 'newStartDate',
+                                    displayName: 'Start Date'
+                                  },
+                                  {
+                                    name: 'newEndDate',
+                                    displayName: 'End Date'
                                   }
-                                  placeholder="Job Name"
-                                  type="text"
-                                  // meta={reqHandlerJobName}
-                                  id="jobname"
-                                />
-                              </div>
-                              <div className="col-md-6 form__form-group">
-                                <span className="form__form-group-label">End Date</span>
-                                <TField
-                                  input={
-                                    {
-                                      onChange: this.handleInputChange,
-                                      name: 'name',
-                                      // value: name
-                                    }
-                                  }
-                                  placeholder="Job Name"
-                                  type="text"
-                                  // meta={reqHandlerJobName}
-                                  id="jobname"
-                                />
-                              </div>
-                            </Row>
-                          </form>
+                                ]
+                              }
+                              data={jobs}
+                              handleIdClick={this.handleJobClick}
+                              hidePagination
+                            />
+                          </Row>
                           <Row className="col-md-12">
                             <hr/>
                           </Row>
@@ -131,15 +176,6 @@ class JobListResumePopup extends Component {
                                       onClick={this.closeNow}
                               >
                                 Cancel
-                              </Button>
-                            </ButtonToolbar>
-                            <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                              <Button
-                                color="primary"
-                                className="next"
-                                // onClick={this.nextPage}
-                              >
-                                Next
                               </Button>
                             </ButtonToolbar>
                           </Row>
@@ -167,13 +203,14 @@ class JobListResumePopup extends Component {
 }
 
 JobListResumePopup.propTypes = {
-  jobs: PropTypes.object,
+  pausedJobs: PropTypes.array,
   profile: PropTypes.object,
-  toggle: PropTypes.func.isRequired
+  toggle: PropTypes.func.isRequired,
+  onJobSelect: PropTypes.func.isRequired
 };
 
 JobListResumePopup.defaultProps = {
-  jobs: null,
+  pausedJobs: null,
   profile: null
 };
 

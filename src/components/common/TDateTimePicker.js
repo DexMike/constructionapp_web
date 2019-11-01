@@ -8,15 +8,22 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: null
+      startDate: new Date()
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   // componentDidMount was added in order to prepopulate
   // datePicker date from a fixed date passed from other component.
-  async componentDidMount() {
-    const { input, profileTimeZone } = this.props;
+  /* async componentDidMount() {
+    let { startDate } = this.state;
+    let { defaultDate } = this.props;
+    // const profile = await ProfileService.getProfile();
+    let dueDate = 0;
+
+    this.setState({ startDate: defaultDate }); */
+
+    /* const { input, profileTimeZone } = this.props;
     let { startDate } = this.state;
     let dueDate = 0;
     // const profile = await ProfileService.getProfile();
@@ -56,14 +63,22 @@ class TDateTimePickerField extends PureComponent {
       ).format('YYYY-MM-DD HH:mm:ss'));
       this.setState({ startDate: timeZonedStartDate });
     }
-  }
+  } */
 
   // ComponentWillReceiveProps was added in order to change the
   // datePicker date from a given props value.
-  async componentWillReceiveProps(props) {
+ /*  async componentWillReceiveProps(props) {
+    console.log(props);
     let { startDate } = this.state;
+    let { defaultDate } = this.props;
     // const profile = await ProfileService.getProfile();
     let dueDate = 0;
+
+    if (defaultDate !== startDate) {
+      // startDate = defaultDate;
+      console.log();
+      this.setState({ startDate: defaultDate });
+    }
 
     if (props.input.value) {
       let parsedDate = new Date(props.input.value);
@@ -92,7 +107,19 @@ class TDateTimePickerField extends PureComponent {
       const timeZonedStartDate = new Date(moment(startDate).tz(
         props.profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).format('YYYY-MM-DD HH:mm:ss'));
+      console.log(timeZonedStartDate);
       this.setState({ startDate: timeZonedStartDate });
+    }
+  } */
+
+  async componentDidUpdate(prevProps, prevState) {
+    console.log('inside cdu');
+    let { startDate } = this.state;
+    console.log(prevProps.defaultDate);
+    console.log(startDate);
+    if ((prevProps.defaultDate !== this.props.defaultDate)) {
+      console.log('updating shit');
+      this.setState({ startDate: this.props.defaultDate });
     }
   }
 
@@ -105,7 +132,7 @@ class TDateTimePickerField extends PureComponent {
   }
 
   render() {
-    // const { startDate } = this.state;
+    const { startDate } = this.state;
     const {
       dateFormat,
       meta: { touched, error },
@@ -116,6 +143,8 @@ class TDateTimePickerField extends PureComponent {
       placeholder,
       defaultDate
     } = this.props;
+    console.log('start date:', startDate);
+    console.log('default date:', defaultDate);
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">

@@ -330,8 +330,9 @@ class JobFilter extends Component {
 
     const jobs = result.data;
     const {metadata} = result;
+    const {pausedJobs} = result;
     const {returnJobs} = this.props;
-    returnJobs(jobs, filters, metadata);
+    returnJobs(jobs, filters, metadata, pausedJobs);
     this.setState({lastZipCode: filters.zipCode});
     return jobs;
   }
