@@ -95,5 +95,9 @@
   "Success": "Success",
   "Warning": "Warning",
   "Return": "Return",
-  "Resend Invite": "Resend Invite"
+  "Resend Invite": "Resend Invite",
+  "A Driver": "A Driver",
+  "DEFAULT_DRIVER_PROMPT": "under your company has successfully registered. Would you like to associate them as a default driver for one of your trucks?",
+  "Ask me later": "Ask me later",
+  "Yes": "Yes"
 }
