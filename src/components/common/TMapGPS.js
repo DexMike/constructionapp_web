@@ -3,9 +3,9 @@ import * as PropTypes from 'prop-types';
 import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
 import GeoUtils from '../../utils/GeoUtils';
-// import MapService from '../../api/MapService';
+import MapService from '../../api/MapService';
 
-class TMap extends Component {
+class TMapGPS extends Component {
   constructor(props) {
     super(props);
 
@@ -21,8 +21,8 @@ class TMap extends Component {
     this.ui = null;
     this.boundingBoxDistance = 0;
 
-    this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
-    // this.calculateRouteMultiple = this.calculateRouteMultiple.bind(this);
+    // this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
+    this.calculateRouteGPS = this.calculateRouteGPS.bind(this);
     this.onRouteSuccess = this.onRouteSuccess.bind(this);
   }
 
@@ -32,8 +32,7 @@ class TMap extends Component {
       center,
       id,
       startAddress,
-      endAddress,
-      trackings
+      endAddress
     } = this.props;
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
@@ -50,79 +49,30 @@ class TMap extends Component {
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
 
     if (startAddress && endAddress) {
-      this.calculateRouteFromAtoB();
-      this.addMarkersToMap();
+      this.calculateRouteGPS();
     }
-
-    // https://trelar.atlassian.net/browse/SG-930
-    // don't delete commented code, please
-    /*
-    if (trackings && trackings.length > 0) {
-      const lineString = new H.geo.LineString();
-      for (const tracking of trackings) {
-        // this.addGPSPoint(tracking[1], tracking[0]);
-        lineString.pushPoint({lat: tracking[1], lng: tracking[0]});
-      }
-      this.map.addObject(new H.map.Polyline(
-        lineString,
-        {
-          style: {
-            lineWidth: 5,
-            strokeColor: 'rgb(0, 196, 147)'
-          }
-        }
-      ));
-    }
-    */
   }
 
   onRouteSuccess(result) {
     const route = result.response.route[0];
     this.addRouteShapeToMap(route);
-    // for (const tracking of trackings) {
-    //   this.addGPSPoint(tracking[1], tracking[0]);
-    // }
   }
 
   onRouteError(error) {
     console.error(error);
   }
 
-  calculateRouteFromAtoB() {
-    const {startAddress, endAddress} = this.props;
-    const router = this.platform.getRoutingService();
-    const routeRequestParams = {
-      mode: 'balanced;truck;traffic:disabled;motorway:0',
-      representation: 'display',
-      routeattributes: 'waypoints,summary,shape,legs,incidents',
-      maneuverattributes: 'direction,action',
-      truckType: 'tractorTruck',
-      limitedWeight: 700,
-      metricSystem: 'imperial',
-      language: 'en-us', // en-us|es-es|de-de
-      waypoint0: `${startAddress.latitude},${startAddress.longitude}`,
-      waypoint1: `${endAddress.latitude},${endAddress.longitude}`
-    };
-
-    router.calculateRoute(
-      routeRequestParams,
-      this.onRouteSuccess,
-      this.onRouteError
-    );
-  }
-
-  /*
-  async calculateRouteMultiple() {
-    console.log('>>GETING ROUTE MULTIPLE...');
+  async calculateRouteGPS() {
+    const { loadId } = this.props;
 
     let distanceInfo = [];
     const wps = [];
     // instead of getting the info here, we will query the backend
     try {
-      distanceInfo = await MapService.getDistanceFroFleet(386);
-      console.log('TCL: TMap -> calculateRouteMultiple -> distanceInfo', distanceInfo);
+      distanceInfo = await MapService.getDistanceForFleet(loadId);
+      // console.log('TCL-> distanceInfo', distanceInfo);
     } catch (e) {
-      console.log('>>ERROR: ', e);
+      console.log('ERROR: ', e);
     }
 
     for (const wp of distanceInfo.waypoints) {
@@ -133,8 +83,7 @@ class TMap extends Component {
     this.addRouteShapeToMap({
       shape: wps
     });
-	}
-	*/
+  }
 
   /**
    * Creates a H.map.Polyline from the shape of the route and adds it to the map.
@@ -208,11 +157,12 @@ class TMap extends Component {
   }
 }
 
-TMap.propTypes = {
+TMapGPS.propTypes = {
   id: PropTypes.string,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   zoom: PropTypes.number,
+  loadId: PropTypes.number,
   center: PropTypes.shape({
     lat: PropTypes.number,
     lng: PropTypes.number
@@ -224,22 +174,21 @@ TMap.propTypes = {
   endAddress: PropTypes.shape({
     latitude: PropTypes.number,
     longitude: PropTypes.number
-  }),
-  trackings: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
+  })
 };
 
-TMap.defaultProps = {
+TMapGPS.defaultProps = {
   id: '1',
   width: 400,
   height: 400,
   zoom: 10,
+  loadId: 0,
   center: {
     lat: 30.274983,
     lng: -97.739604
   },
   startAddress: null,
-  endAddress: null,
-  trackings: []
+  endAddress: null
 };
 
-export default TMap;
+export default TMapGPS;

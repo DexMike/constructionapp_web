@@ -99,9 +99,11 @@ class TMapLive extends Component {
     const { loads } = this.props;
     const loadsList = loads();
     const allLoads = [];
+
     for (const load of loadsList) {
       allLoads.push(String(load.id));
     }
+    console.log('TCL: TMapLive -> getLatestGPSForLoad -> allLoads', allLoads);
 
     // on ly get if there is one load or more
     if (allLoads.length > 0) {
