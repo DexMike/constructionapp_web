@@ -145,8 +145,8 @@ class ReportsProducerPage extends Component {
       columnsCarrier: [
         {
           field: 'name',
-          headerName: 'Carrier Name',
-          headerTooltip: "Carrier of Producer",
+          headerName: 'Job Name',
+          headerTooltip: "Job's name",
           // width: 200,
         }, {
           field: 'avgTotEarningsComparison',
@@ -557,8 +557,8 @@ class ReportsProducerPage extends Component {
     totalProducers,
     totalProducts,
     totalProjects,
-    filters/*, metadata*/)
-  {
+    filters/*, metadata*/
+  ) {
     const totalCount = 0;
     this.setState({
       carriers,
@@ -686,7 +686,7 @@ class ReportsProducerPage extends Component {
                           <AreaChart data={this.state.carriers} margin={{ top: 20, left: -15, bottom: 20 }}>
                             <XAxis dataKey="name" tickLine={false} />
                             <YAxis tickLine={false} />
-                            <Tooltip formatter={(value) => new Intl.NumberFormat('en').format(value)} />
+                            <Tooltip formatter={value => new Intl.NumberFormat('en').format(value)} />
                             <Legend />
                             <CartesianGrid />{/*
                             <Area name="Site A" type="monotone" dataKey="a" fill="#4ce1b6" stroke="#4ce1b6" fillOpacity={0.2} />
@@ -715,7 +715,7 @@ class ReportsProducerPage extends Component {
                           // floatingFilter={true}
                           onGridReady={this.onGridReadyCarriers}
                           paginationPageSize={25}
-                          pagination={true}
+                          pagination
                           domLayout="print"
                           rowHeight={60}
                         />
@@ -727,7 +727,7 @@ class ReportsProducerPage extends Component {
                           <AreaChart data={this.state.products} margin={{ top: 20, left: -15, bottom: 20 }}>
                             <XAxis dataKey="name" tickLine={false} />
                             <YAxis tickLine={false} />
-                            <Tooltip formatter={(value) => new Intl.NumberFormat('en').format(value)} />
+                            <Tooltip formatter={value => new Intl.NumberFormat('en').format(value)} />
                             <Legend />
                             <CartesianGrid />{/*
                             <Area name="Site A" type="monotone" dataKey="a" fill="#4ce1b6" stroke="#4ce1b6" fillOpacity={0.2} />
@@ -757,7 +757,7 @@ class ReportsProducerPage extends Component {
                           // floatingFilter={true}
                           onGridReady={this.onGridReadyProducts}
                           paginationPageSize={25}
-                          pagination={true}
+                          pagination
                           domLayout="print"
                           rowHeight={60}
                         />
@@ -769,7 +769,7 @@ class ReportsProducerPage extends Component {
                           <AreaChart data={this.state.projects} margin={{ top: 20, left: -15, bottom: 20 }}>
                             <XAxis dataKey="name" tickLine={false} />
                             <YAxis tickLine={false} />
-                            <Tooltip formatter={(value) => new Intl.NumberFormat('en').format(value)} />
+                            <Tooltip formatter={value => new Intl.NumberFormat('en').format(value)} />
                             <Legend />
                             <CartesianGrid />{/*
                             <Area name="Site A" type="monotone" dataKey="a" fill="#4ce1b6" stroke="#4ce1b6" fillOpacity={0.2} />
@@ -782,7 +782,7 @@ class ReportsProducerPage extends Component {
                         </ResponsiveContainer>
                       </div>
                       <div
-                        id={"ProjectsGrid"}
+                        id="ProjectsGrid"
                         className="ag-theme-balham"
                         style={{
                           // height: '500px',
@@ -799,7 +799,7 @@ class ReportsProducerPage extends Component {
                           // floatingFilter={true}
                           onGridReady={this.onGridReadyProjects}
                           paginationPageSize={25}
-                          pagination={true}
+                          pagination
                           domLayout="print"
                           rowHeight={60}
                         />
@@ -881,7 +881,7 @@ class ReportsProducerPage extends Component {
           {/* */}
           <FilterComparisonReport
             type="Producer"
-            showComparison={true}
+            showComparison
             ref="filterChild"
             onReturnFilters={this.returnFilters}
             returnCarriers={this.returnCarriers/*(e, f, g) => {              
