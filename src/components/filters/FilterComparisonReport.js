@@ -60,7 +60,7 @@ function percentFormatter(params) {
 }
 
 function realRound(value, decimals) {
-  return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+  return Number(`${Math.round(`${value}e${decimals}`)}e-${decimals}`);
 }
 
 class FilterComparisonReport extends Component {
@@ -438,13 +438,14 @@ class FilterComparisonReport extends Component {
 
   async fetchFilterLists() {
     const {filters, materialTypeList, rateTypeList} = this.state;
-    let { equipmentTypeList } = this.state;
+    // let { equipmentTypeList } = this.state;
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
 
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
-    equipmentTypeList = lookupEquipmentList.map(eq => ({
+    const equipmentTypeList = lookupEquipmentList.map(eq => ({
+      name: 'equipmentType',
       id: eq.id,
       value: eq.val1.trim(),
       label: eq.val1.trim()
@@ -936,7 +937,7 @@ class FilterComparisonReport extends Component {
     await this.fetchCarrierData();
   }
 
-  async handleMultiChange(data, name) {
+  async handleMultiChange(data, name) {    
     const {filters} = this.state;
     switch(name) {
       case 'status':
@@ -1091,14 +1092,11 @@ class FilterComparisonReport extends Component {
     selectedRangeComp = value;
 
     // substract days
-    const dateOffset = (24*60*60*1000) * Number(selectedRangeComp);
+    const dateOffset = (24 * 60 * 60 * 1000) * Number(selectedRangeComp);
     const endDate = intervals.startInterval;
 
     let startDate = new Date();
     startDate.setTime(endDate.getTime() - dateOffset);
-
-    // console.log(endDate, '|', startDate, selectedRangeComp)
-    // console.log(endDate, '|', startDate, '>', selectedRangeComp)
     
     if (name === 'Custom') {
       intervals.startIntervalComp = startDate;
