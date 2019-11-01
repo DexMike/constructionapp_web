@@ -3,7 +3,6 @@ import * as PropTypes from 'prop-types';
 import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
 import GeoUtils from '../../utils/GeoUtils';
-// import MapService from '../../api/MapService';
 
 class TMap extends Component {
   constructor(props) {
@@ -22,7 +21,6 @@ class TMap extends Component {
     this.boundingBoxDistance = 0;
 
     this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
-    // this.calculateRouteMultiple = this.calculateRouteMultiple.bind(this);
     this.onRouteSuccess = this.onRouteSuccess.bind(this);
   }
 
@@ -110,31 +108,6 @@ class TMap extends Component {
       this.onRouteError
     );
   }
-
-  /*
-  async calculateRouteMultiple() {
-    console.log('>>GETING ROUTE MULTIPLE...');
-
-    let distanceInfo = [];
-    const wps = [];
-    // instead of getting the info here, we will query the backend
-    try {
-      distanceInfo = await MapService.getDistanceFroFleet(386);
-      console.log('TCL: TMap -> calculateRouteMultiple -> distanceInfo', distanceInfo);
-    } catch (e) {
-      console.log('>>ERROR: ', e);
-    }
-
-    for (const wp of distanceInfo.waypoints) {
-      const newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
-      wps.push(newWp);
-    }
-
-    this.addRouteShapeToMap({
-      shape: wps
-    });
-	}
-	*/
 
   /**
    * Creates a H.map.Polyline from the shape of the route and adds it to the map.
