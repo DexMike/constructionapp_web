@@ -13,6 +13,13 @@ class TDateTimePickerField extends PureComponent {
     this.handleChange = this.handleChange.bind(this);
   }
 
+  componentDidMount() {
+    let { startDate } = this.state;
+    let { defaultDate } = this.props;
+
+    this.setState({ startDate: defaultDate });
+  }
+
   // componentDidMount was added in order to prepopulate
   // datePicker date from a fixed date passed from other component.
   /* async componentDidMount() {
@@ -112,7 +119,7 @@ class TDateTimePickerField extends PureComponent {
     }
   } */
 
-  async componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     console.log('inside cdu');
     let { startDate } = this.state;
     console.log(prevProps.defaultDate);
@@ -120,6 +127,7 @@ class TDateTimePickerField extends PureComponent {
     if ((prevProps.defaultDate !== this.props.defaultDate)) {
       console.log('updating shit');
       this.setState({ startDate: this.props.defaultDate });
+      
     }
   }
 
@@ -155,7 +163,7 @@ class TDateTimePickerField extends PureComponent {
             placeholder={placeholder}
             options={{
               enableTime: showTime,
-              defaultDate,
+              startDate,
               dateFormat,
               // enableTime: true,
               allowInput: true,
