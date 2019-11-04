@@ -435,10 +435,12 @@ class ReportsComparison extends Component {
 
   setLabelsCustomer (obj) {
     const newObj = obj;
+    /*
     if (obj.field === 'name') {
       newObj.headerName = 'Carrier Name';
       newObj.headerTooltip = 'Carrier of Producer';
     }
+    */
     if (obj.field === 'avgTotEarningsComparison') {
       newObj.headerName = 'Total Cost';
       newObj.headerTooltip = 'Total Cost for this time period';
@@ -503,7 +505,7 @@ class ReportsComparison extends Component {
     }
     this.setState({
       columnsProducts
-    }, function set() {
+    }, () => {
       console.log("TCL: ReportsComparison -> hideAvg -> columnsProducts", columnsProducts, show)
     })
   }
