@@ -1208,6 +1208,10 @@ class JobWizard extends Component {
       status = 'Published';
     }
 
+    if (selectedCarrierId && selectedCarrierId > 0) {
+      status = 'On Offer';
+    }
+
     // const calcTotal = d.rateEstimate * rate;
     // const rateTotal = Math.round(calcTotal * 100) / 100;
 
