@@ -30,6 +30,7 @@ import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
 import UserUtils from '../../api/UtilsService';
 import UserService from '../../api/UserService';
+import GeoUtils from "../../utils/GeoUtils";
 
 class JobWizard extends Component {
   constructor(props) {
@@ -82,7 +83,7 @@ class JobWizard extends Component {
         favoriteAdminTels: []
       },
       tabSummary: {
-        instructions: '',
+        instructions: ''
       },
       tabPickupDelivery: {
         allUSstates: [],
@@ -235,9 +236,9 @@ class JobWizard extends Component {
   }
 
   async componentDidMount() {
-    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate} = this.state;
+    const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate, tabSummary} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
-    const {jobEdit, jobEditSaved} = this.props;
+    const {jobEdit, jobEditSaved, copyJob} = this.props;
 
     let truckTypes;
     try {
@@ -256,80 +257,12 @@ class JobWizard extends Component {
       });
     tabTruckSpecs.allTruckTypes = allTruckTypes;
 
-
-    if (jobEdit || jobEditSaved) {
-      const {job} = this.props;
-      // populate form with job data
-      if (job) {
-        // populate top part of job create
-        name = job.name;
-        jobStartDate = job.startTime;
-        jobEndDate = job.endTime;
-        poNumber = job.poNumber;
-        // populate tabMaterials
-        let materials;
-        try {
-          materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
-        } catch (err) {
-          console.error(err);
-        }
-        if (materials && materials.length > 0) {
-          tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
-        }
-        tabMaterials.estMaterialPricing = job.estMaterialPricing;
-        tabMaterials.quantityType = job.amountType;
-        tabMaterials.quantity = job.rateEstimate;
-
-        // populate pickup/delivery tab
-        tabPickupDelivery.selectedStartAddressId = job.startAddress.id.toString();
-        tabPickupDelivery.selectedEndAddressId = job.endAddress.id.toString();
-
-        // populate truck specs
-        tabTruckSpecs.truckQuantity = job.numEquipments;
-        let selectedTruckTypes;
-        try {
-          selectedTruckTypes = await JobService.getMaterialsByJobId(job.id);
-        } catch (err) {
-          console.error(err);
-        }
-        const mapSelectedTruckTypes = [];
-        Object.values(selectedTruckTypes)
-          .forEach((itm) => {
-            Object.keys(allTruckTypes).map((propKey) => {
-              if (allTruckTypes[propKey].label === itm) {
-                mapSelectedTruckTypes.push(allTruckTypes[propKey].value);
-              }
-              return null;
-            });
-          });
-        tabTruckSpecs.selectedTruckTypes = mapSelectedTruckTypes;
-
-        // populate haul rate tab
-        tabHaulRate.payType = job.rateType;
-        tabHaulRate.ratePerPayType = job.rate;
-      }
-    }
-
     let profile;
     try {
       profile = await ProfileService.getProfile();
     } catch (err) {
       console.error(err);
     }
-
-    // MATERIAL TAB DATA
-    let allMaterials;
-    try {
-      allMaterials = await LookupsService.getLookupsByType('MaterialType');
-    } catch (err) {
-      console.error(err);
-    }
-    allMaterials = allMaterials.map(material => ({
-      value: material.val1,
-      label: material.val1
-    }));
-
-    tabMaterials.allMaterials = allMaterials;
 
     // PICKUP AND DELIVERY TAB DATA
     // addresses
@@ -357,6 +290,115 @@ class JobWizard extends Component {
     }));
 
     tabPickupDelivery.allUSstates = states;
+
+    if (jobEdit || jobEditSaved || copyJob) {
+      const {job} = this.props;
+      // populate form with job data
+      if (job) {
+        // populate top part of job create
+        name = job.name;
+        jobStartDate = job.startTime;
+        jobEndDate = job.endTime;
+        poNumber = job.poNumber;
+        // populate tabMaterials
+        let materials;
+        try {
+          materials = await JobMaterialsService.getJobMaterialsByJobId(job.id);
+        } catch (err) {
+          console.error(err);
+        }
+        if (materials && materials.length > 0) {
+          tabMaterials.selectedMaterial = {value: materials[0].value, label: materials[0].value};
+        }
+
+        tabSummary.instructions = !job.notes ? '' : job.notes;
+
+        tabMaterials.estMaterialPricing = !job.estMaterialPricing ? '0.00' : job.estMaterialPricing;
+        tabMaterials.quantityType = job.amountType;
+        tabMaterials.quantity = !job.rateEstimate ? '0.00' : job.rateEstimate;
+
+        // populate pickup/delivery tab
+        tabPickupDelivery.selectedStartAddressId = job.startAddress.id.toString();
+        tabPickupDelivery.selectedEndAddressId = job.endAddress.id.toString();
+
+        const startAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
+        const startString = startAddress.label;
+
+        const endAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
+        const endString = endAddress.label;
+
+        let startCoordinates;
+        let endCoordinates;
+        try {
+          startCoordinates = await GeoUtils.getCoordsFromAddress(startString);
+          endCoordinates = await GeoUtils.getCoordsFromAddress(endString);
+        } catch (err) {
+          console.error(err);
+        }
+
+        if (startCoordinates) {
+          tabPickupDelivery.startGPS = startCoordinates;
+          tabPickupDelivery.startLocationLatitude = startCoordinates.lat;
+          tabPickupDelivery.startLocationLongitude = startCoordinates.lng;
+        }
+
+        if (endCoordinates) {
+          tabPickupDelivery.endGPS = endCoordinates;
+          tabPickupDelivery.endLocationLatitude = endCoordinates.lat;
+          tabPickupDelivery.endLocationLongitude = endCoordinates.lng;
+        }
+
+        if (tabPickupDelivery.startLocationLatitude && tabPickupDelivery.startLocationLongitude
+          && tabPickupDelivery.endLocationLatitude && tabPickupDelivery.endLocationLongitude) {
+          const waypoint0 = `${tabPickupDelivery.startLocationLatitude},${tabPickupDelivery.startLocationLongitude}`;
+          const waypoint1 = `${tabPickupDelivery.endLocationLatitude},${tabPickupDelivery.endLocationLongitude}`;
+          const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);
+          const travelInfoReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+          tabPickupDelivery.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
+          tabPickupDelivery.avgDistanceReturn = (travelInfoReturn.distance * 0.000621371192).toFixed(2);
+          tabPickupDelivery.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
+          tabPickupDelivery.avgTimeReturn = (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
+        }
+
+        // populate truck specs
+        tabTruckSpecs.truckQuantity = job.numEquipments;
+        let selectedTruckTypes;
+        try {
+          selectedTruckTypes = await JobService.getMaterialsByJobId(job.id);
+        } catch (err) {
+          console.error(err);
+        }
+        const mapSelectedTruckTypes = [];
+        Object.values(selectedTruckTypes)
+          .forEach((itm) => {
+            Object.keys(allTruckTypes).map((propKey) => {
+              if (allTruckTypes[propKey].label === itm) {
+                mapSelectedTruckTypes.push(allTruckTypes[propKey].value);
+              }
+              return null;
+            });
+          });
+        tabTruckSpecs.selectedTruckTypes = mapSelectedTruckTypes;
+
+        // populate haul rate tab
+        tabHaulRate.payType = job.rateType;
+        tabHaulRate.ratePerPayType = !job.rate ? '0.00' : job.rate;
+      }
+    }
+
+    // MATERIAL TAB DATA
+    let allMaterials;
+    try {
+      allMaterials = await LookupsService.getLookupsByType('MaterialType');
+    } catch (err) {
+      console.error(err);
+    }
+    allMaterials = allMaterials.map(material => ({
+      value: material.val1,
+      label: material.val1
+    }));
+
+    tabMaterials.allMaterials = allMaterials;
 
     // TRUCK SPECS TAB DATA
 
@@ -509,9 +551,7 @@ class JobWizard extends Component {
     const {tabPickupDelivery} = {...this.state};
     // const {startGPS} = {...this.state};
     const val = [];
-
-    if (!tabPickupDelivery.selectedStartAddressId
-      || tabPickupDelivery.selectedStartAddressId === 0) {
+    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
       if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
         && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
         val.push('Same start and end addresses');
@@ -573,23 +613,23 @@ class JobWizard extends Component {
     });
   }
 
-  // updateJobView(newJob) {
-  //   const {updateJobView, updateCopiedJob} = this.props;
-  //   if (newJob.copiedJob) {
-  //     updateCopiedJob(newJob);
-  //   }
-  //   if (updateJobView) {
-  //     updateJobView(newJob, null);
-  //   }
-  // }
-  //
-  //
   updateJobView(newJob) {
-    const {updateJobView} = this.props;
+    const {updateJobView, updateCopiedJob} = this.props;
+    if (newJob.copiedJob) {
+      updateCopiedJob(newJob);
+    }
     if (updateJobView) {
       updateJobView(newJob, null);
     }
   }
+
+  //
+  // updateJobView(newJob) {
+  //   const {updateJobView} = this.props;
+  //   if (updateJobView) {
+  //     updateJobView(newJob, null);
+  //   }
+  // }
 
   handleInputChange(e) {
     if (e.target.name === 'name') {
@@ -1154,6 +1194,10 @@ class JobWizard extends Component {
       status = 'Published';
     }
 
+    if (selectedCarrierId && selectedCarrierId > 0) {
+      status = 'On Offer';
+    }
+
     jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
     const jobCreate = {
       companiesId: profile.companyId,
@@ -1240,7 +1284,6 @@ class JobWizard extends Component {
     this.updateJobView(newJob);
     this.closeNow();
   }
-
   // Used to either store a Copied or 'Saved' job to the database
   async saveJobDraft() {
     const {jobEdit, jobEditSaved, job} = this.props;
@@ -1783,150 +1826,132 @@ class JobWizard extends Component {
       return (
         <Container className="dashboard">
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
-            {/* {this.renderGoTo()} */}
-            <Row>
-              {/* <h1>TEST</h1> */}
-              <Col md={12} lg={12}>
-                <Card style={{paddingBottom: 0}}>
+            {/*{this.renderGoTo()}*/}
+            <Card style={{paddingBottom: 0}}>
+              <div className="wizard">
+                <div className="wizard__steps">
+                  {/* onClick={this.gotoPage(1)} */}
+                  <div
+                    className="wizard__step wizard__step--active"
+                  >
+                    <p>{jobRequest ? 'Request' : jobEdit ? 'Edit' : 'Create'} Job</p>
+                  </div>
+                </div>
+                <div className="wizard__form-wrapper">
+                  <div className="dashboard dashboard__job-create-section">
+                    {this.renderJobDetails()}
+                  </div>
+                </div>
+                <div className="dashboard dashboard__job-create-section">
                   <div className="wizard">
-                    <div className="wizard__steps">
-                      {/* onClick={this.gotoPage(1)} */}
-                      <div
-                        className="wizard__step wizard__step--active"
-                      >
-                        <p>{jobRequest ? 'Request' : jobEdit ? 'Edit' : 'Create'} Job</p>
-                      </div>
-                    </div>
+                    {this.renderTabs()}
                     <div className="wizard__form-wrapper">
-                      <div className="dashboard dashboard__job-create-section">
-                        {this.renderJobDetails()}
-                      </div>
-                    </div>
-                    <div className="dashboard dashboard__job-create-section">
-                      <div className="wizard">
-
-                        {this.renderTabs()}
-                        <div className="wizard__form-wrapper">
-
-                          {page === 1
-                          && (
-                          <JobMaterials
-                            data={tabMaterials}
-                            handleInputChange={this.handleChildInputChange}
-                          />
-                          )}
-                          {page === 2
-                          && (
-                          <PickupAndDelivery
-                            data={tabPickupDelivery}
-                            handleInputChange={this.handleChildInputChange}
-                          />
-                          )}
-                          {page === 3
-                          && (
-                          <TruckSpecs
-                            data={tabTruckSpecs}
-                            handleInputChange={this.handleChildInputChange}
-                          />
-                          )}
-                          {page === 4
-                          && (
-                          <HaulRate
-                            data={tabHaulRate}
-                            tabMaterials={tabMaterials}
-                            tabPickupDelivery={tabPickupDelivery}
-                            handleInputChange={this.handleChildInputChange}
-                          />
-                          )}
-                          {page === 5
-                          && (
-                          <Summary
-                            tabHaulRate={tabHaulRate}
-                            tabMaterials={tabMaterials}
-                            tabPickupDelivery={tabPickupDelivery}
-                            tabTruckSpecs={tabTruckSpecs}
-                            data={tabSummary}
-                            closeModal={this.closeNow}
-                            saveJob={this.validateAndSaveJobDraft}
-                            goBack={this.goBack}
-                            goToSend={this.sixthPage}
-                            setPageNumber={this.setPageNumber}
-                            handleInputChange={this.handleChildInputChange}
-                            validateSend={this.validateSend}
-                            jobRequest={jobRequest}
-                            jobEdit={jobEdit}
-                            validateMaterialsTab={this.validateMaterialsTab}
-                            validateTruckSpecsTab={this.validateTruckSpecsTab}
-                            validateHaulRateTab={this.validateHaulRateTab}
-                            validateStartAddress={this.validateStartAddress}
-                            validateEndAddress={this.validateEndAddress}
-                            validateForm={this.validateForm}
-                            validateTopForm={this.validateTopForm}
-                          />
-                          )}
-                          {(page === 6 && !jobEdit)
-                          && (
-                          <SendJob
-                            data={tabSend}
-                            handleInputChange={this.handleChildInputChange}
-                            tabMaterials={tabMaterials}
-                            saveJob={this.validateAndSaveJobDraft}
-                            goBack={this.goBack}
-                            sendJob={this.saveJob}
-                            onClose={this.closeNow}
-                            jobRequest={jobRequest}
-                          />
-                          )}
-                        </div>
-                      </div>
-                      {page < 5 && (
-                      <React.Fragment>
-                        <Row className="col-md-12">
-                          <hr/>
-                        </Row>
-                        <Row className="col-md-12">
-                          <ButtonToolbar className="col-md-6 wizard__toolbar">
-                            <Button color="minimal" className="btn btn-outline-secondary"
-                                    type="button"
-                                    onClick={this.closeNow}
-                            >
-                              Cancel
-                            </Button>
-                          </ButtonToolbar>
-                          <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                            {(!jobRequest && !jobEdit) && (
-                              <Button
-                                color="outline-primary"
-                                className="next"
-                                onClick={this.validateAndSaveJobDraft}
-                              >
-                                Save Job & Close
-                              </Button>
-                            )}
-                            {page !== 1 && (
-                            <Button color="outline-primary" type="button"
-                                    className="previous"
-                                    onClick={this.goBack}
-                            >
-                              Back
-                            </Button>
-                            )}
-                            <Button
-                              color="primary"
-                              className="next"
-                              onClick={this.nextPage}
-                            >
-                              Next
-                            </Button>
-                          </ButtonToolbar>
-                        </Row>
-                      </React.Fragment>
-                      )}
+                      {page === 1
+                      && <JobMaterials
+                        data={tabMaterials}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 2
+                      && <PickupAndDelivery
+                        data={tabPickupDelivery}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 3
+                      && <TruckSpecs
+                        data={tabTruckSpecs}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 4
+                      && <HaulRate
+                        data={tabHaulRate}
+                        tabMaterials={tabMaterials}
+                        tabPickupDelivery={tabPickupDelivery}
+                        handleInputChange={this.handleChildInputChange}
+                      />}
+                      {page === 5
+                      && <Summary
+                        tabHaulRate={tabHaulRate}
+                        tabMaterials={tabMaterials}
+                        tabPickupDelivery={tabPickupDelivery}
+                        tabTruckSpecs={tabTruckSpecs}
+                        data={tabSummary}
+                        closeModal={this.closeNow}
+                        saveJob={this.validateAndSaveJobDraft}
+                        goBack={this.goBack}
+                        goToSend={this.sixthPage}
+                        setPageNumber={this.setPageNumber}
+                        handleInputChange={this.handleChildInputChange}
+                        validateSend={this.validateSend}
+                        jobRequest={jobRequest}
+                        jobEdit={jobEdit}
+                        validateMaterialsTab={this.validateMaterialsTab}
+                        validateTruckSpecsTab={this.validateTruckSpecsTab}
+                        validateHaulRateTab={this.validateHaulRateTab}
+                        validateStartAddress={this.validateStartAddress}
+                        validateEndAddress={this.validateEndAddress}
+                        validateForm={this.validateForm}
+                        validateTopForm={this.validateTopForm}
+                      />}
+                      {(page === 6 && !jobEdit)
+                      && <SendJob
+                        data={tabSend}
+                        handleInputChange={this.handleChildInputChange}
+                        tabMaterials={tabMaterials}
+                        saveJob={this.validateAndSaveJobDraft}
+                        goBack={this.goBack}
+                        sendJob={this.saveJob}
+                        onClose={this.closeNow}
+                        jobRequest={jobRequest}
+                      />}
                     </div>
                   </div>
-                </Card>
-              </Col>
-            </Row>
+                  {page < 5 &&
+                  <React.Fragment>
+                    <Row className="col-md-12">
+                      <hr/>
+                    </Row>
+                    <Row className="col-md-12">
+                      <ButtonToolbar className="col-md-6 wizard__toolbar">
+                        <Button color="minimal" className="btn btn-outline-secondary"
+                                type="button"
+                                onClick={this.closeNow}
+                        >
+                          Cancel
+                        </Button>
+                      </ButtonToolbar>
+                      <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                        {(!jobRequest && !jobEdit) &&
+                        <Button
+                          color="outline-primary"
+                          className="next"
+                          onClick={this.validateAndSaveJobDraft}
+                        >
+                          Save Job & Close
+                        </Button>
+                        }
+                        {page !== 1 &&
+                        <Button color="outline-primary" type="button"
+                                className="previous"
+                                onClick={this.goBack}
+                        >
+                          Back
+                        </Button>
+                        }
+                        <Button
+                          color="primary"
+                          className="next"
+                          onClick={this.nextPage}
+                        >
+                          Next
+                        </Button>
+                      </ButtonToolbar>
+                    </Row>
+                  </React.Fragment>
+                  }
+
+                </div>
+              </div>
+            </Card>
           </div>
         </Container>
       );
@@ -1948,9 +1973,11 @@ JobWizard.propTypes = {
   selectedCarrierId: PropTypes.number,
   jobRequest: PropTypes.bool,
   jobEdit: PropTypes.bool,
+  copyJob: PropTypes.bool,
   jobEditSaved: PropTypes.bool,
   job: PropTypes.object,
-  updateJobView: PropTypes.func.isRequired
+  updateJobView: PropTypes.func,
+  updateCopiedJob: PropTypes.func
 };
 
 JobWizard.defaultProps = {
@@ -1958,6 +1985,7 @@ JobWizard.defaultProps = {
   jobRequest: false,
   jobEdit: false,
   jobEditSaved: false,
+  copyJob: false,
   job: null
 };
 

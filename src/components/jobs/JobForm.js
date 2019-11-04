@@ -28,6 +28,7 @@ import TMap from '../common/TMap';
 import GeoUtils from '../../utils/GeoUtils';
 import TSpinner from '../common/TSpinner';
 import RatesDeliveryService from '../../api/RatesDeliveryService';
+import CompanySettingsService from '../../api/CompanySettingsService';
 import TCalculator from '../common/TCalculator';
 
 class JobForm extends Component {
@@ -79,7 +80,8 @@ class JobForm extends Component {
       approvingLoadsError: false,
       trelarFees: 0,
       summary: [],
-      summaryReturn: []
+      summaryReturn: [],
+      producerBillingType: ''
     };
 
     this.loadJobForm = this.loadJobForm.bind(this);
@@ -142,7 +144,8 @@ class JobForm extends Component {
       company,
       trelarFees,
       summary,
-      summaryReturn
+      summaryReturn,
+      producerBillingType
     } = this.state;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
@@ -183,6 +186,12 @@ class JobForm extends Component {
       }
     }
 
+    const producerCompanySettings = await CompanySettingsService.getCompanySettings(company.id);
+    if (producerCompanySettings && producerCompanySettings.length > 0) {
+      producerBillingType = producerCompanySettings.filter(obj => obj.key === 'billingType');
+      producerBillingType = producerBillingType[0].value;
+    }
+
     const companyRates = {
       companyId: company.id,
       rate: job.rate,
@@ -220,7 +229,8 @@ class JobForm extends Component {
       distanceEnroute,
       distanceReturn,
       timeEnroute,
-      timeReturn
+      timeReturn,
+      producerBillingType
     });
   }
 
@@ -365,7 +375,7 @@ class JobForm extends Component {
     const { approveLoadsModal, approvingLoads, approvingLoadsError } = this.state;
     return (
       <React.Fragment>
-        <Modal isOpen={approveLoadsModal} toggle={this.toggleApproveLoadsModal} className="status-modal">
+        <Modal isOpen={approveLoadsModal} toggle={this.toggleApproveLoadsModal} className="status-modal" backdrop="static">
           <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
             <div style={{ fontSize: 16, color: '#FFF' }}>
               { approvingLoadsError ? 'Error Message' : 'Confirmation' }
@@ -468,6 +478,7 @@ class JobForm extends Component {
       carrier,
       allTruckTypes,
       trelarFees,
+      producerBillingType,
       timeEnroute,
       timeReturn,
       distanceEnroute
@@ -570,7 +581,10 @@ class JobForm extends Component {
             }
             Potential Earnings:&nbsp;
             {
-              TFormat.asMoneyByRate(job.rateType, job.rate - trelarFees.perTonPerHourFee, job.rateEstimate)
+              (
+                producerBillingType === 'Excluded'
+              ) ? TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+                : TFormat.asMoneyByRate(job.rateType, job.rate - trelarFees.perTonPerHourFee, job.rateEstimate)
             }
             <br/>
             {
@@ -580,7 +594,12 @@ class JobForm extends Component {
             }
             &nbsp;Amount: {job.rateEstimate} {job.rateType}(s)
             <br/>
-            Rate: {job.rate > 0 ? TFormat.asMoney(job.rate - trelarFees.perTonPerHourFee) : 0.00} / {job.rateType}
+            Rate: {
+              (
+                producerBillingType === 'Excluded'
+              ) ? TFormat.asMoney(job.rate)
+                : TFormat.asMoney(job.rate - trelarFees.perTonPerHourFee)
+            } / {job.rateType}
           </div>
         )}
         {(companyType === 'Customer' || companyType === 'Producer') && (
@@ -626,11 +645,12 @@ class JobForm extends Component {
             {
               TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
             }
-            {/* <br/>
-            Estimated Total Cost:&nbsp;
-            {
-              TFormat.asMoney(estimatedCost + trelarFees.totalFee)
-            } */}
+            {(producerBillingType === 'Excluded') && (
+              <React.Fragment>
+                <br/>
+                Estimated Total Cost:&nbsp; {TFormat.asMoney((job.rate * job.rateEstimate) + trelarFees.totalFee)}
+              </React.Fragment>
+            )}
           </div>
         )}
       </React.Fragment>

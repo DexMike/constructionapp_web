@@ -171,6 +171,7 @@ class EquipmentListPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddTruckModal}
         className="equipments-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body">
           {/* Replaced AddTruckForm for EquipmentDetails */}
@@ -195,6 +196,7 @@ class EquipmentListPage extends Component {
         isOpen={equipmentsModal}
         toggle={this.toggleAddMultiTrucksModal}
         className="equipments-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body">
           <EquipmentsShortForm
@@ -302,6 +304,10 @@ class EquipmentListPage extends Component {
                               {
                                 name: 'image',
                                 displayName: 'Truck Image'
+                              },
+                              {
+                                name: 'externalEquipmentNumber',
+                                displayName: 'Number'
                               },
                               {
                                 name: 'name',

@@ -6,12 +6,14 @@ import ReactDOM from 'react-dom';
 class MultiSelectField extends PureComponent {
   constructor(props) {
     super(props);
+    // console.log('>>>PROPOS:', props)
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(value) {
-    const { onChange } = this.props;
-    onChange(value);
+    const { onChange, name } = this.props;
+    // console.log("TCL: MultiSelectField -> handleChange -> ONCHANGE", value, name)
+    onChange(value, name);
   }
 
   render() {
@@ -43,10 +45,16 @@ const renderMultiSelectField = function renderMultiSelectField(
     meta: { touched, error }
   }
 ) {
+
+  let selected = 0;
+  if (selectedItems !== undefined) {
+    selected = selectedItems.length;
+  }
+  
   function slideTo(direction) {
     const selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
     if (direction) {
-      const maxDistance = 40 * selectedItems * 1.5;
+      const maxDistance = 40 * selected * 1.5;
       if (selector.scrollLeft < maxDistance) {
         selector.scrollLeft += 20;
       }
@@ -84,7 +92,7 @@ const renderMultiSelectField = function renderMultiSelectField(
     ReactDOM.render(element, document.querySelector(`#${id}Scroll`));
   }
 
-  if (horizontalScroll === 'true' && selectedItems >= 3) {
+  if (horizontalScroll === 'true' && selected >= 3) {
     appendArrows();
   }
 
@@ -111,6 +119,7 @@ renderMultiSelectField.propTypes = {
     error: PropTypes.string
   }),
   options: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.number,
     value: PropTypes.string,
     label: PropTypes.string
   })),
@@ -131,6 +140,7 @@ MultiSelectField.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.number,
     value: PropTypes.string,
     label: PropTypes.string
   })),

@@ -510,6 +510,7 @@ class TrucksCustomerPage extends Component {
         isOpen={modalSelectMaterials}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__header">
           <button
@@ -568,6 +569,7 @@ class TrucksCustomerPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header form"
+        backdrop="static"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"

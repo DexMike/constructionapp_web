@@ -130,7 +130,14 @@ class TMap extends Component {
     });
     // Add the polyline to the map
     this.map.addObject(polyline);
-    // let bounds = polyline.getBoundingBox(); // H.geo.Rect
+
+    const bounds = polyline.getBoundingBox();
+    const newBounds = GeoUtils.setZoomBounds(bounds);
+
+    // And zoom to its bounding rectangle
+    this.map.getViewModel().setLookAtData({
+      newBounds
+    });
   }
 
   addMarkersToMap() {

@@ -1,34 +1,157 @@
 .date-filter .form__form-group-datepicker {
-    height: 28px !important;
-    width: 100% !important;
-    border-radius: 3px !important;
-    padding-left: 8px !important;
+  height: 28px !important;
+  width: 100% !important;
+  border-radius: 3px !important;
+  padding-left: 8px !important;
 
-    border: 1px solid #CACACA !important;
-    box-shadow: none !important;
-    outline :none !important;
-    font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
-    color: #333;
+  border: 1px solid #CACACA !important;
+  box-shadow: none !important;
+  outline :none !important;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  /*color: #333;*/
 }
 
 .date-filter .form__form-group {
-    margin-bottom: 2px !important;
+  margin-bottom: 2px !important;
 }
 
 .date-filter .Select-input, .Select-control {
-    height: 26px !important;
+  height: 26px !important;
 }
 
 .date-filter .Select-value {
-    line-height: 26px !important;
+  line-height: 26px !important;
 }
 
 .date-filter .form__form-group-select {
-    height: 26px !important;
-    width: 100% !important;
+  height: 26px !important;
+  width: 100% !important;
 }
 
 .date-filter .calendarIcon {
-    padding-top: 6px;
-    padding-left: 26px;
+  padding-top: 6px;
+  padding-left: 26px;
+}
+
+.number-cell {
+  text-align: right;
+}
+
+.ag-row-hover {
+  background-color: #f7f7f7 !important;
+}
+
+.ag-column-hover {
+  background-color: transparent !important;
+}
+
+.ag-fresh  .ag-header-cell-label{
+  float: none !important;
+  width: auto !important;
+  justify-content: center;
+}
+.ag-fresh .ag-header-cell-menu-button{
+  position: absolute;
+  float: none;
+}
+
+.spinner-container {
+  position: absolute;
+  background-color: rgba(255,255,255,0.75);
+  width: 100%;
+  height: 500px;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*.col-md-4 {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}*/
+
+.ag-theme-balham .ag-row {
+  border-width: 0px !important;
+  border-bottom-width: 1px !important;
+  border-color: #ededed;
+  margin-bottom: 4px !important;
+  margin-top: 4px !important;
+  border-bottom: 0px !important;
+}
+
+.ag-theme-balham .ag-row-even {
+  background-color: #FAFAFA !important;
+}
+.ag-theme-balham .ag-root {
+  border: 0 !important;
+}
+
+
+.ag-overlay-no-rows-center {
+  color: #CCC;
+  margin-top: 60px !important;
+}
+
+.ag-theme-balham .ag-header {
+  border-bottom: 0px !important;
+}
+
+.ag-theme-balham .ag-paging-panel {
+  border-top: 0px !important;
+}
+
+.gridTable {
+  width: 1530px !important;
+  padding-bottom: 10px;
+  overflow-y: hidden !important;
+}
+
+.gridTableJobs {
+  width: 1260px !important;
+  padding-bottom: 10px;
+  overflow-y: hidden !important;
+}
+
+.singleTable {
+  overflow-x: auto !important;
+}
+
+.tabs {
+  overflow: hidden;
+}
+
+.menuOnTop {
+  z-index: 10000 !important;
+}
+
+.dashboard__chart-legend {
+  position: absolute !important;
+  top: 0px !important;
+  columns: 2;
+  -webkit-columns: 2;
+  -moz-columns: 2;
+  /* position: relative;*/
+  left: 10px !important;
+  top: -200px !important;
+
+  width: 400px !important;
+  height: 400px !important;
+  max-width: 600px !important; 
+  max-height: 400px !important;
+  line-height: 24px;
+  overflow: auto !important;
+}
+
+/*.row {
+  margin: 0 !important;
+}*/
+
+.noSidePadding {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.noSidePadding .row {
+  margin: 0 !important;
 }

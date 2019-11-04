@@ -5,6 +5,7 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
+import ImageZoom from 'react-medium-image-zoom';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -13,7 +14,8 @@ import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
 import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
-import TMap from '../common/TMap';
+import TMapGPS from '../common/TMapGPS';
+import '../common/ImageZoom.scss';
 
 const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;
@@ -33,6 +35,7 @@ class LoadsExpandableRow extends Component {
       loadInvoices: [],
       disputeEmail: null,
       profile: null,
+      company: null,
       toggledId: 0
     };
     this.toggleDisputeModal = this.toggleDisputeModal.bind(this);
@@ -44,36 +47,40 @@ class LoadsExpandableRow extends Component {
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let { loadInvoices, disputeEmail } = {...this.state};
+    let { driver, company, profile, loadInvoices, disputeEmail } = {...this.state};
 
     this.getTrackings(load.id);
-    loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
 
-    // This throws an error
-    const driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+    try {
+      loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
+      driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
+      profile = await ProfileService.getProfile();
+      company = await CompanyService.getCompanyById(profile.companyId);
 
-    const profile = await ProfileService.getProfile();
-    const company = await CompanyService.getCompanyById(profile.companyId);
-    const date = new Date();
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
-    disputeEmail = {
-      toEmail: 'csr@trelar.com',
-      toName: 'Trelar CSR',
-      subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
-      isHTML: true,
-      body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
-        + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
-        + `Company: ${company.legalName}<br>`
-        + `Job: ${props.job.name}<br>`
-        + `Load Ticket Number: ${load.ticketNumber}`,
-      recipients: [
-        {name: 'CSR', email: 'csr@trelar.com'}
-      ],
-      attachments: []
-    };
-    this.setState({driver, loaded: true});
-    this.handleApproveLoad = this.handleApproveLoad.bind(this);
-    this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
+      const date = new Date();
+      const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
+      disputeEmail = {
+        toEmail: 'csr@trelar.com',
+        toName: 'Trelar CSR',
+        subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
+        isHTML: true,
+        body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
+          + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
+          + `Company: ${company.legalName}<br>`
+          + `Job: ${props.job.name}<br>`
+          + `Load Ticket Number: ${load.ticketNumber}`,
+        recipients: [
+          {name: 'CSR', email: 'csr@trelar.com'}
+        ],
+        attachments: []
+      };
+      this.setState({driver, loaded: true});
+      this.handleApproveLoad = this.handleApproveLoad.bind(this);
+      this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
+    } catch (err) {
+      console.log(err);
+    }
+
     this.setState({
       disputeEmail,
       profile,
@@ -86,13 +93,8 @@ class LoadsExpandableRow extends Component {
   }
 
   async getTrackings(loadId) {
-    const gpsTrackings = await this.fetchGPSPoints(loadId);
+    const gpsTrackings = await GPSTrackingService.getGPSTrackingByLoadId(loadId);
     this.setState({ gpsTrackings });
-  }
-
-  async fetchGPSPoints(loadId) {
-    return GPSTrackingService.getGPSTrackingByLoadId(loadId);
-    // return GPSTrackingService.getGPSTrackingByLoadId(315);
   }
 
   toggle() {
@@ -154,6 +156,7 @@ class LoadsExpandableRow extends Component {
         isOpen={modal}
         toggle={this.toggleDisputeModal}
         className="modal-dialog--primary modal-dialog--header form"
+        backdrop="static"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -210,8 +213,6 @@ class LoadsExpandableRow extends Component {
       let endCoords = job.endAddress;
 
       // According to https://trelar.atlassian.net/browse/SG-930
-      // please do not delete code commented
-      /*
       // if there are tracking points use those instead of job address.
       if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
         startCoords = {
@@ -223,9 +224,9 @@ class LoadsExpandableRow extends Component {
           longitude: gpsTrackings[gpsTrackings.length - 1][0]
         };
       }
-      */
 
-      startCoords = {
+      // please do not delete code commented
+      /* startCoords = {
         latitude: job.startAddress.latitude,
         longitude: job.startAddress.longitude
       };
@@ -233,7 +234,7 @@ class LoadsExpandableRow extends Component {
       endCoords = {
         latitude: job.endAddress.latitude,
         longitude: job.endAddress.longitude
-      };
+      }; */
 
       const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));
@@ -345,27 +346,28 @@ class LoadsExpandableRow extends Component {
                   </Row>
                   <Row>
                     <Col md={4}>
-                      <TMap
+                      <TMapGPS
                         id={`load${load.id}`}
                         width="100%"
                         height={400}
                         startAddress={startCoords}
                         endAddress={endCoords}
-                        trackings={gpsTrackings}
+                        loadId={load.id}
                       />
                     </Col>
-                    <Col md={4}>
-                      {loadInvoices.map(item => (
-                        <img
-                          key={item}
-                          src={`${item.image}`}
-                          alt={`${item.image}`}
-                          style={{
-                            width: '100%'
-                          }}
-                        />
-                      ))
-                      }
+                    <Col md={8}>
+                      <Row>
+                        {loadInvoices.map(item => (
+                          <Col key={item.id} sm className="loadTicketCol">
+                            <ImageZoom
+                              image={{
+                                src: `${item.image}`
+                              }}
+                            />
+                          </Col>
+                        ))
+                        }
+                      </Row>
                     </Col>
                   </Row>
                 </Container>

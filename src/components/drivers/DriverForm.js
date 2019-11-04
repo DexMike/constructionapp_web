@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
+import { withTranslation } from 'react-i18next';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
@@ -107,8 +108,7 @@ class DriverForm extends Component {
   }
 
   async saveUser() {
-    let {inviteStatus, inviteMessage} = this.state;
-    const {toggle, currentUser} = this.props;
+    const {toggle, currentUser, onSuccess} = this.props;
     this.setState({btnSubmitting: true});
     const isValid = await this.isFormValid();
     if (!isValid) {
@@ -146,27 +146,23 @@ class DriverForm extends Component {
       user.createdOn = moment.utc().format();
       user.modifiedBy = currentUser.id;
       user.modifiedOn = moment.utc().format();
+      const newUser = await UserService.createUser(user);
+      user.id = newUser.id;
+
+      const driver = {};
+      driver.usersId = newUser.id;
+      driver.driverStatus = 'Invited';
+      driver.createdBy = currentUser.id;
+      driver.createdOn = moment.utc().format();
+      // we are not seeing driver id to user record.. we should do that here
       try {
-        const response = await UserService.createDriver(user);
-        if (response === true) {
-          inviteStatus = true;
-          inviteMessage = `Your invitation to ${user.firstName} ${user.lastName}, sent to phone number ${user.mobilePhone}, was Successful.`;
-        } else {
-          inviteStatus = false;
-          inviteMessage = `Error. Your invitation to ${user.firstName} ${user.lastName}
-            to phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
-        }
+        await DriverService.createDriver(driver);
+        await this.sendDriverInvite(user);
       } catch (err) {
-        inviteStatus = false;
-        inviteMessage = `Error. Your invitation to ${user.firstName} ${user.lastName}
-          to phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
+        console.error('Failed to created driver / notify driver invited');
       }
-      this.setState({
-        sendingSMS: false,
-        inviteStatus,
-        inviteMessage,
-        step: 2,
-        selectedUser: user});
+      onSuccess(user, driver);
+      this.setState({step: 2, selectedUser: user});
     }
   }
 
@@ -271,14 +267,14 @@ class DriverForm extends Component {
   }
 
   renderDriverInvite() {
-    const {inviteStatus, inviteMessage, sendingSMS} = this.state;
-    const {toggle} = this.props;
+    const {inviteStatus, inviteMessage, selectedUser, sendingSMS} = this.state;
+    const {toggle, t} = this.props;
     if (sendingSMS) {
       return (
         <Row>
           <Col md={12} className="text-center">
             <div className="spinner-border text-success" role="status">
-              <span className="sr-only">Loading...</span>
+              <span className="sr-only">{t('Loading...')}</span>
             </div>
           </Col>
         </Row>
@@ -289,7 +285,7 @@ class DriverForm extends Component {
         <Col md={12}>
           {/* <span>Invite a Driver</span> */}
           <br/>
-          <h3>{inviteStatus ? 'Success!' : 'Warning'}</h3>
+          <h3>{inviteStatus ? `${t('Success')}!` : t('Warning')}</h3>
           <p>
             {inviteMessage}
           </p>
@@ -303,7 +299,7 @@ class DriverForm extends Component {
                 }}
                 className="primaryButton"
               >
-                Return
+                {t('Return')}
               </Button>
             </Col>
           ) : null
@@ -317,7 +313,13 @@ class DriverForm extends Component {
                 })}
                 className="secondaryButton"
               >
-                Edit
+                {t('Edit')}
+              </Button>
+              <Button
+                onClick={() => this.sendDriverInvite(selectedUser)}
+                className="primaryButton"
+              >
+                {t('Resend Invite')}
               </Button>
             </Col>
           ) : null
@@ -337,7 +339,7 @@ class DriverForm extends Component {
       userStatus,
       btnSubmitting
     } = this.state;
-    const {driverId, toggle} = this.props;
+    const {driverId, toggle, t} = this.props;
     return (
       <Row className="form">
         {this.renderGoTo()}
@@ -346,20 +348,20 @@ class DriverForm extends Component {
             className="page-title pl-4 pr-4 pt-2 pb-2"
             style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
           >
-            {driverId ? 'Edit Driver' : 'Add Driver'}
+            {driverId ? t('Edit Driver') : t('Add Driver')}
           </h3>
         </Col>
         <Col md={12}>
           <Row className="pl-4 pr-4">
             <Col md={6} className="pt-2">
               <span>
-                First Name
+                {t('First Name')}
               </span>
               <TField
                 input={{
                   onChange: this.handleInputChange,
                   name: 'firstName',
-                  value: firstName
+                  value: t(firstName)
                 }}
                 placeholder="First Name"
                 type="text"
@@ -368,7 +370,7 @@ class DriverForm extends Component {
             </Col>
             <Col md={6} className="pt-2">
               <span>
-                Last Name
+                {t('Last Name')}
               </span>
               <TField
                 input={{
@@ -376,18 +378,18 @@ class DriverForm extends Component {
                   name: 'lastName',
                   value: lastName
                 }}
-                placeholder="Last Name"
+                placeholder={t('Last Name')}
                 type="text"
                 meta={reqHandlerLName}
               />
             </Col>
             <Col md={6} className="pt-2">
               <span>
-                Mobile Phone
+                {t('Mobile Phone')}
               </span>
               <NumberFormat
                 name="mobilePhone"
-                placeholder="Mobile Phone"
+                placeholder={t('Mobile Phone')}
                 type="text"
                 format="##########"
                 // mask="_"
@@ -410,14 +412,14 @@ class DriverForm extends Component {
                       onClick={toggle}
                       className="secondaryButton"
               >
-                Cancel
+                {t('Cancel')}
               </Button>
               <TSubmitButton
                 onClick={this.saveUser}
                 className="primaryButton"
                 loading={btnSubmitting}
                 // loaderSize={10}
-                bntText={driverId && userStatus !== 'Driver Invited' ? 'Update' : 'Send Invite'}
+                bntText={driverId && userStatus !== 'Driver Invited' ? t('Update') : t('Send Invite')}
               />
             </Col>
           </Row>
@@ -443,6 +445,7 @@ class DriverForm extends Component {
       loaded,
       step
     } = this.state;
+    const { t } = { ...this.props };
     if (loaded) {
       return (
         <React.Fragment>
@@ -456,7 +459,7 @@ class DriverForm extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Edit Driver</h3>
+            <h3 className="page-title">{t('Edit Driver')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -475,7 +478,9 @@ DriverForm.propTypes = {
       id: PropTypes.string
     })
   }),
-  driverId: PropTypes.number
+  driverId: PropTypes.number,
+  onSuccess: PropTypes.func,
+  t: PropTypes.func
 };
 
 DriverForm.defaultProps = {
@@ -483,7 +488,9 @@ DriverForm.defaultProps = {
   match: {
     params: {}
   },
-  driverId: 0
+  driverId: 0,
+  onSuccess: () => {},
+  t: () => {}
 };
 
-export default DriverForm;
+export default withTranslation()(DriverForm);

@@ -274,6 +274,7 @@ class JobViewForm extends Component {
           isOpen={modalCancelRequest}
           toggle={this.toggleCancelRequest}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -467,6 +468,7 @@ class JobViewForm extends Component {
           isOpen={modalLiability}
           toggle={this.toggleLiabilityModal}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"

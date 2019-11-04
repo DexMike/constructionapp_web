@@ -296,6 +296,19 @@ class EquipmentDetails extends PureComponent {
     }
   }
 
+  async archiveTruck() {
+    const { selectedMaterials } = this.state;
+    const { toggle } = this.props;
+    const equipment = this.setUpdatedEquipment();
+    equipment.isArchived = '1';
+    try {
+      await EquipmentService.updateEquipment(equipment);
+      toggle();
+    } catch (e) {
+      // console.log(e);
+    }
+  }
+
   handleInputChange(e) {
     const { value } = e.target;
     let reqHandler = '';
@@ -671,6 +684,9 @@ class EquipmentDetails extends PureComponent {
                 </Button>
               </ButtonToolbar>
               <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                {/*<Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.archiveTruck()}>*/}
+                {/*  Delete*/}
+                {/*</Button>*/}
                 <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
                   Save
                 </Button>

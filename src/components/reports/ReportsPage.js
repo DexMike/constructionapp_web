@@ -1,40 +1,55 @@
 import React, { Component } from 'react';
-// import { Redirect } from 'react-router-dom';
-// import JobService from '../../api/JobService';
-// import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-import { Redirect } from 'react-router-dom';
-import { Container } from 'reactstrap';
-import ReportsCarrierPage from './ReportsCarrierPage';
-import ReportsCustomerPage from './ReportsCustomerPage';
-import ProfileService from '../../api/ProfileService';
-import '../addTruck/AddTruck.css';
+import ReportsComparison from './ReportsComparison';
 
 class ReportsPage extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      isAdmin: null,
-      companyType: null
+      type: null
     };
   } // constructor
 
   async componentDidMount() {
-    const profile = await ProfileService.getProfile();
+    const { match } = this.props;
+    let type = null;
+
+    /*
+    if (match.params.type === 'producer') {
+      type = 'Producer';
+    } else {
+      type = 'Carrier';
+    }
+
     this.setState({
-      isAdmin: profile.isAdmin,
-      companyType: profile.companyType,
+      type,
       loaded: true
     });
+    */
+  }
+
+  componentWillReceiveProps(nextProps) {
+    /*
+    const { match } = this.props;
+    if (nextProps.match.params.type !== match.params.type) {
+      let type = null;
+      if (nextProps.match.params.type === 'producer') {
+        type = 'Producer';
+      } else {
+        type = 'Carrier';
+      }
+      this.setState({
+        type,
+        loaded: true
+      });
+    }
+    */
   }
 
   renderReportsFromCompanyType() {
-    // console.log(56);
-    const { companyType } = this.state;
+    // const { type } = this.state;
     return (
       <React.Fragment>
-        { companyType === 'Carrier' && <ReportsCarrierPage/>}
-        { companyType === 'Customer' && <ReportsCustomerPage/>}
+        <ReportsComparison/>
       </React.Fragment>
     );
   }
@@ -52,20 +67,9 @@ class ReportsPage extends Component {
   }
 
   render() {
-    const { companyType, loaded, isAdmin } = this.state;
-    if (isAdmin === false) {
-      return <Redirect push to="/" />;
-    }
-    if (loaded) {
-      return (
-        <React.Fragment>
-          { !!companyType && this.renderReportsFromCompanyType()}
-        </React.Fragment>
-      );
-    }
     return (
       <React.Fragment>
-        {this.renderLoader()}
+        {this.renderReportsFromCompanyType()}
       </React.Fragment>
     );
   }

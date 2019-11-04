@@ -339,7 +339,7 @@ class JobSavePage extends Component {
           let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
             const newDriver = {...itm};
-            if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled') {
+            if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled' || newDriver.userStatus === 'Enabled') {
               newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
               enabledDrivers.push(newDriver);
             }
@@ -657,7 +657,7 @@ class JobSavePage extends Component {
     let enabledDrivers = [];
     Object.values(drivers).forEach((itm) => {
       const newDriver = {...itm};
-      if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled') {
+      if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled' || newDriver.userStatus === 'Enabled') {
         newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
         enabledDrivers.push(newDriver);
       }
@@ -1046,6 +1046,7 @@ class JobSavePage extends Component {
         isOpen={closeModal}
         toggle={this.toggleCloseModal}
         className="status-modal"
+        backdrop="static"
       >
         <JobClosePopup
           toggle={this.toggleCloseModal}
@@ -1064,6 +1065,7 @@ class JobSavePage extends Component {
         isOpen={deleteModal}
         toggle={this.toggleDeleteModal}
         className="status-modal"
+        backdrop="static"
       >
         <JobDeletePopup
           toggle={this.toggleDeleteModal}
@@ -1086,6 +1088,7 @@ class JobSavePage extends Component {
         isOpen={modalAddJob}
         toggle={this.toggleNewJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <JobCreatePopup
           toggle={this.toggleNewJobModal}
@@ -1145,18 +1148,18 @@ class JobSavePage extends Component {
       job,
       modalCopyJob
     } = this.state;
-    const copyJob = true;
     return (
       <Modal
         isOpen={modalCopyJob}
         toggle={this.toggleCopyJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
-        <JobCreatePopup
+        <JobWizard
           toggle={this.toggleCopyJobModal}
-          jobId={job.id}
-          copyJob={copyJob}
           updateCopiedJob={this.updateCopiedJob}
+          copyJob
+          job={job}
         />
       </Modal>
     );
@@ -1185,6 +1188,7 @@ class JobSavePage extends Component {
         isOpen={allocateDriversModal}
         toggle={this.toggleAllocateDriversModal}
         className="allocate-modal"
+        backdrop="static"
       >
         <div className="modal__body" style={{padding: '0px'}}>
           <Container className="dashboard">
@@ -1253,6 +1257,7 @@ class JobSavePage extends Component {
           isOpen={modalCancelRequest}
           toggle={this.toggleCancelRequest}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -1322,6 +1327,7 @@ class JobSavePage extends Component {
           isOpen={modalLiability}
           toggle={this.toggleLiabilityModal}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -1408,6 +1414,7 @@ class JobSavePage extends Component {
           isOpen={modalCarrierCancel}
           toggle={this.toggleCarrierCancelModal}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -1513,6 +1520,7 @@ class JobSavePage extends Component {
           isOpen={modalCancel1}
           toggle={this.toggleCancelModal1}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -1599,6 +1607,7 @@ class JobSavePage extends Component {
           isOpen={modalCancel2}
           toggle={this.toggleCancelModal2}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"

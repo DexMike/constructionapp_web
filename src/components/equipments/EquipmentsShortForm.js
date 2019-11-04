@@ -16,6 +16,7 @@ import LookupsService from '../../api/LookupsService';
 import TSpinner from '../common/TSpinner';
 import EquipmentService from '../../api/EquipmentService';
 import TField from '../common/TField';
+import { withTranslation } from 'react-i18next';
 
 class EquipmentsShortForm extends PureComponent {
   constructor(props) {
@@ -199,7 +200,7 @@ class EquipmentsShortForm extends PureComponent {
       description: '',
       driversId: 0,
       defaultDriverId: 0,
-      equipmentAddressId: 77,
+      equipmentAddressId: null,
       maxCapacity,
       maxDistance: maxDistanceToPickup,
       rateType,
@@ -228,6 +229,7 @@ class EquipmentsShortForm extends PureComponent {
       materials.push(newMaterial);
     }
     try {
+      console.log({equipments, equipmentMaterials: materials});
       await EquipmentService.createEquipmentsBatch(equipments, materials);
     } catch (e) {
       // console.log(e);
@@ -333,7 +335,7 @@ class EquipmentsShortForm extends PureComponent {
       reqHandlerMaxCapacity,
       loaded
     } = this.state;
-    const { toggle } = this.props;
+    const { toggle, t } = this.props;
     if (loaded) {
       return (
         <React.Fragment>
@@ -341,11 +343,11 @@ class EquipmentsShortForm extends PureComponent {
             <Row className="col-12">
               <Col md={12}>
                 <h3 className="subhead">
-                  Tell us about your trucks
+                  {t('Tell us about your truck')}
                 </h3>
               </Col>
               <Col md={4}>
-                <span>Truck Type</span>
+                <span>{t('Truck Type')}</span>
                 <SelectField
                   input={
                     {
@@ -357,12 +359,12 @@ class EquipmentsShortForm extends PureComponent {
                   meta={reqHandlerTruckType}
                   value={truckType}
                   options={truckTypes}
-                  placeholder="Truck Type"
+                  placeholder={t('Truck Type')}
                 />
               </Col>
               <Col md={4}>
                 <span>
-                  Maximum Capacity (Tons)
+                  {`${t('Maximum Capacity')} (${t('Tons')})`}
                 </span>
                 <TFieldNumber
                   input={
@@ -377,7 +379,7 @@ class EquipmentsShortForm extends PureComponent {
                 />
               </Col>
               <Col md={4}>
-                <span>Truck Number</span>
+                <span>{t('Truck Number')}</span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -390,7 +392,7 @@ class EquipmentsShortForm extends PureComponent {
               </Col>
               <Col md={12} style={{marginTop: 6}}>
                 <span>
-                  Materials Hauled
+                  {t('Materials Hauled')}
                 </span>
                 <MultiSelect
                   input={
@@ -402,14 +404,14 @@ class EquipmentsShortForm extends PureComponent {
                   }
                   meta={reqHandlerMaterials}
                   options={allMaterials}
-                  placeholder="Materials"
+                  placeholder={t('Materials')}
                 />
               </Col>
             </Row>
             <Row className="col-12 pt-4">
               <Col md={12}>
                 <h3 className="subhead">
-                  Truck Rates
+                  {t('Truck Rates')}
                 </h3>
               </Col>
             </Row>
@@ -419,11 +421,11 @@ class EquipmentsShortForm extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByHour"
                   value={isRatedHour}
-                  label="By Hour"
+                  label={t('By Hour')}
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum cost per hour</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Hour')}`}</span>
                 <TFieldNumber
                   style={{textAlign: 'right'}}
                   input={
@@ -439,7 +441,7 @@ class EquipmentsShortForm extends PureComponent {
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum Hours</span>
+                <span className="label">{t('Minimum Hours')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -458,11 +460,11 @@ class EquipmentsShortForm extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByTon"
                   value={isRatedTon}
-                  label="By Ton"
+                  label={t('By Ton')}
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum cost per ton</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Ton')}`}</span>
                 <TFieldNumber
                   input={
                     {
@@ -477,7 +479,7 @@ class EquipmentsShortForm extends PureComponent {
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum Tons</span>
+                <span className="label">{t('Minimum Tons')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -493,7 +495,7 @@ class EquipmentsShortForm extends PureComponent {
             <Row className="col-12 pt-4">
               <Col md={12}>
                 <span>
-                  Max Distance to Pickup (Miles, optional)
+                  {`${t('Max Distance to Pickup')} (${t('Miles')}, ${t('Optional')})`}
                 </span>
                 <TFieldNumber
                   input={{
@@ -501,19 +503,19 @@ class EquipmentsShortForm extends PureComponent {
                     name: 'maxDistanceToPickup',
                     value: maxDistanceToPickup
                   }}
-                  placeholder="How far will you travel per job"
+                  placeholder={t('How far will you travel per job')}
                 />
               </Col>
             </Row>
             <Row className="col-12 pt-4">
               <Col md={6}>
                 <Button className="tertiaryButton" type="button" onClick={toggle}>
-                  Cancel
+                  {t('Cancel')}
                 </Button>
               </Col>
               <Col md={6} className="text-right">
                 <Button type="submit" className="primaryButton" onClick={() => this.saveTruck()}>
-                  Save
+                  {t('Save')}
                 </Button>
               </Col>
             </Row>
@@ -537,12 +539,14 @@ EquipmentsShortForm.propTypes = {
   userId: PropTypes.number,
   companyId: PropTypes.number,
   toggle: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func
+  onSuccess: PropTypes.func,
+  t: PropTypes.func
 };
 
 EquipmentsShortForm.defaultProps = {
   userId: 0,
   companyId: 0,
-  onSuccess: () => {}
+  onSuccess: () => {},
+  t: () => {}
 };
-export default EquipmentsShortForm;
+export default withTranslation()(EquipmentsShortForm);

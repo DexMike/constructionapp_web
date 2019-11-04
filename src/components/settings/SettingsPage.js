@@ -137,6 +137,7 @@ class SettingsPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header form"
+        backdrop="static"
       >
         <div className="modal__header">
           <h5 style={{color: 'white'}}>
