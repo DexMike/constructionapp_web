@@ -141,7 +141,7 @@ class DailyReportFilter extends Component {
         companies: [],
         states: [],
         zipCode: '',
-        range: 500,
+        range: 3000,
 
         statuses: [],
         materials: [],
@@ -164,7 +164,8 @@ class DailyReportFilter extends Component {
       reqHandlerRange: {
         touched: false,
         error: ''
-      }
+      },
+      blankFilters: null
     };
 
     this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -189,7 +190,8 @@ class DailyReportFilter extends Component {
       company,
       filters,
       selectedRange,
-      selectedRangeComp
+      selectedRangeComp,
+      blankFilters
     } = {...this.state};
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
@@ -211,6 +213,9 @@ class DailyReportFilter extends Component {
         filters.companyLongitude = address.longitude;
       }
     }
+
+    //save blank filters
+    const newBlankFilters = CloneDeep(filters);
 
     // This should save the filters, there's no need to save at every change
     if (localStorage.getItem('filters')) {
@@ -235,7 +240,8 @@ class DailyReportFilter extends Component {
       selectedRange,
       loaded: true,
       companiesTypelist: allCompanies,
-      companyType: profile.companyType
+      companyType: profile.companyType,
+      blankFilters: newBlankFilters
     });
   }
 
@@ -318,8 +324,10 @@ class DailyReportFilter extends Component {
     Object.values(lookupMaterialTypeList)
       .forEach((itm) => {
         materialTypeList.push(itm.val1);
-      });
+         });
+     
     const materialTypes = materialTypeList.map(materialType => ({
+      // id: id
       name: 'materialType',
       value: materialType.trim(),
       label: materialType.trim()
@@ -598,7 +606,7 @@ class DailyReportFilter extends Component {
   }
 
   async handleMultiChange(data, meta) {
-    // console.log("TCL: handleMultiChange -> data", data)
+    console.log("TCL: handleMultiChange -> data", data, meta)
     const {filters} = this.state;
     switch(meta) {
       case 'status':
@@ -711,15 +719,11 @@ class DailyReportFilter extends Component {
   }
 
   async handleResetFilters() {
-    // set values to default or last saved filter
-    if (localStorage.getItem('filters')) {
-      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
-        async () => this.fetchJobsAndLoads());
-    } else {
-      // defaults
-      this.saveFilters();
-      await this.fetchJobsAndLoads();
-    }
+    const { blankFilters } = this.state;
+    this.setState({
+      filters: blankFilters
+    })
+    this.fetchJobsAndLoads();
   }
 
   render() {
@@ -753,7 +757,7 @@ class DailyReportFilter extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form">
-                {/*Row 1: Company, State, Zip, Range */}
+                {/*Row 1: Company, State, Zip, Range 
 
                 <div className="flex-daily-report-container-1">
                   <div className="filter-item" id="companySelect">
@@ -783,21 +787,6 @@ class DailyReportFilter extends Component {
                       horizontalScroll="true"
                       // selectedItems={filters.materialType.length}
                     />
-                    {/*
-                    <TField
-                      input={
-                        {
-                          onChange: this.handleFilterChangeDelayed,
-                          name: 'zipCode',
-                          value: filters.zipCode
-                        }
-                      }
-                      meta={reqHandlerZip}
-                      className="filter-text"
-                      placeholder={companyZipCode}
-                      type="number"
-                    />
-                    */}
 
                   </div>
                   <div className="filter-item" id="materialTypeSelect">
@@ -865,8 +854,9 @@ class DailyReportFilter extends Component {
                     />
                   </div>
                 </div>
+                */}
 
-                {/*Row 2: Status, Material, Rate Type, Rate, Tons, TruckType*/}
+                {/*Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
 
                 <div className="flex-daily-report-container-2">
                   <div className="filter-item" id="statusSelect">
@@ -1017,9 +1007,12 @@ class DailyReportFilter extends Component {
                       // selectedItems={filters.equipmentType.length}
                     />
                   </div>
+                  */}
 
-                  {/*Row 3: Time Range, Range, Reset*/}
+                {/*Row 3: Time Range, Range, Reset*/}
 
+
+                <div className="flex-daily-report-container-2">
                   <div className="filter-item">
                     <div className="filter-item-title">
                       Day Range

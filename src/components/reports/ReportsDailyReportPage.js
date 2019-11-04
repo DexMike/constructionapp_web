@@ -294,12 +294,12 @@ class ReportsDailyReportPage extends Component {
   extractCSVInfoJobs(data) {
     const { columnsJobs } = this.state;
     const newData = data.map(d => ({
-      'Date': d.date,
-      'Completed': d.numJobs,
-      'loads': d.numLoads,
+      Date: d.date,
+      Completed: d.numJobs,
+      loads: d.numLoads,
       'Not completed': d.notCompletedJobs,
       'In progress': d.jobsInProgress,
-      'Total': d.totalJobs,
+      Total: d.totalJobs,
       // 'Rate: $/Ton': d.rateTon,
       'Rate: $/Hour': d.rateHour
       /*,
@@ -312,9 +312,9 @@ class ReportsDailyReportPage extends Component {
 
   extractCSVInfoLoads(data) {
     const newData = data.map(d => ({
-      'Date': d.date,
-      'Loads': d.totalNumberOfLoads,
-      'Completed': d.totalNumberOfCompletedLoads,
+      Date: d.date,
+      Loads: d.totalNumberOfLoads,
+      Completed: d.totalNumberOfCompletedLoads,
       'Distance travelled': d.totalDistanceTravelled
     }))
     return newData;
