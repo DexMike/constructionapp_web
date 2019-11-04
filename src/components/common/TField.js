@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 class TField extends PureComponent {
   render() {
     const {
-      input, placeholder, type, meta: { touched, error }, id
+      input, placeholder, offClick, type, meta: { touched, error }, id
     } = this.props;
 
     return (
@@ -15,6 +15,7 @@ class TField extends PureComponent {
           placeholder={placeholder}
           type={type}
           id={id}
+          onBlur={() => offClick(input.name)}
         />
         {touched && error && <span className="form__form-group-error">{error}</span>}
       </div>
@@ -33,10 +34,12 @@ TField.propTypes = {
     error: PropTypes.string
   }),
   placeholder: PropTypes.string,
-  type: PropTypes.string
+  type: PropTypes.string,
+  offClick: PropTypes.func
 };
 
 TField.defaultProps = {
+  offClick: () => {},
   placeholder: '',
   meta: {
     value: null,

@@ -7,6 +7,9 @@ import TFormat from '../common/TFormat';
 
 import PaymentsService from '../../api/PaymentsService';
 import PaymentsFilter from './PaymentsFilter';
+import ProfileService from '../../api/ProfileService';
+import CompanyService from '../../api/CompanyService';
+
 
 class PaymentsCustomer extends Component {
   constructor(props) {
@@ -18,7 +21,7 @@ class PaymentsCustomer extends Component {
       goToPaymentDetails: false,
       payments: [],
       page: 0,
-      rows: 10,
+      rows: 10
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -53,27 +56,30 @@ class PaymentsCustomer extends Component {
   }
 
   async fetchPayments() {
-    const response = await PaymentsService.searchTransactions({});
-    const payments = response.data.map((payment) => {
-      const newPayment = {};
-      newPayment.id = payment.id;
+    try {
+      const response = await PaymentsService.searchTransactions();
+      const payments = response.data.map((payment) => {
+        const newPayment = {};
+        newPayment.id = payment.id;
 
-      newPayment.amount = payment.amount;
-      newPayment.amountF = TFormat.getValue(
-        TFormat.asMoney(payment.amount)
-      );
+        newPayment.amount = payment.amount;
+        newPayment.amountF = TFormat.getValue(
+          TFormat.asMoney(payment.amount)
+        );
 
-      newPayment.type = payment.type;
-      newPayment.status = payment.status;
-      newPayment.createdAt = TFormat.asDate(payment.createdAt);
-      newPayment.company = (payment.customer && payment.customer.company)
-        ? payment.customer.company : '';
-      newPayment.paymentMethod = (payment.usBankAccountDetails
-        && payment.usBankAccountDetails.last4) ? payment.usBankAccountDetails.last4 : '';
-      return newPayment;
-    });
-
-    this.setState({ payments });
+        newPayment.type = payment.type;
+        newPayment.status = payment.status;
+        newPayment.createdAt = TFormat.asDate(payment.createdAt);
+        newPayment.company = (payment.customer && payment.customer.company)
+          ? payment.customer.company : '';
+        newPayment.paymentMethod = (payment.usBankAccountDetails
+          && payment.usBankAccountDetails.last4) ? payment.usBankAccountDetails.last4 : '';
+        return newPayment;
+      });
+      this.setState({ payments });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   renderGoTo() {
@@ -110,7 +116,7 @@ class PaymentsCustomer extends Component {
               <h3 className="page-title">Customer Charges</h3>
             </Col>
           </Row>
-          <PaymentsFilter />
+          {/* <PaymentsFilter /> */}
           <Row>
             <Col md={12}>
               <Card>

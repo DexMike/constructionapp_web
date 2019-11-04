@@ -17,7 +17,6 @@ import moment from 'moment';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
-import JobCreateFormCarrier from '../jobs/JobCreateFormCarrier';
 
 import CompanyService from '../../api/CompanyService';
 import AddressService from '../../api/AddressService';
@@ -237,15 +236,15 @@ class CarriersCustomerPage extends Component {
       return newCarrier;
     });
 
-    if (groupsFavorites) {
-      // if we find the equipment's companyId in
-      // groupsFavorites we favorite it
-      carriers.map((carrier) => {
-        const newCarrier = carrier;
-        if (groupsFavorites.includes(newCarrier.id)) {
-          newCarrier.favorite = true;
-        }
-        return newCarrier;
+    if (groupsFavorites && Object.keys(groupsFavorites).length > 0) {
+      Object.keys(groupsFavorites).forEach((key) => {
+        carriers.map((carrier) => {
+          const newCarrier = carrier;
+          if (groupsFavorites[key].companyId === newCarrier.id) {
+            newCarrier.favorite = true;
+          }
+          return newCarrier;
+        });
       });
     }
 
@@ -596,7 +595,7 @@ class CarriersCustomerPage extends Component {
       await this.fetchCarriers();
     }); */
     const self = this;
-    const { value } = e.target;
+    let { value } = e.target;
     const { filters, reqHandlerZip, reqHandlerRange } = this.state;
     const filter = e.target.name;
     let invalidZip = false;
@@ -616,15 +615,16 @@ class CarriersCustomerPage extends Component {
       invalidZip = false;
     }
 
-    if (filter === 'range' && (value.length > 3 || value < 0)) {
-      this.setState({
-        reqHandlerRange: {
-          ...reqHandlerRange,
-          error: 'Range can not be more than 999 and less than 0',
-          touched: true
-        }
-      });
-      invalidRange = true;
+    if (filter === 'range' && (value > 999 || value < 0 || value.length === 0)) {
+      value = '999';
+      // this.setState({
+      //   reqHandlerRange: {
+      //     ...reqHandlerRange,
+      //     error: 'Range can not be more than 999 and less than 0',
+      //     touched: true
+      //   }
+      // });
+      // invalidRange = true;
     } else {
       this.setState({
         reqHandlerRange: {
@@ -729,6 +729,7 @@ class CarriersCustomerPage extends Component {
         isOpen={modalSelectMaterials}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__header">
           <button
@@ -1019,7 +1020,7 @@ class CarriersCustomerPage extends Component {
     const { unfavoriteModal, selectedFavoriteCompanyId, selectedFavoriteCompanyName } = this.state;
     return (
       <React.Fragment>
-        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal">
+        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal" backdrop="static">
           <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
             <div style={{ fontSize: 16, color: '#FFF' }}>
               Are you sure you want to unfavorite &apos;{selectedFavoriteCompanyName}&apos;?

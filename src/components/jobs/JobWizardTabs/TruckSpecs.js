@@ -101,7 +101,7 @@ class TruckSpecs extends PureComponent {
                 </Row>
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Select a truck types (s)
+                    <span className="form__form-group-label">Select a truck type(s)
                     <span
                       style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
                     </span>

@@ -12,78 +12,44 @@ import TSpinner from '../../common/TSpinner';
 import DeliveryCostsSummary from './DeliveryCostsSummary';
 import GeoUtils from "../../../utils/GeoUtils";
 import ReactTooltip from 'react-tooltip'
+import TCalculator from "../../common/TCalculator";
 
 class Summary extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       loaded: false,
+      formIsValid: false,
       materialTabValidations: [],
       truckSpecsTabValidations: [],
       haulRateTabValidations: [],
       startAddressValidations: [],
       endAddressValidations: []
-
     };
-    this.validateMaterialsTab = this.validateMaterialsTab.bind(this);
-    this.validateTruckSpecsTab = this.validateTruckSpecsTab.bind(this);
-    this.validateHaulRateTab = this.validateHaulRateTab.bind(this);
-    this.validateStartAddress = this.validateStartAddress.bind(this);
-    this.validateEndAddress = this.validateEndAddress.bind(this);
     this.handleInstructionChange = this.handleInstructionChange.bind(this);
-    this.validateTopForm = this.validateTopForm.bind(this);
   }
 
   async componentDidMount() {
-    const {data, tabPickupDelivery, handleInputChange} = {...this.props};
-    // let {endGPS, startGPS, avgDistanceEnroute, avgTimeEnroute} = {...this.state};
+    const {validateForm} = {...this.props};
     let {
+      formIsValid,
       materialTabValidations,
       truckSpecsTabValidations,
       haulRateTabValidations,
       startAddressValidations,
       endAddressValidations
     } = {...this.state};
-    let endString;
-    if (tabPickupDelivery.selectedEndAddressId > 0) {
-      const endAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedEndAddressId);
-      endString = endAddress.label;
-    } else {
-      endString = `${tabPickupDelivery.endLocationAddress1} ${tabPickupDelivery.endLocationCity} ${tabPickupDelivery.endLocationState} ${tabPickupDelivery.endLocationZip}`;
-    }
-    try {
-      data.endGPS = await GeoUtils.getCoordsFromAddress(endString);
-    } catch (err) {
-      console.error(err);
-    }
-    let startString;
-    if (tabPickupDelivery.selectedStartAddressId > 0) {
-      const startAddress = tabPickupDelivery.allAddresses.find(item => item.value === tabPickupDelivery.selectedStartAddressId);
-      startString = startAddress.label;
-    } else {
-      startString = `${tabPickupDelivery.startLocationAddress1} ${tabPickupDelivery.startLocationCity} ${tabPickupDelivery.startLocationState} ${tabPickupDelivery.startLocationZip}`;
-    }
-    try {
-      data.startGPS = await GeoUtils.getCoordsFromAddress(startString);
-    } catch (err) {
-      console.error(err);
-    }
-    if (data.endGPS.lat && data.startGPS.lat
-      && data.endGPS.lng && data.startGPS.lng) {
-      const waypoint0 = `${data.startGPS.lat},${data.startGPS.lng}`;
-      const waypoint1 = `${data.endGPS.lat},${data.endGPS.lng}`;
-      const travelInfoEnroute = await GeoUtils.getDistance(waypoint0, waypoint1);
-      data.avgDistanceEnroute = (travelInfoEnroute.distance * 0.000621371192).toFixed(2);
-      data.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
-    }
-    handleInputChange('tabSummary', data);
-    materialTabValidations = this.validateMaterialsTab();
-    truckSpecsTabValidations = this.validateTruckSpecsTab();
-    haulRateTabValidations = this.validateHaulRateTab();
-    startAddressValidations = this.validateStartAddress();
-    endAddressValidations = this.validateEndAddress();
+    const validationResponse = validateForm();
+    formIsValid = validationResponse.valid;
+    materialTabValidations = validationResponse.materialTabValidations;
+    truckSpecsTabValidations = validationResponse.truckSpecsTabValidations;
+    haulRateTabValidations = validationResponse.haulRateTabValidations;
+    startAddressValidations = validationResponse.startAddressValidations;
+    endAddressValidations = validationResponse.endAddressValidations;
+
     this.setState({
       loaded: true,
+      formIsValid,
       materialTabValidations,
       truckSpecsTabValidations,
       haulRateTabValidations,
@@ -94,7 +60,34 @@ class Summary extends PureComponent {
 
   async componentWillReceiveProps(nextProps) {
     const {data} = {...nextProps};
-    this.setState({data: {...data}});
+
+    const {validateForm} = {...this.props};
+    let {
+      formIsValid,
+      materialTabValidations,
+      truckSpecsTabValidations,
+      haulRateTabValidations,
+      startAddressValidations,
+      endAddressValidations
+    } = {...this.state};
+    const validationResponse = validateForm();
+    formIsValid = validationResponse.valid;
+    materialTabValidations = validationResponse.materialTabValidations;
+    truckSpecsTabValidations = validationResponse.truckSpecsTabValidations;
+    haulRateTabValidations = validationResponse.haulRateTabValidations;
+    startAddressValidations = validationResponse.startAddressValidations;
+    endAddressValidations = validationResponse.endAddressValidations;
+
+    this.setState({
+      data: {...data},
+      loaded: true,
+      formIsValid,
+      materialTabValidations,
+      truckSpecsTabValidations,
+      haulRateTabValidations,
+      startAddressValidations,
+      endAddressValidations
+    });
   }
 
   handleInstructionChange(e) {
@@ -102,105 +95,6 @@ class Summary extends PureComponent {
     const {value} = e.target;
     data.instructions = value;
     handleInputChange('tabSummary', data);
-  }
-
-  validateMaterialsTab() {
-    const {tabMaterials} = {...this.props};
-    const val = [];
-    if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.value === '') {
-      val.push('Material Type');
-    }
-    if (!tabMaterials.quantity || tabMaterials.quantity <= 0) {
-      if (tabMaterials.quantityType === 'Hour') {
-        val.push('Estimated Hours');
-      } else {
-        val.push('Estimated Tons');
-      }
-    }
-    return val;
-  }
-
-  validateTruckSpecsTab() {
-    const {tabTruckSpecs} = {...this.props};
-    const val = [];
-    if (!tabTruckSpecs.selectedTruckTypes || tabTruckSpecs.selectedTruckTypes.length === 0) {
-      val.push('At least one truck type');
-    }
-    return val;
-  }
-
-  validateHaulRateTab() {
-    const {tabHaulRate} = {...this.props};
-    const val = [];
-    if (!tabHaulRate.ratePerPayType || tabHaulRate.ratePerPayType <= 0) {
-      val.push('Missing haul rate');
-    }
-    return val;
-  }
-
-  validateStartAddress() {
-    const {tabPickupDelivery, data} = {...this.props};
-    // const {startGPS} = {...this.state};
-    const val = [];
-
-    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
-      if (!tabPickupDelivery.startLocationAddressName || tabPickupDelivery.startLocationAddressName === '') {
-        val.push('Missing start address name');
-      }
-
-      if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
-        && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
-        val.push('Same start and end addresses');
-      }
-      if (tabPickupDelivery.startLocationAddress1.length === 0
-        || tabPickupDelivery.startLocationCity.length === 0
-        || tabPickupDelivery.startLocationZip.length === 0
-        || tabPickupDelivery.startLocationState.length === 0) {
-        val.push('Missing start address fields');
-      }
-    }
-
-    if (val.length > 0) {
-      return val;
-    }
-
-    if (!data.startGPS || !data.startGPS.lat
-      || !data.startGPS.lng) {
-      val.push('Invalid start address');
-    }
-
-    return val;
-  }
-
-  validateEndAddress() {
-    const {tabPickupDelivery, data} = {...this.props};
-    const val = [];
-    // const {endGPS} = {...this.state};
-
-    if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
-
-      if (!tabPickupDelivery.endLocationAddressName || tabPickupDelivery.endLocationAddressName === '') {
-        val.push('Missing end address name');
-      }
-
-      if (tabPickupDelivery.endLocationAddress1.length === 0
-        || tabPickupDelivery.endLocationCity.length === 0
-        || tabPickupDelivery.endLocationZip.length === 0
-        || tabPickupDelivery.endLocationState.length === 0) {
-        val.push('Missing end address fields');
-      }
-    }
-
-    if (val.length > 0) {
-      return val;
-    }
-
-    if (!data.endGPS || !data.endGPS.lat
-      || !data.endGPS.lng) {
-      val.push('Invalid end address');
-    }
-
-    return val;
   }
 
   renderStartAddress() {
@@ -328,7 +222,7 @@ class Summary extends PureComponent {
   }
 
   renderHaul() {
-    const {tabTruckSpecs, data} = {...this.props};
+    const {tabTruckSpecs, tabPickupDelivery, data} = {...this.props};
     // const {avgTimeEnroute, avgDistanceEnroute} = {...this.state};
 
     const selectedTruckTypesName = [];
@@ -373,7 +267,7 @@ class Summary extends PureComponent {
           <div className="col-md-5 form__form-group">
                     <span style={{}}
                     >
-                      {data.avgDistanceEnroute}
+                      {tabPickupDelivery.avgDistanceEnroute}
                     </span>
           </div>
         </Row>
@@ -384,7 +278,7 @@ class Summary extends PureComponent {
           <div className="col-md-5 form__form-group">
                     <span style={{}}
                     >
-                      {data.avgTimeEnroute}
+                      {tabPickupDelivery.avgTimeEnroute}
                     </span>
           </div>
         </Row>
@@ -430,11 +324,11 @@ class Summary extends PureComponent {
     return (
       <React.Fragment>
         <Row className="col-md-12" style={{marginTop: -15}}>
-          <div className="col-md-7 form__form-group">
-            <span
-              className="form__form-group-label" style={{fontWeight: 'bold'}}>Rate per {tabHaulRate.payType}</span>
-          </div>
           <div className="col-md-5 form__form-group">
+            <span
+              className="form__form-group-label" style={{fontWeight: 'bold'}}>$/{tabHaulRate.payType}</span>
+          </div>
+          <div className="col-md-7 form__form-group">
                     <span style={{
                       fontWeight: 'bold'
                     }}
@@ -506,29 +400,96 @@ class Summary extends PureComponent {
     const truckCapacity = 22;
 
     const haulCostPerTonHour = tabHaulRate.ratePerPayType;
-    let oneWayCostPerTonHourPerMile = 0;
-    let deliveredPricePerTon = 0;
-    let deliveredPriceJob = 0;
-    let estimatedCostForJob = 0;
+    let oneWayCostPerTonHourPerMile = '0.00';
+    let deliveredPricePerTon = '0.00';
+    let deliveredPriceJob = '0.00';
+    let estimatedCostForJob = '0.00';
     // const sufficientInfo = (parseFloat(tabHaulRate.avgTimeEnroute) + parseFloat(tabHaulRate.avgTimeReturn)) * parseFloat(tabHaulRate.ratePerPayType);
     if (haulCostPerTonHour > 0) {
-      // haulCostPerTonHour = ((sufficientInfo) / parseFloat(tabHaulRate.rateCalculator.truckCapacity)).toFixed(2);
+      // haulCostPerTonHour = ((sufficientInfo) / parseFloat(data.rateCalculator.truckCapacity)).toFixed(2);
+      // oneWayCostPerTonHourPerMile = data.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(data.avgDistanceEnroute)).toFixed(2) : 0;
       if (tabHaulRate.payType === 'Ton') {
-        oneWayCostPerTonHourPerMile = tabPickupDelivery.avgDistanceEnroute > 0 ? (parseFloat(haulCostPerTonHour) / parseFloat(tabPickupDelivery.avgDistanceEnroute)).toFixed(2) : 0;
-
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByTonRate(haulCostPerTonHour, tabPickupDelivery.avgDistanceEnroute);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        oneWayCostPerTonHourPerMile = (oneLoad * (parseFloat(tabHaulRate.ratePerPayType)) / truckCapacity / (parseFloat(tabPickupDelivery.avgDistanceEnroute))).toFixed(2);
+        oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByHourRate(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabHaulRate.ratePerPayType),
+          truckCapacity,
+          tabPickupDelivery.avgDistanceEnroute
+        );
       }
-      deliveredPricePerTon = (parseFloat(tabMaterials.estMaterialPricing) + parseFloat(haulCostPerTonHour)).toFixed(2);
-      estimatedCostForJob = (parseFloat(haulCostPerTonHour) * parseFloat(tabMaterials.quantity)).toFixed(2);
+      if (tabHaulRate.payType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByTonRate(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Ton') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByTonAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
+        deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
+          parseFloat(tabMaterials.estMaterialPricing),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          tabMaterials.quantity,
+          truckCapacity,
+          parseFloat(haulCostPerTonHour)
+        );
+      }
+      if ((tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Ton')
+        || (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Hour')) {
+        estimatedCostForJob = TCalculator.getJobCostSameRateAndAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabMaterials.quantity)
+        );
+      } else if (tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Hour') {
+        estimatedCostForJob = TCalculator.getJobCostHourRateTonAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
+        );
+      } else if (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Ton') {
+        estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
+          parseFloat(haulCostPerTonHour),
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity
+        );
+      }
+
       if (tabMaterials.quantityType === 'Ton') {
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * parseFloat(tabMaterials.quantity)).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByTonAmount(tabMaterials.quantity, deliveredPricePerTon);
       } else {
-        const oneLoad = 0.5 + parseFloat(tabPickupDelivery.avgTimeReturn) + parseFloat(tabPickupDelivery.avgTimeEnroute);
-        const numTrips = Math.floor(parseFloat(tabMaterials.quantity) / oneLoad);
-        const estimatedTons = (numTrips * truckCapacity).toFixed(2);
-        deliveredPriceJob = (parseFloat(deliveredPricePerTon) * estimatedTons).toFixed(2);
+        deliveredPriceJob = TCalculator.getDelPricePerJobByHourAmount(
+          parseFloat(tabPickupDelivery.avgTimeEnroute),
+          parseFloat(tabPickupDelivery.avgTimeReturn),
+          0.25,
+          0.25,
+          parseFloat(tabMaterials.quantity),
+          truckCapacity,
+          deliveredPricePerTon
+        );
       }
     }
 
@@ -538,6 +499,7 @@ class Summary extends PureComponent {
           deliveredPricePerTon={deliveredPricePerTon}
           deliveredPriceJob={deliveredPriceJob}
           payType={tabHaulRate.payType}
+          quantityType={tabMaterials.quantityType}
           oneWayCostPerTonHourPerMile={oneWayCostPerTonHourPerMile}
           haulCostPerTonHour={haulCostPerTonHour}
           estimatedCostForJob={estimatedCostForJob}
@@ -560,29 +522,10 @@ class Summary extends PureComponent {
     );
   }
 
-  async validateTopForm() {
-    const {validateSend, goToSend} = {...this.props};
-    const isValid = await validateSend();
-    if (isValid) {
-      goToSend();
-    }
-  }
 
   render() {
-    const {loaded} = {...this.state};
-    const {data, goBack, saveJob, closeModal, jobRequest} = {...this.props};
-    const {
-      materialTabValidations,
-      truckSpecsTabValidations,
-      haulRateTabValidations,
-      startAddressValidations,
-      endAddressValidations
-    } = {...this.state};
-    const sendIsDisabled = materialTabValidations.length > 0
-      || truckSpecsTabValidations.length > 0
-      || haulRateTabValidations.length > 0
-      || startAddressValidations.length > 0
-      || endAddressValidations.length > 0;
+    const {loaded, formIsValid} = {...this.state};
+    const {data, goBack, saveJob, closeModal, jobRequest, jobEdit, validateTopForm} = {...this.props};
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -639,7 +582,7 @@ class Summary extends PureComponent {
                   >
                     Back
                   </Button>
-                  {!jobRequest &&
+                  {(!jobRequest && !jobEdit) &&
                   <Button
                     color="outline-primary"
                     className="next"
@@ -651,10 +594,10 @@ class Summary extends PureComponent {
                   <Button
                     color="primary"
                     className="next"
-                    onClick={this.validateTopForm}
-                    disabled={sendIsDisabled}
+                    onClick={() => validateTopForm()}
+                    disabled={!formIsValid}
                   >
-                    Send
+                    {jobEdit ? 'Update job' : 'Next'}
                   </Button>
                 </ButtonToolbar>
               </Row>
@@ -763,7 +706,8 @@ Summary.propTypes = {
       touched: PropTypes.bool,
       error: PropTypes.string
     })
-  })
+  }),
+  validateForm: PropTypes.func.isRequired
 };
 
 Summary.defaultProps = {

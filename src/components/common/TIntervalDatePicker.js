@@ -1,7 +1,6 @@
-/* eslint-disable no-param-reassign */
 import React, { PureComponent } from 'react';
 import moment from 'moment';
-import DatePicker from 'react-datepicker';
+// import DatePicker from 'react-datepicker';
 import MinusIcon from 'mdi-react/MinusIcon';
 import PropTypes from 'prop-types';
 import './overrides.css';
@@ -57,53 +56,50 @@ class IntervalDatePickerField extends PureComponent {
   }
 
   render() {
-    const { startDate, endDate } = this.state;
-    const { name, dateFormat } = this.props;
+    const { startDate, endDate, name, dateFormat, isCustom } = this.props;
+    // console.log("TCL: render -> startDate", startDate, endDate, isCustom);
+
+    let startDateM;
+    let endDateM;
+    if (startDate !== null) {
+      startDateM = startDate.getTime();
+    } else {
+      startDateM = new Date();
+    }
+
+    if (endDate !== null) {
+      endDateM = endDate.getTime();
+    } else {
+      endDateM = new Date();
+    }
+
     return (
-      <div className="date-picker date-picker--interval" style={{backgroundColor: 'transparent'}}>
-        {/*<DatePicker*/}
-        {/*  name={name}*/}
-        {/*  selected={startDate}*/}
-        {/*  selectsStart*/}
-        {/*  startDate={startDate}*/}
-        {/*  endDate={endDate}*/}
-        {/*  onChange={this.handleChangeStart}*/}
-        {/*  dateFormat={dateFormat}*/}
-        {/*  placeholderText="From"*/}
-        {/*/>*/}
+      <div className="date-picker date-picker--interval" style={{ backgroundColor: 'transparent' }}>
         <Flatpickr
-          className="c-date-picker"
+          className={`c-date-picker ${!isCustom ? 'fake-disable' : 'fake-enable'}`}
           name={name}
           options={{
-            defaultDate: startDate,
-            maxDate: endDate,
+            defaultDate: startDateM,
+            // maxDate: endDate,
             dateFormat,
             // enableTime: true,
             onChange: this.handleChangeStart
           }}
+          value={startDateM}
+          disabled={!isCustom}
         />
         <MinusIcon className="date-picker__svg" />
         <Flatpickr
-          className="c-date-picker"
+          className={`c-date-picker ${!isCustom ? 'fake-disable' : 'fake-enable'}`}
           name={name}
           options={{
-            defaultDate: endDate,
+            defaultDate: endDateM,
             dateFormat,
-            minDate: startDate,
-            // enableTime: true,
             onChange: this.handleChangeEnd
           }}
+          value={endDateM}
+          disabled={!isCustom}
         />
-        {/*<DatePicker*/}
-        {/*  name={name}*/}
-        {/*  selected={endDate}*/}
-        {/*  selectsEnd*/}
-        {/*  startDate={startDate}*/}
-        {/*  endDate={endDate}*/}
-        {/*  onChange={this.handleChangeEnd}*/}
-        {/*  dateFormat={dateFormat}*/}
-        {/*  placeholderText="To"*/}
-        {/*/>*/}
       </div>
     );
   }
@@ -121,13 +117,15 @@ IntervalDatePickerField.propTypes = {
     PropTypes.instanceOf(Date),
     PropTypes.oneOf([null]).isRequired
   ]),
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  isCustom: PropTypes.bool
 };
 
 IntervalDatePickerField.defaultProps = {
   dateFormat: 'm/d/Y',
   startDate: null,
-  endDate: null
+  endDate: null,
+  isCustom: false
 };
 
 export default IntervalDatePickerField;

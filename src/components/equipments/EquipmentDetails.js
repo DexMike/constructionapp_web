@@ -26,6 +26,7 @@ import StringGenerator from '../../utils/StringGenerator';
 import FileGenerator from '../../utils/FileGenerator';
 import TSpinner from '../common/TSpinner';
 import EquipmentService from '../../api/EquipmentService';
+import TField from '../common/TField';
 
 const maxWidth = 1200;
 const maxHeight = 800;
@@ -52,6 +53,8 @@ class EquipmentDetails extends PureComponent {
       hourRate: 0,
       tonRate: 0,
       rateType: 'Hour',
+      externalEquipmentNumber: '',
+      currentExternalEquipmentNumber: '',
       defaultDriverId: 0,
       driverEquipmentsId: 0,
       driversId: 0,
@@ -82,6 +85,7 @@ class EquipmentDetails extends PureComponent {
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerMaxCapacity: { touched: false, error: '' },
+      reqHandlerExternalEquipmentNumber: { touched: false, error: ''},
       loaded: false
     };
 
@@ -94,10 +98,13 @@ class EquipmentDetails extends PureComponent {
 
   async componentDidMount() {
     const { equipmentId } = this.props;
+    let { currentExternalEquipmentNumber } = { ...this.state };
     const equipment = await EquipmentService.getEquipmentById(equipmentId);
+    currentExternalEquipmentNumber = equipment.externalEquipmentNumber;
     await this.setEquipment(equipment);
     await this.fetchMaterials();
     this.setState({
+      currentExternalEquipmentNumber,
       equipmentToUpdate: equipment,
       loaded: true
     });
@@ -135,7 +142,8 @@ class EquipmentDetails extends PureComponent {
       minHours,
       hourRate,
       tonRate,
-      image
+      image,
+      externalEquipmentNumber
     } = this.state;
 
     const {userId} = this.props;
@@ -154,6 +162,7 @@ class EquipmentDetails extends PureComponent {
     newEquipment.hourRate = hourRate;
     newEquipment.tonRate = tonRate;
     newEquipment.image = image;
+    newEquipment.externalEquipmentNumber = externalEquipmentNumber;
     newEquipment.modifiedOn = moment.utc().format();
     newEquipment.modifiedBy = userId;
 
@@ -180,18 +189,22 @@ class EquipmentDetails extends PureComponent {
     });
   }
 
-  isFormValid() {
+  async isFormValid() {
     const {
       type,
+      companyId,
       maxCapacity,
-      selectedMaterials
+      selectedMaterials,
+      externalEquipmentNumber,
+      currentExternalEquipmentNumber
     } = this.state;
     let isValid = true;
 
     this.setState({
       reqHandlerTruckType: { touched: false },
       reqHandlerMaterials: { touched: false },
-      reqHandlerMaxCapacity: { touched: false }
+      reqHandlerMaxCapacity: { touched: false },
+      reqHandlerExternalEquipmentNumber: { touched: false }
     });
 
     if (type.length === 0) {
@@ -224,6 +237,34 @@ class EquipmentDetails extends PureComponent {
       isValid = false;
     }
 
+    if (externalEquipmentNumber === '' || externalEquipmentNumber === null) {
+      this.setState({
+        reqHandlerExternalEquipmentNumber: {
+          touched: true,
+          error: 'Please enter truck number'
+        }
+      });
+      isValid = false;
+    }
+
+    if (externalEquipmentNumber !== currentExternalEquipmentNumber) {
+      const response = await EquipmentService.checkExternalEquipmentNumber(
+        {
+          companyId,
+          externalEquipmentNumber
+        }
+      );
+      if (!response.isUnique) {
+        this.setState({
+          reqHandlerExternalEquipmentNumber: {
+            touched: true,
+            error: 'You have used this truck number for another truck'
+          }
+        });
+        isValid = false;
+      }
+    }
+
     if (isValid) {
       return true;
     }
@@ -238,7 +279,8 @@ class EquipmentDetails extends PureComponent {
   }
 
   async save() {
-    if (!this.isFormValid()) {
+    const isFormValid = await this.isFormValid();
+    if (!isFormValid) {
       return;
     }
     const { selectedMaterials } = this.state;
@@ -248,6 +290,19 @@ class EquipmentDetails extends PureComponent {
       await EquipmentService.updateEquipment(equipment);
       await EquipmentMaterialsService
         .createAllEquipmentMaterials(selectedMaterials, equipment.id);
+      toggle();
+    } catch (e) {
+      // console.log(e);
+    }
+  }
+
+  async archiveTruck() {
+    const { selectedMaterials } = this.state;
+    const { toggle } = this.props;
+    const equipment = this.setUpdatedEquipment();
+    equipment.isArchived = '1';
+    try {
+      await EquipmentService.updateEquipment(equipment);
       toggle();
     } catch (e) {
       // console.log(e);
@@ -280,6 +335,8 @@ class EquipmentDetails extends PureComponent {
       reqHandler = 'reqHandlerMinTime';
     } else if (e.target.name === 'maxCapacity') {
       reqHandler = 'reqHandlerMaxCapacity';
+    } else if (e.target.name === 'externalEquipmentNumber') {
+      reqHandler = 'reqHandlerExternalEquipmentNumber';
     }
     // Then we set the touched prop to false, hiding the error label
     this.setState({
@@ -385,6 +442,7 @@ class EquipmentDetails extends PureComponent {
       minHours,
       hourRate,
       tonRate,
+      externalEquipmentNumber,
       files,
       imageUploading,
       isRatedHour,
@@ -392,6 +450,7 @@ class EquipmentDetails extends PureComponent {
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerMaxCapacity,
+      reqHandlerExternalEquipmentNumber,
       loaded
     } = this.state;
     const { toggle } = this.props;
@@ -406,19 +465,18 @@ class EquipmentDetails extends PureComponent {
                 </h3>
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck Type</span>
-                <SelectField
+                <span>Truck Number</span>
+                <TField
                   input={
                     {
-                      onChange: this.selectChange,
-                      name: 'type',
-                      value: type
+                      onChange: this.handleInputChange,
+                      name: 'externalEquipmentNumber',
+                      value: externalEquipmentNumber
                     }
                   }
-                  value={type}
-                  options={truckTypes}
-                  placeholder="Truck Type"
-                  meta={reqHandlerTruckType}
+                  value={externalEquipmentNumber}
+                  placeholder="0"
+                  meta={reqHandlerExternalEquipmentNumber}
                 />
               </Col>
               <Col md={6} className="pt-2">
@@ -438,6 +496,39 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
+                <span>Truck Type</span>
+                <SelectField
+                  input={
+                    {
+                      onChange: this.selectChange,
+                      name: 'type',
+                      value: type
+                    }
+                  }
+                  value={type}
+                  options={truckTypes}
+                  placeholder="Truck Type"
+                  meta={reqHandlerTruckType}
+                />
+              </Col>
+              <Col md={6} className="pt-2">
+                <span>
+                  Materials Hauled
+                </span>
+                <MultiSelect
+                  input={
+                    {
+                      onChange: this.handleMultiChange,
+                      name: 'materials',
+                      value: selectedMaterials
+                    }
+                  }
+                  options={allMaterials}
+                  placeholder="Materials"
+                  meta={reqHandlerMaterials}
+                />
+              </Col>
+              <Col md={6} className="pt-2">
                 <span>Truck name</span>
                 <input
                   name="name"
@@ -453,26 +544,6 @@ class EquipmentDetails extends PureComponent {
                   type="text"
                   value={description}
                   onChange={this.handleInputChange}
-                />
-              </Col>
-            </Row>
-
-            <Row className="col-12">
-              <Col md={12} className="pt-2">
-                <span>
-                  Materials Hauled
-                </span>
-                <MultiSelect
-                  input={
-                    {
-                      onChange: this.handleMultiChange,
-                      name: 'materials',
-                      value: selectedMaterials
-                    }
-                  }
-                  options={allMaterials}
-                  placeholder="Materials"
-                  meta={reqHandlerMaterials}
                 />
               </Col>
             </Row>
@@ -613,6 +684,9 @@ class EquipmentDetails extends PureComponent {
                 </Button>
               </ButtonToolbar>
               <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                {/*<Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.archiveTruck()}>*/}
+                {/*  Delete*/}
+                {/*</Button>*/}
                 <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
                   Save
                 </Button>

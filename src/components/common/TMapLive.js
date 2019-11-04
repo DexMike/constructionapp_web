@@ -5,7 +5,7 @@ import pinB from '../../img/PinB.png';
 // import truckIcon from '../../img/icons8-truck-30.png';
 import LoadsService from '../../api/LoadService';
 // import { type } from 'os';
-import './overrides.css';
+import './overrides.scss';
 
 const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;

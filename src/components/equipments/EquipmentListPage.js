@@ -17,7 +17,7 @@ import EquipmentService from '../../api/EquipmentService';
 import ProfileService from '../../api/ProfileService';
 import AddTruckForm from '../addTruck/AddTruckForm';
 import EquipmentDetails from './EquipmentDetails';
-import MultiEquipmentsForm from './MultiEquipmentsForm';
+import EquipmentsShortForm from './EquipmentsShortForm';
 import '../addTruck/AddTruck.css';
 import './Equipment.css';
 
@@ -171,6 +171,7 @@ class EquipmentListPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddTruckModal}
         className="equipments-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body">
           {/* Replaced AddTruckForm for EquipmentDetails */}
@@ -195,9 +196,10 @@ class EquipmentListPage extends Component {
         isOpen={equipmentsModal}
         toggle={this.toggleAddMultiTrucksModal}
         className="equipments-modal modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__body">
-          <MultiEquipmentsForm
+          <EquipmentsShortForm
             userId={userId}
             companyId={companyId}
             toggle={this.toggleAddMultiTrucksModal}
@@ -302,6 +304,10 @@ class EquipmentListPage extends Component {
                               {
                                 name: 'image',
                                 displayName: 'Truck Image'
+                              },
+                              {
+                                name: 'externalEquipmentNumber',
+                                displayName: 'Number'
                               },
                               {
                                 name: 'name',

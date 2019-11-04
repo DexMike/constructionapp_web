@@ -14,6 +14,7 @@ import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
 import MultiSelect from '../common/TMultiSelect';
+import GeoUtils from '../../utils/GeoUtils';
 import AddressService from '../../api/AddressService';
 import CompanyService from '../../api/CompanyService';
 import JobService from '../../api/JobService';
@@ -57,21 +58,24 @@ class JobFilter extends Component {
         startInterval: startDate,
         endInterval: endDate
       },
+      resetIntervals: {
+        startInterval: startDate,
+        endInterval: endDate
+      },
       address: {},
       company: {},
       profile: {},
       companyZipCode: '',
       lastZipCode: '',
-      // Rate Type Button toggle
-      // isAvailable: true,
+      loaded: false,
 
       // TODO: Refactor to a single filter object
       // Filter defaults
       filters: {
         rateType: '',
         searchType: 'Carrier Job',
-        startAvailability: null,
-        endAvailability: null,
+        startAvailability: startDate,
+        endAvailability: endDate,
         rate: '',
         minTons: '',
         minHours: '',
@@ -132,16 +136,24 @@ class JobFilter extends Component {
         filters.companyLongitude = address.longitude;
       }
     }
-
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
     }
 
-    this.setState({companyZipCode, lastZipCode, company, address, filters, profile});
 
     await this.fetchJobs();
-    this.fetchFilterLists();
+    await this.fetchFilterLists();
+    
+    this.setState({
+      companyZipCode,
+      lastZipCode,
+      company,
+      address,
+      filters,
+      profile,
+      loaded: true
+    });
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -243,12 +255,11 @@ class JobFilter extends Component {
     let {company, address, profile} = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
-
-    if (!profile) {
+    if (!profile || Object.keys(profile).length === 0) {
       profile = await ProfileService.getProfile();
-      if (!company) {
+      if (!company || Object.keys(company).length === 0) {
         company = await CompanyService.getCompanyById(profile.companyId);
-        if (!address) {
+        if (!address || Object.keys(address).length === 0) {
           address = await AddressService.getAddressById(company.addressId);
         }
       }
@@ -270,13 +281,12 @@ class JobFilter extends Component {
     // or we don't have any coordinates on our db
     if ((lastZipCode !== filters.zipCode) || !filters.companyLatitude) {
       if (filters.zipCode.length > 0 && (companyZipCode !== filters.zipCode)) {
-        try { // Search for that new zip code's coordinates with MapBox API
-          // TODO -> do this without MapBox
-          /*
-          const geoLocation = await GeoCodingService.getGeoCode(filters.zipCode);
-          filters.companyLatitude = geoLocation.features[0].center[1];
-          filters.companyLongitude = geoLocation.features[0].center[0];
-          */
+        try {
+          // Search for that new zip code's coordinates with Here.com API,
+          // had to add 'US' to specify country
+          const geoCode = await GeoUtils.getCoordsFromAddress(`${filters.zipCode}, US`);
+          filters.companyLatitude = geoCode.lat;
+          filters.companyLongitude = geoCode.lng;
         } catch (e) {
           this.setState({
             reqHandlerZip: {
@@ -321,7 +331,6 @@ class JobFilter extends Component {
     const jobs = result.data;
     const {metadata} = result;
     const {returnJobs} = this.props;
-
     returnJobs(jobs, filters, metadata);
     this.setState({lastZipCode: filters.zipCode});
     return jobs;
@@ -329,7 +338,7 @@ class JobFilter extends Component {
 
   async handleFilterChangeDelayed(e) {
     const self = this;
-    const {value} = e.target;
+    let {value} = e.target;
     const {filters, reqHandlerZip, reqHandlerRange} = this.state;
     const filter = e.target.name;
     let invalidZip = false;
@@ -349,15 +358,16 @@ class JobFilter extends Component {
       invalidZip = false;
     }
 
-    if (filter === 'range' && (value.length > 3 || value < 0)) {
-      this.setState({
-        reqHandlerRange: {
-          ...reqHandlerRange,
-          error: 'Range can not be more than 999 and less than 0',
-          touched: true
-        }
-      });
-      invalidRange = true;
+    if (filter === 'range' && (value > 999 || value < 0 || value.length === 0)) {
+      value = '999';
+      // this.setState({
+      //   reqHandlerRange: {
+      //     ...reqHandlerRange,
+      //     error: 'Range can not be more than 999 and less than 0',
+      //     touched: true
+      //   }
+      // });
+      // invalidRange = true;
     } else {
       this.setState({
         reqHandlerRange: {
@@ -461,15 +471,34 @@ class JobFilter extends Component {
   }
 
   async handleResetFilters() {
-    // set values to default or last saved filter
-    if (localStorage.getItem('filters')) {
-      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
-        async () => this.fetchJobs());
-    } else {
-      // defaults
+    const { filters, companyZipCode } = this.state;
+    const resetFilters = filters;
+    const resetIntervals = {
+      startInterval: moment().startOf('week').add(-1, 'weeks').hours(0).minutes(0).seconds(0).toDate(),
+      endInterval: moment().endOf('week').add(1, 'weeks').hours(23).minutes(59).seconds(59).toDate()
+    };
+    resetFilters.startAvailability = resetIntervals.startInterval;
+    resetFilters.endAvailability = resetIntervals.endInterval;
+    resetFilters.rate = '';
+    resetFilters.rateType = 'Any';
+    resetFilters.minCapacity = '';
+    resetFilters.minTons = '';
+    resetFilters.minHours = '';
+    resetFilters.materials = '';
+    resetFilters.materialType = [];
+    resetFilters.equipmentType = [];
+    resetFilters.numEquipments = '';
+    resetFilters.range = '50';
+    resetFilters.zipCode = companyZipCode;
+
+    this.setState({
+      filters: resetFilters,
+      intervals: resetIntervals
+    }, function saved() {
       this.saveFilters();
-      await this.fetchJobs();
-    }
+    });
+
+    await this.fetchJobs();
   }
 
   render() {
@@ -483,17 +512,19 @@ class JobFilter extends Component {
       companyZipCode,
       filters,
       reqHandlerZip,
-      reqHandlerRange
+      reqHandlerRange,
+      loaded
     } = this.state;
     // let start = filters.startAvailability;
-    return (
-      <Row>
-        <Col md={12}>
-          <Card>
-            <CardBody>
-              <form className="form">
-                <div className="flex-job-filters">
-                  <div>
+    if (loaded) {
+      return (
+        <Row>
+          <Col md={12}>
+            <Card>
+              <CardBody>
+                <form className="form">
+                  <div className="flex-job-filters">
+                    <div>
                       <div className="filter-item-title">
                         Date Range
                       </div>
@@ -503,9 +534,10 @@ class JobFilter extends Component {
                         name="dateInterval"
                         onChange={this.handleIntervalInputChange}
                         dateFormat="m/d/Y"
+                        isCustom
                       />
                     </div>
-                  <div>
+                    <div>
                       <div className="filter-item-title">
                         Rate Type
                       </div>
@@ -534,7 +566,7 @@ class JobFilter extends Component {
                         placeholder={rateTypeList[0]}
                       />
                     </div>
-                  <div>
+                    <div>
                       <div className="filter-item-title">
                         Min Rate
                       </div>
@@ -552,7 +584,7 @@ class JobFilter extends Component {
                         currency
                       />
                     </div>
-                  <div>
+                    <div>
                       <div className="filter-item-title">
                         Min Capacity
                       </div>
@@ -568,7 +600,7 @@ class JobFilter extends Component {
                         placeholder="#"
                       />
                     </div>
-                  <div id="truckTypeSelect">
+                    <div id="truckTypeSelect">
                       <div className="filter-item-title">
                         Truck Type
                       </div>
@@ -598,10 +630,10 @@ class JobFilter extends Component {
                         placeholder="Any"
                         id="truckTypeSelect"
                         horizontalScroll="true"
-                        selectedItems={filters.equipmentType.length}
+                        selectedItems={filters.equipmentType}
                       />
                     </div>
-                  <div>
+                    <div>
                       <div className="filter-item-title">
                         # of Trucks
                       </div>
@@ -617,7 +649,7 @@ class JobFilter extends Component {
                         placeholder="Any"
                       />
                     </div>
-                  <div>
+                    <div>
                       <div className="filter-item-title">
                         Zip Code
                       </div>
@@ -635,7 +667,7 @@ class JobFilter extends Component {
                         type="number"
                       />
                     </div>
-                  <div>
+                    <div>
                       <div className="filter-item-title">
                         Range (mi)
                       </div>
@@ -653,7 +685,7 @@ class JobFilter extends Component {
                         type="number"
                       />
                     </div>
-                  <div id="materialTypeSelect" >
+                    <div id="materialTypeSelect" >
                       <div className="filter-item-title">
                         Materials
                       </div>
@@ -683,30 +715,36 @@ class JobFilter extends Component {
                         // placeholder={materialTypeList[0]}
                         id="materialTypeSelect"
                         horizontalScroll="true"
-                        selectedItems={filters.materialType.length}
+                        selectedItems={filters.materialType}
                       />
                     </div>
-                </div>
-                <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
-                  <Row>
-                    <Col lg={9}/>
-                    <Col lg={3}>
-                      <ButtonToolbar className="wizard__toolbar right-buttons">
-                        <Button className="btn btn-secondary"
-                                type="button"
-                                onClick={this.handleResetFilters}
-                        >
-                          Reset
-                        </Button>
-                      </ButtonToolbar>
-                    </Col>
-                  </Row>
-                </Col>
-              </form>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+                  </div>
+                  <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
+                    <Row>
+                      <Col lg={9}/>
+                      <Col lg={3}>
+                        <ButtonToolbar className="wizard__toolbar right-buttons">
+                          <Button className="btn btn-secondary"
+                                  type="button"
+                                  onClick={this.handleResetFilters}
+                          >
+                            Reset
+                          </Button>
+                        </ButtonToolbar>
+                      </Col>
+                    </Row>
+                  </Col>
+                </form>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      );
+    }
+    return (
+      <React.Fragment>
+        Loading...
+      </React.Fragment>
     );
   }
 }

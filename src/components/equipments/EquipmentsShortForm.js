@@ -15,8 +15,10 @@ import TFieldNumber from '../common/TFieldNumber';
 import LookupsService from '../../api/LookupsService';
 import TSpinner from '../common/TSpinner';
 import EquipmentService from '../../api/EquipmentService';
+import TField from '../common/TField';
+import { withTranslation } from 'react-i18next';
 
-class MultiEquipmentsForm extends PureComponent {
+class EquipmentsShortForm extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,7 +26,7 @@ class MultiEquipmentsForm extends PureComponent {
       allMaterials: [],
       truckTypes: [],
       maxCapacity: 0,
-      numberOfTrucks: 1,
+      externalEquipmentNumber: '',
       ratesCostPerTon: 0,
       ratesCostPerHour: 0,
       minOperatingTime: 0,
@@ -35,7 +37,7 @@ class MultiEquipmentsForm extends PureComponent {
       isRatedTon: false,
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
-      reqHandlerNumberOfTrucks: { touched: false, error: '' },
+      reqHandlerExternalEquipmentNumber: { touched: false, error: '' },
       loaded: false
     };
 
@@ -70,19 +72,21 @@ class MultiEquipmentsForm extends PureComponent {
     this.setState({ truckType: data.value });
   }
 
-  isFormValid() {
+  async isFormValid() {
     const {
       truckType,
       selectedMaterials,
-      numberOfTrucks,
+      externalEquipmentNumber,
       maxCapacity
     } = this.state;
+    const { companyId } = { ...this.props };
     let isValid = true;
 
     this.setState({
       reqHandlerTruckType: { touched: false },
       reqHandlerMaterials: { touched: false },
-      reqHandlerMaxCapacity: { touched: false }
+      reqHandlerMaxCapacity: { touched: false },
+      reqHandlerExternalEquipmentNumber: { touched: false }
     });
 
     if (truckType.length === 0) {
@@ -105,11 +109,28 @@ class MultiEquipmentsForm extends PureComponent {
       isValid = false;
     }
 
-    if (Number(numberOfTrucks) === 0 || Number(numberOfTrucks) === '0' || Number(numberOfTrucks) === null) {
+    if (externalEquipmentNumber === '' || externalEquipmentNumber === null) {
       this.setState({
-        reqHandlerNumberOfTrucks: {
+        reqHandlerExternalEquipmentNumber: {
           touched: true,
-          error: 'Please select at least one truck to add'
+          error: 'Please enter truck number'
+        }
+      });
+      isValid = false;
+    }
+
+    const response = await EquipmentService.checkExternalEquipmentNumber(
+      {
+        companyId,
+        externalEquipmentNumber
+      }
+    );
+
+    if (!response.isUnique) {
+      this.setState({
+        reqHandlerExternalEquipmentNumber: {
+          touched: true,
+          error: 'You have used this truck number for another truck'
         }
       });
       isValid = false;
@@ -139,11 +160,12 @@ class MultiEquipmentsForm extends PureComponent {
   }
 
   async saveTruck() {
-    if (!this.isFormValid()) {
+    const isFormValid = await this.isFormValid();
+    if (!isFormValid) {
       return;
     }
     const {
-      numberOfTrucks,
+      externalEquipmentNumber,
       truckType,
       selectedMaterials,
       isRatedHour,
@@ -155,7 +177,7 @@ class MultiEquipmentsForm extends PureComponent {
       minTons,
       minOperatingTime
     } = this.state;
-    const { userId, companyId, toggle } = this.props;
+    const { userId, companyId, toggle, onSuccess } = this.props;
     let rateType;
     if ((isRatedHour && isRatedTon) || (!isRatedHour && !isRatedTon)) {
       rateType = 'Any';
@@ -168,30 +190,32 @@ class MultiEquipmentsForm extends PureComponent {
     }
 
     const equipments = [];
-    for (let i = 0; i < numberOfTrucks; i += 1) {
-      const newEquipment = {
-        companyId,
-        name: `${truckType} ${i + 1}`,
-        type: truckType,
-        image: '',
-        description: '',
-        driversId: 1,
-        defaultDriverId: 1,
-        equipmentAddressId: 77,
-        maxCapacity,
-        maxDistance: maxDistanceToPickup,
-        rateType,
-        tonRate: rateType === 'Tonage' || rateType === 'Any' ? ratesCostPerTon : null,
-        hourRate: rateType === 'Hour' || rateType === 'Any' ? ratesCostPerHour : null,
-        minCapacity: rateType === 'Tonage' || rateType === 'Any' ? minTons : null,
-        minHours: rateType === 'Hour' || rateType === 'Any' ? minOperatingTime : null,
-        createdOn: moment.utc().format(),
-        createdBy: userId,
-        modifiedOn: moment.utc().format(),
-        modifiedBy: userId
-      };
-      equipments.push(newEquipment);
-    }
+    // for (let i = 0; i < numberOfTrucks; i += 1) {
+    const newEquipment = {
+      companyId,
+      // name: `${truckType} ${i + 1}`,
+      name: truckType,
+      type: truckType,
+      image: '',
+      description: '',
+      driversId: 0,
+      defaultDriverId: 0,
+      equipmentAddressId: null,
+      maxCapacity,
+      maxDistance: maxDistanceToPickup,
+      rateType,
+      externalEquipmentNumber,
+      tonRate: rateType === 'Tonage' || rateType === 'Any' ? ratesCostPerTon : null,
+      hourRate: rateType === 'Hour' || rateType === 'Any' ? ratesCostPerHour : null,
+      minCapacity: rateType === 'Tonage' || rateType === 'Any' ? minTons : null,
+      minHours: rateType === 'Hour' || rateType === 'Any' ? minOperatingTime : null,
+      createdOn: moment.utc().format(),
+      createdBy: userId,
+      modifiedOn: moment.utc().format(),
+      modifiedBy: userId
+    };
+    equipments.push(newEquipment);
+    // }
     const materials = [];
     for (let i = 0; i < selectedMaterials.length; i += 1) {
       const newMaterial = {
@@ -205,10 +229,24 @@ class MultiEquipmentsForm extends PureComponent {
       materials.push(newMaterial);
     }
     try {
+      console.log({equipments, equipmentMaterials: materials});
       await EquipmentService.createEquipmentsBatch(equipments, materials);
     } catch (e) {
       // console.log(e);
     }
+
+    onSuccess({externalEquipmentNumber,
+      truckType,
+      selectedMaterials,
+      isRatedHour,
+      isRatedTon,
+      maxCapacity,
+      maxDistanceToPickup,
+      ratesCostPerHour,
+      ratesCostPerTon,
+      minTons,
+      minOperatingTime});
+
     toggle();
   }
 
@@ -227,8 +265,8 @@ class MultiEquipmentsForm extends PureComponent {
       this.setState({ isRatedTon: false });
     }
 
-    if (e.target.name === 'numberOfTrucks') {
-      reqHandler = 'reqHandlerNumberOfTrucks';
+    if (e.target.name === 'externalEquipmentNumber') {
+      reqHandler = 'reqHandlerExternalEquipmentNumber';
     }
 
     if (e.target.name === 'ratesCostPerHour') {
@@ -278,7 +316,7 @@ class MultiEquipmentsForm extends PureComponent {
 
   render() {
     const {
-      numberOfTrucks,
+      externalEquipmentNumber,
       selectedMaterials,
       allMaterials,
       truckType,
@@ -293,11 +331,11 @@ class MultiEquipmentsForm extends PureComponent {
       truckTypes,
       reqHandlerTruckType,
       reqHandlerMaterials,
-      reqHandlerNumberOfTrucks,
+      reqHandlerExternalEquipmentNumber,
       reqHandlerMaxCapacity,
       loaded
     } = this.state;
-    const { toggle } = this.props;
+    const { toggle, t } = this.props;
     if (loaded) {
       return (
         <React.Fragment>
@@ -305,11 +343,11 @@ class MultiEquipmentsForm extends PureComponent {
             <Row className="col-12">
               <Col md={12}>
                 <h3 className="subhead">
-                  Tell us about your trucks
+                  {t('Tell us about your truck')}
                 </h3>
               </Col>
               <Col md={4}>
-                <span>Truck Type</span>
+                <span>{t('Truck Type')}</span>
                 <SelectField
                   input={
                     {
@@ -321,12 +359,12 @@ class MultiEquipmentsForm extends PureComponent {
                   meta={reqHandlerTruckType}
                   value={truckType}
                   options={truckTypes}
-                  placeholder="Truck Type"
+                  placeholder={t('Truck Type')}
                 />
               </Col>
               <Col md={4}>
                 <span>
-                  Maximum Capacity (Tons)
+                  {`${t('Maximum Capacity')} (${t('Tons')})`}
                 </span>
                 <TFieldNumber
                   input={
@@ -341,20 +379,20 @@ class MultiEquipmentsForm extends PureComponent {
                 />
               </Col>
               <Col md={4}>
-                <span>Number of Trucks</span>
-                <TFieldNumber
+                <span>{t('Truck Number')}</span>
+                <TField
                   input={{
                     onChange: this.handleInputChange,
-                    name: 'numberOfTrucks',
-                    value: numberOfTrucks
+                    name: 'externalEquipmentNumber',
+                    value: externalEquipmentNumber
                   }}
-                  meta={reqHandlerNumberOfTrucks}
-                  value={numberOfTrucks}
+                  meta={reqHandlerExternalEquipmentNumber}
+                  value={externalEquipmentNumber}
                 />
               </Col>
               <Col md={12} style={{marginTop: 6}}>
                 <span>
-                  Materials Hauled
+                  {t('Materials Hauled')}
                 </span>
                 <MultiSelect
                   input={
@@ -366,14 +404,14 @@ class MultiEquipmentsForm extends PureComponent {
                   }
                   meta={reqHandlerMaterials}
                   options={allMaterials}
-                  placeholder="Materials"
+                  placeholder={t('Materials')}
                 />
               </Col>
             </Row>
             <Row className="col-12 pt-4">
               <Col md={12}>
                 <h3 className="subhead">
-                  Truck Rates
+                  {t('Truck Rates')}
                 </h3>
               </Col>
             </Row>
@@ -383,11 +421,11 @@ class MultiEquipmentsForm extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByHour"
                   value={isRatedHour}
-                  label="By Hour"
+                  label={t('By Hour')}
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum cost per hour</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Hour')}`}</span>
                 <TFieldNumber
                   style={{textAlign: 'right'}}
                   input={
@@ -403,7 +441,7 @@ class MultiEquipmentsForm extends PureComponent {
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum Hours</span>
+                <span className="label">{t('Minimum Hours')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -422,11 +460,11 @@ class MultiEquipmentsForm extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByTon"
                   value={isRatedTon}
-                  label="By Ton"
+                  label={t('By Ton')}
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum cost per ton</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Ton')}`}</span>
                 <TFieldNumber
                   input={
                     {
@@ -441,7 +479,7 @@ class MultiEquipmentsForm extends PureComponent {
                 />
               </Col>
               <Col md={5}>
-                <span className="label">Minimum Tons</span>
+                <span className="label">{t('Minimum Tons')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -457,7 +495,7 @@ class MultiEquipmentsForm extends PureComponent {
             <Row className="col-12 pt-4">
               <Col md={12}>
                 <span>
-                  Max Distance to Pickup (Miles, optional)
+                  {`${t('Max Distance to Pickup')} (${t('Miles')}, ${t('Optional')})`}
                 </span>
                 <TFieldNumber
                   input={{
@@ -465,19 +503,19 @@ class MultiEquipmentsForm extends PureComponent {
                     name: 'maxDistanceToPickup',
                     value: maxDistanceToPickup
                   }}
-                  placeholder="How far will you travel per job"
+                  placeholder={t('How far will you travel per job')}
                 />
               </Col>
             </Row>
             <Row className="col-12 pt-4">
               <Col md={6}>
                 <Button className="tertiaryButton" type="button" onClick={toggle}>
-                  Cancel
+                  {t('Cancel')}
                 </Button>
               </Col>
               <Col md={6} className="text-right">
                 <Button type="submit" className="primaryButton" onClick={() => this.saveTruck()}>
-                  Save
+                  {t('Save')}
                 </Button>
               </Col>
             </Row>
@@ -497,14 +535,18 @@ class MultiEquipmentsForm extends PureComponent {
   }
 }
 
-MultiEquipmentsForm.propTypes = {
+EquipmentsShortForm.propTypes = {
   userId: PropTypes.number,
   companyId: PropTypes.number,
-  toggle: PropTypes.func.isRequired
+  toggle: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
+  t: PropTypes.func
 };
 
-MultiEquipmentsForm.defaultProps = {
+EquipmentsShortForm.defaultProps = {
   userId: 0,
-  companyId: 0
+  companyId: 0,
+  onSuccess: () => {},
+  t: () => {}
 };
-export default MultiEquipmentsForm;
+export default withTranslation()(EquipmentsShortForm);

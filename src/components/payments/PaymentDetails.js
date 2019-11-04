@@ -81,10 +81,10 @@ class PaymentDetails extends Component {
                 <CardBody style={{ padding: 32 }}>
                   <br />
                   <div style={{ fontSize: 16 }}>
-                    <div className="row">
-                      <div className="col-4"><strong>Id</strong></div>
-                      <div className="col-8">{payment.id}</div>
-                    </div>
+                    {/* <div className="row"> */}
+                    {/* <div className="col-4"><strong>Id</strong></div> */}
+                    {/* <div className="col-8">{payment.id}</div> */}
+                    {/* </div> */}
                     <div className="row">
                       <div className="col-4"><strong>Date</strong></div>
                       <div className="col-8">{TFormat.asDate(payment.createdAt)}</div>
@@ -93,10 +93,10 @@ class PaymentDetails extends Component {
                       <div className="col-4"><strong>Amount</strong></div>
                       <div className="col-8">{TFormat.asMoney(payment.amount)}</div>
                     </div>
-                    <div className="row">
-                      <div className="col-4"><strong>Currency</strong></div>
-                      <div className="col-8">{payment.currencyIsoCode}</div>
-                    </div>
+                    {/* <div className="row"> */}
+                    {/* <div className="col-4"><strong>Currency</strong></div> */}
+                    {/* <div className="col-8">{payment.currencyIsoCode}</div> */}
+                    {/* </div> */}
                     <div className="row">
                       <div className="col-4"><strong>Processor response text</strong></div>
                       <div className="col-8">{payment.processorResponseText}</div>
@@ -105,10 +105,10 @@ class PaymentDetails extends Component {
                       <div className="col-4"><strong>Status</strong></div>
                       <div className="col-8">{payment.status}</div>
                     </div>
-                    <div className="row">
-                      <div className="col-4"><strong>Type</strong></div>
-                      <div className="col-8">{payment.type}</div>
-                    </div>
+                    {/* <div className="row"> */}
+                    {/* <div className="col-4"><strong>Type</strong></div> */}
+                    {/* <div className="col-8">{payment.type}</div> */}
+                    {/* </div> */}
                     {this.renderPaymentDetail(payment.usBankAccountDetails)}
                   </div>
                   <br/>

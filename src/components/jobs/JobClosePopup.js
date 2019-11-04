@@ -21,6 +21,8 @@ import LoadService from '../../api/LoadService';
 import UserService from '../../api/UserService';
 import TwilioService from '../../api/TwilioService';
 import UserUtils from '../../api/UtilsService';
+import GeoUtils from '../../utils/GeoUtils';
+import AddressService from '../../api/AddressService';
 
 class JobClosePopup extends Component {
   constructor(props) {
@@ -87,97 +89,11 @@ class JobClosePopup extends Component {
   }
 
   async closeJob() {
-    const { jobId, jobName, closeJobModalPopup } = this.props;
-    const { loads, profile } = this.state;
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
-
-    const job = await JobService.getJobById(jobId);
-    let newJob = [];
-
-    // Specs at SG-811
-    // 1) All existing loads get to finish
-    const loadsToFinish = [];
-    const allLoads = [];
-    for (const load of loads) {
-      loadsToFinish.push(load.id);
-      allLoads.push(String(load.id));
-    }
-
-    // 2) No new loads can be started?
-
-    // 3) All drivers need text notification
-    let gpsTrackings = [];
-    if (allLoads.length > 0) { // there's loads
-      try {
-        gpsTrackings = await LoadService.getLatestGPSForLoads(allLoads);
-      } catch (error) {
-        console.error('Unable to retrieve GPS for loads:', error);
-      }
-      const usersWithLoad = [];
-      const usersWithoutLoad = [];
-
-      if (Object.keys(gpsTrackings).length > 0) { // there's loads in progress, notify drivers
-        // console.log('>>>GOT LOADS: ', gpsTrackings, typeof gpsTrackings);
-        for (const tracking of gpsTrackings) {
-          if (tracking.status !== 'Ended' && tracking.status !== 'Returning') {
-            // a) If they are in progress on load driver gets a text: “ Job <job name> is ending.
-            // Finish your load, and then you are done with the job.”
-            usersWithLoad.push(tracking.userId);
-          } else {
-            // b) If the driver does not have a load in progress they get text:
-            // “<job name> has ended. Do not pickup any more material.”
-            usersWithoutLoad.push(tracking.userId);
-          }
-        }
-
-        if (usersWithLoad.length > 0) {
-          const notification = {
-            usersIds: usersWithLoad,
-            body: `${envString}Job ${jobName} is ending. Finish your load, and then you are done with the job.`
-          };
-          await TwilioService.smsBatchSending(notification);
-        }
-
-        if (usersWithoutLoad.length > 0) {
-          const notification = {
-            usersIds: usersWithoutLoad,
-            body: `${envString}${jobName} has ended. Do not pickup any more material.`
-          };
-          await TwilioService.smsBatchSending(notification);
-        }
-
-        // changing job status to 'Job Ended'
-        newJob = CloneDeep(job);
-        newJob.status = 'Job Ended';
-        newJob.modifiedOn = moment.utc().format();
-        newJob.modifiedBy = profile.userId;
-      } else { // no loads in progress, set job status to 'Job Completed'
-        newJob = CloneDeep(job);
-        newJob.status = 'Job Completed';
-        newJob.actualEndTime = moment.utc().format();
-        newJob.modifiedOn = moment.utc().format();
-        newJob.modifiedBy = profile.userId;
-      }
-    } else { // there's no loads, just complete the job
-      newJob = CloneDeep(job);
-      newJob.status = 'Job Completed';
-      newJob.actualEndTime = moment.utc().format();
-      newJob.modifiedOn = moment.utc().format();
-      newJob.modifiedBy = profile.userId;
-    }
-
-    // Set load's status as Job Ended
-    /* const loadsFinish = {
-      id: 0,
-      ids: loadsToFinish,
-      status: 'Job Ended'
-    };
-    LoadService.closeLoads(loadsFinish); */
-
+    const { jobId, closeJobModalPopup } = this.props;
     try {
-      newJob = await JobService.updateJob(newJob);
+      await JobService.closeJob(jobId);
     } catch (e) {
-      console.error('>> NOT SAVED: JobClosePopup -> closeJob -> e', e)  ;
+      console.error('>> NOT SAVED: JobClosePopup -> closeJob -> e', e);
     }
 
     // bubble to parent
@@ -199,7 +115,7 @@ class JobClosePopup extends Component {
               {jobName}
             </div>
           </ModalHeader>
-          <ModalBody className="text-left">
+          <ModalBody className="text-left" backdrop="static">
             <p style={{ fontSize: 14 }}>
               Are you sure you want to end this job?
             </p>
