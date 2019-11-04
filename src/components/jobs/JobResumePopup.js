@@ -45,6 +45,8 @@ class JobResumePopup extends Component {
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.jobEndDateChange = this.jobEndDateChange.bind(this);
+    this.clearValidationLabels = this.clearValidationLabels.bind(this);
+    this.handleResumeJob = this.handleResumeJob.bind(this);
   }
 
   async componentDidMount() {
@@ -75,7 +77,6 @@ class JobResumePopup extends Component {
   }
 
   jobEndDateChange(data) {
-    // return false;
     const {reqHandlerEndDate} = this.state;
     this.setState({
       jobEndDate: data,
@@ -153,6 +154,122 @@ class JobResumePopup extends Component {
     return isValid;
   }
 
+  async handleResumeJob() {
+    this.clearValidationLabels();
+    const {
+      job,
+      jobEndDate,
+      
+      reqHandlerRate,
+      reqHandlerEndDate,
+      profile
+    } = this.state;
+    let newJob = [];
+    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+    const currDate = new Date();
+
+    if (!jobEndDate) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'Required input'
+        }
+      });
+    } else if (jobEndDate && (new Date(jobEndDate).getTime() <= currDate.getTime())) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'The end date of the job can not be set in the past or equivalent to the current date and time'
+        }
+      });
+    } else if (jobEndDate && (new Date(jobEndDate).getTime() <= new Date(jobStartDate).getTime())) {
+      this.setState({
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: 'The end date of the job can not be set in the past of or equivalent to the start date'
+        }
+      });
+    } else {
+      this.setState({btnSubmitting: true});
+
+      console.log('resuming job:', job);
+      console.log(jobEndDate);
+
+
+
+      // updating job
+      /* newJob = CloneDeep(job);
+      delete newJob.company;
+      newJob.startAddress = newJob.startAddress.id;
+      newJob.endAddress = newJob.endAddress.id;
+      newJob.status = 'In Progress';
+      newJob.dateCancelled = moment.utc().format();
+      newJob.modifiedBy = profile.userId;
+      newJob.modifiedOn = moment.utc().format();
+      newJob = await JobService.updateJob(newJob);
+
+      const cancelledSms = `${envString}Your booked job ${newJob.name} for ${TFormat.asDateTime(newJob.startTime)} has been cancelled by ${job.company.legalName}.
+      The reason for cancellation is: ${newJob.cancelReason}.`; // TODO: do we need to check for this field's length?
+
+      // Notify Carrier about cancelled job
+      try {
+        await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id);
+      } catch (err) {
+        console.error(err);
+      }
+
+      // get allocated drivers for this job, and send sms to those drivers
+      const allocatedDrivers = await JobService.getAllocatedDriversInfoByJobId(job.id);
+      let allocatedDriversNames = '';
+      if (allocatedDrivers.length > 0) {
+        allocatedDriversNames = allocatedDrivers.map(driver => `${driver.firstName} ${driver.lastName}`);
+        allocatedDriversNames = `Drivers affected: ${allocatedDriversNames.join(', ')}`;
+
+        const cancelledDriversSms = [];
+        for (const driver of allocatedDrivers) {
+          if (this.checkPhoneFormat(driver.mobilePhone)) {
+            const notification = {
+              to: UserUtils.phoneToNumberFormat(driver.mobilePhone),
+              body: cancelledSms
+            };
+            cancelledDriversSms.push(TwilioService.createSms(notification));
+          }
+        }
+        await Promise.all(cancelledDriversSms);
+      }
+
+      // sending an email to CSR
+      const cancelJobEmail = {
+        toEmail: 'csr@trelar.com',
+        toName: 'Trelar CSR',
+        subject: `${envString}Trelar Job Cancelled`,
+        isHTML: true,
+        body: 'A producer cancelled a job on Trelar.<br><br>'
+          + `Producer Company Name: ${job.company.legalName}<br>`
+          + `Cancel Reason: ${newJob.cancelReason}<br>`
+          + `Job Name: ${newJob.name}<br>`
+          // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
+          + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
+          + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}<br>`
+          + `Carrier(s) Affected: ${companyCarrierData.legalName}<br>`
+          + `${allocatedDriversNames}`,
+        recipients: [
+          {name: 'CSR', email: 'csr@trelar.com'}
+        ],
+        attachments: []
+      };
+      await EmailService.sendEmail(cancelJobEmail);
+
+      this.updateJobView(newJob); */
+      this.setState({btnSubmitting: false});
+      this.closeNow();
+    }
+  }
+
+
   renderGoTo() {
     const { goToJobDetail, job } = this.state;
     if (goToJobDetail) {
@@ -166,7 +283,9 @@ class JobResumePopup extends Component {
     const {
       job,
       jobEndDate,
-      loaded
+      loaded,
+      reqHandlerRate,
+      reqHandlerEndDate
     } = this.state;
     console.log(jobEndDate);
     if (loaded) {
@@ -206,7 +325,7 @@ class JobResumePopup extends Component {
                                   }
                                   placeholder="Job Name"
                                   type="text"
-                                  // meta={reqHandlerJobName}
+                                  meta={reqHandlerRate}
                                   id="jobname"
                                 />
                               </div>
@@ -226,7 +345,7 @@ class JobResumePopup extends Component {
                                   onChange={this.jobEndDateChange}
                                   dateFormat="m/d/Y h:i K"
                                   showTime
-                                  // meta={reqHandlerEndDate}
+                                  meta={reqHandlerEndDate}
                                   id="jobenddatetime"
                                   profileTimeZone={profile.timeZone}
                                 />
@@ -249,7 +368,7 @@ class JobResumePopup extends Component {
                               <Button
                                 color="primary"
                                 className="next"
-                                // onClick={this.nextPage}
+                                onClick={() => this.handleResumeJob()}
                               >
                                 Resume Job
                               </Button>
