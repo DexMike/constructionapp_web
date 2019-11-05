@@ -49,15 +49,18 @@ class DriverListPage extends Component {
   }
 
   async componentDidMount() {
+    let { drivers, totalCount } = { ...this.state };
     const profile = await ProfileService.getProfile();
     const currentUser = await UserService.getUserById(profile.userId);
     if (profile.isAdmin) {
       this.setState({ companyId: profile.companyId });
-      await this.fetchDrivers();
+      ({ drivers, totalCount} = await this.fetchDrivers());
     }
     this.setState({
       isAdmin: profile.isAdmin,
       currentUser,
+      drivers,
+      totalCount,
       loaded: true
     });
   }
@@ -85,7 +88,8 @@ class DriverListPage extends Component {
             userStatus: driver.userStatus,
             driverStatus: driver.driverStatus,
             email: driver.email,
-            userId: driver.id
+            userId: driver.id,
+            defaultEquipment: driver.defaultEquipment ? driver.defaultEquipment : 'Unassigned'
           };
           return newDriver;
         } catch (error) {
@@ -94,10 +98,10 @@ class DriverListPage extends Component {
         }
       });
     }
-    this.setState({
+    return {
       drivers,
       totalCount
-    });
+    };
   }
 
   handlePageChange(page) {
@@ -234,6 +238,10 @@ class DriverListPage extends Component {
                       {
                         name: 'driverStatus',
                         displayName: 'Driver Status'
+                      },
+                      {
+                        name: 'defaultEquipment',
+                        displayName: 'Default Truck'
                       },
                       {
                         name: 'email',

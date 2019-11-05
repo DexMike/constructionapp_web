@@ -246,7 +246,7 @@ class EquipmentListPage extends Component {
       newEquipment.newTonRateF = TFormat.getValue(
         TFormat.asMoneyByTons(newEquipment.tonRate)
       );
-
+      newEquipment.defaultDriverName = equipment.defaultDriverName ? equipment.defaultDriverName : 'Unassigned';
       return newEquipment;
     });
 
@@ -293,7 +293,7 @@ class EquipmentListPage extends Component {
                       Displaying {equipments.length} out of {totalCount} Trucks
                     </div>
                     <div className="tabs tabs--bordered-bottom">
-                      <div className="tabs__wrap">
+                      <div className="tabs__wrap" >
                         <TTable
                           columns={
                             [
@@ -316,6 +316,10 @@ class EquipmentListPage extends Component {
                               {
                                 name: 'type',
                                 displayName: 'Type'
+                              },
+                              {
+                                name: 'defaultDriverName',
+                                displayName: 'Default Driver'
                               },
                               {
                                 name: 'newMaxCapacity',

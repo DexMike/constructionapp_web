@@ -109,7 +109,7 @@ class EquipmentDetails extends PureComponent {
     try {
       await this.setEquipment(equipment);
       await this.fetchMaterials();
-      companyDrivers = (await EquipmentDetailService.getDefaultDriverList(companyId))
+      companyDrivers = (await EquipmentDetailService.getDefaultDriverList(companyId, equipmentId))
         .data.map(companyDriver => ({
           value: companyDriver.driverId,
           label: `${companyDriver.firstName} ${companyDriver.lastName}`
@@ -117,6 +117,8 @@ class EquipmentDetails extends PureComponent {
     } catch (err) {
       console.error(err);
     }
+    companyDrivers = [{ value: null, label: 'Unassigned' }, ...companyDrivers];
+    defaultDriver = { value: null, label: 'Unassigned' };
     if (equipment.defaultDriverId) {
       const companyDriverMatch = companyDrivers
         .find(companyDriver => companyDriver.value === equipment.defaultDriverId);
@@ -185,7 +187,7 @@ class EquipmentDetails extends PureComponent {
     newEquipment.tonRate = tonRate;
     newEquipment.image = image;
     newEquipment.externalEquipmentNumber = externalEquipmentNumber;
-    if (defaultDriver && defaultDriver.value) {
+    if (defaultDriver) {
       newEquipment.defaultDriverId = defaultDriver.value;
     }
     newEquipment.modifiedOn = moment.utc().format();
