@@ -20,6 +20,7 @@ import DriverForm from './DriverForm';
 // import moment from "moment";
 import TFormat from '../common/TFormat';
 import './Driver.css';
+import { withTranslation } from 'react-i18next';
 
 class DriverListPage extends Component {
   constructor(props) {
@@ -67,6 +68,8 @@ class DriverListPage extends Component {
 
   async fetchDrivers() {
     const { companyId, page, rows } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     let { totalCount } = this.state;
     let drivers;
     try {
@@ -89,7 +92,7 @@ class DriverListPage extends Component {
             driverStatus: driver.driverStatus,
             email: driver.email,
             userId: driver.id,
-            defaultEquipment: driver.defaultEquipment ? driver.defaultEquipment : 'Unassigned'
+            defaultEquipment: driver.defaultEquipment ? driver.defaultEquipment : translate('Unassigned')
           };
           return newDriver;
         } catch (error) {
@@ -190,6 +193,8 @@ class DriverListPage extends Component {
 
   render() {
     const { drivers, loaded, isAdmin, totalCount } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     if (isAdmin === false) {
       return <Redirect push to="/" />;
     }
@@ -241,7 +246,7 @@ class DriverListPage extends Component {
                       },
                       {
                         name: 'defaultEquipment',
-                        displayName: 'Default Truck'
+                        displayName: translate('Default Truck')
                       },
                       {
                         name: 'email',
@@ -274,4 +279,4 @@ class DriverListPage extends Component {
   }
 }
 
-export default DriverListPage;
+export default withTranslation()(DriverListPage);

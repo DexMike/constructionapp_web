@@ -102,5 +102,7 @@
   "A Driver": "Un Conductor",
   "DEFAULT_DRIVER_PROMPT": "de su empresa se ha registrado correctamente. ¿Desea asociarlo como conductor predeterminado para uno de sus camiones?",
   "Ask me later": "Pregúntame más tarde",
-  "Yes": "Si"
+  "Yes": "Si",
+  "Default Truck": "Camión predeterminado",
+  "Unassigned": "Sin Asignar"
 }

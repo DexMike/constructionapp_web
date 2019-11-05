@@ -102,7 +102,8 @@ class EquipmentDetails extends PureComponent {
   }
 
   async componentDidMount() {
-    const { equipmentId, companyId } = this.props;
+    const { equipmentId, companyId, t } = { ...this.props };
+    const translate = t;
     let { currentExternalEquipmentNumber, companyDrivers, defaultDriver } = { ...this.state };
     const equipment = await EquipmentService.getEquipmentById(equipmentId);
     currentExternalEquipmentNumber = equipment.externalEquipmentNumber;
@@ -117,8 +118,8 @@ class EquipmentDetails extends PureComponent {
     } catch (err) {
       console.error(err);
     }
-    companyDrivers = [{ value: null, label: 'Unassigned' }, ...companyDrivers];
-    defaultDriver = { value: null, label: 'Unassigned' };
+    companyDrivers = [{ value: null, label: translate('Unassigned') }, ...companyDrivers];
+    defaultDriver = { value: null, label: translate('Unassigned') };
     if (equipment.defaultDriverId) {
       const companyDriverMatch = companyDrivers
         .find(companyDriver => companyDriver.value === equipment.defaultDriverId);

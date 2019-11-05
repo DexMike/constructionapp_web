@@ -20,6 +20,7 @@ import EquipmentDetails from './EquipmentDetails';
 import EquipmentsShortForm from './EquipmentsShortForm';
 import '../addTruck/AddTruck.css';
 import './Equipment.css';
+import { withTranslation } from 'react-i18next';
 
 class EquipmentListPage extends Component {
   constructor(props) {
@@ -224,6 +225,8 @@ class EquipmentListPage extends Component {
   render() {
     let { equipments } = this.state;
     const { loaded, totalCount } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     equipments = equipments.map((equipment) => {
       const newEquipment = equipment;
       // const tempHourRate = newEquipment.hourRate;
@@ -246,7 +249,7 @@ class EquipmentListPage extends Component {
       newEquipment.newTonRateF = TFormat.getValue(
         TFormat.asMoneyByTons(newEquipment.tonRate)
       );
-      newEquipment.defaultDriverName = equipment.defaultDriverName ? equipment.defaultDriverName : 'Unassigned';
+      newEquipment.defaultDriverName = equipment.defaultDriverName ? equipment.defaultDriverName : translate('Unassigned');
       return newEquipment;
     });
 
@@ -319,7 +322,7 @@ class EquipmentListPage extends Component {
                               },
                               {
                                 name: 'defaultDriverName',
-                                displayName: 'Default Driver'
+                                displayName: translate('Default Driver')
                               },
                               {
                                 name: 'newMaxCapacity',
@@ -371,4 +374,4 @@ class EquipmentListPage extends Component {
   }
 }
 
-export default EquipmentListPage;
+export default withTranslation()(EquipmentListPage);
