@@ -605,7 +605,7 @@ class DailyReportFilter extends Component {
   }
 
   async handleMultiChange(data, meta) {
-    console.log("TCL: handleMultiChange -> data", data, meta)
+    // console.log("TCL: handleMultiChange -> data", data, meta)
     const {filters} = this.state;
     switch(meta) {
       case 'status':
