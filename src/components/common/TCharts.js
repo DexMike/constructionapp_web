@@ -243,7 +243,7 @@ class TCharts extends PureComponent {
               <CartesianGrid strokeDasharray="3 3"/>
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="avgEarningsHour" height={30} stroke={colors[0]}/>
               <Bar
@@ -292,7 +292,7 @@ class TCharts extends PureComponent {
               <CartesianGrid strokeDasharray="3 3"/>
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="avgEarningsJob" height={30} stroke={colors[0]}/>
               <Bar
@@ -351,7 +351,7 @@ class TCharts extends PureComponent {
               <CartesianGrid strokeDasharray="3 3"/>
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="costPerTonMile" height={30} stroke={colors[0]}/>
               <Bar dataKey="costPerTonMile" name="Cost per Ton/Mile" fill={colors[0]} />
@@ -396,7 +396,7 @@ class TCharts extends PureComponent {
               <YAxis type="number" />
               <CartesianGrid strokeDasharray="3 3"/>
               <CartesianGrid strokeDasharray="3 3"/>
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <ReferenceLine y={0} stroke="#000"/>
               <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
               <Bar
@@ -425,7 +425,7 @@ class TCharts extends PureComponent {
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <CartesianGrid />
               <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
               <Area
@@ -456,7 +456,7 @@ class TCharts extends PureComponent {
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <CartesianGrid />
               <Brush dataKey="avgEarningsHourNum" height={30} stroke={colors[0]}/>
               <Area
@@ -486,7 +486,7 @@ class TCharts extends PureComponent {
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <CartesianGrid />
               <Brush dataKey="avgEarningsJobNum" height={30} stroke={colors[0]}/>
               <Area
@@ -508,7 +508,7 @@ class TCharts extends PureComponent {
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
               <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <CartesianGrid />
               <Brush dataKey="costPerTonMile" height={30} stroke={colors[0]}/>
               <Area
@@ -539,7 +539,7 @@ class TCharts extends PureComponent {
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
               <Tooltip />
-              <Legend margin={(compToggled ? 1500 : 0)} />
+              <Legend />
               <CartesianGrid />
               <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
               <Area
