@@ -190,8 +190,7 @@ class DailyReportFilter extends Component {
       company,
       filters,
       selectedRange,
-      selectedRangeComp,
-      blankFilters
+      selectedRangeComp
     } = {...this.state};
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
