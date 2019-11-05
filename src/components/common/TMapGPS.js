@@ -79,27 +79,29 @@ class TMapGPS extends Component {
     }
 
     // markers
-    const start = wps[0].split(',');
-    const end = wps.pop().split(',');
-    const startAddress = {
-      latitude: start[0],
-      longitude: start[1]
-    };
-    const endAddress = {
-      latitude: end[0],
-      longitude: end[1]
-    };
-    this.addMarkersToMap(startAddress, endAddress);
-    this.setState({
-      loadedText: ''
-    });
-
-    try {
-      this.addRouteShapeToMap({
-        shape: wps
+    if (wps.length > 1) {
+      const start = wps[0].split(',');
+      const end = wps.pop().split(',');
+      const startAddress = {
+        latitude: start[0],
+        longitude: start[1]
+      };
+      const endAddress = {
+        latitude: end[0],
+        longitude: end[1]
+      };
+      this.addMarkersToMap(startAddress, endAddress);
+      this.setState({
+        loadedText: ''
       });
-    } catch (e) {
-      console.log('TCL: ERROR_>', e);
+
+      try {
+        this.addRouteShapeToMap({
+          shape: wps
+        });
+      } catch (e) {
+        console.log('TCL: ERROR_>', e);
+      }
     }
   }
 
@@ -212,10 +214,7 @@ TMapGPS.defaultProps = {
   height: 400,
   zoom: 10,
   loadId: 0,
-  center: {
-    lat: 30.274983,
-    lng: -97.739604
-  },
+  center: null,
   startAddress: null,
   endAddress: null
 };
