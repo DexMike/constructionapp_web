@@ -38,9 +38,9 @@ export default class BarRenderer extends React.Component {
   render() {
     const data = this.props;    
     const maximum = data.value.max;
-    let total = data.value.total;
-    let totalComp = data.value.totalComp;
-    const type = data.value.type;
+    let {total} = data.value;
+    let {totalComp} = data.value;
+    const {type} = data.value;
     let percent = 0;
     let percentComp = 0;
     let numberOfDecimals = 2;
@@ -82,9 +82,19 @@ export default class BarRenderer extends React.Component {
       numberOfDecimals = 0;
     }
 
+    // avoid decimals in millions
+    if (total >= 1000000) {
+      total = Math.round(total);
+      numberOfDecimals = 0;
+    }
+    if (totalComp >= 1000000) {
+      totalComp = Math.round(totalComp);
+      numberOfDecimals = 0;
+    }
+
     return (
       <React.Fragment>
-        <Row style={{ marginLeft: '10px' }}>
+        <Row>
           <Col md={4} style={{ color: '#333333', fontWeight: 'bold', textAlign: 'right' }}>
             <NumberFormat
               value={total}
@@ -110,7 +120,7 @@ export default class BarRenderer extends React.Component {
             </div>
           </Col>
         </Row>
-        <Row style={{ marginLeft: '10px' }}>
+        <Row>
           <Col md={4} style={{ color: '#999999', fontWeight: 'bold', textAlign: 'right' }}>
             <NumberFormat
               value={totalComp}
