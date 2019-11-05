@@ -636,7 +636,7 @@ class ReportsDailyReportPage extends Component {
             </Col>
           </Row>
           
-          {this.renderCards()}
+          {/* this.renderCards() */}
           <DailyReportFilter
             onReturnFilters={this.returnFilters}
             fetching={(value) => {

@@ -190,8 +190,7 @@ class DailyReportFilter extends Component {
       company,
       filters,
       selectedRange,
-      selectedRangeComp,
-      blankFilters
+      selectedRangeComp
     } = {...this.state};
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
@@ -606,7 +605,7 @@ class DailyReportFilter extends Component {
   }
 
   async handleMultiChange(data, meta) {
-    console.log("TCL: handleMultiChange -> data", data, meta)
+    // console.log("TCL: handleMultiChange -> data", data, meta)
     const {filters} = this.state;
     switch(meta) {
       case 'status':
