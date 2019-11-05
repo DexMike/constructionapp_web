@@ -762,7 +762,7 @@ class JobForm extends Component {
     let hoursDelivered = 0;
     if (loads.length > 0) {
       for (const i in loads) {
-        if (loads[i].loadStatus === 'Submitted') {
+        if (loads[i].loadStatus === 'Submitted' || loads[i].loadStatus === 'Approved') {
           tonsDelivered += loads[i].tonsEntered;
           hoursDelivered += loads[i].hoursEntered;
         }
@@ -823,7 +823,7 @@ class JobForm extends Component {
     let tonsDelivered = 0;
     if (loads.length > 0) {
       for (const i in loads) {
-        if (loads[i].loadStatus === 'Submitted') {
+        if (loads[i].loadStatus === 'Submitted' || loads[i].loadStatus === 'Approved') {
           completedLoads += 1;
           tonsDelivered += loads[i].tonsEntered;
         }
