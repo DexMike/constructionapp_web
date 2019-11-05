@@ -33,6 +33,7 @@ class TDateTimePickerField extends PureComponent {
   }
 
   handleChange(date) {
+    console.log('changing date picker', date);
     this.setState({
       startDate: date[0]
     });
@@ -53,7 +54,6 @@ class TDateTimePickerField extends PureComponent {
       defaultDate
     } = this.props;
 
-    const date = 1573588800000;
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">

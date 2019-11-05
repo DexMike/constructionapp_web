@@ -126,17 +126,6 @@ class DashboardCustomerPage extends Component {
   async componentDidMount() {
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo(profile);
-
-    /* if (profile.companyType === 'Customer') {
-      pausedJobs = await JobService.getCustomerPausedJobs(profile.companyId);
-    } else if (profile.companyType === 'Carrier') {
-      pausedJobs = await JobService.getCarrierPausedJobs(profile.companyId);
-    } */
-
-    // console.log(pausedJobs);
-
-    this.toggleResumeJobListModal();
-
     this.setState({
       // pausedJobs,
       profile,
@@ -153,6 +142,11 @@ class DashboardCustomerPage extends Component {
 
   returnJobs(jobs, filters, metadata, pausedJobsList) {
     const { totalCount } = metadata;
+    console.log(jobs);
+    if (pausedJobsList && pausedJobsList.length > 0) {
+      this.toggleResumeJobListModal(true);
+    }
+
     this.setState({
       jobs,
       pausedJobs: pausedJobsList,
@@ -290,11 +284,17 @@ class DashboardCustomerPage extends Component {
     });
   }
 
-  toggleResumeJobListModal() {
+  toggleResumeJobListModal(toggle) {
     const {modalResumeJobList} = this.state;
-    this.setState({
-      modalResumeJobList: !modalResumeJobList
-    });
+    if (toggle) {
+      this.setState({
+        modalResumeJobList: toggle
+      });
+    } else {
+      this.setState({
+        modalResumeJobList: !modalResumeJobList
+      });
+    }
   }
 
   renderGoTo() {

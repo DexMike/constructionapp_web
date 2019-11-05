@@ -108,13 +108,7 @@ class JobListResumePopup extends Component {
       const tempRate = newJob.rate;
 
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
-      console.log(newJob.id);
-      console.log(job.startTime);
-      console.log(newJob.newStartDate);
       newJob.newEndDate = TFormat.asDateTime(job.endTime, profile.timeZone);
-      console.log(job.endTime);
-      console.log(newJob.newEndDate );
-
       if (!job.companyCarrierLegalName) {
         newJob.companyCarrierLegalName = 'Unassigned';
       }

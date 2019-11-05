@@ -28,12 +28,7 @@ class JobResumePopup extends Component {
 
     this.state = {
       page: 1,
-      // job: [],
-      job: {
-        rate: 0,
-        rateType: '',
-        endTime: null
-      },
+      job: [],
       jobEndDate: null,
       jobId: null,
       loaded: false,
@@ -63,11 +58,9 @@ class JobResumePopup extends Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    if ((prevProps.jobId !== this.state.jobId)) {
-      const job = await JobService.getJobById(prevProps.jobId);
-      const jobEndDate = job.endTime;
-      const jobStartDate = job.startTime;
-      this.setState({ job, jobEndDate, jobStartDate, jobId: job.id });
+    if ((prevProps.job !== this.state.job)) {
+      const job = prevProps.job;
+      this.setState({ job });
     }
   }
 
@@ -171,7 +164,6 @@ class JobResumePopup extends Component {
     return isValid;
   }
 
-
   async handleResumeJob() {
     const { profile, updateResumedJob } = this.props;
     const { job } = this.state;
@@ -260,7 +252,6 @@ class JobResumePopup extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderGoTo()}
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
             <Card style={{paddingBottom: 0}}>
               <div className="wizard">
@@ -367,7 +358,7 @@ class JobResumePopup extends Component {
 }
 
 JobResumePopup.propTypes = {
-  jobId: PropTypes.number,
+  job: PropTypes.object,
   profile: PropTypes.object,
   toggle: PropTypes.func.isRequired,
   updateResumedJob: PropTypes.func
