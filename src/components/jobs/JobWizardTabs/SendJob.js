@@ -1,5 +1,4 @@
 import React, {PureComponent} from 'react';
-import moment from 'moment';
 import {
   Card,
   CardBody,
@@ -10,15 +9,10 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import ProfileService from '../../../api/ProfileService';
-import AddressService from '../../../api/AddressService';
-import JobService from '../../../api/JobService';
-import BidService from '../../../api/BidService';
 // import GroupService from '../../api/GroupService';
 import TCheckBox from '../../common/TCheckBox';
-import TwilioService from '../../../api/TwilioService';
-import "../jobs.css";
+import '../jobs.css';
 // import GroupListService from '../../api/GroupListService';
-import JobMaterialsService from '../../../api/JobMaterialsService';
 import TSpinner from '../../common/TSpinner';
 import TSubmitButton from '../../common/TSubmitButton';
 import CompanyService from '../../../api/CompanyService';
@@ -226,14 +220,15 @@ class SendJob extends PureComponent {
                   >
                     Back
                   </Button>
-                  {!jobRequest &&
-                  <Button
-                    color="outline-primary"
-                    className="next"
-                    onClick={saveJob}
-                  >
-                    Save Job & Close
-                  </Button>
+                  {!jobRequest && (
+                    <Button
+                      color="outline-primary"
+                      className="next"
+                      onClick={saveJob}
+                    >
+                      Save Job & Close
+                    </Button>
+                  )
                   }
                   <TSubmitButton
                     onClick={sendJob}
@@ -272,7 +267,7 @@ SendJob.propTypes = {
     favoriteAdminTels: PropTypes.array,
     nonFavoriteAdminTels: PropTypes.array
   }),
-  handleInputChange: PropTypes.func.isRequired,
+  // handleInputChange: PropTypes.func.isRequired,
   tabMaterials: PropTypes.shape({
     materialType: PropTypes.string,
     quantityType: PropTypes.string,

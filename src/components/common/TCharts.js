@@ -35,7 +35,6 @@ function currencyFormatter(value) {
 
 class TCharts extends PureComponent {
   renderLegend(data) {
-
     // TODO -> Rewrite this inefficient thing
     const newItems = [];
     for (const datum of data.payload) {
@@ -69,10 +68,10 @@ class TCharts extends PureComponent {
 
   render() {
     const {
-      data, type, visType, profile, compEnabled
+      data, type, visType, profile, compEnabled, title
     } = this.props;
     const compToggled = !compEnabled;
-    // console.log("TCL: TCharts -> render -> compEnabled", compEnabled, compToggled)
+    // console.log('TCL: compToggled', compToggled);
 
     // PIE CHART data massaging
     const style = {
@@ -174,19 +173,19 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={(props) => (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    )}
+                  )}
                 />
               </XAxis>
 
@@ -224,19 +223,19 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={(props) => (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    )}
+                  )}
                 />
               </XAxis>
 
@@ -273,19 +272,19 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={(props) => (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    )}
+                  )}
                 />
               </XAxis>
 
@@ -317,19 +316,19 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={(props) => (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    )}
+                  )}
                 />
               </XAxis>
 
@@ -337,16 +336,16 @@ class TCharts extends PureComponent {
                 <Label
                   value="$"
                   position="top"
-                  content={(props) => (
+                  content={props => (
                     <text
                         style={{ fontSize: '11px'}}
                         x={20}
                         y={10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    )}
+                  )}
                 />
               </YAxis>
               <CartesianGrid strokeDasharray="3 3"/>
@@ -381,16 +380,16 @@ class TCharts extends PureComponent {
                   value="Tons"
                   position="bottom"
                   offset={0}
-                  content={(props) => (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    )}
+                  )}
                 />
               </XAxis>
 
@@ -709,7 +708,8 @@ TCharts.propTypes = {
   type: PropTypes.string,
   visType: PropTypes.string,
   profile: PropTypes.string,
-  compEnabled: PropTypes.bool
+  compEnabled: PropTypes.bool,
+  title: PropTypes.string
 };
 
 TCharts.defaultProps = {
@@ -717,7 +717,8 @@ TCharts.defaultProps = {
   type: null,
   visType: null,
   profile: null,
-  compEnabled: null
+  compEnabled: null,
+  title: null
 };
 
 export default TCharts;
