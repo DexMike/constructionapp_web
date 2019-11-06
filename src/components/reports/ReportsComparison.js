@@ -734,7 +734,7 @@ class ReportsComparison extends Component {
       }))
       return newData;
     }
-    if (activeTab === '2') {
+    if (activeTab === '3') {
       newData = data.map(d => ({
         'Job Name': d.name,
         'Total Cost': Number(d.totEarnings),
@@ -746,7 +746,7 @@ class ReportsComparison extends Component {
       }))
       return newData;
     }
-    return false;
+    return [];
   }
 
   renderChart(type, data, title) {
