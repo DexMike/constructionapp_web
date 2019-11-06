@@ -215,7 +215,6 @@ class EquipmentsShortForm extends PureComponent {
       modifiedBy: userId
     };
 
-    console.log(218, newEquipment);
     equipments.push(newEquipment);
     // }
     const materials = [];
@@ -231,8 +230,8 @@ class EquipmentsShortForm extends PureComponent {
       materials.push(newMaterial);
     }
     try {
-      console.log({equipments, equipmentMaterials: materials});
-      // await EquipmentService.createEquipmentsBatch(equipments, materials);
+      // console.log({equipments, equipmentMaterials: materials});
+      await EquipmentService.createEquipmentsBatch(equipments, materials);
     } catch (e) {
       // console.log(e);
     }
