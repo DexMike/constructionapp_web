@@ -100,5 +100,11 @@
   "License Plate": "License Plate",
   "Upload a picture of your Truck": "Upload a picture of your Truck",
   "Uploading Image": "Uploading Image",
-  "VIN #": "VIN #"
+  "VIN #": "VIN #",
+  "A Driver": "A Driver",
+  "DEFAULT_DRIVER_PROMPT": "under your company has successfully registered. Would you like to associate them as a default driver for one of your trucks?",
+  "Ask me later": "Ask me later",
+  "Yes": "Yes",
+  "Default Truck": "Default Truck",
+  "Unassigned": "Unassigned"
 }

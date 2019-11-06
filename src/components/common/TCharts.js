@@ -223,7 +223,7 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value={titles}
+                  value={title}
                   position="bottom"
                   offset={0}
                   content={props => (

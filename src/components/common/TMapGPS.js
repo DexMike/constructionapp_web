@@ -4,10 +4,18 @@ import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
 import GeoUtils from '../../utils/GeoUtils';
 import MapService from '../../api/MapService';
+import GPSTrackingService from '../../api/GPSTrackingService';
+
+// this reduces the results times the number specified
+const reducer = 10; // one tenth
+const maxPointsThreshold = 400;
 
 class TMapGPS extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      loadedText: 'Loading route'
+    };
 
     this.platform = new H.service.Platform({
       apikey: process.env.HERE_MAPS_API_KEY,
@@ -16,73 +24,141 @@ class TMapGPS extends Component {
       app_code: process.env.HERE_MAPS_APP_CODE,
       useHTTPS: true
     });
-    this.map = null;
+    this.mapGPS = null;
     this.behavior = null;
     this.ui = null;
     this.boundingBoxDistance = 0;
 
     // this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
     this.calculateRouteGPS = this.calculateRouteGPS.bind(this);
-    this.onRouteSuccess = this.onRouteSuccess.bind(this);
+    this.addRouteShapeToMap = this.addRouteShapeToMap.bind(this);
+    this.addMarkersToMap = this.addMarkersToMap.bind(this);
+    this.reducer = this.reducer.bind(this);
+    this.setMarkers = this.setMarkers.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const {
       zoom,
       center,
       id,
-      startAddress,
-      endAddress
+      loadId
     } = this.props;
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
     mapOptions.center = center;
     mapOptions.zoom = zoom;
-    this.map = new H.Map(mapDiv, defaultLayers.vector.normal.map, mapOptions);
+    this.mapGPS = new H.Map(mapDiv, defaultLayers.vector.normal.map, mapOptions);
     // add a resize listener to make sure that the map occupies the whole container
-    window.addEventListener('resize', () => this.map.getViewPort().resize());
+    window.addEventListener('resize', () => this.mapGPS.getViewPort().resize());
     // MapEvents enables the event system
     // Behavior implements default interactions for pan/zoom (also on mobile touch environments)
-    this.behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    this.behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.mapGPS));
     // Create the default UI components
-    this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
+    this.ui = H.ui.UI.createDefault(this.mapGPS, defaultLayers);
 
-    if (startAddress && endAddress) {
-      this.calculateRouteGPS();
+    if (loadId) {
+      // await this.calculateRouteGPS(); // this queries here.com for the api route
+      await this.getRouteGPS(); // this one draws the points directly from gps_trackings
     }
   }
 
-  onRouteSuccess(result) {
-    const route = result.response.route[0];
-    this.addRouteShapeToMap(route);
+  async getRouteGPS() {
+    const { loadId } = this.props;
+
+    let distanceInfo = [];
+    let wps = [];
+    // instead of getting the info here, we will query the backend
+    try {
+      distanceInfo = await GPSTrackingService.getGPSTrackingByLoadId(loadId);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
+
+    for (const wp of distanceInfo) {
+      let newWp = '';
+      newWp = `${wp[1]},${wp[0]}`;
+      wps.push(newWp);
+    }
+
+    if (wps.length > maxPointsThreshold) {
+      wps = this.reducer(wps);
+    }
+    this.setMarkers(wps);
   }
 
-  onRouteError(error) {
-    console.error(error);
+  setMarkers(wps) {
+    // markers
+    if (wps.length > 1) {
+      const start = wps[0].split(',');
+      const end = wps.pop().split(',');
+      const startAddress = {
+        latitude: start[0],
+        longitude: start[1]
+      };
+      const endAddress = {
+        latitude: end[0],
+        longitude: end[1]
+      };
+      this.addMarkersToMap(startAddress, endAddress);
+      this.setState({
+        loadedText: ''
+      });
+
+      try {
+        this.addRouteShapeToMap({
+          shape: wps
+        });
+      } catch (e) {
+        console.log('TCL: ERROR_>', e);
+      }
+    }
+  }
+
+  reducer(input) {
+    const reduced = [];
+    let reducerCount = 0;
+    for (const wp of input) {
+      if (reducerCount % reducer === 0) {
+        reduced.push(wp);
+      }
+      reducerCount += 1;
+    }
+    // console.log('TCL: Total REDUCED -> wps', reduced.length, reduced);
+    return reduced;
   }
 
   async calculateRouteGPS() {
     const { loadId } = this.props;
 
     let distanceInfo = [];
-    const wps = [];
+    let wps = [];
     // instead of getting the info here, we will query the backend
     try {
       distanceInfo = await MapService.getDistanceForFleet(loadId);
-      // console.log('TCL-> distanceInfo', distanceInfo);
     } catch (e) {
       console.log('ERROR: ', e);
     }
 
     for (const wp of distanceInfo.waypoints) {
-      const newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
+      let newWp = '';
+      /*
+      if (wp.mappedPosition.latitude === 0 || wp.mappedPosition.longitude === 0) {
+        newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
+      } else {
+        newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
+      }
+      */
+      // use only original
+      newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
       wps.push(newWp);
     }
 
-    this.addRouteShapeToMap({
-      shape: wps
-    });
+    if (wps.length > maxPointsThreshold) {
+      wps = this.reducer(wps);
+    }
+    this.setMarkers(wps);
   }
 
   /**
@@ -105,19 +181,20 @@ class TMapGPS extends Component {
       }
     });
     // Add the polyline to the map
-    this.map.addObject(polyline);
+    this.mapGPS.addObject(polyline);
 
     const bounds = polyline.getBoundingBox();
     const newBounds = GeoUtils.setZoomBounds(bounds);
 
     // And zoom to its bounding rectangle
-    this.map.getViewModel().setLookAtData({
+    this.mapGPS.getViewModel().setLookAtData({
       newBounds
     });
+    /**/
   }
 
-  addMarkersToMap() {
-    const {startAddress, endAddress} = this.props;
+  addMarkersToMap(startAddress, endAddress) {
+    // const {startAddress, endAddress} = this.props;
     const pinAIcon = new H.map.Icon(`${window.location.origin}/${pinA}`,
       { size: { w: 35, h: 50 } });
     const markerA = new H.map.Marker({ lat: startAddress.latitude, lng: startAddress.longitude },
@@ -128,31 +205,41 @@ class TMapGPS extends Component {
       { zIndex: 0, icon: pinBIcon });
     const group = new H.map.Group();
     group.addObjects([markerA, markerB]);
-    this.map.addObject(group);
+    this.mapGPS.addObject(group);
     const bounds = group.getBoundingBox(); // H.geo.Rect
     // And zoom to its bounding rectangle
-    this.map.getViewModel().setLookAtData({
+    this.mapGPS.getViewModel().setLookAtData({
       bounds: GeoUtils.setZoomBounds(bounds)
     });
   }
 
-  addGPSPoint(latitude, longitude) {
-    this.map.addObject(new H.map.Circle(
-      {lat: latitude, lng: longitude}, (1 + (this.boundingBoxDistance * 500)),
-      {
-        style: {
-          strokeColor: 'rgba(0, 0, 255, 0.5)', // Color of the perimeter
-          lineWidth: 1,
-          fillColor: 'rgba(255, 255, 255, 0.5)' // Color of the circle
-        }
-      }
-    ));
+  renderLoader() {
+    const { loadedText } = this.state;
+    if (loadedText !== '') {
+      return (
+        <React.Fragment>
+          {loadedText}
+          <div className="load__icon-wrap">
+            <svg className="load__icon">
+              <path fill="#4ce1b6" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+            </svg>
+          </div>
+        </React.Fragment>
+      );
+    }
+    return false;
   }
 
   render() {
-    const {width, height, id} = this.props;
+    const {width, height, id } = this.props;
     return (
-      <section style={{width, height}} id={`mapContainer${id}`}/>
+      <React.Fragment>
+        <section
+          style={{width, height}}
+          id={`mapContainer${id}`}
+        />
+        {this.renderLoader()}
+      </React.Fragment>
     );
   }
 }
@@ -183,10 +270,7 @@ TMapGPS.defaultProps = {
   height: 400,
   zoom: 10,
   loadId: 0,
-  center: {
-    lat: 30.274983,
-    lng: -97.739604
-  },
+  center: null,
   startAddress: null,
   endAddress: null
 };

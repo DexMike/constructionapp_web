@@ -54,6 +54,7 @@ import BarFilter from '../../utils/BarFilter';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { string } from 'prop-types';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -686,10 +687,17 @@ class ReportsComparison extends Component {
     const input = document.getElementById('visualizations');
     html2canvas(input)
       .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l');
-        pdf.addImage(imgData, 'JPEG', 10, 10, 270, 190, 'img', 'MEDIUM');
-        pdf.save(`Report_${StringGenerator.getDateString()}.pdf`); 
+        const img = canvas.toDataURL('image/jpg');
+        const doc = new jsPDF({
+          orientation: 'landscape',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+        const width = doc.internal.pageSize.getWidth();    
+        const height = doc.internal.pageSize.getHeight();
+        // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
+        doc.addImage(img, 'JPEG', 0, 0, width, height);
+        doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
       });
   }
 
@@ -700,18 +708,45 @@ class ReportsComparison extends Component {
   }
 
   extractCSVInfo(data) {
-    const newData = data.map(d => ({
-      'Total Earnings': d.totEarnings,
-      'Total # of Jobs': d.numJobs,
-      'Total # of Loads': d.numLoads,
-      'Total Tons delivered': d.tonsDelivered,
-      'Average Earnings per Job': d.avgEarningsJob,
-      'Average Earnings per Ton': d.avgEarningsTon,
-      'Average Earnings per Hour': d.avgEarningsHour,
-      'Cost per Ton/Mile': d.costPerTonMile,
-      'Average Miles traveled': d.avgMilesTraveled
-    }))
-    return newData;
+    let newData = [];
+    const { activeTab } = this.state;
+    if (activeTab === '1') {
+      newData = data.map(d => ({
+        'Material Name': d.name,
+        'Total Cost': Number(d.totEarnings),
+        '# of Jobs': Number(d.numJobs),
+        'Tons Delivered': Number(d.tonsDelivered),
+        'Cost per Ton Mile': Number(d.avgEarningsJob),
+        'Rate per Ton': Number(d.avgEarningsHour),
+        'Average Miles Traveled': Number(d.avgMilesTraveled),
+      }))
+      return newData;
+    }
+    if (activeTab === '2') {
+      newData = data.map(d => ({
+        'Customer Name': d.name,
+        'Total Cost': Number(d.totEarnings),
+        '# of Jobs': Number(d.numJobs),
+        '# of Loads': Number(d.numLoads),
+        'Tons Delivered': Number(d.tonsDelivered),
+        'Rate per Ton': Number(d.avgEarningsTon),
+        'Average Miles Traveled': Number(d.avgMilesTraveled),
+      }))
+      return newData;
+    }
+    if (activeTab === '2') {
+      newData = data.map(d => ({
+        'Job Name': d.name,
+        'Total Cost': Number(d.totEarnings),
+        '# of Loads': Number(d.numLoads),
+        'Tons Delivered': Number(d.tonsDelivered),
+        'Cost per Ton Mile': Number(d.avgEarningsJob),
+        'Rate per Ton': Number(d.avgEarningsTon),
+        'Average Miles Traveled': Number(d.avgMilesTraveled),
+      }))
+      return newData;
+    }
+    return false;
   }
 
   renderChart(type, data, title) {
@@ -807,24 +842,28 @@ class ReportsComparison extends Component {
     let dataToRender = [];
     let dataToRenderA = [];
     let columnsToRender = [];
-    let title = "";
+    let csvName = '';
+    let title = '';
 
     // prepare data for CSV printing
     if (activeTab === '1') {
       dataToPrint = this.extractCSVInfo(products);
       dataToRender = products;
       columnsToRender = columnsProducts;
+      csvName = 'Materials';
       title = "Materials";
     } else if (activeTab === '2') {
       dataToPrint = this.extractCSVInfo(carriers);
       dataToRender = carriers;
       columnsToRender = columnsCarrier;
+      csvName = 'Carrier';
       title = "Companies";
     } else if (activeTab === '3') {
       dataToPrint = this.extractCSVInfo(projects);
       dataToRender = projects;
       columnsToRender = columnsProjects;
-      title = "Job name";
+      csvName = 'Jobs';
+      title = "Job";
     }
 
     // const {t} = useTranslation();
@@ -851,7 +890,7 @@ class ReportsComparison extends Component {
                       </Button>
                     </ButtonGroup>
                     <ButtonGroup className="btn-group--icons">
-                      <CSVLink data={dataToPrint} filename={`Report_${StringGenerator.getDateString()}.csv`}>
+                      <CSVLink data={dataToPrint} filename={`Report_${csvName}_${StringGenerator.getDateString()}.csv`}>
                         <Button
                           outline
                         >Export data as CSV &nbsp; 
@@ -921,7 +960,7 @@ class ReportsComparison extends Component {
                           this.toggle('1');
                         }}
                       >
-                        Materials 
+                        Materials
                       </NavLink>
                     </NavItem>
                     <NavItem>
@@ -974,7 +1013,7 @@ class ReportsComparison extends Component {
                 autoHeightMax={800}
                 // disableVerticalScrolling
                 >
-                <div className="ag-theme-balham gridTable" data-html2canvas-ignore="true">
+                <div className="ag-theme-balham gridTable">
                   {
                     this.renderTable(
                       columnsToRender,

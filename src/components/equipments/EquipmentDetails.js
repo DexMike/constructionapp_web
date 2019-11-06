@@ -12,6 +12,7 @@ import * as PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { Storage } from 'aws-amplify';
 import Resizer from 'react-image-file-resizer';
+import { withTranslation } from 'react-i18next';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
@@ -28,6 +29,7 @@ import FileGenerator from '../../utils/FileGenerator';
 import TSpinner from '../common/TSpinner';
 import EquipmentService from '../../api/EquipmentService';
 import TField from '../common/TField';
+import EquipmentDetailService from '../../api/EquipmentDetailService';
 
 const maxWidth = 1200;
 const maxHeight = 800;
@@ -71,6 +73,8 @@ class EquipmentDetails extends PureComponent {
     };
     this.state = {
       ...equipment,
+      defaultDriver: {},
+      companyDrivers: [],
       imageUploading: false,
       selectedMaterials: [],
       allMaterials: [],
@@ -92,14 +96,16 @@ class EquipmentDetails extends PureComponent {
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
-    this.selectChange = this.selectChange.bind(this);
+    this.selectTypeChange = this.selectTypeChange.bind(this);
+    this.selectDefaultDriverChange = this.selectDefaultDriverChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleImageUpload = this.handleImageUpload.bind(this);
   }
 
   async componentDidMount() {
-    const { equipmentId } = this.props;
-    let { currentExternalEquipmentNumber } = { ...this.state };
+    const { equipmentId, companyId, t } = { ...this.props };
+    const translate = t;
+    let { currentExternalEquipmentNumber, companyDrivers, defaultDriver } = { ...this.state };
     let equipment;
     try {
       equipment = await EquipmentService.getEquipmentById(equipmentId);
@@ -107,9 +113,28 @@ class EquipmentDetails extends PureComponent {
     } catch (e) {
       // console.log(e);
     }
-    await this.setEquipment(equipment);
-    await this.fetchMaterials();
+    
+    try {
+      await this.setEquipment(equipment);
+      await this.fetchMaterials();
+      companyDrivers = (await EquipmentDetailService.getDefaultDriverList(companyId, equipmentId))
+        .data.map(companyDriver => ({
+          value: companyDriver.driverId,
+          label: `${companyDriver.firstName} ${companyDriver.lastName}`
+        }));
+    } catch (err) {
+      console.error(err);
+    }
+    companyDrivers = [{ value: null, label: translate('Unassigned') }, ...companyDrivers];
+    defaultDriver = { value: null, label: translate('Unassigned') };
+    if (equipment && equipment.defaultDriverId) {
+      const companyDriverMatch = companyDrivers
+        .find(companyDriver => companyDriver.value === equipment.defaultDriverId);
+      defaultDriver = companyDriverMatch;
+    }
     this.setState({
+      companyDrivers,
+      defaultDriver,
       currentExternalEquipmentNumber,
       equipmentToUpdate: equipment,
       loaded: true
@@ -166,10 +191,11 @@ class EquipmentDetails extends PureComponent {
       image,
       isRatedHour,
       isRatedTon,
-      externalEquipmentNumber
+      externalEquipmentNumber,
+      defaultDriver
     } = this.state;
 
-    const {userId} = this.props;
+    const { userId } = this.props;
 
     const newEquipment = equipmentToUpdate;
     newEquipment.type = type;
@@ -186,6 +212,9 @@ class EquipmentDetails extends PureComponent {
     newEquipment.tonRate = tonRate;
     newEquipment.image = image;
     newEquipment.externalEquipmentNumber = externalEquipmentNumber;
+    if (defaultDriver) {
+      newEquipment.defaultDriverId = defaultDriver.value;
+    }
     newEquipment.modifiedOn = moment.utc().format();
     newEquipment.modifiedBy = userId;
 
@@ -214,13 +243,20 @@ class EquipmentDetails extends PureComponent {
     });
   }
 
-  selectChange(data) {
+  selectTypeChange(data) {
     const { reqHandlerTruckType } = this.state;
     this.setState({
       reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
         touched: false
       }),
       type: data.value
+    });
+  }
+
+  selectDefaultDriverChange(data) {
+    // const { defaultDriver } = this.state;
+    this.setState({
+      defaultDriver: data
     });
   }
 
@@ -486,9 +522,12 @@ class EquipmentDetails extends PureComponent {
       reqHandlerMaterials,
       reqHandlerMaxCapacity,
       reqHandlerExternalEquipmentNumber,
-      loaded
+      loaded,
+      defaultDriver,
+      companyDrivers
     } = this.state;
     const { toggle, t } = this.props;
+    const translate = t;
     if (loaded) {
       return (
         <React.Fragment>
@@ -535,7 +574,7 @@ class EquipmentDetails extends PureComponent {
                 <SelectField
                   input={
                     {
-                      onChange: this.selectChange,
+                      onChange: this.selectTypeChange,
                       name: 'type',
                       value: type
                     }
@@ -558,6 +597,7 @@ class EquipmentDetails extends PureComponent {
                       value: selectedMaterials
                     }
                   }
+                  selectedItems={selectedMaterials}
                   options={allMaterials}
                   placeholder="Materials"
                   meta={reqHandlerMaterials}
@@ -605,6 +645,25 @@ class EquipmentDetails extends PureComponent {
                   onChange={this.handleInputChange}
                 />
               </Col>
+            </Row>
+            <Row className="col-md-12">
+              <Col md={6} className="pt-2">
+                <span>{translate('Default Driver')}</span>
+                <SelectField
+                  input={
+                    {
+                      onChange: this.selectDefaultDriverChange,
+                      name: 'defaultDriver',
+                      value: defaultDriver
+                    }
+                  }
+                  value={defaultDriver}
+                  options={companyDrivers}
+                  placeholder={translate('Default Driver')}
+                  // meta={reqHandlerTruckType}
+                />
+              </Col>
+              <Col md={6} className="pt-2" />
             </Row>
             <Row className="col-12">
               <Col md={12} className="pt-4">
@@ -750,7 +809,7 @@ class EquipmentDetails extends PureComponent {
 EquipmentDetails.propTypes = {
   equipmentId: PropTypes.number,
   toggle: PropTypes.func.isRequired,
-  t: PropTypes.func
+  companyId: PropTypes.number.isRequired
 };
 
 EquipmentDetails.defaultProps = {
