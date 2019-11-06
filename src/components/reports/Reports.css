@@ -102,7 +102,7 @@
 }
 
 .gridTable {
-  width: 1530px !important;
+  width: 1560px !important;
   padding-bottom: 10px;
   overflow-y: hidden !important;
 }
@@ -137,7 +137,7 @@
 
   width: 400px !important;
   height: 400px !important;
-  max-width: 600px !important; 
+  max-width: 600px !important;
   max-height: 400px !important;
   line-height: 24px;
   overflow: auto !important;
@@ -154,4 +154,15 @@
 
 .noSidePadding .row {
   margin: 0 !important;
+}
+
+.forceHide {
+  display: none;
+}
+.forceShow {
+  display: block;
+}
+
+.primaryGreen {
+  color: darkgreen;
 }

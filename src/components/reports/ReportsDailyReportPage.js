@@ -178,7 +178,7 @@ class ReportsDailyReportPage extends Component {
       }
     }
 
-    this.setState({ 
+    this.setState({
       columnsJobs,
       columnsLoads,
       loaded: true
@@ -289,32 +289,41 @@ class ReportsDailyReportPage extends Component {
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
-  }  
+  }
 
   extractCSVInfoJobs(data) {
     const { columnsJobs } = this.state;
+
+    //console.log(data)
+
     const newData = data.map(d => ({
-      'Date': d.date,
-      'Completed': d.numJobs,
-      'loads': d.numLoads,
-      'Not completed': d.notCompletedJobs,
-      'In progress': d.jobsInProgress,
-      'Total': d.totalJobs,
-      // 'Rate: $/Ton': d.rateTon,
-      'Rate: $/Hour': d.rateHour
+      Date: d.date,
+      Completed: d.completedJobs,
+      'Not Completed': Number(d.notCompletedJobs),
+      'In Progress': Number(d.jobsInProgress),
+      'Total Jobs': Number(d.totalJobs),
+      'Total Loads': Number(d.totalLoads),
+      'Rate per Ton': Number(d.rateTon),
+      'Cost per Day': Number(d.avgRevenuePerDay),
+      'Total Tons Hauled': Number(d.totalTonsHauled),
+      'Job Duration': Number(d.avgJobTime),
+      //'Job Duration (hrs)': Number(Math.floor(d.avgJobTime % 86400) / 3600),
+      'Distance (mi)': Number(d.realDistance),
+      //'Rate: $/Hour': d.rateHour
       /*,
       'Potential Earnings': d.potentialEarnings,
       'Total Market Value': d.totalMarketValue
       */
+
     }))
     return newData;
   }
 
   extractCSVInfoLoads(data) {
     const newData = data.map(d => ({
-      'Date': d.date,
-      'Loads': d.totalNumberOfLoads,
-      'Completed': d.totalNumberOfCompletedLoads,
+      Date: d.date,
+      Loads: d.totalNumberOfLoads,
+      Completed: d.totalNumberOfCompletedLoads,
       'Distance travelled': d.totalDistanceTravelled
     }))
     return newData;
@@ -488,7 +497,7 @@ class ReportsDailyReportPage extends Component {
                         <CSVLink data={dataToPrintJobs} filename={`DailyJobsReport_${StringGenerator.getDateString()}.csv`}>
                           <Button
                             outline
-                          >Export data as CSV &nbsp; 
+                          >Export data as CSV &nbsp;
                             <span className="lnr lnr-chart-bars" />
                           </Button>
                         </CSVLink>
@@ -512,7 +521,7 @@ class ReportsDailyReportPage extends Component {
                         autoHeightMin={0}
                         autoHeightMax={800}
                         // disableVerticalScrolling
-                        >
+                      >
                         <div
                           id="jobsGrid"
                           className="ag-theme-balham gridTableJobs"
@@ -531,7 +540,7 @@ class ReportsDailyReportPage extends Component {
                           />
                         </div>
                       </Scrollbars>
-                      
+
                     </Col>
                   </Row>
 
@@ -557,7 +566,7 @@ class ReportsDailyReportPage extends Component {
                         <CSVLink data={dataToPrintLoads} filename={`DailyLoadsReport_${StringGenerator.getDateString()}.csv`}>
                           <Button
                             outline
-                          >Export data as CSV &nbsp; 
+                          >Export data as CSV &nbsp;
                             <span className="lnr lnr-chart-bars" />
                           </Button>
                         </CSVLink>
@@ -626,8 +635,8 @@ class ReportsDailyReportPage extends Component {
               {this.renderTitle()}
             </Col>
           </Row>
-          
-          {this.renderCards()}
+
+          {/* this.renderCards() */}
           <DailyReportFilter
             onReturnFilters={this.returnFilters}
             fetching={(value) => {

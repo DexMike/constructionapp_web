@@ -21,6 +21,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import GeoUtils from "../utils/GeoUtils";
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
@@ -225,7 +226,8 @@ class FilterComparisonReport extends Component {
       reqHandlerRange: {
         touched: false,
         error: ''
-      }
+      },
+      blankFilters: null
     };
 
     this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -284,6 +286,9 @@ class FilterComparisonReport extends Component {
       }
     }
 
+    //save blank filters
+    const newBlankFilters = CloneDeep(filters);
+
     // This should save the filters, there's no need to save at every change
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
@@ -300,7 +305,7 @@ class FilterComparisonReport extends Component {
     await this.fetchStates();
     await this.fetchLookups();
     let allCompanies = await this.fetchCompanies();
-    
+
     this.fetchFilterLists();
     if (type === 'Producer' || type === 'Customer') {
       filters.companyType = 'Customer';
@@ -317,7 +322,8 @@ class FilterComparisonReport extends Component {
       profile,
       selectedRange,
       loaded: true,
-      companiesTypelist: allCompanies
+      companiesTypelist: allCompanies,
+      blankFilters: newBlankFilters
     });
   }
 
@@ -550,7 +556,7 @@ class FilterComparisonReport extends Component {
       // timeRangesComp
     } = this.props;
     fetching(true);
-    
+
     let comp = false;
     if(compActualValue !== -1) {
       comp = true;
@@ -607,14 +613,14 @@ class FilterComparisonReport extends Component {
     // for multifields we have to extract just the values
     // WE MUST clone the object if we are going to change the info
     const allFilters = {...filters};
-   
+
     //extract ids from collections
     allFilters.companies = this.getIds(allFilters.companies);
     allFilters.states = this.getValues(allFilters.states);
     allFilters.materials = this.getValues(allFilters.materials);
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
-    
+
     //if comp is disabled, do not get comp data
     allFilters.compare = compEnabled;
 
@@ -628,16 +634,16 @@ class FilterComparisonReport extends Component {
       const {metadata} = result;
       onReturnFilters(result, resultLoads, allFilters/*, metadata*/);
     }
-      
+
     try {
-      
+
       let resultCarriers = [];
       let resultProducts = [];
       let resultProjects = [];
-      
+
       resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
       resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
-      
+
       //projects should NOT have comparisonData
       allFilters.compare = false;
       resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
@@ -675,7 +681,7 @@ class FilterComparisonReport extends Component {
     const currencyKeys = ['avgEarningsHour', 'avgEarningsHourComp', 'totEarnings', 'totEarningsComp',
       'avgEarningsJob', 'avgEarningsJobComp', 'avgEarningsTon', 'avgEarningsTonComp'];
     let mappedObject = object;
-    
+
     let maxTotEarnings = 0;
     let maxNumJobs = 0;
     let maxNumLoads = 0;
@@ -749,7 +755,7 @@ class FilterComparisonReport extends Component {
 
     mappedObject.map((item) => {
       const newObject = item;
-     
+
       // no nulls on screen
       Object.keys(item)
         .map((key) => {
@@ -761,7 +767,7 @@ class FilterComparisonReport extends Component {
           }
           return true;
         });
-        
+
 
       // totEarnings
       newObject.avgTotEarningsComparison = {
@@ -778,7 +784,7 @@ class FilterComparisonReport extends Component {
         max: maxNumJobs,
         type: 'integer'
       };
-      
+
       // totalJobs
       newObject.totalLoadsComparison = {
         total: newObject.numLoads,
@@ -825,7 +831,7 @@ class FilterComparisonReport extends Component {
         totalComp: newObject.avgMilesTraveledComp,
         max: maxAvgMilesTraveled,
         type: 'number'
-      } 
+      }
 
       // totalTons
       newObject.costPerTonMileComparison = {
@@ -841,7 +847,7 @@ class FilterComparisonReport extends Component {
       newObject.avgEarningsHourNum = this.checkForString(newObject.avgEarningsHour);
       newObject.avgEarningsTonNum = this.checkForString(newObject.avgEarningsTon);
       newObject.avgEarningsJobNum = this.checkForString(newObject.avgEarningsJob);
-      
+
       // return newObject;
     });
     return mappedObject;
@@ -937,7 +943,7 @@ class FilterComparisonReport extends Component {
     await this.fetchCarrierData();
   }
 
-  async handleMultiChange(data, name) {    
+  async handleMultiChange(data, name) {
     const {filters} = this.state;
     switch(name) {
       case 'status':
@@ -1097,7 +1103,7 @@ class FilterComparisonReport extends Component {
 
     let startDate = new Date();
     startDate.setTime(endDate.getTime() - dateOffset);
-    
+
     if (name === 'Custom') {
       intervals.startIntervalComp = startDate;
       intervals.endIntervalComp = endDate;
@@ -1132,15 +1138,11 @@ class FilterComparisonReport extends Component {
   }
 
   async handleResetFilters() {
-    // set values to default or last saved filter
-    if (localStorage.getItem('filters')) {
-      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
-        async () => this.fetchCarrierData());
-    } else {
-      // defaults
-      this.saveFilters();
-      await this.fetchCarrierData();
-    }
+    const { blankFilters } = this.state;
+    this.setState({
+      filters: blankFilters
+    })
+    this.fetchCarrierData();
   }
 
   render() {
@@ -1151,7 +1153,7 @@ class FilterComparisonReport extends Component {
       materialTypeList,
       rateTypeList,
       intervals,
-      
+
       statesTypeList,
       statusTypeList,
       companiesTypelist,
@@ -1210,6 +1212,7 @@ class FilterComparisonReport extends Component {
                       horizontalScroll="true"
                       selectedItems={filters.materialType}
                       name="companies"
+                      value={filters.companies}
                     />
 
                   </div>
@@ -1237,6 +1240,7 @@ class FilterComparisonReport extends Component {
                       placeholder="Any"
                       id="materialTypeSelect"
                       horizontalScroll="true"
+                      value={filters.states}
                     />
                   </div>
                   <div className="filter-item">
@@ -1304,6 +1308,7 @@ class FilterComparisonReport extends Component {
                       id="statusSelect"
                       horizontalScroll="true"
                       selectedItems={filters.materialType}
+                      value={filters.statuses}
                     />
 
                   </div>
@@ -1331,6 +1336,7 @@ class FilterComparisonReport extends Component {
                       id="materialTypeSelect"
                       horizontalScroll="true"
                       selectedItems={filters.materialType}
+                      value={filters.materials}
                     />
                   </div>
                   <div className="filter-item">
@@ -1420,6 +1426,7 @@ class FilterComparisonReport extends Component {
                       id="truckTypeSelect"
                       horizontalScroll="true"
                       selectedItems={filters.equipmentType}
+                      value={filters.equipments}
                     />
                   </div>
 
@@ -1477,22 +1484,22 @@ class FilterComparisonReport extends Component {
                           Comparison Day Range
                         </div>
                         <TSelect
-                        input={
-                          {
-                            onChange: this.handleRangeComparisonFilterChange,
-                            name: this.timeRangesComp[selectIndexComp].name,
-                            value: this.timeRangesComp[selectIndexComp].value
+                          input={
+                            {
+                              onChange: this.handleRangeComparisonFilterChange,
+                              name: this.timeRangesComp[selectIndexComp].name,
+                              value: this.timeRangesComp[selectIndexComp].value
+                            }
                           }
-                        }
-                        value={this.timeRangesComp[selectIndexComp].value.toString()}
-                        options={
-                          this.timeRangesComp.map(timeRangeComp => ({
-                            name: timeRangeComp.name,
-                            value: timeRangeComp.value.toString(),
-                            label: timeRangeComp.name
-                          }))
-                        }
-                        placeholder={this.timeRangesComp[selectIndexComp].name}
+                          value={this.timeRangesComp[selectIndexComp].value.toString()}
+                          options={
+                            this.timeRangesComp.map(timeRangeComp => ({
+                              name: timeRangeComp.name,
+                              value: timeRangeComp.value.toString(),
+                              label: timeRangeComp.name
+                            }))
+                          }
+                          placeholder={this.timeRangesComp[selectIndexComp].name}
                         />
                       </div>
                       <div className="filter-item">
