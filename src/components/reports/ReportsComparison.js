@@ -687,10 +687,17 @@ class ReportsComparison extends Component {
     const input = document.getElementById('visualizations');
     html2canvas(input)
       .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l');
-        pdf.addImage(imgData, 'JPEG', 10, 10, 270, 190, 'img', 'MEDIUM');
-        pdf.save(`Report_${StringGenerator.getDateString()}.pdf`); 
+        const img = canvas.toDataURL('image/jpg');
+        const doc = new jsPDF({
+          orientation: 'landscape',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+        const width = doc.internal.pageSize.getWidth();    
+        const height = doc.internal.pageSize.getHeight();
+        // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
+        doc.addImage(img, 'JPEG', 0, 0, width, height);
+        doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
       });
   }
 
@@ -701,10 +708,10 @@ class ReportsComparison extends Component {
   }
 
   extractCSVInfo(data) {
-    const newData = [];
+    let newData = [];
     const { activeTab } = this.state;
     if (activeTab === '1') {
-      const newData = data.map(d => ({
+      newData = data.map(d => ({
         'Material Name': d.name,
         'Total Cost': Number(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
@@ -714,8 +721,9 @@ class ReportsComparison extends Component {
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
-    } else if (activeTab === '2') {
-      const newData = data.map(d => ({
+    }
+    if (activeTab === '2') {
+      newData = data.map(d => ({
         'Customer Name': d.name,
         'Total Cost': Number(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
@@ -725,8 +733,9 @@ class ReportsComparison extends Component {
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
-    } else {
-      const newData = data.map(d => ({
+    }
+    if (activeTab === '2') {
+      newData = data.map(d => ({
         'Job Name': d.name,
         'Total Cost': Number(d.totEarnings),
         '# of Loads': Number(d.numLoads),
@@ -737,8 +746,7 @@ class ReportsComparison extends Component {
       }))
       return newData;
     }
-
-    //return newData;
+    return false;
   }
 
   renderChart(type, data, title) {
@@ -1005,7 +1013,7 @@ class ReportsComparison extends Component {
                 autoHeightMax={800}
                 // disableVerticalScrolling
                 >
-                <div className="ag-theme-balham gridTable" data-html2canvas-ignore="true">
+                <div className="ag-theme-balham gridTable">
                   {
                     this.renderTable(
                       columnsToRender,
