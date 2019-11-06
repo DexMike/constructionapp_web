@@ -7,8 +7,8 @@ import MapService from '../../api/MapService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 
 // this reduces the results times the number specified
-const reducer = 5; // one tenth
-const maxPointsThreshold = 20000;
+const reducer = 10; // one tenth
+const maxPointsThreshold = 400;
 
 class TMapGPS extends Component {
   constructor(props) {
@@ -59,25 +59,9 @@ class TMapGPS extends Component {
     this.ui = H.ui.UI.createDefault(this.mapGPS, defaultLayers);
 
     if (loadId) {
-      // await this.calculateRouteGPS();
-      await this.getRouteGPS();
+      // await this.calculateRouteGPS(); // this queries here.com for the api route
+      await this.getRouteGPS(); // this one draws the points directly from gps_trackings
     }
-  }
-
-  getCSVdata(distanceInfo) {
-    /*
-    let wps = '"latitude","longitude"\n';
-    for (const wp of distanceInfo) {
-      wps += `"${wp[1]}","${wp[0]}"\n`;
-    }
-    */
-    let wps = '';
-
-    for (const wp of distanceInfo) {
-      const points = wp.split(',');
-      wps += `${points[0]}	${points[1]}	cross5	red	1\n`;
-    }
-    console.log('TCL: TMapGPS -> getCSVdata -> wps', wps);
   }
 
   async getRouteGPS() {
@@ -98,10 +82,8 @@ class TMapGPS extends Component {
       wps.push(newWp);
     }
 
-    console.log('TCL: WPSs', wps.length, loadId);
     if (wps.length > maxPointsThreshold) {
       wps = this.reducer(wps);
-      this.getCSVdata(wps);
     }
     this.setMarkers(wps);
   }
@@ -143,7 +125,7 @@ class TMapGPS extends Component {
       }
       reducerCount += 1;
     }
-    console.log('TCL: Total REDUCED -> wps', reduced.length, reduced);
+    // console.log('TCL: Total REDUCED -> wps', reduced.length, reduced);
     return reduced;
   }
 
@@ -173,7 +155,6 @@ class TMapGPS extends Component {
       wps.push(newWp);
     }
 
-    console.log('TCL: WPSs', wps.length);
     if (wps.length > maxPointsThreshold) {
       wps = this.reducer(wps);
     }
