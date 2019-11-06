@@ -855,7 +855,7 @@ class ReportsComparison extends Component {
       dataToRender = projects;
       columnsToRender = columnsProjects;
       csvName = 'Jobs';
-      title = "Job name";
+      title = "Job";
     }
 
     // const {t} = useTranslation();
@@ -952,7 +952,7 @@ class ReportsComparison extends Component {
                           this.toggle('1');
                         }}
                       >
-                        Materials 
+                        Materials
                       </NavLink>
                     </NavItem>
                     <NavItem>
