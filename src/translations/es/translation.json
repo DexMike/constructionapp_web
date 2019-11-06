@@ -97,5 +97,12 @@
   "Success": "Éxito",
   "Warning": "Advertencia",
   "Return": "Regresar",
-  "Resend Invite": "Volver a enviar invitación"
+  "Resend Invite": "Volver a enviar invitación",
+  "Default Driver": "Conductor predeterminado",
+  "A Driver": "Un Conductor",
+  "DEFAULT_DRIVER_PROMPT": "de su empresa se ha registrado correctamente. ¿Desea asociarlo como conductor predeterminado para uno de sus camiones?",
+  "Ask me later": "Pregúntame más tarde",
+  "Yes": "Si",
+  "Default Truck": "Camión predeterminado",
+  "Unassigned": "Sin Asignar"
 }
