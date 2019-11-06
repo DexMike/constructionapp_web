@@ -549,7 +549,7 @@ class JobSavePage extends Component {
       newJob.startAddress = newJob.startAddress.id;
       newJob.endAddress = newJob.endAddress.id;
       newJob.status = 'Cancelled';
-      newJob.cancelReason = `[Cancelled by ${profile.companyType}] ${approveCancelReason}`;;
+      newJob.cancelReason = `[Cancelled by ${profile.companyType}] ${approveCancelReason}`;
       newJob.dateCancelled = moment.utc().format();
       newJob.modifiedBy = profile.userId;
       newJob.modifiedOn = moment.utc().format();
@@ -1584,7 +1584,7 @@ class JobSavePage extends Component {
         backdrop="static"
       >
         <JobResumePopup
-          job={job.id}
+          jobId={job.id}
           profile={profile}
           updateResumedJob={this.updateJobView}
           toggle={this.toggleResumeJobModal}
@@ -1609,7 +1609,7 @@ class JobSavePage extends Component {
         <JobPausePopup
           job={job}
           profile={profile}
-          updateResumedJob={this.updateJobView}
+          updatePausedJob={this.updateJobView}
           toggle={this.togglePauseJobModal}
         />
       </Modal>

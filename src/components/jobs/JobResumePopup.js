@@ -35,6 +35,7 @@ class JobResumePopup extends Component {
         endTime: null
       },
       jobEndDate: null,
+      jobStartDate: null,
       jobId: null,
       loaded: false,
       validateFormOne: false,
