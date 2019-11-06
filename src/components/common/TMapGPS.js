@@ -4,6 +4,11 @@ import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
 import GeoUtils from '../../utils/GeoUtils';
 import MapService from '../../api/MapService';
+import GPSTrackingService from '../../api/GPSTrackingService';
+
+// this reduces the results times the number specified
+const reducer = 10; // one tenth
+const maxPointsThreshold = 400;
 
 class TMapGPS extends Component {
   constructor(props) {
@@ -28,6 +33,8 @@ class TMapGPS extends Component {
     this.calculateRouteGPS = this.calculateRouteGPS.bind(this);
     this.addRouteShapeToMap = this.addRouteShapeToMap.bind(this);
     this.addMarkersToMap = this.addMarkersToMap.bind(this);
+    this.reducer = this.reducer.bind(this);
+    this.setMarkers = this.setMarkers.bind(this);
   }
 
   async componentDidMount() {
@@ -52,32 +59,36 @@ class TMapGPS extends Component {
     this.ui = H.ui.UI.createDefault(this.mapGPS, defaultLayers);
 
     if (loadId) {
-      await this.calculateRouteGPS();
+      // await this.calculateRouteGPS(); // this queries here.com for the api route
+      await this.getRouteGPS(); // this one draws the points directly from gps_trackings
     }
   }
 
-  async calculateRouteGPS() {
+  async getRouteGPS() {
     const { loadId } = this.props;
 
     let distanceInfo = [];
-    const wps = [];
+    let wps = [];
     // instead of getting the info here, we will query the backend
     try {
-      distanceInfo = await MapService.getDistanceForFleet(loadId);
+      distanceInfo = await GPSTrackingService.getGPSTrackingByLoadId(loadId);
     } catch (e) {
       console.log('ERROR: ', e);
     }
 
-    for (const wp of distanceInfo.waypoints) {
+    for (const wp of distanceInfo) {
       let newWp = '';
-      if (wp.mappedPosition.latitude === 0 || wp.mappedPosition.longitude === 0) {
-        newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
-      } else {
-        newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
-      }
+      newWp = `${wp[1]},${wp[0]}`;
       wps.push(newWp);
     }
 
+    if (wps.length > maxPointsThreshold) {
+      wps = this.reducer(wps);
+    }
+    this.setMarkers(wps);
+  }
+
+  setMarkers(wps) {
     // markers
     if (wps.length > 1) {
       const start = wps[0].split(',');
@@ -103,6 +114,51 @@ class TMapGPS extends Component {
         console.log('TCL: ERROR_>', e);
       }
     }
+  }
+
+  reducer(input) {
+    const reduced = [];
+    let reducerCount = 0;
+    for (const wp of input) {
+      if (reducerCount % reducer === 0) {
+        reduced.push(wp);
+      }
+      reducerCount += 1;
+    }
+    // console.log('TCL: Total REDUCED -> wps', reduced.length, reduced);
+    return reduced;
+  }
+
+  async calculateRouteGPS() {
+    const { loadId } = this.props;
+
+    let distanceInfo = [];
+    let wps = [];
+    // instead of getting the info here, we will query the backend
+    try {
+      distanceInfo = await MapService.getDistanceForFleet(loadId);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
+
+    for (const wp of distanceInfo.waypoints) {
+      let newWp = '';
+      /*
+      if (wp.mappedPosition.latitude === 0 || wp.mappedPosition.longitude === 0) {
+        newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
+      } else {
+        newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
+      }
+      */
+      // use only original
+      newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
+      wps.push(newWp);
+    }
+
+    if (wps.length > maxPointsThreshold) {
+      wps = this.reducer(wps);
+    }
+    this.setMarkers(wps);
   }
 
   /**
