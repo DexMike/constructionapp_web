@@ -12,7 +12,6 @@ import * as PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { Storage } from 'aws-amplify';
 import Resizer from 'react-image-file-resizer';
-import { withTranslation } from 'react-i18next';
 import MultiSelect from '../common/TMultiSelect';
 // import DropZoneMultipleField from '../common/TDropZoneMultiple';
 import SelectField from '../common/TSelect';
