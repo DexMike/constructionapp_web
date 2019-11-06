@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import { Storage } from 'aws-amplify';
 import Resizer from 'react-image-file-resizer';
 import { withTranslation } from 'react-i18next';
@@ -105,8 +106,14 @@ class EquipmentDetails extends PureComponent {
     const { equipmentId, companyId, t } = { ...this.props };
     const translate = t;
     let { currentExternalEquipmentNumber, companyDrivers, defaultDriver } = { ...this.state };
-    const equipment = await EquipmentService.getEquipmentById(equipmentId);
-    currentExternalEquipmentNumber = equipment.externalEquipmentNumber;
+    let equipment;
+    try {
+      equipment = await EquipmentService.getEquipmentById(equipmentId);
+      currentExternalEquipmentNumber = equipment.externalEquipmentNumber;
+    } catch (e) {
+      // console.log(e);
+    }
+    
     try {
       await this.setEquipment(equipment);
       await this.fetchMaterials();
@@ -120,7 +127,7 @@ class EquipmentDetails extends PureComponent {
     }
     companyDrivers = [{ value: null, label: translate('Unassigned') }, ...companyDrivers];
     defaultDriver = { value: null, label: translate('Unassigned') };
-    if (equipment.defaultDriverId) {
+    if (equipment && equipment.defaultDriverId) {
       const companyDriverMatch = companyDrivers
         .find(companyDriver => companyDriver.value === equipment.defaultDriverId);
       defaultDriver = companyDriverMatch;
@@ -136,17 +143,32 @@ class EquipmentDetails extends PureComponent {
 
   async setEquipment(equipmentProps) {
     this.mounted = true;
+    let { isRatedHour, isRatedTon } = this.state;
     const equipment = equipmentProps;
     Object.keys(equipment)
       .map((key) => {
         if (equipment[key] === null) {
           equipment[key] = '';
         }
+        if (equipment.rateType === 'Tonage') {
+          isRatedHour = false;
+          isRatedTon = true;
+        }
+        if (equipment.rateType === 'Hour') {
+          isRatedHour = true;
+          isRatedTon = false;
+        }
+        if (equipment.rateType === 'Any') {
+          isRatedHour = true;
+          isRatedTon = true;
+        }
         return true;
       });
     if (this.mounted) {
       this.setState({
-        ...equipment
+        ...equipment,
+        isRatedHour,
+        isRatedTon
       });
     }
   }
@@ -167,6 +189,8 @@ class EquipmentDetails extends PureComponent {
       hourRate,
       tonRate,
       image,
+      isRatedHour,
+      isRatedTon,
       externalEquipmentNumber,
       defaultDriver
     } = this.state;
@@ -193,6 +217,18 @@ class EquipmentDetails extends PureComponent {
     }
     newEquipment.modifiedOn = moment.utc().format();
     newEquipment.modifiedBy = userId;
+
+    let rateType;
+    if ((isRatedHour && isRatedTon) || (!isRatedHour && !isRatedTon)) {
+      rateType = 'Any';
+    }
+    if (isRatedHour && !isRatedTon) {
+      rateType = 'Hour';
+    }
+    if (!isRatedHour && isRatedTon) {
+      rateType = 'Tonage';
+    }
+    newEquipment.rateType = rateType;
 
     return newEquipment;
   }
@@ -499,11 +535,11 @@ class EquipmentDetails extends PureComponent {
             <Row className="col-12">
               <Col md={12}>
                 <h3 className="subhead">
-                  Tell us about your truck
+                  {t('Tell us about your truck')}
                 </h3>
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck Number</span>
+                <span>{t('Truck Number')}</span>
                 <TField
                   input={
                     {
@@ -519,7 +555,7 @@ class EquipmentDetails extends PureComponent {
               </Col>
               <Col md={6} className="pt-2">
                 <span>
-                  Maximum Capacity (Tons)
+                  {`${t('Maximum Capacity')} (${t('Tons')})`}
                 </span>
                 <TFieldNumber
                   input={
@@ -534,7 +570,7 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck Type</span>
+                <span>{t('Truck Type')}</span>
                 <SelectField
                   input={
                     {
@@ -551,7 +587,7 @@ class EquipmentDetails extends PureComponent {
               </Col>
               <Col md={6} className="pt-2">
                 <span>
-                  Materials Hauled
+                  {t('Materials Hauled')}
                 </span>
                 <MultiSelect
                   input={
@@ -568,7 +604,9 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck name</span>
+                <span>
+                  {t('Truck Name')}
+                </span>
                 <input
                   name="name"
                   type="text"
@@ -577,7 +615,7 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck description</span>
+                <span>{t('Truck Description')}</span>
                 <input
                   name="description"
                   type="text"
@@ -588,7 +626,7 @@ class EquipmentDetails extends PureComponent {
             </Row>
             <Row className="col-md-12">
               <Col md={6} className="pt-2">
-                <span>Vin #</span>
+                <span>{t('VIN #')}</span>
                 <input
                   name="vin"
                   type="text"
@@ -597,7 +635,9 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>License Plate</span>
+                <span>
+                  {t('License Plate')}
+                </span>
                 <input
                   name="licensePlate"
                   type="text"
@@ -628,7 +668,7 @@ class EquipmentDetails extends PureComponent {
             <Row className="col-12">
               <Col md={12} className="pt-4">
                 <h3 className="subhead">
-                  Truck Rates
+                  {t('Truck Description')}
                 </h3>
               </Col>
             </Row>
@@ -639,11 +679,11 @@ class EquipmentDetails extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByHour"
                   value={isRatedHour}
-                  label="By Hour"
+                  label={t('By Hour')}
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum cost per hour</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Hour')}`}</span>
                 <TFieldNumber
                   input={
                     {
@@ -658,7 +698,7 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum Hours</span>
+                <span className="label">{t('Minimum Hours')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -677,11 +717,11 @@ class EquipmentDetails extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByTon"
                   value={isRatedTon}
-                  label="By Ton"
+                  label={t('By Ton')}
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum cost per ton</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Ton')}`}</span>
                 <TFieldNumber
                   input={
                     {
@@ -696,7 +736,7 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum Tons</span>
+                <span className="label">{t('Minimum Tons')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -712,7 +752,7 @@ class EquipmentDetails extends PureComponent {
             <Row className="col-12 pt-4">
               <Col md={6} className="pt-2">
                 <span>
-                  Max Distance to Pickup (Miles)
+                  {`${t('Max Distance to Pickup')} (${t('Miles')}, ${t('Optional')})`}
                 </span>
                 <TFieldNumber
                   input={
@@ -722,15 +762,15 @@ class EquipmentDetails extends PureComponent {
                       value: maxDistance
                     }
                   }
-                  placeholder="How far will you travel per job"
+                  placeholder={t('How far will you travel per job')}
                 />
               </Col>
               <Col md={6} className="pt-2">
                 <h4 className="subhead">
-                  Upload a picture of your Truck (Optional)
+                  {`${t('Upload a picture of your Truck')} (${t('Optional')})`}
                 </h4>
                 <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload} />
-                {imageUploading && <span>Uploading Image...</span>}
+                {imageUploading && <span>{t('Uploading Image')}...</span>}
               </Col>
             </Row>
             <Row className="col-12 pt-4">
@@ -738,7 +778,7 @@ class EquipmentDetails extends PureComponent {
                 <Button className="tertiaryButton" type="button"
                   onClick={toggle} disabled={imageUploading}
                 >
-                  Cancel
+                  {t('Cancel')}
                 </Button>
               </ButtonToolbar>
               <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
@@ -746,7 +786,7 @@ class EquipmentDetails extends PureComponent {
                 {/*  Delete*/}
                 {/*</Button>*/}
                 <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
-                  Save
+                  {t('Save')}
                 </Button>
               </ButtonToolbar>
             </Row>
@@ -773,7 +813,8 @@ EquipmentDetails.propTypes = {
 };
 
 EquipmentDetails.defaultProps = {
-  equipmentId: 0
+  equipmentId: 0,
+  t: () => {}
 };
 
 export default withTranslation()(EquipmentDetails);

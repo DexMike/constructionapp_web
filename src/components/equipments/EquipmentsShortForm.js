@@ -33,8 +33,8 @@ class EquipmentsShortForm extends PureComponent {
       minTons: 0,
       maxDistanceToPickup: '',
       truckType: '',
-      isRatedHour: false,
-      isRatedTon: false,
+      isRatedHour: true,
+      isRatedTon: true,
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerExternalEquipmentNumber: { touched: false, error: '' },
@@ -214,6 +214,7 @@ class EquipmentsShortForm extends PureComponent {
       modifiedOn: moment.utc().format(),
       modifiedBy: userId
     };
+
     equipments.push(newEquipment);
     // }
     const materials = [];
@@ -229,13 +230,14 @@ class EquipmentsShortForm extends PureComponent {
       materials.push(newMaterial);
     }
     try {
-      console.log({equipments, equipmentMaterials: materials});
+      // console.log({equipments, equipmentMaterials: materials});
       await EquipmentService.createEquipmentsBatch(equipments, materials);
     } catch (e) {
       // console.log(e);
     }
 
-    onSuccess({externalEquipmentNumber,
+    onSuccess({
+      externalEquipmentNumber,
       truckType,
       selectedMaterials,
       isRatedHour,
@@ -342,7 +344,7 @@ class EquipmentsShortForm extends PureComponent {
           <div className="form">
             <Row className="col-12">
               <Col md={12}>
-                <h3 className="subhead">
+                <h3 className="subhead">                  
                   {t('Tell us about your truck')}
                 </h3>
               </Col>
