@@ -115,7 +115,7 @@ npm run deployProd'''
             sh '''npm install
 npm --max_old_space_size=8192 run deployStaging'''
             slackSend botUser: true,
-              channel: 'staging',
+              channel: 'jenkins',
               color: 'good',
               message: 'Stargate staging deploy finished successfully',
               teamDomain: 'trelarlogistics',

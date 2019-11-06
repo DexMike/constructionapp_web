@@ -393,7 +393,7 @@ class CarriersCustomerPage extends Component {
         let materialsFoundCount = 0;
         filters.materialType.forEach((material) => {
           carrier.carrierMaterials.forEach((carrierMaterial) => {
-            if (material.value === carrierMaterial) {
+            if (material === carrierMaterial) {
               materialsFoundCount += 1;
             }
             return false;
@@ -490,7 +490,12 @@ class CarriersCustomerPage extends Component {
 
   handleMultiChange(data) {
     const { filters } = this.state;
-    filters.materialType = data;
+    const selectedTypes = [];
+    data.map((item) => {
+      selectedTypes.push(item.value);
+      return item;
+    });
+    filters.materialType = selectedTypes;
     this.setState({
       filters
     }, async function changed() {
@@ -500,7 +505,12 @@ class CarriersCustomerPage extends Component {
 
   handleMultiTruckChange(data) {
     const { filters } = this.state;
-    filters.equipmentType = data;
+    const selectedTypes = [];
+    data.map((item) => {
+      selectedTypes.push(item.value);
+      return item;
+    });
+    filters.equipmentType = selectedTypes;
     this.setState({
       filters
     }, async function changed() {
@@ -1060,7 +1070,6 @@ class CarriersCustomerPage extends Component {
       filters,
       carriers
     } = this.state;
-
 
     return (
       <Container>
