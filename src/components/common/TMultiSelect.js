@@ -41,7 +41,7 @@ class MultiSelectField extends PureComponent {
 }
 
 const renderMultiSelectField = function renderMultiSelectField(
-  { input, options, placeholder, id, horizontalScroll, selectedItems, 
+  { input, options, placeholder, id, horizontalScroll, selectedItems,
     meta: { touched, error }
   }
 ) {
@@ -50,7 +50,7 @@ const renderMultiSelectField = function renderMultiSelectField(
   if (selectedItems !== undefined) {
     selected = selectedItems.length;
   }
-  
+
   function slideTo(direction) {
     const selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
     if (direction) {
@@ -141,13 +141,14 @@ MultiSelectField.propTypes = {
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.number,
-    value: PropTypes.string,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     label: PropTypes.string
   })),
   value: PropTypes.oneOfType([
     PropTypes.string,
+    PropTypes.number,
     PropTypes.arrayOf(PropTypes.shape({
-      value: PropTypes.string,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       label: PropTypes.string
     }))
   ]).isRequired

@@ -448,6 +448,8 @@ class DashboardCustomerPage extends Component {
 
   renderJobList() {
     const {profile, loaded, totalJobs, totalCount} = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -464,7 +466,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-    
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;

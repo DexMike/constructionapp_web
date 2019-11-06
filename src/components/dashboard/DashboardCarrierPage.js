@@ -4,7 +4,7 @@ import {
   Card,
   CardBody,
   Col,
-  Container,
+  Container, Modal,
   Row
 } from 'reactstrap';
 import {useTranslation} from 'react-i18next';
@@ -16,6 +16,9 @@ import JobFilter from '../filters/JobFilter';
 import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import NumberFormatting from '../../utils/NumberFormatting';
+import UserService from '../../api/UserService';
+import DriverForm from '../drivers/DriverForm';
+import PromptDefaultDriverModal from './PromptDefaultDriverModal';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -60,7 +63,8 @@ class DashboardCarrierPage extends Component {
       page: 0,
       rows: 10,
       totalCount: 10,
-      totalJobs: 0
+      totalJobs: 0,
+      defaultDriverPrompt: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -74,18 +78,30 @@ class DashboardCarrierPage extends Component {
   }
 
   async componentDidMount() {
+    let { defaultDriverPrompt } = { ...this.state };
     const profile = await ProfileService.getProfile();
-    this.setState({ profile });
-    await this.fetchJobsInfo();
-    this.setState({ loaded: true });
+    const user = await UserService.getUserById(profile.userId);
+    if (user.defaultDriverPrompt === true) {
+      // TODO need to make a modal here
+      // alert('You need to add a default driver!');
+      defaultDriverPrompt = true;
+    }
+    const { jobsInfo, totalJobs } = await this.fetchJobsInfo(profile);
+    this.setState({
+      profile,
+      user,
+      jobsInfo,
+      totalJobs,
+      defaultDriverPrompt,
+      loaded: true
+    });
   }
 
-  async fetchJobsInfo() {
-    const { profile } = this.state;
+  async fetchJobsInfo(profile) {
     const response = await JobService.getCarrierJobsInfo(profile.companyId);
     const jobsInfo = response.data;
     const { totalJobs } = response;
-    this.setState({ jobsInfo, totalJobs });
+    return { jobsInfo, totalJobs };
   }
 
   returnJobs(jobs, filters, metadata) {
@@ -195,42 +211,34 @@ class DashboardCarrierPage extends Component {
     return filters.materialType;
   }
 
-  // renderModal stolen from MarketplaceCarrierPage
-  renderModal() {
-    // const {
-    //   // equipments,
-    //   // startAvailability,
-    //   // endAvailability,
-    //   // equipmentType,
-    //   // minCapacity,
-    //   // materials,
-    //   // zipCode,
-    //   // rateType,
-    //   modal,
-    //   selectedEquipment
-    // } = this.state;
-    // return (
-    //   <Modal
-    //     isOpen={modal}
-    //     toggle={this.toggleAddJobModal}
-    //     className="modal-dialog--primary modal-dialog--header"
-    //   >
-    //     <div className="modal__header">
-    //       <button type="button" className="lnr lnr-cross modal__close-btn"
-    //               onClick={this.toggleAddJobModal}
-    //       />
-    //       <h4 className="bold-text modal__title">Job Request</h4>
-    //     </div>
-    //     <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-    //       <JobCreateForm
-    //         selectedEquipment={selectedEquipment}
-    //         closeModal={this.toggleAddJobModal}
-    //         selectedMaterials={this.returnSelectedMaterials}
-    //         getAllMaterials={this.retrieveAllMaterials}
-    //       />
-    //     </div>
-    //   </Modal>
-    // );
+  renderPromptDefaultDriverModal() {
+    const {
+      defaultDriverPrompt,
+      profile,
+      user
+    } = this.state;
+    return (
+      <Modal
+        isOpen={defaultDriverPrompt}
+        toggle={() => { this.setState({defaultDriverPrompt: !defaultDriverPrompt}); }}
+        className="driver-modal modal-  dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <div className="modal__body" style={{ padding: '0px' }}>
+          <PromptDefaultDriverModal
+            profile={profile}
+            user={user}
+            toggle={() => { this.setState({defaultDriverPrompt: !defaultDriverPrompt}); }}
+          />
+          {/*<DriverForm*/}
+          {/*  toggle={this.toggleAddDriversModal}*/}
+          {/*  driverId={0}*/}
+          {/*  currentUser={{}}*/}
+          {/*  onSuccess={this.handleAddedDriver}*/}
+          {/*/>*/}
+        </div>
+      </Modal>
+    );
   }
 
   renderGoTo() {
@@ -545,7 +553,7 @@ class DashboardCarrierPage extends Component {
     if (loaded) {
       return (
         <Container className="dashboard">
-          {this.renderModal()}
+          {this.renderPromptDefaultDriverModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}
