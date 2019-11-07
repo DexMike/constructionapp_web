@@ -168,10 +168,31 @@ class TMapGPS extends Component {
   addRouteShapeToMap(route) {
     const lineString = new H.geo.LineString();
     const routeShape = route.shape;
+    const lineStringHalf = new H.geo.LineString();
+    const halfRoute = routeShape.length / 2;
+    let halfRouteShape;
+    let routeReturn = false;
+    let i;
+
+    // Get the point of the half route
+    for (i = 1; i <= routeShape.length; i++) {
+      if (i === halfRoute) {
+        halfRouteShape = routeShape[i];
+      }
+    }
 
     routeShape.forEach((point) => {
       const parts = point.split(',');
       lineString.pushLatLngAlt(parts[0], parts[1]);
+
+      // Return route
+      if (point <= halfRouteShape) {
+        const partshalf = point.split(',');
+        lineStringHalf.pushLatLngAlt(partshalf[0], partshalf[1]);
+      }
+      if (point === halfRouteShape) {
+        routeReturn = true;
+      }
     });
 
     const polyline = new H.map.Polyline(lineString, {
@@ -180,17 +201,26 @@ class TMapGPS extends Component {
         strokeColor: 'rgb(0, 111, 83)'
       }
     });
+    // Return poliline
+    const polylineHalf = new H.map.Polyline(lineStringHalf, {
+      style: {
+        lineWidth: 2,
+        strokeColor: 'rgb(113, 75, 166)'
+      }
+    });
+
     // Add the polyline to the map
     this.mapGPS.addObject(polyline);
-
     const bounds = polyline.getBoundingBox();
     const newBounds = GeoUtils.setZoomBounds(bounds);
+
+    // Add the return polyline to the map
+    this.mapGPS.addObject(polylineHalf);
 
     // And zoom to its bounding rectangle
     this.mapGPS.getViewModel().setLookAtData({
       newBounds
     });
-    /**/
   }
 
   addMarkersToMap(startAddress, endAddress) {
