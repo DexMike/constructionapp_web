@@ -684,19 +684,38 @@ class ReportsComparison extends Component {
   }
 
   exportToPDF() {
+    window.scrollTo(0, 0);
     const input = document.getElementById('visualizations');
     html2canvas(input)
       .then((canvas) => {
-        const img = canvas.toDataURL('image/jpg');
+        const img = canvas.toDataURL('image/jpeg', 0.5);
+        let marginTop = 5;
+        let marginLeft = 5;
+
         const doc = new jsPDF({
           orientation: 'landscape',
           unit: 'px',
           format: [canvas.width, canvas.height]
         });
-        const width = doc.internal.pageSize.getWidth();    
-        const height = doc.internal.pageSize.getHeight();
-        // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
-        doc.addImage(img, 'JPEG', 0, 0, width, height);
+        const width = Math.round(doc.internal.pageSize.getWidth());    
+        const height = Math.round(doc.internal.pageSize.getHeight());
+
+        try {
+          doc.addImage(
+            img,
+            'JPEG',
+            marginLeft,
+            marginTop,
+            width - 10,
+            height - 10,
+            StringGenerator.getDateString(),
+            70,
+            0
+          );
+        } catch(e) {
+          console.log('PDF Error: ', e);
+        }
+        
         doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
       });
   }
