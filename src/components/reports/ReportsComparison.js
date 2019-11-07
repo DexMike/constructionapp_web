@@ -710,14 +710,21 @@ class ReportsComparison extends Component {
   extractCSVInfo(data) {
     let newData = [];
     const { activeTab } = this.state;
+
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    })
+
     if (activeTab === '1') {
       newData = data.map(d => ({
         'Material Name': d.name,
-        'Total Cost': Number(d.totEarnings),
+        'Total Cost': formatter.format(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Cost per Ton Mile': Number(d.avgEarningsJob),
-        'Rate per Ton': Number(d.avgEarningsHour),
+        'Cost per Ton Mile': formatter.format(d.avgEarningsJob),
+        'Rate per Ton': formatter.format(d.avgEarningsHour),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
@@ -725,11 +732,11 @@ class ReportsComparison extends Component {
     if (activeTab === '2') {
       newData = data.map(d => ({
         'Customer Name': d.name,
-        'Total Cost': Number(d.totEarnings),
+        'Total Cost': formatter.format(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Rate per Ton': Number(d.avgEarningsTon),
+        'Rate per Ton': formatter.format(d.avgEarningsTon),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
@@ -737,11 +744,11 @@ class ReportsComparison extends Component {
     if (activeTab === '3') {
       newData = data.map(d => ({
         'Job Name': d.name,
-        'Total Cost': Number(d.totEarnings),
+        'Total Cost': formatter.format(d.totEarnings),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Cost per Ton Mile': Number(d.avgEarningsJob),
-        'Rate per Ton': Number(d.avgEarningsTon),
+        'Cost per Ton Mile': formatter.format(d.avgEarningsJob),
+        'Rate per Ton': formatter.format(d.avgEarningsTon),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
