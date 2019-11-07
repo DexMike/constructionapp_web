@@ -1,0 +1,15 @@
+.indicators{
+    list-style-type: none;
+    padding: 0;
+    margin: 0 10px 10px;
+    text-align: center;
+}
+
+.indicators li{
+    display: inline;
+    margin: 0 15px;
+}
+
+.indicators li svg{
+    margin: 0 5px;
+}
