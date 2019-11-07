@@ -166,3 +166,28 @@
 .primaryGreen {
   color: darkgreen;
 }
+
+.div-percent-bar {
+  -webkit-transition: 0.50s;
+  -moz-transition: 0.50s;
+  -o-transition: 0.50s;
+  width: 50px;
+  transition: 0.50s;
+  background-color: white;
+}
+.div-percent-bar.show {
+  background-color: #218169 !important;
+}
+
+.div-percent-bar_comp {
+  -webkit-transition: 0.50s;
+  -moz-transition: 0.50s;
+  -o-transition: 0.50s;
+  width: 1%;
+  transition: 0.50s;
+  background-color: white;
+}
+
+.div-percent-bar_comp.show_comp {
+  background-color: #9A9A9A !important;
+}
