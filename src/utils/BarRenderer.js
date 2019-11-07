@@ -20,6 +20,7 @@ import {
   Row
 } from 'reactstrap';
 import NumberFormat from 'react-number-format';
+import '../components/reports/Reports.css';
 
 function formatNumber(number) {
   return Math.floor(number)
@@ -35,14 +36,30 @@ function currencyFormatter(params) {
 // it is arguable that we should not of used React and just returned a string of
 // html as a normal ag-Grid cellRenderer.
 export default class BarRenderer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { 
+      show: false
+    };
+  }
+
+  componentDidMount() {
+    const that = this;
+    setTimeout(() => { 
+      that.setState({
+        show: true
+      })
+    }, 100);
+  }
+
   render() {
     const data = this.props;    
     const maximum = data.value.max;
-    let total = data.value.total;
-    let totalComp = data.value.totalComp;
-    const type = data.value.type;
-    let percent = 0;
-    let percentComp = 0;
+    let {total} = data.value;
+    let {totalComp} = data.value;
+    const {type} = data.value;
+    let percent = 50;
+    let percentComp = 50;
     let numberOfDecimals = 2;
 
     try {
@@ -82,9 +99,23 @@ export default class BarRenderer extends React.Component {
       numberOfDecimals = 0;
     }
 
+    // avoid decimals in millions
+    if (total >= 1000000) {
+      total = Math.round(total);
+      numberOfDecimals = 0;
+    }
+    if (totalComp >= 1000000) {
+      totalComp = Math.round(totalComp);
+      numberOfDecimals = 0;
+    }
+
+    
+
+    const { show } = this.state;
+
     return (
       <React.Fragment>
-        <Row style={{ marginLeft: '10px' }}>
+        <Row>
           <Col md={4} style={{ color: '#333333', fontWeight: 'bold', textAlign: 'right' }}>
             <NumberFormat
               value={total}
@@ -98,19 +129,19 @@ export default class BarRenderer extends React.Component {
           </Col>
           <Col md={8} className="text-right">
             <div
-              className="div-percent-bar"
+              className={`div-percent-bar ${show ? 'show' : ''}`}
               style={{
                 width: `${percent}%`,
                 marginTop: '4px',
-                backgroundColor: '#218169',
-                marginLeft: '4px',
+                // backgroundColor: '#218169',
+                marginLeft: '4px', 
                 height: '21px'
               }}>
               &nbsp;
             </div>
           </Col>
         </Row>
-        <Row style={{ marginLeft: '10px' }}>
+        <Row>
           <Col md={4} style={{ color: '#999999', fontWeight: 'bold', textAlign: 'right' }}>
             <NumberFormat
               value={totalComp}
@@ -124,11 +155,11 @@ export default class BarRenderer extends React.Component {
           </Col>
           <Col md={8} className="text-right">
             <div
-              className="div-percent-bar"
+              className={`div-percent-bar_comp ${show ? 'show_comp' : ''}`}
               style={{
                 width: `${percentComp}%`,
                 marginTop: '4px',
-                backgroundColor: '#9A9A9A',
+                // backgroundColor: '#9A9A9A',
                 marginLeft: '4px',
                 height: '21px'
               }}>

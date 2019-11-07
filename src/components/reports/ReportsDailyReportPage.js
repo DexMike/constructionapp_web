@@ -293,15 +293,26 @@ class ReportsDailyReportPage extends Component {
 
   extractCSVInfoJobs(data) {
     const { columnsJobs } = this.state;
+
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    })
+
     const newData = data.map(d => ({
-      'Date': d.date,
-      'Completed': d.numJobs,
-      'loads': d.numLoads,
-      'Not completed': d.notCompletedJobs,
-      'In progress': d.jobsInProgress,
-      'Total': d.totalJobs,
-      // 'Rate: $/Ton': d.rateTon,
-      'Rate: $/Hour': d.rateHour
+      Date: d.date,
+      Completed: d.completedJobs,
+      'Not Completed': Number(d.notCompletedJobs),
+      'In Progress': Number(d.jobsInProgress),
+      'Total Jobs': Number(d.totalJobs),
+      'Total Loads': Number(d.totalLoads),
+      'Rate per Ton': formatter.format(d.rateTon),
+      'Cost per Day': formatter.format(d.avgRevenuePerDay),
+      'Total Tons Hauled': Number(d.totalTonsHauled),
+      'Job Duration': Number(d.avgJobTime),
+      'Distance (mi)': Number(d.realDistance),
+      //'Rate: $/Hour': d.rateHour
       /*,
       'Potential Earnings': d.potentialEarnings,
       'Total Market Value': d.totalMarketValue
@@ -312,9 +323,9 @@ class ReportsDailyReportPage extends Component {
 
   extractCSVInfoLoads(data) {
     const newData = data.map(d => ({
-      'Date': d.date,
-      'Loads': d.totalNumberOfLoads,
-      'Completed': d.totalNumberOfCompletedLoads,
+      Date: d.date,
+      Loads: d.totalNumberOfLoads,
+      Completed: d.totalNumberOfCompletedLoads,
       'Distance travelled': d.totalDistanceTravelled
     }))
     return newData;
@@ -627,7 +638,7 @@ class ReportsDailyReportPage extends Component {
             </Col>
           </Row>
           
-          {this.renderCards()}
+          {/* this.renderCards() */}
           <DailyReportFilter
             onReturnFilters={this.returnFilters}
             fetching={(value) => {

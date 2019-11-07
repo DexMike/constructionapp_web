@@ -21,6 +21,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import CloneDeep from 'lodash.clonedeep';
 import GeoUtils from "../utils/GeoUtils";
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
@@ -225,7 +226,8 @@ class FilterComparisonReport extends Component {
       reqHandlerRange: {
         touched: false,
         error: ''
-      }
+      },
+      blankFilters: null
     };
 
     this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -284,6 +286,9 @@ class FilterComparisonReport extends Component {
       }
     }
 
+    //save blank filters
+    const newBlankFilters = CloneDeep(filters);
+
     // This should save the filters, there's no need to save at every change
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
@@ -317,7 +322,8 @@ class FilterComparisonReport extends Component {
       profile,
       selectedRange,
       loaded: true,
-      companiesTypelist: allCompanies
+      companiesTypelist: allCompanies,
+      blankFilters: newBlankFilters
     });
   }
 
@@ -1132,15 +1138,11 @@ class FilterComparisonReport extends Component {
   }
 
   async handleResetFilters() {
-    // set values to default or last saved filter
-    if (localStorage.getItem('filters')) {
-      this.setState({filters: JSON.parse(localStorage.getItem('filters'))},
-        async () => this.fetchCarrierData());
-    } else {
-      // defaults
-      this.saveFilters();
-      await this.fetchCarrierData();
-    }
+    const { blankFilters } = this.state;
+    this.setState({
+      filters: blankFilters
+    })
+    this.fetchCarrierData();
   }
 
   render() {

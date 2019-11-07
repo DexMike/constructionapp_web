@@ -16,6 +16,7 @@ import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
 import TMapGPS from '../common/TMapGPS';
 import '../common/ImageZoom.scss';
+import './Load.css';
 
 const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;
@@ -332,6 +333,20 @@ class LoadsExpandableRow extends Component {
                       >
                         Route
                       </h3>
+                      <ul className="indicators">
+                        <li>
+                          <svg width="14" height="14">
+                            <rect width="14" height="14" fill="rgb(111, 166, 152)"/>
+                          </svg>
+                          <span>Depart</span>
+                        </li>
+                        <li>
+                          <svg width="14" height="14">
+                            <rect width="14" height="14" fill="rgb(107, 173, 191)"/>
+                          </svg>
+                          <span>Return</span>
+                        </li>
+                      </ul>
                     </Col>
                     <Col md={4}>
                       <h3 className="subhead" style={{
