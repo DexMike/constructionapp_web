@@ -36,7 +36,7 @@ TSelectField.propTypes = {
     error: PropTypes.string
   }),
   options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     label: PropTypes.string
   })),
   placeholder: PropTypes.string

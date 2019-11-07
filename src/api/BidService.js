@@ -44,6 +44,16 @@ class BidService extends AgentService {
     return (response);
   }
 
+  static async acceptBid(jobId, bidId) {
+    const response = await super.post(`/jobs/${jobId}/bids/${bidId}/accept`);
+    return (response);
+  }
+
+  static async declineBid(jobId, bidId) {
+    const response = await super.post(`/jobs/${jobId}/bids/${bidId}/decline`);
+    return (response);
+  }
+
   static getDefaultBid() {
     return {
       jobId: 0,
