@@ -100,11 +100,11 @@ export default class BarRenderer extends React.Component {
     }
 
     // avoid decimals in millions
-    if (total >= 1000000) {
+    if (total >= 10000) {
       total = Math.round(total);
       numberOfDecimals = 0;
     }
-    if (totalComp >= 1000000) {
+    if (totalComp >= 10000) {
       totalComp = Math.round(totalComp);
       numberOfDecimals = 0;
     }
