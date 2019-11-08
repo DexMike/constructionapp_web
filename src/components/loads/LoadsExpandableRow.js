@@ -342,7 +342,7 @@ class LoadsExpandableRow extends Component {
                         </li>
                         <li>
                           <svg width="14" height="14">
-                            <rect width="14" height="14" fill="rgb(113, 75, 166)"/>
+                            <rect width="14" height="14" fill="rgb(45, 140, 200)"/>
                           </svg>
                           <span>Return</span>
                         </li>

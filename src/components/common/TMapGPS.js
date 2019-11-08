@@ -75,24 +75,24 @@ class TMapGPS extends Component {
     } catch (e) {
       console.log('ERROR: ', e);
     }
-
+    /*
     for (const wp of distanceInfo) {
       let newWp = '';
-      newWp = `${wp[1]},${wp[0]}`;
+      // newWp = `${wp[1]},${wp[0]}`;
       wps.push(newWp);
     }
-
-    if (wps.length > maxPointsThreshold) {
-      wps = this.reducer(wps);
+    */
+    if (distanceInfo.length > maxPointsThreshold) {
+      distanceInfo = this.reducer(distanceInfo);
     }
-    this.setMarkers(wps);
+    this.setMarkers(distanceInfo);
   }
 
-  setMarkers(wps) {
+  setMarkers(distanceInfo) {
     // markers
-    if (wps.length > 1) {
-      const start = wps[0].split(',');
-      const end = wps.pop().split(',');
+    if (distanceInfo.length > 1) {
+      const start = distanceInfo[0];
+      const end = distanceInfo.pop();
       const startAddress = {
         latitude: start[0],
         longitude: start[1]
@@ -108,7 +108,7 @@ class TMapGPS extends Component {
 
       try {
         this.addRouteShapeToMap({
-          shape: wps
+          shape: distanceInfo
         });
       } catch (e) {
         console.log('TCL: ERROR_>', e);
@@ -168,30 +168,14 @@ class TMapGPS extends Component {
   addRouteShapeToMap(route) {
     const lineString = new H.geo.LineString();
     const routeShape = route.shape;
-    const lineStringHalf = new H.geo.LineString();
-    const halfRoute = routeShape.length / 2;
-    let halfRouteShape;
-    let routeReturn = false;
-    let i;
-
-    // Get the point of the half route
-    for (i = 1; i <= routeShape.length; i++) {
-      if (i === halfRoute) {
-        halfRouteShape = routeShape[i];
-      }
-    }
+    const lineStringReturn = new H.geo.LineString();
 
     routeShape.forEach((point) => {
-      const parts = point.split(',');
-      lineString.pushLatLngAlt(parts[0], parts[1]);
-
+      lineString.pushLatLngAlt(point[0], point[1]);
+      
       // Return route
-      if (point <= halfRouteShape) {
-        const partshalf = point.split(',');
-        lineStringHalf.pushLatLngAlt(partshalf[0], partshalf[1]);
-      }
-      if (point === halfRouteShape) {
-        routeReturn = true;
+      if (point[2] === 1) {
+        lineStringReturn.pushLatLngAlt(point[0], point[1]);
       }
     });
 
@@ -202,10 +186,10 @@ class TMapGPS extends Component {
       }
     });
     // Return poliline
-    const polylineHalf = new H.map.Polyline(lineStringHalf, {
+    const polylineHalf = new H.map.Polyline(lineStringReturn, {
       style: {
         lineWidth: 2,
-        strokeColor: 'rgb(113, 75, 166)'
+        strokeColor: 'rgb(45, 140, 200)'
       }
     });
 
