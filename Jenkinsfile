@@ -8,6 +8,7 @@ def env_fullname() {
     "demo":    "Demo",
     "qa":      "QA",
     "staging": "Staging",
+    "cat": "CAT",
     "newqa":   "QA",
   ]
   return name["${BRANCH_NAME}"]
@@ -22,6 +23,7 @@ def app_env() {
     "demo":    "Demo",
     "qa":      "QA",
     "staging": "Staging",
+    "cat": "CAT",
     "newqa":   "QA",
   ]
   return name["${BRANCH_NAME}"]
@@ -36,6 +38,7 @@ def env_shortname() {
     "demo":    "demo",
     "qa":      "qa",
     "staging": "staging",
+    "cat": "cat",
     "newqa":   "qa",
   ]
   return name["${BRANCH_NAME}"]
@@ -50,6 +53,7 @@ def user_pool_id() {
     "demo":    "us-east-1_32MZPld6o",
     "qa":      "us-east-1_Yrq15MnQf",
     "newqa":   "us-east-1_pb3k8WLi6",
+    "cat": "us-east-1_klczD3P71",
     "staging": "us-east-1_GkxSiARkF",
   ]
   return id_map["${BRANCH_NAME}"]
@@ -63,6 +67,7 @@ def app_client_id() {
     "demo":    "5p0qgf8n9ldmhaup4q0qba84j3",
     "qa":      "6tlhjedvj2k9e50l98t930i4gu",
     "staging": "3sahkf5trdejfrrfujb0rdt1t9",
+    "cat": "7cgrvdq48bt613kgvqnu8bhcqg",
     "newqa":   "22hd146pgsl4bh6b5afu5t179",
   ]
   return id_map["${BRANCH_NAME}"]
@@ -77,6 +82,7 @@ def pool_id() {
     "demo":    "us-east-1:f96db308-49c5-4fc0-95b1-c3ff9513faa3",
     "qa":      "us-east-1:340c27b0-2315-48cf-9290-588039295b26",
     "staging": "us-east-1:2076fc41-91e6-4796-b306-ac52c6b24486",
+    "cat": "us-east-1:438cf1ca-6b3c-4717-b773-6c7a6aad68ff",
     "newqa":   "us-east-1:349c25e6-aec7-4d87-a3c6-3ccfd75b64ea",
   ]
   return id_map["${BRANCH_NAME}"]
@@ -99,6 +105,7 @@ def cloudfront_id() {
     "dev":     "E1LAYT176RPT8J",
     "demo":    "E3VLWJXIOSHO30",
     "qa":      "E2W2Q6ROFYLZDI",
+    "cat":      "E1XUS55INHEOEY",
     "staging": "E3KJAHZFANQPXC"
   ]
   return id_map["${BRANCH_NAME}"]
