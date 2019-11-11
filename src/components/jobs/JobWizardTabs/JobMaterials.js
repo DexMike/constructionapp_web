@@ -12,6 +12,7 @@ import SelectField from '../../common/TSelect';
 import '../jobs.css';
 import TField from '../../common/TField';
 import TSpinner from '../../common/TSpinner';
+import TFormat from '../../common/TFormat';
 
 // import USstates from '../../utils/usStates';
 
@@ -25,6 +26,7 @@ class JobMaterials extends PureComponent {
     this.handleSubMaterialTypeChange = this.handleSubMaterialTypeChange.bind(this);
     this.handleQuantityTypeChange = this.handleQuantityTypeChange.bind(this);
     this.handleQuantityChange = this.handleQuantityChange.bind(this);
+    this.handleOffClick = this.handleOffClick.bind(this);
     this.handleEstimatedMaterialPricingChange = this.handleEstimatedMaterialPricingChange.bind(this);
   }
 
@@ -61,12 +63,20 @@ class JobMaterials extends PureComponent {
   }
 
   handleQuantityChange(quantity) {
-    const {data} = {...this.props};
-    const {handleInputChange} = {...this.props};
+    const {data, handleInputChange} = {...this.props};
     let {value} = quantity.target;
-    value = value.replace(/\D/g, '');
+    // value = value.replace(/\D/g, '');
+    value = TFormat.asIntegerNoLeadingZeros(value);
     data.quantity = value;
     handleInputChange('tabMaterials', data);
+  }
+
+  handleOffClick(e) {
+    const {data, handleInputChange} = {...this.props};
+    if (e === 'estimatedMaterialPricing') {
+      data.estMaterialPricing = TFormat.asFloatTwoDecimals(data.estMaterialPricing);
+      handleInputChange('tabMaterials', data);
+    }
   }
 
 
@@ -74,7 +84,7 @@ class JobMaterials extends PureComponent {
     const {data} = {...this.props};
     const {handleInputChange} = {...this.props};
     let {value} = estimatedMaterialPricing.target;
-    value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    value = TFormat.asFloatOneLeadingZero(value);
     data.estMaterialPricing = value;
     handleInputChange('tabMaterials', data);
   }
@@ -208,6 +218,7 @@ class JobMaterials extends PureComponent {
                           value: data.estMaterialPricing
                         }
                       }
+                      offClick={this.handleOffClick}
                       placeholder=""
                       type="text"
                       // meta={data.reqHandlerEstimatedTons}

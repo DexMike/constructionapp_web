@@ -4,31 +4,20 @@ import {
   Row,
   Col,
   Button,
-  Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Container,
   Card
 } from 'reactstrap';
-import CloneDeep from 'lodash.clonedeep';
-import moment from 'moment';
-import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
-import BookingService from '../../api/BookingService';
-import BookingEquipmentService from '../../api/BookingEquipmentService';
-import LoadService from '../../api/LoadService';
-import UserService from '../../api/UserService';
-import TwilioService from '../../api/TwilioService';
-import UserUtils from '../../api/UtilsService';
 
 class JobDeletePopup extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loaded: false,
-      profile: null
+      loaded: false
     };
 
     this.closeNow = this.closeNow.bind(this);
@@ -36,15 +25,7 @@ class JobDeletePopup extends Component {
   }
 
   async componentDidMount() {
-    let profile = [];
-    try {
-      profile = await ProfileService.getProfile();
-    } catch (error) {
-      console.error('Unable to obtain profile');
-    }
-
     this.setState({
-      profile,
       loaded: true
     });
   }
@@ -55,36 +36,12 @@ class JobDeletePopup extends Component {
   }
 
   async deleteJob() {
-    const { jobId, jobName, deleteJobModalPopup } = this.props;
-    const { profile } = this.state;
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
-
-    const job = await JobService.getJobById(jobId);
-    let newJob = [];
-    const requesterCarriersIds = [];
-
-    const requesterCarriers = await JobService.getRequestersByCancelledJobId(jobId);
-    if (requesterCarriers.length > 0) {
-      for (const requesterCarrier of requesterCarriers) {
-        requesterCarriersIds.push(requesterCarrier.id);
-      }
-      const notification = {
-        usersIds: requesterCarriersIds,
-        body: `${envString}The job ${jobName} you requested has been deleted.`
-      };
-      await TwilioService.smsBatchSending(notification);
-    }
-
-    newJob = CloneDeep(job);
-    newJob.status = 'Job Deleted';
-    newJob.actualEndTime = moment.utc().format();
-    newJob.modifiedOn = moment.utc().format();
-    newJob.modifiedBy = profile.userId;
+    const { jobId, deleteJobModalPopup } = this.props;
 
     try {
-      newJob = await JobService.updateJob(newJob);
+      await JobService.deleteJob(jobId);
     } catch (e) {
-      console.error('>> NOT SAVED: JobDeletePopup -> deleteJob -> e', e)  ;
+      console.error('>> NOT SAVED: JobDeletePopup -> deleteJob -> e', e);
     }
 
     // bubble to parent
@@ -106,7 +63,7 @@ class JobDeletePopup extends Component {
               {jobName}
             </div>
           </ModalHeader>
-          <ModalBody className="text-left">
+          <ModalBody className="text-left" backdrop="static">
             <p style={{ fontSize: 14 }}>
               Are you sure you want to delete this job?
             </p>
@@ -123,7 +80,7 @@ class JobDeletePopup extends Component {
                 &nbsp;
                 <Button
                   color="primary"
-                  onClick={(e) => {
+                  onClick={() => {
                     this.deleteJob();
                   }
                 }

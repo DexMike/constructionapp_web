@@ -207,21 +207,6 @@ class DashboardCustomerPage extends Component {
     this.setState({ rows });
   }
 
-  // handleJobEdit(id) {
-  //   const { jobs } = this.state;
-  //   const [selectedJob] = jobs.filter((job) => {
-  //     if (id === job.id) {
-  //       return job;
-  //     }
-  //     return false;
-  //   }, id);
-  //   selectedJob.materials = ['Any'];
-  //   this.setState({
-  //     selectedJob,
-  //     modal: true
-  //   });
-  // }
-
   async toggleNewJobModal() {
     const {modalAddJob, filters} = this.state;
     if (modalAddJob) {
@@ -271,6 +256,7 @@ class DashboardCustomerPage extends Component {
         isOpen={modalAddJob}
         toggle={this.toggleNewJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <JobCreatePopup
           toggle={this.toggleNewJobModal}
@@ -303,9 +289,6 @@ class DashboardCustomerPage extends Component {
         <Col md={10}>
           <PageTitle />
         </Col>
-        {/*<Col md={2}>*/}
-        {/*  <AddJobButton handle={this.toggleNewJobModal}/>*/}
-        {/*</Col>*/}
         <Col md={2}>
           <AddJobButton handle={this.toggleNewJobWizardModal}/>
         </Col>
@@ -465,6 +448,8 @@ class DashboardCustomerPage extends Component {
 
   renderJobList() {
     const {profile, loaded, totalJobs, totalCount} = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     let {jobs} = this.state;
     let onOfferJobCount = 0;
     let publishedJobCount = 0;
@@ -481,7 +466,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-    
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;

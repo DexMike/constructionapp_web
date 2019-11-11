@@ -236,15 +236,15 @@ class CarriersCustomerPage extends Component {
       return newCarrier;
     });
 
-    if (groupsFavorites) {
-      // if we find the equipment's companyId in
-      // groupsFavorites we favorite it
-      carriers.map((carrier) => {
-        const newCarrier = carrier;
-        if (groupsFavorites.includes(newCarrier.id)) {
-          newCarrier.favorite = true;
-        }
-        return newCarrier;
+    if (groupsFavorites && Object.keys(groupsFavorites).length > 0) {
+      Object.keys(groupsFavorites).forEach((key) => {
+        carriers.map((carrier) => {
+          const newCarrier = carrier;
+          if (groupsFavorites[key].companyId === newCarrier.id) {
+            newCarrier.favorite = true;
+          }
+          return newCarrier;
+        });
       });
     }
 
@@ -393,7 +393,7 @@ class CarriersCustomerPage extends Component {
         let materialsFoundCount = 0;
         filters.materialType.forEach((material) => {
           carrier.carrierMaterials.forEach((carrierMaterial) => {
-            if (material.value === carrierMaterial) {
+            if (material === carrierMaterial) {
               materialsFoundCount += 1;
             }
             return false;
@@ -490,7 +490,12 @@ class CarriersCustomerPage extends Component {
 
   handleMultiChange(data) {
     const { filters } = this.state;
-    filters.materialType = data;
+    const selectedTypes = [];
+    data.map((item) => {
+      selectedTypes.push(item.value);
+      return item;
+    });
+    filters.materialType = selectedTypes;
     this.setState({
       filters
     }, async function changed() {
@@ -500,7 +505,12 @@ class CarriersCustomerPage extends Component {
 
   handleMultiTruckChange(data) {
     const { filters } = this.state;
-    filters.equipmentType = data;
+    const selectedTypes = [];
+    data.map((item) => {
+      selectedTypes.push(item.value);
+      return item;
+    });
+    filters.equipmentType = selectedTypes;
     this.setState({
       filters
     }, async function changed() {
@@ -595,7 +605,7 @@ class CarriersCustomerPage extends Component {
       await this.fetchCarriers();
     }); */
     const self = this;
-    const { value } = e.target;
+    let { value } = e.target;
     const { filters, reqHandlerZip, reqHandlerRange } = this.state;
     const filter = e.target.name;
     let invalidZip = false;
@@ -615,15 +625,16 @@ class CarriersCustomerPage extends Component {
       invalidZip = false;
     }
 
-    if (filter === 'range' && (value.length > 3 || value < 0)) {
-      this.setState({
-        reqHandlerRange: {
-          ...reqHandlerRange,
-          error: 'Range can not be more than 999 and less than 0',
-          touched: true
-        }
-      });
-      invalidRange = true;
+    if (filter === 'range' && (value > 999 || value < 0 || value.length === 0)) {
+      value = '999';
+      // this.setState({
+      //   reqHandlerRange: {
+      //     ...reqHandlerRange,
+      //     error: 'Range can not be more than 999 and less than 0',
+      //     touched: true
+      //   }
+      // });
+      // invalidRange = true;
     } else {
       this.setState({
         reqHandlerRange: {
@@ -728,6 +739,7 @@ class CarriersCustomerPage extends Component {
         isOpen={modalSelectMaterials}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__header">
           <button
@@ -1018,7 +1030,7 @@ class CarriersCustomerPage extends Component {
     const { unfavoriteModal, selectedFavoriteCompanyId, selectedFavoriteCompanyName } = this.state;
     return (
       <React.Fragment>
-        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal">
+        <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal" backdrop="static">
           <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
             <div style={{ fontSize: 16, color: '#FFF' }}>
               Are you sure you want to unfavorite &apos;{selectedFavoriteCompanyName}&apos;?
@@ -1058,7 +1070,6 @@ class CarriersCustomerPage extends Component {
       filters,
       carriers
     } = this.state;
-
 
     return (
       <Container>

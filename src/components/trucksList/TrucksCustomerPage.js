@@ -270,7 +270,7 @@ class TrucksCustomerPage extends Component {
 
   async handleFilterChange(e) {
     const self = this;
-    const {value} = e.target;
+    let {value} = e.target;
     const {filters, reqHandlerZip, reqHandlerRange} = this.state;
     const filter = e.target.name;
     let invalidZip = false;
@@ -299,15 +299,16 @@ class TrucksCustomerPage extends Component {
       invalidZip = false;
     }
 
-    if (filter === 'range' && (value.length > 3 || value < 0)) {
-      this.setState({
-        reqHandlerRange: {
-          ...reqHandlerRange,
-          error: 'Range can not be more than 999 and less than 0',
-          touched: true
-        }
-      });
-      invalidRange = true;
+    if (filter === 'range' && (value > 999 || value < 0 || value.length === 0)) {
+      value = '999';
+      // this.setState({
+      //   reqHandlerRange: {
+      //     ...reqHandlerRange,
+      //     error: 'Range can not be more than 999 and less than 0',
+      //     touched: true
+      //   }
+      // });
+      // invalidRange = true;
     } else {
       this.setState({
         reqHandlerRange: {
@@ -509,6 +510,7 @@ class TrucksCustomerPage extends Component {
         isOpen={modalSelectMaterials}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
       >
         <div className="modal__header">
           <button
@@ -567,6 +569,7 @@ class TrucksCustomerPage extends Component {
         isOpen={modal}
         toggle={this.toggleAddJobModal}
         className="modal-dialog--primary modal-dialog--header form"
+        backdrop="static"
       >
         <div className="modal__header">
           <button type="button" className="lnr lnr-cross modal__close-btn"

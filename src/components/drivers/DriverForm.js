@@ -9,13 +9,14 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
+import { withTranslation } from 'react-i18next';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import UserManagementService from '../../api/UserManagementService';
-import TwilioService from '../../api/TwilioService';
-import CompanyService from '../../api/CompanyService';
 import TSubmitButton from '../common/TSubmitButton';
+import CompanyService from '../../api/CompanyService';
+import TwilioService from '../../api/TwilioService';
 
 class DriverForm extends Component {
   constructor(props) {
@@ -33,11 +34,9 @@ class DriverForm extends Component {
       btnSubmitting: false,
       reqHandlerFName: {touched: false, error: ''},
       reqHandlerLName: {touched: false, error: ''},
-      reqHandlerEmail: {touched: false, error: ''},
       reqHandlerPhone: {touched: false, error: ''},
       loaded: false,
       step: 1,
-      updateNewDriver: false,
       inviteStatus: false,
       inviteMessage: '',
       sendingSMS: false
@@ -50,7 +49,16 @@ class DriverForm extends Component {
 
   async componentDidMount() {
     const {driverId} = this.props;
-    let {id, firstName, lastName, email, mobilePhone, userStatus, driverStatus, selectedUser} = this.state;
+    let {
+      id,
+      firstName,
+      lastName,
+      email,
+      mobilePhone,
+      userStatus,
+      driverStatus,
+      selectedUser
+    } = this.state;
 
     if (driverId) {
       const driver = await DriverService.getDriverById(driverId);
@@ -89,16 +97,6 @@ class DriverForm extends Component {
   phoneToNumberFormat(phone) {
     const num = Number(phone.replace(/\D/g, ''));
     return num;
-  }
-
-  checkPhoneFormat(phone) {
-    const phoneNotParents = String(this.phoneToNumberFormat(phone));
-    const areaCode3 = phoneNotParents.substring(0, 3);
-    const areaCode4 = phoneNotParents.substring(0, 4);
-    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
-      return false;
-    }
-    return true;
   }
 
   async sendDriverInvite(user) {
@@ -141,8 +139,18 @@ class DriverForm extends Component {
     });
   }
 
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(this.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
+      return false;
+    }
+    return true;
+  }
+
   async saveUser() {
-    const {toggle, currentUser} = this.props;
+    const {toggle, currentUser, onSuccess} = this.props;
     this.setState({btnSubmitting: true});
     const isValid = await this.isFormValid();
     if (!isValid) {
@@ -151,7 +159,7 @@ class DriverForm extends Component {
     }
     const {
       firstName,
-      lastName, email, mobilePhone, userStatus, selectedUser, driverStatus, updateNewDriver
+      lastName, email, mobilePhone, selectedUser
     } = this.state;
     const user = selectedUser;
     user.mobilePhone = `+1${mobilePhone}`;
@@ -162,13 +170,12 @@ class DriverForm extends Component {
     if (user && user.id) {
       user.modifiedBy = currentUser.userId;
       user.modifiedOn = moment.utc().format();
-      await UserService.updateUser(user);
-      if (updateNewDriver || driverStatus === 'Invited') {
-        this.setState({step: 2, sendingSMS: true});
-        this.sendDriverInvite(user);
-      } else {
-        toggle();
+      try {
+        await UserService.updateUser(user);
+      } catch (e) {
+        // console.log(e);
       }
+      toggle();
     } else {
       user.email = `${user.mobilePhone}refBy${currentUser.email}`;
       user.companyId = currentUser.companyId;
@@ -189,9 +196,14 @@ class DriverForm extends Component {
       driver.driverStatus = 'Invited';
       driver.createdBy = currentUser.id;
       driver.createdOn = moment.utc().format();
-      // we are not seeting driver id to user record.. we should do that here
-      await DriverService.createDriver(driver);
-      this.sendDriverInvite(user);
+      // we are not seeing driver id to user record.. we should do that here
+      try {
+        await DriverService.createDriver(driver);
+        await this.sendDriverInvite(user);
+      } catch (err) {
+        console.error('Failed to created driver / notify driver invited');
+      }
+      onSuccess(user, driver);
       this.setState({step: 2, selectedUser: user});
     }
   }
@@ -221,19 +233,7 @@ class DriverForm extends Component {
       isValid = false;
     }
 
-    // if (email === null || email.length === 0) {
-    //   this.setState({
-    //     reqHandlerEmail: {
-    //       touched: true,
-    //       error: 'Please enter drivers email'
-    //     }
-    //   });
-    //   isValid = false;
-    // }
-
     if (mobilePhone === null || mobilePhone.replace(/\D/g, '').length === 0 || mobilePhone.replace(/\D/g, '').length < 10) {
-      console.log(mobilePhone.length);
-      console.log(mobilePhone);
       this.setState({
         reqHandlerPhone: {
           touched: true,
@@ -251,7 +251,6 @@ class DriverForm extends Component {
       console.log(err);
     }
     const user = await UserService.getUserByMobile(`+1${mobilePhone}`);
-
     if (userStatusResponse || user.id) {
       this.setState({
         reqHandlerPhone: {
@@ -311,13 +310,13 @@ class DriverForm extends Component {
 
   renderDriverInvite() {
     const {inviteStatus, inviteMessage, selectedUser, sendingSMS} = this.state;
-    const {toggle} = this.props;
+    const {toggle, t} = this.props;
     if (sendingSMS) {
       return (
         <Row>
           <Col md={12} className="text-center">
             <div className="spinner-border text-success" role="status">
-              <span className="sr-only">Loading...</span>
+              <span className="sr-only">{t('Loading...')}</span>
             </div>
           </Col>
         </Row>
@@ -328,7 +327,7 @@ class DriverForm extends Component {
         <Col md={12}>
           {/* <span>Invite a Driver</span> */}
           <br/>
-          <h3>{inviteStatus ? 'Success!' : 'Warning'}</h3>
+          <h3>{inviteStatus ? `${t('Success')}!` : t('Warning')}</h3>
           <p>
             {inviteMessage}
           </p>
@@ -338,13 +337,11 @@ class DriverForm extends Component {
             <Col md={12} className="text-right pt-4">
               <Button
                 onClick={() => {
-                  this.setState({updateNewDriver: false});
                   toggle();
-                }
-                }
+                }}
                 className="primaryButton"
               >
-                Return
+                {t('Return')}
               </Button>
             </Col>
           ) : null
@@ -353,16 +350,18 @@ class DriverForm extends Component {
           inviteStatus === false ? (
             <Col md={12} className="text-right pt-4">
               <Button
-                onClick={() => this.setState({step: 1, updateNewDriver: true})}
+                onClick={() => this.setState({
+                  step: 1
+                })}
                 className="secondaryButton"
               >
-                Edit
+                {t('Edit')}
               </Button>
               <Button
                 onClick={() => this.sendDriverInvite(selectedUser)}
                 className="primaryButton"
               >
-                Resend Invite
+                {t('Resend Invite')}
               </Button>
             </Col>
           ) : null
@@ -375,17 +374,14 @@ class DriverForm extends Component {
     const {
       firstName,
       lastName,
-      email,
       mobilePhone,
-      // btnSubmitting,
       reqHandlerFName,
       reqHandlerLName,
-      reqHandlerEmail,
       reqHandlerPhone,
       userStatus,
       btnSubmitting
     } = this.state;
-    const {driverId, toggle} = this.props;
+    const {driverId, toggle, t} = this.props;
     return (
       <Row className="form">
         {this.renderGoTo()}
@@ -394,20 +390,20 @@ class DriverForm extends Component {
             className="page-title pl-4 pr-4 pt-2 pb-2"
             style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
           >
-            {driverId ? 'Edit Driver' : 'Add Driver'}
+            {driverId ? t('Edit Driver') : t('Add Driver')}
           </h3>
         </Col>
         <Col md={12}>
           <Row className="pl-4 pr-4">
             <Col md={6} className="pt-2">
               <span>
-                First Name
+                {t('First Name')}
               </span>
               <TField
                 input={{
                   onChange: this.handleInputChange,
                   name: 'firstName',
-                  value: firstName
+                  value: t(firstName)
                 }}
                 placeholder="First Name"
                 type="text"
@@ -416,7 +412,7 @@ class DriverForm extends Component {
             </Col>
             <Col md={6} className="pt-2">
               <span>
-                Last Name
+                {t('Last Name')}
               </span>
               <TField
                 input={{
@@ -424,47 +420,18 @@ class DriverForm extends Component {
                   name: 'lastName',
                   value: lastName
                 }}
-                placeholder="Last Name"
+                placeholder={t('Last Name')}
                 type="text"
                 meta={reqHandlerLName}
               />
             </Col>
-            {/* <Col md={6} className="pt-2"> */}
-            {/* <span> */}
-            {/* Email */}
-            {/* </span> */}
-            {/* <TField */}
-            {/* input={{ */}
-            {/* onChange: this.handleInputChange, */}
-            {/* name: 'email', */}
-            {/* value: email */}
-            {/* }} */}
-            {/* placeholder="Email" */}
-            {/* type="text" */}
-            {/* meta={reqHandlerEmail} */}
-            {/* /> */}
-            {/* </Col> */}
             <Col md={6} className="pt-2">
               <span>
-                Mobile Phone
+                {t('Mobile Phone')}
               </span>
-              {
-                /*
-                <TField
-                  input={{
-                    onChange: this.handleInputChange,
-                    name: 'mobilePhone',
-                    value: mobilePhone
-                  }}
-                  placeholder="Mobile Phone"
-                  type="text"
-                  meta={reqHandlerPhone}
-                />
-                */
-              }
               <NumberFormat
                 name="mobilePhone"
-                placeholder="Mobile Phone"
+                placeholder={t('Mobile Phone')}
                 type="text"
                 format="##########"
                 // mask="_"
@@ -476,8 +443,8 @@ class DriverForm extends Component {
                 reqHandlerPhone.touched
                   ? (
                     <span style={{color: '#D32F2F'}}>
-                        {reqHandlerPhone.error}
-                      </span>
+                      {reqHandlerPhone.error}
+                    </span>
                   )
                   : null
               }
@@ -487,14 +454,14 @@ class DriverForm extends Component {
                       onClick={toggle}
                       className="secondaryButton"
               >
-                Cancel
+                {t('Cancel')}
               </Button>
               <TSubmitButton
                 onClick={this.saveUser}
                 className="primaryButton"
                 loading={btnSubmitting}
                 // loaderSize={10}
-                bntText={driverId && userStatus !== 'Driver Invited' ? 'Update' : 'Send Invite'}
+                bntText={driverId && userStatus !== 'Driver Invited' ? t('Update') : t('Send Invite')}
               />
             </Col>
           </Row>
@@ -520,6 +487,7 @@ class DriverForm extends Component {
       loaded,
       step
     } = this.state;
+    const { t } = { ...this.props };
     if (loaded) {
       return (
         <React.Fragment>
@@ -533,7 +501,7 @@ class DriverForm extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Edit Driver</h3>
+            <h3 className="page-title">{t('Edit Driver')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -543,6 +511,7 @@ class DriverForm extends Component {
 }
 
 DriverForm.propTypes = {
+  toggle: PropTypes.func.isRequired,
   user: PropTypes.shape({
     id: PropTypes.number
   }),
@@ -551,7 +520,9 @@ DriverForm.propTypes = {
       id: PropTypes.string
     })
   }),
-  driverId: PropTypes.number
+  driverId: PropTypes.number,
+  onSuccess: PropTypes.func,
+  t: PropTypes.func
 };
 
 DriverForm.defaultProps = {
@@ -559,7 +530,9 @@ DriverForm.defaultProps = {
   match: {
     params: {}
   },
-  driverId: 0
+  driverId: 0,
+  onSuccess: () => {},
+  t: () => {}
 };
 
-export default DriverForm;
+export default withTranslation()(DriverForm);
