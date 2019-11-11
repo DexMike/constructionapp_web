@@ -294,7 +294,11 @@ class ReportsDailyReportPage extends Component {
   extractCSVInfoJobs(data) {
     const { columnsJobs } = this.state;
 
-    //console.log(data)
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    })
 
     const newData = data.map(d => ({
       Date: d.date,
@@ -303,11 +307,10 @@ class ReportsDailyReportPage extends Component {
       'In Progress': Number(d.jobsInProgress),
       'Total Jobs': Number(d.totalJobs),
       'Total Loads': Number(d.totalLoads),
-      'Rate per Ton': Number(d.rateTon),
-      'Cost per Day': Number(d.avgRevenuePerDay),
+      'Rate per Ton': formatter.format(d.rateTon),
+      'Cost per Day': formatter.format(d.avgRevenuePerDay),
       'Total Tons Hauled': Number(d.totalTonsHauled),
       'Job Duration': Number(d.avgJobTime),
-      //'Job Duration (hrs)': Number(Math.floor(d.avgJobTime % 86400) / 3600),
       'Distance (mi)': Number(d.realDistance),
       //'Rate: $/Hour': d.rateHour
       /*,
@@ -635,7 +638,7 @@ class ReportsDailyReportPage extends Component {
               {this.renderTitle()}
             </Col>
           </Row>
-
+          
           {/* this.renderCards() */}
           <DailyReportFilter
             onReturnFilters={this.returnFilters}
