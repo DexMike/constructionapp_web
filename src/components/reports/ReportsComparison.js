@@ -24,7 +24,7 @@ import {
   NavLink,
   TabContent,
   TabPane,
-  ButtonGroup, 
+  ButtonGroup,
   ButtonToolbar
 } from 'reactstrap';
 import classnames from 'classnames';
@@ -322,7 +322,7 @@ class ReportsComparison extends Component {
           comparator: compa
         }
       ]
-     
+
     }; // state
 
     // Ag-Grid
@@ -363,7 +363,7 @@ class ReportsComparison extends Component {
   }
 
   async componentDidMount() {
-    const { columnsProjects, columnsCarrier, columnsProducts } = this.state;    
+    const { columnsProjects, columnsCarrier, columnsProducts } = this.state;
     const profile = await ProfileService.getProfile();
     this.hideShowPie(true);
     // this.hideAvg(true, 425);
@@ -394,7 +394,7 @@ class ReportsComparison extends Component {
       this.removeCost(columnsProjects);
     }
 
-    this.setState({   
+    this.setState({
       profile,
       loaded: true,
       companyType: profile.companyType
@@ -487,7 +487,7 @@ class ReportsComparison extends Component {
         filterFramework: BarFilter
       }
       columnsProducts.push(avgMiles);
-      
+
     } else {
       columnsProducts.pop();
     }
@@ -688,34 +688,16 @@ class ReportsComparison extends Component {
     const input = document.getElementById('visualizations');
     html2canvas(input)
       .then((canvas) => {
-        const img = canvas.toDataURL('image/jpeg', 0.5);
-        let marginTop = 5;
-        let marginLeft = 5;
-
+        const img = canvas.toDataURL('image/jpg');
         const doc = new jsPDF({
           orientation: 'landscape',
           unit: 'px',
           format: [canvas.width, canvas.height]
         });
-        const width = Math.round(doc.internal.pageSize.getWidth());    
-        const height = Math.round(doc.internal.pageSize.getHeight());
-
-        try {
-          doc.addImage(
-            img,
-            'JPEG',
-            marginLeft,
-            marginTop,
-            width - 10,
-            height - 10,
-            StringGenerator.getDateString(),
-            70,
-            0
-          );
-        } catch(e) {
-          console.log('PDF Error: ', e);
-        }
-        
+        const width = doc.internal.pageSize.getWidth();
+        const height = doc.internal.pageSize.getHeight();
+        // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
+        doc.addImage(img, 'JPEG', 0, 0, width, height);
         doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
       });
   }
@@ -777,7 +759,6 @@ class ReportsComparison extends Component {
 
   renderChart(type, data, title) {
     const { chartVisType, companyType, compEnabled } = this.state;
-    
     // set some dummy data so that the graph doesn't crash
     if (data.length === 0) {
       data = [
@@ -825,7 +806,7 @@ class ReportsComparison extends Component {
 
   renderTable(columns, defaultData, data, onGridReady) {
     const { activeTab, compEnabled } = this.state;
-    
+
     let newData = data;
     let colHeight = 60;
     if (Number(activeTab) === 3 || !compEnabled) {
@@ -862,7 +843,7 @@ class ReportsComparison extends Component {
       columnsProjects,
       defaultColumnDef,
       chartOpts
-    } = this.state;  
+    } = this.state;
 
     let dataToPrint = [];
     let dataToRender = [];
@@ -886,17 +867,19 @@ class ReportsComparison extends Component {
       title = "Companies";
     } else if (activeTab === '3') {
       dataToPrint = this.extractCSVInfo(projects);
+
       dataToRender = projects;
       columnsToRender = columnsProjects;
       csvName = 'Jobs';
       title = "Job";
     }
+    console.log("TCL: renderVisualizations -> dataToPrint", dataToPrint)
 
     // const {t} = useTranslation();
-    
+
     return (
       <Row id="visualizations">
-        
+
         <Col md={12}>
           <Card>
             <CardBody>
@@ -911,7 +894,7 @@ class ReportsComparison extends Component {
                       <Button
                         outline
                         onClick={() => this.exportToPDF()}
-                        >Export chart as PDF &nbsp; 
+                      >Export chart as PDF &nbsp;
                         <span className="lnr lnr-cloud-download" />
                       </Button>
                     </ButtonGroup>
@@ -919,7 +902,7 @@ class ReportsComparison extends Component {
                       <CSVLink data={dataToPrint} filename={`Report_${csvName}_${StringGenerator.getDateString()}.csv`}>
                         <Button
                           outline
-                        >Export data as CSV &nbsp; 
+                        >Export data as CSV &nbsp;
                           <span className="lnr lnr-chart-bars" />
                         </Button>
                       </CSVLink>
@@ -997,7 +980,7 @@ class ReportsComparison extends Component {
                         }}
                       >
                         {
-                          (companyType === 'Customer') 
+                          (companyType === 'Customer')
                             ? 'Carrier' : 'Producers'
                         }
                       </NavLink>
@@ -1038,7 +1021,7 @@ class ReportsComparison extends Component {
                 autoHeightMin={0}
                 autoHeightMax={800}
                 // disableVerticalScrolling
-                >
+              >
                 <div className="ag-theme-balham gridTable">
                   {
                     this.renderTable(
@@ -1048,13 +1031,13 @@ class ReportsComparison extends Component {
                       this.onGridReadyCarriers
                     )
                   }
-                </div>                
+                </div>
               </Scrollbars>
             </CardBody>
           </Card>
         </Col>
       </Row>
-      
+
     );
   }
 
@@ -1088,7 +1071,7 @@ class ReportsComparison extends Component {
     const { loaded, page, rows, companyType } = this.state;
 
     if (loaded) {
-      
+
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
