@@ -306,7 +306,14 @@ class ReportsComparison extends Component {
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter,
           comparator: compa
-        }, {
+        }, /* {
+          field: 'avgEarningsJobComparison',
+          headerName: 'Earnings per Ton Mile',
+          headerTooltip: "Average earnings per job for this time period",
+          cellRendererFramework: BarRenderer,
+          filterFramework: BarFilter,
+          comparator: compa
+        },*/ {
           field: 'avgEarningsTonComparison',
           headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
@@ -422,6 +429,7 @@ class ReportsComparison extends Component {
     this.gridColumnApi = params.columnApi;
   }
 
+  // Title Remapper
   setLabelsCustomer (obj) {
     const newObj = obj;
     /*
@@ -748,7 +756,7 @@ class ReportsComparison extends Component {
         'Total Cost': formatter.format(d.totEarnings),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Cost per Ton Mile': formatter.format(d.avgEarningsJob),
+        'Cost per Ton Mile': formatter.format(d.costPerTonMile),
         'Rate per Ton': formatter.format(d.avgEarningsTon),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
@@ -805,6 +813,7 @@ class ReportsComparison extends Component {
   }
 
   renderTable(columns, defaultData, data, onGridReady) {
+    // console.log("TCL: renderTable -> data", data, columns)
     const { activeTab, compEnabled } = this.state;
 
     let newData = data;
@@ -873,7 +882,6 @@ class ReportsComparison extends Component {
       csvName = 'Jobs';
       title = "Job";
     }
-    console.log("TCL: renderVisualizations -> dataToPrint", dataToPrint)
 
     // const {t} = useTranslation();
 

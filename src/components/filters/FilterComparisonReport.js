@@ -836,6 +836,7 @@ class FilterComparisonReport extends Component {
       // totalTons
       newObject.costPerTonMileComparison = {
         total: newObject.costPerTonMile,
+        
         totalComp: newObject.costPerTonMileComp,
         max: maxCostPerTonMile,
         type: 'price'
