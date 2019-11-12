@@ -1168,6 +1168,7 @@ class FilterComparisonReport extends Component {
     } = this.state;
     const {
       showComparison,
+      activeTab
     } = this.props;
     // let start = filters.startAvailability;
 
@@ -1478,49 +1479,47 @@ class FilterComparisonReport extends Component {
                     />
                   </div>
                   {/*Comparison*/}
-                  { showComparison === true && (
-                    <React.Fragment>
-                      <div className="filter-item">
-                        <div className="filter-item-title">
-                          Comparison Day Range
-                        </div>
-                        <TSelect
-                          input={
-                            {
-                              onChange: this.handleRangeComparisonFilterChange,
-                              name: this.timeRangesComp[selectIndexComp].name,
-                              value: this.timeRangesComp[selectIndexComp].value
-                            }
-                          }
-                          value={this.timeRangesComp[selectIndexComp].value.toString()}
-                          options={
-                            this.timeRangesComp.map(timeRangeComp => ({
-                              name: timeRangeComp.name,
-                              value: timeRangeComp.value.toString(),
-                              label: timeRangeComp.name
-                            }))
-                          }
-                          placeholder={this.timeRangesComp[selectIndexComp].name}
-                        />
+                  <React.Fragment>
+                    <div className={`filter-item ${activeTab !== '3' ? 'forceShow' : 'forceHide'}`}>
+                      <div className="filter-item-title">
+                        Comparison Day Range
                       </div>
-                      <div className="filter-item">
-                        <div className="filter-item-title">
-                          Comparison Date Range
-                        </div>
-                        <TIntervalDatePicker
-                          startDate={intervals.startIntervalComp}
-                          endDate={intervals.endIntervalComp}
-                          name="dateIntervalComp"
-                          onChange={this.handleIntervalComparisonInputChange}
-                          dateFormat="m/d/Y"
-                          isCustom={
-                            this.timeRangesComp[selectIndexComp].name === 'Custom'
+                      <TSelect
+                        input={
+                          {
+                            onChange: this.handleRangeComparisonFilterChange,
+                            name: this.timeRangesComp[selectIndexComp].name,
+                            value: this.timeRangesComp[selectIndexComp].value
                           }
-                        />
+                        }
+                        value={this.timeRangesComp[selectIndexComp].value.toString()}
+                        options={
+                          this.timeRangesComp.map(timeRangeComp => ({
+                            name: timeRangeComp.name,
+                            value: timeRangeComp.value.toString(),
+                            label: timeRangeComp.name
+                          }))
+                        }
+                        placeholder={this.timeRangesComp[selectIndexComp].name}
+                      />
+                    </div>
+                    
+                    <div className={`filter-item ${activeTab !== '3' ? 'forceShow' : 'forceHide'}`}>
+                      <div className="filter-item-title">
+                        Comparison Date Range
                       </div>
-                    </React.Fragment>
-                  )
-                  }
+                      <TIntervalDatePicker
+                        startDate={intervals.startIntervalComp}
+                        endDate={intervals.endIntervalComp}
+                        name="dateIntervalComp"
+                        onChange={this.handleIntervalComparisonInputChange}
+                        dateFormat="m/d/Y"
+                        isCustom={
+                          this.timeRangesComp[selectIndexComp].name === 'Custom'
+                        }
+                      />
+                    </div>
+                  </React.Fragment>
                   <div className="filter-item-button">
                     <button
                       className="btn btn-secondary"
@@ -1547,7 +1546,7 @@ FilterComparisonReport.propTypes = {
   page: PropTypes.number,
   type: PropTypes.string,
   showComparison: PropTypes.bool,
-
+  activeTab: PropTypes.string,
   returnCarriers: PropTypes.func,
   returnProducers: PropTypes.func,
   returnProducts: PropTypes.func,
@@ -1559,6 +1558,7 @@ FilterComparisonReport.defaultProps = {
   page: 0,
   type: null,
   showComparison: false,
+  activeTab: null,
   returnCarriers: null,
   returnProducers: null,
   returnProducts: null,

@@ -106,11 +106,6 @@
   padding-bottom: 10px;
   overflow-y: hidden !important;
 }
-.gridTable_extended {
-  width: 1560px !important;
-  padding-bottom: 10px;
-  overflow-y: hidden !important;
-}
 
 .gridTableJobs {
   width: 1320px !important;
@@ -195,4 +190,16 @@
 
 .div-percent-bar_comp.show_comp {
   background-color: #9A9A9A !important;
+}
+
+.visualizations {
+  width: 100% !important;
+}
+
+.visualizations_extended {
+  width: 1560px !important;
+}
+
+.tabs .tabs__wrap {
+  min-width: 100% !important;
 }

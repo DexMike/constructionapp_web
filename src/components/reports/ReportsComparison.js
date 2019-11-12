@@ -54,7 +54,7 @@ import BarFilter from '../../utils/BarFilter';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import { string } from 'prop-types';
+import trelarLogo from '../../img/trelar-logo_green.png';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -151,6 +151,7 @@ class ReportsComparison extends Component {
       totalCount: 10,
       activeTab: '1',
       chartType: 'bar', //area
+      pdfRendering: false,
 
       // Grid
       defaultColumnDef: {
@@ -166,7 +167,7 @@ class ReportsComparison extends Component {
       columnsCarrier: [
         {
           field: 'name',
-          headerName: 'Customer Name',
+          headerName: 'Producers',
           headerTooltip: "Carrier of Producer",
           // width: 200,
         }, {
@@ -432,12 +433,12 @@ class ReportsComparison extends Component {
   // Title Remapper
   setLabelsCustomer (obj) {
     const newObj = obj;
-    /*
+    /**/
     if (obj.field === 'name') {
-      newObj.headerName = 'Carrier Name';
+      newObj.headerName = 'Carriers';
       newObj.headerTooltip = 'Carrier of Producer';
     }
-    */
+    
     if (obj.field === 'avgTotEarningsComparison') {
       newObj.headerName = 'Total Cost';
       newObj.headerTooltip = 'Total Cost for this time period';
@@ -693,21 +694,31 @@ class ReportsComparison extends Component {
 
   exportToPDF() {
     window.scrollTo(0, 0);
-    const input = document.getElementById('visualizations');
-    html2canvas(input)
-      .then((canvas) => {
-        const img = canvas.toDataURL('image/jpg');
-        const doc = new jsPDF({
-          orientation: 'landscape',
-          unit: 'px',
-          format: [canvas.width, canvas.height]
+    this.setState({
+      pdfRendering: true // hack for full PDF rendering (table width)
+    }, function done() {
+      const input = document.getElementById('visualizations');
+      html2canvas(input)
+        .then((canvas) => {
+          const img = canvas.toDataURL('image/jpg');
+          const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+          });
+          const width = doc.internal.pageSize.getWidth();
+          const height = doc.internal.pageSize.getHeight();
+          // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
+          doc.addImage(img, 'JPEG', 2, 0, width, height);
+          doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
+
+          this.setState({
+            pdfRendering: false
+          }, function doneRendering() {
+            this.forceUpdate();
+          })
         });
-        const width = doc.internal.pageSize.getWidth();
-        const height = doc.internal.pageSize.getHeight();
-        // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
-        doc.addImage(img, 'JPEG', 0, 0, width, height);
-        doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
-      });
+    })
   }
 
   exportToCSV() {
@@ -718,7 +729,7 @@ class ReportsComparison extends Component {
 
   extractCSVInfo(data) {
     let newData = [];
-    const { activeTab } = this.state;
+    const { activeTab, profile } = this.state;
 
     const formatter = new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -739,8 +750,14 @@ class ReportsComparison extends Component {
       return newData;
     }
     if (activeTab === '2') {
+
+      let name = 'Producer';
+      if (profile.companyType === 'Customer') {
+        name = 'Carrier';
+      }
+
       newData = data.map(d => ({
-        'Customer Name': d.name,
+        [name]: d.name,
         'Total Cost': formatter.format(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
         '# of Loads': Number(d.numLoads),
@@ -851,7 +868,8 @@ class ReportsComparison extends Component {
       columnsProducts,
       columnsProjects,
       defaultColumnDef,
-      chartOpts
+      chartOpts,
+      pdfRendering
     } = this.state;
 
     let dataToPrint = [];
@@ -883,11 +901,11 @@ class ReportsComparison extends Component {
       title = "Job";
     }
 
-    // const {t} = useTranslation();
-
     return (
-      <Row id="visualizations">
-
+      <Row
+        id="visualizations"
+        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`}
+      >
         <Col md={12}>
           <Card>
             <CardBody>
@@ -1076,7 +1094,7 @@ class ReportsComparison extends Component {
   }
 
   render() {
-    const { loaded, page, rows, companyType } = this.state;
+    const { loaded, page, rows, companyType, showComparison, activeTab } = this.state;
 
     if (loaded) {
 
@@ -1086,7 +1104,7 @@ class ReportsComparison extends Component {
           {this.renderTitle()}
           <FilterComparisonReport
             type={companyType}
-            showComparison
+            showComparison={showComparison}
             ref="filterChild"
             onReturnFilters={this.returnFilters}
             // returnProducers={this.returnProducers}
@@ -1098,6 +1116,7 @@ class ReportsComparison extends Component {
             }}
             page={page}
             rows={rows}
+            activeTab={activeTab}
           />
           {this.renderVisualizations()}
         </Container>
