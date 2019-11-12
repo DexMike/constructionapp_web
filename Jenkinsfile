@@ -178,6 +178,11 @@ pipeline {
        sh "aws cloudfront create-invalidation --distribution-id ${cloudfront_id()} --paths '/*'"
      }
     }
+    stage('Clean up') {
+      steps {
+        cleanWs cleanWhenAborted: false, cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false, deleteDirs: true
+      }
+    }
   }
   post {
     success {
