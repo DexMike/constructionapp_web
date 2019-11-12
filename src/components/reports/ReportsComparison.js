@@ -693,7 +693,10 @@ class ReportsComparison extends Component {
   }
 
   exportToPDF() {
+    const { activeTab } = this.state;
+    const previousTab = activeTab;
     window.scrollTo(0, 0);
+    const that = this;
     this.setState({
       pdfRendering: true // hack for full PDF rendering (table width)
     }, function done() {
@@ -713,9 +716,15 @@ class ReportsComparison extends Component {
           doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
 
           this.setState({
-            pdfRendering: false
-          }, function doneRendering() {
-            this.forceUpdate();
+            pdfRendering: false,
+            activeTab: '4' // this is a hack to get the width back
+          }, () => {
+            // this.forceUpdate();
+            setTimeout(() => {
+              this.setState({
+                activeTab: previousTab
+              })
+            }, 2000);
           })
         });
     })
@@ -894,7 +903,6 @@ class ReportsComparison extends Component {
       title = "Companies";
     } else if (activeTab === '3') {
       dataToPrint = this.extractCSVInfo(projects);
-
       dataToRender = projects;
       columnsToRender = columnsProjects;
       csvName = 'Jobs';
@@ -932,10 +940,6 @@ class ReportsComparison extends Component {
                           <span className="lnr lnr-chart-bars" />
                         </Button>
                       </CSVLink>
-                      {/*
-                      <Button outline><span className="lnr lnr-heart-pulse" /></Button>
-                      <Button outline><span className="lnr lnr-cog" /></Button>
-                      <Button outline><span className="lnr lnr-magic-wand" /></Button> */}
                     </ButtonGroup>
                   </ButtonToolbar>
                 </Col>
@@ -1021,6 +1025,9 @@ class ReportsComparison extends Component {
                         Jobs
                       </NavLink>
                     </NavItem>
+                    <NavItem>
+                      &nbsp;
+                    </NavItem>
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
@@ -1036,6 +1043,11 @@ class ReportsComparison extends Component {
                     <TabPane tabId="3">
                       <div style={{ width: '100%', height: '400px' }}>
                         {this.renderChart(chartType, projects, title)}
+                      </div>
+                    </TabPane>
+                    <TabPane tabId="4">
+                      <div className="pdf_loading_tab">
+                        &nbsp;One moment, please...
                       </div>
                     </TabPane>
                   </TabContent>
