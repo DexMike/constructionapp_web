@@ -324,7 +324,7 @@ class LoadsExpandableRow extends Component {
                   )
                   }
                   <Row style={{paddingTop: 0}}>
-                    <Col md={4}>
+                    <Col md={4} className="headroute">
                       <h3 className="subhead" style={{
                         paddingTop: 30,
                         color: '#006F53',
@@ -336,13 +336,13 @@ class LoadsExpandableRow extends Component {
                       <ul className="indicators">
                         <li>
                           <svg width="14" height="14">
-                            <rect width="14" height="14" fill="rgb(111, 166, 152)"/>
+                            <rect width="14" height="14" fill="rgb(0, 111, 83)"/>
                           </svg>
                           <span>Depart</span>
                         </li>
                         <li>
                           <svg width="14" height="14">
-                            <rect width="14" height="14" fill="rgb(107, 173, 191)"/>
+                            <rect width="14" height="14" fill="rgb(45, 140, 200)"/>
                           </svg>
                           <span>Return</span>
                         </li>

@@ -1,15 +1,22 @@
 .indicators{
+    display: inline-block;
+    width: 70%;
     list-style-type: none;
     padding: 0;
-    margin: 0 10px 10px;
     text-align: center;
+    margin-bottom: 10px;
 }
 
 .indicators li{
     display: inline;
-    margin: 0 15px;
+    margin: 0 15px 0 0;
 }
 
 .indicators li svg{
     margin: 0 5px;
+}
+
+.headroute > .subhead{
+    display: inline-block;
+    width: 30%;
 }
