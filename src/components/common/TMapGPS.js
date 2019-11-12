@@ -75,24 +75,24 @@ class TMapGPS extends Component {
     } catch (e) {
       console.log('ERROR: ', e);
     }
-
+    /*
     for (const wp of distanceInfo) {
       let newWp = '';
-      newWp = `${wp[1]},${wp[0]}`;
+      // newWp = `${wp[1]},${wp[0]}`;
       wps.push(newWp);
     }
-
-    if (wps.length > maxPointsThreshold) {
-      wps = this.reducer(wps);
+    */
+    if (distanceInfo.length > maxPointsThreshold) {
+      distanceInfo = this.reducer(distanceInfo);
     }
-    this.setMarkers(wps);
+    this.setMarkers(distanceInfo);
   }
 
-  setMarkers(wps) {
+  setMarkers(distanceInfo) {
     // markers
-    if (wps.length > 1) {
-      const start = wps[0].split(',');
-      const end = wps.pop().split(',');
+    if (distanceInfo.length > 1) {
+      const start = distanceInfo[0];
+      const end = distanceInfo.pop();
       const startAddress = {
         latitude: start[0],
         longitude: start[1]
@@ -108,7 +108,7 @@ class TMapGPS extends Component {
 
       try {
         this.addRouteShapeToMap({
-          shape: wps
+          shape: distanceInfo
         });
       } catch (e) {
         console.log('TCL: ERROR_>', e);
@@ -168,10 +168,15 @@ class TMapGPS extends Component {
   addRouteShapeToMap(route) {
     const lineString = new H.geo.LineString();
     const routeShape = route.shape;
+    const lineStringReturn = new H.geo.LineString();
 
     routeShape.forEach((point) => {
-      const parts = point.split(',');
-      lineString.pushLatLngAlt(parts[0], parts[1]);
+      lineString.pushLatLngAlt(point[0], point[1]);
+      
+      // Return route
+      if (point[2] === 1) {
+        lineStringReturn.pushLatLngAlt(point[0], point[1]);
+      }
     });
 
     const polyline = new H.map.Polyline(lineString, {
@@ -180,17 +185,26 @@ class TMapGPS extends Component {
         strokeColor: 'rgb(0, 111, 83)'
       }
     });
+    // Return poliline
+    const polylineHalf = new H.map.Polyline(lineStringReturn, {
+      style: {
+        lineWidth: 2,
+        strokeColor: 'rgb(45, 140, 200)'
+      }
+    });
+
     // Add the polyline to the map
     this.mapGPS.addObject(polyline);
-
     const bounds = polyline.getBoundingBox();
     const newBounds = GeoUtils.setZoomBounds(bounds);
+
+    // Add the return polyline to the map
+    this.mapGPS.addObject(polylineHalf);
 
     // And zoom to its bounding rectangle
     this.mapGPS.getViewModel().setLookAtData({
       newBounds
     });
-    /**/
   }
 
   addMarkersToMap(startAddress, endAddress) {

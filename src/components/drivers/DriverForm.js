@@ -15,6 +15,8 @@ import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import UserManagementService from '../../api/UserManagementService';
 import TSubmitButton from '../common/TSubmitButton';
+import CompanyService from '../../api/CompanyService';
+import TwilioService from '../../api/TwilioService';
 
 class DriverForm extends Component {
   constructor(props) {
@@ -95,6 +97,46 @@ class DriverForm extends Component {
   phoneToNumberFormat(phone) {
     const num = Number(phone.replace(/\D/g, ''));
     return num;
+  }
+
+  async sendDriverInvite(user) {
+    let {inviteStatus, inviteMessage} = this.state;
+    const {currentUser} = this.props;
+
+    try {
+      // Sending SMS to Truck's company
+      const chars = {'(': '', ')': '', '-': '', ' ': ''};
+      const mobilePhone = user.mobilePhone.replace(/[abc]/g, m => chars[m]);
+
+      // get company legal name
+      const tempCompany = await CompanyService.getCompanyById(currentUser.companyId);
+      const companyLegalName = tempCompany.legalName;
+
+      if (this.checkPhoneFormat(mobilePhone)) {
+        const notification = {
+          to: this.phoneToNumberFormat(mobilePhone),
+          body: `Hi, you’ve been invited by ${companyLegalName} to join Trelar Logistics. Go here to download the app https://www.trelar.com/drivers-app/`
+        };
+
+        await TwilioService.createInviteSms(notification);
+
+        inviteStatus = true;
+        inviteMessage = `
+        Your invitation to ${user.firstName} ${user.lastName}, sent to phone number ${user.mobilePhone}, was Successful.`;
+      } else {
+        inviteStatus = false;
+        inviteMessage = `Mobile phone format ${user.mobilePhone} is invalid. Try editing it ...`;
+      }
+    } catch (err) {
+      inviteStatus = false;
+      inviteMessage = `Error. Your invitation to ${user.firstName} ${user.lastName}
+        to phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
+    }
+    this.setState({
+      sendingSMS: false,
+      inviteStatus,
+      inviteMessage
+    });
   }
 
   checkPhoneFormat(phone) {
