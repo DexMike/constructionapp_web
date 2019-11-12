@@ -684,19 +684,38 @@ class ReportsComparison extends Component {
   }
 
   exportToPDF() {
+    window.scrollTo(0, 0);
     const input = document.getElementById('visualizations');
     html2canvas(input)
       .then((canvas) => {
-        const img = canvas.toDataURL('image/jpg');
+        const img = canvas.toDataURL('image/jpeg', 0.5);
+        let marginTop = 5;
+        let marginLeft = 5;
+
         const doc = new jsPDF({
           orientation: 'landscape',
           unit: 'px',
           format: [canvas.width, canvas.height]
         });
-        const width = doc.internal.pageSize.getWidth();    
-        const height = doc.internal.pageSize.getHeight();
-        // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
-        doc.addImage(img, 'JPEG', 0, 0, width, height);
+        const width = Math.round(doc.internal.pageSize.getWidth());    
+        const height = Math.round(doc.internal.pageSize.getHeight());
+
+        try {
+          doc.addImage(
+            img,
+            'JPEG',
+            marginLeft,
+            marginTop,
+            width - 10,
+            height - 10,
+            StringGenerator.getDateString(),
+            70,
+            0
+          );
+        } catch(e) {
+          console.log('PDF Error: ', e);
+        }
+        
         doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
       });
   }
@@ -710,14 +729,21 @@ class ReportsComparison extends Component {
   extractCSVInfo(data) {
     let newData = [];
     const { activeTab } = this.state;
+
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    })
+
     if (activeTab === '1') {
       newData = data.map(d => ({
         'Material Name': d.name,
-        'Total Cost': Number(d.totEarnings),
+        'Total Cost': formatter.format(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Cost per Ton Mile': Number(d.avgEarningsJob),
-        'Rate per Ton': Number(d.avgEarningsHour),
+        'Cost per Ton Mile': formatter.format(d.avgEarningsJob),
+        'Rate per Ton': formatter.format(d.avgEarningsHour),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
@@ -725,11 +751,11 @@ class ReportsComparison extends Component {
     if (activeTab === '2') {
       newData = data.map(d => ({
         'Customer Name': d.name,
-        'Total Cost': Number(d.totEarnings),
+        'Total Cost': formatter.format(d.totEarnings),
         '# of Jobs': Number(d.numJobs),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Rate per Ton': Number(d.avgEarningsTon),
+        'Rate per Ton': formatter.format(d.avgEarningsTon),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
@@ -737,11 +763,11 @@ class ReportsComparison extends Component {
     if (activeTab === '3') {
       newData = data.map(d => ({
         'Job Name': d.name,
-        'Total Cost': Number(d.totEarnings),
+        'Total Cost': formatter.format(d.totEarnings),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
-        'Cost per Ton Mile': Number(d.avgEarningsJob),
-        'Rate per Ton': Number(d.avgEarningsTon),
+        'Cost per Ton Mile': formatter.format(d.avgEarningsJob),
+        'Rate per Ton': formatter.format(d.avgEarningsTon),
         'Average Miles Traveled': Number(d.avgMilesTraveled),
       }))
       return newData;
