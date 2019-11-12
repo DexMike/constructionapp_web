@@ -193,13 +193,22 @@
 }
 
 .visualizations {
-  width: 100% !important;
+  min-width: 100% !important;
 }
 
 .visualizations_extended {
-  width: 1560px !important;
+  min-width: 1560px !important;
 }
 
-.tabs .tabs__wrap {
-  min-width: 100% !important;
+.pdf_loading_tab {
+  margin-left: 25px;
+  color: #9A9A9A;
+}
+
+:global .recharts-responsive-container div:nth-child(2) {
+  overflow: hidden !important;
+}
+
+:global .recharts-responsive-container div:nth-child(2) div {
+  overflow: hidden !important;
 }
