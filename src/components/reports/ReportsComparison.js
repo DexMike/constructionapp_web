@@ -1033,7 +1033,7 @@ class ReportsComparison extends Component {
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
-                      <div style={{ width: '100%', height: '400p  xx' }}>
+                      <div style={{ width: '100%', height: '400px' }}>
                         {this.renderChart(chartType, products, title)}
                       </div>
                     </TabPane>
