@@ -435,8 +435,10 @@ class ReportsComparison extends Component {
     const newObj = obj;
     /**/
     if (obj.field === 'name') {
-      newObj.headerName = 'Carriers';
-      newObj.headerTooltip = 'Carrier of Producer';
+      if(newObj.headerName === 'Producers') {
+        newObj.headerName = 'Carriers';
+        newObj.headerTooltip = 'Carrier of Producer';
+      }
     }
     
     if (obj.field === 'avgTotEarningsComparison') {
