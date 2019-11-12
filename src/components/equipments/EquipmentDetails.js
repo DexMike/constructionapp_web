@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import { Storage } from 'aws-amplify';
 import Resizer from 'react-image-file-resizer';
 import MultiSelect from '../common/TMultiSelect';
@@ -26,6 +27,8 @@ import StringGenerator from '../../utils/StringGenerator';
 import FileGenerator from '../../utils/FileGenerator';
 import TSpinner from '../common/TSpinner';
 import EquipmentService from '../../api/EquipmentService';
+import TField from '../common/TField';
+import EquipmentDetailService from '../../api/EquipmentDetailService';
 
 const maxWidth = 1200;
 const maxHeight = 800;
@@ -52,6 +55,8 @@ class EquipmentDetails extends PureComponent {
       hourRate: 0,
       tonRate: 0,
       rateType: 'Hour',
+      externalEquipmentNumber: '',
+      currentExternalEquipmentNumber: '',
       defaultDriverId: 0,
       driverEquipmentsId: 0,
       driversId: 0,
@@ -67,6 +72,8 @@ class EquipmentDetails extends PureComponent {
     };
     this.state = {
       ...equipment,
+      defaultDriver: {},
+      companyDrivers: [],
       imageUploading: false,
       selectedMaterials: [],
       allMaterials: [],
@@ -82,22 +89,52 @@ class EquipmentDetails extends PureComponent {
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerMaxCapacity: { touched: false, error: '' },
+      reqHandlerExternalEquipmentNumber: { touched: false, error: ''},
       loaded: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
-    this.selectChange = this.selectChange.bind(this);
+    this.selectTypeChange = this.selectTypeChange.bind(this);
+    this.selectDefaultDriverChange = this.selectDefaultDriverChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleImageUpload = this.handleImageUpload.bind(this);
   }
 
   async componentDidMount() {
-    const { equipmentId } = this.props;
-    const equipment = await EquipmentService.getEquipmentById(equipmentId);
-    await this.setEquipment(equipment);
-    await this.fetchMaterials();
+    const { equipmentId, companyId, t } = { ...this.props };
+    const translate = t;
+    let { currentExternalEquipmentNumber, companyDrivers, defaultDriver } = { ...this.state };
+    let equipment;
+    try {
+      equipment = await EquipmentService.getEquipmentById(equipmentId);
+      currentExternalEquipmentNumber = equipment.externalEquipmentNumber;
+    } catch (e) {
+      // console.log(e);
+    }
+    
+    try {
+      await this.setEquipment(equipment);
+      await this.fetchMaterials();
+      companyDrivers = (await EquipmentDetailService.getDefaultDriverList(companyId, equipmentId))
+        .data.map(companyDriver => ({
+          value: companyDriver.driverId,
+          label: `${companyDriver.firstName} ${companyDriver.lastName}`
+        }));
+    } catch (err) {
+      console.error(err);
+    }
+    companyDrivers = [{ value: null, label: translate('Unassigned') }, ...companyDrivers];
+    defaultDriver = { value: null, label: translate('Unassigned') };
+    if (equipment && equipment.defaultDriverId) {
+      const companyDriverMatch = companyDrivers
+        .find(companyDriver => companyDriver.value === equipment.defaultDriverId);
+      defaultDriver = companyDriverMatch;
+    }
     this.setState({
+      companyDrivers,
+      defaultDriver,
+      currentExternalEquipmentNumber,
       equipmentToUpdate: equipment,
       loaded: true
     });
@@ -105,17 +142,32 @@ class EquipmentDetails extends PureComponent {
 
   async setEquipment(equipmentProps) {
     this.mounted = true;
+    let { isRatedHour, isRatedTon } = this.state;
     const equipment = equipmentProps;
     Object.keys(equipment)
       .map((key) => {
         if (equipment[key] === null) {
           equipment[key] = '';
         }
+        if (equipment.rateType === 'Tonage') {
+          isRatedHour = false;
+          isRatedTon = true;
+        }
+        if (equipment.rateType === 'Hour') {
+          isRatedHour = true;
+          isRatedTon = false;
+        }
+        if (equipment.rateType === 'Any') {
+          isRatedHour = true;
+          isRatedTon = true;
+        }
         return true;
       });
     if (this.mounted) {
       this.setState({
-        ...equipment
+        ...equipment,
+        isRatedHour,
+        isRatedTon
       });
     }
   }
@@ -135,10 +187,14 @@ class EquipmentDetails extends PureComponent {
       minHours,
       hourRate,
       tonRate,
-      image
+      image,
+      isRatedHour,
+      isRatedTon,
+      externalEquipmentNumber,
+      defaultDriver
     } = this.state;
 
-    const {userId} = this.props;
+    const { userId } = this.props;
 
     const newEquipment = equipmentToUpdate;
     newEquipment.type = type;
@@ -154,8 +210,24 @@ class EquipmentDetails extends PureComponent {
     newEquipment.hourRate = hourRate;
     newEquipment.tonRate = tonRate;
     newEquipment.image = image;
+    newEquipment.externalEquipmentNumber = externalEquipmentNumber;
+    if (defaultDriver) {
+      newEquipment.defaultDriverId = defaultDriver.value;
+    }
     newEquipment.modifiedOn = moment.utc().format();
     newEquipment.modifiedBy = userId;
+
+    let rateType;
+    if ((isRatedHour && isRatedTon) || (!isRatedHour && !isRatedTon)) {
+      rateType = 'Any';
+    }
+    if (isRatedHour && !isRatedTon) {
+      rateType = 'Hour';
+    }
+    if (!isRatedHour && isRatedTon) {
+      rateType = 'Tonage';
+    }
+    newEquipment.rateType = rateType;
 
     return newEquipment;
   }
@@ -170,7 +242,7 @@ class EquipmentDetails extends PureComponent {
     });
   }
 
-  selectChange(data) {
+  selectTypeChange(data) {
     const { reqHandlerTruckType } = this.state;
     this.setState({
       reqHandlerTruckType: Object.assign({}, reqHandlerTruckType, {
@@ -180,18 +252,29 @@ class EquipmentDetails extends PureComponent {
     });
   }
 
-  isFormValid() {
+  selectDefaultDriverChange(data) {
+    // const { defaultDriver } = this.state;
+    this.setState({
+      defaultDriver: data
+    });
+  }
+
+  async isFormValid() {
     const {
       type,
+      companyId,
       maxCapacity,
-      selectedMaterials
+      selectedMaterials,
+      externalEquipmentNumber,
+      currentExternalEquipmentNumber
     } = this.state;
     let isValid = true;
 
     this.setState({
       reqHandlerTruckType: { touched: false },
       reqHandlerMaterials: { touched: false },
-      reqHandlerMaxCapacity: { touched: false }
+      reqHandlerMaxCapacity: { touched: false },
+      reqHandlerExternalEquipmentNumber: { touched: false }
     });
 
     if (type.length === 0) {
@@ -224,6 +307,34 @@ class EquipmentDetails extends PureComponent {
       isValid = false;
     }
 
+    if (externalEquipmentNumber === '' || externalEquipmentNumber === null) {
+      this.setState({
+        reqHandlerExternalEquipmentNumber: {
+          touched: true,
+          error: 'Please enter truck number'
+        }
+      });
+      isValid = false;
+    }
+
+    if (externalEquipmentNumber !== currentExternalEquipmentNumber) {
+      const response = await EquipmentService.checkExternalEquipmentNumber(
+        {
+          companyId,
+          externalEquipmentNumber
+        }
+      );
+      if (!response.isUnique) {
+        this.setState({
+          reqHandlerExternalEquipmentNumber: {
+            touched: true,
+            error: 'You have used this truck number for another truck'
+          }
+        });
+        isValid = false;
+      }
+    }
+
     if (isValid) {
       return true;
     }
@@ -238,7 +349,8 @@ class EquipmentDetails extends PureComponent {
   }
 
   async save() {
-    if (!this.isFormValid()) {
+    const isFormValid = await this.isFormValid();
+    if (!isFormValid) {
       return;
     }
     const { selectedMaterials } = this.state;
@@ -248,6 +360,19 @@ class EquipmentDetails extends PureComponent {
       await EquipmentService.updateEquipment(equipment);
       await EquipmentMaterialsService
         .createAllEquipmentMaterials(selectedMaterials, equipment.id);
+      toggle();
+    } catch (e) {
+      // console.log(e);
+    }
+  }
+
+  async archiveTruck() {
+    const { selectedMaterials } = this.state;
+    const { toggle } = this.props;
+    const equipment = this.setUpdatedEquipment();
+    equipment.isArchived = '1';
+    try {
+      await EquipmentService.updateEquipment(equipment);
       toggle();
     } catch (e) {
       // console.log(e);
@@ -280,6 +405,8 @@ class EquipmentDetails extends PureComponent {
       reqHandler = 'reqHandlerMinTime';
     } else if (e.target.name === 'maxCapacity') {
       reqHandler = 'reqHandlerMaxCapacity';
+    } else if (e.target.name === 'externalEquipmentNumber') {
+      reqHandler = 'reqHandlerExternalEquipmentNumber';
     }
     // Then we set the touched prop to false, hiding the error label
     this.setState({
@@ -385,6 +512,7 @@ class EquipmentDetails extends PureComponent {
       minHours,
       hourRate,
       tonRate,
+      externalEquipmentNumber,
       files,
       imageUploading,
       isRatedHour,
@@ -392,9 +520,13 @@ class EquipmentDetails extends PureComponent {
       reqHandlerTruckType,
       reqHandlerMaterials,
       reqHandlerMaxCapacity,
-      loaded
+      reqHandlerExternalEquipmentNumber,
+      loaded,
+      defaultDriver,
+      companyDrivers
     } = this.state;
-    const { toggle } = this.props;
+    const { toggle, t } = this.props;
+    const translate = t;
     if (loaded) {
       return (
         <React.Fragment>
@@ -402,28 +534,27 @@ class EquipmentDetails extends PureComponent {
             <Row className="col-12">
               <Col md={12}>
                 <h3 className="subhead">
-                  Tell us about your truck
+                  {t('Tell us about your truck')}
                 </h3>
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck Type</span>
-                <SelectField
+                <span>{t('Truck Number')}</span>
+                <TField
                   input={
                     {
-                      onChange: this.selectChange,
-                      name: 'type',
-                      value: type
+                      onChange: this.handleInputChange,
+                      name: 'externalEquipmentNumber',
+                      value: externalEquipmentNumber
                     }
                   }
-                  value={type}
-                  options={truckTypes}
-                  placeholder="Truck Type"
-                  meta={reqHandlerTruckType}
+                  value={externalEquipmentNumber}
+                  placeholder="0"
+                  meta={reqHandlerExternalEquipmentNumber}
                 />
               </Col>
               <Col md={6} className="pt-2">
                 <span>
-                  Maximum Capacity (Tons)
+                  {`${t('Maximum Capacity')} (${t('Tons')})`}
                 </span>
                 <TFieldNumber
                   input={
@@ -438,29 +569,24 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck name</span>
-                <input
-                  name="name"
-                  type="text"
-                  value={name}
-                  onChange={this.handleInputChange}
+                <span>{t('Truck Type')}</span>
+                <SelectField
+                  input={
+                    {
+                      onChange: this.selectTypeChange,
+                      name: 'type',
+                      value: type
+                    }
+                  }
+                  value={type}
+                  options={truckTypes}
+                  placeholder="Truck Type"
+                  meta={reqHandlerTruckType}
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>Truck description</span>
-                <input
-                  name="description"
-                  type="text"
-                  value={description}
-                  onChange={this.handleInputChange}
-                />
-              </Col>
-            </Row>
-
-            <Row className="col-12">
-              <Col md={12} className="pt-2">
                 <span>
-                  Materials Hauled
+                  {t('Materials Hauled')}
                 </span>
                 <MultiSelect
                   input={
@@ -470,15 +596,36 @@ class EquipmentDetails extends PureComponent {
                       value: selectedMaterials
                     }
                   }
+                  selectedItems={selectedMaterials}
                   options={allMaterials}
                   placeholder="Materials"
                   meta={reqHandlerMaterials}
                 />
               </Col>
+              <Col md={6} className="pt-2">
+                <span>
+                  {t('Truck Name')}
+                </span>
+                <input
+                  name="name"
+                  type="text"
+                  value={name}
+                  onChange={this.handleInputChange}
+                />
+              </Col>
+              <Col md={6} className="pt-2">
+                <span>{t('Truck Description')}</span>
+                <input
+                  name="description"
+                  type="text"
+                  value={description}
+                  onChange={this.handleInputChange}
+                />
+              </Col>
             </Row>
             <Row className="col-md-12">
               <Col md={6} className="pt-2">
-                <span>Vin #</span>
+                <span>{t('VIN #')}</span>
                 <input
                   name="vin"
                   type="text"
@@ -487,7 +634,9 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={6} className="pt-2">
-                <span>License Plate</span>
+                <span>
+                  {t('License Plate')}
+                </span>
                 <input
                   name="licensePlate"
                   type="text"
@@ -496,10 +645,29 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
             </Row>
+            <Row className="col-md-12">
+              <Col md={6} className="pt-2">
+                <span>{translate('Default Driver')}</span>
+                <SelectField
+                  input={
+                    {
+                      onChange: this.selectDefaultDriverChange,
+                      name: 'defaultDriver',
+                      value: defaultDriver
+                    }
+                  }
+                  value={defaultDriver}
+                  options={companyDrivers}
+                  placeholder={translate('Default Driver')}
+                  // meta={reqHandlerTruckType}
+                />
+              </Col>
+              <Col md={6} className="pt-2" />
+            </Row>
             <Row className="col-12">
               <Col md={12} className="pt-4">
                 <h3 className="subhead">
-                  Truck Rates
+                  {t('Truck Description')}
                 </h3>
               </Col>
             </Row>
@@ -510,11 +678,11 @@ class EquipmentDetails extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByHour"
                   value={isRatedHour}
-                  label="By Hour"
+                  label={t('By Hour')}
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum cost per hour</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Hour')}`}</span>
                 <TFieldNumber
                   input={
                     {
@@ -529,7 +697,7 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum Hours</span>
+                <span className="label">{t('Minimum Hours')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -548,11 +716,11 @@ class EquipmentDetails extends PureComponent {
                   onChange={this.handleInputChange}
                   name="ratesByTon"
                   value={isRatedTon}
-                  label="By Ton"
+                  label={t('By Ton')}
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum cost per ton</span>
+                <span className="label">{`$ ${t('Cost')} / ${t('Ton')}`}</span>
                 <TFieldNumber
                   input={
                     {
@@ -567,7 +735,7 @@ class EquipmentDetails extends PureComponent {
                 />
               </Col>
               <Col md={5} className="pt-2">
-                <span className="label">Minimum Tons</span>
+                <span className="label">{t('Minimum Tons')}</span>
                 <TFieldNumber
                   input={
                     {
@@ -583,7 +751,7 @@ class EquipmentDetails extends PureComponent {
             <Row className="col-12 pt-4">
               <Col md={6} className="pt-2">
                 <span>
-                  Max Distance to Pickup (Miles)
+                  {`${t('Max Distance to Pickup')} (${t('Miles')}, ${t('Optional')})`}
                 </span>
                 <TFieldNumber
                   input={
@@ -593,15 +761,15 @@ class EquipmentDetails extends PureComponent {
                       value: maxDistance
                     }
                   }
-                  placeholder="How far will you travel per job"
+                  placeholder={t('How far will you travel per job')}
                 />
               </Col>
               <Col md={6} className="pt-2">
                 <h4 className="subhead">
-                  Upload a picture of your Truck (Optional)
+                  {`${t('Upload a picture of your Truck')} (${t('Optional')})`}
                 </h4>
                 <TFileUploadSingle name="image" files={files} onChange={this.handleImageUpload} />
-                {imageUploading && <span>Uploading Image...</span>}
+                {imageUploading && <span>{t('Uploading Image')}...</span>}
               </Col>
             </Row>
             <Row className="col-12 pt-4">
@@ -609,12 +777,15 @@ class EquipmentDetails extends PureComponent {
                 <Button className="tertiaryButton" type="button"
                   onClick={toggle} disabled={imageUploading}
                 >
-                  Cancel
+                  {t('Cancel')}
                 </Button>
               </ButtonToolbar>
               <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
+                {/*<Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.archiveTruck()}>*/}
+                {/*  Delete*/}
+                {/*</Button>*/}
                 <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
-                  Save
+                  {t('Save')}
                 </Button>
               </ButtonToolbar>
             </Row>
@@ -636,11 +807,13 @@ class EquipmentDetails extends PureComponent {
 
 EquipmentDetails.propTypes = {
   equipmentId: PropTypes.number,
-  toggle: PropTypes.func.isRequired
+  toggle: PropTypes.func.isRequired,
+  companyId: PropTypes.number.isRequired
 };
 
 EquipmentDetails.defaultProps = {
-  equipmentId: 0
+  equipmentId: 0,
+  t: () => {}
 };
 
-export default EquipmentDetails;
+export default withTranslation()(EquipmentDetails);

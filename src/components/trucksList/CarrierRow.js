@@ -123,6 +123,7 @@ class CarrierRow extends Component {
           isOpen={modalFavoriteCarrier}
           toggle={this.toggleViewJobModal}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -237,6 +238,7 @@ class CarrierRow extends Component {
           isOpen={modalRequestJob}
           toggle={this.toggleRequestJobModal}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"

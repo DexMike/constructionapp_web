@@ -1,0 +1,60 @@
+.date-filter .form__form-group-datepicker {
+  height: 28px !important;
+  width: 100% !important;
+  border-radius: 3px !important;
+  padding-left: 8px !important;
+
+  border: 1px solid #CACACA !important;
+  box-shadow: none !important;
+  outline :none !important;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+}
+
+.date-filter .form__form-group {
+  margin-bottom: 2px !important;
+}
+
+.date-filter .Select-input, .Select-control {
+  height: 26px !important;
+}
+
+.date-filter .Select-value {
+  line-height: 26px !important;
+}
+
+.date-filter .form__form-group-select {
+  height: 26px !important;
+  width: 100% !important;
+}
+
+.date-filter .calendarIcon {
+  padding-top: 6px;
+  padding-left: 26px;
+}
+
+.number-cell {
+  text-align: right;
+}
+
+.ag-row-hover {
+  /* putting in !important so it overrides the theme's styling as it hovers the row also */
+  background-color: rgba(255,255,255,0.75) !important;
+}
+
+.ag-column-hover {
+  background-color: #8d8d8d;
+}
+
+.spinner-container {
+  position: absolute;
+  background-color: rgba(255,255,255,0.75);
+  width: 100%;
+  height: 500px;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

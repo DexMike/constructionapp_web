@@ -11,7 +11,6 @@ import {
   ButtonToolbar
 } from 'reactstrap';
 import moment from 'moment';
-import CloneDeep from 'lodash.clonedeep';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import BidService from '../../api/BidService';
@@ -20,14 +19,11 @@ import BookingEquipmentService from '../../api/BookingEquipmentService';
 import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TFormat from '../common/TFormat';
-import TwilioService from '../../api/TwilioService';
 import CompanyService from '../../api/CompanyService';
-import UserService from '../../api/UserService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
 import TMap from '../common/TMap';
-import UserUtils from "../../api/UtilsService";
 
 class JobViewForm extends Component {
   constructor(props) {
@@ -192,160 +188,24 @@ class JobViewForm extends Component {
     this.setState({ btnSubmitting: true });
     const {
       job,
-      favoriteCompany,
-      profile
+      favoriteCompany
     } = this.state;
-    let {
-      bid,
-      booking
-    } = this.state;
-    let notification;
 
     // Is the Carrier this Company's favorite? If so, accepting the job
     if (favoriteCompany.length > 0) {
-      // console.log('accepting');
-      const newJob = CloneDeep(job);
-
-      // Updating the Job
-      newJob.status = 'Booked';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      delete newJob.materials;
-      await JobService.updateJob(newJob);
-
-      // If The Job was sent to both marketplace and favorites, update bid
-      // If the Job was sent to marketplace but a favorite carrier is accepting it, create a bid
-      if (bid && bid.length > 0) {
-        const newBid = CloneDeep(bid);
-        newBid.companyCarrierId = profile.companyId;
-        newBid.hasSchedulerAccepted = 1;
-        newBid.status = 'Accepted';
-        newBid.rateEstimate = newJob.rateEstimate;
-        newBid.notes = newJob.notes;
-        newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment.utc().format();
-        bid = {};
-        bid = await BidService.updateBid(newBid);
-      } else {
-        bid = {};
-        bid.jobId = newJob.id;
-        bid.userId = profile.userId;
-        bid.companyCarrierId = profile.companyId;
-        bid.hasCustomerAccepted = 1;
-        bid.hasSchedulerAccepted = 1;
-        bid.status = 'Accepted';
-        bid.rateType = newJob.rateType;
-        bid.rate = newJob.rate;
-        bid.rateEstimate = newJob.rateEstimate;
-        bid.notes = newJob.notes;
-        bid.createdBy = profile.userId;
-        bid.createdOn = moment.utc().format();
-        bid.modifiedBy = profile.userId;
-        bid.modifiedOn = moment.utc().format();
-        bid = await BidService.createBid(bid);
+      try {
+        await JobService.acceptJob(job.id);
+      } catch (e) {
+        // console.log(e);
       }
-
-      // Create a Booking
-      // Check if we have a booking first
-      const bookings = await BookingService.getBookingsByJobId(newJob.id);
-      if (!bookings || bookings.length <= 0) {
-        booking = {};
-        booking.rateType = bid.rateType;
-        booking.startTime = job.startTime;
-        booking.endTime = job.endTime;
-        booking.startAddressId = job.startAddress.id;
-        booking.endAddressId = job.endAddress.id;
-        booking.fee = 0.0;
-        booking.bookingStatus = 'New';
-        booking.invoiceNumber = '';
-        booking.orderNumber = '';
-        booking.ticketNumber = '';
-        booking.bidId = bid.id;
-        booking.schedulersCompanyId = bid.companyCarrierId;
-        booking.sourceAddressId = job.startAddress.id;
-        booking.notes = '';
-        booking.createdBy = profile.userId;
-        booking.createdOn = moment.utc().format();
-        booking.modifiedOn = moment.utc().format();
-        booking.modifiedBy = profile.userId;
-        booking = await BookingService.createBooking(booking);
-      }
-
-      // Let's make a call to Twilio to send an SMS
-      // We need to change later get the body from the lookups table
-      // We tell the customer that the job has been accepted
-      const customerAdmin = await UserService.getAdminByCompanyId(job.companiesId);
-      if (customerAdmin.length > 0) { // check if we get a result
-        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
-          notification = {
-            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
-            body: 'Your job request has been accepted.'
-          };
-          await TwilioService.createSms(notification);
-        }
-      }
-      // eslint-disable-next-line no-alert
-      // alert('You have won this job! Congratulations.');
       this.closeNow();
-    } else { // The Carrier is not this Company's favorite? requesting the job
-      // console.log('carrier is not this company´s favorite, requesting');
-      const newJob = CloneDeep(job);
-
-      // Updating the Job
-      // newJob.status = 'Requested';
-      newJob.startAddress = newJob.startAddress.id;
-      newJob.endAddress = newJob.endAddress.id;
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      delete newJob.materials;
-      await JobService.updateJob(newJob);
-
-      // CREATING BID
-      if (bid && bid.length > 0) {
-        const newBid = CloneDeep(bid);
-        newBid.companyCarrierId = profile.companyId;
-        bid.hasCustomerAccepted = 0;
-        bid.hasSchedulerAccepted = 1;
-        newBid.status = 'Pending';
-        newBid.modifiedBy = profile.userId;
-        newBid.modifiedOn = moment.utc().format();
-        bid = await BidService.updateBid(newBid);
-      } else {
-        bid = {};
-        bid.jobId = newJob.id;
-        bid.userId = profile.userId;
-        bid.companyCarrierId = profile.companyId;
-        bid.hasCustomerAccepted = 0;
-        bid.hasSchedulerAccepted = 1;
-        bid.status = 'Pending';
-        bid.rateType = newJob.rateType;
-        bid.rate = newJob.rate;
-        bid.rateEstimate = newJob.rateEstimate;
-        bid.notes = newJob.notes;
-        bid.createdBy = profile.userId;
-        bid.createdOn = moment.utc().format();
-        bid.modifiedBy = profile.userId;
-        bid.modifiedOn = moment.utc().format();
-        bid = await BidService.createBid(bid);
+    } else {
+      // The Carrier is not this Company's favorite? requesting the job
+      try {
+        await JobService.requestJob(job.id);
+      } catch (e) {
+        // console.log(e);
       }
-
-      // Let's make a call to Twilio to send an SMS
-      // Sending SMS to customer who created Job
-      const customerAdmin = await UserService.getAdminByCompanyId(newJob.companiesId);
-      if (customerAdmin.length > 0) { // check if we get a result
-        if (customerAdmin[0].mobilePhone && this.checkPhoneFormat(customerAdmin[0].mobilePhone)) {
-          notification = {
-            to: this.phoneToNumberFormat(customerAdmin[0].mobilePhone),
-            body: 'You have a new job request.'
-          };
-          await TwilioService.createSms(notification);
-        }
-      }
-
-      // eslint-disable-next-line no-alert
-      // alert('Your request has been sent.');
       this.closeNow();
     }
   }
@@ -414,6 +274,7 @@ class JobViewForm extends Component {
           isOpen={modalCancelRequest}
           toggle={this.toggleCancelRequest}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"
@@ -607,6 +468,7 @@ class JobViewForm extends Component {
           isOpen={modalLiability}
           toggle={this.toggleLiabilityModal}
           className="modal-dialog--primary modal-dialog--header"
+          backdrop="static"
         >
           <div className="modal__header">
             <button type="button" className="lnr lnr-cross modal__close-btn"

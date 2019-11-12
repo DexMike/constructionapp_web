@@ -1,4 +1,5 @@
 import AgentService from './AgentService';
+import { request } from 'https';
 
 const PATH = '/users';
 
@@ -48,6 +49,15 @@ class UserService extends AgentService {
     return (response);
   }
 
+  static async getCompanyDrivers(companyId, pageNumber, pageSize) {
+    const data = {
+      pageNumber,
+      pageSize
+    };
+    const response = await this.post(`/companies/${companyId}/users/drivers`, data);
+    return (response);
+  }
+
   static async getUserByMobile(mobile) {
     const response = await this.get(`${PATH}/mobile/${mobile}`);
     return (response);
@@ -90,6 +100,11 @@ class UserService extends AgentService {
 
   static async getDriverByBookingEquipmentId(id) {
     const response = await this.get(`/booking_equipments/${id}/driver`);
+    return (response);
+  }
+
+  static async createDriver(user) {
+    const response = await this.post('/drivers/create', user);
     return (response);
   }
 }

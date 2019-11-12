@@ -65,6 +65,11 @@ class CompanyService extends AgentService {
     const response = await this.post(url, filters);
     return (response);
   }
+
+  static async getCompaniesByFilters(filters) {
+    const response = await super.post(`/admin${PATH}/filters`, filters);
+    return (response);
+  }
 }
 
 export default CompanyService;

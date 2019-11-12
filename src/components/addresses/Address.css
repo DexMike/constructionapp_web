@@ -1,0 +1,43 @@
+.addresses-page .btn-main {
+    color: #FFFFFF !important;
+    background-color: #006f53 !important;
+    border: 2px solid #FFFFFF !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    object-fit: contain !important;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .addresses-page .btn-main:before {
+    background-color: #006f53 !important;
+    box-shadow: 0 6px 8px 0 rgba(0, 0, 0, 0.25) !important;
+  }
+  
+  .addresses-page .btn-main:hover {
+    background-color: #006f53 !important;
+    box-shadow: 0 6px 8px 0 rgba(0, 0, 0, 0.25) !important;
+  }
+  
+  .addresses-page .btn-secondary {
+    color: #808080 !important;
+    background-color: #FFFFFF !important;
+    border: 2px solid #808080 !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    object-fit: contain !important;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .addresses-page .btn-secondary:before {
+    background-color: #FFFFFF !important;
+    box-shadow: 0 6px 8px 0 rgba(0, 0, 0, 0.25) !important;
+  }
+  
+  .addresses-page .btn-secondary:hover {
+    background-color: #FFFFFF !important;
+    box-shadow: 0 6px 8px 0 rgba(0, 0, 0, 0.25) !important;
+  }
