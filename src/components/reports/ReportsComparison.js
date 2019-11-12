@@ -435,8 +435,10 @@ class ReportsComparison extends Component {
     const newObj = obj;
     /**/
     if (obj.field === 'name') {
-      newObj.headerName = 'Carriers';
-      newObj.headerTooltip = 'Carrier of Producer';
+      if(newObj.headerName === 'Producers') {
+        newObj.headerName = 'Carriers';
+        newObj.headerTooltip = 'Carrier of Producer';
+      }
     }
     
     if (obj.field === 'avgTotEarningsComparison') {
@@ -1031,7 +1033,7 @@ class ReportsComparison extends Component {
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div style={{ width: '100%', height: '400p  xx' }}>
                         {this.renderChart(chartType, products, title)}
                       </div>
                     </TabPane>
