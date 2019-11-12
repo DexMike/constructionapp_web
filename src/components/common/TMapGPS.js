@@ -8,7 +8,7 @@ import GPSTrackingService from '../../api/GPSTrackingService';
 
 // this reduces the results times the number specified
 const reducer = 10; // one tenth
-const maxPointsThreshold = 400;
+const maxPointsThreshold = 40000;
 
 class TMapGPS extends Component {
   constructor(props) {
@@ -30,11 +30,13 @@ class TMapGPS extends Component {
     this.boundingBoxDistance = 0;
 
     // this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
-    this.calculateRouteGPS = this.calculateRouteGPS.bind(this);
     this.addRouteShapeToMap = this.addRouteShapeToMap.bind(this);
     this.addMarkersToMap = this.addMarkersToMap.bind(this);
     this.reducer = this.reducer.bind(this);
     this.setMarkers = this.setMarkers.bind(this);
+
+    this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
+    this.onRouteSuccess = this.onRouteSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -64,6 +66,19 @@ class TMapGPS extends Component {
     }
   }
 
+  onRouteSuccess(result) {
+    const route = result.response.route[0];
+    this.addRouteShapeToMap(route);
+    // for (const tracking of trackings) {
+    //   this.addGPSPoint(tracking[1], tracking[0]);
+    // }
+  }
+
+  onRouteError(error) {
+    console.error(error);
+  }
+
+
   async getRouteGPS() {
     const { loadId } = this.props;
 
@@ -89,19 +104,24 @@ class TMapGPS extends Component {
   }
 
   setMarkers(wps) {
+    const { startAddress, endAddress } = this.props;
+    // wps = [];
+
+
     // markers
-    if (wps.length > 1) {
+    if (wps.length >= 2) {
+      console.log('TCL: TMapGPS -> setMarkers -> wps.length', wps);
       const start = wps[0].split(',');
       const end = wps.pop().split(',');
-      const startAddress = {
+      const startAddressGPS = {
         latitude: start[0],
         longitude: start[1]
       };
-      const endAddress = {
+      const endAddressGPS = {
         latitude: end[0],
         longitude: end[1]
       };
-      this.addMarkersToMap(startAddress, endAddress);
+      this.addMarkersToMap(startAddressGPS, endAddressGPS);
       this.setState({
         loadedText: ''
       });
@@ -113,6 +133,13 @@ class TMapGPS extends Component {
       } catch (e) {
         console.log('TCL: ERROR_>', e);
       }
+    } else {
+      console.log('TCL: TMapGPS -> setMarkers -> startAddress', startAddress, endAddress);
+      this.addMarkersToMap(startAddress, endAddress);
+      this.setState({
+        loadedText: ''
+      });
+      this.calculateRouteFromAtoB();
     }
   }
 
@@ -129,36 +156,27 @@ class TMapGPS extends Component {
     return reduced;
   }
 
-  async calculateRouteGPS() {
-    const { loadId } = this.props;
+  calculateRouteFromAtoB() {
+    const {startAddress, endAddress} = this.props;
+    const router = this.platform.getRoutingService();
+    const routeRequestParams = {
+      mode: 'balanced;truck;traffic:disabled;motorway:0',
+      representation: 'display',
+      routeattributes: 'waypoints,summary,shape,legs,incidents',
+      maneuverattributes: 'direction,action',
+      truckType: 'tractorTruck',
+      limitedWeight: 700,
+      metricSystem: 'imperial',
+      language: 'en-us', // en-us|es-es|de-de
+      waypoint0: `${startAddress.latitude},${startAddress.longitude}`,
+      waypoint1: `${endAddress.latitude},${endAddress.longitude}`
+    };
 
-    let distanceInfo = [];
-    let wps = [];
-    // instead of getting the info here, we will query the backend
-    try {
-      distanceInfo = await MapService.getDistanceForFleet(loadId);
-    } catch (e) {
-      console.log('ERROR: ', e);
-    }
-
-    for (const wp of distanceInfo.waypoints) {
-      let newWp = '';
-      /*
-      if (wp.mappedPosition.latitude === 0 || wp.mappedPosition.longitude === 0) {
-        newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
-      } else {
-        newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
-      }
-      */
-      // use only original
-      newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
-      wps.push(newWp);
-    }
-
-    if (wps.length > maxPointsThreshold) {
-      wps = this.reducer(wps);
-    }
-    this.setMarkers(wps);
+    router.calculateRoute(
+      routeRequestParams,
+      this.onRouteSuccess,
+      this.onRouteError
+    );
   }
 
   /**
