@@ -6,8 +6,21 @@ import AuthService from '../utils/AuthService';
 const { API_ENDPOINT } = process.env;
 
 class AgentService {
-  static async getHeaders() {
+
+  static async getHeaders(path, accessToken, idToken) {
     try {
+      if (AuthService.isNonAuthPath(path)) {
+        return {
+          'Content-Type': 'application/json'
+        };
+      }
+      if (accessToken && idToken) {
+        return {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+          'Id-Token': idToken
+        };
+      }
       const currentSession = await AuthService.refreshSession();
       return {
         'Content-Type': 'application/json',
@@ -32,6 +45,17 @@ class AgentService {
     if (response.status === 403) {
       throw new Error('Access Forbidden');
     }
+    return response.json();
+  }
+
+  static async getPreLogin(path, accessToken, idToken) {
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = await this.getHeaders(path, accessToken, idToken);
+    const init = {
+      method: 'GET',
+      headers
+    };
+    const response = await fetch(input, init);
     return response.json();
   }
 

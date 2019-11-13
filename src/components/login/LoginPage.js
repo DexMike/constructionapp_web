@@ -21,6 +21,7 @@ import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
+import UserManagementService from "../../api/UserManagementService";
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -130,7 +131,8 @@ class LoginPage extends SignIn {
     this.setState({loading: true, btnSubmitting: true, error: null, errorCode: null});
     try {
       if (!username || username.length <= 0
-        || !password || password.length <= 0) {
+        || !password || password.length <= 0
+        || !(username.indexOf('@') > -1)) {
         // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
@@ -153,9 +155,19 @@ class LoginPage extends SignIn {
         return;
       }
 
-      const isAdmin = await CompanyService.isCompanyAdmin(user.id);
-      if (!isAdmin) {
-        this.setState({isDriver: true});
+      const userSignIn = await UserManagementService.signIn({email: username, password});
+      if (userSignIn.success) {
+        const profile = await ProfileService.getProfilePreLogin(userSignIn.accessToken, userSignIn.idToken);
+        if (profile.companyType === 'Carrier' && !profile.isAdmin) {
+          this.setState({isDriver: true});
+          return;
+        }
+      } else {
+        this.setState({
+          error: 'Incorrect username or password.',
+          btnSubmitting: false,
+          loading: false
+        });
         return;
       }
 
@@ -188,7 +200,6 @@ class LoginPage extends SignIn {
         browserVersion,
         screenSize
       });
-
       const data = await Auth.signIn(user.cognitoId, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);

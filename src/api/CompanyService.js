@@ -33,12 +33,6 @@ class CompanyService extends AgentService {
     return (response);
   }
 
-  // use this to check if user record is admin before logging in, otherwise user getProfile()
-  static async isCompanyAdmin(userId) {
-    const response = await super.get(`${PATH}/${userId}/isadmin`);
-    return (response);
-  }
-
   static async createCompany(company) {
     const response = await super.post(PATH, company);
     return (response);
