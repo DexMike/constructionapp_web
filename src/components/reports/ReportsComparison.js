@@ -347,6 +347,7 @@ class ReportsComparison extends Component {
     this.toggle = this.toggle.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
     this.closeModal = this.closeModal.bind(this);
+    this.handlePageClick = this.handlePageClick.bind(this);
 
     // TODO: need to do for Producer, Product, and Project
     this.handlePageChange = this.handlePageChange.bind(this);
@@ -780,8 +781,8 @@ class ReportsComparison extends Component {
   async getJob(jobId) {
     // await this.handleFilterChange(filters);
     const job = await JobService.getJobById(jobId);
-    console.log(job);
     const company = await CompanyService.getCompanyById(job.companiesId);
+    company.company = company;
     const sAddress = await AddressService.getAddressById(job.startAddress);
     const eAddress = await AddressService.getAddressById(job.endAddress);
     job.startAddress = sAddress;
@@ -925,8 +926,7 @@ class ReportsComparison extends Component {
   }
   
   renderModal() {
-    const { modal, job, closeModal, activeTab, company } = this.state;
-
+    const { modal, job, closeModal, activeTab } = this.state;
     if (Number(activeTab) === 3) {
       return (
         <React.Fragment>
@@ -935,7 +935,7 @@ class ReportsComparison extends Component {
               <JobForm
                 job={job}
                 bid={null}
-                companyCarrier={company}
+                // companyCarrier={company}
               />
               <div className="cont-button">
                 <Button
