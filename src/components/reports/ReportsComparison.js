@@ -48,7 +48,7 @@ import ProfileService from '../../api/ProfileService';
 import TFormat from '../common/TFormat';
 
 import './Reports.css';
-// import '../addresses/Address.css';
+import '../addresses/Address.css';
 
 import JobForm from '../jobs/JobForm';
 import JobService from '../../api/JobService';
@@ -168,8 +168,7 @@ class ReportsComparison extends Component {
         cellStyle: { 'text-align': 'right'},
         resizable: true,
         suppressSizeToFit: true,
-        enableSorting: true,
-        onRowClicked: function(event) { console.log('a row was clicked', event); }
+        enableSorting: true
       },
 
       columnsCarrier: [
@@ -424,7 +423,6 @@ class ReportsComparison extends Component {
     this.gridColumnApi = params.columnApi;
   }
 
-
   onGridReadyProducts(params) {
     this.gridApiProducers = params.api;
     this.gridColumnApi = params.columnApi;
@@ -548,13 +546,13 @@ class ReportsComparison extends Component {
     }
   }
 
+  // modal with job detail information
   togglePopup() {
     const { modal } = this.state;
     
     if (modal) {
       this.setState(({
         modal: !modal,
-        // addressId: 0
       }));
     } else {
       this.setState(({
@@ -877,15 +875,14 @@ class ReportsComparison extends Component {
       />
     )
   }
-  onRowClicked(event: any) { console.log('row', event); }
-
+  // onRowClicked(event: any) { console.log('row', event); }
+  
   renderTable(columns, defaultData, data, onGridReady) {
     const { activeTab, compEnabled } = this.state;
     
     let newData = data;
     let colHeight = 60;
 
-    console.log('datos', data);
     if (Number(activeTab) === 3 || !compEnabled) {
       colHeight = 28;
     }
@@ -895,7 +892,7 @@ class ReportsComparison extends Component {
         columnDefs={columns}
         defaultColDef={defaultData}
         rowData={data}
-        // onRowClicked={() => this.onRowClicked(data)}
+        onRowClicked={(event) => this.getJob(event.data.id) }
         // floatingFilter={true}
         onGridReady={onGridReady}
         paginationPageSize={15}
@@ -908,28 +905,34 @@ class ReportsComparison extends Component {
   }
   
   renderModal() {
-    const { modal, job, closeModal } = this.state;
-    // const job = await JobService.getJobById(288);
+    const { modal, job, closeModal, activeTab } = this.state;
+
+    if (Number(activeTab) === 3) {
+      return (
+        <React.Fragment>
+          <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="modal-job">
+            <div className="dashboard dashboard__job-create" style={{width: 900}}>
+              <JobForm
+                job={job}
+                bid={null}
+                companyCarrier={null}
+              />
+              <div className="cont-button">
+                <Button
+                  color="minimal"
+                  className="btn btn-outline-secondary"
+                  outline
+                  onClick={this.closeModal}
+                  >Close &nbsp;
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        </React.Fragment>
+      );
+    }
     return (
       <React.Fragment>
-        <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="modal-job">
-          <div className="dashboard dashboard__job-create" style={{width: 900}}>
-            <JobForm
-              job={job}
-              bid={null}
-              companyCarrier={null}
-            />
-            <div className="cont-button">
-              <Button
-                color="minimal"
-                className="btn btn-outline-secondary"
-                outline
-                onClick={this.closeModal}
-                >Close &nbsp;
-              </Button>
-            </div>
-          </div>
-        </Modal>
       </React.Fragment>
     );
   }
@@ -1181,11 +1184,6 @@ class ReportsComparison extends Component {
           {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
-          <Button
-            outline
-            onClick={() => this.getJob(223)}
-            >Details &nbsp;
-          </Button>
           <FilterComparisonReport
             type={companyType}
             showComparison

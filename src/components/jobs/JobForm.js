@@ -953,7 +953,6 @@ class JobForm extends Component {
           <Card>
             <CardBody className="card-full-height">
               <Row>
-                z
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
