@@ -7,6 +7,11 @@ class UserManagementService extends AgentService {
     const response = await this.post(`${PATH}/hascognito`, cognitoRequest);
     return (response);
   }
+
+  static async signIn(signInRequest) {
+    const response = await this.post(`${PATH}/signin`, signInRequest);
+    return response;
+  }
 }
 
 export default UserManagementService;

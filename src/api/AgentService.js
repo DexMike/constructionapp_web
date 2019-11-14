@@ -6,8 +6,20 @@ import AuthService from '../utils/AuthService';
 const { API_ENDPOINT } = process.env;
 
 class AgentService {
-  static async getHeaders() {
+  static async getHeaders(path, accessToken, idToken) {
     try {
+      if (AuthService.isNonAuthPath(path)) {
+        return {
+          'Content-Type': 'application/json'
+        };
+      }
+      if (accessToken && idToken) {
+        return {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+          'Id-Token': idToken
+        };
+      }
       const currentSession = await AuthService.refreshSession();
       return {
         'Content-Type': 'application/json',
@@ -23,7 +35,7 @@ class AgentService {
 
   static async get(path) {
     const input = `${API_ENDPOINT}${path}`;
-    const headers = await this.getHeaders();
+    const headers = await this.getHeaders(path);
     const init = {
       method: 'GET',
       headers
@@ -35,9 +47,20 @@ class AgentService {
     return response.json();
   }
 
+  static async getPreLogin(path, accessToken, idToken) {
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = await this.getHeaders(path, accessToken, idToken);
+    const init = {
+      method: 'GET',
+      headers
+    };
+    const response = await fetch(input, init);
+    return response.json();
+  }
+
   static async getText(path) {
     const input = `${API_ENDPOINT}${path}`;
-    const headers = await this.getHeaders();
+    const headers = await this.getHeaders(path);
     const init = {
       method: 'GET',
       headers
@@ -48,7 +71,7 @@ class AgentService {
 
   static async post(path, entity) {
     const input = `${API_ENDPOINT}${path}`;
-    const headers = await this.getHeaders();
+    const headers = await this.getHeaders(path);
     const init = {
       method: 'POST',
       headers,
@@ -60,7 +83,7 @@ class AgentService {
 
   static async put(path, entity) {
     const input = `${API_ENDPOINT}${path}`;
-    const headers = await this.getHeaders();
+    const headers = await this.getHeaders(path);
     const init = {
       method: 'PUT',
       headers,
@@ -72,7 +95,7 @@ class AgentService {
 
   static async delete(path, id) {
     const input = `${API_ENDPOINT}${path}/${id}`;
-    const headers = await this.getHeaders();
+    const headers = await this.getHeaders(path);
     const init = {
       method: 'DELETE',
       headers
