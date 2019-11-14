@@ -31,6 +31,8 @@ import RatesDeliveryService from '../../api/RatesDeliveryService';
 import CompanySettingsService from '../../api/CompanySettingsService';
 import TCalculator from '../common/TCalculator';
 
+// import '../addresses/Address.scss';
+
 class JobForm extends Component {
   constructor(props) {
     super(props);
@@ -131,6 +133,7 @@ class JobForm extends Component {
   async loadJobForm() {
     const profile = await ProfileService.getProfile();
     const { job, companyCarrier } = this.props;
+    console.log(job);
     let {
       loads,
       carrier,
@@ -950,6 +953,7 @@ class JobForm extends Component {
           <Card>
             <CardBody className="card-full-height">
               <Row>
+                z
                 {this.renderJobTop(job)}
               </Row>
               <hr/>
