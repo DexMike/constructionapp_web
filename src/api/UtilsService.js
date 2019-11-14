@@ -9,7 +9,8 @@ class UserUtils {
   }
 
   static async getBrowserVersion() {
-    var ua = navigator.userAgent,tem,M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || []; 
+    let ua = navigator.userAgent; var tem; var  
+M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
     if (/trident/i.test(M[1])) {
       tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
       return {name: 'IE', version: (tem[1] || '')};
@@ -42,6 +43,10 @@ class UserUtils {
       height: window.innerWidth,
       width: window.innerHeight
     };
+  }
+
+  static sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 
