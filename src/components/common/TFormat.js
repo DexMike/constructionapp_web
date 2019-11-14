@@ -261,6 +261,10 @@ class TFormat {
     if (userTimeZone && userTimeZone.length > 0) {
       return moment.utc(inputValue).tz(userTimeZone).format('MM/DD/YYYY hh:mm a');
     }
+    // should be something like 'America/Chicago', but was undefined in IE11
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone === undefined) {
+      return moment(inputValue).format('MM/DD/YYYY hh:mm a');
+    }
     return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY hh:mm a');
   }
 
