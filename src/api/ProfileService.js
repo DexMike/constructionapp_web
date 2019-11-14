@@ -8,6 +8,11 @@ class ProfileService extends AgentService {
     return (response);
   }
 
+  static async getProfilePreLogin(accessToken, idToken) {
+    const response = await super.getPreLogin(PATH, accessToken, idToken);
+    return (response);
+  }
+
   static getDefaultProfile() {
     return {
       companyType: 'Customer',

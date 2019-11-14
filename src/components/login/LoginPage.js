@@ -20,6 +20,8 @@ import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 import ProfileService from '../../api/ProfileService';
+import CompanyService from '../../api/CompanyService';
+import UserManagementService from "../../api/UserManagementService";
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -44,6 +46,7 @@ class LoginPage extends SignIn {
       user: null,
       btnSubmitting: false, // Used by TSubmitButton
       userUnderReview: false,
+      isDriver: false,
       ip: '',
       browserVersion: [],
       screenSize: []
@@ -128,7 +131,8 @@ class LoginPage extends SignIn {
     this.setState({loading: true, btnSubmitting: true, error: null, errorCode: null});
     try {
       if (!username || username.length <= 0
-        || !password || password.length <= 0) {
+        || !password || password.length <= 0
+        || !(username.indexOf('@') > -1)) {
         // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
@@ -151,6 +155,22 @@ class LoginPage extends SignIn {
         return;
       }
 
+      const userSignIn = await UserManagementService.signIn({email: username, password});
+      if (userSignIn.success) {
+        const profile = await ProfileService.getProfilePreLogin(userSignIn.accessToken, userSignIn.idToken);
+        if (profile.companyType === 'Carrier' && !profile.isAdmin) {
+          this.setState({isDriver: true});
+          return;
+        }
+      } else {
+        this.setState({
+          error: 'Incorrect username or password.',
+          btnSubmitting: false,
+          loading: false
+        });
+        return;
+      }
+
       if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
         return;
@@ -159,7 +179,7 @@ class LoginPage extends SignIn {
       if (user.id && user.userStatus === 'Driver Created') {
         const driver = await UserService.getDriverByUserId(user.id);
         if (driver.id === null || driver.driverStatus !== 'Enabled') {
-          await this.createLoginLog(true);
+          // await this.createLoginLog(true);
           this.setState({userUnderReview: true});
           return;
         }
@@ -180,7 +200,6 @@ class LoginPage extends SignIn {
         browserVersion,
         screenSize
       });
-
       const data = await Auth.signIn(user.cognitoId, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
@@ -189,7 +208,7 @@ class LoginPage extends SignIn {
         if (this.props.onStateChange) {
           this.props.onStateChange('authenticated', data);
         }
-        await this.createLoginLog(true);
+        // await this.createLoginLog(true);
         // window.location = '/';
         this.setLogging(username);
 
@@ -290,6 +309,14 @@ class LoginPage extends SignIn {
       <h6> Thank you for checking back with us. Your account is still in review.
         This normally takes 1-2 business days.
         If you have not been contact you can email us at csr@trelar.com. Thank you.
+      </h6>
+    );
+  }
+
+  renderIsDriver() {
+    return (
+      <h6> Drivers do not have access to the Trelar web app at this time.
+        You can email us at csr@trelar.com. Thank you.
       </h6>
     );
   }
@@ -395,7 +422,7 @@ class LoginPage extends SignIn {
   }
 
   renderPage() {
-    const {userUnderReview} = this.state;
+    const {userUnderReview, isDriver} = this.state;
 
     return (
       <div className="theme-light">
@@ -427,7 +454,8 @@ class LoginPage extends SignIn {
                     </h4>
                   </div>
                   {userUnderReview && this.renderUserNotReviewed()}
-                  {!userUnderReview && this.renderLogInForm()}
+                  {isDriver && this.renderIsDriver()}
+                  {!userUnderReview && !isDriver && this.renderLogInForm()}
                   {/* <div className="account__or"> */}
                   {/* <p>Or Easily Using</p> */}
                   {/* </div> */}

@@ -95,6 +95,8 @@ class JobForm extends Component {
   }
 
   async componentDidMount() {
+    const { companyCarrier } = this.props;
+    console.log(companyCarrier);
     await this.loadJobForm();
   }
 
