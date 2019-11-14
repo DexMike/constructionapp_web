@@ -112,11 +112,11 @@ class EquipmentDetails extends PureComponent {
     } catch (e) {
       // console.log(e);
     }
-    
+
     try {
       await this.setEquipment(equipment);
       await this.fetchMaterials();
-      companyDrivers = (await EquipmentDetailService.getDefaultDriverList(companyId, equipmentId))
+      companyDrivers = (await EquipmentDetailService.getEquipmentDefaultDriverList(companyId, equipmentId))
         .data.map(companyDriver => ({
           value: companyDriver.driverId,
           label: `${companyDriver.firstName} ${companyDriver.lastName}`
