@@ -178,7 +178,7 @@ class ReportsDailyReportPage extends Component {
       }
     }
 
-    this.setState({ 
+    this.setState({
       columnsJobs,
       columnsLoads,
       loaded: true
@@ -289,7 +289,7 @@ class ReportsDailyReportPage extends Component {
   returnSelectedMaterials() {
     const { filters } = this.state;
     return filters.materialType;
-  }  
+  }
 
   extractCSVInfoJobs(data) {
     const { columnsJobs } = this.state;
@@ -317,6 +317,7 @@ class ReportsDailyReportPage extends Component {
       'Potential Earnings': d.potentialEarnings,
       'Total Market Value': d.totalMarketValue
       */
+
     }))
     return newData;
   }
@@ -499,7 +500,7 @@ class ReportsDailyReportPage extends Component {
                         <CSVLink data={dataToPrintJobs} filename={`DailyJobsReport_${StringGenerator.getDateString()}.csv`}>
                           <Button
                             outline
-                          >Export data as CSV &nbsp; 
+                          >Export data as CSV &nbsp;
                             <span className="lnr lnr-chart-bars" />
                           </Button>
                         </CSVLink>
@@ -523,7 +524,7 @@ class ReportsDailyReportPage extends Component {
                         autoHeightMin={0}
                         autoHeightMax={800}
                         // disableVerticalScrolling
-                        >
+                      >
                         <div
                           id="jobsGrid"
                           className="ag-theme-balham gridTableJobs"
@@ -542,7 +543,7 @@ class ReportsDailyReportPage extends Component {
                           />
                         </div>
                       </Scrollbars>
-                      
+
                     </Col>
                   </Row>
 
@@ -568,7 +569,7 @@ class ReportsDailyReportPage extends Component {
                         <CSVLink data={dataToPrintLoads} filename={`DailyLoadsReport_${StringGenerator.getDateString()}.csv`}>
                           <Button
                             outline
-                          >Export data as CSV &nbsp; 
+                          >Export data as CSV &nbsp;
                             <span className="lnr lnr-chart-bars" />
                           </Button>
                         </CSVLink>

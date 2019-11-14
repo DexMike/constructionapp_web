@@ -1,128 +1,135 @@
+// All of these need to be dynamic and not hard coded.
+def env_fullname() {
+  def name = [
+
+    "master":  "Production",
+    "infra":   "Infrastructure",
+    "dev":     "Dev",
+    "demo":    "Demo",
+    "qa":      "QA",
+    "staging": "Staging",
+    "cat":     "CAT",
+    "newqa":   "QA",
+  ]
+  return name["${BRANCH_NAME}"]
+}
+
+def env_shortname() {
+  def name = [
+
+    "master":  "prod",
+    "infra":   "infra",
+    "dev":     "dev",
+    "demo":    "demo",
+    "qa":      "qa",
+    "staging": "staging",
+    "cat":     "cat",
+    "newqa":   "qa",
+  ]
+  return name["${BRANCH_NAME}"]
+}
+
+def domain() {
+  if ("${BRANCH_NAME}" == "master") {
+    return "mytrelar.com"
+  }
+  else {
+    return "${env_shortname()}.mytrelar.com"
+  }
+}
+
+def cloudfront_id() {
+  def id_map = [
+
+    "master":  "E1AHYHKY2WVINB",
+    "infra":   "E1EGZGUUXJ1IES",
+    "demo":    "E3VLWJXIOSHO30",
+    "qa":      "E2W2Q6ROFYLZDI",
+    "cat":     "E1XUS55INHEOEY",
+    "staging": "E3KJAHZFANQPXC"
+  ]
+  return id_map["${BRANCH_NAME}"]
+}
+
 pipeline {
-  agent any
+  options {
+    disableConcurrentBuilds()
+  }
+
+  environment {
+    ENVIRONMENT = env_fullname()
+    /*
+    AWS_REGION           = "us-east-1"
+    GOOGLE_MAPS_API      = "AIzaSyDUwWVXa6msmVdA-oGjnvhFXtvTzkvw2Jg"
+    MAPBOX_API           = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA"
+    HERE_MAPS_APP_ID     = "FlTEFFbhzrFwU1InxRgH"
+    HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
+    HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
+    APP_ENV              = app_env()
+    API_ENDPOINT         = "api.${domain()}"
+    AWS_USER_POOL_ID     = user_pool_id()
+    AWS_IDENTITY_POOL_ID = pool_id()
+    AWS_UPLOADS_BUCKET   = "uploads.${domain()}"
+    AWS_UPLOADS_ENDPOINT = "https://uploads.${domain()}"
+    CLOUDFRONT_ID        = cloudfront_id()
+
+    AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
+    */
+  }
+  agent {
+    node {
+      label 'master'
+    }
+  }
   stages {
-    stage('Initialize') {
-      parallel {
-        stage('Initialize dev') {
-          when {
-            branch 'dev'
-          }
-          steps {
-            echo 'Starting Dev'
-          }
-        }
-        stage('Initialize demo') {
-          when {
-            branch 'demo'
-          }
-          steps {
-            echo 'Starting Demo'
-          }
-        }
-        stage('Initialize qa') {
-          when {
-            branch 'qa'
-          }
-          steps {
-            echo 'Starting qa'
-          }
-        }
-        stage('Initialize prod') {
-          when {
-            branch 'master'
-          }
-          steps {
-            echo 'Starting prod'
-          }
-        }
-        stage('Initialize staging') {
-          when {
-            branch 'staging'
-          }
-          steps {
-            echo 'Starting staging'
-          }
-        }
+    stage("Install NPM packages") {
+      steps {
+        sh 'npm install'
       }
     }
-    stage('Build / Package') {
-      parallel {
-        stage('Build / Package dev') {
-          when {
-            branch 'dev'
-          }
-          steps {
-            sh '''npm install
-npm run deployDev'''
-            slackSend botUser: true,
-              channel: 'jenkins',
-              color: 'good',
-              message: 'Stargate dev deploy finished successfully',
-              teamDomain: 'trelarlogistics',
-              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
-          }
+    stage("Clean dist") {
+      steps {
+        dir('dist') {
+          deleteDir()
         }
-        stage('Build / Package demo') {
-          when {
-            branch 'demo'
-          }
-          steps {
-            sh '''npm install
-npm run deployDemo'''
-            slackSend botUser: true,
-              channel: 'jenkins',
-              color: 'good',
-              message: 'Stargate demo deploy finished successfully',
-              teamDomain: 'trelarlogistics',
-              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
-          }
-        }
-        stage('Build / Package qa') {
-          when {
-            branch 'qa'
-          }
-          steps {
-            sh '''npm install
-npm run deployQa'''
-            slackSend botUser: true,
-              channel: 'jenkins',
-              color: 'good',
-              message: 'Stargate qa deploy finished successfully',
-              teamDomain: 'trelarlogistics',
-              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
-          }
-        }
-        stage('Build / Package prod') {
-          when {
-            branch 'master'
-          }
-          steps {
-            sh '''npm install
-npm run deployProd'''
-            slackSend botUser: true,
-              channel: 'jenkins',
-              color: 'good',
-              message: 'Stargate prod deploy finished successfully',
-              teamDomain: 'trelarlogistics',
-              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
-          }
-        }
-        stage('Build / Package staging') {
-          when {
-            branch 'staging'
-          }
-          steps {
-            sh '''npm install
-npm --max_old_space_size=8192 run deployStaging'''
-            slackSend botUser: true,
-              channel: 'jenkins',
-              color: 'good',
-              message: 'Stargate staging deploy finished successfully',
-              teamDomain: 'trelarlogistics',
-              tokenCredentialId: 'b2e400d0-bea2-4d00-946e-ba25ced0ff09'
-          }
-        }
+        sh 'mkdir dist'
       }
+    }
+    stage ("Build HTML") {
+      steps {
+        sh 'npx babel-node tools/buildHtml.js'
+      }
+    }
+    stage("Build Bundle") {
+      steps {
+        sh 'npx babel-node --max_old_space_size=4096 tools/build.js'
+      }
+    }
+    stage("Sync to S3") {
+      steps {
+        sh "aws s3 sync dist/ s3://app.${domain()}"
+      }
+    }
+    stage("Invalidate cloudfront") {
+      when {
+        expression { cloudfront_id() }
+      }
+      steps {
+       sh "aws cloudfront create-invalidation --distribution-id ${cloudfront_id()} --paths '/*'"
+     }
+    }
+    stage('Clean up') {
+      steps {
+        cleanWs cleanWhenAborted: false, cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false, deleteDirs: true
+      }
+    }
+  }
+  post {
+    success {
+      slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: '#devops', color: 'RED', message: "Stargate ${ENVIRONMENT} deploy finished successfully", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
+    }
+    failure {
+      slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: '#devops', color: 'RED', message: "Stargate ${ENVIRONMENT} deploy failed", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
     }
   }
 }
