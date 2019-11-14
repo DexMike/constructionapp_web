@@ -17,6 +17,14 @@ class AuthService {
     return {};
   }
 
+  static isNonAuthPath(path) {
+    const nonAuthPaths = [
+      '/','/auth', '/actuator', '/users/email', '/users/email', '/users/mobile', '/usermanagement/signin',
+      '/appmeta', '/login/logs', '/users/email/company'
+    ];
+    nonAuthPaths.some(nonAuthPath => path.indexOf(nonAuthPath) > -1);
+  }
+
   static async logOut() {
     try {
       localStorage.removeItem('filters');
