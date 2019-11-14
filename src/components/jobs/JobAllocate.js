@@ -486,6 +486,7 @@ class JobAllocate extends Component {
         ? equipmentMatch.label : '-';
       return {
         ...bookingEquipment,
+        createdOnFormatted: moment(bookingEquipment.createdOn).format(),
         driverName,
         externalEquipmentNumber,
         actions: this.renderBookingEquipmentActions(bookingEquipment)
@@ -522,8 +523,8 @@ class JobAllocate extends Component {
                           displayName: 'Driver',
                           name: 'driverName'
                         }, {
-                          displayName: 'Created On',
-                          name: 'createdOn'
+                          displayName: 'Allocated On',
+                          name: 'createdOnFormatted'
                         }, {
                           displayName: 'Actions',
                           name: 'actions'
