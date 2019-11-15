@@ -9,7 +9,6 @@ def env_fullname() {
     "qa":      "QA",
     "staging": "Staging",
     "cat":     "CAT",
-    "newqa":   "QA",
   ]
   return name["${BRANCH_NAME}"]
 }
@@ -24,7 +23,6 @@ def env_shortname() {
     "qa":      "qa",
     "staging": "staging",
     "cat":     "cat",
-    "newqa":   "qa",
   ]
   return name["${BRANCH_NAME}"]
 }
@@ -58,23 +56,6 @@ pipeline {
 
   environment {
     ENVIRONMENT = env_fullname()
-    /*
-    AWS_REGION           = "us-east-1"
-    GOOGLE_MAPS_API      = "AIzaSyDUwWVXa6msmVdA-oGjnvhFXtvTzkvw2Jg"
-    MAPBOX_API           = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA"
-    HERE_MAPS_APP_ID     = "FlTEFFbhzrFwU1InxRgH"
-    HERE_MAPS_APP_CODE   = "gTgJkC9u0YWzXzvjMadDzQ"
-    HERE_MAPS_API_KEY    = "7ObLMmc-zYDiOYIxaFFuuOZ0BSS0tC6qj5xV9yexR5A"
-    APP_ENV              = app_env()
-    API_ENDPOINT         = "api.${domain()}"
-    AWS_USER_POOL_ID     = user_pool_id()
-    AWS_IDENTITY_POOL_ID = pool_id()
-    AWS_UPLOADS_BUCKET   = "uploads.${domain()}"
-    AWS_UPLOADS_ENDPOINT = "https://uploads.${domain()}"
-    CLOUDFRONT_ID        = cloudfront_id()
-
-    AWS_USER_POOL_WEB_CLIENT_ID = app_client_id()
-    */
   }
   agent {
     node {
@@ -102,6 +83,7 @@ pipeline {
     }
     stage("Build Bundle") {
       steps {
+        slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: env_shortname() , color: 'RED', message: "Stargate ${ENVIRONMENT} bundle started", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
         sh 'npx babel-node --max_old_space_size=4096 tools/build.js'
       }
     }
@@ -126,10 +108,10 @@ pipeline {
   }
   post {
     success {
-      slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: '#devops', color: 'RED', message: "Stargate ${ENVIRONMENT} deploy finished successfully", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
+      slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: env_shortname() , color: 'RED', message: "Stargate ${ENVIRONMENT} deploy successful", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
     }
     failure {
-      slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: '#devops', color: 'RED', message: "Stargate ${ENVIRONMENT} deploy failed", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
+      slackSend(baseUrl: 'https://trelarlogistics.slack.com/services/hooks/jenkins-ci/', botUser: true, channel: env_shortname() , color: 'RED', message: "Stargate ${ENVIRONMENT} deploy failed", teamDomain: 'trelarlogistics.slack.com', token: 'bKwJFYhX22RgyoqU0wfwfHny')
     }
   }
 }
