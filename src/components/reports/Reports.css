@@ -192,6 +192,61 @@
   background-color: #9A9A9A !important;
 }
 
+.reports-modal-job .modal-content{
+  width: 900px!important;
+  background-color: #e5e5e0;
+}
+
+.reports-modal-job .col-md-9{
+  background: #006f53;
+  border-color: #006f53;
+  width: 100%;
+  max-width: 100%!important;
+  text-align: center;
+  height: 55px;
+  display: flex;
+}
+
+.reports-modal-job .col-md-9 h3{
+  color: #ffffff;
+  font-weight: 700;
+  margin: auto;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.reports-modal-job .col-md-9 + .container{
+  width: auto;
+  background-color: whitesmoke;
+  border-color: #dfdfdf;
+  border-width: 4px;
+  border-radius: 2px;
+  margin: 15px 15px 0;
+  text-align: left;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.reports-modal-job .col-md-9 + .container h3{
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.reports-cont-btn{
+  width: auto;
+  background-color: whitesmoke;
+  margin: 0 15px 15px;
+  padding: 15px;
+  border-width: 4px;
+  border-radius: 2px;
+  border-top: solid 1px rgb(204, 204, 204);
+  text-align: left;
+}
+
+.reports-cont-btn button{
+  margin: auto;
+}
 .visualizations {
   min-width: 100% !important;
 }
