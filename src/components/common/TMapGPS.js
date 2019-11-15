@@ -8,7 +8,7 @@ import GPSTrackingService from '../../api/GPSTrackingService';
 
 // this reduces the results times the number specified
 const reducer = 10; // one tenth
-const maxPointsThreshold = 400;
+const maxPointsThreshold = 40000;
 
 class TMapGPS extends Component {
   constructor(props) {
@@ -30,11 +30,13 @@ class TMapGPS extends Component {
     this.boundingBoxDistance = 0;
 
     // this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
-    this.calculateRouteGPS = this.calculateRouteGPS.bind(this);
     this.addRouteShapeToMap = this.addRouteShapeToMap.bind(this);
     this.addMarkersToMap = this.addMarkersToMap.bind(this);
     this.reducer = this.reducer.bind(this);
     this.setMarkers = this.setMarkers.bind(this);
+
+    this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
+    this.onRouteSuccess = this.onRouteSuccess.bind(this);
   }
 
   async componentDidMount() {
@@ -64,6 +66,19 @@ class TMapGPS extends Component {
     }
   }
 
+  onRouteSuccess(result) {
+    const route = result.response.route[0];
+    this.addRouteShapeToMap(route);
+    // for (const tracking of trackings) {
+    //   this.addGPSPoint(tracking[1], tracking[0]);
+    // }
+  }
+
+  onRouteError(error) {
+    console.error(error);
+  }
+
+
   async getRouteGPS() {
     const { loadId } = this.props;
 
@@ -75,44 +90,56 @@ class TMapGPS extends Component {
     } catch (e) {
       console.log('ERROR: ', e);
     }
-    /*
+
     for (const wp of distanceInfo) {
       let newWp = '';
-      // newWp = `${wp[1]},${wp[0]}`;
+      newWp = `${wp[1]},${wp[0]}`;
       wps.push(newWp);
     }
-    */
-    if (distanceInfo.length > maxPointsThreshold) {
-      distanceInfo = this.reducer(distanceInfo);
+
+    if (wps.length > maxPointsThreshold) {
+      wps = this.reducer(wps);
     }
-    this.setMarkers(distanceInfo);
+    this.setMarkers(wps);
   }
 
-  setMarkers(distanceInfo) {
+  setMarkers(wps) {
+    const { startAddress, endAddress } = this.props;
+    // wps = [];
+
+
     // markers
-    if (distanceInfo.length > 1) {
-      const start = distanceInfo[0];
-      const end = distanceInfo.pop();
-      const startAddress = {
+    if (wps.length >= 2) {
+      console.log('TCL: TMapGPS -> setMarkers -> wps.length', wps);
+      const start = wps[0].split(',');
+      const end = wps.pop().split(',');
+      const startAddressGPS = {
         latitude: start[0],
         longitude: start[1]
       };
-      const endAddress = {
+      const endAddressGPS = {
         latitude: end[0],
         longitude: end[1]
       };
-      this.addMarkersToMap(startAddress, endAddress);
+      this.addMarkersToMap(startAddressGPS, endAddressGPS);
       this.setState({
         loadedText: ''
       });
 
       try {
         this.addRouteShapeToMap({
-          shape: distanceInfo
+          shape: wps
         });
       } catch (e) {
         console.log('TCL: ERROR_>', e);
       }
+    } else {
+      console.log('TCL: TMapGPS -> setMarkers -> startAddress', startAddress, endAddress);
+      this.addMarkersToMap(startAddress, endAddress);
+      this.setState({
+        loadedText: ''
+      });
+      this.calculateRouteFromAtoB();
     }
   }
 
@@ -129,36 +156,27 @@ class TMapGPS extends Component {
     return reduced;
   }
 
-  async calculateRouteGPS() {
-    const { loadId } = this.props;
+  calculateRouteFromAtoB() {
+    const {startAddress, endAddress} = this.props;
+    const router = this.platform.getRoutingService();
+    const routeRequestParams = {
+      mode: 'balanced;truck;traffic:disabled;motorway:0',
+      representation: 'display',
+      routeattributes: 'waypoints,summary,shape,legs,incidents',
+      maneuverattributes: 'direction,action',
+      truckType: 'tractorTruck',
+      limitedWeight: 700,
+      metricSystem: 'imperial',
+      language: 'en-us', // en-us|es-es|de-de
+      waypoint0: `${startAddress.latitude},${startAddress.longitude}`,
+      waypoint1: `${endAddress.latitude},${endAddress.longitude}`
+    };
 
-    let distanceInfo = [];
-    let wps = [];
-    // instead of getting the info here, we will query the backend
-    try {
-      distanceInfo = await MapService.getDistanceForFleet(loadId);
-    } catch (e) {
-      console.log('ERROR: ', e);
-    }
-
-    for (const wp of distanceInfo.waypoints) {
-      let newWp = '';
-      /*
-      if (wp.mappedPosition.latitude === 0 || wp.mappedPosition.longitude === 0) {
-        newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
-      } else {
-        newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
-      }
-      */
-      // use only original
-      newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
-      wps.push(newWp);
-    }
-
-    if (wps.length > maxPointsThreshold) {
-      wps = this.reducer(wps);
-    }
-    this.setMarkers(wps);
+    router.calculateRoute(
+      routeRequestParams,
+      this.onRouteSuccess,
+      this.onRouteError
+    );
   }
 
   /**
@@ -168,15 +186,10 @@ class TMapGPS extends Component {
   addRouteShapeToMap(route) {
     const lineString = new H.geo.LineString();
     const routeShape = route.shape;
-    const lineStringReturn = new H.geo.LineString();
 
     routeShape.forEach((point) => {
-      lineString.pushLatLngAlt(point[0], point[1]);
-      
-      // Return route
-      if (point[2] === 1) {
-        lineStringReturn.pushLatLngAlt(point[0], point[1]);
-      }
+      const parts = point.split(',');
+      lineString.pushLatLngAlt(parts[0], parts[1]);
     });
 
     const polyline = new H.map.Polyline(lineString, {
@@ -185,26 +198,17 @@ class TMapGPS extends Component {
         strokeColor: 'rgb(0, 111, 83)'
       }
     });
-    // Return poliline
-    const polylineHalf = new H.map.Polyline(lineStringReturn, {
-      style: {
-        lineWidth: 2,
-        strokeColor: 'rgb(45, 140, 200)'
-      }
-    });
-
     // Add the polyline to the map
     this.mapGPS.addObject(polyline);
+
     const bounds = polyline.getBoundingBox();
     const newBounds = GeoUtils.setZoomBounds(bounds);
-
-    // Add the return polyline to the map
-    this.mapGPS.addObject(polylineHalf);
 
     // And zoom to its bounding rectangle
     this.mapGPS.getViewModel().setLookAtData({
       newBounds
     });
+    /**/
   }
 
   addMarkersToMap(startAddress, endAddress) {
