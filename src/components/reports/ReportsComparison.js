@@ -928,7 +928,7 @@ class ReportsComparison extends Component {
     if (Number(activeTab) === 3) {
       return (
         <React.Fragment>
-          <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="modal-job">
+          <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
             <div className="dashboard dashboard__job-create" style={{width: 900}}>
               <JobForm
                 job={job}
@@ -936,7 +936,7 @@ class ReportsComparison extends Component {
                 handlePageClick={this.handlePageClick}
                 // companyCarrier={company}
               />
-              <div className="cont-button">
+              <div className="reports-cont-btn">
                 <Button
                   color="minimal"
                   className="btn btn-outline-secondary"
