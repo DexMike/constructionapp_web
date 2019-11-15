@@ -935,6 +935,7 @@ class ReportsComparison extends Component {
               <JobForm
                 job={job}
                 bid={null}
+                handlePageClick={this.handlePageClick}
                 // companyCarrier={company}
               />
               <div className="cont-button">
