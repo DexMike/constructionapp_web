@@ -1246,10 +1246,10 @@ class JobWizard extends Component {
         if (newJob) {
           if (Object.keys(tabMaterials.selectedMaterial).length > 0) {
             // check if there's materials to add
-            // await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
+            await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
           }
           if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
-            // await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
+            await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
           }
         }
         this.setState({ btnSubmitting: false });
@@ -1282,7 +1282,7 @@ class JobWizard extends Component {
       console.error(e);
     }
 
-    this.setState({ 
+    this.setState({
       btnSubmitting: false
     });
     this.updateJobView(newJob);
