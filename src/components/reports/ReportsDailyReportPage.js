@@ -19,7 +19,8 @@ import {
   Col,
   Container,
   Row,
-  ButtonGroup
+  ButtonGroup,
+  Modal
 } from 'reactstrap';
 
 import {useTranslation} from 'react-i18next';
@@ -40,6 +41,8 @@ import JobService from '../../api/JobService';
 import ProfileService from '../../api/ProfileService';
 import './Reports.css';
 import ReportsDailyReportsColumns from './ReportsDailyReportsColumns';
+
+import JobForm from '../jobs/JobForm';
 
 
 function bracketsFormatter(params) {
@@ -123,6 +126,9 @@ class ReportsDailyReportPage extends Component {
       loadsInfo: [],
       totalLoads: 0,
 
+      modal: false,
+      job: {},
+
       totalCount: 1000,
       totalLoadsCount: 99,
 
@@ -161,6 +167,11 @@ class ReportsDailyReportPage extends Component {
     this.returnFilters = this.returnFilters.bind(this);
     this.onGridReadyJobs = this.onGridReadyJobs.bind(this);
     this.onGridReadyLoads = this.onGridReadyLoads.bind(this);
+
+    // this.toggle = this.toggle.bind(this);
+    this.togglePopup = this.togglePopup.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.handlePageClick = this.handlePageClick.bind(this);
   }
 
   async componentDidMount() {
@@ -332,6 +343,42 @@ class ReportsDailyReportPage extends Component {
     return newData;
   }
 
+  // modal with job detail information
+  togglePopup() {
+    const { modal } = this.state;
+    
+    if (modal) {
+      this.setState(({
+        modal: !modal,
+      }));
+    } else {
+      this.setState(({
+        modal: !modal
+      }));
+    }
+  }
+  
+  closeModal() {
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
+    });
+  }
+
+  async getJob(jobId) {
+    // await this.handleFilterChange(filters);
+    const job = await JobService.getJobById(jobId);
+    // const sAddress = await AddressService.getAddressById(job.startAddress);
+    // const eAddress = await AddressService.getAddressById(job.endAddress);
+    // job.startAddress = sAddress;
+    // job.endAddress = eAddress;
+    this.setState({
+      job
+    }, function done() {
+      this.togglePopup();
+    });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -469,6 +516,33 @@ class ReportsDailyReportPage extends Component {
     );
   }
 
+  renderModal() {
+    const { modal, job, closeModal, activeTab } = this.state;
+    return (
+      <React.Fragment>
+        <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
+          <div className="dashboard dashboard__job-create" style={{width: 900}}>
+            <JobForm
+              job={job}
+              bid={null}
+              handlePageClick={this.handlePageClick}
+              // companyCarrier={company}
+            />
+            <div className="reports-cont-btn">
+              <Button
+                color="minimal"
+                className="btn btn-outline-secondary"
+                outline
+                onClick={this.closeModal}
+                >Close &nbsp;
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </React.Fragment>
+    );
+  }
+
   renderResults() {
     let {
       jobs,
@@ -534,6 +608,7 @@ class ReportsDailyReportPage extends Component {
                             columnDefs={columnsJobs}
                             defaultColDef={defaultColumnDef}
                             rowData={jobs}
+                            onRowClicked={() => this.getJob(223)}
                             // floatingFilter={true}
                             onGridReady={this.onGridReadyJobs}
                             paginationAutoPageSize
@@ -633,6 +708,7 @@ class ReportsDailyReportPage extends Component {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
+          {this.renderModal()}
           <Row>
             <Col md={12}>
               {this.renderTitle()}
