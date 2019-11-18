@@ -13,7 +13,7 @@ import {
   Row
 } from 'reactstrap';
 import moment from 'moment';
-
+import TSpinner from '../common/TSpinner';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
 import LookupsService from '../../api/LookupsService';
@@ -30,7 +30,7 @@ import CarrierRow from './CarrierRow';
 // import GeoCodingService from '../../api/GeoCodingService';
 import GeoUtils from '../../utils/GeoUtils';
 import BidService from '../../api/BidService';
-import JobWizard from "../jobs/JobWizard";
+import JobWizard from '../jobs/JobWizard';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -95,7 +95,8 @@ class CarriersCustomerPage extends Component {
       },
       unfavoriteModal: false,
       selectedGroup: null,
-      selectedCarrierId: null
+      selectedCarrierId: null,
+      isLoading: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -526,6 +527,7 @@ class CarriersCustomerPage extends Component {
 
   async handleUnfavoriteCompany() {
     const { profile, selectedCarrierId, selectedGroup, carriers } = this.state;
+    this.setState({ isLoading: true });
     try {
       await GroupListService.deleteGroupListById(selectedGroup.id);
       await GroupService.deleteGroupById(selectedGroup.groupId);
@@ -535,6 +537,7 @@ class CarriersCustomerPage extends Component {
       // console.log(e);
     }
     this.fetchFavoriteCarriers(carriers);
+    this.setState({ isLoading: false });
     this.toggleUnfavoriteModal(null, null);
   }
 
@@ -777,12 +780,12 @@ class CarriersCustomerPage extends Component {
   renderModal() {
     const {
       modal,
-      selectedCarrier,
-      materialTypeList
+      selectedCarrier
+      // materialTypeList
       // carriers
     } = this.state;
 
-    const mats = this.returnSelectedMaterials();
+    // const mats = this.returnSelectedMaterials();
 
     /* if (mats.length < 1 && modal && materialTypeList.length > 0) {
       // this.toggleSelectMaterialsModal();
@@ -798,11 +801,11 @@ class CarriersCustomerPage extends Component {
         className="modal-dialog--primary modal-dialog--header"
         backdrop="static"
       >
-          <JobWizard
-            toggle={this.toggleAddJobModal}
-            selectedCarrierId={selectedCarrier}
-            jobRequest
-          />
+        <JobWizard
+          toggle={this.toggleAddJobModal}
+          selectedCarrierId={selectedCarrier}
+          jobRequest
+        />
       </Modal>
     );
   }
@@ -1027,7 +1030,7 @@ class CarriersCustomerPage extends Component {
   }
 
   renderUnfavoriteModal() {
-    const { unfavoriteModal, selectedFavoriteCompanyId, selectedFavoriteCompanyName } = this.state;
+    const {unfavoriteModal, selectedFavoriteCompanyName, isLoading} = this.state;
     return (
       <React.Fragment>
         <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal" backdrop="static">
@@ -1051,10 +1054,19 @@ class CarriersCustomerPage extends Component {
                 </Button>
                 &nbsp;
                 <Button
+                  disabled={isLoading}
                   color="primary"
                   onClick={() => this.handleUnfavoriteCompany()}
                 >
-                  Yes, unfavorite
+                  {
+                    isLoading ? (
+                      <TSpinner
+                        color="#808080"
+                        loaderSize={10}
+                        loading
+                      />
+                    ) : 'Yes, unfavorite'
+                  }
                 </Button>
               </Col>
             </Row>

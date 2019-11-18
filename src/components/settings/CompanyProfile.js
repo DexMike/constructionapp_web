@@ -110,6 +110,7 @@ class CompanyProfile extends Component {
   }
 
   async setAddress(addressProps) {
+    const { legalName } = this.state;
     const address = addressProps;
     Object.keys(address)
       .map((key) => {
@@ -119,7 +120,8 @@ class CompanyProfile extends Component {
         return true;
       });
     this.setState({
-      ...address
+      ...address,
+      legalName // For some reason this value was set to '' here
     });
   }
 
@@ -350,8 +352,8 @@ class CompanyProfile extends Component {
     if (isValid) {
       return true;
     }
-
-    return false;
+    this.setState({ loading: false });
+    return false;    
   }
 
   async saveCompany() {
@@ -407,12 +409,14 @@ class CompanyProfile extends Component {
       // states,
       countryStates
     } = this.state;
+
+    const { company } = this.props;
     return (
       <Container>
         <Row className="tab-content-header">
           <Col md={12}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              {legalName}
+              {company.legalName || ''}
             </span>
           </Col>
         </Row>
