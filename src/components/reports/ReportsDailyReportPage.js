@@ -42,7 +42,7 @@ import ProfileService from '../../api/ProfileService';
 import './Reports.css';
 import ReportsDailyReportsColumns from './ReportsDailyReportsColumns';
 
-import JobForm from '../jobs/JobForm';
+import JobDate from '../jobs/JobDate';
 
 
 function bracketsFormatter(params) {
@@ -128,6 +128,7 @@ class ReportsDailyReportPage extends Component {
 
       modal: false,
       job: {},
+      jobsDate: [],
 
       totalCount: 1000,
       totalLoadsCount: 99,
@@ -365,18 +366,17 @@ class ReportsDailyReportPage extends Component {
     });
   }
 
-  async getJob(jobId) {
-    // await this.handleFilterChange(filters);
-    const job = await JobService.getJobById(jobId);
-    // const sAddress = await AddressService.getAddressById(job.startAddress);
-    // const eAddress = await AddressService.getAddressById(job.endAddress);
-    // job.startAddress = sAddress;
-    // job.endAddress = eAddress;
-    this.setState({
-      job
-    }, function done() {
-      this.togglePopup();
-    });
+  async getJob(date) {
+    try {
+      const jobsDate = await JobService.getJobsByDate(date);
+      this.setState({
+        jobsDate
+      }, function done() {
+        this.togglePopup();
+      });
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
   }
 
   renderGoTo() {
@@ -517,13 +517,13 @@ class ReportsDailyReportPage extends Component {
   }
 
   renderModal() {
-    const { modal, job, closeModal, activeTab } = this.state;
+    const { modal, jobsDate, closeModal, activeTab } = this.state;
     return (
       <React.Fragment>
         <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
-            <JobForm
-              job={job}
+            <JobDate
+              jobsDate={jobsDate}
               bid={null}
               handlePageClick={this.handlePageClick}
               // companyCarrier={company}
@@ -608,8 +608,7 @@ class ReportsDailyReportPage extends Component {
                             columnDefs={columnsJobs}
                             defaultColDef={defaultColumnDef}
                             rowData={jobs}
-                            onRowClicked={() => this.getJob(223)}
-                            // floatingFilter={true}
+                            onRowClicked={event => this.getJob(event.data.date)}
                             onGridReady={this.onGridReadyJobs}
                             paginationAutoPageSize
                             pagination

@@ -53,7 +53,7 @@
   margin-top: -3px;
 }
 
-/* modals */
+/* Modals */
 .modal .status-modal {
   max-width: 100% !important;
   top: 35%;
@@ -70,4 +70,33 @@
 }
 .close {
   display: none;
+}
+
+/* Modal Job by Date*/
+.gridTableDateJob {
+  width: auto;
+  background-color: whitesmoke !important;
+  border-color: #dfdfdf;
+  border-width: 4px;
+  border-radius: 2px;
+  margin: 15px 15px 0;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 12px !important;
+}
+
+.tittleModalDateJob{
+  background: #006f53;
+  border-color: #006f53;
+  width: 100%;
+  height: 55px;
+  display: flex;
+  text-align: center;
+}
+
+.tittleModalDateJob span{
+  color: #ffffff;
+  font-weight: 700;
+  margin: auto;
+  font-size: 14px;
+  text-transform: uppercase;
 }
