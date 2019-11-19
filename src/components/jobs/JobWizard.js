@@ -1138,6 +1138,7 @@ class JobWizard extends Component {
         zipCode: tabPickupDelivery.startLocationZip,
         latitude: tabPickupDelivery.startLocationLatitude,
         longitude: tabPickupDelivery.startLocationLongitude,
+        country: 'US',
         createdBy: profile.userId,
         createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
@@ -1161,7 +1162,12 @@ class JobWizard extends Component {
         state: tabPickupDelivery.endLocationState,
         zipCode: tabPickupDelivery.endLocationZip,
         latitude: tabPickupDelivery.endLocationLatitude,
-        longitude: tabPickupDelivery.endLocationLongitude
+        longitude: tabPickupDelivery.endLocationLongitude,
+        country: 'US',
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
       };
     } else {
       address2.id = tabPickupDelivery.selectedEndAddressId;
