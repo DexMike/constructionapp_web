@@ -694,6 +694,8 @@ class JobWizard extends Component {
     // const {saveJobDraft} = this.props;
     if (isValid) {
       await this.saveJobDraft();
+      this.setState({btnSubmitting: false});
+      this.closeNow();
     }
   }
 
@@ -1153,6 +1155,7 @@ class JobWizard extends Component {
         zipCode: tabPickupDelivery.startLocationZip,
         latitude: tabPickupDelivery.startLocationLatitude,
         longitude: tabPickupDelivery.startLocationLongitude,
+        country: 'US',
         createdBy: profile.userId,
         createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
@@ -1176,7 +1179,12 @@ class JobWizard extends Component {
         state: tabPickupDelivery.endLocationState,
         zipCode: tabPickupDelivery.endLocationZip,
         latitude: tabPickupDelivery.endLocationLatitude,
-        longitude: tabPickupDelivery.endLocationLongitude
+        longitude: tabPickupDelivery.endLocationLongitude,
+        country: 'US',
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
       };
     } else {
       address2.id = tabPickupDelivery.selectedEndAddressId;
@@ -1297,7 +1305,9 @@ class JobWizard extends Component {
       console.error(e);
     }
 
-    this.setState({ btnSubmitting: false });
+    this.setState({
+      btnSubmitting: false
+    });
     this.updateJobView(newJob);
     this.closeNow();
   }
@@ -1843,7 +1853,8 @@ class JobWizard extends Component {
       tabTruckSpecs,
       tabHaulRate,
       tabSummary,
-      tabSend
+      tabSend,
+      btnSubmitting
     } = this.state;
     if (loaded) {
       return (
@@ -1965,8 +1976,19 @@ class JobWizard extends Component {
                           color="outline-primary"
                           className="next"
                           onClick={this.validateAndSaveJobDraft}
+                          loading={btnSubmitting}
+                          loaderSize={10}
+                          disabled={btnSubmitting}
                         >
-                          {translate('Save Job & Close')}
+                          {
+                            btnSubmitting ? (
+                              <TSpinner
+                                color="#808080"
+                                loaderSize={10}
+                                loading
+                              />
+                            ) : `${translate('Save Job & Close')}`
+                          }
                         </Button>
                         )}
                         {page !== 1 && (
