@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import {withTranslation} from 'react-i18next';
 import {
   Card,
   CardBody,
@@ -238,6 +239,8 @@ class PickupAndDelivery extends PureComponent {
 
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {loaded} = {...this.state};
     const {data} = {...this.props};
     if (loaded && data) {
@@ -259,11 +262,11 @@ class PickupAndDelivery extends PureComponent {
                 <Row className="col-md-12 rateTab">
                   <div className="col-md-6">
                     <h3 className="subhead">
-                      Start Location <span
-                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
+                      {translate('Start Location')}&nbsp;
+                      <span style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( {translate('required')} )</span>
                     </h3>
                     <small>
-                      Select a starting address:
+                      {translate('Select a starting address')}:
                     </small>
                     <div
                       id="starting_id"
@@ -279,7 +282,7 @@ class PickupAndDelivery extends PureComponent {
                         // meta={reqHandlerMaterials}
                         value={data.selectedStartAddressId}
                         options={data.allAddresses}
-                        placeholder="Select a location"
+                        placeholder={translate('Select a location')}
                         meta={data.reqHandlerSameAddresses}
                       />
                     </div>
@@ -287,7 +290,7 @@ class PickupAndDelivery extends PureComponent {
                       &nbsp;
                     </div>
                     <small>
-                      Or create a new one:
+                      {translate('Or create a new one')}:
                     </small>
                     <div
                       onKeyPress={this.handleKeyPress}
@@ -308,7 +311,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.startLocationAddressName
                               }
                             }
-                            placeholder="Address Name"
+                            placeholder={translate('Address Name')}
                             type="text"
                             meta={data.reqHandlerStartAddressName}
                           />
@@ -322,7 +325,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.startLocationAddress1
                               }
                             }
-                            placeholder="Address 1"
+                            placeholder={translate('Address 1')}
                             type="text"
                             meta={data.reqHandlerStartAddress}
                           />
@@ -333,7 +336,7 @@ class PickupAndDelivery extends PureComponent {
                             type="text"
                             value={data.startLocationAddress2}
                             onChange={this.handleStartAddressChange}
-                            placeholder="Address 2"
+                            placeholder={translate('Address 2')}
                           />
                         </div>
                         <div className="form__form-group">
@@ -345,7 +348,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.startLocationCity
                               }
                             }
-                            placeholder="City"
+                            placeholder={translate('City')}
                             type="text"
                             meta={data.reqHandlerStartCity}
                           />
@@ -359,7 +362,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.startLocationState
                               }
                             }
-                            placeholder="State"
+                            placeholder={translate('State')}
                             meta={data.reqHandlerStartState}
                             value={data.startLocationState}
                             options={data.allUSstates}
@@ -374,7 +377,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.startLocationZip
                               }
                             }
-                            placeholder="Zip"
+                            placeholder={translate('Zip Code')}
                             type="text"
                             meta={data.reqHandlerStartZip}
                           />
@@ -385,11 +388,11 @@ class PickupAndDelivery extends PureComponent {
 
                   <div className="col-md-6">
                     <h3 className="subhead">
-                      End Location <span
-                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
+                      {translate('End Location')}&nbsp;
+                      <span style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( {translate('required')} )</span>
                     </h3>
                     <small>
-                      Select a ending address:
+                      {translate('Select an ending address')}:
                     </small>
                     <div
                       id="ending_id"
@@ -405,14 +408,14 @@ class PickupAndDelivery extends PureComponent {
                         // meta={reqHandlerMaterials}
                         value={data.selectedEndAddressId}
                         options={data.allAddresses}
-                        placeholder="Select a location"
+                        placeholder={translate('Select a location')}
                       />
                     </div>
                     <div>
                       &nbsp;
                     </div>
                     <small>
-                      Or create a new one:
+                      {translate('Or create a new one')}:
                     </small>
                     <div
                       onKeyPress={this.handleKeyPress}
@@ -433,7 +436,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.endLocationAddressName
                               }
                             }
-                            placeholder="Address Name"
+                            placeholder={translate('Address Name')}
                             type="text"
                             meta={data.reqHandlerEndAddressName}
                           />
@@ -447,7 +450,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.endLocationAddress1
                               }
                             }
-                            placeholder="Address 1"
+                            placeholder={translate('Address 1')}
                             type="text"
                             meta={data.reqHandlerEndAddress}
                           />
@@ -458,7 +461,7 @@ class PickupAndDelivery extends PureComponent {
                             type="text"
                             value={data.endLocationAddress2}
                             onChange={this.handleEndAddressChange}
-                            placeholder="Address 2"
+                            placeholder={translate('Address 2')}
                             autoComplete="new-password"
                           />
                         </div>
@@ -471,7 +474,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.endLocationCity
                               }
                             }
-                            placeholder="City"
+                            placeholder={translate('City')}
                             type="text"
                             meta={data.reqHandlerEndCity}
                           />
@@ -485,7 +488,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.endLocationState
                               }
                             }
-                            placeholder="State"
+                            placeholder={translate('State')}
                             meta={data.reqHandlerEndState}
                             value={data.endLocationState}
                             options={data.allUSstates}
@@ -500,7 +503,7 @@ class PickupAndDelivery extends PureComponent {
                                 value: data.endLocationZip
                               }
                             }
-                            placeholder="Zip"
+                            placeholder={translate('Zip Code')}
                             type="text"
                             meta={data.reqHandlerEndZip}
                           />
@@ -600,4 +603,4 @@ PickupAndDelivery.defaultProps = {
   data: null
 };
 
-export default PickupAndDelivery;
+export default withTranslation()(PickupAndDelivery);
