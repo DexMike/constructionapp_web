@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import {withTranslation} from 'react-i18next';
 import {
   Card,
   CardBody,
@@ -91,6 +92,8 @@ class JobMaterials extends PureComponent {
 
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {loaded} = {...this.state};
     const {data} = {...this.props};
     if (loaded && data) {
@@ -100,7 +103,7 @@ class JobMaterials extends PureComponent {
             <CardBody>
               {/* this.handleSubmit  */}
               <div className="dashboard dashboard__job-create-section-title">
-                <span>Select a Material Type</span>
+                <span>{translate('Select a Material Type')}</span>
               </div>
               <form
                 className="form form--horizontal addtruck__form"
@@ -109,8 +112,9 @@ class JobMaterials extends PureComponent {
               >
                 <Row className="col-md-12">
                   <div className="col-md-6 form__form-group">
-                    <span className="form__form-group-label">Material Type <span
-                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span></span>
+                    <span className="form__form-group-label">{translate('Material Type')}&nbsp;
+                      <span style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}>( {translate('required')} )</span>
+                    </span>
                     <SelectField
                       input={
                         {
@@ -122,7 +126,7 @@ class JobMaterials extends PureComponent {
                       meta={data.reqHandlerMaterials}
                       value={data.selectedMaterial}
                       options={data.allMaterials}
-                      placeholder="Select Material"
+                      placeholder={translate('Select Material')}
                     />
                   </div>
                   {/*<div className="col-md-6 form__form-group">*/}
@@ -146,7 +150,7 @@ class JobMaterials extends PureComponent {
                 </Row>
                 <Row className="col-md-12">
                   <div className="col-md-6 form__form-group">
-                    <span className="form__form-group-label">What is the quantity for this job?</span>
+                    <span className="form__form-group-label">{translate('What is the quantity for this job?')}</span>
                   </div>
                   <div className="col-md-6 form__form-group">
                     <Button
@@ -155,7 +159,7 @@ class JobMaterials extends PureComponent {
                       onClick={() => this.handleQuantityTypeChange('Ton')}
 
                     >
-                      <p>tons</p>
+                      <p>{translate('tons')}</p>
                     </Button>
                     <Button
                       color="primary"
@@ -163,25 +167,31 @@ class JobMaterials extends PureComponent {
                       onClick={() => this.handleQuantityTypeChange('Hour')}
 
                     >
-                      <p>hours</p>
+                      <p>{translate('hours')}</p>
                     </Button>
                   </div>
                 </Row>
                 <Row className="col-md-12" style={{paddingTop: 15}}>
                   <div className="col-md-6 form__form-group">
-                    <span className="form__form-group-label" style={{paddingTop: 20}}>How many <span style={{
-                      fontWeight: 'bold',
-                      color: 'black'
-                    }}
-                    >{data.quantityType === 'Ton' ? 'tons' : 'hours'}</span>
-                      {data.quantityType === 'Ton' ? ' do you need delivered' : ' will be worked'}?
+                    <span className="form__form-group-label" style={{paddingTop: 20}}>{translate('HOW_MANY_1')}&nbsp;
+                      <span style={{
+                        fontWeight: 'bold',
+                        color: 'black'
+                      }}
+                      >
+                        {data.quantityType === 'Ton' ? `${translate('tons')}` : `${translate('hours')}`}
                       </span>
+                      &nbsp;{data.quantityType === 'Ton' ? `${translate('do you need delivered')}` : `${translate('will be worked')}`}?
+                    </span>
                   </div>
                   <div className="col-md-3 form__form-group">
                     <span
-                      className="form__form-group-label">Estimated {data.quantityType === 'Ton' ? 'Tons' : 'Hours'}
+                      className="form__form-group-label"
+                    >{data.quantityType === 'Ton' ? `${translate('Estimated Tons')}` : `${translate('Estimated Hours')}`}
                       <span
-                        style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
+                        style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}
+                      > ( {translate('required')} )
+                      </span>
                     </span>
                     <TField
                       input={
@@ -202,12 +212,13 @@ class JobMaterials extends PureComponent {
                   <hr/>
                 </Row>
                 <div className="dashboard dashboard__job-create-section-title">
-                  <span>Estimated Material Pricing</span> ( for calculation of delivered price )
+                  <span>{translate('Estimated Material Pricing')}</span> ( {translate('for calculation of delivered price')} )
                 </div>
                 <Row className="col-md-12">
                   <div className="col-md-3 form__form-group">
                     <span
-                      className="form__form-group-label">Price ($ / ton)
+                      className="form__form-group-label"
+                    >{translate('Price ($ / ton)')}
                     </span>
 
                     <TField
@@ -281,4 +292,4 @@ JobMaterials.defaultProps = {
   data: null
 };
 
-export default JobMaterials;
+export default withTranslation()(JobMaterials);

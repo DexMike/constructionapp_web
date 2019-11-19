@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {withTranslation} from 'react-i18next';
 import {
   Button,
   Col,
@@ -380,6 +381,8 @@ class CompanyProfile extends Component {
   }
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {
       legalName,
       phone,
@@ -531,21 +534,21 @@ class CompanyProfile extends Component {
           <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
-                <span>Address #1</span>
+                <span>{translate('Address 1')}</span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
                     name: 'address1',
                     value: address1
                   }}
-                  placeholder="Address 1"
+                  placeholder={translate('Address 1')}
                   type="text"
                   meta={reqHandlerAddress}
                 />
               </Col>
               <Col md={12} className="pt-2">
                 <span>
-                  Address #2
+                  {translate('Address 2')}
                 </span>
                 <TField
                   input={{
@@ -553,7 +556,7 @@ class CompanyProfile extends Component {
                     name: 'address2',
                     value: address2
                   }}
-                  placeholder="Address 2"
+                  placeholder={translate('Address 2')}
                   type="text"
                 />
               </Col>
@@ -705,4 +708,4 @@ CompanyProfile.defaultProps = {
   }
 };
 
-export default CompanyProfile;
+export default withTranslation()(CompanyProfile);
