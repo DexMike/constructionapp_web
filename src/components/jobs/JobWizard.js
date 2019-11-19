@@ -681,6 +681,8 @@ class JobWizard extends Component {
     // const {saveJobDraft} = this.props;
     if (isValid) {
       await this.saveJobDraft();
+      this.setState({btnSubmitting: false});
+      this.closeNow();
     }
   }
 
@@ -1280,7 +1282,9 @@ class JobWizard extends Component {
       console.error(e);
     }
 
-    this.setState({ btnSubmitting: false });
+    this.setState({
+      btnSubmitting: false
+    });
     this.updateJobView(newJob);
     this.closeNow();
   }
@@ -1820,7 +1824,8 @@ class JobWizard extends Component {
       tabTruckSpecs,
       tabHaulRate,
       tabSummary,
-      tabSend
+      tabSend,
+      btnSubmitting
     } = this.state;
     if (loaded) {
       return (
@@ -1891,6 +1896,7 @@ class JobWizard extends Component {
                         validateEndAddress={this.validateEndAddress}
                         validateForm={this.validateForm}
                         validateTopForm={this.validateTopForm}
+                        isLoading={btnSubmitting}
                       />}
                       {(page === 6 && !jobEdit)
                       && <SendJob
@@ -1902,6 +1908,7 @@ class JobWizard extends Component {
                         sendJob={this.saveJob}
                         onClose={this.closeNow}
                         jobRequest={jobRequest}
+                        isLoading={btnSubmitting}
                       />}
                     </div>
                   </div>
@@ -1925,8 +1932,19 @@ class JobWizard extends Component {
                           color="outline-primary"
                           className="next"
                           onClick={this.validateAndSaveJobDraft}
+                          loading={btnSubmitting}
+                          loaderSize={10}
+                          disabled={btnSubmitting}
                         >
-                          Save Job & Close
+                          {
+                            btnSubmitting ? (
+                              <TSpinner
+                                color="#808080"
+                                loaderSize={10}
+                                loading
+                              />
+                            ) : 'Save Job & Close'
+                          }
                         </Button>
                         }
                         {page !== 1 &&

@@ -525,7 +525,7 @@ class Summary extends PureComponent {
 
   render() {
     const {loaded, formIsValid} = {...this.state};
-    const {data, goBack, saveJob, closeModal, jobRequest, jobEdit, validateTopForm} = {...this.props};
+    const {data, goBack, saveJob, closeModal, jobRequest, jobEdit, validateTopForm, isLoading} = {...this.props};
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -586,9 +586,20 @@ class Summary extends PureComponent {
                   <Button
                     color="outline-primary"
                     className="next"
+                    loading={isLoading}
+                    loaderSize={10}
+                    disabled={isLoading}
                     onClick={saveJob}
                   >
-                    Save Job & Close
+                    {
+                      isLoading ? (
+                        <TSpinner
+                          color="#808080"
+                          loaderSize={10}
+                          loading
+                        />
+                      ) : 'Save Job & Close'
+                    }
                   </Button>
                   }
                   <Button
