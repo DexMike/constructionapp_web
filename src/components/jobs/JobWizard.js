@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {withTranslation} from 'react-i18next';
 import {Link, Redirect} from 'react-router-dom';
 import moment from 'moment';
 import PropTypes from 'prop-types';
@@ -484,13 +485,15 @@ class JobWizard extends Component {
 
   validateMaterialsPage() {
     this.clearValidationMaterialsPage();
+    const { t } = { ...this.props };
+    const translate = t;
     const {tabMaterials} = {...this.state};
     let isValid = true;
     if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.length === 0) {
       tabMaterials.reqHandlerMaterials = {
         ...tabMaterials.reqHandlerMaterials,
         touched: true,
-        error: 'Required input'
+        error: translate('Required input')
       };
       this.setState({
         tabMaterials
@@ -502,7 +505,7 @@ class JobWizard extends Component {
       tabMaterials.reqHandlerQuantity = {
         ...tabMaterials.reqHandlerQuantity,
         touched: true,
-        error: 'Required input'
+        error: translate('Required input')
       };
       this.setState({
         tabMaterials
@@ -514,53 +517,61 @@ class JobWizard extends Component {
   }
 
   validateMaterialsTab() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {tabMaterials} = {...this.state};
     const val = [];
     if (!tabMaterials.selectedMaterial || tabMaterials.selectedMaterial.value === '') {
-      val.push('Material Type');
+      val.push(translate('Material Type'));
     }
     if (!tabMaterials.quantity || tabMaterials.quantity <= 0) {
       if (tabMaterials.quantityType === 'Hour') {
-        val.push('Estimated Hours');
+        val.push(translate('Estimated Hours'));
       } else {
-        val.push('Estimated Tons');
+        val.push(translate('Estimated Tons'));
       }
     }
     return val;
   }
 
   validateTruckSpecsTab() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {tabTruckSpecs} = {...this.state};
     const val = [];
     if (!tabTruckSpecs.selectedTruckTypes || tabTruckSpecs.selectedTruckTypes.length === 0) {
-      val.push('At least one truck type');
+      val.push(translate('At least one truck type'));
     }
     return val;
   }
 
   validateHaulRateTab() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {tabHaulRate} = {...this.state};
     const val = [];
     if (!tabHaulRate.ratePerPayType || tabHaulRate.ratePerPayType <= 0) {
-      val.push('Missing haul rate');
+      val.push(translate('Missing haul rate'));
     }
     return val;
   }
 
   validateStartAddress() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {tabPickupDelivery} = {...this.state};
     // const {startGPS} = {...this.state};
     const val = [];
     if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
       if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
         && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
-        val.push('Same start and end addresses');
+        val.push(translate('Same start and end addresses'));
       }
       if (tabPickupDelivery.startLocationAddress1.length === 0
         || tabPickupDelivery.startLocationCity.length === 0
         || tabPickupDelivery.startLocationZip.length === 0
         || tabPickupDelivery.startLocationState.length === 0) {
-        val.push('Missing start address fields');
+        val.push(translate('Missing start address fields'));
       }
     }
 
@@ -570,12 +581,14 @@ class JobWizard extends Component {
 
     if (!tabPickupDelivery.startGPS || !tabPickupDelivery.startGPS.lat
       || !tabPickupDelivery.startGPS.lng) {
-      val.push('Invalid start address');
+      val.push(translate('Invalid start address'));
     }
     return val;
   }
 
   validateEndAddress() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {tabPickupDelivery} = {...this.state};
     const val = [];
     // const {endGPS} = {...this.state};
@@ -586,7 +599,7 @@ class JobWizard extends Component {
         || tabPickupDelivery.endLocationCity.length === 0
         || tabPickupDelivery.endLocationZip.length === 0
         || tabPickupDelivery.endLocationState.length === 0) {
-        val.push('Missing end address fields');
+        val.push(translate('Missing end address fields'));
       }
     }
 
@@ -596,7 +609,7 @@ class JobWizard extends Component {
 
     if (!tabPickupDelivery.endGPS || !tabPickupDelivery.endGPS.lat
       || !tabPickupDelivery.endGPS.lng) {
-      val.push('Invalid end address');
+      val.push(translate('Invalid end address'));
     }
 
     return val;
@@ -681,6 +694,8 @@ class JobWizard extends Component {
     // const {saveJobDraft} = this.props;
     if (isValid) {
       await this.saveJobDraft();
+      this.setState({btnSubmitting: false});
+      this.closeNow();
     }
   }
 
@@ -749,6 +764,8 @@ class JobWizard extends Component {
   }
 
   async validateSend() {
+    const { t } = { ...this.props };
+    const translate = t;
     this.clearValidationLabels();
     const {
       name,
@@ -756,7 +773,7 @@ class JobWizard extends Component {
       reqHandlerJobName,
       reqHandlerStartDate,
       jobEndDate,
-      reqHandlerEndDate,
+      reqHandlerEndDate
     } = {...this.state};
     let isValid = true;
     if (!name || name === '') {
@@ -764,7 +781,7 @@ class JobWizard extends Component {
         reqHandlerJobName: {
           ...reqHandlerJobName,
           touched: true,
-          error: 'Please enter a name for your job'
+          error: translate('Please enter a name for your job')
         }
       });
       isValid = false;
@@ -776,7 +793,7 @@ class JobWizard extends Component {
         reqHandlerStartDate: {
           ...reqHandlerStartDate,
           touched: true,
-          error: 'Required input'
+          error: translate('Required input')
         }
       });
       isValid = false;
@@ -786,7 +803,7 @@ class JobWizard extends Component {
         reqHandlerStartDate: {
           ...reqHandlerStartDate,
           touched: true,
-          error: 'The start date of the job can not be set in the past or as the current date and time'
+          error: translate('The start date of the job can not be set in the past or as the current date and time')
         }
       });
       isValid = false;
@@ -797,7 +814,7 @@ class JobWizard extends Component {
         reqHandlerEndDate: {
           ...reqHandlerEndDate,
           touched: true,
-          error: 'Required input'
+          error: translate('Required input')
         }
       });
       isValid = false;
@@ -808,7 +825,7 @@ class JobWizard extends Component {
         reqHandlerEndDate: {
           ...reqHandlerEndDate,
           touched: true,
-          error: 'The end date of the job can not be set in the past or equivalent to the current date and time'
+          error: translate('The end date of the job can not be set in the past or equivalent to the current date and time')
         }
       });
       isValid = false;
@@ -819,7 +836,7 @@ class JobWizard extends Component {
         reqHandlerEndDate: {
           ...reqHandlerEndDate,
           touched: true,
-          error: 'The end date of the job can not be set in the past of or equivalent to the start date'
+          error: translate('The end date of the job can not be set in the past of or equivalent to the start date')
         }
       });
       isValid = false;
@@ -829,6 +846,8 @@ class JobWizard extends Component {
   }
 
   async isDraftValid() {
+    const { t } = { ...this.props };
+    const translate = t;
     this.clearValidationLabels();
     const {
       name,
@@ -855,7 +874,7 @@ class JobWizard extends Component {
         reqHandlerJobName: {
           ...reqHandlerJobName,
           touched: true,
-          error: 'Please enter a name for your job'
+          error: translate('Please enter a name for your job')
         }
       });
       isValid = false;
@@ -867,7 +886,7 @@ class JobWizard extends Component {
         reqHandlerStartDate: {
           ...reqHandlerStartDate,
           touched: true,
-          error: 'Required input'
+          error: translate('Required input')
         }
       });
       isValid = false;
@@ -877,7 +896,7 @@ class JobWizard extends Component {
         reqHandlerStartDate: {
           ...reqHandlerStartDate,
           touched: true,
-          error: 'The start date of the job can not be set in the past or as the current date and time'
+          error: translate('The start date of the job can not be set in the past or as the current date and time')
         }
       });
       isValid = false;
@@ -896,7 +915,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerStartAddress = {
           ...reqHandlerStartAddress,
           touched: true,
-          error: 'Missing starting address field'
+          error: translate('Missing starting address field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -906,7 +925,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerStartCity = {
           ...reqHandlerStartCity,
           touched: true,
-          error: 'Missing starting city field'
+          error: translate('Missing starting city field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -916,7 +935,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerStartZip = {
           ...reqHandlerStartZip,
           touched: true,
-          error: 'Missing starting zip code field'
+          error: translate('Missing starting zip code field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -927,7 +946,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerStartState = {
           ...reqHandlerStartState,
           touched: true,
-          error: 'Missing starting state field'
+          error: translate('Missing starting state field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -946,7 +965,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerStartAddress = {
           ...reqHandlerStartAddress,
           touched: true,
-          error: 'Start address not found.'
+          error: translate('Start address not found')
         };
         isValid = false;
         goToAddressTab = true;
@@ -967,7 +986,7 @@ class JobWizard extends Component {
       tabPickupDelivery.reqHandlerSameAddresses = {
         ...reqHandlerSameAddresses,
         touched: true,
-        error: "Can't have same start and end locations"
+        error: translate("Can't have same start and end locations")
       };
       isValid = false;
       goToAddressTab = true;
@@ -987,7 +1006,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerEndAddress = {
           ...reqHandlerEndAddress,
           touched: true,
-          error: 'Missing ending address field'
+          error: translate('Missing ending address field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -997,7 +1016,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerEndCity = {
           ...reqHandlerEndCity,
           touched: true,
-          error: 'Missing ending city field'
+          error: translate('Missing ending city field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -1007,7 +1026,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerEndState = {
           ...reqHandlerEndState,
           touched: true,
-          error: 'Missing ending state field'
+          error: translate('Missing ending state field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -1017,7 +1036,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerEndZip = {
           ...reqHandlerEndZip,
           touched: true,
-          error: 'Missing ending zip field'
+          error: translate('Missing ending zip field')
         };
         isValid = false;
         goToAddressTab = true;
@@ -1038,7 +1057,7 @@ class JobWizard extends Component {
         tabPickupDelivery.reqHandlerEndAddress = {
           ...reqHandlerEndAddress,
           touched: true,
-          error: 'End address not found.'
+          error: translate('End address not found')
         };
         isValid = false;
         goToAddressTab = true;
@@ -1136,6 +1155,7 @@ class JobWizard extends Component {
         zipCode: tabPickupDelivery.startLocationZip,
         latitude: tabPickupDelivery.startLocationLatitude,
         longitude: tabPickupDelivery.startLocationLongitude,
+        country: 'US',
         createdBy: profile.userId,
         createdOn: moment.utc().format(),
         modifiedBy: profile.userId,
@@ -1159,7 +1179,12 @@ class JobWizard extends Component {
         state: tabPickupDelivery.endLocationState,
         zipCode: tabPickupDelivery.endLocationZip,
         latitude: tabPickupDelivery.endLocationLatitude,
-        longitude: tabPickupDelivery.endLocationLongitude
+        longitude: tabPickupDelivery.endLocationLongitude,
+        country: 'US',
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
       };
     } else {
       address2.id = tabPickupDelivery.selectedEndAddressId;
@@ -1280,10 +1305,13 @@ class JobWizard extends Component {
       console.error(e);
     }
 
-    this.setState({ btnSubmitting: false });
+    this.setState({
+      btnSubmitting: false
+    });
     this.updateJobView(newJob);
     this.closeNow();
   }
+
   // Used to either store a Copied or 'Saved' job to the database
   async saveJobDraft() {
     const {jobEdit, jobEditSaved, job} = this.props;
@@ -1481,7 +1509,6 @@ class JobWizard extends Component {
     // }
   }
 
-
   closeNow() {
     const {toggle} = this.props;
     toggle();
@@ -1563,6 +1590,8 @@ class JobWizard extends Component {
   }
 
   renderTabs() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {jobEdit} = this.props;
     const {
       page,
@@ -1580,7 +1609,7 @@ class JobWizard extends Component {
             onClick={this.firstPage}
             className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
           >
-            <p>Materials</p>
+            <p>{translate('Materials')}</p>
           </div>
           <div
             role="link"
@@ -1589,7 +1618,7 @@ class JobWizard extends Component {
             onClick={this.secondPage}
             className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
           >
-            <p>Pickup / Delivery</p>
+            <p>{translate('Pickup / Delivery')}</p>
           </div>
           <div
             role="link"
@@ -1598,7 +1627,7 @@ class JobWizard extends Component {
             onClick={this.thirdPage}
             className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
           >
-            <p>Truck Specs</p>
+            <p>{translate('Truck Specs')}</p>
           </div>
           <div
             role="link"
@@ -1607,7 +1636,7 @@ class JobWizard extends Component {
             onClick={this.fourthPage}
             className={`wizard__step${page === 4 ? ' wizard__step--active' : ''}`}
           >
-            <p>Haul Rate</p>
+            <p>{translate('Haul Rate')}</p>
           </div>
           <div
             role="link"
@@ -1616,7 +1645,7 @@ class JobWizard extends Component {
             onClick={this.fifthPage}
             className={`wizard__step${page === 5 ? ' wizard__step--active' : ''}`}
           >
-            <p>Summary</p>
+            <p>{translate('Summary')}</p>
           </div>
           {!jobEdit && (
             <div
@@ -1626,7 +1655,7 @@ class JobWizard extends Component {
               onClick={validateResponse.valid ? this.validateTopForm : null}
               className={`wizard__step${!validateResponse.valid ? ' wizard__step--disabled' : ''}${page === 6 ? ' wizard__step--active ' : ''}`}
             >
-              <p>Send</p>
+              <p>{translate('Send')}</p>
             </div>
           )
           }
@@ -1637,7 +1666,7 @@ class JobWizard extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <Card>Loading...</Card>
+            <Card>{translate('Loading')}...</Card>
           </Col>
         </Row>
       </Container>
@@ -1645,6 +1674,8 @@ class JobWizard extends Component {
   }
 
   renderJobDetails() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {
       jobStartDate,
       jobEndDate,
@@ -1669,9 +1700,9 @@ class JobWizard extends Component {
               >
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Job Name
+                    <span className="form__form-group-label">{translate('Job Name')}&nbsp;
                       <span style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}>
-                        ( required )
+                        ( {translate('required')} )
                       </span>
                     </span>
                     {
@@ -1694,7 +1725,7 @@ class JobWizard extends Component {
                           value: name
                         }
                       }
-                      placeholder="Job Name"
+                      placeholder={translate('Job Name')}
                       type="text"
                       meta={reqHandlerJobName}
                       id="jobname"
@@ -1703,9 +1734,9 @@ class JobWizard extends Component {
                 </Row>
                 <Row className="col-md-12">
                   <div className="col-md-4 form__form-group">
-                    <span className="form__form-group-label">Start Date / Time&nbsp;
+                    <span className="form__form-group-label">{translate('Start Date / Time')}&nbsp;
                       <span style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}>
-                        ( required )
+                        ( {translate('required')} )
                       </span>
                     </span>
                     <TDateTimePicker
@@ -1717,7 +1748,7 @@ class JobWizard extends Component {
                           givenDate: jobStartDate
                         }
                       }
-                      placeholder="Date and time of job"
+                      placeholder={translate('Date and time of job')}
                       defaultDate={jobStartDate}
                       onChange={this.jobStartDateChange}
                       dateFormat="m/d/Y h:i K"
@@ -1728,9 +1759,9 @@ class JobWizard extends Component {
                     />
                   </div>
                   <div className="col-md-4 form__form-group">
-                    <span className="form__form-group-label">End Date / Time&nbsp;
+                    <span className="form__form-group-label">{translate('End Date / Time')}&nbsp;
                       <span style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}>
-                        ( required )
+                        ( {translate('required')} )
                       </span>
                     </span>
                     <TDateTimePicker
@@ -1742,7 +1773,7 @@ class JobWizard extends Component {
                           givenDate: jobEndDate
                         }
                       }
-                      placeholder="Date and time of job"
+                      placeholder={translate('Date and time of job')}
                       defaultDate={jobEndDate}
                       onChange={this.jobEndDateChange}
                       dateFormat="m/d/Y h:i K"
@@ -1753,7 +1784,7 @@ class JobWizard extends Component {
                     />
                   </div>
                   <div className="col-md-4 form__form-group">
-                    <span className="form__form-group-label">PO Number</span>
+                    <span className="form__form-group-label">{translate('PO Number')}</span>
                     {
                       /*
                       <input
@@ -1774,7 +1805,7 @@ class JobWizard extends Component {
                           value: poNumber
                         }
                       }
-                      placeholder="PO Number"
+                      placeholder={translate('PO Number')}
                       type="text"
                       // meta={reqHandlerJobName}
                       id="poNumber"
@@ -1784,11 +1815,11 @@ class JobWizard extends Component {
                 <Row className="col-md-12">
                   <div className="col-md-8 form__form-group">
                     <span className="form__form-group-label">
-                      <span className="form-small-label">Your current time zone is set to&nbsp;
+                      <span className="form-small-label">{translate('Your current time zone is set to')}&nbsp;
                         {profile.timeZone
                           ? moment().tz(profile.timeZone).format('z')
                           : moment().tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('z')
-                        }. Your timezone can be changed in <Link to="/settings"><span>User Settings</span></Link>.
+                        }. {translate('Your timezone can be changed in')} <Link to="/settings"><span>{translate('User Settings')}</span></Link>.
                       </span>
                     </span>
                   </div>
@@ -1811,6 +1842,8 @@ class JobWizard extends Component {
   }
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {jobRequest, jobEdit} = this.props;
     const {
       page,
@@ -1820,13 +1853,14 @@ class JobWizard extends Component {
       tabTruckSpecs,
       tabHaulRate,
       tabSummary,
-      tabSend
+      tabSend,
+      btnSubmitting
     } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
-            {/*{this.renderGoTo()}*/}
+            {/* {this.renderGoTo()} */}
             <Card style={{paddingBottom: 0}}>
               <div className="wizard">
                 <div className="wizard__steps">
@@ -1834,7 +1868,12 @@ class JobWizard extends Component {
                   <div
                     className="wizard__step wizard__step--active"
                   >
-                    <p>{jobRequest ? 'Request' : jobEdit ? 'Edit' : 'Create'} Job</p>
+                    <p>{jobRequest
+                      ? `${translate('REQUEST_JOB')}`
+                      : jobEdit
+                        ? `${translate('EDIT_JOB')}`
+                        : `${translate('CREATE_JOB')}`
+                      }</p>
                   </div>
                 </div>
                 <div className="wizard__form-wrapper">
@@ -1847,29 +1886,38 @@ class JobWizard extends Component {
                     {this.renderTabs()}
                     <div className="wizard__form-wrapper">
                       {page === 1
-                      && <JobMaterials
+                      && (
+                      <JobMaterials
                         data={tabMaterials}
                         handleInputChange={this.handleChildInputChange}
-                      />}
+                      />
+                      )}
                       {page === 2
-                      && <PickupAndDelivery
+                      && (
+                      <PickupAndDelivery
                         data={tabPickupDelivery}
                         handleInputChange={this.handleChildInputChange}
-                      />}
+                      />
+                      )}
                       {page === 3
-                      && <TruckSpecs
+                      && (
+                      <TruckSpecs
                         data={tabTruckSpecs}
                         handleInputChange={this.handleChildInputChange}
-                      />}
+                      />
+                      )}
                       {page === 4
-                      && <HaulRate
+                      && (
+                      <HaulRate
                         data={tabHaulRate}
                         tabMaterials={tabMaterials}
                         tabPickupDelivery={tabPickupDelivery}
                         handleInputChange={this.handleChildInputChange}
-                      />}
+                      />
+                      )}
                       {page === 5
-                      && <Summary
+                      && (
+                      <Summary
                         tabHaulRate={tabHaulRate}
                         tabMaterials={tabMaterials}
                         tabPickupDelivery={tabPickupDelivery}
@@ -1891,9 +1939,11 @@ class JobWizard extends Component {
                         validateEndAddress={this.validateEndAddress}
                         validateForm={this.validateForm}
                         validateTopForm={this.validateTopForm}
-                      />}
+                      />
+                      )}
                       {(page === 6 && !jobEdit)
-                      && <SendJob
+                      && (
+                      <SendJob
                         data={tabSend}
                         handleInputChange={this.handleChildInputChange}
                         tabMaterials={tabMaterials}
@@ -1902,52 +1952,64 @@ class JobWizard extends Component {
                         sendJob={this.saveJob}
                         onClose={this.closeNow}
                         jobRequest={jobRequest}
-                      />}
+                      />
+                      )}
                     </div>
                   </div>
-                  {page < 5 &&
+                  {page < 5 && (
                   <React.Fragment>
                     <Row className="col-md-12">
                       <hr/>
                     </Row>
                     <Row className="col-md-12">
-                      <ButtonToolbar className="col-md-6 wizard__toolbar">
+                      <ButtonToolbar className="col-md-4 wizard__toolbar">
                         <Button color="minimal" className="btn btn-outline-secondary"
                                 type="button"
                                 onClick={this.closeNow}
                         >
-                          Cancel
+                          {translate('Cancel')}
                         </Button>
                       </ButtonToolbar>
-                      <ButtonToolbar className="col-md-6 wizard__toolbar right-buttons">
-                        {(!jobRequest && !jobEdit) &&
+                      <ButtonToolbar className="col-md-8 wizard__toolbar right-buttons">
+                        {(!jobRequest && !jobEdit) && (
                         <Button
                           color="outline-primary"
                           className="next"
                           onClick={this.validateAndSaveJobDraft}
+                          loading={btnSubmitting}
+                          loaderSize={10}
+                          disabled={btnSubmitting}
                         >
-                          Save Job & Close
+                          {
+                            btnSubmitting ? (
+                              <TSpinner
+                                color="#808080"
+                                loaderSize={10}
+                                loading
+                              />
+                            ) : `${translate('Save Job & Close')}`
+                          }
                         </Button>
-                        }
-                        {page !== 1 &&
+                        )}
+                        {page !== 1 && (
                         <Button color="outline-primary" type="button"
                                 className="previous"
                                 onClick={this.goBack}
                         >
-                          Back
+                          {translate('Back')}
                         </Button>
-                        }
+                        )}
                         <Button
                           color="primary"
                           className="next"
                           onClick={this.nextPage}
                         >
-                          Next
+                          {translate('Next')}
                         </Button>
                       </ButtonToolbar>
                     </Row>
                   </React.Fragment>
-                  }
+                  )}
 
                 </div>
               </div>
@@ -1989,5 +2051,4 @@ JobWizard.defaultProps = {
   job: null
 };
 
-
-export default JobWizard;
+export default withTranslation()(JobWizard);

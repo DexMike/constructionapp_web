@@ -19,6 +19,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getJobsByDate(date) {
+    const response = await this.get(`/date/${date}${PATH}`);
+    return (response);
+  }
+
   // getJobsByCompanyIdAndStatus
   // input
   //    companyID: id of company
@@ -151,7 +156,6 @@ class JobService extends AgentService {
   }
 
   static async createNewJob(jobRequest) {
-    console.log(154, jobRequest);
     const response = await super.post(`${PATH}/create`, jobRequest);
     return (response);
   }
