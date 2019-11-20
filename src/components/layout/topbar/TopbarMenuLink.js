@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {withTranslation} from 'react-i18next';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 import ThemeContext from '../../ThemeContext';
@@ -10,6 +11,8 @@ class TopbarMenuLink extends Component {
   }
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {title, icon, path, toggle} = this.props;
     return (
       <React.Fragment>
@@ -45,7 +48,7 @@ class TopbarMenuLink extends Component {
             }}
           >
             <span className={`topbar__link-icon lnr lnr-${icon}`}/>
-            <p className="topbar__link-title">{title}</p>
+            <p className="topbar__link-title">{translate(title)}</p>
           </Link>
         )}
       </React.Fragment>
@@ -65,4 +68,4 @@ TopbarMenuLink.defaultProps = {
   toggle: null
 };
 
-export default TopbarMenuLink;
+export default withTranslation()(TopbarMenuLink);

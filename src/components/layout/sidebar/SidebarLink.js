@@ -1,21 +1,24 @@
 import React, { Component } from 'react';
+import {withTranslation} from 'react-i18next';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 
 class SidebarLink extends Component {
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const { route, onClick, icon, title } = this.props;
     return (
       <NavLink
         to={route}
         onClick={onClick}
         activeClassName="sidebar__link-active"
-        exact={true}
+        exact
       >
         <li className="sidebar__link">
           {icon ? <i className="material-icons iconSet">{icon}</i> : ''}
           <p className="sidebar__link-title">
-            {title}
+            {translate(title)}
           </p>
         </li>
       </NavLink>
@@ -41,4 +44,4 @@ SidebarLink.defaultProps = {
   }
 };
 
-export default SidebarLink;
+export default withTranslation()(SidebarLink);

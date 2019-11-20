@@ -620,6 +620,7 @@ class FilterComparisonReport extends Component {
     allFilters.materials = this.getValues(allFilters.materials);
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
+    allFilters.statuses = this.getValues(allFilters.statuses);
 
     //if comp is disabled, do not get comp data
     allFilters.compare = compEnabled;

@@ -750,7 +750,6 @@ class ReportsComparison extends Component {
           });
           const width = doc.internal.pageSize.getWidth();
           const height = doc.internal.pageSize.getHeight();
-          // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
           doc.addImage(img, 'JPEG', 2, 0, width, height);
           doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
 
@@ -794,6 +793,7 @@ class ReportsComparison extends Component {
 
   extractCSVInfo(data) {
     let newData = [];
+    let date = new Date(0);
     const { activeTab, profile } = this.state;
 
     const formatter = new Intl.NumberFormat('en-US', {
@@ -835,6 +835,7 @@ class ReportsComparison extends Component {
     if (activeTab === '3') {
       newData = data.map(d => ({
         'Job Name': d.name,
+        Date: moment.unix(d.startTime / 1000).format('MMMM Do, YYYY h:mm:ss A'),
         'Total Cost': formatter.format(d.totEarnings),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
@@ -911,7 +912,7 @@ class ReportsComparison extends Component {
         columnDefs={columns}
         defaultColDef={defaultData}
         rowData={data}
-        onRowClicked={(event) => this.getJob(event.data.id) }
+        onRowClicked={event => this.getJob(event.data.id)}
         // floatingFilter={true}
         onGridReady={onGridReady}
         paginationPageSize={15}
