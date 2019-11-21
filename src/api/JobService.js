@@ -19,8 +19,8 @@ class JobService extends AgentService {
     return (response);
   }
 
-  static async getJobsByDate(date) {
-    const response = await this.get(`/date/${date}${PATH}`);
+  static async getJobsByDate(date, profile) {
+    const response = await this.get(`/date/${date}/profile/${profile}${PATH}`);
     return (response);
   }
 
