@@ -135,7 +135,6 @@ class ReportsDailyReportPage extends Component {
 
       goToDashboard: false,
       goToUpdateJob: false,
-      profile: {},
       // Rate Type Button toggle
       filters: {
         status: ''
