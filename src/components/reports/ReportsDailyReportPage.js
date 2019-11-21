@@ -367,11 +367,9 @@ class ReportsDailyReportPage extends Component {
   }
 
   async getJob(date) {
-    const { profile } = this.state;
     try {
       const jobsDate = await JobService.getJobsByDate(
-        date,
-        profile.companyType
+        date
       );
       this.setState({
         jobsDate
