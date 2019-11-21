@@ -15,10 +15,11 @@ class EquipmentGeneralMap extends Component {
     this.state = {
       profileType: null,
       profileCompanyId: 0,
-      loaded: false
+      loaded: false,
+      shiftText: ''
     };
 
-    // this.renderGoTo = this.renderGoTo.bind(this);
+    this.noTrucksOnShift = this.noTrucksOnShift.bind(this);
   }
 
   async componentDidMount() {
@@ -29,6 +30,12 @@ class EquipmentGeneralMap extends Component {
       profileCompanyId: profile.companyId,
       loaded: true
     });
+  }
+
+  noTrucksOnShift(trucksNumber) {
+    const plural = trucksNumber === 1 ? `is ${trucksNumber} truck` : `are ${trucksNumber} trucks`;
+    const shiftText = `There ${plural} on an active shift.`;
+    this.setState({ shiftText });
   }
 
   renderLoader() {
@@ -45,7 +52,7 @@ class EquipmentGeneralMap extends Component {
 
   render() {
     const title = 'General Trucks Map';
-    const { loaded, profileType, profileCompanyId } = this.state;
+    const { loaded, profileType, profileCompanyId, shiftText } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -60,7 +67,13 @@ class EquipmentGeneralMap extends Component {
             height="600px"
             profileType={profileType}
             profileCompanyId={profileCompanyId}
+            onTrucksLoaded={this.noTrucksOnShift}
           />
+          <Row>
+            <Col md={12}>
+              {shiftText}
+            </Col>
+          </Row>
         </Container>
       );
     }
