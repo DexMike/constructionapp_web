@@ -31,6 +31,8 @@ import RatesDeliveryService from '../../api/RatesDeliveryService';
 import CompanySettingsService from '../../api/CompanySettingsService';
 import TCalculator from '../common/TCalculator';
 
+// import '../addresses/Address.scss';
+
 class JobForm extends Component {
   constructor(props) {
     super(props);
@@ -93,6 +95,7 @@ class JobForm extends Component {
   }
 
   async componentDidMount() {
+    const { companyCarrier } = this.props;
     await this.loadJobForm();
   }
 

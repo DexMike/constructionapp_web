@@ -5,7 +5,7 @@ import TableRow from '@material-ui/core/TableRow/index';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
-import ImageZoom from 'react-medium-image-zoom'
+import ImageZoom from 'react-medium-image-zoom';
 import LoadService from '../../api/LoadService';
 import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
@@ -14,8 +14,9 @@ import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
 import UserService from '../../api/UserService';
 import TFormat from '../common/TFormat';
-import TMap from '../common/TMap';
+import TMapGPS from '../common/TMapGPS';
 import '../common/ImageZoom.scss';
+import './Load.css';
 
 const refreshInterval = 15; // refresh every 15 seconds
 let timerVar;
@@ -211,17 +212,16 @@ class LoadsExpandableRow extends Component {
       } = {...this.state};
       let startCoords = job.startAddress;
       let endCoords = job.endAddress;
-
       // According to https://trelar.atlassian.net/browse/SG-930
       // if there are tracking points use those instead of job address.
       if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
         startCoords = {
-          latitude: gpsTrackings[0][1],
-          longitude: gpsTrackings[0][0]
+          latitude: gpsTrackings[0][0],
+          longitude: gpsTrackings[0][1]
         };
         endCoords = {
-          latitude: gpsTrackings[gpsTrackings.length - 1][1],
-          longitude: gpsTrackings[gpsTrackings.length - 1][0]
+          latitude: gpsTrackings[gpsTrackings.length - 1][0],
+          longitude: gpsTrackings[gpsTrackings.length - 1][1]
         };
       }
 
@@ -323,7 +323,7 @@ class LoadsExpandableRow extends Component {
                   )
                   }
                   <Row style={{paddingTop: 0}}>
-                    <Col md={4}>
+                    <Col md={6} className="headroute">
                       <h3 className="subhead" style={{
                         paddingTop: 30,
                         color: '#006F53',
@@ -332,8 +332,28 @@ class LoadsExpandableRow extends Component {
                       >
                         Route
                       </h3>
+                      <ul className="indicators">
+                        <li>
+                          <svg width="14" height="14">
+                            <rect width="14" height="14" fill="rgb(0, 201, 151)"/>
+                          </svg>
+                          <span>Recommended</span>
+                        </li>
+                        <li>
+                          <svg width="14" height="14">
+                            <rect width="14" height="14" fill="rgb(0, 111, 83)"/>
+                          </svg>
+                          <span>Depart</span>
+                        </li>
+                        <li>
+                          <svg width="14" height="14">
+                            <rect width="14" height="14" fill="rgb(45, 140, 200)"/>
+                          </svg>
+                          <span>Return</span>
+                        </li>
+                      </ul>
                     </Col>
-                    <Col md={4}>
+                    <Col md={6}>
                       <h3 className="subhead" style={{
                         paddingTop: 30,
                         color: '#006F53',
@@ -345,17 +365,18 @@ class LoadsExpandableRow extends Component {
                     </Col>
                   </Row>
                   <Row>
-                    <Col md={4}>
-                      <TMap
+                    <Col md={6}>
+                      <TMapGPS
                         id={`load${load.id}`}
                         width="100%"
                         height={400}
                         startAddress={startCoords}
                         endAddress={endCoords}
-                        trackings={gpsTrackings}
+                        loadId={load.id}
+                        loadStatus={loadStatus}
                       />
                     </Col>
-                    <Col md={8}>
+                    <Col md={6}>
                       <Row>
                         {loadInvoices.map(item => (
                           <Col key={item.id} sm className="loadTicketCol">

@@ -19,6 +19,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getJobsByDate(date) {
+    const response = await this.get(`/date/${date}${PATH}`);
+    return (response);
+  }
+
   // getJobsByCompanyIdAndStatus
   // input
   //    companyID: id of company
@@ -130,6 +135,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async requestJob(id) {
+    const response = await super.post(`${PATH}/${id}/request`);
+    return (response);
+  }
+
+  static async acceptJob(id) {
+    const response = await super.post(`${PATH}/${id}/accept`);
+    return (response);
+  }
+
   static async deleteJob(id) {
     const response = await super.post(`${PATH}/${id}/delete`, null);
     return (response);
@@ -137,6 +152,21 @@ class JobService extends AgentService {
 
   static async closeJob(id) {
     const response = await super.post(`${PATH}/${id}/close`, null);
+    return (response);
+  }
+
+  static async cancelJobAsProducer(id, reason) {
+    const response = await super.post(`/producer${PATH}/${id}/cancel`, reason);
+    return (response);
+  }
+
+  static async cancelJobAsCarrier(id, reason) {
+    const response = await super.post(`/carrier${PATH}/${id}/cancel`, reason);
+    return (response);
+  }
+
+  static async createNewJob(jobRequest) {
+    const response = await super.post(`${PATH}/create`, jobRequest);
     return (response);
   }
 

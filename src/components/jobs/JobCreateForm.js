@@ -1124,7 +1124,7 @@ class JobCreateForm extends Component {
                         value: endAddress.address1
                       }
                     }
-                    placeholder="Address #1"
+                    placeholder={translate('Address 1')}
                     type="text"
                     meta={reqHandlerEAddress}
                   />
@@ -1134,7 +1134,7 @@ class JobCreateForm extends Component {
                 <div className="form__form-group">
                   <input name="address2"
                         type="text"
-                        placeholder="Address #2"
+                        placeholder={translate('Address 2')}
                         value={endAddress.address2}
                         onChange={this.handleEndAddressInputChange}
                   />

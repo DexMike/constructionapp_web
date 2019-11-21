@@ -102,13 +102,13 @@
 }
 
 .gridTable {
-  width: 1530px !important;
+  width: 1560px !important;
   padding-bottom: 10px;
   overflow-y: hidden !important;
 }
 
 .gridTableJobs {
-  width: 1260px !important;
+  width: 1320px !important;
   padding-bottom: 10px;
   overflow-y: hidden !important;
 }
@@ -137,7 +137,7 @@
 
   width: 400px !important;
   height: 400px !important;
-  max-width: 600px !important; 
+  max-width: 600px !important;
   max-height: 400px !important;
   line-height: 24px;
   overflow: auto !important;
@@ -154,4 +154,116 @@
 
 .noSidePadding .row {
   margin: 0 !important;
+}
+
+.forceHide {
+  display: none;
+}
+.forceShow {
+  display: block;
+}
+
+.primaryGreen {
+  color: darkgreen;
+}
+
+.div-percent-bar {
+  -webkit-transition: 0.50s;
+  -moz-transition: 0.50s;
+  -o-transition: 0.50s;
+  width: 50px;
+  transition: 0.50s;
+  background-color: white;
+}
+.div-percent-bar.show {
+  background-color: #218169 !important;
+}
+
+.div-percent-bar_comp {
+  -webkit-transition: 0.50s;
+  -moz-transition: 0.50s;
+  -o-transition: 0.50s;
+  width: 1%;
+  transition: 0.50s;
+  background-color: white;
+}
+
+.div-percent-bar_comp.show_comp {
+  background-color: #9A9A9A !important;
+}
+
+.reports-modal-job .modal-content{
+  width: 900px!important;
+  background-color: #e5e5e0;
+}
+
+.reports-modal-job .col-md-9{
+  background: #006f53;
+  border-color: #006f53;
+  width: 100%;
+  max-width: 100%!important;
+  text-align: center;
+  height: 55px;
+  display: flex;
+}
+
+.reports-modal-job .col-md-9 h3{
+  color: #ffffff;
+  font-weight: 700;
+  margin: auto;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.reports-modal-job .col-md-9 + .container{
+  width: auto;
+  background-color: whitesmoke;
+  border-color: #dfdfdf;
+  border-width: 4px;
+  border-radius: 2px;
+  margin: 15px 15px 0;
+  text-align: left;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.reports-modal-job .col-md-9 + .container h3{
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.reports-cont-btn{
+  width: auto;
+  background-color: whitesmoke;
+  margin: 0 15px 15px;
+  padding: 15px;
+  border-width: 4px;
+  border-radius: 2px;
+  border-top: solid 1px rgb(204, 204, 204);
+  text-align: left;
+}
+
+.reports-cont-btn button{
+  margin: auto;
+}
+.visualizations {
+  min-width: 100% !important;
+}
+
+.visualizations_extended {
+  min-width: 1560px !important;
+}
+
+.pdf_loading_tab {
+  margin-left: 25px;
+  color: #9A9A9A;
+}
+
+:global .recharts-responsive-container div:nth-child(2) {
+  overflow: hidden !important;
+}
+
+:global .recharts-responsive-container div:nth-child(2) div {
+  overflow: hidden !important;
 }

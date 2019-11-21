@@ -35,7 +35,6 @@ function currencyFormatter(value) {
 
 class TCharts extends PureComponent {
   renderLegend(data) {
-
     // TODO -> Rewrite this inefficient thing
     const newItems = [];
     for (const datum of data.payload) {
@@ -69,10 +68,9 @@ class TCharts extends PureComponent {
 
   render() {
     const {
-      data, type, visType, profile, compEnabled
+      data, type, visType, profile, compEnabled, title
     } = this.props;
     const compToggled = !compEnabled;
-    // console.log("TCL: TCharts -> render -> compEnabled", compEnabled, compToggled)
 
     // PIE CHART data massaging
     const style = {
@@ -174,27 +172,25 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={props => {
-                    return (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    );
-                  }}
+                  )}
                 />
               </XAxis>
-              
+
               <YAxis type="number" tickFormatter={currencyFormatter} />
               <CartesianGrid strokeDasharray="3 3"/>
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
@@ -226,27 +222,25 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={props => {
-                    return (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    );
-                  }}
+                  )}
                 />
               </XAxis>
-              
+
               <YAxis type="number" tickFormatter={currencyFormatter}/>
               <CartesianGrid strokeDasharray="3 3"/>
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
@@ -277,27 +271,25 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={props => {
-                    return (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    );
-                  }}
+                  )}
                 />
               </XAxis>
-              
+
               <YAxis type="number" tickFormatter={currencyFormatter}/>
               <CartesianGrid strokeDasharray="3 3"/>
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
@@ -323,44 +315,40 @@ class TCharts extends PureComponent {
             >
               <XAxis type="category" dataKey="name">
                 <Label
-                  value="Companies"
+                  value={title}
                   position="bottom"
                   offset={0}
-                  content={props => {
-                    return (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    );
-                  }}
+                  )}
                 />
               </XAxis>
-              
+
               <YAxis type="number">
                 <Label
                   value="$"
                   position="top"
-                  content={props => {
-                    return (
+                  content={props => (
                     <text
                         style={{ fontSize: '11px'}}
                         x={20}
                         y={10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    );
-                  }}
+                  )}
                 />
               </YAxis>
               <CartesianGrid strokeDasharray="3 3"/>
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <CartesianGrid strokeDasharray="3 3"/>
               <Legend />
               <ReferenceLine y={0} stroke="#000"/>
@@ -391,21 +379,19 @@ class TCharts extends PureComponent {
                   value="Tons"
                   position="bottom"
                   offset={0}
-                  content={props => {
-                    return (
+                  content={props => (
                     <text
                         style={{ fontSize: '12px'}}
                         x={17}
                         y={props.viewBox.y + props.viewBox.height - 10}
                         fill="#176A55"
                     >
-                        {props.value}
+                      {props.value}
                     </text>
-                    );
-                  }}
+                  )}
                 />
               </XAxis>
-              
+
               <YAxis type="number" />
               <CartesianGrid strokeDasharray="3 3"/>
               <CartesianGrid strokeDasharray="3 3"/>
@@ -428,7 +414,7 @@ class TCharts extends PureComponent {
         );
       }
     }
-    
+
     // AREA
     if (type === 'area') {
       if (visType === 'totals') {
@@ -437,7 +423,7 @@ class TCharts extends PureComponent {
             <AreaChart data={data} margin={{ top: 20, left: -15, bottom: 20 }}>
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Legend />
               <CartesianGrid />
               <Brush dataKey="totEarningsNum" height={30} stroke={colors[0]}/>
@@ -468,7 +454,7 @@ class TCharts extends PureComponent {
             <AreaChart data={data} margin={{ top: 20, left: -15, bottom: 20 }}>
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Legend />
               <CartesianGrid />
               <Brush dataKey="avgEarningsHourNum" height={30} stroke={colors[0]}/>
@@ -498,7 +484,7 @@ class TCharts extends PureComponent {
             <AreaChart data={data} margin={{ top: 20, left: -15, bottom: 20 }}>
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Legend />
               <CartesianGrid />
               <Brush dataKey="avgEarningsJobNum" height={30} stroke={colors[0]}/>
@@ -520,7 +506,7 @@ class TCharts extends PureComponent {
             <AreaChart data={data} margin={{ top: 20, left: -15, bottom: 20 }}>
               <XAxis dataKey="name" tickLine={false} />
               <YAxis tickLine={false} />
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Legend />
               <CartesianGrid />
               <Brush dataKey="costPerTonMile" height={30} stroke={colors[0]}/>
@@ -584,7 +570,7 @@ class TCharts extends PureComponent {
         return (
           <ResponsiveContainer>
             <PieChart className="dashboard__chart-pie-container">
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Pie
                 data={earnings}
                 dataKey="value"
@@ -612,7 +598,7 @@ class TCharts extends PureComponent {
         return (
           <ResponsiveContainer>
             <PieChart className="dashboard__chart-pie-container">
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Pie
                 data={avgTon}
                 dataKey="value"
@@ -640,7 +626,7 @@ class TCharts extends PureComponent {
         return (
           <ResponsiveContainer>
             <PieChart className="dashboard__chart-pie-container">
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Pie
                 data={avgJob}
                 dataKey="value"
@@ -658,7 +644,7 @@ class TCharts extends PureComponent {
         return (
           <ResponsiveContainer>
             <PieChart className="dashboard__chart-pie-container">
-              <Tooltip formatter={(value) => `$ ${new Intl.NumberFormat('en').format(value)}`} />
+              <Tooltip formatter={value => `$ ${new Intl.NumberFormat('en').format(value)}`} />
               <Pie
                 data={costPerTon}
                 dataKey="value"
@@ -721,7 +707,8 @@ TCharts.propTypes = {
   type: PropTypes.string,
   visType: PropTypes.string,
   profile: PropTypes.string,
-  compEnabled: PropTypes.bool
+  compEnabled: PropTypes.bool,
+  title: PropTypes.string
 };
 
 TCharts.defaultProps = {
@@ -729,7 +716,8 @@ TCharts.defaultProps = {
   type: null,
   visType: null,
   profile: null,
-  compEnabled: null
+  compEnabled: null,
+  title: null
 };
 
 export default TCharts;

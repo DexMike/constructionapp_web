@@ -25,7 +25,8 @@ import {
   TabContent,
   TabPane,
   ButtonGroup, 
-  ButtonToolbar
+  ButtonToolbar,
+  Modal
 } from 'reactstrap';
 import classnames from 'classnames';
 import {useTranslation} from 'react-i18next';
@@ -49,11 +50,17 @@ import TFormat from '../common/TFormat';
 import './Reports.css';
 import '../addresses/Address.css';
 
+import JobForm from '../jobs/JobForm';
+import JobService from '../../api/JobService';
+import CompanyService from '../../api/CompanyService';
+
 import BarRenderer from '../../utils/BarRenderer';
 import BarFilter from '../../utils/BarFilter';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { string } from 'prop-types';
+import AddressService from '../../api/AddressService';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -87,6 +94,11 @@ function percentFormatter(params) {
   return `${formatNumber(params.value * 100)} %`;
 }
 
+function compa (a, b) {
+  // return a.total > b.total ? 1 : (a.total < b.total ? -1 : 0);
+  return a.total > b.total ? 1 : (a.total < b.total ? -1 : 0);
+}
+
 window.html2canvas = html2canvas
 class ReportsComparison extends Component {
   /*
@@ -106,7 +118,11 @@ class ReportsComparison extends Component {
       jobsInfo: [],
       totalJobs: 0,
 
+      modal: false,
+
       loadId: 0,
+      job: {},
+      company: {},
 
       carriers: [],
       carrierID: 0,
@@ -145,6 +161,7 @@ class ReportsComparison extends Component {
       totalCount: 10,
       activeTab: '1',
       chartType: 'bar', //area
+      pdfRendering: false,
 
       // Grid
       defaultColumnDef: {
@@ -154,12 +171,13 @@ class ReportsComparison extends Component {
         cellStyle: { 'text-align': 'right'},
         resizable: true,
         suppressSizeToFit: true,
+        enableSorting: true
       },
 
       columnsCarrier: [
         {
           field: 'name',
-          headerName: 'Customer Name',
+          headerName: 'Producers',
           headerTooltip: "Carrier of Producer",
           // width: 200,
         }, {
@@ -167,51 +185,45 @@ class ReportsComparison extends Component {
           headerName: 'Total Earnings',
           headerTooltip: "Total Earnings for this time period",
           sort: "desc",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter,
-          valueFormatter: currencyFormatterRound
+          valueFormatter: currencyFormatterRound,
+          comparator: compa
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
           headerTooltip: "Total number of jobs for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'totalLoadsComparison',
           headerName: '# of Loads',
           headerTooltip: "Total number of loads for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
           headerTooltip: "Total number of tons delivered for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgEarningsTonComparison',
           headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
           headerTooltip: "Average miles traveled for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }
       ],
 
@@ -226,51 +238,45 @@ class ReportsComparison extends Component {
           headerName: 'Total Earnings',
           headerTooltip: "Total Earnings for this time period",
           sort: "desc",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter,
-          valueFormatter: currencyFormatterRound
+          valueFormatter: currencyFormatterRound,
+          comparator: compa
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
           headerTooltip: "Total number of jobs for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
           headerTooltip: "Total number of tons delivered for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgEarningsTonComparison',
           headerName: 'Avg. Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
           headerTooltip: "Average miles traveled for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }
       ],
 
@@ -286,54 +292,55 @@ class ReportsComparison extends Component {
           headerName: 'Total Earnings',
           headerTooltip: "Total Earnings for this time period",
           sort: "desc",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
           filterFramework: BarFilter,
-          valueFormatter: currencyFormatterRound
+          valueFormatter: currencyFormatterRound,
+          comparator: compa
         }, {
           field: 'totalLoadsComparison',
           headerName: '# of Loads',
           headerTooltip: "Total number of jobs for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
           headerTooltip: "Total number of tons delivered for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Earnings per Ton Mile',
           headerTooltip: "Average earnings per job for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
-        }, {
+          filterFramework: BarFilter,
+          comparator: compa
+        }, /* {
+          field: 'avgEarningsJobComparison',
+          headerName: 'Earnings per Ton Mile',
+          headerTooltip: "Average earnings per job for this time period",
+          cellRendererFramework: BarRenderer,
+          filterFramework: BarFilter,
+          comparator: compa
+        },*/ {
           field: 'avgEarningsTonComparison',
           headerName: 'Ton Rate',
           headerTooltip: "Average earnings per ton for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
           headerTooltip: "Average miles traveled for this time period",
-          // renderer
-          // enableValue: true,
           cellRendererFramework: BarRenderer,
-          filterFramework: BarFilter
+          filterFramework: BarFilter,
+          comparator: compa
         }
       ]
-     
+
     }; // state
 
     // Ag-Grid
@@ -346,6 +353,11 @@ class ReportsComparison extends Component {
     this.handleJobEdit = this.handleJobEdit.bind(this);
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
+
+    this.toggle = this.toggle.bind(this);
+    this.togglePopup = this.togglePopup.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.handlePageClick = this.handlePageClick.bind(this);
 
     // TODO: need to do for Producer, Product, and Project
     this.handlePageChange = this.handlePageChange.bind(this);
@@ -374,8 +386,9 @@ class ReportsComparison extends Component {
   }
 
   async componentDidMount() {
-    const { columnsProjects, columnsCarrier, columnsProducts } = this.state;    
+    const { columnsProjects, columnsCarrier, columnsProducts } = this.state;
     const profile = await ProfileService.getProfile();
+    
     this.hideShowPie(true);
     // this.hideAvg(true, 425);
 
@@ -405,7 +418,7 @@ class ReportsComparison extends Component {
       this.removeCost(columnsProjects);
     }
 
-    this.setState({   
+    this.setState({
       profile,
       loaded: true,
       companyType: profile.companyType
@@ -422,7 +435,6 @@ class ReportsComparison extends Component {
     this.gridColumnApi = params.columnApi;
   }
 
-
   onGridReadyProducts(params) {
     this.gridApiProducers = params.api;
     this.gridColumnApi = params.columnApi;
@@ -433,12 +445,17 @@ class ReportsComparison extends Component {
     this.gridColumnApi = params.columnApi;
   }
 
+  // Title Remapper
   setLabelsCustomer (obj) {
     const newObj = obj;
+    /**/
     if (obj.field === 'name') {
-      newObj.headerName = 'Carrier Name';
-      newObj.headerTooltip = 'Carrier of Producer';
+      if(newObj.headerName === 'Producers') {
+        newObj.headerName = 'Carriers';
+        newObj.headerTooltip = 'Carrier of Producer';
+      }
     }
+    
     if (obj.field === 'avgTotEarningsComparison') {
       newObj.headerName = 'Total Cost';
       newObj.headerTooltip = 'Total Cost for this time period';
@@ -485,7 +502,6 @@ class ReportsComparison extends Component {
 
   hideAvg (show, caller) {
     let { columnsProducts } = this.state;
-    // console.log("TCL: ReportsComparison -> CALL", columnsProducts, caller)
     if (show) {
       const avgMiles = {
         field: 'avgMilesTraveledComparison',
@@ -497,14 +513,14 @@ class ReportsComparison extends Component {
         filterFramework: BarFilter
       }
       columnsProducts.push(avgMiles);
-      
+
     } else {
       columnsProducts.pop();
     }
     this.setState({
       columnsProducts
-    }, function set() {
-      console.log("TCL: ReportsComparison -> hideAvg -> columnsProducts", columnsProducts, show)
+    }, () => {
+      // console.log("TCL: ReportsComparison -> hideAvg -> columnsProducts", columnsProducts, show)
     })
   }
 
@@ -518,8 +534,8 @@ class ReportsComparison extends Component {
   }
 
   toggle(tab) {
-    let { chartType } = this.state;
-    if (this.state.activeTab !== tab) {
+    let { chartType, activeTab } = this.state;
+    if (activeTab !== tab) {
 
       // hide pie for jobs
       if (tab === '3') {
@@ -543,6 +559,28 @@ class ReportsComparison extends Component {
         chartType
       });
     }
+  }
+
+  // modal with job detail information
+  togglePopup() {
+    const { modal } = this.state;
+    
+    if (modal) {
+      this.setState(({
+        modal: !modal,
+      }));
+    } else {
+      this.setState(({
+        modal: !modal
+      }));
+    }
+  }
+
+  closeModal() {
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
+    });
   }
 
   handlePageClick(menuItem) {
@@ -604,7 +642,6 @@ class ReportsComparison extends Component {
   */
 
   returnCarriers(carriers, filters, metadata, enabled) {
-    // console.log("TCL: ReportsComparison -> returnCarriers -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       carriers,
@@ -615,7 +652,6 @@ class ReportsComparison extends Component {
   }
 
   returnProducts(products, filters, metadata, enabled) {
-    // console.log("TCL: ReportsComparison -> returnProducts -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       products,
@@ -626,7 +662,6 @@ class ReportsComparison extends Component {
   }
 
   returnProjects(projects, filters, metadata, enabled) {
-    // console.log("TCL: ReportsComparison -> returnProjects -> enabled", enabled)
     const {totalCount} = metadata;
     this.setState({
       projects,
@@ -697,14 +732,40 @@ class ReportsComparison extends Component {
   }
 
   exportToPDF() {
-    const input = document.getElementById('visualizations');
-    html2canvas(input)
-      .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l');
-        pdf.addImage(imgData, 'JPEG', 10, 10, 270, 190, 'img', 'MEDIUM');
-        pdf.save(`Report_${StringGenerator.getDateString()}.pdf`); 
-      });
+    const { activeTab } = this.state;
+    const previousTab = activeTab;
+    window.scrollTo(0, 0);
+    const that = this;
+    this.setState({
+      pdfRendering: true // hack for full PDF rendering (table width)
+    }, function done() {
+      const input = document.getElementById('visualizations');
+      html2canvas(input)
+        .then((canvas) => {
+          const img = canvas.toDataURL('image/jpg');
+          const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+          });
+          const width = doc.internal.pageSize.getWidth();
+          const height = doc.internal.pageSize.getHeight();
+          doc.addImage(img, 'JPEG', 2, 0, width, height);
+          doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
+
+          this.setState({
+            pdfRendering: false,
+            activeTab: '4' // this is a hack to get the width back
+          }, () => {
+            // this.forceUpdate();
+            setTimeout(() => {
+              this.setState({
+                activeTab: previousTab
+              })
+            }, 2000);
+          })
+        });
+    })
   }
 
   exportToCSV() {
@@ -713,25 +774,82 @@ class ReportsComparison extends Component {
     }
   }
 
-  extractCSVInfo(data) {
-    const newData = data.map(d => ({
-      'Total Earnings': d.totEarnings,
-      'Total # of Jobs': d.numJobs,
-      'Total # of Loads': d.numLoads,
-      'Total Tons delivered': d.tonsDelivered,
-      'Average Earnings per Job': d.avgEarningsJob,
-      'Average Earnings per Ton': d.avgEarningsTon,
-      'Average Earnings per Hour': d.avgEarningsHour,
-      'Cost per Ton/Mile': d.costPerTonMile,
-      'Average Miles traveled': d.avgMilesTraveled
-    }))
-    return newData;
+  async getJob(jobId) {
+    // await this.handleFilterChange(filters);
+    const job = await JobService.getJobById(jobId);
+    const company = await CompanyService.getCompanyById(job.companiesId);
+    company.company = company;
+    const sAddress = await AddressService.getAddressById(job.startAddress);
+    const eAddress = await AddressService.getAddressById(job.endAddress);
+    job.startAddress = sAddress;
+    job.endAddress = eAddress;
+    this.setState({
+      job,
+      company
+    }, function done() {
+      this.togglePopup();
+    });
   }
 
-  renderChart(type, data) {
+  extractCSVInfo(data) {
+    let newData = [];
+    let date = new Date(0);
+    const { activeTab, profile } = this.state;
+
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    })
+
+    if (activeTab === '1') {
+      newData = data.map(d => ({
+        'Material Name': d.name,
+        'Total Cost': formatter.format(d.totEarnings),
+        '# of Jobs': Number(d.numJobs),
+        'Tons Delivered': Number(d.tonsDelivered),
+        'Cost per Ton Mile': formatter.format(d.avgEarningsJob),
+        'Rate per Ton': formatter.format(d.avgEarningsHour),
+        'Average Miles Traveled': Number(d.avgMilesTraveled),
+      }))
+      return newData;
+    }
+    if (activeTab === '2') {
+
+      let name = 'Producer';
+      if (profile.companyType === 'Customer') {
+        name = 'Carrier';
+      }
+
+      newData = data.map(d => ({
+        [name]: d.name,
+        'Total Cost': formatter.format(d.totEarnings),
+        '# of Jobs': Number(d.numJobs),
+        '# of Loads': Number(d.numLoads),
+        'Tons Delivered': Number(d.tonsDelivered),
+        'Rate per Ton': formatter.format(d.avgEarningsTon),
+        'Average Miles Traveled': Number(d.avgMilesTraveled),
+      }))
+      return newData;
+    }
+    if (activeTab === '3') {
+      newData = data.map(d => ({
+        'Job Name': d.name,
+        Date: moment.unix(d.startTime / 1000).format('MMMM Do, YYYY h:mm:ss A'),
+        'Total Cost': formatter.format(d.totEarnings),
+        '# of Loads': Number(d.numLoads),
+        'Tons Delivered': Number(d.tonsDelivered),
+        'Cost per Ton Mile': formatter.format(d.costPerTonMile),
+        'Rate per Ton': formatter.format(d.avgEarningsTon),
+        'Average Miles Traveled': Number(d.avgMilesTraveled),
+      }))
+      return newData;
+    }
+    return [];
+  }
+
+  renderChart(type, data, title) {
     const { chartVisType, companyType, compEnabled } = this.state;
-    // console.log("TCL: renderChart -> compEnabled", compEnabled)
-    
     // set some dummy data so that the graph doesn't crash
     if (data.length === 0) {
       data = [
@@ -772,26 +890,29 @@ class ReportsComparison extends Component {
         style={{ width: '100%' }}
         profile={companyType}
         compEnabled={compEnabled}
+        title={title}
       />
     )
   }
-
+  // onRowClicked(event: any) { console.log('row', event); }
+  
   renderTable(columns, defaultData, data, onGridReady) {
+    // console.log("TCL: renderTable -> data", data, columns)
     const { activeTab, compEnabled } = this.state;
-    //console.log("TCL: renderTable -> compEnabled", compEnabled)
-    
+
     let newData = data;
     let colHeight = 60;
+
     if (Number(activeTab) === 3 || !compEnabled) {
       colHeight = 28;
     }
     // this.compHeight(showComp)
-    // console.log("TCL: renderTable -> data", activeTab, colHeight)
     return (
       <AgGridReact
         columnDefs={columns}
         defaultColDef={defaultData}
         rowData={data}
+        onRowClicked={event => this.getJob(event.data.id)}
         // floatingFilter={true}
         onGridReady={onGridReady}
         paginationPageSize={15}
@@ -801,6 +922,39 @@ class ReportsComparison extends Component {
         style={{ width: '2000px' }}
       />
     )
+  }
+  
+  renderModal() {
+    const { modal, job, closeModal, activeTab } = this.state;
+    if (Number(activeTab) === 3) {
+      return (
+        <React.Fragment>
+          <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
+            <div className="dashboard dashboard__job-create" style={{width: 900}}>
+              <JobForm
+                job={job}
+                bid={null}
+                handlePageClick={this.handlePageClick}
+                // companyCarrier={company}
+              />
+              <div className="reports-cont-btn">
+                <Button
+                  color="minimal"
+                  className="btn btn-outline-secondary"
+                  outline
+                  onClick={this.closeModal}
+                  >Close &nbsp;
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+      </React.Fragment>
+    );
   }
 
   renderVisualizations() {
@@ -816,35 +970,43 @@ class ReportsComparison extends Component {
       columnsProducts,
       columnsProjects,
       defaultColumnDef,
-      chartOpts
-    } = this.state;  
+      chartOpts,
+      pdfRendering
+    } = this.state;
 
     let dataToPrint = [];
     let dataToRender = [];
     let dataToRenderA = [];
     let columnsToRender = [];
+    let csvName = '';
+    let title = '';
 
-    // console.log("TCL: renderVisualizations -> filters", filters)
     // prepare data for CSV printing
     if (activeTab === '1') {
       dataToPrint = this.extractCSVInfo(products);
       dataToRender = products;
       columnsToRender = columnsProducts;
+      csvName = 'Materials';
+      title = "Materials";
     } else if (activeTab === '2') {
       dataToPrint = this.extractCSVInfo(carriers);
       dataToRender = carriers;
       columnsToRender = columnsCarrier;
+      csvName = 'Carrier';
+      title = "Companies";
     } else if (activeTab === '3') {
       dataToPrint = this.extractCSVInfo(projects);
       dataToRender = projects;
       columnsToRender = columnsProjects;
+      csvName = 'Jobs';
+      title = "Job";
     }
 
-    // const {t} = useTranslation();
-    
     return (
-      <Row id="visualizations">
-        
+      <Row
+        id="visualizations"
+        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`}
+      >
         <Col md={12}>
           <Card>
             <CardBody>
@@ -859,22 +1021,18 @@ class ReportsComparison extends Component {
                       <Button
                         outline
                         onClick={() => this.exportToPDF()}
-                        >Export chart as PDF &nbsp; 
+                      >Export chart as PDF &nbsp;
                         <span className="lnr lnr-cloud-download" />
                       </Button>
                     </ButtonGroup>
                     <ButtonGroup className="btn-group--icons">
-                      <CSVLink data={dataToPrint} filename={`Report_${StringGenerator.getDateString()}.csv`}>
+                      <CSVLink data={dataToPrint} filename={`Report_${csvName}_${StringGenerator.getDateString()}.csv`}>
                         <Button
                           outline
-                        >Export data as CSV &nbsp; 
+                        >Export data as CSV &nbsp;
                           <span className="lnr lnr-chart-bars" />
                         </Button>
                       </CSVLink>
-                      {/*
-                      <Button outline><span className="lnr lnr-heart-pulse" /></Button>
-                      <Button outline><span className="lnr lnr-cog" /></Button>
-                      <Button outline><span className="lnr lnr-magic-wand" /></Button> */}
                     </ButtonGroup>
                   </ButtonToolbar>
                 </Col>
@@ -934,7 +1092,7 @@ class ReportsComparison extends Component {
                           this.toggle('1');
                         }}
                       >
-                        Materials 
+                        Materials
                       </NavLink>
                     </NavItem>
                     <NavItem>
@@ -945,7 +1103,7 @@ class ReportsComparison extends Component {
                         }}
                       >
                         {
-                          (companyType === 'Customer') 
+                          (companyType === 'Customer')
                             ? 'Carrier' : 'Producers'
                         }
                       </NavLink>
@@ -960,21 +1118,29 @@ class ReportsComparison extends Component {
                         Jobs
                       </NavLink>
                     </NavItem>
+                    <NavItem>
+                      &nbsp;
+                    </NavItem>
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
                       <div style={{ width: '100%', height: '400px' }}>
-                        {this.renderChart(chartType, products)}
+                        {this.renderChart(chartType, products, title)}
                       </div>
                     </TabPane>
                     <TabPane tabId="2">
                       <div style={{ width: '100%', height: '400px' }}>
-                        {this.renderChart(chartType, carriers)}
+                        {this.renderChart(chartType, carriers, title)}
                       </div>
                     </TabPane>
                     <TabPane tabId="3">
                       <div style={{ width: '100%', height: '400px' }}>
-                        {this.renderChart(chartType, projects)}
+                        {this.renderChart(chartType, projects, title)}
+                      </div>
+                    </TabPane>
+                    <TabPane tabId="4">
+                      <div className="pdf_loading_tab">
+                        &nbsp;One moment, please...
                       </div>
                     </TabPane>
                   </TabContent>
@@ -986,8 +1152,8 @@ class ReportsComparison extends Component {
                 autoHeightMin={0}
                 autoHeightMax={800}
                 // disableVerticalScrolling
-                >
-                <div className="ag-theme-balham gridTable" data-html2canvas-ignore="true">
+              >
+                <div className="ag-theme-balham gridTable">
                   {
                     this.renderTable(
                       columnsToRender,
@@ -996,13 +1162,13 @@ class ReportsComparison extends Component {
                       this.onGridReadyCarriers
                     )
                   }
-                </div>                
+                </div>
               </Scrollbars>
             </CardBody>
           </Card>
         </Col>
       </Row>
-      
+
     );
   }
 
@@ -1033,17 +1199,18 @@ class ReportsComparison extends Component {
   }
 
   render() {
-    const { loaded, page, rows, companyType } = this.state;
+    const { loaded, page, rows, companyType, showComparison, activeTab } = this.state;
 
     if (loaded) {
-      
+
       return (
         <Container className="dashboard">
+          {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           <FilterComparisonReport
             type={companyType}
-            showComparison
+            showComparison={showComparison}
             ref="filterChild"
             onReturnFilters={this.returnFilters}
             // returnProducers={this.returnProducers}
@@ -1055,6 +1222,7 @@ class ReportsComparison extends Component {
             }}
             page={page}
             rows={rows}
+            activeTab={activeTab}
           />
           {this.renderVisualizations()}
         </Container>

@@ -68,7 +68,7 @@ class TMapGeneralLive extends Component {
   }
 
   async getLatestGPSForLoad() {
-    const { profileType, profileCompanyId } = this.props;
+    const { profileType, profileCompanyId, onTrucksLoaded } = this.props;
     let gpsTrackings = [];
 
     if (profileType === 'Carrier') {
@@ -84,7 +84,7 @@ class TMapGeneralLive extends Component {
       // if customer
       /*
       all jobs with an open shift and that are working for
-      the customer’s company -linked by the
+      the customerâ€™s company -linked by the
       customerSchedulerCompanyId from loads
       */
       // console.log('This is a Customer', profileCompanyId);
@@ -102,6 +102,8 @@ class TMapGeneralLive extends Component {
         gps.lastName
       );
     }
+
+    onTrucksLoaded(gpsTrackings.length);
 
     // set zoom and margin
     if (gpsTrackings.length > 0) {
@@ -188,20 +190,22 @@ TMapGeneralLive.propTypes = {
     lng: PropTypes.number
   }),
   profileType: PropTypes.string,
-  profileCompanyId: PropTypes.number
+  profileCompanyId: PropTypes.number,
+  onTrucksLoaded: PropTypes.func
 };
 
 TMapGeneralLive.defaultProps = {
   // id: '1',
   width: 400,
   height: 400,
-  zoom: 10,
+  zoom: 4,
   center: {
-    lat: 30.274983,
-    lng: -97.739604
+    lat: 39.850033,
+    lng: -87.6500523
   },
   profileType: null,
-  profileCompanyId: null
+  profileCompanyId: null,
+  onTrucksLoaded: null
 };
 
 export default TMapGeneralLive;

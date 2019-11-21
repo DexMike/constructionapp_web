@@ -44,7 +44,7 @@ function decimalFormatter(params) {
 function dateComparator(date1, date2) {
   if (date1 > date2) {
     return 1;
-  } 
+  }
   if (date1 < date2) {
     return -1;
   }
@@ -103,22 +103,22 @@ const columnsJobs = [
         width: 110
       }, {
         field: 'totalJobs',
-        headerName: 'Total',
+        headerName: 'Total Jobs',
         headerTooltip: 'Total number of Jobs',
         comparator: numberComparator,
         filter: 'agNumberColumnFilter',
         valueFormatter: numberFormatter,
-        width: 75
+        width: 110
       }, {
         field: 'totalLoads',
-        headerName: 'Loads',
+        headerName: 'Total Loads',
         headerTooltip: '# of loads on that day',
         filter: true,
         sortable: true,
         // comparator: numberComparator,
         // valueFormatter: numberFormatter,
         // filter: 'agNumberColumnFilter',
-        width: 75
+        width: 110
       }, {
         field: 'rateTon',
         headerName: 'Rate per Ton',
