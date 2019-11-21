@@ -135,7 +135,6 @@ class ReportsDailyReportPage extends Component {
 
       goToDashboard: false,
       goToUpdateJob: false,
-      // profile: null
       // Rate Type Button toggle
       filters: {
         status: ''
@@ -368,7 +367,9 @@ class ReportsDailyReportPage extends Component {
 
   async getJob(date) {
     try {
-      const jobsDate = await JobService.getJobsByDate(date);
+      const jobsDate = await JobService.getJobsByDate(
+        date
+      );
       this.setState({
         jobsDate
       }, function done() {
