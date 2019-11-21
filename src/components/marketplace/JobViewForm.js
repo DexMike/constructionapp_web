@@ -20,6 +20,8 @@ import ProfileService from '../../api/ProfileService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import TFormat from '../common/TFormat';
 import CompanyService from '../../api/CompanyService';
+import RatesDeliveryService from '../../api/RatesDeliveryService';
+import CompanySettingsService from '../../api/CompanySettingsService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import TSpinner from '../common/TSpinner';
@@ -44,7 +46,9 @@ class JobViewForm extends Component {
       modalCancelRequest: false,
       selectedDrivers: [],
       accessForbidden: false,
-      modalLiability: false
+      modalLiability: false,
+      trelarFees: 0,
+      producerBillingType: ''
     };
     this.closeNow = this.closeNow.bind(this);
     this.saveJob = this.saveJob.bind(this);
@@ -63,7 +67,9 @@ class JobViewForm extends Component {
       booking,
       profile,
       favoriteCompany,
-      selectedDrivers
+      selectedDrivers,
+      producerBillingType,
+      trelarFees
     } = this.state;
     const { jobId } = this.props;
 
@@ -87,7 +93,7 @@ class JobViewForm extends Component {
       if (profile.companyType === 'Carrier') {
         companyCarrier = await CompanyService.getCompanyById(profile.companyId);
       }
-      company = await CompanyService.getCompanyById(job.companiesId);
+      company = await CompanyService.getCompanyById(job.companiesId); // Producer
       startAddress = await AddressService.getAddressById(job.startAddress);
       endAddress = null;
       if (job.endAddress) {
@@ -114,6 +120,23 @@ class JobViewForm extends Component {
       allTruckTypes = await JobService.getMaterialsByJobId(job.id);
       if (allTruckTypes.length > 0) {
         allTruckTypes = allTruckTypes.join(', ');
+      }
+
+      const producerCompanySettings = await CompanySettingsService.getCompanySettings(company.id);
+      if (producerCompanySettings && producerCompanySettings.length > 0) {
+        producerBillingType = producerCompanySettings.filter(obj => obj.key === 'billingType');
+        producerBillingType = producerBillingType[0].value;
+      }
+
+      const companyRates = {
+        companyId: company.id,
+        rate: job.rate,
+        rateEstimate: job.rateEstimate
+      };
+      try {
+        trelarFees = await RatesDeliveryService.calculateTrelarFee(companyRates);
+      } catch (err) {
+        console.error(err);
       }
 
       bids = await BidService.getBidsByJobId(job.id);
@@ -162,6 +185,8 @@ class JobViewForm extends Component {
       profile,
       favoriteCompany,
       selectedDrivers,
+      trelarFees,
+      producerBillingType,
       loaded: true
     });
   }
@@ -333,7 +358,9 @@ class JobViewForm extends Component {
       companyName,
       favoriteCompany,
       profile,
-      btnSubmitting
+      btnSubmitting,
+      trelarFees,
+      producerBillingType
     } = this.state;
     const companyProducer = company;
     let showModalButton;
@@ -421,9 +448,20 @@ class JobViewForm extends Component {
                 .format('dddd, MMMM Do')}
             </h3>
             <p>
-              Estimated Income: {TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)}
+              Potential Earnings:&nbsp;
+              {
+                (
+                  producerBillingType === 'Excluded'
+                ) ? TFormat.asMoneyByRate(job.rateType, job.rate, job.rateEstimate)
+                  : TFormat.asMoneyByRate(job.rateType, job.rate - trelarFees.perTonPerHourFee, job.rateEstimate)
+              }
               <br/>
-              Rate: ${job.rate} / {job.rateType}
+              Rate: {
+                (
+                  producerBillingType === 'Excluded'
+                ) ? TFormat.asMoney(job.rate)
+                  : TFormat.asMoney(job.rate - trelarFees.perTonPerHourFee)
+              } / {job.rateType}
               <br/>
               Estimated - {job.rateEstimate} {job.rateType}(s)
             </p>
