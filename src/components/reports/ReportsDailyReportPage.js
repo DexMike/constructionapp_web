@@ -42,7 +42,7 @@ import ProfileService from '../../api/ProfileService';
 import './Reports.css';
 import ReportsDailyReportsColumns from './ReportsDailyReportsColumns';
 
-import JobDate from '../jobs/JobDate';
+import ReportsJobPopup from './ReportsJobPopup';
 
 
 function bracketsFormatter(params) {
@@ -215,14 +215,6 @@ class ReportsDailyReportPage extends Component {
     return newObj;
   }
 
-  async fetchJobsInfo() {
-    const { profile } = this.state;
-    const response = await JobService.getCarrierJobsInfo(profile.companyId);
-    const jobsInfo = response.data;
-    const { totalJobs } = response;
-    this.setState({ totalJobs, jobsInfo });
-  }
-
   returnFilters(jobs, loads, filters/*, metadata*/) {
     const totalCount = 0;
     this.setState({
@@ -380,6 +372,14 @@ class ReportsDailyReportPage extends Component {
     }
   }
 
+  async fetchJobsInfo() {
+    const { profile } = this.state;
+    const response = await JobService.getCarrierJobsInfo(profile.companyId);
+    const jobsInfo = response.data;
+    const { totalJobs } = response;
+    this.setState({ totalJobs, jobsInfo });
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -523,7 +523,7 @@ class ReportsDailyReportPage extends Component {
       <React.Fragment>
         <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
-            <JobDate
+            <ReportsJobPopup
               jobsDate={jobsDate}
               bid={null}
               handlePageClick={this.handlePageClick}
