@@ -847,7 +847,7 @@ class JobForm extends Component {
               <span>Avg Tons / Load:&nbsp;
                 <span>
                   {
-                    tonnage ? tonnage : 0
+                    tonnage || 0
                   }
                 </span>
               </span>
