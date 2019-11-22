@@ -38,7 +38,7 @@
 
 .allocate-modal .modal-content{
   text-align: left;
-  max-width: 1000px !important;
+  max-width: 1200px !important;
   width: 1000px !important;
 }
 
@@ -68,13 +68,18 @@
 .status-modal .modal-footer {
   display: inline-block;
 }
+
+.reports-modal-job .modal-dialog{
+  width: 90% !important;
+}
+
 .close {
   display: none;
 }
 
 /* Modal Job by Date*/
 .gridTableDateJob {
-  width: auto;
+  width: 1230px;
   background-color: whitesmoke !important;
   border-color: #dfdfdf;
   border-width: 4px;

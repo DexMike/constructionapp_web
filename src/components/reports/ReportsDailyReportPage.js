@@ -42,7 +42,7 @@ import ProfileService from '../../api/ProfileService';
 import './Reports.css';
 import ReportsDailyReportsColumns from './ReportsDailyReportsColumns';
 
-import JobDate from '../jobs/JobDate';
+import ReportsJobPopup from './ReportsJobPopup';
 
 
 function bracketsFormatter(params) {
@@ -135,7 +135,6 @@ class ReportsDailyReportPage extends Component {
 
       goToDashboard: false,
       goToUpdateJob: false,
-      // profile: null
       // Rate Type Button toggle
       filters: {
         status: ''
@@ -214,14 +213,6 @@ class ReportsDailyReportPage extends Component {
       newObj.headerTooltip = 'Carrier of Producer';
     }
     return newObj;
-  }
-
-  async fetchJobsInfo() {
-    const { profile } = this.state;
-    const response = await JobService.getCarrierJobsInfo(profile.companyId);
-    const jobsInfo = response.data;
-    const { totalJobs } = response;
-    this.setState({ totalJobs, jobsInfo });
   }
 
   returnFilters(jobs, loads, filters/*, metadata*/) {
@@ -322,7 +313,7 @@ class ReportsDailyReportPage extends Component {
       'Rate per Ton': formatter.format(d.rateTon),
       'Cost per Day': formatter.format(d.avgRevenuePerDay),
       'Total Tons Hauled': Number(d.totalTonsHauled),
-      'Job Duration': Number(d.avgJobTime),
+      'Job Duration': TFormat.asMinutesToDHms(d.avgJobTime),
       'Distance (mi)': Number(d.realDistance),
       //'Rate: $/Hour': d.rateHour
       /*,
@@ -368,7 +359,9 @@ class ReportsDailyReportPage extends Component {
 
   async getJob(date) {
     try {
-      const jobsDate = await JobService.getJobsByDate(date);
+      const jobsDate = await JobService.getJobsByDate(
+        date
+      );
       this.setState({
         jobsDate
       }, function done() {
@@ -377,6 +370,14 @@ class ReportsDailyReportPage extends Component {
     } catch (e) {
       console.log('ERROR: ', e);
     }
+  }
+
+  async fetchJobsInfo() {
+    const { profile } = this.state;
+    const response = await JobService.getCarrierJobsInfo(profile.companyId);
+    const jobsInfo = response.data;
+    const { totalJobs } = response;
+    this.setState({ totalJobs, jobsInfo });
   }
 
   renderGoTo() {
@@ -522,7 +523,7 @@ class ReportsDailyReportPage extends Component {
       <React.Fragment>
         <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
-            <JobDate
+            <ReportsJobPopup
               jobsDate={jobsDate}
               bid={null}
               handlePageClick={this.handlePageClick}

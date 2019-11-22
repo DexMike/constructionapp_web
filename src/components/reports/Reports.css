@@ -192,8 +192,12 @@
   background-color: #9A9A9A !important;
 }
 
+.reports-modal-job .modal-dialog{
+  width: 90% !important;
+}
+
 .reports-modal-job .modal-content{
-  width: 900px!important;
+  width: 900px !important;
   background-color: #e5e5e0;
 }
 

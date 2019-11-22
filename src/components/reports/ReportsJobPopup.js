@@ -1,8 +1,31 @@
 import React, { Component } from 'react';
-import './jobs.css';
+import '../jobs/jobs.css';
 import { AgGridReact } from 'ag-grid-react';
+import moment from 'moment';
+import { Scrollbars } from 'react-custom-scrollbars';
+import TFormat from '../common/TFormat';
 
-class JobDate extends Component {
+function dateFormatter(date) {
+  const dateClean = date.value / 1000;
+  return moment.unix(dateClean).format('MMMM Do, YYYY h:mm:ss A');
+}
+
+function currencyFormatter(params) {
+  if (params) {
+    return TFormat.currencyFormatter(params.value);
+  }
+  return '$ 0.00';
+}
+
+function distanceFormatter(params) {
+  console.log('TCL: distanceFormatter -> params', params.value);
+  if (params.value !== null) {
+    return `${params.value} miles`;
+  }
+  return '0 miles';
+}
+
+class ReportsJobPopup extends Component {
   constructor(props) {
     super(props);
 
@@ -32,6 +55,13 @@ class JobDate extends Component {
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
+          field: 'materials',
+          headerName: 'Materials',
+          headerTooltip: 'Materials Hauled',
+          width: 160,
+          cellStyle: { 'text-align': 'center'},
+          sort: 'desc'
+        }, {
           field: 'status',
           headerName: 'Status',
           headerTooltip: 'Job Status',
@@ -40,26 +70,37 @@ class JobDate extends Component {
           filter: true,
           sortable: true
         }, {
+          field: 'avgDistance',
+          headerName: 'Distance',
+          headerTooltip: 'Travel Distance',
+          width: 90,
+          cellStyle: { 'text-align': 'center'},
+          filter: true,
+          sortable: true,
+          valueFormatter: distanceFormatter
+        }, {
           field: 'startTime',
           headerName: 'Start Time',
           headerTooltip: 'Start Time',
-          width: 145,
+          width: 225,
           cellStyle: { 'text-align': 'center'},
           filter: true,
-          sortable: true
+          sortable: true,
+          valueFormatter: dateFormatter
         }, {
           field: 'endTime',
           headerName: 'End Time',
           headerTooltip: 'End Time',
-          width: 145,
+          width: 225,
           cellStyle: { 'text-align': 'center'},
           filter: true,
-          sortable: true
+          sortable: true,
+          valueFormatter: dateFormatter
         }, {
           field: 'rateType',
           headerName: 'Rate Type',
           headerTooltip: 'Rate Type',
-          width: 130,
+          width: 105,
           cellStyle: { 'text-align': 'center'},
           filter: true,
           sortable: true
@@ -67,21 +108,22 @@ class JobDate extends Component {
           field: 'rate',
           headerName: 'Rate',
           headerTooltip: 'Rate',
-          width: 130,
+          width: 80,
           cellStyle: { 'text-align': 'center'},
           filter: true,
-          sortable: true
+          sortable: true,
+          valueFormatter: currencyFormatter
         }
       ]
     };
     // Binds
     this.onGridReadyJobs = this.onGridReadyJobs.bind(this);
   }
-  
+
   async componentDidMount() {
     const { jobsDate } = this.props;
   }
-  
+
   componentWillReceiveProps(nextProps) {
     const { job } = this.props;
     if (nextProps.job !== job) {
@@ -93,35 +135,42 @@ class JobDate extends Component {
     this.gridApiJobs = params.api;
     this.gridColumnApi = params.columnApi;
   }
-  
+
   render() {
     const { columnsJobs, defaultColumnDef } = this.state;
     const { jobsDate } = this.props;
+    console.log('TCL: ReportsJobPopup -> render -> jobsDate', jobsDate);
     return (
       <div className="dashboard">
         <h3 className="tittleModalDateJob">
           <span>Jobs per Day</span>
         </h3>
-        <div
-          id="dateJobsGrid"
-          className="ag-theme-balham gridTableDateJob"
-          data-html2canvas-ignore="true"
+        <Scrollbars
+          autoHeight
+          autoHeightMin={0}
+          autoHeightMax={800}
         >
-          <AgGridReact
-            columnDefs={columnsJobs}
-            defaultColDef={defaultColumnDef}
-            rowData={jobsDate}
-            // floatingFilter={true}
-            onGridReady={this.onGridReadyJobs}
-            paginationAutoPageSize
-            pagination
-            domLayout="print"
-            style={{ width: '1800px' }}
-          />
-        </div>
+          <div
+            id="dateJobsGrid"
+            className="ag-theme-balham gridTableDateJob"
+            data-html2canvas-ignore="true"
+          >
+            <AgGridReact
+              columnDefs={columnsJobs}
+              defaultColDef={defaultColumnDef}
+              rowData={jobsDate}
+              // floatingFilter={true}
+              onGridReady={this.onGridReadyJobs}
+              paginationAutoPageSize
+              pagination
+              domLayout="print"
+              style={{ width: '2100px' }}
+            />
+          </div>
+        </Scrollbars>
       </div>
     );
   }
 }
 
-export default JobDate;
+export default ReportsJobPopup;
