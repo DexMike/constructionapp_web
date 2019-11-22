@@ -333,7 +333,7 @@ class DashboardCustomerPage extends Component {
         if (newJob.status === 'Published And Offered') {
           // publishedJobCount += 1;
           onOfferJobCount += newJob.countJobs;
-          publishedJobCount += newJob.countJobs;
+          // publishedJobCount += newJob.countJobs;
         }
         if (newJob.status === 'Booked') {
           // publishedJobCount += 1;

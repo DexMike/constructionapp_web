@@ -27,13 +27,13 @@ class LoadsTable extends Component {
     if (!isExpanded) {
       this.setState({
         expandedLoad: 0
-      }, function loaded() {
+      }, () => {
         expandedRow(0);
       });
     } else {
       this.setState({
         expandedLoad: rowId
-      }, function loaded() {
+      }, () => {
         expandedRow(rowId);
       });
     }
@@ -83,7 +83,7 @@ class LoadsTable extends Component {
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Rate</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Total Cost</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Status</TableCell>
-              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Ticket Number</TableCell>            
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Ticket Number</TableCell>
             </TableRow>
           </TableHead>
           {loads && (

@@ -2,19 +2,21 @@ import React, {Component} from 'react';
 import * as PropTypes from 'prop-types';
 import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
+import truckImg from '../../img/icons8-truck-30.png';
 import GeoUtils from '../../utils/GeoUtils';
 import MapService from '../../api/MapService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 
 // this reduces the results times the number specified
-const reducer = 10; // one tenth
-const maxPointsThreshold = 400;
+const reducer = 20; // one twenieth
+const maxPointsThreshold = 1000;
 
 class TMapGPS extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loadedText: 'Loading route'
+      loadedText: 'Loading route',
+      gpsPointsPresent: false
     };
 
     this.platform = new H.service.Platform({
@@ -28,13 +30,13 @@ class TMapGPS extends Component {
     this.behavior = null;
     this.ui = null;
     this.boundingBoxDistance = 0;
-
-    // this.calculateRouteFromAtoB = this.calculateRouteFromAtoB.bind(this);
-    this.calculateRouteGPS = this.calculateRouteGPS.bind(this);
+    this.onRouteSuccess = this.onRouteSuccess.bind(this);
+    this.onRouteSuccessRecommended = this.onRouteSuccessRecommended.bind(this);
     this.addRouteShapeToMap = this.addRouteShapeToMap.bind(this);
     this.addMarkersToMap = this.addMarkersToMap.bind(this);
     this.reducer = this.reducer.bind(this);
-    this.setMarkers = this.setMarkers.bind(this);
+    this.arragePoints = this.arragePoints.bind(this);
+    this.addRouteShapeToMapRecommended = this.addRouteShapeToMapRecommended.bind(this);
   }
 
   async componentDidMount() {
@@ -59,60 +61,195 @@ class TMapGPS extends Component {
     this.ui = H.ui.UI.createDefault(this.mapGPS, defaultLayers);
 
     if (loadId) {
-      // await this.calculateRouteGPS(); // this queries here.com for the api route
       await this.getRouteGPS(); // this one draws the points directly from gps_trackings
+      this.calculateRouteFromAtoB(true); // this one draws the recommended route
     }
+  }
+
+  onRouteSuccess(result) {
+    const { gpsPointsPresent } = this.state;
+    const wps = this.arragePoints(result);
+    if (wps.length > 2) {
+      this.addRouteShapeToMap({
+        shape: wps
+      });
+      // if no points were obtained from GPS, draw markers
+      if (!gpsPointsPresent) {
+        this.setMarkersSimple();
+      }
+    }
+  }
+
+  onRouteSuccessRecommended(result) {
+    const { gpsPointsPresent } = this.state;
+    const wps = this.arragePoints(result);
+    if (wps.length >= 2) {
+      this.addRouteShapeToMapRecommended({
+        shape: wps
+      });
+      // if points were obtained from GPS, draw markers
+      if (gpsPointsPresent) {
+        this.setMarkersSimple();
+      }
+    }
+  }
+
+  onRouteError(error) {
+    console.error(error);
   }
 
   async getRouteGPS() {
-    const { loadId } = this.props;
+    const { loadId, loadStatus } = this.props;
 
-    let distanceInfo = [];
     let wps = [];
     // instead of getting the info here, we will query the backend
     try {
-      distanceInfo = await GPSTrackingService.getGPSTrackingByLoadId(loadId);
+      wps = await GPSTrackingService.getGPSTrackingByLoadId(loadId);
     } catch (e) {
       console.log('ERROR: ', e);
     }
-    /*
-    for (const wp of distanceInfo) {
-      let newWp = '';
-      // newWp = `${wp[1]},${wp[0]}`;
-      wps.push(newWp);
+    if (wps.length > maxPointsThreshold) {
+      wps = this.reducer(wps);
     }
-    */
-    if (distanceInfo.length > maxPointsThreshold) {
-      distanceInfo = this.reducer(distanceInfo);
-    }
-    this.setMarkers(distanceInfo);
-  }
-
-  setMarkers(distanceInfo) {
-    // markers
-    if (distanceInfo.length > 1) {
-      const start = distanceInfo[0];
-      const end = distanceInfo.pop();
-      const startAddress = {
-        latitude: start[0],
-        longitude: start[1]
-      };
-      const endAddress = {
-        latitude: end[0],
-        longitude: end[1]
-      };
-      this.addMarkersToMap(startAddress, endAddress);
+    // this.setMarkers(distanceInfo);
+    if (wps.length >= 2) {
+      this.addRouteShapeToMap({
+        shape: wps
+      }, true);
       this.setState({
-        loadedText: ''
+        gpsPointsPresent: true
       });
 
-      try {
-        this.addRouteShapeToMap({
-          shape: distanceInfo
+      // since we have GPS positions, let's draw a little truck
+      // in the final one, provided the status is not 'ended'
+      if (loadStatus !== 'Ended' || loadStatus !== 'Job Ended') {
+        this.addTruckMarker({
+          latitude: wps.pop()[0],
+          longitude: wps.pop()[1]
         });
-      } catch (e) {
-        console.log('TCL: ERROR_>', e);
       }
+    }
+  }
+
+  setMarkersSimple() {
+    const { startAddress, endAddress } = this.props;
+    this.addMarkersToMap(startAddress, endAddress);
+    this.setState({
+      loadedText: ''
+    });
+  }
+
+  setInsideBounds(polyline) {
+    try {
+      const bounds = polyline.getBoundingBox();
+      this.mapGPS.getViewModel().setLookAtData({
+        bounds: GeoUtils.setZoomBounds(bounds)
+      });
+    } catch (e) {
+      console.log('MAP ERROR: ', e);
+    }
+  }
+
+  /**
+   * Creates a H.map.Polyline from the shape of the route and adds it to the map.
+   * @param {Object} route A route as received from the H.service.RoutingService
+   */
+  addRouteShapeToMapRecommended(route) {
+    const { gpsPointsPresent } = this.state;
+    const lineString = new H.geo.LineString();
+    const routeShape = route.shape;
+
+    routeShape.forEach((point) => {
+      lineString.pushLatLngAlt(point[0], point[1]);
+    });
+
+    const polyline = new H.map.Polyline(lineString, {
+      style: {
+        lineWidth: 4,
+        strokeColor: 'rgb(0, 201, 151)'
+      }
+    });
+
+    this.mapGPS.addObject(polyline);
+
+    if (!gpsPointsPresent) {
+      this.setInsideBounds(polyline);
+    }
+  }
+
+  /**
+   * Creates a H.map.Polyline from the shape of the route and adds it to the map.
+   * @param {Object} route A route as received from the H.service.RoutingService
+   */
+  addRouteShapeToMap(route, center) {
+    const lineString = new H.geo.LineString();
+    const routeShape = route.shape;
+    const lineStringReturn = new H.geo.LineString();
+    let returnPointsCount = 0;
+
+    routeShape.forEach((point) => {
+      if (point[2] === 0) {
+        lineString.pushLatLngAlt(point[0], point[1]);
+      } else {
+        lineStringReturn.pushLatLngAlt(point[0], point[1]);
+        returnPointsCount += 1;
+      }
+    });
+
+    const polyline = new H.map.Polyline(lineString, {
+      style: {
+        lineWidth: 2,
+        strokeColor: 'rgb(0, 111, 83)'
+      }
+    });
+
+    // Draw return line, if we have points
+    if (returnPointsCount > 2) {
+      const polylineHalf = new H.map.Polyline(lineStringReturn, {
+        style: {
+          lineWidth: 2,
+          strokeColor: 'rgb(45, 140, 200)'
+        }
+      });
+      this.mapGPS.addObject(polylineHalf);
+    }
+
+    // Add the polyline to the map
+    this.mapGPS.addObject(polyline);
+
+    if (center) {
+      this.setInsideBounds(polyline);
+    }
+  }
+
+  calculateRouteFromAtoB(recommended) {
+    const {startAddress, endAddress} = this.props;
+    const router = this.platform.getRoutingService();
+    const routeRequestParams = {
+      mode: 'balanced;truck;traffic:disabled;motorway:0',
+      representation: 'display',
+      routeattributes: 'waypoints,summary,shape,legs,incidents',
+      maneuverattributes: 'direction,action',
+      truckType: 'tractorTruck',
+      limitedWeight: 700,
+      metricSystem: 'imperial',
+      language: 'en-us', // en-us|es-es|de-de
+      waypoint0: `${startAddress.latitude},${startAddress.longitude}`,
+      waypoint1: `${endAddress.latitude},${endAddress.longitude}`
+    };
+
+    if (recommended) {
+      router.calculateRoute(
+        routeRequestParams,
+        this.onRouteSuccessRecommended,
+        this.onRouteError
+      );
+    } else {
+      router.calculateRoute(
+        routeRequestParams,
+        this.onRouteSuccess,
+        this.onRouteError
+      );
     }
   }
 
@@ -125,86 +262,18 @@ class TMapGPS extends Component {
       }
       reducerCount += 1;
     }
-    // console.log('TCL: Total REDUCED -> wps', reduced.length, reduced);
     return reduced;
   }
 
-  async calculateRouteGPS() {
-    const { loadId } = this.props;
-
-    let distanceInfo = [];
-    let wps = [];
-    // instead of getting the info here, we will query the backend
-    try {
-      distanceInfo = await MapService.getDistanceForFleet(loadId);
-    } catch (e) {
-      console.log('ERROR: ', e);
-    }
-
-    for (const wp of distanceInfo.waypoints) {
-      let newWp = '';
-      /*
-      if (wp.mappedPosition.latitude === 0 || wp.mappedPosition.longitude === 0) {
-        newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
-      } else {
-        newWp = `${wp.mappedPosition.latitude},${wp.mappedPosition.longitude}`;
-      }
-      */
-      // use only original
-      newWp = `${wp.originalPosition.latitude},${wp.originalPosition.longitude}`;
+  arragePoints(result) {
+    const route = result.response.route[0];
+    const wps = [];
+    for (const wp of route.shape) {
+      const wpoint = wp.split(',');
+      const newWp = [wpoint[0], wpoint[1], 0];
       wps.push(newWp);
     }
-
-    if (wps.length > maxPointsThreshold) {
-      wps = this.reducer(wps);
-    }
-    this.setMarkers(wps);
-  }
-
-  /**
-   * Creates a H.map.Polyline from the shape of the route and adds it to the map.
-   * @param {Object} route A route as received from the H.service.RoutingService
-   */
-  addRouteShapeToMap(route) {
-    const lineString = new H.geo.LineString();
-    const routeShape = route.shape;
-    const lineStringReturn = new H.geo.LineString();
-
-    routeShape.forEach((point) => {
-      lineString.pushLatLngAlt(point[0], point[1]);
-      
-      // Return route
-      if (point[2] === 1) {
-        lineStringReturn.pushLatLngAlt(point[0], point[1]);
-      }
-    });
-
-    const polyline = new H.map.Polyline(lineString, {
-      style: {
-        lineWidth: 2,
-        strokeColor: 'rgb(0, 111, 83)'
-      }
-    });
-    // Return poliline
-    const polylineHalf = new H.map.Polyline(lineStringReturn, {
-      style: {
-        lineWidth: 2,
-        strokeColor: 'rgb(45, 140, 200)'
-      }
-    });
-
-    // Add the polyline to the map
-    this.mapGPS.addObject(polyline);
-    const bounds = polyline.getBoundingBox();
-    const newBounds = GeoUtils.setZoomBounds(bounds);
-
-    // Add the return polyline to the map
-    this.mapGPS.addObject(polylineHalf);
-
-    // And zoom to its bounding rectangle
-    this.mapGPS.getViewModel().setLookAtData({
-      newBounds
-    });
+    return wps;
   }
 
   addMarkersToMap(startAddress, endAddress) {
@@ -220,11 +289,28 @@ class TMapGPS extends Component {
     const group = new H.map.Group();
     group.addObjects([markerA, markerB]);
     this.mapGPS.addObject(group);
-    const bounds = group.getBoundingBox(); // H.geo.Rect
-    // And zoom to its bounding rectangle
-    this.mapGPS.getViewModel().setLookAtData({
-      bounds: GeoUtils.setZoomBounds(bounds)
-    });
+  }
+
+  addTruckMarker(truckPosition) {
+    // const {startAddress, endAddress} = this.props;
+    const truck = new H.map.Icon(
+      `${window.location.origin}/${truckImg}`,
+      {
+        size: { w: 30, h: 30 }
+        // anchor: { x: -15, y: -15 }
+      }
+    );
+
+    const marker = new H.map.Marker(
+      {
+        lat: truckPosition.latitude, lng: truckPosition.longitude
+      },
+      { zIndex: 0, icon: truck }
+    );
+
+    const groupTruck = new H.map.Group();
+    groupTruck.addObjects([marker]);
+    this.mapGPS.addObject(groupTruck);
   }
 
   renderLoader() {
@@ -264,6 +350,7 @@ TMapGPS.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   zoom: PropTypes.number,
   loadId: PropTypes.number,
+  loadStatus: PropTypes.string,
   center: PropTypes.shape({
     lat: PropTypes.number,
     lng: PropTypes.number
@@ -284,6 +371,7 @@ TMapGPS.defaultProps = {
   height: 400,
   zoom: 10,
   loadId: 0,
+  loadStatus: null,
   center: null,
   startAddress: null,
   endAddress: null

@@ -71,7 +71,6 @@ class TCharts extends PureComponent {
       data, type, visType, profile, compEnabled, title
     } = this.props;
     const compToggled = !compEnabled;
-    // console.log('TCL: compToggled', compToggled);
 
     // PIE CHART data massaging
     const style = {

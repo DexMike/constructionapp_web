@@ -6,6 +6,10 @@
   top: 6px !important;
 }
 
+.sidebar--collapse .top_title {
+  top: 20px !important;
+}
+
 .reports {
   padding-top: 0px !important;
 }

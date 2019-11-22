@@ -323,8 +323,8 @@ class DailyReportFilter extends Component {
     Object.values(lookupMaterialTypeList)
       .forEach((itm) => {
         materialTypeList.push(itm.val1);
-         });
-     
+      });
+
     const materialTypes = materialTypeList.map(materialType => ({
       // id: id
       name: 'materialType',
@@ -733,7 +733,7 @@ class DailyReportFilter extends Component {
       materialTypeList,
       rateTypeList,
       intervals,
-      
+
       statesTypeList,
       statusTypeList,
       companiesTypelist,
@@ -756,7 +756,7 @@ class DailyReportFilter extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form">
-                {/*Row 1: Company, State, Zip, Range 
+                {/*Row 1: Company, State, Zip, Range
 
                 <div className="flex-daily-report-container-1">
                   <div className="filter-item" id="companySelect">

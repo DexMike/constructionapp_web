@@ -1,5 +1,6 @@
 import { Auth } from 'aws-amplify';
 import React, { Component } from 'react';
+import {withTranslation} from 'react-i18next';
 import {
   Button,
   Col,
@@ -771,6 +772,8 @@ class UserSettings extends Component {
   }
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const { user, admin } = this.props;
     const {
       firstName,
@@ -909,7 +912,7 @@ class UserSettings extends Component {
           <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
-                <span><Trans>Address #1</Trans></span>
+                <span><Trans>{translate('Address 1')}</Trans></span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -917,14 +920,14 @@ class UserSettings extends Component {
                     value: address1,
                     disabled: !admin
                   }}
-                  placeholder="Address 1"
+                  placeholder={translate('Address 2')}
                   type="text"
                   meta={reqHandlerAddress}
                 />
               </Col>
               <Col md={12} className="pt-2">
                 <span>
-                  <Trans>Address #2</Trans>
+                  <Trans>{translate('Address 2')}</Trans>
                 </span>
                 <TField
                   input={{
@@ -933,7 +936,7 @@ class UserSettings extends Component {
                     value: address2,
                     disabled: !admin
                   }}
-                  placeholder="Address 2"
+                  placeholder={translate('Address 2')}
                   type="text"
                 />
               </Col>
@@ -1104,4 +1107,4 @@ UserSettings.defaultProps = {
   admin: false
 };
 
-export default UserSettings;
+export default withTranslation()(UserSettings);

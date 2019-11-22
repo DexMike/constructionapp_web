@@ -460,7 +460,7 @@ class DriverForm extends Component {
                 onClick={this.saveUser}
                 className="primaryButton"
                 loading={btnSubmitting}
-                // loaderSize={10}
+                loaderSize={10}
                 bntText={driverId && userStatus !== 'Driver Invited' ? t('Update') : t('Send Invite')}
               />
             </Col>
