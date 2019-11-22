@@ -313,7 +313,7 @@ class ReportsDailyReportPage extends Component {
       'Rate per Ton': formatter.format(d.rateTon),
       'Cost per Day': formatter.format(d.avgRevenuePerDay),
       'Total Tons Hauled': Number(d.totalTonsHauled),
-      'Job Duration': Number(d.avgJobTime),
+      'Job Duration': TFormat.asMinutesToDHms(d.avgJobTime),
       'Distance (mi)': Number(d.realDistance),
       //'Rate: $/Hour': d.rateHour
       /*,
