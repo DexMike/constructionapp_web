@@ -12,6 +12,7 @@ import MatTableHead from './materialTable/MatTableHead';
 // import MatTableToolbar from './materialTable/MatTableToolbar';
 // import TableHead from '@material-ui/core/TableHead';
 import truckImage from '../../img/default_truck.png';
+import TSpinner from './TSpinner';
 
 class TTable extends Component {
   constructor(props) {
@@ -220,7 +221,8 @@ class TTable extends Component {
       // handleIdClick,
       totalCount,
       // handleSelectAllClick,
-      isSelectable
+      isSelectable,
+      isLoading
     } = this.props;
     const emptyRows = 0;
     // const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - (page * rowsPerPage));
@@ -230,6 +232,23 @@ class TTable extends Component {
           <CardBody>
             <div className="material-table__wrap">
               <Table className="material-table">
+                {
+                  isLoading && (
+                    <div className="ttable-spinner">
+                      <div
+                        style={{
+                          position: 'relative',
+                          top: '50%',
+                          transform: 'translateY(-50%)'
+                        }}
+                      >
+                        <TSpinner
+                          loading
+                        />
+                      </div>
+                    </div>
+                  )
+                }
                 <MatTableHead
                   columns={columns}
                   numSelected={selected.length}
@@ -322,7 +341,8 @@ TTable.propTypes = {
         PropTypes.number
       ])
     })
-  )
+  ),
+  isLoading: PropTypes.bool
 };
 
 TTable.defaultProps = {
@@ -333,7 +353,8 @@ TTable.defaultProps = {
   selected: [],
   onSelect: () => {},
   isSelectable: false,
-  omitFromSelect: []
+  omitFromSelect: [],
+  isLoading: false
 };
 
 export default TTable;

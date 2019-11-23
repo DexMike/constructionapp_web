@@ -90,7 +90,8 @@ class EquipmentDetails extends PureComponent {
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerMaxCapacity: { touched: false, error: '' },
       reqHandlerExternalEquipmentNumber: { touched: false, error: ''},
-      loaded: false
+      loaded: false,
+      isLoading: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -349,10 +350,12 @@ class EquipmentDetails extends PureComponent {
   }
 
   async save() {
+    this.setState({ isLoading: true });
     const isFormValid = await this.isFormValid();
     if (!isFormValid) {
+      this.setState({ isLoading: false });
       return;
-    }
+    }    
     const { selectedMaterials } = this.state;
     const { toggle } = this.props;
     const equipment = this.setUpdatedEquipment();
@@ -360,9 +363,10 @@ class EquipmentDetails extends PureComponent {
       await EquipmentService.updateEquipment(equipment);
       await EquipmentMaterialsService
         .createAllEquipmentMaterials(selectedMaterials, equipment.id);
+      this.setState({ isLoading: false });
       toggle();
     } catch (e) {
-      // console.log(e);
+      this.setState({ isLoading: false });
     }
   }
 
@@ -523,7 +527,8 @@ class EquipmentDetails extends PureComponent {
       reqHandlerExternalEquipmentNumber,
       loaded,
       defaultDriver,
-      companyDrivers
+      companyDrivers,
+      isLoading
     } = this.state;
     const { toggle, t } = this.props;
     const translate = t;
@@ -784,8 +789,21 @@ class EquipmentDetails extends PureComponent {
                 {/*<Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.archiveTruck()}>*/}
                 {/*  Delete*/}
                 {/*</Button>*/}
-                <Button type="submit" className="primaryButton" disabled={imageUploading} onClick={() => this.save()}>
-                  {t('Save')}
+                <Button
+                  type="submit"
+                  className="primaryButton"
+                  disabled={imageUploading || isLoading}
+                  onClick={() => this.save()}
+                >
+                  {
+                    isLoading ? (
+                      <TSpinner
+                        color="#808080"
+                        loaderSize={10}
+                        loading
+                      />
+                    ) : t('Save')
+                  }
                 </Button>
               </ButtonToolbar>
             </Row>
@@ -794,7 +812,7 @@ class EquipmentDetails extends PureComponent {
       );
     }
     return (
-      <Col md={12}>
+      <Col md={12} className="text-center">
         <Card style={{ paddingBottom: 0 }}>
           <CardBody>
             <Row className="col-md-12"><TSpinner loading /></Row>
