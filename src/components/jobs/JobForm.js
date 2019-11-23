@@ -309,8 +309,6 @@ class JobForm extends Component {
     const {allocatedTrucksModal} = this.state;
     this.setState({
       allocatedTrucksModal: !allocatedTrucksModal
-    }, () => {
-      console.log('>>>CHANGED: ', allocatedTrucksModal);
     });
   }
 
