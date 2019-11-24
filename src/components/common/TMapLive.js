@@ -106,7 +106,6 @@ class TMapLive extends Component {
     // on ly get if there is one load or more
     if (allLoads.length > 0) {
       const gpsTrackings = await LoadsService.getLatestGPSForLoads(allLoads);
-      console.log('TCL: TMapLive -> getLatestGPSForLoad -> gpsTrackings', gpsTrackings);
       this.map.addObject(groupTrackings);
 
       for (const gps of gpsTrackings) {
