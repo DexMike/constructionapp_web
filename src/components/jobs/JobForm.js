@@ -1048,9 +1048,6 @@ class JobForm extends Component {
         </Container>
       );
     }
-    console.log('>>>SHOULDNT GET HERE!!!');
-    return false;
-    /*
     // TODO -> Verify if we really need the lines below
     return (
       <Container>
@@ -1107,7 +1104,6 @@ class JobForm extends Component {
         </Card>
       </Container>
     );
-    */
   }
 
   renderLoader() {
