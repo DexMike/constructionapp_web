@@ -262,7 +262,6 @@ class TMapLive extends Component {
       const that = this;
       const timerTimer = function timerTimer() {
         count += 1;
-        console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
         that.getLatestGPSForLoad();
       };
       timerVar = setInterval(timerTimer, (refreshInterval * 1000));

@@ -126,7 +126,10 @@ class TMapGPS extends Component {
       // Before drawing the truck, let's make sure that the shift has not ended.
       const isShiftOn = await LoadService.isShiftOn(loadId);
 
-      if (loadStatus !== 'Ended' && isShiftOn) {
+      if (
+        (loadStatus !== 'Ended' || loadStatus !== 'Submitted')
+           && isShiftOn
+      ) {
         this.addTruckMarker({
           latitude: wps.pop()[0],
           longitude: wps.pop()[1]
