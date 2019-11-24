@@ -11,6 +11,7 @@ import {
 } from 'reactstrap';
 import { Redirect } from 'react-router-dom';
 import classnames from 'classnames';
+import {withTranslation, Trans} from 'react-i18next';
 import './Settings.css';
 
 import CompanyProfile from './CompanyProfile';
@@ -133,6 +134,8 @@ class CompanySettingsPage extends Component {
 
   renderTabs() {
     const { activeTab, user, company, address, isAdmin, profile } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <div>
         <Nav tabs>
@@ -141,7 +144,7 @@ class CompanySettingsPage extends Component {
               className={classnames({ active: activeTab === '1' }, 'tab')}
               onClick={() => { this.toggle('1'); }}
             >
-              <div className="navLink">Profile</div>
+              <div className="navLink">{translate('Profile')}</div>
             </NavLink>
           </NavItem>
           {
@@ -151,7 +154,7 @@ class CompanySettingsPage extends Component {
                   className={classnames({ active: activeTab === '2' }, 'tab')}
                   onClick={() => { this.toggle('2'); }}
                 >
-                  Notifications
+                  {translate('Notifications')}
                 </NavLink>
               </NavItem>
             ) : null
@@ -161,7 +164,7 @@ class CompanySettingsPage extends Component {
               className={classnames({ active: activeTab === '3' }, 'tab')}
               onClick={() => { this.toggle('3'); }}
             >
-              Payment Method
+              {translate('Payment Method')}
             </NavLink>
           </NavItem>
           <NavItem>
@@ -169,7 +172,7 @@ class CompanySettingsPage extends Component {
               className={classnames({ active: activeTab === '4' }, 'tab')}
               onClick={() => { this.toggle('4'); }}
             >
-              Attachments
+              {translate('Attachments')}
             </NavLink>
           </NavItem>
           <NavItem>
@@ -177,7 +180,7 @@ class CompanySettingsPage extends Component {
               className={classnames({ active: activeTab === '5' }, 'tab')}
               onClick={() => { this.toggle('5'); }}
             >
-              Insurance
+              {translate('Insurance')}
             </NavLink>
           </NavItem>
         </Nav>
@@ -244,6 +247,8 @@ class CompanySettingsPage extends Component {
 
   render() {
     const { loaded, title, isAdmin } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     if (isAdmin === false && this.mounted) {
       return <Redirect to="/settings" />;
     }
@@ -252,7 +257,7 @@ class CompanySettingsPage extends Component {
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Company Settings / {title}</h3>
+              <h3 className="page-title">{translate('Company Settings')} / {translate(title)}</h3>
             </Col>
           </Row>
           <Row>
@@ -267,7 +272,7 @@ class CompanySettingsPage extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Company Settings</h3>
+            <h3 className="page-title">{translate('Company Settings')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -276,4 +281,4 @@ class CompanySettingsPage extends Component {
   }
 }
 
-export default CompanySettingsPage;
+export default withTranslation()(CompanySettingsPage);

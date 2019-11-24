@@ -354,7 +354,7 @@ class CompanyProfile extends Component {
       return true;
     }
     this.setState({ loading: false });
-    return false;    
+    return false;
   }
 
   async saveCompany() {
@@ -432,13 +432,13 @@ class CompanyProfile extends Component {
                     !error ? (
                       <span style={{ width: '70%' }}>
                         <span className="lnr lnr-checkmark-circle"/>
-                        &nbsp;Company Updated!
+                        &nbsp;{t('Company Updated')}!
                       </span>
                     ) : (
                       <span style={{ width: '70%' }}>
                         <span className="lnr lnr-cross-circle"/>
-                        &nbsp;Error!
-                        &nbsp;The information couldn&apos;t be saved. Please try again...
+                        &nbsp;{t('Error')}!
+                        &nbsp;{t("The information couldn't be saved")}. {t('Please try again')}...
                       </span>
                     )
                   }
@@ -456,7 +456,7 @@ class CompanyProfile extends Component {
           <Col md={12}>&nbsp;</Col>
           <Col md={6}>
             <span>
-              Company Name
+              {translate('Company Name')}
             </span>
             <TField
               className="settings-input"
@@ -465,14 +465,14 @@ class CompanyProfile extends Component {
                 name: 'legalName',
                 value: legalName
               }}
-              placeholder="Company Name"
+              placeholder={translate('Company Name')}
               type="text"
               meta={reqHandlerLegalName}
             />
           </Col>
           <Col md={6}>
             <span>
-              Website
+              {translate('Website')}
             </span>
             <TField
               input={{
@@ -480,7 +480,7 @@ class CompanyProfile extends Component {
                 name: 'url',
                 value: url
               }}
-              placeholder="Website"
+              placeholder={translate('Website')}
               type="text"
             />
           </Col>
@@ -488,7 +488,7 @@ class CompanyProfile extends Component {
         <Row className="pt-2">
           <Col md={6}>
             <span>
-              Phone Number
+              {translate('Phone number')}
             </span>
             <TField
               input={{
@@ -496,7 +496,7 @@ class CompanyProfile extends Component {
                 name: 'phone',
                 value: phone
               }}
-              placeholder="Phone number"
+              placeholder={translate('Phone number')}
               type="text"
               meta={reqHandlerPhone}
             />
@@ -518,7 +518,7 @@ class CompanyProfile extends Component {
         </Row>
         <Row className="pt-2">
           <Col md={6}>
-            <span>DOT Number:</span>
+            <span>{translate('DOT Number')}</span>
             <TField
               input={{
                 value: dotNumber,
@@ -531,7 +531,7 @@ class CompanyProfile extends Component {
         </Row>
         <Row className="pt-4 pl-3 pr-3">
           <Col md={12} className="separator">
-            <span className="sub-header">Company Address</span>
+            <span className="sub-header">{translate('Company Address')}</span>
           </Col>
         </Row>
         <Row>
@@ -566,7 +566,7 @@ class CompanyProfile extends Component {
               </Col>
               <Col md={6} className="pt-2">
                 <span>
-                  City
+                  {translate('City')}
                 </span>
                 <TField
                   input={{
@@ -581,7 +581,7 @@ class CompanyProfile extends Component {
               </Col>
               <Col md={3} className="pt-2">
                 <span>
-                  State
+                  {translate('State')}
                 </span>
                 <TSelect
                   input={
@@ -592,12 +592,12 @@ class CompanyProfile extends Component {
                     }
                   }
                   options={countryStates}
-                  placeholder="State"
+                  placeholder={translate('State')}
                 />
               </Col>
               <Col md={3} className="pt-2">
                 <span>
-                  Zip Code
+                  {translate('Zip Code')}
                 </span>
                 <TField
                   input={{
@@ -605,7 +605,7 @@ class CompanyProfile extends Component {
                     name: 'zipCode',
                     value: zipCode
                   }}
-                  placeholder="Zip Code"
+                  placeholder={translate('Zip Code')}
                   type="text"
                   meta={reqHandlerZip}
                 />
@@ -639,7 +639,7 @@ class CompanyProfile extends Component {
           <Col md={12} className="pt-4 text-right">
             <Link to="/">
               <Button className="mr-2">
-              Cancel
+                {translate('Cancel')}
               </Button>
             </Link>
             <Button
@@ -654,7 +654,7 @@ class CompanyProfile extends Component {
                     loaderSize={10}
                     loading
                   />
-                ) : 'Save'
+                ) : translate('Save')
               }
             </Button>
           </Col>
