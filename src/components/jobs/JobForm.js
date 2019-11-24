@@ -785,7 +785,9 @@ class JobForm extends Component {
                   <br/>
                   <span>Load Tonnage Delivered: <span>{tonsDelivered}</span></span>
                   <br/>
-                  <span>Tons Remaining: <span>{total - tonsDelivered}</span></span>
+                  <span>Tons Remaining:
+                    <span>{TFormat.asMoney(total - tonsDelivered)}</span>
+                  </span>
                   <br/>
                   <span>% Completed:&nbsp;
                     <span>
@@ -932,6 +934,37 @@ class JobForm extends Component {
     );
   }
 
+  renderMap(job) {
+    if (job.status === 'In Progress') {
+      return (
+        <React.Fragment>
+          <TMapLive
+            id={`job${job.id}`}
+            width="100%"
+            height="100%"
+            startAddress={job.startAddress}
+            endAddress={job.endAddress}
+            loads={this.getLoads}
+          />
+        </React.Fragment>
+      );
+    }
+    if (job.status === 'Job Ended' || job.status === 'Job Completed') {
+      return (
+        <React.Fragment>
+          <TMap
+            id={`job${job.id}`}
+            width="100%"
+            height="100%"
+            startAddress={job.startAddress}
+            endAddress={job.endAddress}
+          />
+        </React.Fragment>
+      );
+    }
+    return false;
+  }
+
   renderEverything() {
     const {
       images,
@@ -978,6 +1011,7 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
+                  {/*
                   <TMap
                     id={`job${job.id}`}
                     width="100%"
@@ -985,6 +1019,8 @@ class JobForm extends Component {
                     startAddress={job.startAddress}
                     endAddress={job.endAddress}
                   />
+                  */}
+                  {this.renderMap(job)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -1012,56 +1048,10 @@ class JobForm extends Component {
         </Container>
       );
     }
-    if (job.status === 'In Progress') {
-      return (
-        <Container>
-          <Card>
-            <CardBody className="card-full-height">
-              <Row>
-                {this.renderJobTop(job)}
-              </Row>
-              <hr/>
-              <Row style={{
-                paddingLeft: '10px',
-                paddingRight: '10px'
-              }}
-              >
-                <div className="col-md-8" style={{ padding: 0 }}>
-                  <TMapLive
-                    id={`job${job.id}`}
-                    width="100%"
-                    height="100%"
-                    startAddress={job.startAddress}
-                    endAddress={job.endAddress}
-                    loads={this.getLoads}
-                  />
-                </div>
-                <div className="col-md-4">
-                  <div className="row">
-                    <div className="col-md-12">
-                      {this.renderStartAddress(job.startAddress)}
-                    </div>
-                  </div>
-                  <div className="row mt-1">
-                    <div className="col-md-12">
-                      {endAddress}
-                    </div>
-                  </div>
-                  <div className="row mt-1">
-                    <div className="col-md-12">
-                      {this.renderJobBottom(job)}
-                    </div>
-                  </div>
-                </div>
-              </Row>
-              <hr/>
-              {this.renderLoads(loads, job)}
-            </CardBody>
-          </Card>
-        </Container>
-      );
-    }
-
+    console.log('>>>SHOULDNT GET HERE!!!');
+    return false;
+    /*
+    // TODO -> Verify if we really need the lines below
     return (
       <Container>
         <Card>
@@ -1117,6 +1107,7 @@ class JobForm extends Component {
         </Card>
       </Container>
     );
+    */
   }
 
   renderLoader() {

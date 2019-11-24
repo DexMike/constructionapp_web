@@ -106,6 +106,7 @@ class TMapLive extends Component {
     // on ly get if there is one load or more
     if (allLoads.length > 0) {
       const gpsTrackings = await LoadsService.getLatestGPSForLoads(allLoads);
+      console.log('TCL: TMapLive -> getLatestGPSForLoad -> gpsTrackings', gpsTrackings);
       this.map.addObject(groupTrackings);
 
       for (const gps of gpsTrackings) {
@@ -261,7 +262,7 @@ class TMapLive extends Component {
       const that = this;
       const timerTimer = function timerTimer() {
         count += 1;
-        // console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
+        console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
         that.getLatestGPSForLoad();
       };
       timerVar = setInterval(timerTimer, (refreshInterval * 1000));

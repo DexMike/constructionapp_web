@@ -78,8 +78,9 @@ class TMapGeneralLive extends Component {
       (independent of job). This is for ALL TRUCKS that
       are on a shift.
       */
-      // console.log('This is a Carrier', profileCompanyId);
-      gpsTrackings = await LoadsService.getLastGPSForCompanyId(profileCompanyId);
+      gpsTrackings = await LoadsService.getLastGPSForCompanyId(
+        profileCompanyId, 0
+      );
     } else if (profileType === 'Customer') {
       // if customer
       /*
@@ -87,8 +88,9 @@ class TMapGeneralLive extends Component {
       the customerâ€™s company -linked by the
       customerSchedulerCompanyId from loads
       */
-      // console.log('This is a Customer', profileCompanyId);
-      gpsTrackings = await LoadsService.getLastGPSForSchedulerCustomer(profileCompanyId);
+      gpsTrackings = await LoadsService.getLastGPSForSchedulerCustomer(
+        profileCompanyId, 0
+      );
     }
 
     this.map.addObject(groupTrackings);
