@@ -85,7 +85,8 @@ class DashboardCustomerPage extends Component {
       page: 0,
       rows: 10,
       totalCount: 10,
-      totalJobs: 0
+      totalJobs: 0,
+      isLoading: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -447,7 +448,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {profile, loaded, totalJobs, totalCount} = this.state;
+    const {profile, loaded, totalJobs, totalCount, isLoading} = this.state;
     const { t } = { ...this.props };
     const translate = t;
     let {jobs} = this.state;
@@ -617,6 +618,7 @@ class DashboardCustomerPage extends Component {
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
+                    isLoading={isLoading}
                   />
                 </CardBody>
               </Card>
@@ -660,6 +662,7 @@ class DashboardCustomerPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
+            isLoading={(e) => this.setState({isLoading: e})}  
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}

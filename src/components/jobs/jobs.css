@@ -89,6 +89,18 @@
   font-size: 12px !important;
 }
 
+/* Modal for Truck's list on Job's detail page*/
+.gridTableTruckList {
+  width: auto;
+  background-color: whitesmoke !important;
+  border-color: #dfdfdf;
+  border-width: 4px;
+  border-radius: 2px;
+  margin: 15px 15px 0;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 12px !important;
+}
+
 .tittleModalDateJob{
   background: #006f53;
   border-color: #006f53;

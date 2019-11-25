@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import TSpinner from '../common/TSpinner';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
@@ -253,6 +254,10 @@ class JobFilter extends Component {
   async fetchJobs() {
     const {lastZipCode, companyZipCode, filters, reqHandlerZip} = this.state;
     let {company, address, profile} = this.state;
+    const { isLoading } = this.props;
+    if (isLoading) {
+      isLoading(true);
+    }
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
     if (!profile || Object.keys(profile).length === 0) {
@@ -333,6 +338,9 @@ class JobFilter extends Component {
     const {returnJobs} = this.props;
     returnJobs(jobs, filters, metadata);
     this.setState({lastZipCode: filters.zipCode});
+    if (isLoading) {
+      isLoading(false);
+    }
     return jobs;
   }
 
@@ -742,9 +750,17 @@ class JobFilter extends Component {
       );
     }
     return (
-      <React.Fragment>
-        Loading...
-      </React.Fragment>
+      <Row>
+        <Col md={12} className="text-center">
+          <Card>
+            <CardBody>
+              <TSpinner
+                loading
+              />
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
     );
   }
 }
