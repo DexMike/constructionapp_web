@@ -190,7 +190,7 @@
   "Select a truck type(s)": "Seleccione tipos de camiones",
   "ANY_QUANTITY": "Cualquier cantidad",
   "Change Password": "Cambiar contraseña",
-  "Company Settings": "Ajustes de compañia",
+  "Company Settings": "Ajustes de compañía",
   "Profile": "Perfil",
   "Payment Method": "Método de pago",
   "Attachments": "Archivos adjuntos",
@@ -201,7 +201,7 @@
   "DOT Number": "Número de DOT",
   "Company Updated": "Compañía actualizada",
   "The information couldn't be saved": "La información no se pudo guardar",
-  "Please try again": "Por favor intentelo de nuevo",
+  "Please try again": "Por favor inténtelo de nuevo",
   "Insurance Settings": "Ajustes de Seguro",
   "General Liability": "Responsabilidad general",
   "Minimum General Liability": "Responsabilidad general mínima",
@@ -249,6 +249,6 @@
   "We were unable to verify your account information, please update with the correct banking info or contact Trelar support":
   "No pudimos verificar la información de su cuenta, actualícela con la información bancaria correcta o comuníquese con el soporte de Trelar",
   "Congrats! Your account was approved for ACH debits. You can start using Trelar now.": 
-  "¡Felicidades! Su cuenta fue aprobada para débitos ACH. Puedes comenzar a usar Trelar ahora.",
+  "¡Felicidades! Su cuenta fue aprobada para débitos ACH. Puede comenzar a usar Trelar ahora.",
   "User Updated": "Usuario Actualizado"
 }
