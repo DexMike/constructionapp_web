@@ -64,7 +64,8 @@ class DashboardCarrierPage extends Component {
       rows: 10,
       totalCount: 10,
       totalJobs: 0,
-      defaultDriverPrompt: false
+      defaultDriverPrompt: false,
+      isLoading: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -106,7 +107,6 @@ class DashboardCarrierPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
-
     this.setState({
       jobs,
       filters,
@@ -450,7 +450,7 @@ class DashboardCarrierPage extends Component {
     );
 
     if (loaded) {
-      const { filters, totalCount, totalJobs} = this.state;
+      const { filters, totalCount, totalJobs, isLoading} = this.state;
       return (
         <Container className="dashboard">
           <Row>
@@ -521,6 +521,7 @@ class DashboardCarrierPage extends Component {
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
+                    isLoading={isLoading}
                   />
                 </CardBody>
               </Card>
@@ -562,6 +563,7 @@ class DashboardCarrierPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
+            isLoading={(e) => this.setState({isLoading: e})}           
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}

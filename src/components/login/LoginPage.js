@@ -16,12 +16,12 @@ import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
 import UtilsService from '../../api/UtilsService';
-import LoginLogService from '../../api/LoginLogService';
+// import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 import ProfileService from '../../api/ProfileService';
-import CompanyService from '../../api/CompanyService';
-import UserManagementService from "../../api/UserManagementService";
+// import CompanyService from '../../api/CompanyService';
+import UserManagementService from '../../api/UserManagementService';
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -47,7 +47,7 @@ class LoginPage extends SignIn {
       btnSubmitting: false, // Used by TSubmitButton
       userUnderReview: false,
       isDriver: false,
-      ip: '',
+      // ip: '',
       browserVersion: [],
       screenSize: []
     };
@@ -107,21 +107,21 @@ class LoginPage extends SignIn {
     await UserService.updateUser(user);
   }
 
-  async createLoginLog(state) {
-    const log = {
-      attemptedUsername: this.state.username,
-      attemptedPassword: !state ? this.state.password : null,
-      ipAddress: this.state.ip,
-      browserType: this.state.browserVersion.name,
-      browserVersion: this.state.browserVersion.version,
-      screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
-      createdBy: 1,
-      createdOn: moment.utc().format(),
-      modifiedBy: 1,
-      modifiedOn: moment.utc().format()
-    };
-    await LoginLogService.createLoginLog(log);
-  }
+  // async createLoginLog(state) {
+  //   const log = {
+  //     attemptedUsername: this.state.username,
+  //     attemptedPassword: !state ? this.state.password : null,
+  //     ipAddress: this.state.ip,
+  //     browserType: this.state.browserVersion.name,
+  //     browserVersion: this.state.browserVersion.version,
+  //     screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
+  //     createdBy: 1,
+  //     createdOn: moment.utc().format(),
+  //     modifiedBy: 1,
+  //     modifiedOn: moment.utc().format()
+  //   };
+  //   await LoginLogService.createLoginLog(log);
+  // }
 
   async onSignIn() {
     let { username } = this.state;
@@ -157,7 +157,8 @@ class LoginPage extends SignIn {
 
       const userSignIn = await UserManagementService.signIn({email: username, password});
       if (userSignIn.success) {
-        const profile = await ProfileService.getProfilePreLogin(userSignIn.accessToken, userSignIn.idToken);
+        const profile = await ProfileService
+          .getProfilePreLogin(userSignIn.accessToken, userSignIn.idToken);
         if (profile.companyType === 'Carrier' && !profile.isAdmin) {
           this.setState({isDriver: true});
           return;
@@ -184,19 +185,19 @@ class LoginPage extends SignIn {
           return;
         }
       }
-      let ip = '';
-      try {
-        const ipAddress = await UtilsService.getUserIP();
-        ({ ip } = ipAddress);
-      } catch (e) {
-        // console.log(e);
-      }
+      // let ip = '';
+      // try {
+      //   const ipAddress = await UtilsService.getUserIP();
+      //   ({ ip } = ipAddress);
+      // } catch (e) {
+      //   // console.log(e);
+      // }
       const browserVersion = await UtilsService.getBrowserVersion();
       const screenSize = await UtilsService.getScreenDimentions();
 
       this.setState({
         //  settingsLoaded: true,
-        ip,
+        // ip,
         browserVersion,
         screenSize
       });
@@ -397,7 +398,7 @@ class LoginPage extends SignIn {
             />
           </Col>
           <Col className="text-right">
-            <div className="app-link" onClick={this.onResetPassword} style={{marginRight: -40}}>
+            <div aria-hidden="true" className="app-link" onClick={this.onResetPassword} style={{marginRight: -40}}>
               Forgot Password?
             </div>
           </Col>
