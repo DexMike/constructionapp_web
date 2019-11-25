@@ -6,6 +6,7 @@ import {
   Row
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
+import {withTranslation} from 'react-i18next';
 import moment from 'moment';
 import CloneDeep from 'lodash.clonedeep';
 import { Link } from 'react-router-dom';
@@ -192,7 +193,8 @@ class InsuranceSettings extends Component {
   }
 
   render() {
-    const { profile } = this.props;
+    const { profile, t } = this.props;
+    const translate = t;
     const {
       liabilityGeneral,
       liabilityAuto,
@@ -208,7 +210,7 @@ class InsuranceSettings extends Component {
         <Row className="tab-content-header">
           <Col md={12}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              Insurance Settings
+              {t('Insurance Settings')}
             </span>
           </Col>
         </Row>
@@ -216,7 +218,7 @@ class InsuranceSettings extends Component {
           <Col md={12}>&nbsp;</Col>
           <Col md={6}>
             <span>
-              {profile.companyType !== 'Carrier' ? 'Minimum ' : ''}General Liability
+              {profile.companyType !== 'Carrier' ? t('Minimum General Liability') : t('General Liability')}
             </span>
             <TField
               className="settings-input"
@@ -226,7 +228,7 @@ class InsuranceSettings extends Component {
                 value: liabilityGeneral,
                 disabled: true
               }}
-              placeholder="General Liability"
+              placeholder={t('General Liability')}
               type="text"
               meta={reqHandlerGeneral}
               readonly
@@ -234,7 +236,7 @@ class InsuranceSettings extends Component {
           </Col>
           <Col md={6}>
             <span>
-              {profile.companyType !== 'Carrier' ? 'Minimum ' : ''}Auto Liability
+              {profile.companyType !== 'Carrier' ? t('Minimum Auto Liability') : t('Auto Liability')}
             </span>
             <TField
               input={{
@@ -243,7 +245,7 @@ class InsuranceSettings extends Component {
                 value: liabilityAuto,
                 disabled: true
               }}
-              placeholder="Auto Liability"
+              placeholder={t('Auto Liability')}
               type="text"
               meta={reqHandlerAuto}
             />
@@ -252,7 +254,7 @@ class InsuranceSettings extends Component {
         <Row className="pt-2">
           <Col md={6}>
             <span>
-              {profile.companyType !== 'Carrier' ? 'Minimum ' : ''}Other Liability
+              {profile.companyType !== 'Carrier' ? t('Other Minimum Liability') : t('Other Liability')}
             </span>
             <TField
               input={{
@@ -261,13 +263,13 @@ class InsuranceSettings extends Component {
                 value: liabilityOther,
                 disabled: true
               }}
-              placeholder="Other Liability"
+              placeholder={t('Other Liability')}
               type="text"
               meta={reqHandlerOther}
             />
           </Col>
           <Col md={6}>
-            <span>Expiration Date:</span>
+            <span>{t('Expiration Date')}</span>
             <TDateTimePicker
               input={
                 {
@@ -311,4 +313,4 @@ InsuranceSettings.propTypes = {
 
 InsuranceSettings.defaultProps = {};
 
-export default InsuranceSettings;
+export default withTranslation()(InsuranceSettings);
