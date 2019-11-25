@@ -94,7 +94,7 @@ class JobAllocate extends Component {
     });
   }
 
-  async handleAllocateDrivers() {
+  async handleAllocateDrivers() {    
     const { booking, profile, job, t } = { ...this.props };
     const translate = t;
     const {
@@ -104,8 +104,10 @@ class JobAllocate extends Component {
       equipments,
       drivers
     } = { ...this.state };
+    this.setState({ btnSubmitting: true });
     const isValid = this.isFormValid();
     if (!isValid) {
+      this.setState({ btnSubmitting: false });
       return;
     }
     let newBookingEquipment = {
@@ -155,7 +157,8 @@ class JobAllocate extends Component {
     this.setState({
       bookingEquipments,
       selectableDrivers,
-      selectableEquipments
+      selectableEquipments,
+      btnSubmitting: true
     });
   }
 
