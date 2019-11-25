@@ -210,8 +210,10 @@ class LoadsExpandableRow extends Component {
         profile,
         job
       } = {...this.state};
-      let startCoords = job.startAddress;
-      let endCoords = job.endAddress;
+      const startCoords = job.startAddress;
+      const endCoords = job.endAddress;
+
+      /*
       // According to https://trelar.atlassian.net/browse/SG-930
       // if there are tracking points use those instead of job address.
       if (gpsTrackings && gpsTrackings.length && gpsTrackings.length > 0) {
@@ -224,17 +226,9 @@ class LoadsExpandableRow extends Component {
           longitude: gpsTrackings[gpsTrackings.length - 1][1]
         };
       }
-
-      // please do not delete code commented
-      /* startCoords = {
-        latitude: job.startAddress.latitude,
-        longitude: job.startAddress.longitude
-      };
-
-      endCoords = {
-        latitude: job.endAddress.latitude,
-        longitude: job.endAddress.longitude
-      }; */
+      */
+      // per https://trelar.atlassian.net/browse/SG-1391
+      // the start and end addresses shoul be the ones from the job
 
       const { isExpanded } = this.props;
       const startTime = (!load.startTime ? null : moment(new Date(load.startTime)).format('lll'));

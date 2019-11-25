@@ -4,8 +4,9 @@ import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
 import truckImg from '../../img/icons8-truck-30.png';
 import GeoUtils from '../../utils/GeoUtils';
-import MapService from '../../api/MapService';
+// import MapService from '../../api/MapService';
 import GPSTrackingService from '../../api/GPSTrackingService';
+import LoadService from '../../api/LoadService';
 
 // this reduces the results times the number specified
 const reducer = 20; // one twenieth
@@ -61,8 +62,8 @@ class TMapGPS extends Component {
     this.ui = H.ui.UI.createDefault(this.mapGPS, defaultLayers);
 
     if (loadId) {
-      await this.getRouteGPS(); // this one draws the points directly from gps_trackings
       this.calculateRouteFromAtoB(true); // this one draws the recommended route
+      await this.getRouteGPS(); // this one draws the points directly from gps_trackings
     }
   }
 
@@ -81,16 +82,16 @@ class TMapGPS extends Component {
   }
 
   onRouteSuccessRecommended(result) {
-    const { gpsPointsPresent } = this.state;
     const wps = this.arragePoints(result);
     if (wps.length >= 2) {
       this.addRouteShapeToMapRecommended({
         shape: wps
       });
-      // if points were obtained from GPS, draw markers
-      if (gpsPointsPresent) {
+      this.setState({
+        gpsPointsPresent: true
+      }, () => {
         this.setMarkersSimple();
-      }
+      });
     }
   }
 
@@ -121,8 +122,14 @@ class TMapGPS extends Component {
       });
 
       // since we have GPS positions, let's draw a little truck
-      // in the final one, provided the status is not 'ended'
-      if (loadStatus !== 'Ended' || loadStatus !== 'Job Ended') {
+      // in the final one, provided the status is not 'Ended'.
+      // Before drawing the truck, let's make sure that the shift has not ended.
+      const isShiftOn = await LoadService.isShiftOn(loadId);
+
+      if (
+        (loadStatus !== 'Ended' || loadStatus !== 'Submitted')
+           && isShiftOn
+      ) {
         this.addTruckMarker({
           latitude: wps.pop()[0],
           longitude: wps.pop()[1]
@@ -166,7 +173,7 @@ class TMapGPS extends Component {
     const polyline = new H.map.Polyline(lineString, {
       style: {
         lineWidth: 4,
-        strokeColor: 'rgb(0, 201, 151)'
+        strokeColor: 'rgba(0, 201, 151, 0.45)'
       }
     });
 

@@ -18,6 +18,11 @@ class LoadService extends AgentService {
     return (response);
   }
 
+  static async isShiftOn(loadId) {
+    const response = await this.get(`/shift${PATH}/${loadId}`);
+    return (response);
+  }
+
   static async getActiveDriversByBookingId(id) {
     const response = await this.get(`/bookings/${id}${PATH}/active_drivers`);
     return (response);
@@ -34,13 +39,17 @@ class LoadService extends AgentService {
     return (response);
   }
 
-  static async getLastGPSForCompanyId(companyId) {
-    const response = await this.get(`/company/${companyId}/gpstrackings${PATH}`);
+  static async getLastGPSForCompanyId(companyId, jobId) {
+    const response = await this.get(
+      `/company/${companyId}/job/${jobId}/gpstrackings${PATH}`
+    );
     return (response);
   }
 
-  static async getLastGPSForSchedulerCustomer(companyId) {
-    const response = await this.get(`/scheduler/${companyId}/gpstrackings${PATH}`);
+  static async getLastGPSForSchedulerCustomer(companyId, jobId) {
+    const response = await this.get(
+      `/scheduler/${companyId}/job/${jobId}/gpstrackings${PATH}`
+    );
     return (response);
   }
 
