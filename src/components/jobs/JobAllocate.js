@@ -25,7 +25,8 @@ class JobAllocate extends Component {
       selectedEquipment: null,
       selectedDriver: null,
       reqHandlerEquipment: { touched: false, error: '' },
-      reqHandlerDriver: { touched: false, error: '' }
+      reqHandlerDriver: { touched: false, error: '' },
+      isLoading: false
     };
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
     this.unAllocateDriver = this.unAllocateDriver.bind(this);
@@ -104,10 +105,10 @@ class JobAllocate extends Component {
       equipments,
       drivers
     } = { ...this.state };
-    this.setState({ btnSubmitting: true });
+    this.setState({ isLoading: true });
     const isValid = this.isFormValid();
     if (!isValid) {
-      this.setState({ btnSubmitting: false });
+      this.setState({ isLoading: false });
       return;
     }
     let newBookingEquipment = {
@@ -158,7 +159,7 @@ class JobAllocate extends Component {
       bookingEquipments,
       selectableDrivers,
       selectableEquipments,
-      btnSubmitting: true
+      isLoading: false
     });
   }
 
@@ -239,7 +240,7 @@ class JobAllocate extends Component {
     let reqHandlerEquipment = { touched: false };
     let reqHandlerDriver = { touched: false };
 
-    if (selectedEquipment === null) {
+    if (selectedEquipment == null) {
       reqHandlerEquipment = {
         touched: true,
         error: translate('Please select the truck')
@@ -247,7 +248,7 @@ class JobAllocate extends Component {
       isValid = false;
     }
 
-    if (selectedDriver === null) {
+    if (selectedDriver == null) {
       reqHandlerDriver = {
         touched: true,
         error: translate('Please select the driver')
@@ -271,7 +272,8 @@ class JobAllocate extends Component {
       selectableEquipments,
       selectableDrivers,
       reqHandlerEquipment,
-      reqHandlerDriver
+      reqHandlerDriver,
+      isLoading
     } = this.state;
     const { t } = { ...this.props };
     const translate = t;
@@ -341,7 +343,7 @@ class JobAllocate extends Component {
                   <TSubmitButton
                     onClick={this.handleAllocateDrivers}
                     className="primaryButton"
-                    loading={btnSubmitting}
+                    loading={isLoading}
                     loaderSize={10}
                     bntText="Save"
                   />
