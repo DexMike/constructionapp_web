@@ -65,7 +65,7 @@ class LoadsTable extends Component {
   }
 
   render() {
-    const {loads, job, expandedLoad} = {...this.state};
+    const {loads, job} = {...this.state};
     // debugger;
     return (
       <Paper style={{overflowX: 'auto'}}>
@@ -75,6 +75,7 @@ class LoadsTable extends Component {
             <TableRow>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Details</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Load</TableCell>
+              <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Truck #</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Driver Name</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>Start Time</TableCell>
               <TableCell align="left" style={{color: '#006F53', fontSize: 13}}>End Time</TableCell>

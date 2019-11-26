@@ -69,7 +69,6 @@ class JobFilter extends Component {
       companyZipCode: '',
       lastZipCode: '',
       loaded: false,
-      statusTypeList: [],
 
       // TODO: Refactor to a single filter object
       // Filter defaults
@@ -111,7 +110,6 @@ class JobFilter extends Component {
     this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
-    this.handleMultiStatusChange = this.handleMultiStatusChange.bind(this);
     this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
     this.getUTCEndInterval = this.getUTCEndInterval.bind(this);
     this.handleResetFilters = this.handleResetFilters.bind(this);
@@ -141,7 +139,7 @@ class JobFilter extends Component {
     }
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
-      console.log('>>GOT SAVED FILTERS:', filters);
+      // console.log('>>GOT SAVED FILTERS:', savedFilters);
     }
 
 
@@ -212,18 +210,10 @@ class JobFilter extends Component {
     return endDate;
   }
 
-  getValues(collection) {
-    const newCollection = [];
-    if (collection.length > 0) {
-      for (const item of collection) {
-        newCollection.push(item.value);
-      }
-    }
-    return newCollection;
-  }
-
   saveFilters() {
     const {filters} = {...this.state};
+    // don't save status
+    delete filters.status;
     localStorage.setItem('filters', JSON.stringify(filters));
   }
 
@@ -251,19 +241,12 @@ class JobFilter extends Component {
         rateTypeList.push(itm.val1);
       });
 
-    let statusTypeList = await LookupsService.getLookupsByType('JobStatus');
-    statusTypeList = statusTypeList.map(state => ({
-      value: String(state.val1),
-      label: state.val1
-    }));
-
     [filters.materials] = materialTypeList;
     [filters.rateType] = rateTypeList;
     this.setState({
       filters,
       equipmentTypeList,
       materialTypeList,
-      statusTypeList,
       rateTypeList
     });
   }
@@ -331,9 +314,6 @@ class JobFilter extends Component {
         });
       }
     }
-
-    // get statuses
-    filters.statuses = this.getValues(filters.statuses);
 
     let result = [];
 
@@ -498,31 +478,18 @@ class JobFilter extends Component {
     await this.fetchJobs();
   }
 
-  handleMultiStatusChange(data) {
-    const {filters} = this.state;
-    filters.statuses = data;
-    this.setState({
-      filters
-    }, async function changed() {
-      await this.fetchJobs();
-      this.saveFilters();
-    });
-  }
-
   async handleResetFilters() {
     const { filters, companyZipCode } = this.state;
     const resetFilters = filters;
     const resetIntervals = {
-      startInterval: moment().startOf('week').add(-1, 'weeks')
-        .hours(0)
-        .minutes(0)
-        .seconds(0)
-        .toDate(),
-      endInterval: moment().endOf('week').add(1, 'weeks')
-        .hours(23)
-        .minutes(59)
-        .seconds(59)
-        .toDate()
+      startInterval: moment().startOf('week').add(-1, 'weeks').hours(0)
+.minutes(0)
+.seconds(0)
+.toDate(),
+      endInterval: moment().endOf('week').add(1, 'weeks').hours(23)
+.minutes(59)
+.seconds(59)
+.toDate()
     };
     resetFilters.startAvailability = resetIntervals.startInterval;
     resetFilters.endAvailability = resetIntervals.endInterval;
@@ -560,17 +527,9 @@ class JobFilter extends Component {
       filters,
       reqHandlerZip,
       reqHandlerRange,
-      loaded,
-      statusTypeList
+      loaded
     } = this.state;
-
-    // if we have the dates saved locally, use those instead
-    if (localStorage.getItem('filters')) {
-      const savedFilters = JSON.parse(localStorage.getItem('filters'));
-      intervals.startInterval = new Date(savedFilters.startAvailability);
-      intervals.endInterval = new Date(savedFilters.endAvailability);
-    }
-
+    // let start = filters.startAvailability;
     if (loaded) {
       return (
         <Row>
@@ -688,7 +647,6 @@ class JobFilter extends Component {
                         selectedItems={filters.equipmentType}
                       />
                     </div>
-
                     <div>
                       <div className="filter-item-title">
                         # of Trucks
@@ -777,36 +735,7 @@ class JobFilter extends Component {
                   </div>
                   <Col lg={12} style={{background: '#F9F9F7', paddingTop: 8}}>
                     <Row>
-                      <Col lg={3}>
-                      //AQUI ME QEUDO EL DE STATUS DEBE SER UN SELECT SIMPLE NO MultiSelect
-                      // PARA NO ROMPER PLUTO
-                        <div className="filter-item-title">
-                          Status
-                        </div>
-                        <MultiSelect
-                          input={
-                            {
-                              onChange: this.handleMultiStatusChange,
-                              name: 'status',
-                              value: filters.statuses
-                            }
-                          }
-                          meta={
-                            {
-                              touched: false,
-                              error: 'Unable to select'
-                            }
-                          }
-                          options={statusTypeList}
-                          placeholder="Any"
-                          // placeholder={materialTypeList[0]}
-                          id="statusSelect"
-                          horizontalScroll="true"
-                          selectedItems={filters.materialType}
-                          value={filters.statuses}
-                        />
-                      </Col>
-                      <Col lg={6}/>
+                      <Col lg={9}/>
                       <Col lg={3}>
                         <ButtonToolbar className="wizard__toolbar right-buttons">
                           <Button className="btn btn-secondary"

@@ -262,6 +262,7 @@ class LoadsExpandableRow extends Component {
               </IconButton>
             </TableCell>
             <TableCell align="left">{index + 1}</TableCell>
+            <TableCell align="left">{load.truckNumber}</TableCell>
             <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
