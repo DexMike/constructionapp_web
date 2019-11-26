@@ -6,7 +6,7 @@ import * as PropTypes from 'prop-types';
 const override = css`
     display: inline-block;
     margin: 0 auto;
-    border-color: red;
+    border-color: #1C7F66;
 `;
 
 class TSpinner extends PureComponent {
