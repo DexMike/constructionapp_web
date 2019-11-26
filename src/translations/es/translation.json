@@ -250,5 +250,8 @@
   "No pudimos verificar la información de su cuenta, actualícela con la información bancaria correcta o comuníquese con el soporte de Trelar",
   "Congrats! Your account was approved for ACH debits. You can start using Trelar now.": 
   "¡Felicidades! Su cuenta fue aprobada para débitos ACH. Puede comenzar a usar Trelar ahora.",
-  "User Updated": "Usuario Actualizado"
+  "User Updated": "Usuario Actualizado",
+  "No Trucks are allocated to this job yet.": "Aún no hay camiones asignados a este trabajo.",
+  "Allocated Trucks": "Camiones asignados",
+  "See Allocated Trucks": "Ver los camiones asignados"
 }
