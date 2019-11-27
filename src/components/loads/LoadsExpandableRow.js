@@ -355,7 +355,7 @@ class LoadsExpandableRow extends Component {
                         fontSize: 22
                       }}
                       >
-                        Ticket Number: {load.ticketNumber}
+                        Driver: {!driver.id ? 'No driver assigned' : `${driver.firstName} ${driver.lastName}`}
                       </h3>
                     </Col>
                   </Row>

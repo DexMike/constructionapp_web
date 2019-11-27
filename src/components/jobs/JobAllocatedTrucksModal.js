@@ -25,22 +25,29 @@ class JobAllocatedTrucksModal extends Component {
       },
       columnsJobs: [
         {
+          field: 'externalEquipmentNumber',
+          rowGroupIndex: null,
+          headerName: t('Truck Number'),
+          // width: 160,
+          cellStyle: { 'text-align': 'center'},
+          sort: 'desc'
+        }, {
           field: 'name',
           rowGroupIndex: null,
           headerName: t('Name'),
-          // width: 160,
+          width: 180,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
           field: 'type',
           headerName: t('Type'),
-          // width: 160,
+          width: 120,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
           field: 'licensePlate',
           headerName: t('License Plate'),
-          // width: 160,
+          width: 150,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
