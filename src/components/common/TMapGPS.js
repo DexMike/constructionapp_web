@@ -11,6 +11,7 @@ import LoadService from '../../api/LoadService';
 // this reduces the results times the number specified
 const reducer = 20; // one twenieth
 const maxPointsThreshold = 1000;
+const waitBeforeRecommended = 1500;
 
 class TMapGPS extends Component {
   constructor(props) {
@@ -63,7 +64,13 @@ class TMapGPS extends Component {
 
     if (loadId) {
       this.calculateRouteFromAtoB(true); // this one draws the recommended route
-      await this.getRouteGPS(); // this one draws the points directly from gps_trackings
+
+      const that = this;
+      setTimeout(async () => {
+        // this one draws the points directly from gps_trackings
+        await that.getRouteGPS();
+        console.log('>>DRAWING...');
+      }, waitBeforeRecommended);
     }
   }
 
@@ -173,7 +180,7 @@ class TMapGPS extends Component {
     const polyline = new H.map.Polyline(lineString, {
       style: {
         lineWidth: 4,
-        strokeColor: 'rgba(0, 201, 151, 0.45)'
+        strokeColor: 'rgba(0, 201, 151, 0.6)'
       }
     });
 
@@ -205,8 +212,8 @@ class TMapGPS extends Component {
 
     const polyline = new H.map.Polyline(lineString, {
       style: {
-        lineWidth: 2,
-        strokeColor: 'rgb(0, 111, 83)'
+        lineWidth: 3,
+        strokeColor: 'rgba(0, 111, 83, 0.85)'
       }
     });
 
@@ -214,8 +221,8 @@ class TMapGPS extends Component {
     if (returnPointsCount > 2) {
       const polylineHalf = new H.map.Polyline(lineStringReturn, {
         style: {
-          lineWidth: 2,
-          strokeColor: 'rgb(45, 140, 200)'
+          lineWidth: 3,
+          strokeColor: 'rgba(45, 140, 200, 0.85)'
         }
       });
       this.mapGPS.addObject(polylineHalf);

@@ -4,10 +4,12 @@ import { AgGridReact } from 'ag-grid-react';
 // import moment from 'moment';
 // import { Scrollbars } from 'react-custom-scrollbars';
 // import TFormat from '../common/TFormat';
+import { withTranslation } from 'react-i18next';
 
 class JobAllocatedTrucksModal extends Component {
   constructor(props) {
     super(props);
+    const { t } = { ...this.props };
 
     this.state = {
       trucks: [],
@@ -23,27 +25,34 @@ class JobAllocatedTrucksModal extends Component {
       },
       columnsJobs: [
         {
+          field: 'externalEquipmentNumber',
+          rowGroupIndex: null,
+          headerName: t('Truck Number'),
+          // width: 160,
+          cellStyle: { 'text-align': 'center'},
+          sort: 'desc'
+        }, {
           field: 'name',
           rowGroupIndex: null,
-          headerName: 'Name',
-          // width: 160,
+          headerName: t('Name'),
+          width: 180,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
           field: 'type',
-          headerName: 'Type',
-          // width: 160,
+          headerName: t('Type'),
+          width: 120,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
           field: 'licensePlate',
-          headerName: 'License Plate',
-          // width: 160,
+          headerName: t('License Plate'),
+          width: 150,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
         }, {
           field: 'driver',
-          headerName: 'Driver',
+          headerName: t('Driver'),
           // width: 160,
           cellStyle: { 'text-align': 'center'},
           sort: 'desc'
@@ -66,12 +75,13 @@ class JobAllocatedTrucksModal extends Component {
 
   render() {
     const { columnsJobs, defaultColumnDef, trucks } = this.state;
+    const { t } = { ...this.props };
     return (
-      <div className="dashboard">
-        <h3 className="tittleModalDateJob">
-          <span>Trucks Allocated to this Job</span>
+      <div className="dashboard jobAllocatedTrcuksModal">
+        <h3 className="title">
+          <span>{t('Allocated Trucks')}</span>
         </h3>
-        { // no scrolbars neede for the moment but will use if we have more columns
+        { // no scrolbars needed for the moment but will use if we have more columns
           /*
           <Scrollbars
           autoHeight
@@ -103,4 +113,4 @@ class JobAllocatedTrucksModal extends Component {
   }
 }
 
-export default JobAllocatedTrucksModal;
+export default withTranslation()(JobAllocatedTrucksModal);

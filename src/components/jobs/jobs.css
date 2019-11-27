@@ -101,13 +101,19 @@
   font-size: 12px !important;
 }
 
-.tittleModalDateJob{
+.jobAllocatedTrcuksModal .title{
   background: #006f53;
   border-color: #006f53;
   width: 100%;
   height: 55px;
   display: flex;
-  text-align: center;
+  text-align: left;
+
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 14px !important;
+  padding: 14px;
+  padding-left: 17px;
+  color: white;
 }
 
 .tittleModalDateJob span{

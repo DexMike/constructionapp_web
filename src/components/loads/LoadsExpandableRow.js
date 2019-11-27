@@ -262,6 +262,7 @@ class LoadsExpandableRow extends Component {
               </IconButton>
             </TableCell>
             <TableCell align="left">{index + 1}</TableCell>
+            <TableCell align="left">{load.externalEquipmentNumber}</TableCell>
             <TableCell align="left">{!driver.id ? 'Not Available' : `${driver.firstName} ${driver.lastName}`}</TableCell>
             <TableCell align="left">{(!startTime ? 'Error creating load' : startTime)}</TableCell>
             <TableCell align="left"
@@ -354,7 +355,7 @@ class LoadsExpandableRow extends Component {
                         fontSize: 22
                       }}
                       >
-                        Ticket Number: {load.ticketNumber}
+                        Driver: {!driver.id ? 'No driver assigned' : `${driver.firstName} ${driver.lastName}`}
                       </h3>
                     </Col>
                   </Row>
