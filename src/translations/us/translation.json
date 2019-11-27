@@ -15,6 +15,7 @@
   "Dashboard": "Dashboard",
   "Displaying": "Displaying",
   "Drivers": "Drivers",
+  "Driver": "Driver",
   "Earnings": "Earnings",
   "Email": "Email",
   "First Name": "First Name",
@@ -250,5 +251,8 @@
   "We were unable to verify your account information, please update with the correct banking info or contact Trelar support",
   "Congrats! Your account was approved for ACH debits. You can start using Trelar now.": 
   "Congrats! Your account was approved for ACH debits. You can start using Trelar now.",
-  "User Updated": "User Updated"
+  "User Updated": "User Updated",
+  "No Trucks are allocated to this job yet.": "No Trucks are allocated to this job yet.",
+  "Allocated Trucks": "Allocated Trucks",
+  "See Allocated Trucks": "See Allocated Trucks"
 }

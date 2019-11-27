@@ -14,6 +14,7 @@ import {
   ModalFooter,
   Button } from 'reactstrap';
 import './jobs.css';
+import { withTranslation } from 'react-i18next';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -913,16 +914,17 @@ class JobForm extends Component {
 
   renderAllocatedTrucks() {
     const { profile, job, trucks } = this.state;
+    const { t } = { ...this.props };
     if (profile.companyType === 'Customer' && trucks.length === 0) {
       return (
         <React.Fragment>
           <Row>
             <Col>
               <h3 className="subhead">
-                Allocated Trucks
+                {t('Allocated Trucks')}
               </h3>
               <div>
-                No Trucks are allocated to this job yet
+                {t('No Trucks are allocated to this job yet')}
               </div>
               <br/>
             </Col>
@@ -936,7 +938,7 @@ class JobForm extends Component {
           <Row>
             <Col>
               <h3 className="subhead">
-                Allocated Trucks
+                {t('Allocated Trucks')}
               </h3>
               <div>
                 <TSubmitButton
@@ -944,7 +946,7 @@ class JobForm extends Component {
                   className="primaryButton w-100"
                   // loading={btnSubmitting}
                   loaderSize={10}
-                  bntText="See Allocated Trucks"
+                  bntText={t('See Allocated Trucks')}
                 />
               </div>
               <br/>
@@ -1271,4 +1273,4 @@ JobForm.defaultProps = {
   companyCarrier: null
 };
 
-export default JobForm;
+export default withTranslation()(JobForm);

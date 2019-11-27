@@ -145,7 +145,7 @@ class JobFilter extends Component {
 
     await this.fetchJobs();
     await this.fetchFilterLists();
-    
+
     this.setState({
       companyZipCode,
       lastZipCode,
@@ -482,8 +482,14 @@ class JobFilter extends Component {
     const { filters, companyZipCode } = this.state;
     const resetFilters = filters;
     const resetIntervals = {
-      startInterval: moment().startOf('week').add(-1, 'weeks').hours(0).minutes(0).seconds(0).toDate(),
-      endInterval: moment().endOf('week').add(1, 'weeks').hours(23).minutes(59).seconds(59).toDate()
+      startInterval: moment().startOf('week').add(-1, 'weeks').hours(0)
+.minutes(0)
+.seconds(0)
+.toDate(),
+      endInterval: moment().endOf('week').add(1, 'weeks').hours(23)
+.minutes(59)
+.seconds(59)
+.toDate()
     };
     resetFilters.startAvailability = resetIntervals.startInterval;
     resetFilters.endAvailability = resetIntervals.endInterval;
