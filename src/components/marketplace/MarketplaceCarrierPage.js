@@ -211,7 +211,7 @@ class MarketplaceCarrierPage extends Component {
       // console.log("MarketPlaceCarrierPage: no Jobs");
       jobs = [];
     }
-    const { totalCount, totalJobs } = this.state;
+    const { totalCount, totalJobs, isLoading } = this.state;
     return (
       <Container className="dashboard">
         <Row>
@@ -277,6 +277,7 @@ class MarketplaceCarrierPage extends Component {
                   handleRowsChange={this.handleRowsPerPage}
                   handlePageChange={this.handlePageChange}
                   totalCount={totalCount}
+                  isLoading={isLoading}
                 />
 
               </CardBody>
@@ -314,6 +315,7 @@ class MarketplaceCarrierPage extends Component {
             returnJobs={this.returnJobs}
             page={page}
             rows={rows}
+            isLoading={(e) => this.setState({isLoading: e})}
           />
           {this.renderJobList()}
         </Container>

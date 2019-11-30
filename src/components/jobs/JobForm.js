@@ -14,6 +14,7 @@ import {
   ModalFooter,
   Button } from 'reactstrap';
 import './jobs.css';
+import { withTranslation } from 'react-i18next';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
 import BookingService from '../../api/BookingService';
@@ -30,6 +31,10 @@ import TSpinner from '../common/TSpinner';
 import RatesDeliveryService from '../../api/RatesDeliveryService';
 import CompanySettingsService from '../../api/CompanySettingsService';
 import TCalculator from '../common/TCalculator';
+import TSubmitButton from '../common/TSubmitButton';
+import JobAllocatedTrucksModal from './JobAllocatedTrucksModal';
+
+// import '../addresses/Address.scss';
 
 class JobForm extends Component {
   constructor(props) {
@@ -76,12 +81,14 @@ class JobForm extends Component {
       instructions: [],
       markersGroup: [],
       approveLoadsModal: false,
+      allocatedTrucksModal: false,
       approvingLoads: false,
       approvingLoadsError: false,
       trelarFees: 0,
       summary: [],
       summaryReturn: [],
-      producerBillingType: ''
+      producerBillingType: '',
+      trucks: []
     };
 
     this.loadJobForm = this.loadJobForm.bind(this);
@@ -89,11 +96,22 @@ class JobForm extends Component {
     this.onExpandedChanged = this.onExpandedChanged.bind(this);
     this.getLoads = this.getLoads.bind(this);
     this.toggleApproveLoadsModal = this.toggleApproveLoadsModal.bind(this);
+    this.toggleAllocatedTrucks = this.toggleAllocatedTrucks.bind(this);
     this.approveAllSubmittedLoads = this.approveAllSubmittedLoads.bind(this);
   }
 
   async componentDidMount() {
+    const { job } = this.props;
     await this.loadJobForm();
+    let trucks = [];
+    try {
+      trucks = await JobService.getTrucksForJob(job.id);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
+    this.setState({
+      trucks
+    });
   }
 
   async componentWillReceiveProps(nextProps) {
@@ -288,6 +306,13 @@ class JobForm extends Component {
     });
   }
 
+  toggleAllocatedTrucks() {
+    const {allocatedTrucksModal} = this.state;
+    this.setState({
+      allocatedTrucksModal: !allocatedTrucksModal
+    });
+  }
+
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
@@ -369,6 +394,34 @@ class JobForm extends Component {
       );
     }
     return false;
+  }
+
+  renderAllocatedTrucksModal() {
+    const { allocatedTrucksModal, trucks } = this.state;
+    return (
+      <React.Fragment>
+        <Modal isOpen={allocatedTrucksModal} toggle={this.toggleAllocatedTrucks} backdrop="static" className="reports-modal-job">
+          <div className="dashboard dashboard__job-create">
+            <JobAllocatedTrucksModal
+              trucks={trucks}
+              // bid={null}
+              handlePageClick={this.handlePageClick}
+              // companyCarrier={company}
+            />
+            <div className="reports-cont-btn">
+              <Button
+                color="minimal"
+                className="btn btn-outline-secondary"
+                outline
+                onClick={this.toggleAllocatedTrucks}
+              >
+                Close &nbsp;
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </React.Fragment>
+    );
   }
 
   renderApproveAllLoadsModal() {
@@ -782,7 +835,9 @@ class JobForm extends Component {
                   <br/>
                   <span>Load Tonnage Delivered: <span>{tonsDelivered}</span></span>
                   <br/>
-                  <span>Tons Remaining: <span>{total - tonsDelivered}</span></span>
+                  <span>Tons Remaining:
+                    <span>{TFormat.asMoney(total - tonsDelivered)}</span>
+                  </span>
                   <br/>
                   <span>% Completed:&nbsp;
                     <span>
@@ -844,7 +899,7 @@ class JobForm extends Component {
               <span>Avg Tons / Load:&nbsp;
                 <span>
                   {
-                    tonnage ? tonnage : 0
+                    tonnage || 0
                   }
                 </span>
               </span>
@@ -855,6 +910,69 @@ class JobForm extends Component {
         </Row>
       </React.Fragment>
     );
+  }
+
+  renderAllocatedTrucks() {
+    const { profile, job, trucks } = this.state;
+    const { t } = { ...this.props };
+    if (profile.companyType === 'Customer' && trucks.length === 0) {
+      return (
+        <React.Fragment>
+          <Row>
+            <Col>
+              <h3 className="subhead">
+                {t('Allocated Trucks')}
+              </h3>
+              <div>
+                {t('No Trucks are allocated to this job yet')}
+              </div>
+              <br/>
+            </Col>
+          </Row>
+        </React.Fragment>
+      );
+    }
+    if (profile.companyType === 'Customer' && trucks.length > 0) {
+      return (
+        <React.Fragment>
+          <Row>
+            <Col>
+              <h3 className="subhead">
+                {t('Allocated Trucks')}
+              </h3>
+              <div>
+                <TSubmitButton
+                  onClick={() => this.toggleAllocatedTrucks()}
+                  className="primaryButton w-100"
+                  // loading={btnSubmitting}
+                  loaderSize={10}
+                  bntText={t('See Allocated Trucks')}
+                />
+              </div>
+              <br/>
+            </Col>
+          </Row>
+        </React.Fragment>
+      );
+    }
+    if (profile.companyType === 'Carrier') {
+      return (
+        <React.Fragment>
+          <Row>
+            <Col>
+              <h3 className="subhead">
+                Truck Info
+              </h3>
+              <div>
+                {this.renderRunSummary(job)}
+              </div>
+              <br/>
+            </Col>
+          </Row>
+        </React.Fragment>
+      );
+    }
+    return false;
   }
 
   renderRunSummary() {
@@ -929,6 +1047,37 @@ class JobForm extends Component {
     );
   }
 
+  renderMap(job) {
+    if (job.status === 'In Progress') {
+      return (
+        <React.Fragment>
+          <TMapLive
+            id={`job${job.id}`}
+            width="100%"
+            height="100%"
+            startAddress={job.startAddress}
+            endAddress={job.endAddress}
+            loads={this.getLoads}
+          />
+        </React.Fragment>
+      );
+    }
+    if (job.status === 'Job Ended' || job.status === 'Job Completed') {
+      return (
+        <React.Fragment>
+          <TMap
+            id={`job${job.id}`}
+            width="100%"
+            height="100%"
+            startAddress={job.startAddress}
+            endAddress={job.endAddress}
+          />
+        </React.Fragment>
+      );
+    }
+    return false;
+  }
+
   renderEverything() {
     const {
       images,
@@ -947,6 +1096,7 @@ class JobForm extends Component {
     ) {
       return (
         <Container>
+          {this.renderAllocatedTrucksModal()}
           <Card>
             <CardBody className="card-full-height">
               <Row>
@@ -967,6 +1117,9 @@ class JobForm extends Component {
                   </div>
                   */
                 }
+                <div className="col-md-4">
+                  {this.renderAllocatedTrucks(job)}
+                </div>
               </div>
               <hr/>
               <Row style={{
@@ -975,6 +1128,7 @@ class JobForm extends Component {
               }}
               >
                 <div className="col-md-8" style={{ padding: 0 }}>
+                  {/*
                   <TMap
                     id={`job${job.id}`}
                     width="100%"
@@ -982,6 +1136,8 @@ class JobForm extends Component {
                     startAddress={job.startAddress}
                     endAddress={job.endAddress}
                   />
+                  */}
+                  {this.renderMap(job)}
                 </div>
                 <div className="col-md-4">
                   <div className="row">
@@ -1004,55 +1160,6 @@ class JobForm extends Component {
               <hr/>
               {this.renderLoads()}
               {this.renderUploadedPhotos(images)}
-            </CardBody>
-          </Card>
-        </Container>
-      );
-    }
-    if (job.status === 'In Progress') {
-      return (
-        <Container>
-          <Card>
-            <CardBody className="card-full-height">
-              <Row>
-                {this.renderJobTop(job)}
-              </Row>
-              <hr/>
-              <Row style={{
-                paddingLeft: '10px',
-                paddingRight: '10px'
-              }}
-              >
-                <div className="col-md-8" style={{ padding: 0 }}>
-                  <TMapLive
-                    id={`job${job.id}`}
-                    width="100%"
-                    height="100%"
-                    startAddress={job.startAddress}
-                    endAddress={job.endAddress}
-                    loads={this.getLoads}
-                  />
-                </div>
-                <div className="col-md-4">
-                  <div className="row">
-                    <div className="col-md-12">
-                      {this.renderStartAddress(job.startAddress)}
-                    </div>
-                  </div>
-                  <div className="row mt-1">
-                    <div className="col-md-12">
-                      {endAddress}
-                    </div>
-                  </div>
-                  <div className="row mt-1">
-                    <div className="col-md-12">
-                      {this.renderJobBottom(job)}
-                    </div>
-                  </div>
-                </div>
-              </Row>
-              <hr/>
-              {this.renderLoads(loads, job)}
             </CardBody>
           </Card>
         </Container>
@@ -1166,4 +1273,4 @@ JobForm.defaultProps = {
   companyCarrier: null
 };
 
-export default JobForm;
+export default withTranslation()(JobForm);

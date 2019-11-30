@@ -13,6 +13,7 @@ export default {
   entry: [
     'babel-polyfill',
     'eventsource-polyfill',
+    'whatwg-fetch',
     path.resolve(__dirname, 'src/index')
   ],
   output: {
@@ -49,7 +50,11 @@ export default {
     new webpack.DefinePlugin(GLOBALS),
     new MiniCssExtractPlugin({
       filename: 'style.css'
-    })
+    }),
+    // new webpack.ProvidePlugin({
+    //   // 'Promise': 'es6-promise',
+    //   'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+    // })
     // new Dotenv()
   ],
   resolve: {

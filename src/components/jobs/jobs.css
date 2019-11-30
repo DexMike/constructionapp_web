@@ -38,7 +38,7 @@
 
 .allocate-modal .modal-content{
   text-align: left;
-  max-width: 1000px !important;
+  max-width: 1200px !important;
   width: 1000px !important;
 }
 
@@ -53,7 +53,7 @@
   margin-top: -3px;
 }
 
-/* modals */
+/* Modals */
 .modal .status-modal {
   max-width: 100% !important;
   top: 35%;
@@ -68,6 +68,58 @@
 .status-modal .modal-footer {
   display: inline-block;
 }
+
+.reports-modal-job .modal-dialog{
+  width: 90% !important;
+}
+
 .close {
   display: none;
+}
+
+/* Modal Job by Date*/
+.gridTableDateJob {
+  width: 1230px;
+  background-color: whitesmoke !important;
+  border-color: #dfdfdf;
+  border-width: 4px;
+  border-radius: 2px;
+  margin: 15px 15px 0;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 12px !important;
+}
+
+/* Modal for Truck's list on Job's detail page*/
+.gridTableTruckList {
+  width: auto;
+  background-color: whitesmoke !important;
+  border-color: #dfdfdf;
+  border-width: 4px;
+  border-radius: 2px;
+  margin: 15px 15px 0;
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 12px !important;
+}
+
+.jobAllocatedTrcuksModal .title{
+  background: #006f53;
+  border-color: #006f53;
+  width: 100%;
+  height: 55px;
+  display: flex;
+  text-align: left;
+
+  font-family: "Interstate", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 14px !important;
+  padding: 14px;
+  padding-left: 17px;
+  color: white;
+}
+
+.tittleModalDateJob span{
+  color: #ffffff;
+  font-weight: 700;
+  margin: auto;
+  font-size: 14px;
+  text-transform: uppercase;
 }

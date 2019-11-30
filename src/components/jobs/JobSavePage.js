@@ -22,19 +22,18 @@ import CompanyService from '../../api/CompanyService';
 import ProfileService from '../../api/ProfileService';
 import BidService from '../../api/BidService';
 import BookingService from '../../api/BookingService';
-import BookingEquipmentService from '../../api/BookingEquipmentService';
 import UserService from '../../api/UserService';
 import LoadService from '../../api/LoadService';
 import GroupListService from '../../api/GroupListService';
 import TSubmitButton from '../common/TSubmitButton';
 import JobForm from './JobForm';
-import TTable from '../common/TTable';
 import BidsTable from './BidsTable';
 import JobCreatePopup from './JobCreatePopup';
 import JobClosePopup from './JobClosePopup';
 import JobDeletePopup from './JobDeletePopup';
 import JobWizard from './JobWizard';
 import LookupsService from '../../api/LookupsService';
+import JobAllocate from './JobAllocate';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -71,8 +70,6 @@ class JobSavePage extends Component {
       // for some reason I couldn't set it when nested
       companyType: null,
       btnSubmitting: false,
-      allocateDriversModal: false,
-      drivers: [],
       selectedDrivers: [],
       accessForbidden: false,
       modalAddJob: false,
@@ -108,8 +105,8 @@ class JobSavePage extends Component {
     this.handlePageClick = this.handlePageClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleConfirmRequestCarrier = this.handleConfirmRequestCarrier.bind(this);
-    this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
-    this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
+    // this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
+    // this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
     this.updateJobView = this.updateJobView.bind(this);
     this.updateCopiedJob = this.updateCopiedJob.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
@@ -301,14 +298,7 @@ class JobSavePage extends Component {
           }
           if (bookings && bookings.length > 0) {
             [booking] = bookings;
-            const bookingEquipments = await BookingEquipmentService
-              .getBookingEquipmentsByBookingId(booking.id);
-            selectedDrivers = bookingEquipments
-              .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
-            // bookingEquipment = bookingEquipments.find(
-            //   bookingEq => bookingEq.bookingId === booking.id,
-            //   booking
-            // );
+
             const driversResponse = await LoadService.getDriversWithLoadsByBookingId(booking.id);
             if (driversResponse && driversResponse.length > 0) {
               driversResponse.map(driver => (
@@ -325,16 +315,6 @@ class JobSavePage extends Component {
             );
           }
 
-          // let drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-          // console.log(207, drivers);
-          // drivers = drivers.map((driver) => {
-          //   if (driver.userStatus !== 'Driver Created' && driver.userStatus !== 'Enabled') {
-          //     const newDriver = driver;
-          //     newDriver.checkboxDisabled = true;
-          //     return newDriver;
-          //   }
-          //   return driver;
-          // });
           const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
           let enabledDrivers = [];
           Object.values(drivers).forEach((itm) => {
@@ -640,46 +620,6 @@ class JobSavePage extends Component {
     }
   }
 
-  async toggleAllocateDriversModal() {
-    const {allocateDriversModal, booking, profile, driversWithLoads} = this.state;
-    const driversResponse = await LoadService.getDriversWithLoadsByBookingId(booking.id);
-    if (driversResponse && driversResponse.length > 0) {
-      driversResponse.map(driver => (
-        driversWithLoads.push(driver.id)
-      ));
-    }
-    this.setState({btnSubmitting: true});
-    const bookingEquipments = await BookingEquipmentService
-      .getBookingEquipmentsByBookingId(booking.id);
-    const selectedDrivers = bookingEquipments
-      .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
-    const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-    let enabledDrivers = [];
-    Object.values(drivers).forEach((itm) => {
-      const newDriver = {...itm};
-      if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled' || newDriver.userStatus === 'Enabled') {
-        newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
-        enabledDrivers.push(newDriver);
-      }
-    });
-    // Setting id to driverId since is getting the userId and saving it as driverId
-    enabledDrivers = enabledDrivers.map((driver) => {
-      const newDriver = driver;
-      newDriver.id = newDriver.driverId;
-      if (driversWithLoads.includes(newDriver.driverId)) {
-        newDriver.checkboxDisabled = true;
-      }
-      return newDriver;
-    });
-    this.setState({
-      allocateDriversModal: !allocateDriversModal,
-      selectedDrivers,
-      drivers: enabledDrivers,
-      btnSubmitting: false,
-      driversWithLoads
-    });
-  }
-
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({[`goTo${menuItem}`]: true});
@@ -726,32 +666,15 @@ class JobSavePage extends Component {
     this.setState({btnSubmitting: false});
   }
 
-  async handleAllocateDrivers() {
-    try {
-      // console.log('saving...');
-      const {selectedDrivers, booking, job, profile} = this.state;
-      const newBookingEquipments = selectedDrivers.map(selectedDriver => ({
-        bookingId: booking.id,
-        schedulerId: profile.userId,
-        driverId: selectedDriver,
-        equipmentId: null, // NOTE: for now don't reference equipment
-        rateType: booking.rateType, // This could be from equipment
-        rateActual: 0,
-        startTime: new Date(),
-        endTime: new Date(),
-        startAddressId: job.startAddress.id,
-        endAddressId: job.endAddress.id,
-        notes: '',
-        createdBy: profile.userId,
-        createdOn: new Date(),
-        modifiedBy: profile.userId,
-        modifiedOn: new Date()
-      }));
-      await BookingEquipmentService.allocateDrivers(newBookingEquipments, booking.id);
-    } catch (err) {
-      // console.error(err);
+  // check format ok
+  checkPhoneFormat(phone) {
+    const phoneNotParents = String(UserUtils.phoneToNumberFormat(phone));
+    const areaCode3 = phoneNotParents.substring(0, 3);
+    const areaCode4 = phoneNotParents.substring(0, 4);
+    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
+      return false;
     }
-    this.toggleAllocateDriversModal();
+    return true;
   }
 
   async closeJobModal() {
@@ -825,7 +748,7 @@ class JobSavePage extends Component {
   }
 
   renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid) {
-    const {profile, company, bids} = this.state;
+    const {profile, company, bids, booking} = this.state;
     const companyProducer = job.company;
     const companyCarrier = company;
     // If a Customer 'Published' a Job to the Marketplace, the Carrier can Accept or Request it
@@ -919,19 +842,6 @@ class JobSavePage extends Component {
             bntText="Accept Job"
           />
         </div>
-      );
-    }
-
-    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress')
-      && companyType === 'Carrier' && profile.isAdmin) {
-      return (
-        <TSubmitButton
-          onClick={() => this.toggleAllocateDriversModal()}
-          className="primaryButton"
-          loading={btnSubmitting}
-          loaderSize={10}
-          bntText="Allocate Drivers"
-        />
       );
     }
 
@@ -1161,86 +1071,6 @@ class JobSavePage extends Component {
           copyJob
           job={job}
         />
-      </Modal>
-    );
-  }
-
-  renderAllocateDriversModal() {
-    const {
-      allocateDriversModal,
-      drivers,
-      selectedDrivers,
-      btnSubmitting,
-      driversWithLoads
-    } = this.state;
-    const driverData = drivers;
-    const driverColumns = [
-      {
-        displayName: 'Name',
-        name: 'fullName'
-      }, {
-        displayName: 'Phone',
-        name: 'mobilePhone'
-      }
-    ];
-    return (
-      <Modal
-        isOpen={allocateDriversModal}
-        toggle={this.toggleAllocateDriversModal}
-        className="allocate-modal"
-        backdrop="static"
-      >
-        <div className="modal__body" style={{padding: '0px'}}>
-          <Container className="dashboard">
-            <Row>
-              <Col md={12} lg={12}>
-                <Card style={{paddingBottom: 0}}>
-                  <h1 style={{
-                    marginTop: 20,
-                    marginLeft: 20
-                  }}
-                  >
-                    Allocate Drivers
-                  </h1>
-
-                  <div className="row">
-
-                    <TTable
-                      handleRowsChange={() => {
-                      }}
-                      data={driverData}
-                      columns={driverColumns}
-                      handlePageChange={() => {
-                      }}
-                      handleIdClick={() => {
-                      }}
-                      isSelectable
-                      onSelect={selected => this.setState({selectedDrivers: selected})}
-                      selected={selectedDrivers}
-                      omitFromSelect={driversWithLoads}
-                    />
-                    <div className="col-md-8"/>
-                    <div className="col-md-4 text-right pr-4">
-                      <Button type="button" className="tertiaryButton" onClick={() => {
-                        this.toggleAllocateDriversModal();
-                      }}
-                      >
-                        Cancel
-                      </Button>
-                      <TSubmitButton
-                        onClick={this.handleAllocateDrivers}
-                        className="primaryButton"
-                        loading={btnSubmitting}
-                        loaderSize={10}
-                        bntText="Save"
-                      />
-                    </div>
-                  </div>
-                </Card>
-              </Col>
-            </Row>
-          </Container>
-        </div>
       </Modal>
     );
   }
@@ -1675,6 +1505,16 @@ class JobSavePage extends Component {
     return null;
   }
 
+  renderJobAllocate() {
+    const { job, profile, booking } = { ...this.state };
+    if ((job.status === 'Booked' || job.status === 'Allocated' || job.status === 'In Progress')
+      && profile.companyType === 'Carrier' && profile.isAdmin) {
+      return (
+        <JobAllocate booking={booking} profile={profile} job={job} />
+      );
+    }
+  }
+
   render() {
     const {
       job,
@@ -1709,7 +1549,7 @@ class JobSavePage extends Component {
             {this.renderCopyJobModal()}
             {this.renderEditExistingJobModal()}
             {this.renderEditSavedJobModal()}
-            {this.renderAllocateDriversModal(profile)}
+            {/*{this.renderAllocateDriversModal(profile)}*/}
             {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
             {this.renderCancelCarrierModal()}
@@ -1728,6 +1568,7 @@ class JobSavePage extends Component {
                 {this.renderCancelButton()}
               </div>
             </div>
+            { this.renderJobAllocate() }
             {
               job.status && (
                 job.status === 'In Progress'

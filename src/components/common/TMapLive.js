@@ -184,7 +184,7 @@ class TMapLive extends Component {
     const polyline = new H.map.Polyline(lineString, {
       style: {
         lineWidth: 4,
-        strokeColor: 'rgba(0, 128, 255, 0.7)'
+        strokeColor: 'rgba(0, 201, 151, 0.6)'
       }
     });
     // Add the polyline to the map
@@ -261,7 +261,6 @@ class TMapLive extends Component {
       const that = this;
       const timerTimer = function timerTimer() {
         count += 1;
-        // console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
         that.getLatestGPSForLoad();
       };
       timerVar = setInterval(timerTimer, (refreshInterval * 1000));

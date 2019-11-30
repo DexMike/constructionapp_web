@@ -8,6 +8,7 @@ import * as PropTypes from 'prop-types';
 import moment from 'moment';
 import './Settings.css';
 import UserNotificationsService from '../../api/UserNotificationsService';
+import {withTranslation} from 'react-i18next';
 
 class NotificationsSettings extends Component {
   constructor(props) {
@@ -163,12 +164,14 @@ class NotificationsSettings extends Component {
   }
 
   renderTable(objectSettings) {
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <table className="table table-sm">
         <thead>
           <tr>
             <th scope="col" colSpan={objectSettings.communicationTypes.length + 2}>
-              {objectSettings.title}
+              {translate(objectSettings.title)}
             </th>
           </tr>
         </thead>
@@ -178,7 +181,7 @@ class NotificationsSettings extends Component {
               <strong>On/Off</strong>
             </td>
             <td style={{width: 850}}>
-              <strong>Notification</strong>
+              <strong>{translate('Notification')}</strong>
             </td>
             {
               objectSettings.communicationTypes.map(item => <td key={item.name} className="text-center"><strong>{item.title}</strong></td>)
@@ -204,7 +207,7 @@ class NotificationsSettings extends Component {
                   </label>
                 </td>
                 <td>
-                  <strong>Select All</strong>
+                  <strong>{translate('Select All')}</strong>
                 </td>
                 {
                   objectSettings.communicationTypes.map(item => (
@@ -245,7 +248,7 @@ class NotificationsSettings extends Component {
                     <span className="checkmark centered" />
                   </label>
                 </td>
-                <td>{notification.description}</td>
+                <td>{translate(notification.description)}</td>
                 {
                   /*
                   <td className="text-center">
@@ -427,13 +430,14 @@ class NotificationsSettings extends Component {
   }
 
   render() {
-    const { company } = this.props;
+    const { company, t } = this.props;
+    const translate = t;
     return (
       <Container className="pb-4">
         <Row className="tab-content-header">
           <Col md={12}>
             <span style={{ fontWeight: 'bold', fontSize: 20 }}>
-              Notifications
+              {translate('Notifications')}
             </span>
           </Col>
         </Row>
@@ -472,4 +476,4 @@ NotificationsSettings.defaultProps = {
   }
 };
 
-export default NotificationsSettings;
+export default withTranslation()(NotificationsSettings);

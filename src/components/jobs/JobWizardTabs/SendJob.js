@@ -131,7 +131,7 @@ class SendJob extends PureComponent {
       loaded,
       btnSubmitting
     } = this.state;
-    const {data, saveJob, sendJob, goBack, onClose, jobRequest} = {...this.props};
+    const {data, saveJob, sendJob, goBack, onClose, jobRequest, isLoading} = {...this.props};
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -224,16 +224,27 @@ class SendJob extends PureComponent {
                     <Button
                       color="outline-primary"
                       className="next"
+                      loading={isLoading}
+                      loaderSize={10}
+                      disabled={isLoading}
                       onClick={saveJob}
                     >
-                      Save Job & Close
+                      {
+                        isLoading ? (
+                          <TSpinner
+                            color="#808080"
+                            loaderSize={10}
+                            loading
+                          />
+                        ) : 'Save Job & Close'
+                      }
                     </Button>
                   )
                   }
                   <TSubmitButton
                     onClick={sendJob}
                     className="primaryButton"
-                    loading={btnSubmitting}
+                    loading={isLoading}
                     loaderSize={10}
                     disabled={!data.sendToMkt && !data.sendToFavorites}
                     bntText="Send Job"

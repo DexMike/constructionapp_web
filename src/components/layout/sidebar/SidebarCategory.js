@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {withTranslation} from 'react-i18next';
 import { Collapse } from 'reactstrap';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -20,6 +21,8 @@ class SidebarCategory extends Component {
   }
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const { title, icon, isNew, children } = this.props;
     const { collapse } = this.state;
     const categoryClass = classNames({
@@ -32,7 +35,7 @@ class SidebarCategory extends Component {
         <button type="button" className="sidebar__link sidebar__category" onClick={this.toggle}>
           {icon ? <i className="material-icons iconSet">{icon}</i> : ''}
           <p className="sidebar__link-title top_title">
-            {title}
+            {translate(title)}
             {isNew && <span className="sidebar__category-new"/>}
           </p>
           <span className="sidebar__category-icon lnr lnr-chevron-right"/>
@@ -61,4 +64,4 @@ SidebarCategory.defaultProps = {
   isNew: false
 };
 
-export default SidebarCategory;
+export default withTranslation()(SidebarCategory);

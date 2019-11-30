@@ -1,5 +1,6 @@
 import { Auth } from 'aws-amplify';
 import React, { Component } from 'react';
+import {withTranslation} from 'react-i18next';
 import {
   Button,
   Col,
@@ -16,7 +17,7 @@ import EyeIcon from 'mdi-react/EyeIcon';
 // import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
-
+import TSpinner from '../common/TSpinner';
 import UserService from '../../api/UserService';
 import LookupsService from '../../api/LookupsService';
 import AddressService from '../../api/AddressService';
@@ -114,7 +115,10 @@ class UserSettings extends Component {
         error: ''
       },
       showResetPasswordError: false,
-      errorMessage: ''
+      errorMessage: '',
+      loading: false,
+      alert: false,
+      error: false
     };
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handlePreferredLangChange = this.handlePreferredLangChange.bind(this);
@@ -510,9 +514,12 @@ class UserSettings extends Component {
   }
 
   async saveUser() {
+    this.setState({loading: true});
     if (!this.isFormValid()) {
+      this.setState({loading: false});
       return;
     }
+    let error = false;
     const {profile, timeZone} = this.state;
 
     let selectedTimeZone = '';
@@ -546,8 +553,14 @@ class UserSettings extends Component {
         // console.log('Updated');
       } catch (err) {
         console.log(err);
+        error = true;
       }
     }
+    this.setState({
+      loading: false,
+      alert: true,
+      error
+    });
   }
 
   async changeUserPassword() {
@@ -771,6 +784,8 @@ class UserSettings extends Component {
   }
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const { user, admin } = this.props;
     const {
       firstName,
@@ -793,7 +808,10 @@ class UserSettings extends Component {
       reqHandlerAddress,
       reqHandlerCity,
       reqHandlerZip,
-      timeZone
+      timeZone,
+      error,
+      alert,
+      loading
     } = this.state;
 
     const {
@@ -814,6 +832,35 @@ class UserSettings extends Component {
           </Col>
           <Col md={6} className="text-right">
             <strong><Trans>Email</Trans>:</strong> {user.email}
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {
+              alert && (
+                <div className={`alert alert-${error ? 'danger' : 'success'} p-2`} role="alert" style={{ width: '100%', color: '#FFF', marginTop: 16, borderLeft: 5, borderLeftColor: 'red' }}>
+                  {
+                    !error ? (
+                      <span style={{ width: '70%' }}>
+                        <span className="lnr lnr-checkmark-circle"/>
+                        &nbsp;{t('User Updated')}!
+                      </span>
+                    ) : (
+                      <span style={{ width: '70%' }}>
+                        <span className="lnr lnr-cross-circle"/>
+                        &nbsp;Error!
+                        &nbsp;{t("The information couldn't be saved")}. {t('Please try again')}...
+                      </span>
+                    )
+                  }
+                  <div className="text-right" style={{ width: '30%' }}>
+                    <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={() => this.setState({ alert: false })}>
+                      <span className="lnr lnr-cross"/>
+                    </button>
+                  </div>
+                </div>
+              )
+            }
           </Col>
         </Row>
         <Row className="pt-2">
@@ -909,7 +956,7 @@ class UserSettings extends Component {
           <Col md={6} className="pt-4">
             <Row>
               <Col md={12}>
-                <span><Trans>Address #1</Trans></span>
+                <span><Trans>{translate('Address 1')}</Trans></span>
                 <TField
                   input={{
                     onChange: this.handleInputChange,
@@ -917,14 +964,14 @@ class UserSettings extends Component {
                     value: address1,
                     disabled: !admin
                   }}
-                  placeholder="Address 1"
+                  placeholder={translate('Address 2')}
                   type="text"
                   meta={reqHandlerAddress}
                 />
               </Col>
               <Col md={12} className="pt-2">
                 <span>
-                  <Trans>Address #2</Trans>
+                  <Trans>{translate('Address 2')}</Trans>
                 </span>
                 <TField
                   input={{
@@ -933,7 +980,7 @@ class UserSettings extends Component {
                     value: address2,
                     disabled: !admin
                   }}
-                  placeholder="Address 2"
+                  placeholder={translate('Address 2')}
                   type="text"
                 />
               </Col>
@@ -1042,14 +1089,23 @@ class UserSettings extends Component {
           <Col md={12} className="text-right">
             <Link to="/">
               <Button className="mr-2">
-              <Trans>Cancel</Trans>
+                <Trans>Cancel</Trans>
               </Button>
             </Link>
             <Button
+              disabled={loading}
               color="primary"
               onClick={this.saveUser}
             >
-              <Trans>Save</Trans>
+              {
+                loading ? (
+                  <TSpinner
+                    color="#808080"
+                    loaderSize={10}
+                    loading
+                  />
+                ) : (<Trans>Save</Trans>)
+              }
             </Button>
           </Col>
         </Row>
@@ -1104,4 +1160,4 @@ UserSettings.defaultProps = {
   admin: false
 };
 
-export default UserSettings;
+export default withTranslation()(UserSettings);

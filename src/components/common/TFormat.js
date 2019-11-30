@@ -254,6 +254,11 @@ class TFormat {
     if (userTimeZone && userTimeZone.length > 0) {
       return moment.utc(inputValue).tz(userTimeZone).format('MM/DD/YYYY');
     }
+    // In case that the Internationalisation API is not supported by the browser,
+    // then use Moment's guess(). Ref: https://momentjs.com/timezone/docs/
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone === undefined) {
+      return moment.utc(inputValue).tz(moment.tz.guess()).format('MM/DD/YYYY');
+    }
     return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY');
   }
 
@@ -261,12 +266,22 @@ class TFormat {
     if (userTimeZone && userTimeZone.length > 0) {
       return moment.utc(inputValue).tz(userTimeZone).format('MM/DD/YYYY hh:mm a');
     }
+    // In case that the Internationalisation API is not supported by the browser,
+    // then use Moment's guess(). Ref: https://momentjs.com/timezone/docs/
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone === undefined) {
+      return moment.utc(inputValue).tz(moment.tz.guess()).format('MM/DD/YYYY hh:mm a');
+    }
     return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY hh:mm a');
   }
 
   static asDayWeek(inputValue, userTimeZone) {
     if (userTimeZone && userTimeZone.length > 0) {
       return moment.utc(inputValue).tz(userTimeZone).format('LLLL');
+    }
+    // In case that the Internationalisation API is not supported by the browser,
+    // then use Moment's guess(). Ref: https://momentjs.com/timezone/docs/
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone === undefined) {
+      return moment.utc(inputValue).tz(moment.tz.guess()).format('LLLL');
     }
     return moment.utc(inputValue).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('LLLL');
   }

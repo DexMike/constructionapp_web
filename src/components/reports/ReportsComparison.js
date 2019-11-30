@@ -24,8 +24,9 @@ import {
   NavLink,
   TabContent,
   TabPane,
-  ButtonGroup,
-  ButtonToolbar
+  ButtonGroup, 
+  ButtonToolbar,
+  Modal
 } from 'reactstrap';
 import classnames from 'classnames';
 import {useTranslation} from 'react-i18next';
@@ -49,12 +50,17 @@ import TFormat from '../common/TFormat';
 import './Reports.css';
 import '../addresses/Address.css';
 
+import JobForm from '../jobs/JobForm';
+import JobService from '../../api/JobService';
+import CompanyService from '../../api/CompanyService';
+
 import BarRenderer from '../../utils/BarRenderer';
 import BarFilter from '../../utils/BarFilter';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import trelarLogo from '../../img/trelar-logo_green.png';
+import { string } from 'prop-types';
+import AddressService from '../../api/AddressService';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -112,7 +118,11 @@ class ReportsComparison extends Component {
       jobsInfo: [],
       totalJobs: 0,
 
+      modal: false,
+
       loadId: 0,
+      job: {},
+      company: {},
 
       carriers: [],
       carrierID: 0,
@@ -344,6 +354,11 @@ class ReportsComparison extends Component {
     this.returnSelectedMaterials = this.returnSelectedMaterials.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
 
+    this.toggle = this.toggle.bind(this);
+    this.togglePopup = this.togglePopup.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.handlePageClick = this.handlePageClick.bind(this);
+
     // TODO: need to do for Producer, Product, and Project
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
@@ -373,6 +388,7 @@ class ReportsComparison extends Component {
   async componentDidMount() {
     const { columnsProjects, columnsCarrier, columnsProducts } = this.state;
     const profile = await ProfileService.getProfile();
+    
     this.hideShowPie(true);
     // this.hideAvg(true, 425);
 
@@ -418,7 +434,6 @@ class ReportsComparison extends Component {
     this.gridApiProducers = params.api;
     this.gridColumnApi = params.columnApi;
   }
-
 
   onGridReadyProducts(params) {
     this.gridApiProducers = params.api;
@@ -544,6 +559,28 @@ class ReportsComparison extends Component {
         chartType
       });
     }
+  }
+
+  // modal with job detail information
+  togglePopup() {
+    const { modal } = this.state;
+    
+    if (modal) {
+      this.setState(({
+        modal: !modal,
+      }));
+    } else {
+      this.setState(({
+        modal: !modal
+      }));
+    }
+  }
+
+  closeModal() {
+    const { modal } = this.state;
+    this.setState({
+      modal: !modal
+    });
   }
 
   handlePageClick(menuItem) {
@@ -713,7 +750,6 @@ class ReportsComparison extends Component {
           });
           const width = doc.internal.pageSize.getWidth();
           const height = doc.internal.pageSize.getHeight();
-          // console.log("TCL: exportToPDF -> height", width, height, '|', canvas.width, canvas.height)
           doc.addImage(img, 'JPEG', 2, 0, width, height);
           doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
 
@@ -738,8 +774,26 @@ class ReportsComparison extends Component {
     }
   }
 
+  async getJob(jobId) {
+    // await this.handleFilterChange(filters);
+    const job = await JobService.getJobById(jobId);
+    const company = await CompanyService.getCompanyById(job.companiesId);
+    company.company = company;
+    const sAddress = await AddressService.getAddressById(job.startAddress);
+    const eAddress = await AddressService.getAddressById(job.endAddress);
+    job.startAddress = sAddress;
+    job.endAddress = eAddress;
+    this.setState({
+      job,
+      company
+    }, function done() {
+      this.togglePopup();
+    });
+  }
+
   extractCSVInfo(data) {
     let newData = [];
+    let date = new Date(0);
     const { activeTab, profile } = this.state;
 
     const formatter = new Intl.NumberFormat('en-US', {
@@ -781,6 +835,7 @@ class ReportsComparison extends Component {
     if (activeTab === '3') {
       newData = data.map(d => ({
         'Job Name': d.name,
+        Date: moment.unix(d.startTime / 1000).format('MMMM Do, YYYY h:mm:ss A'),
         'Total Cost': formatter.format(d.totEarnings),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
@@ -839,13 +894,15 @@ class ReportsComparison extends Component {
       />
     )
   }
-
+  // onRowClicked(event: any) { console.log('row', event); }
+  
   renderTable(columns, defaultData, data, onGridReady) {
     // console.log("TCL: renderTable -> data", data, columns)
     const { activeTab, compEnabled } = this.state;
 
     let newData = data;
     let colHeight = 60;
+
     if (Number(activeTab) === 3 || !compEnabled) {
       colHeight = 28;
     }
@@ -855,6 +912,7 @@ class ReportsComparison extends Component {
         columnDefs={columns}
         defaultColDef={defaultData}
         rowData={data}
+        onRowClicked={event => this.getJob(event.data.id)}
         // floatingFilter={true}
         onGridReady={onGridReady}
         paginationPageSize={15}
@@ -864,6 +922,39 @@ class ReportsComparison extends Component {
         style={{ width: '2000px' }}
       />
     )
+  }
+  
+  renderModal() {
+    const { modal, job, closeModal, activeTab } = this.state;
+    if (Number(activeTab) === 3) {
+      return (
+        <React.Fragment>
+          <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
+            <div className="dashboard dashboard__job-create" style={{width: 900}}>
+              <JobForm
+                job={job}
+                bid={null}
+                handlePageClick={this.handlePageClick}
+                // companyCarrier={company}
+              />
+              <div className="reports-cont-btn">
+                <Button
+                  color="minimal"
+                  className="btn btn-outline-secondary"
+                  outline
+                  onClick={this.closeModal}
+                  >Close &nbsp;
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        </React.Fragment>
+      );
+    }
+    return (
+      <React.Fragment>
+      </React.Fragment>
+    );
   }
 
   renderVisualizations() {
@@ -1114,6 +1205,7 @@ class ReportsComparison extends Component {
 
       return (
         <Container className="dashboard">
+          {this.renderModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           <FilterComparisonReport

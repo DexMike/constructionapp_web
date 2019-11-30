@@ -119,7 +119,7 @@ const columnsJobs = [
         // valueFormatter: numberFormatter,
         // filter: 'agNumberColumnFilter',
         width: 110
-      }, {
+      }/* , {
         field: 'rateTon',
         headerName: 'Rate per Ton',
         headerTooltip: 'Rate $ per Ton',
@@ -173,7 +173,7 @@ const columnsJobs = [
         sortable: true,
         // comparator: numberComparator,
         valueFormatter: currencyFormatterRound
-      },/* {
+      }, /* {
         field: 'avgSizeOfJobByTon',
         headerName: 'Average Tons per Job',
         headerTooltip: 'Average size of job by tons',
@@ -182,7 +182,7 @@ const columnsJobs = [
         comparator: numberComparator,
         valueFormatter: decimalFormatter,
         width: 160
-      },*/ {
+      }, */ {
         field: 'totalTonsHauled',
         headerName: 'Total Tons Hauled',
         headerTooltip: 'Total tons hauled per day',
@@ -191,7 +191,7 @@ const columnsJobs = [
         comparator: numberComparator,
         valueFormatter: decimalFormatter,
         width: 140
-      }, {
+      }, /* {
         field: 'avgJobTime',
         headerName: 'Job Duration',
         headerTooltip: 'Average time between a first load and job being closed',
@@ -199,7 +199,7 @@ const columnsJobs = [
         sortable: true,
         comparator: numberComparator,
         valueFormatter: dhmsFormatter
-      }, {
+      }, */{
         field: 'realDistance',
         headerName: 'Distance (mi)',
         headerTooltip: 'Average distance for a job',

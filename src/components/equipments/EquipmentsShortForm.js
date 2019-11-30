@@ -38,7 +38,8 @@ class EquipmentsShortForm extends PureComponent {
       reqHandlerTruckType: { touched: false, error: '' },
       reqHandlerMaterials: { touched: false, error: '' },
       reqHandlerExternalEquipmentNumber: { touched: false, error: '' },
-      loaded: false
+      loaded: false,
+      isLoading: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -160,8 +161,10 @@ class EquipmentsShortForm extends PureComponent {
   }
 
   async saveTruck() {
+    this.setState({ isLoading: true });
     const isFormValid = await this.isFormValid();
     if (!isFormValid) {
+      this.setState({ isLoading: false });
       return;
     }
     const {
@@ -248,7 +251,7 @@ class EquipmentsShortForm extends PureComponent {
       ratesCostPerTon,
       minTons,
       minOperatingTime});
-
+    this.setState({ isLoading: false });
     toggle();
   }
 
@@ -335,7 +338,8 @@ class EquipmentsShortForm extends PureComponent {
       reqHandlerMaterials,
       reqHandlerExternalEquipmentNumber,
       reqHandlerMaxCapacity,
-      loaded
+      loaded,
+      isLoading
     } = this.state;
     const { toggle, t } = this.props;
     if (loaded) {
@@ -516,8 +520,21 @@ class EquipmentsShortForm extends PureComponent {
                 </Button>
               </Col>
               <Col md={6} className="text-right">
-                <Button type="submit" className="primaryButton" onClick={() => this.saveTruck()}>
-                  {t('Save')}
+                <Button
+                  type="submit"
+                  className="primaryButton"
+                  onClick={() => this.saveTruck()}
+                  disabled={isLoading}
+                >
+                  {
+                    isLoading ? (
+                      <TSpinner
+                        color="#808080"
+                        loaderSize={10}
+                        loading
+                      />
+                    ) : t('Save')
+                  }
                 </Button>
               </Col>
             </Row>
@@ -526,7 +543,7 @@ class EquipmentsShortForm extends PureComponent {
       );
     }
     return (
-      <Col md={12}>
+      <Col md={12} className="text-center">
         <Card style={{paddingBottom: 0}}>
           <CardBody>
             <Row className="col-md-12"><TSpinner loading/></Row>

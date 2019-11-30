@@ -1,4 +1,5 @@
 import React, {PureComponent} from 'react';
+import {withTranslation} from 'react-i18next';
 import {
   Card,
   CardBody,
@@ -59,10 +60,12 @@ class TruckSpecs extends PureComponent {
 
 
   render() {
+    const { t } = { ...this.props };
+    const translate = t;
     const {loaded} = {...this.state};
     const {data} = {...this.props};
     const {allTruckTypes, selectedTruckTypes} = data;
-    const secondColumnStart = Math.floor(allTruckTypes.length / 2);
+    // const secondColumnStart = Math.floor(allTruckTypes.length / 2);
     if (loaded && data) {
       return (
         <Col md={12} lg={12}>
@@ -75,11 +78,14 @@ class TruckSpecs extends PureComponent {
               >
                 <Row className="col-md-12">
                   <div className="col-md-6 form__form-group">
-    <span className="form__form-group-label">How many <span style={{
-      fontWeight: 'bold',
-      color: 'black'
-    }}
-    >trucks</span> do you need?</span>
+                    <span className="form__form-group-label">{translate('HOW_MANY_2')}&nbsp;
+                      <span style={{
+                        fontWeight: 'bold',
+                        color: 'black'
+                      }}
+                      >{translate('trucks')}
+                      </span> {translate('do you need?')}
+                    </span>
                   </div>
                   <div className="col-md-3 form__form-group">
                     <TField
@@ -90,7 +96,7 @@ class TruckSpecs extends PureComponent {
                           value: data.truckQuantity
                         }
                       }
-                      placeholder="Any"
+                      placeholder={translate('ANY_QUANTITY')}
                       type="text"
                       id="truckQuantity"
                     />
@@ -101,9 +107,11 @@ class TruckSpecs extends PureComponent {
                 </Row>
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
-                    <span className="form__form-group-label">Select a truck type(s)
-                    <span
-                      style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}> ( required ) </span>
+                    <span className="form__form-group-label">{translate('Select a truck type(s)')}
+                      <span
+                        style={{fontSize: 12, color: 'rgb(101, 104, 119)'}}
+                      > ( {translate('required')} )
+                      </span>
                     </span>
                   </div>
                 </Row>
@@ -163,4 +171,4 @@ TruckSpecs.defaultProps = {
   data: null
 };
 
-export default TruckSpecs;
+export default withTranslation()(TruckSpecs);

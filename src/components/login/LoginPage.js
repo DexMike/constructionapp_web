@@ -16,10 +16,12 @@ import EyeIcon from 'mdi-react/EyeIcon';
 import TCheckBox from '../common/TCheckBox';
 import TAlert from '../common/TAlert';
 import UtilsService from '../../api/UtilsService';
-import LoginLogService from '../../api/LoginLogService';
+// import LoginLogService from '../../api/LoginLogService';
 import UserService from '../../api/UserService';
 import TSubmitButton from '../common/TSubmitButton';
 import ProfileService from '../../api/ProfileService';
+// import CompanyService from '../../api/CompanyService';
+import UserManagementService from '../../api/UserManagementService';
 
 // import ProfileService from '../../api/ProfileService';
 // import AgentService from '../../api/AgentService';
@@ -44,7 +46,8 @@ class LoginPage extends SignIn {
       user: null,
       btnSubmitting: false, // Used by TSubmitButton
       userUnderReview: false,
-      ip: '',
+      isDriver: false,
+      // ip: '',
       browserVersion: [],
       screenSize: []
     };
@@ -104,21 +107,21 @@ class LoginPage extends SignIn {
     await UserService.updateUser(user);
   }
 
-  async createLoginLog(state) {
-    const log = {
-      attemptedUsername: this.state.username,
-      attemptedPassword: !state ? this.state.password : null,
-      ipAddress: this.state.ip,
-      browserType: this.state.browserVersion.name,
-      browserVersion: this.state.browserVersion.version,
-      screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
-      createdBy: 1,
-      createdOn: moment.utc().format(),
-      modifiedBy: 1,
-      modifiedOn: moment.utc().format()
-    };
-    await LoginLogService.createLoginLog(log);
-  }
+  // async createLoginLog(state) {
+  //   const log = {
+  //     attemptedUsername: this.state.username,
+  //     attemptedPassword: !state ? this.state.password : null,
+  //     ipAddress: this.state.ip,
+  //     browserType: this.state.browserVersion.name,
+  //     browserVersion: this.state.browserVersion.version,
+  //     screenSize: `${this.state.screenSize.width} x ${this.state.screenSize.height}`,
+  //     createdBy: 1,
+  //     createdOn: moment.utc().format(),
+  //     modifiedBy: 1,
+  //     modifiedOn: moment.utc().format()
+  //   };
+  //   await LoginLogService.createLoginLog(log);
+  // }
 
   async onSignIn() {
     let { username } = this.state;
@@ -128,7 +131,8 @@ class LoginPage extends SignIn {
     this.setState({loading: true, btnSubmitting: true, error: null, errorCode: null});
     try {
       if (!username || username.length <= 0
-        || !password || password.length <= 0) {
+        || !password || password.length <= 0
+        || !(username.indexOf('@') > -1)) {
         // await this.createLoginLog(false);
         this.setState({
           error: 'Incorrect username or password.',
@@ -151,6 +155,23 @@ class LoginPage extends SignIn {
         return;
       }
 
+      const userSignIn = await UserManagementService.signIn({email: username, password});
+      if (userSignIn.success) {
+        const profile = await ProfileService
+          .getProfilePreLogin(userSignIn.accessToken, userSignIn.idToken);
+        if (profile.companyType === 'Carrier' && !profile.isAdmin) {
+          this.setState({isDriver: true});
+          return;
+        }
+      } else {
+        this.setState({
+          error: 'Incorrect username or password.',
+          btnSubmitting: false,
+          loading: false
+        });
+        return;
+      }
+
       if (user.id && user.userStatus !== 'First Login' && user.userStatus !== 'Enabled' && user.userStatus !== 'Driver Created') {
         this.setState({userUnderReview: true});
         return;
@@ -159,28 +180,27 @@ class LoginPage extends SignIn {
       if (user.id && user.userStatus === 'Driver Created') {
         const driver = await UserService.getDriverByUserId(user.id);
         if (driver.id === null || driver.driverStatus !== 'Enabled') {
-          await this.createLoginLog(true);
+          // await this.createLoginLog(true);
           this.setState({userUnderReview: true});
           return;
         }
       }
-      let ip = '';
-      try {
-        const ipAddress = await UtilsService.getUserIP();
-        ({ ip } = ipAddress);
-      } catch (e) {
-        // console.log(e);
-      }
+      // let ip = '';
+      // try {
+      //   const ipAddress = await UtilsService.getUserIP();
+      //   ({ ip } = ipAddress);
+      // } catch (e) {
+      //   // console.log(e);
+      // }
       const browserVersion = await UtilsService.getBrowserVersion();
       const screenSize = await UtilsService.getScreenDimentions();
 
       this.setState({
         //  settingsLoaded: true,
-        ip,
+        // ip,
         browserVersion,
         screenSize
       });
-
       const data = await Auth.signIn(user.cognitoId, password);
 
       // console.log(`onSignIn::Response#1: ${JSON.stringify(data, null, 2)}`);
@@ -189,7 +209,7 @@ class LoginPage extends SignIn {
         if (this.props.onStateChange) {
           this.props.onStateChange('authenticated', data);
         }
-        await this.createLoginLog(true);
+        // await this.createLoginLog(true);
         // window.location = '/';
         this.setLogging(username);
 
@@ -294,6 +314,14 @@ class LoginPage extends SignIn {
     );
   }
 
+  renderIsDriver() {
+    return (
+      <h6> Drivers do not have access to the Trelar web app at this time.
+        You can email us at csr@trelar.com. Thank you.
+      </h6>
+    );
+  }
+
   renderLogInForm() {
     const {showPassword, btnSubmitting} = this.state;
     return (
@@ -329,7 +357,7 @@ class LoginPage extends SignIn {
               <AccountOutlineIcon/>
             </div>
             <input
-              className="lower"
+              // className="lower"
               name="username"
               type="text"
               placeholder="Email"
@@ -370,7 +398,7 @@ class LoginPage extends SignIn {
             />
           </Col>
           <Col className="text-right">
-            <div className="app-link" onClick={this.onResetPassword} style={{marginRight: -40}}>
+            <div aria-hidden="true" className="app-link" onClick={this.onResetPassword} style={{marginRight: -40}}>
               Forgot Password?
             </div>
           </Col>
@@ -395,7 +423,7 @@ class LoginPage extends SignIn {
   }
 
   renderPage() {
-    const {userUnderReview} = this.state;
+    const {userUnderReview, isDriver} = this.state;
 
     return (
       <div className="theme-light">
@@ -427,7 +455,8 @@ class LoginPage extends SignIn {
                     </h4>
                   </div>
                   {userUnderReview && this.renderUserNotReviewed()}
-                  {!userUnderReview && this.renderLogInForm()}
+                  {isDriver && this.renderIsDriver()}
+                  {!userUnderReview && !isDriver && this.renderLogInForm()}
                   {/* <div className="account__or"> */}
                   {/* <p>Or Easily Using</p> */}
                   {/* </div> */}
