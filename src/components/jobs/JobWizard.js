@@ -562,17 +562,17 @@ class JobWizard extends Component {
     const {tabPickupDelivery} = {...this.state};
     // const {startGPS} = {...this.state};
     const val = [];
-    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
-      if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
-        && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
-        val.push(translate('Same start and end addresses'));
-      }
-      if (tabPickupDelivery.startLocationAddress1.length === 0
+    if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
+      && (tabPickupDelivery.startLocationAddress1.length === 0
         || tabPickupDelivery.startLocationCity.length === 0
         || tabPickupDelivery.startLocationZip.length === 0
-        || tabPickupDelivery.startLocationState.length === 0) {
+        || tabPickupDelivery.startLocationState.length === 0)) {
         val.push(translate('Missing start address fields'));
-      }
+    }
+
+    if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
+      && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
+      val.push(translate('Same start and end addresses'));
     }
 
     if (val.length > 0) {
@@ -593,14 +593,12 @@ class JobWizard extends Component {
     const val = [];
     // const {endGPS} = {...this.state};
 
-    if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
-
-      if (tabPickupDelivery.endLocationAddress1.length === 0
+    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
+      && (tabPickupDelivery.endLocationAddress1.length === 0
         || tabPickupDelivery.endLocationCity.length === 0
         || tabPickupDelivery.endLocationZip.length === 0
-        || tabPickupDelivery.endLocationState.length === 0) {
+        || tabPickupDelivery.endLocationState.length === 0)) {
         val.push(translate('Missing end address fields'));
-      }
     }
 
     if (val.length > 0) {
@@ -773,17 +771,7 @@ class JobWizard extends Component {
       reqHandlerJobName,
       reqHandlerStartDate,
       jobEndDate,
-      reqHandlerEndDate,
-      tabPickupDelivery,
-      reqHandlerEndAddress,
-      reqHandlerEndState,
-      reqHandlerEndCity,
-      reqHandlerEndZip,
-      reqHandlerSameAddresses,
-      reqHandlerStartAddress,
-      reqHandlerStartCity,
-      reqHandlerStartState,
-      reqHandlerStartZip
+      reqHandlerEndDate
     } = {...this.state};
     let isValid = true;
     if (!name || name === '') {
@@ -850,183 +838,6 @@ class JobWizard extends Component {
         }
       });
       isValid = false;
-    }
-
-    let goToAddressTab = false;
-
-    // START ADDRESS VALIDATION
-    if ((!tabPickupDelivery.selectedStartAddressId
-      || tabPickupDelivery.selectedStartAddressId === 0)
-      && (tabPickupDelivery.startLocationAddress1.length > 0
-        || tabPickupDelivery.startLocationCity.length > 0
-        || tabPickupDelivery.startLocationZip.length > 0
-        || tabPickupDelivery.startLocationState.length > 0)) {
-
-      if (tabPickupDelivery.startLocationAddress1.length === 0) {
-        tabPickupDelivery.reqHandlerStartAddress = {
-          ...reqHandlerStartAddress,
-          touched: true,
-          error: translate('Missing starting address field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-
-      if (tabPickupDelivery.startLocationCity.length === 0) {
-        tabPickupDelivery.reqHandlerStartCity = {
-          ...reqHandlerStartCity,
-          touched: true,
-          error: translate('Missing starting city field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-
-      if (tabPickupDelivery.startLocationZip.length === 0) {
-        tabPickupDelivery.reqHandlerStartZip = {
-          ...reqHandlerStartZip,
-          touched: true,
-          error: translate('Missing starting zip code field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-
-      // only work if tab is 1
-      if (tabPickupDelivery.startLocationState.length === 0) {
-        tabPickupDelivery.reqHandlerStartState = {
-          ...reqHandlerStartState,
-          touched: true,
-          error: translate('Missing starting state field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-      this.setState({tabPickupDelivery});
-    }
-
-    if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
-      && (tabPickupDelivery.startLocationAddress1.length > 0
-        || tabPickupDelivery.startLocationCity.length > 0
-        || tabPickupDelivery.startLocationZip.length > 0
-        || tabPickupDelivery.startLocationState.length > 0)) {
-      const geoResponseStart = await this.getStartCoords();
-      if (!geoResponseStart || geoResponseStart.features.length < 1
-        || geoResponseStart.features[0].relevance < 0.90) {
-        tabPickupDelivery.reqHandlerStartAddress = {
-          ...reqHandlerStartAddress,
-          touched: true,
-          error: translate('Start address not found')
-        };
-        isValid = false;
-        goToAddressTab = true;
-        this.setState({tabPickupDelivery});
-      }
-      if (typeof geoResponseStart.features[0] !== 'undefined') {
-        const coordinates = geoResponseStart.features[0].center;
-        tabPickupDelivery.startLocationLatitude = coordinates[1];
-        tabPickupDelivery.startLocationLongitude = coordinates[0];
-        this.setState({
-          tabPickupDelivery
-        });
-      }
-    }
-
-    if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
-      && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
-      tabPickupDelivery.reqHandlerSameAddresses = {
-        ...reqHandlerSameAddresses,
-        touched: true,
-        error: translate("Can't have same start and end locations")
-      };
-      isValid = false;
-      goToAddressTab = true;
-      this.setState({
-        tabPickupDelivery
-      });
-    }
-
-    // END ADDRESS VALIDATION
-    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
-      && (tabPickupDelivery.endLocationAddress1.length > 0
-        || tabPickupDelivery.endLocationCity.length > 0
-        || tabPickupDelivery.endLocationZip.length > 0
-        || tabPickupDelivery.endLocationState.length > 0)) {
-
-      if (tabPickupDelivery.endLocationAddress1.length === 0) {
-        tabPickupDelivery.reqHandlerEndAddress = {
-          ...reqHandlerEndAddress,
-          touched: true,
-          error: translate('Missing ending address field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-
-      if (tabPickupDelivery.endLocationCity.length === 0) {
-        tabPickupDelivery.reqHandlerEndCity = {
-          ...reqHandlerEndCity,
-          touched: true,
-          error: translate('Missing ending city field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-
-      if (tabPickupDelivery.endLocationState.length === 0) {
-        tabPickupDelivery.reqHandlerEndState = {
-          ...reqHandlerEndState,
-          touched: true,
-          error: translate('Missing ending state field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-
-      if (tabPickupDelivery.endLocationZip.length === 0) {
-        tabPickupDelivery.reqHandlerEndZip = {
-          ...reqHandlerEndZip,
-          touched: true,
-          error: translate('Missing ending zip field')
-        };
-        isValid = false;
-        goToAddressTab = true;
-      }
-      this.setState({
-        tabPickupDelivery
-      });
-    }
-
-    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
-      && (tabPickupDelivery.endLocationAddress1.length > 0
-        || tabPickupDelivery.endLocationCity.length > 0
-        || tabPickupDelivery.endLocationZip.length > 0
-        || tabPickupDelivery.endLocationState.length > 0)) {
-      const geoResponseEnd = await this.getEndCoords();
-      if (!geoResponseEnd || geoResponseEnd.features.length < 1
-        || geoResponseEnd.features[0].relevance < 0.90) {
-        tabPickupDelivery.reqHandlerEndAddress = {
-          ...reqHandlerEndAddress,
-          touched: true,
-          error: translate('End address not found')
-        };
-        isValid = false;
-        goToAddressTab = true;
-        this.setState({
-          tabPickupDelivery
-        });
-      }
-      if (typeof geoResponseEnd.features[0] !== 'undefined') {
-        const coordinates = geoResponseEnd.features[0].center;
-        tabPickupDelivery.endLocationLatitude = coordinates[1];
-        tabPickupDelivery.endLocationLongitude = coordinates[0];
-        this.setState({
-          tabPickupDelivery
-        });
-      }
-    }
-    if (goToAddressTab) {
-      this.secondPage();
     }
 
     return isValid;
