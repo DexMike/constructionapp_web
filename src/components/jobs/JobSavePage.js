@@ -643,13 +643,16 @@ class JobSavePage extends Component {
     // A favorite Carrier "accepts" the job
     if (action === 'Accept') {
       try {
-        await BidService.acceptBid(job.id, bid.id);
+        const acceptedBid = await BidService.acceptBid(job.id, bid.id);
+        job.status = "Booked";
+        this.setState({job, companyCarrier: acceptedBid.companyCarrierId});
       } catch (e) {
         // console.log(e);
       }
     } else if (action === 'Decline') { // A Carrier "declines" a job request
       try {
-        await BidService.declineBid(job.id, bid.id);
+        const declinedBid = await BidService.declineBid(job.id, bid.id);
+        this.setState({bid: declinedBid});
       } catch (e) {
         // console.log(e);
       }
