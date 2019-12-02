@@ -100,7 +100,7 @@
   "Success": "Éxito",
   "Warning": "Advertencia",
   "Return": "Regresar",
-  "Resend Invite": "Volver a enviar invitación",  
+  "Resend Invite": "Volver a enviar invitación",
   "Truck Description": "Descripción del camión",
   "License Plate": "Placa",
   "Upload a picture of your Truck": "Sube una foto de tu camión",
@@ -239,9 +239,9 @@
   "Notify me when a Job gets closed while I am working on it": "Notificarme cuando un trabajo se cierra mientras estoy trabajando en él",
   "Notify me when a Carrier has canceled a Job": "Notificarme cuando un transportista haya cancelado un trabajo",
   "Notify me when a Job has been canceled": "Notificarme cuando un trabajo ha sido cancelado",
-  "Welcome to Trelar! To start ordering materials for deliver, please set up your bank account for ACH withdrawls": 
+  "Welcome to Trelar! To start ordering materials for deliver, please set up your bank account for ACH withdrawls":
   "¡Bienvenido a Trelar! Para comenzar a ordenar materiales para entregar, por favor configure su cuenta bancaria para los retiros de ACH",
-  "Nothing will post from your account until load deliveries with attached invoices are approved by your company": 
+  "Nothing will post from your account until load deliveries with attached invoices are approved by your company":
   "No se publicará nada desde su cuenta hasta que su empresa apruebe las entregas de carga con facturas adjuntas",
   "Enter your company bank information": "Ingrese la información bancaria de su empresa",
   "By clicking \"Save\", I authorize Braintree, a service of PayPal, on behalf of Trelar (i) to verify my bank account information using bank information and consumer reports and (ii) to debit my bank account":
@@ -249,10 +249,13 @@
   "Having problems signing up? Please contact our team to get help": "¿Problemas para registrarse? Por favor contacte a nuestro equipo para obtener ayuda",
   "We were unable to verify your account information, please update with the correct banking info or contact Trelar support":
   "No pudimos verificar la información de su cuenta, actualícela con la información bancaria correcta o comuníquese con el soporte de Trelar",
-  "Congrats! Your account was approved for ACH debits. You can start using Trelar now.": 
+  "Congrats! Your account was approved for ACH debits. You can start using Trelar now.":
   "¡Felicidades! Su cuenta fue aprobada para débitos ACH. Puede comenzar a usar Trelar ahora.",
   "User Updated": "Usuario Actualizado",
   "No Trucks are allocated to this job yet.": "Aún no hay camiones asignados a este trabajo.",
   "Allocated Trucks": "Camiones asignados",
-  "See Allocated Trucks": "Ver los camiones asignados"
+  "See Allocated Trucks": "Ver los camiones asignados",
+  "NO_TRUCKS": "No tiene más camiones para asignar a este trabajo",
+  "NO_DRIVERS": "No tiene más conductores para asignar a este trabajo",
+  "NO_TRUCKS_OR_DRIVERS": "No tiene más camiones ni conductores para asignar a este trabajo"
 }

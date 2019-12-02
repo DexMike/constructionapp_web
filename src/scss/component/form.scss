@@ -15,6 +15,18 @@
   border-top-width: 6px;
 }
 
+.customTooltipNoArrow .__react_component_tooltip.place-top{
+  margin-top:0 !important;
+}
+.customTooltipNoArrow .__react_component_tooltip.type-dark{
+  background-color: orange;
+}
+.customTooltipNoArrow .__react_component_tooltip.type-dark.place-top:after {
+  border-top-color: transparent;
+  border-top-style: solid;
+  border-top-width: 6px;
+}
+
 .form {
   display: flex;
   flex-wrap: wrap;

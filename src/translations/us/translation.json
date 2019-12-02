@@ -239,9 +239,9 @@
   "Notify me when a Job gets closed while I am working on it": "Notify me when a Job gets closed while I am working on it",
   "Notify me when a Carrier has canceled a Job": "Notify me when a Carrier has canceled a Job",
   "Notify me when a Job has been canceled": "Notify me when a Job has been canceled",
-  "Welcome to Trelar! To start ordering materials for deliver, please set up your bank account for ACH withdrawls": 
+  "Welcome to Trelar! To start ordering materials for deliver, please set up your bank account for ACH withdrawls":
   "Welcome to Trelar! To start ordering materials for deliver, please set up your bank account for ACH withdrawls",
-  "Nothing will post from your account until load deliveries with attached invoices are approved by your company": 
+  "Nothing will post from your account until load deliveries with attached invoices are approved by your company":
   "Nothing will post from your account until load deliveries with attached invoices are approved by your company",
   "Enter your company bank information": "Enter your company bank information",
   "By clicking \"Save\", I authorize Braintree, a service of PayPal, on behalf of Trelar (i) to verify my bank account information using bank information and consumer reports and (ii) to debit my bank account":
@@ -249,10 +249,13 @@
   "Having problems signing up? Please contact our team to get help": "Having problems signing up? Please contact our team to get help",
   "We were unable to verify your account information, please update with the correct banking info or contact Trelar support":
   "We were unable to verify your account information, please update with the correct banking info or contact Trelar support",
-  "Congrats! Your account was approved for ACH debits. You can start using Trelar now.": 
+  "Congrats! Your account was approved for ACH debits. You can start using Trelar now.":
   "Congrats! Your account was approved for ACH debits. You can start using Trelar now.",
   "User Updated": "User Updated",
   "No Trucks are allocated to this job yet.": "No Trucks are allocated to this job yet.",
   "Allocated Trucks": "Allocated Trucks",
-  "See Allocated Trucks": "See Allocated Trucks"
+  "See Allocated Trucks": "See Allocated Trucks",
+  "NO_TRUCKS": "You do not have any more trucks to allocate to the job",
+  "NO_DRIVERS": "You do not have any more drivers to allocate to the job",
+  "NO_TRUCKS_OR_DRIVERS": "You do not have any more trucks or drivers to allocate to the job"
 }
