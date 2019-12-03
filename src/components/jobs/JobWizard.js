@@ -1107,7 +1107,7 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, selectedCarrierId, job} = this.props;
+    const {jobRequest, jobEdit, jobEditSaved, selectedCarrierId, job} = this.props;
     this.setState({btnSubmitting: true});
     const {
       profile,
@@ -1298,6 +1298,10 @@ class JobWizard extends Component {
     }
 
     try {
+      // Checking if there's a saved job to update so carriers can be notified
+      if (job && job.id) {
+        jobCreate.id = job.id;
+      }       
       newJob = await JobService.createNewJob(jobRequestObject);
     } catch (e) {
       console.error(e);
