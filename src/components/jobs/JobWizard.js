@@ -1298,7 +1298,7 @@ class JobWizard extends Component {
     }
 
     try {
-      // Checking if there's a saved job to update so carriers can be notified
+      // Checking if there's a saved job to update instead of creating a new one
       if (job && job.id) {
         jobCreate.id = job.id;
       }       
