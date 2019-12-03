@@ -562,17 +562,17 @@ class JobWizard extends Component {
     const {tabPickupDelivery} = {...this.state};
     // const {startGPS} = {...this.state};
     const val = [];
-    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
-      if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
-        && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
-        val.push(translate('Same start and end addresses'));
-      }
-      if (tabPickupDelivery.startLocationAddress1.length === 0
+    if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
+      && (tabPickupDelivery.startLocationAddress1.length === 0
         || tabPickupDelivery.startLocationCity.length === 0
         || tabPickupDelivery.startLocationZip.length === 0
-        || tabPickupDelivery.startLocationState.length === 0) {
+        || tabPickupDelivery.startLocationState.length === 0)) {
         val.push(translate('Missing start address fields'));
-      }
+    }
+
+    if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
+      && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
+      val.push(translate('Same start and end addresses'));
     }
 
     if (val.length > 0) {
@@ -593,14 +593,12 @@ class JobWizard extends Component {
     const val = [];
     // const {endGPS} = {...this.state};
 
-    if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
-
-      if (tabPickupDelivery.endLocationAddress1.length === 0
+    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
+      && (tabPickupDelivery.endLocationAddress1.length === 0
         || tabPickupDelivery.endLocationCity.length === 0
         || tabPickupDelivery.endLocationZip.length === 0
-        || tabPickupDelivery.endLocationState.length === 0) {
+        || tabPickupDelivery.endLocationState.length === 0)) {
         val.push(translate('Missing end address fields'));
-      }
     }
 
     if (val.length > 0) {
@@ -695,7 +693,7 @@ class JobWizard extends Component {
     if (isValid) {
       await this.saveJobDraft();
       this.setState({btnSubmitting: false});
-      this.closeNow();
+      // this.closeNow();
     }
   }
 
