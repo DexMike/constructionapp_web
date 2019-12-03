@@ -31,6 +31,7 @@ import CarrierRow from './CarrierRow';
 import GeoUtils from '../../utils/GeoUtils';
 import BidService from '../../api/BidService';
 import JobWizard from '../jobs/JobWizard';
+import TFieldNumber from '../common/TFieldNumber';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -915,13 +916,25 @@ class CarriersCustomerPage extends Component {
                     <div className="filter-item-title">
                       Number of trucks
                     </div>
-                    <input
-                      name="numEquipments"
-                      type="number"
-                      placeholder="Any"
-                      value={filters.numEquipments}
-                      onChange={this.handleNumChange}
+                    <TFieldNumber
+                      input={{
+                        onChange: this.handleNumChange,
+                        name: 'numEquipments',
+                        value: filters.numEquipments
+                      }}
                     />
+                    {
+                      /*
+                      <input
+                        name="numEquipments"
+                        type="number"
+                        placeholder="Any"
+                        value={filters.numEquipments}
+                        onChange={this.handleNumChange}
+
+                      />
+                      */
+                    }                    
                   </div>
                   <div>
                     <div className="filter-item-title">
