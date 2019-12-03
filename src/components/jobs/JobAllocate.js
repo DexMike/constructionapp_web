@@ -413,10 +413,7 @@ class JobAllocate extends Component {
             <CardBody className="card-full-height">
               {/* <CardTitle>Allocate Drivers</CardTitle> */}
               <Row>
-                <a
-                  data-tip
-                  data-for="allocateDriversButton"
-                >
+                <Col md={2}>
                 <TSubmitButton
                   onClick={this.toggleModal}
                   className="primaryButton"
@@ -425,23 +422,31 @@ class JobAllocate extends Component {
                   bntText="Allocate Drivers"
                   disabled={selectableDrivers.length <= 0 || selectableEquipments.length <= 0}
                 />
-                </a>
-                <div className="customTooltipNoArrow" style={{display: (selectableDrivers.length <= 0 || selectableEquipments.length <= 0) ? 'block' : 'none'}}
-                >
-                  <ReactTooltip id='allocateDriversButton' effect='solid'>
-                      <p style={{color: 'white'}}>
-                        { (selectableEquipments.length === 0 && selectableDrivers.length > 0) && (
-                          translate('NO_TRUCKS')
-                        )}
-                        { (selectableDrivers.length === 0 && selectableEquipments.length > 0) && (
-                          translate('NO_DRIVERS')
-                        )}
-                        { (selectableDrivers.length === 0 && selectableEquipments.length === 0) && (
-                          translate('NO_TRUCKS_OR_DRIVERS')
-                        )}
-                      </p>
-                  </ReactTooltip>
-                </div>
+                </Col>
+                <Col md={10}>
+                  <Card style={{display: (selectableDrivers.length <= 0 || selectableEquipments.length <= 0) ? 'block' : 'none'}}>
+                    <CardBody className="bg-warning">
+                      <Row className="justify-content-md-left" style={{paddingTop: 6}}>
+                        <Col md="auto">
+                          <i className="material-icons iconSet" style={{color: 'rgb(145, 85, 2)', paddingLeft: 15, marginRight: -10, paddingTop: 3}}>ic_report_problem</i>
+                        </Col>
+                        <Col md="auto">
+                          <p style={{color: 'rgb(145, 85, 2)'}}>
+                            {(selectableEquipments.length === 0 && selectableDrivers.length > 0) && (
+                              translate('NO_TRUCKS')
+                            )}
+                            {(selectableDrivers.length === 0 && selectableEquipments.length > 0) && (
+                              translate('NO_DRIVERS')
+                            )}
+                            {(selectableDrivers.length === 0 && selectableEquipments.length === 0) && (
+                              translate('NO_TRUCKS_OR_DRIVERS')
+                            )}
+                          </p>
+                        </Col>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
               </Row>
               <Row>
                 {
