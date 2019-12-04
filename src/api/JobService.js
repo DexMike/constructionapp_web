@@ -161,7 +161,7 @@ class JobService extends AgentService {
   }
 
   static async createNewJob(jobRequest) {
-    const response = await super.post(`${PATH}/create`, jobRequest);
+    const response = await super.post(`${PATH}/post`, jobRequest);
     return (response);
   }
 
