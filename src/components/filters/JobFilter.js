@@ -154,7 +154,7 @@ class JobFilter extends Component {
     this.setState({
       intervals,
       filters,
-      loaded: SVGComponentTransferFunctionElement
+      loaded: true
     });
     await this.fetchJobs();
     this.setState({
