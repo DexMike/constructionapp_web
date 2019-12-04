@@ -724,7 +724,7 @@ class HaulRate extends PureComponent {
           </div>
           <div className="customTooltip">
             <ReactTooltip id='estimatedTonsInfo' effect='solid'>
-              <p style={{color: 'white'}}>{TFormat.asNumber(estimatedTonsInfo)}</p>
+              <p style={{color: 'white'}}>{estimatedTonsInfo}</p>
             </ReactTooltip>
           </div>
           <div className="col-md-6 form__form-group">
@@ -744,7 +744,7 @@ class HaulRate extends PureComponent {
           </div>
           <div className="customTooltip">
             <ReactTooltip id='estimatedHoursInfo' effect='solid'>
-              <p style={{color: 'white'}}>{TFormat.asNumber(estimatedHoursInfo)}</p>
+              <p style={{color: 'white'}}>{estimatedHoursInfo}</p>
             </ReactTooltip>
           </div>
           {/*{rateCalculator.rateTypeRadio === 'ton'*/}
