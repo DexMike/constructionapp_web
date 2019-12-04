@@ -602,7 +602,7 @@ class JobForm extends Component {
           {this.renderPhone(showPhone)}
           <br/>
           {this.renderMinimumInsurance()}
-          Number of Trucks: {job.numEquipments || 'Any'}
+          Number of Trucks: {TFormat.asWholeNumber(job.numEquipments) || 'Any'}
           <br/>
           Truck Types: {trucks}
           <br/>
@@ -645,7 +645,7 @@ class JobForm extends Component {
                 ? 'Total'
                 : 'Estimated'
             }
-            &nbsp;Amount: {job.rateEstimate} {job.rateType}(s)
+            &nbsp;Amount: {TFormat.asNumber(job.rateEstimate)} {job.rateType}(s)
             <br/>
             Rate: {
               (
@@ -660,7 +660,7 @@ class JobForm extends Component {
             <h3 className="subhead">
               Job Status: {displayStatus}
             </h3>
-            Estimated Amount: {job.rateEstimate} {job.rateType}(s)
+            Estimated Amount: {TFormat.asNumber(job.rateEstimate)} {job.rateType}(s)
             <br/>
             Rate:&nbsp;{job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>
@@ -669,7 +669,7 @@ class JobForm extends Component {
             <br/>
             {(job.rateType === 'Hour') && (
               <React.Fragment>
-                Estimated One Way Cost / Ton / Mile: ${TCalculator.getOneWayCostByHourRate(
+                Estimated One Way Cost / Ton / Mile: {TFormat.asMoney(TCalculator.getOneWayCostByHourRate(
                 timeEnroute,
                 timeReturn,
                 0.25,
@@ -677,15 +677,15 @@ class JobForm extends Component {
                 job.rate,
                 22,
                 distanceEnroute
-              )}
+              ))}
               </React.Fragment>
             )}
             {(job.rateType === 'Ton') && (
               <React.Fragment>
-                Estimated One Way Cost / Ton / Mile: $ {TCalculator.getOneWayCostByTonRate(
+                Estimated One Way Cost / Ton / Mile: {TFormat.asMoney(TCalculator.getOneWayCostByTonRate(
                 job.rate,
                 distanceEnroute
-              )}
+              ))}
               </React.Fragment>
             )}
             <br/>
@@ -831,17 +831,24 @@ class JobForm extends Component {
             {
               job.rateType === 'Ton' ? (
                 <div>
-                  <span>Total Tons:  <span>{total} {job.rateType}(s)</span></span>
+                  <span>Total Tons: <span>{TFormat.asNumber(total)} {job.rateType}(s)</span></span>
                   <br/>
-                  <span>Load Tonnage Delivered: <span>{tonsDelivered}</span></span>
+                  <span>
+                    Load Tonnage Delivered:&nbsp;
+                    <span>
+                      {TFormat.asNumber(tonsDelivered)}
+                    </span>
+                  </span>
                   <br/>
-                  <span>Tons Remaining:
-                    <span>{TFormat.asMoney(total - tonsDelivered)}</span>
+                  <span>Tons Remaining:&nbsp;
+                    <span>
+                      {TFormat.asNumber(total - tonsDelivered)}
+                    </span>
                   </span>
                   <br/>
                   <span>% Completed:&nbsp;
                     <span>
-                      {parseFloat((tonsDelivered * 100 / total).toFixed(2))}%
+                      {TFormat.formatPercent(tonsDelivered * 100 / total)}
                     </span>
                   </span>
                   <br/>
@@ -899,7 +906,7 @@ class JobForm extends Component {
               <span>Avg Tons / Load:&nbsp;
                 <span>
                   {
-                    tonnage || 0
+                    TFormat.asNumber(tonnage) || 0
                   }
                 </span>
               </span>
