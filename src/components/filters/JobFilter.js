@@ -140,16 +140,21 @@ class JobFilter extends Component {
     }
     if (localStorage.getItem('dashboardFilters') && !isMarketplace) {
       filters = JSON.parse(localStorage.getItem('dashboardFilters'));
-      // console.log('>>GOT SAVED FILTERS:', savedFilters);
+      // console.log('>>GOT SAVED FILTERS:', savedFilters);  
+      intervals.startInterval = new Date(filters.startAvailability);
+      intervals.endInterval = new Date(filters.endAvailability);
     }
     if (localStorage.getItem('marketFilters') && isMarketplace) {
       filters = JSON.parse(localStorage.getItem('marketFilters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
+      intervals.startInterval = new Date(filters.startAvailability);
+      intervals.endInterval = new Date(filters.endAvailability);
     }
     await this.fetchFilterLists();
     this.setState({
-      loaded: true,
-      filters
+      intervals,
+      filters,
+      loaded: SVGComponentTransferFunctionElement
     });
     await this.fetchJobs();
     this.setState({
