@@ -9,6 +9,7 @@ import TTable from '../common/TTable';
 import SelectField from '../common/TSelect';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentDetailService from '../../api/EquipmentDetailService';
+import ReactTooltip from "react-tooltip";
 
 class JobAllocate extends Component {
   constructor(props) {
@@ -95,7 +96,7 @@ class JobAllocate extends Component {
     });
   }
 
-  async handleAllocateDrivers() {    
+  async handleAllocateDrivers() {
     const { booking, profile, job, t } = { ...this.props };
     const translate = t;
     const {
@@ -412,6 +413,7 @@ class JobAllocate extends Component {
             <CardBody className="card-full-height">
               {/* <CardTitle>Allocate Drivers</CardTitle> */}
               <Row>
+                <Col md={2}>
                 <TSubmitButton
                   onClick={this.toggleModal}
                   className="primaryButton"
@@ -420,6 +422,31 @@ class JobAllocate extends Component {
                   bntText="Allocate Drivers"
                   disabled={selectableDrivers.length <= 0 || selectableEquipments.length <= 0}
                 />
+                </Col>
+                <Col md={10}>
+                  <Card style={{display: (selectableDrivers.length <= 0 || selectableEquipments.length <= 0) ? 'block' : 'none'}}>
+                    <CardBody className="bg-warning">
+                      <Row className="justify-content-md-left" style={{paddingTop: 6}}>
+                        <Col md="auto">
+                          <i className="material-icons iconSet" style={{color: 'rgb(145, 85, 2)', paddingLeft: 15, marginRight: -10, paddingTop: 3}}>ic_report_problem</i>
+                        </Col>
+                        <Col md="auto">
+                          <p style={{color: 'rgb(145, 85, 2)'}}>
+                            {(selectableEquipments.length === 0 && selectableDrivers.length > 0) && (
+                              translate('NO_TRUCKS')
+                            )}
+                            {(selectableDrivers.length === 0 && selectableEquipments.length > 0) && (
+                              translate('NO_DRIVERS')
+                            )}
+                            {(selectableDrivers.length === 0 && selectableEquipments.length === 0) && (
+                              translate('NO_TRUCKS_OR_DRIVERS')
+                            )}
+                          </p>
+                        </Col>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
               </Row>
               <Row>
                 {
