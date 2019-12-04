@@ -40,11 +40,25 @@ class MarketplaceCarrierPage extends Component {
   }
 
   async componentDidMount() {
+    let { rows, totalCount, filters } = this.state;
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo();
+
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
+      rows = filters.rows;      
+    }    
+    if (localStorage.getItem('metadata')) {
+      const metadata = JSON.parse(localStorage.getItem('metadata'));
+      totalCount = metadata.totalCount;
+    }
+
     this.setState({
       isAdmin: profile.isAdmin,
-      loaded: true
+      loaded: true,
+      rows,
+      totalCount,
+      filters
     });
   }
 
@@ -57,9 +71,12 @@ class MarketplaceCarrierPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
+    localStorage.setItem('filters', JSON.stringify(filters));
+    localStorage.setItem('metadata', JSON.stringify(metadata));
     this.setState({
-      totalCount,
-      jobs
+      jobs,
+      filters,
+      totalCount
     });
   }
 
@@ -162,7 +179,7 @@ class MarketplaceCarrierPage extends Component {
   }
 
   renderJobList() {
-    let { jobs } = this.state;
+    let { jobs, rows } = this.state;
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
@@ -278,6 +295,7 @@ class MarketplaceCarrierPage extends Component {
                   handlePageChange={this.handlePageChange}
                   totalCount={totalCount}
                   isLoading={isLoading}
+                  defaultRows={rows}
                 />
 
               </CardBody>
@@ -316,6 +334,7 @@ class MarketplaceCarrierPage extends Component {
             page={page}
             rows={rows}
             isLoading={(e) => this.setState({isLoading: e})}
+            isMarketplace
           />
           {this.renderJobList()}
         </Container>
