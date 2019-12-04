@@ -149,18 +149,18 @@ class DashboardCustomerPage extends Component {
       filters[name] = value;
     }
     // clearing filter fields for general jobs based on Status (Top cards)
-    filters.equipmentType = [];
-    filters.materialType = [];
-    filters.startAvailability = '';
-    filters.endAvailability = '';
-    delete filters.rateType;
-    filters.rate = '';
-    filters.minTons = '';
-    filters.minHours = '';
-    filters.minCapacity = '';
-    filters.numEquipments = '';
-    filters.zipCode = '';
-    filters.range = '';
+    // filters.equipmentType = [];
+    // filters.materialType = [];
+    // filters.startAvailability = '';
+    // filters.endAvailability = '';
+    // delete filters.rateType;
+    // filters.rate = '';
+    // filters.minTons = '';
+    // filters.minHours = '';
+    // filters.minCapacity = '';
+    // filters.numEquipments = '';
+    // filters.zipCode = '';
+    // filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       filters,

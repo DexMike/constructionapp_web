@@ -224,7 +224,7 @@ class JobFilter extends Component {
     const { isMarketplace } = this.props;
     const {filters} = {...this.state};
     // don't save status
-    delete filters.status;
+    // delete filters.status;
     if (!isMarketplace) {
       localStorage.setItem('dashboardFilters', JSON.stringify(filters));
     } else {
@@ -489,7 +489,9 @@ class JobFilter extends Component {
   }
 
   async filterWithStatus(filters) {
-    this.state = {filters};
+    this.setState({filters}, function saved() {
+      this.saveFilters();
+    });
     await this.fetchJobs();
   }
 
@@ -498,13 +500,13 @@ class JobFilter extends Component {
     const resetFilters = filters;
     const resetIntervals = {
       startInterval: moment().startOf('week').add(-1, 'weeks').hours(0)
-.minutes(0)
-.seconds(0)
-.toDate(),
+        .minutes(0)
+        .seconds(0)
+        .toDate(),
       endInterval: moment().endOf('week').add(1, 'weeks').hours(23)
-.minutes(59)
-.seconds(59)
-.toDate()
+        .minutes(59)
+        .seconds(59)
+        .toDate()
     };
     resetFilters.startAvailability = resetIntervals.startInterval;
     resetFilters.endAvailability = resetIntervals.endInterval;
