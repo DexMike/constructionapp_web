@@ -113,6 +113,7 @@ class TDateTimePickerField extends PureComponent {
       // timeFormat,
       disabled,
       id,
+      minDate,
       placeholder,
       defaultDate
     } = this.props;
@@ -128,6 +129,7 @@ class TDateTimePickerField extends PureComponent {
               enableTime: showTime,
               defaultDate,
               dateFormat,
+              minDate,
               // enableTime: true,
               allowInput: true,
               altFormat: 'm\\/d\\/Y h\\:i K',
@@ -173,6 +175,10 @@ TDateTimePickerField.propTypes = {
     PropTypes.object,
     PropTypes.number
   ]),
+  minDate: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.number
+  ]),
   id: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number
@@ -183,6 +189,7 @@ TDateTimePickerField.propTypes = {
 
 TDateTimePickerField.defaultProps = {
   dateFormat: 'm/d/Y',
+  minDate: null,
   meta: {
     touched: null,
     error: null
