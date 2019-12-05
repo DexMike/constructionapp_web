@@ -140,8 +140,6 @@ class JobFilter extends Component {
     }
     if (localStorage.getItem('dashboardFilters') && !isMarketplace) {
       filters = JSON.parse(localStorage.getItem('dashboardFilters'));
-      console.log(143, filters.startAvailability);
-      console.log(144, filters.endAvailability);
       // console.log('>>GOT SAVED FILTERS:', savedFilters); 
       intervals.startInterval = this.parseStringToDate(filters.startAvailability);
       intervals.endInterval = moment(filters.endAvailability).endOf('day').toDate();
@@ -152,7 +150,6 @@ class JobFilter extends Component {
       intervals.startInterval = this.parseStringToDate(filters.startAvailability);
       intervals.endInterval = moment(filters.endAvailability).endOf('day').toDate();
     }
-    console.log(167, intervals);
     await this.fetchFilterLists();
     this.setState({
       intervals,
@@ -367,6 +364,7 @@ class JobFilter extends Component {
     const jobs = result.data;
     const {metadata} = result;
     const {returnJobs} = this.props;
+    this.saveFilters();
     returnJobs(jobs, filters, metadata);
     this.setState({lastZipCode: filters.zipCode});
     if (isLoading) {
@@ -505,9 +503,7 @@ class JobFilter extends Component {
   }
 
   async filterWithStatus(filters) {
-    this.setState({filters}, function saved() {
-      this.saveFilters();
-    });
+    this.setState({filters});
     await this.fetchJobs();
   }
 
