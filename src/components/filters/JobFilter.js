@@ -140,16 +140,19 @@ class JobFilter extends Component {
     }
     if (localStorage.getItem('dashboardFilters') && !isMarketplace) {
       filters = JSON.parse(localStorage.getItem('dashboardFilters'));
-      // console.log('>>GOT SAVED FILTERS:', savedFilters);  
-      intervals.startInterval = new Date(filters.startAvailability);
-      intervals.endInterval = new Date(filters.endAvailability);
+      console.log(143, filters.startAvailability);
+      console.log(144, filters.endAvailability);
+      // console.log('>>GOT SAVED FILTERS:', savedFilters); 
+      intervals.startInterval = this.parseStringToDate(filters.startAvailability);
+      intervals.endInterval = moment(filters.endAvailability).endOf('day').toDate();
     }
     if (localStorage.getItem('marketFilters') && isMarketplace) {
       filters = JSON.parse(localStorage.getItem('marketFilters'));
       // console.log('>>GOT SAVED FILTERS:', savedFilters);
-      intervals.startInterval = new Date(filters.startAvailability);
-      intervals.endInterval = new Date(filters.endAvailability);
+      intervals.startInterval = this.parseStringToDate(filters.startAvailability);
+      intervals.endInterval = moment(filters.endAvailability).endOf('day').toDate();
     }
+    console.log(167, intervals);
     await this.fetchFilterLists();
     this.setState({
       intervals,
@@ -223,6 +226,14 @@ class JobFilter extends Component {
       }
     }
     return endDate;
+  }
+
+  parseStringToDate(stringDate) {
+    const dTimezone = new Date();
+    const offset = dTimezone.getTimezoneOffset() / 60;
+    const date = new Date(Date.parse(stringDate));
+    date.setHours(date.getHours() + offset);
+    return date;
   }
 
   saveFilters() {
