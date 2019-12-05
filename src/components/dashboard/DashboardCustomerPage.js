@@ -101,11 +101,25 @@ class DashboardCustomerPage extends Component {
   }
 
   async componentDidMount() {
+    let { rows, totalCount, filters } = this.state;
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo(profile);
+
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
+      rows = filters.rows;      
+    }    
+    if (localStorage.getItem('metadata')) {
+      const metadata = JSON.parse(localStorage.getItem('metadata'));
+      totalCount = metadata.totalCount;
+    }
+
     this.setState({
       profile,
-      loaded: true
+      loaded: true,
+      rows,
+      totalCount,
+      filters
     });
   }
 
@@ -118,6 +132,8 @@ class DashboardCustomerPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
+    localStorage.setItem('filters', JSON.stringify(filters));
+    localStorage.setItem('metadata', JSON.stringify(metadata));
     this.setState({
       jobs,
       filters,
@@ -132,19 +148,6 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
-    // clearing filter fields for general jobs based on Status (Top cards)
-    filters.equipmentType = [];
-    filters.materialType = [];
-    filters.startAvailability = '';
-    filters.endAvailability = '';
-    delete filters.rateType;
-    filters.rate = '';
-    filters.minTons = '';
-    filters.minHours = '';
-    filters.minCapacity = '';
-    filters.numEquipments = '';
-    filters.zipCode = '';
-    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       filters,
@@ -448,7 +451,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {profile, loaded, totalJobs, totalCount, isLoading} = this.state;
+    const {profile, loaded, totalJobs, totalCount, isLoading, rows} = this.state;
     const { t } = { ...this.props };
     const translate = t;
     let {jobs} = this.state;
@@ -619,6 +622,7 @@ class DashboardCustomerPage extends Component {
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
                     isLoading={isLoading}
+                    defaultRows={rows}
                   />
                 </CardBody>
               </Card>
