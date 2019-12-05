@@ -48,6 +48,7 @@ class TMapGPS extends Component {
       id,
       loadId
     } = this.props;
+    console.log('TCL: TMapGPS -> componentDidMount -> loadId', loadId);
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
@@ -134,8 +135,8 @@ class TMapGPS extends Component {
       const isShiftOn = await LoadService.isShiftOn(loadId);
 
       if (
-        (loadStatus !== 'Ended' || loadStatus !== 'Submitted')
-           && isShiftOn
+        (loadStatus === 'Started' || loadStatus === 'Returning')
+          && isShiftOn
       ) {
         this.addTruckMarker({
           latitude: wps.pop()[0],

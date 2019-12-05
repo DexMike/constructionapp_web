@@ -38,6 +38,7 @@ class TMapGeneralLive extends Component {
       zoom,
       center
     } = this.props;
+    console.log('TCL: TMapGeneralLive -> componentDidMount -> this.props', this.props);
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById('generalMap');
     const mapOptions = {};
@@ -108,7 +109,7 @@ class TMapGeneralLive extends Component {
     onTrucksLoaded(gpsTrackings.length);
 
     // set zoom and margin
-    if (gpsTrackings.length > 0) {
+    if (gpsTrackings.length > 0 && count === 0) {
       const bounds = groupTrackings.getBoundingBox();
       this.map.getViewModel().setLookAtData({
         bounds: GeoUtils.setZoomBounds(bounds)
