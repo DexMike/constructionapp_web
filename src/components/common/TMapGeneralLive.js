@@ -38,7 +38,6 @@ class TMapGeneralLive extends Component {
       zoom,
       center
     } = this.props;
-    console.log('TCL: TMapGeneralLive -> componentDidMount -> this.props', this.props);
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById('generalMap');
     const mapOptions = {};
