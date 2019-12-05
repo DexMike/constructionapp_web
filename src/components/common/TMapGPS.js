@@ -48,7 +48,6 @@ class TMapGPS extends Component {
       id,
       loadId
     } = this.props;
-    console.log('TCL: TMapGPS -> componentDidMount -> loadId', loadId);
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
