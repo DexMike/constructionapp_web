@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import '../jobs/jobs.css';
+import './css/Jobs.css';
 import { AgGridReact } from 'ag-grid-react';
 import moment from 'moment';
 import { Scrollbars } from 'react-custom-scrollbars';
-import TFormat from '../common/TFormat';
+import TFormat from './common/TFormat';
 
 function dateFormatter(date) {
   const dateClean = date.value / 1000;
@@ -18,7 +18,6 @@ function currencyFormatter(params) {
 }
 
 function distanceFormatter(params) {
-  console.log('TCL: distanceFormatter -> params', params.value);
   if (params.value !== null) {
     return `${params.value} miles`;
   }
@@ -42,7 +41,7 @@ class ReportsJobPopup extends Component {
         sortable: true,
         filter: true,
         width: 130,
-        cellStyle: { 'text-align': 'right'},
+        cellStyle: { 'text-align': 'right' },
         resizable: true,
         suppressSizeToFit: true
       },
@@ -52,21 +51,21 @@ class ReportsJobPopup extends Component {
           headerName: 'Name',
           headerTooltip: 'Name',
           width: 160,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           sort: 'desc'
         }, {
           field: 'materials',
           headerName: 'Materials',
           headerTooltip: 'Materials Hauled',
           width: 160,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           sort: 'desc'
         }, {
           field: 'status',
           headerName: 'Status',
           headerTooltip: 'Job Status',
           width: 160,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           filter: true,
           sortable: true
         }, {
@@ -74,7 +73,7 @@ class ReportsJobPopup extends Component {
           headerName: 'Distance',
           headerTooltip: 'Travel Distance',
           width: 90,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           filter: true,
           sortable: true,
           valueFormatter: distanceFormatter
@@ -83,7 +82,7 @@ class ReportsJobPopup extends Component {
           headerName: 'Start Time',
           headerTooltip: 'Start Time',
           width: 225,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           filter: true,
           sortable: true,
           valueFormatter: dateFormatter
@@ -92,7 +91,7 @@ class ReportsJobPopup extends Component {
           headerName: 'End Time',
           headerTooltip: 'End Time',
           width: 225,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           filter: true,
           sortable: true,
           valueFormatter: dateFormatter
@@ -101,7 +100,7 @@ class ReportsJobPopup extends Component {
           headerName: 'Rate Type',
           headerTooltip: 'Rate Type',
           width: 105,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           filter: true,
           sortable: true
         }, {
@@ -109,7 +108,7 @@ class ReportsJobPopup extends Component {
           headerName: 'Rate',
           headerTooltip: 'Rate',
           width: 80,
-          cellStyle: { 'text-align': 'center'},
+          cellStyle: { 'text-align': 'center' },
           filter: true,
           sortable: true,
           valueFormatter: currencyFormatter
@@ -127,7 +126,7 @@ class ReportsJobPopup extends Component {
   componentWillReceiveProps(nextProps) {
     const { job } = this.props;
     if (nextProps.job !== job) {
-      this.setState({job});
+      this.setState({ job });
     }
   }
 
@@ -139,7 +138,6 @@ class ReportsJobPopup extends Component {
   render() {
     const { columnsJobs, defaultColumnDef } = this.state;
     const { jobsDate } = this.props;
-    console.log('TCL: ReportsJobPopup -> render -> jobsDate', jobsDate);
     return (
       <div className="dashboard">
         <h3 className="tittleModalDateJob">

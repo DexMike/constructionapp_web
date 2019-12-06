@@ -1,19 +1,6 @@
-/* eslint-disable no-multiple-empty-lines,
-no-trailing-spaces,
-object-curly-spacing,
-no-unused-vars,
-spaced-comment,
-react/jsx-closing-bracket-location,
-semi, quotes, no-empty,
-react/no-string-refs,
-prefer-const, comma-dangle, padded-blocks,
-react/jsx-one-expression-per-line,
-space-before-function-paren,
-keyword-spacing, no-multi-spaces */
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import {
-  Button,
   Card,
   CardBody,
   Col,
@@ -26,12 +13,11 @@ import {
   TabPane
 } from 'reactstrap';
 import classnames from 'classnames';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 
 // ag grid
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
-import PropTypes from 'prop-types';
+import { AgGridReact } from 'ag-grid-react';
 import {
   AreaChart,
   Area,
@@ -42,19 +28,19 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import FilterComparisonReport from "../filters/FilterComparisonReport";
-import ProfileService from '../../api/ProfileService';
+import FilterComparisonReport from './filters/FilterComparisonReport';
+import ProfileService from './services/ProfileService';
 
-import './Reports.css';
-import '../addresses/Address.css';
-import BarRenderer from '../../utils/BarRenderer';
-import BarFilter from '../../utils/BarFilter';
+import './css/Reports.css';
+import './css/Address.css';
+import BarRenderer from './utils/BarRenderer';
+import BarFilter from './utils/BarFilter';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 function PageTitle() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <h3 className="page-title">{t('Comparison Report')}</h3>
   );
@@ -67,13 +53,13 @@ function bracketsFormatter(params) {
 function formatNumber(number) {
   return Math.floor(number)
     .toString()
-    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+    .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
 }
 
 function currencyFormatter(params) {
   return `$ ${formatNumber(params.value)}`;
 }
-  
+
 
 function percentFormatter(params) {
   return `${formatNumber(params.value * 100)} %`;
@@ -85,7 +71,7 @@ class ReportsProducerPage extends Component {
     t: PropTypes.func.isRequired,
   };
   */
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -137,22 +123,22 @@ class ReportsProducerPage extends Component {
         sortable: true,
         filter: true,
         // width: 150,
-        cellStyle: { 'text-align': 'right'},
+        cellStyle: { 'text-align': 'right' },
         resizable: true,
-        suppressSizeToFit: true,
+        suppressSizeToFit: true
       },
 
       columnsCarrier: [
         {
           field: 'name',
           headerName: 'Job Name',
-          headerTooltip: "Job's name",
+          headerTooltip: "Job's name"
           // width: 200,
         }, {
           field: 'avgTotEarningsComparison',
           headerName: 'Total Earnings',
-          headerTooltip: "Total Earnings for this time period",
-          sort: "desc",
+          headerTooltip: 'Total Earnings for this time period',
+          sort: 'desc',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -161,8 +147,8 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'costPerTonMileComparison',
           headerName: 'Cost per Ton/Mile',
-          headerTooltip: "Total Cost per Ton/Mile for this time period",
-          sort: "desc",
+          headerTooltip: 'Total Cost per Ton/Mile for this time period',
+          sort: 'desc',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -171,7 +157,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
-          headerTooltip: "Total number of jobs for this time period",
+          headerTooltip: 'Total number of jobs for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -179,7 +165,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
-          headerTooltip: "Total number of tons delivered for this time period",
+          headerTooltip: 'Total number of tons delivered for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -187,7 +173,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsHourComparison',
           headerName: 'Avg. Earnings/Hour',
-          headerTooltip: "Average earnings per hour for this time period",
+          headerTooltip: 'Average earnings per hour for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -195,7 +181,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Avg. Earnings/Job',
-          headerTooltip: "Average earnings per job for this time period",
+          headerTooltip: 'Average earnings per job for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -203,7 +189,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsTonComparison',
           headerName: 'Avg. Earnings/Ton',
-          headerTooltip: "Average earnings per ton for this time period",
+          headerTooltip: 'Average earnings per ton for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -211,7 +197,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
-          headerTooltip: "Average miles traveled for this time period",
+          headerTooltip: 'Average miles traveled for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -223,13 +209,13 @@ class ReportsProducerPage extends Component {
         {
           field: 'name',
           headerName: 'Product Name',
-          headerTooltip: "Name of product",
+          headerTooltip: 'Name of product'
           // width: 200,
         }, {
           field: 'avgTotEarningsComparison',
           headerName: 'Total Earnings',
-          headerTooltip: "Total Earnings for this time period",
-          sort: "desc",
+          headerTooltip: 'Total Earnings for this time period',
+          sort: 'desc',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -237,7 +223,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
-          headerTooltip: "Total number of jobs for this time period",
+          headerTooltip: 'Total number of jobs for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -245,7 +231,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
-          headerTooltip: "Total number of tons delivered for this time period",
+          headerTooltip: 'Total number of tons delivered for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -253,7 +239,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsHourComparison',
           headerName: 'Avg. Earnings/Hour',
-          headerTooltip: "Average earnings per hour for this time period",
+          headerTooltip: 'Average earnings per hour for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -261,7 +247,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Avg. Earnings/Job',
-          headerTooltip: "Average earnings per job for this time period",
+          headerTooltip: 'Average earnings per job for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -269,7 +255,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsTonComparison',
           headerName: 'Avg. Earnings/Ton',
-          headerTooltip: "Average earnings per ton for this time period",
+          headerTooltip: 'Average earnings per ton for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -277,7 +263,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
-          headerTooltip: "Average miles traveled for this time period",
+          headerTooltip: 'Average miles traveled for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -290,13 +276,13 @@ class ReportsProducerPage extends Component {
         {
           field: 'name',
           headerName: 'Job Name',
-          headerTooltip: "Name of Job",
+          headerTooltip: 'Name of Job'
           // width: 200,
         }, {
           field: 'avgTotEarningsComparison',
           headerName: 'Total Earnings',
-          headerTooltip: "Total Earnings for this time period",
-          sort: "desc",
+          headerTooltip: 'Total Earnings for this time period',
+          sort: 'desc',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -304,7 +290,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'totalJobsComparison',
           headerName: '# of Jobs',
-          headerTooltip: "Total number of jobs for this time period",
+          headerTooltip: 'Total number of jobs for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -312,7 +298,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgTonsDeliveredComparison',
           headerName: 'Tons Delivered',
-          headerTooltip: "Total number of tons delivered for this time period",
+          headerTooltip: 'Total number of tons delivered for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -320,7 +306,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsHourComparison',
           headerName: 'Avg. Earnings/Hour',
-          headerTooltip: "Average earnings per hour for this time period",
+          headerTooltip: 'Average earnings per hour for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -328,7 +314,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsJobComparison',
           headerName: 'Avg. Earnings/Job',
-          headerTooltip: "Average earnings per job for this time period",
+          headerTooltip: 'Average earnings per job for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -336,7 +322,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgEarningsTonComparison',
           headerName: 'Avg. Earnings/Ton',
-          headerTooltip: "Average earnings per ton for this time period",
+          headerTooltip: 'Average earnings per ton for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -344,7 +330,7 @@ class ReportsProducerPage extends Component {
         }, {
           field: 'avgMilesTraveledComparison',
           headerName: 'Avg. Miles Traveled',
-          headerTooltip: "Average miles traveled for this time period",
+          headerTooltip: 'Average miles traveled for this time period',
           // renderer
           enableValue: true,
           cellRendererFramework: BarRenderer,
@@ -394,51 +380,51 @@ class ReportsProducerPage extends Component {
 
   onBtnExportCarriers() {
     const params = {
-      skipHeader: false, //getBooleanValue("#skipHeader"),
-      columnGroups: true, //getBooleanValue("#columnGroups"),
-      skipFooters: false, //getBooleanValue("#skipFooters"),
-      skipGroups: false, //getBooleanValue("#skipGroups"),
-      skipPinnedTop: false, //getBooleanValue("#skipPinnedTop"),
-      skipPinnedBottom: false, //getBooleanValue("#skipPinnedBottom"),
-      allColumns: true, //getBooleanValue("#allColumns"),
-      onlySelected: false, //getBooleanValue("#onlySelected"),
-      suppressQuotes: false, //getBooleanValue("#suppressQuotes"),
-      fileName: 'carriers.csv', //document.querySelector("#fileName").value,
-      columnSeparator: ',' //document.querySelector("#columnSeparator").value
+      skipHeader: false, // getBooleanValue("#skipHeader"),
+      columnGroups: true, // getBooleanValue("#columnGroups"),
+      skipFooters: false, // getBooleanValue("#skipFooters"),
+      skipGroups: false, // getBooleanValue("#skipGroups"),
+      skipPinnedTop: false, // getBooleanValue("#skipPinnedTop"),
+      skipPinnedBottom: false, // getBooleanValue("#skipPinnedBottom"),
+      allColumns: true, // getBooleanValue("#allColumns"),
+      onlySelected: false, // getBooleanValue("#onlySelected"),
+      suppressQuotes: false, // getBooleanValue("#suppressQuotes"),
+      fileName: 'carriers.csv', // document.querySelector("#fileName").value,
+      columnSeparator: ',' // document.querySelector("#columnSeparator").value
     };
     this.gridApiCarrier.exportDataAsCsv(params);
   }
 
   onBtnExportProducts() {
     const params = {
-      skipHeader: false, //getBooleanValue("#skipHeader"),
-      columnGroups: true, //getBooleanValue("#columnGroups"),
-      skipFooters: false, //getBooleanValue("#skipFooters"),
-      skipGroups: false, //getBooleanValue("#skipGroups"),
-      skipPinnedTop: false, //getBooleanValue("#skipPinnedTop"),
-      skipPinnedBottom: false, //getBooleanValue("#skipPinnedBottom"),
-      allColumns: true, //getBooleanValue("#allColumns"),
-      onlySelected: false, //getBooleanValue("#onlySelected"),
-      suppressQuotes: false, //getBooleanValue("#suppressQuotes"),
-      fileName: 'products.csv', //document.querySelector("#fileName").value,
-      columnSeparator: ',' //document.querySelector("#columnSeparator").value
+      skipHeader: false, // getBooleanValue("#skipHeader"),
+      columnGroups: true, // getBooleanValue("#columnGroups"),
+      skipFooters: false, // getBooleanValue("#skipFooters"),
+      skipGroups: false, // getBooleanValue("#skipGroups"),
+      skipPinnedTop: false, // getBooleanValue("#skipPinnedTop"),
+      skipPinnedBottom: false, // getBooleanValue("#skipPinnedBottom"),
+      allColumns: true, // getBooleanValue("#allColumns"),
+      onlySelected: false, // getBooleanValue("#onlySelected"),
+      suppressQuotes: false, // getBooleanValue("#suppressQuotes"),
+      fileName: 'products.csv', // document.querySelector("#fileName").value,
+      columnSeparator: ',' // document.querySelector("#columnSeparator").value
     };
     this.gridApiProduct.exportDataAsCsv(params);
   }
 
   onBtnExportProjects() {
     const params = {
-      skipHeader: false, //getBooleanValue("#skipHeader"),
-      columnGroups: true, //getBooleanValue("#columnGroups"),
-      skipFooters: false, //getBooleanValue("#skipFooters"),
-      skipGroups: false, //getBooleanValue("#skipGroups"),
-      skipPinnedTop: false, //getBooleanValue("#skipPinnedTop"),
-      skipPinnedBottom: false, //getBooleanValue("#skipPinnedBottom"),
-      allColumns: true, //getBooleanValue("#allColumns"),
-      onlySelected: false, //getBooleanValue("#onlySelected"),
-      suppressQuotes: false, //getBooleanValue("#suppressQuotes"),
-      fileName: 'jobs.csv', //document.querySelector("#fileName").value,
-      columnSeparator: ',' //document.querySelector("#columnSeparator").value
+      skipHeader: false, // getBooleanValue("#skipHeader"),
+      columnGroups: true, // getBooleanValue("#columnGroups"),
+      skipFooters: false, // getBooleanValue("#skipFooters"),
+      skipGroups: false, // getBooleanValue("#skipGroups"),
+      skipPinnedTop: false, // getBooleanValue("#skipPinnedTop"),
+      skipPinnedBottom: false, // getBooleanValue("#skipPinnedBottom"),
+      allColumns: true, // getBooleanValue("#allColumns"),
+      onlySelected: false, // getBooleanValue("#onlySelected"),
+      suppressQuotes: false, // getBooleanValue("#suppressQuotes"),
+      fileName: 'jobs.csv', // document.querySelector("#fileName").value,
+      columnSeparator: ',' // document.querySelector("#columnSeparator").value
     };
     this.gridApiProject.exportDataAsCsv(params);
   }
@@ -467,7 +453,7 @@ class ReportsProducerPage extends Component {
   toggle(tab) {
     if (this.state.activeTab !== tab) {
       this.setState({
-        activeTab: tab,
+        activeTab: tab
       });
     }
   }
@@ -502,13 +488,13 @@ class ReportsProducerPage extends Component {
   // Move to TFormat?
   numberComparator(num) {
     // console.log("*** numberComparator");
-    return Number(String(num).replace(/[^0-9-\.]+/g, ""));
+    return Number(String(num).replace(/[^0-9-\.]+/g, ''));
   }
 
   // https://stackoverflow.com/questions/22600856/moment-js-date-time-comparison
   dateComparator(date1, date2) {
-    let momentA = moment(date1, 'MM/DD/YYYY');
-    let momentB = moment(date2, 'MM/DD/YYYY');
+    const momentA = moment(date1, 'MM/DD/YYYY');
+    const momentB = moment(date2, 'MM/DD/YYYY');
     if (momentA > momentB) {
       return 1;
     }
@@ -520,7 +506,7 @@ class ReportsProducerPage extends Component {
 
   // get data
   returnCarriers(carriers, filters, metadata) {
-    const {totalCount} = metadata;
+    const { totalCount } = metadata;
     this.setState({
       carriers,
       filters,
@@ -529,7 +515,7 @@ class ReportsProducerPage extends Component {
   }
 
   returnProducts(products, filters, metadata) {
-    const {totalCount} = metadata;
+    const { totalCount } = metadata;
     this.setState({
       products,
       filters,
@@ -538,7 +524,7 @@ class ReportsProducerPage extends Component {
   }
 
   returnProjects(projects, filters, metadata) {
-    const {totalCount} = metadata;
+    const { totalCount } = metadata;
     this.setState({
       projects,
       filters,
@@ -557,7 +543,7 @@ class ReportsProducerPage extends Component {
     totalProducers,
     totalProducts,
     totalProjects,
-    filters/*, metadata*/
+    filters/* , metadata */
   ) {
     const totalCount = 0;
     this.setState({
@@ -569,12 +555,12 @@ class ReportsProducerPage extends Component {
       totalCarriers,
       totalProducers,
       totalProducts,
-      totalProjects,
+      totalProjects
     });
-  }  
+  }
 
-  async handleFilterStatusChange({value, name}) {
-    const { filters } = { ...this.state};
+  async handleFilterStatusChange({ value, name }) {
+    const { filters } = { ...this.state };
     if (filters[name] === value) {
       filters[name] = '';
     } else {
@@ -632,10 +618,10 @@ class ReportsProducerPage extends Component {
   // Producer: carrier, Product, Projects
   // new stuff from ReportsDailyReports
   renderCarriers() {
-    let { carriers, products, projects, loading } = this.state;
+    const { carriers, products, projects, loading } = this.state;
     // console.log("TCL: renderCarriers -> carriers", carriers);
     // const { t } = this.props;
-    const {t} = useTranslation();
+    const { t } = useTranslation();
     return (
       <Row>
         <Col md={12}>
@@ -688,21 +674,19 @@ class ReportsProducerPage extends Component {
                             <YAxis tickLine={false} />
                             <Tooltip formatter={value => new Intl.NumberFormat('en').format(value)} />
                             <Legend />
-                            <CartesianGrid />{/*
-                            <Area name="Site A" type="monotone" dataKey="a" fill="#4ce1b6" stroke="#4ce1b6" fillOpacity={0.2} />
-                            <Area name="Site B" type="monotone" dataKey="b" fill="#70bbfd" stroke="#70bbfd" fillOpacity={0.2} />*/}
+                            <CartesianGrid />
                             <Area name="Total Earnings" type="monotone" dataKey="totEarningsNum" fill="#74B5A5" stroke="#74B5A5" fillOpacity={0.2} />
                             <Area name="Average Earnings per Hour" type="monotone" dataKey="avgEarningsHourNum" fill="#479682" stroke="#479682" fillOpacity={0.2} />
                             <Area name="Average Earnings per Ton" type="monotone" dataKey="avgEarningsTonNum" fill="#176A55" stroke="#176A55" fillOpacity={0.2} />
                             <Area name="Average Earnings per Job" type="monotone" dataKey="avgEarningsJobNum" fill="#044F3C" stroke="#044F3C" fillOpacity={0.2} />
                           </AreaChart>
                         </ResponsiveContainer>
-                      </div> 
+                      </div>
                       <div
                         id="ProducerGrid"
                         className="ag-theme-balham"
                         style={{
-                          width: '100%',
+                          width: '100%'
                           // height: "100%",
                           // width: "100%",
                           // odd-row-background-color: '#CFD8DC'
@@ -729,9 +713,7 @@ class ReportsProducerPage extends Component {
                             <YAxis tickLine={false} />
                             <Tooltip formatter={value => new Intl.NumberFormat('en').format(value)} />
                             <Legend />
-                            <CartesianGrid />{/*
-                            <Area name="Site A" type="monotone" dataKey="a" fill="#4ce1b6" stroke="#4ce1b6" fillOpacity={0.2} />
-                            <Area name="Site B" type="monotone" dataKey="b" fill="#70bbfd" stroke="#70bbfd" fillOpacity={0.2} />*/}
+                            <CartesianGrid />
                             <Area name="Total Earnings" type="monotone" dataKey="totEarningsNum" fill="#74B5A5" stroke="#74B5A5" fillOpacity={0.2} />
                             <Area name="Average Earnings per Hour" type="monotone" dataKey="avgEarningsHourNum" fill="#479682" stroke="#479682" fillOpacity={0.2} />
                             <Area name="Average Earnings per Ton" type="monotone" dataKey="avgEarningsTonNum" fill="#176A55" stroke="#176A55" fillOpacity={0.2} />
@@ -744,7 +726,7 @@ class ReportsProducerPage extends Component {
                         className="ag-theme-balham"
                         style={{
                           // height: '500px',
-                          width: '100%',
+                          width: '100%'
                           // height: "100%",
                           // width: "100%",
                           // odd-row-background-color: '#CFD8DC'
@@ -771,9 +753,7 @@ class ReportsProducerPage extends Component {
                             <YAxis tickLine={false} />
                             <Tooltip formatter={value => new Intl.NumberFormat('en').format(value)} />
                             <Legend />
-                            <CartesianGrid />{/*
-                            <Area name="Site A" type="monotone" dataKey="a" fill="#4ce1b6" stroke="#4ce1b6" fillOpacity={0.2} />
-                            <Area name="Site B" type="monotone" dataKey="b" fill="#70bbfd" stroke="#70bbfd" fillOpacity={0.2} />*/}
+                            <CartesianGrid />
                             <Area name="Total Earnings" type="monotone" dataKey="totEarningsNum" fill="#74B5A5" stroke="#74B5A5" fillOpacity={0.2} />
                             <Area name="Average Earnings per Hour" type="monotone" dataKey="avgEarningsHourNum" fill="#479682" stroke="#479682" fillOpacity={0.2} />
                             <Area name="Average Earnings per Ton" type="monotone" dataKey="avgEarningsTonNum" fill="#176A55" stroke="#176A55" fillOpacity={0.2} />
@@ -786,7 +766,7 @@ class ReportsProducerPage extends Component {
                         className="ag-theme-balham"
                         style={{
                           // height: '500px',
-                          width: '100%',
+                          width: '100%'
                           // height: "100%",
                           // width: "100%",
                           // odd-row-background-color: '#CFD8DC'
@@ -812,7 +792,7 @@ class ReportsProducerPage extends Component {
           </Card>
         </Col>
       </Row>
-      
+
     );
   }
 
@@ -827,8 +807,7 @@ class ReportsProducerPage extends Component {
 
             <Row>
               <div className="col-md-12 mt-1">
-                <img width="100%" height="100%" src={producerCarrierMetrics} alt=""
-                />
+                <img width="100%" height="100%" src={producerCarrierMetrics} alt=""/>
               </div>
             </Row>
 
@@ -853,8 +832,7 @@ class ReportsProducerPage extends Component {
 
             <Row>
               <div className="col-md-12 mt-1">
-                <img width="100%" height="100%" src={producerProductMetrics} alt=""
-                />
+                <img width="100%" height="100%" src={producerProductMetrics} alt=""/>
               </div>
             </Row>
 
@@ -877,19 +855,19 @@ class ReportsProducerPage extends Component {
         <Container className="dashboard">
           {this.renderGoTo()}
           {this.renderTitle()}
-          {/*{this.renderCards()}*/}
+          {/* {this.renderCards()} */}
           {/* */}
           <FilterComparisonReport
             type="Producer"
             showComparison
             ref="filterChild"
             onReturnFilters={this.returnFilters}
-            returnCarriers={this.returnCarriers/*(e, f, g) => {              
+            returnCarriers={this.returnCarriers/* (e, f, g) => {
               console.log(899, e);
               this.setState({
                 carriers: e
               });
-            }*/}
+            } */}
             returnProducts={this.returnProducts}
             returnProjects={this.returnProjects}
             fetching={(value) => {
@@ -899,15 +877,15 @@ class ReportsProducerPage extends Component {
             rows={rows}
           />
 
-          {/*Render ag-grid table*/}
+          {/* Render ag-grid table */}
           {this.renderCarriers()}
           {/* this.renderProducts() */}
           {/* this.renderProjects() */}
 
-          {/*Render Images*/}
-          {/*this.renderResultsCarriersPNG()*/}
-          {/*this.renderResultsProductsPNG()*/}
-          {/*this.renderResultsProjectsPNG()*/}
+          {/* Render Images */}
+          {/* this.renderResultsCarriersPNG() */}
+          {/* this.renderResultsProductsPNG() */}
+          {/* this.renderResultsProjectsPNG() */}
 
         </Container>
       );
