@@ -86,7 +86,8 @@ class DashboardCustomerPage extends Component {
       rows: 10,
       totalCount: 10,
       totalJobs: 0,
-      isLoading: false
+      isLoading: false,
+      amountType: ''
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -470,7 +471,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
+    
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -498,7 +499,8 @@ class DashboardCustomerPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
-      if (newJob.rateType === 'Hour') {
+      
+      if (newJob.amountType === 'Hour') {
         // newSize is the size with its original value, so that it can be sorted
         newJob.newSize = newJob.rateEstimate;
         // newSizeFormated is the size as we want it to show
@@ -510,7 +512,7 @@ class DashboardCustomerPage extends Component {
           newJob.rate, '.', 2, ',', '$', '/Hour'
         );
       }
-      if (newJob.rateType === 'Ton') {
+      if (newJob.amountType === 'Ton') {
         // newSize is the size with its original value, so that it can be sorted
         newJob.newSize = newJob.rateEstimate;
         // newSizeFormated is the size as we want it to show
@@ -557,7 +559,6 @@ class DashboardCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / totalJobs) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-
     if (loaded) {
       return (
         <Container className="dashboard">
