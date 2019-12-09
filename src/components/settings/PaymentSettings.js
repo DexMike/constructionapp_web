@@ -5,6 +5,7 @@ import {
   Row,
   Button
 } from 'reactstrap';
+import {withTranslation} from 'react-i18next';
 import * as PropTypes from 'prop-types';
 import TField from '../common/TField';
 import BrainTreeClient from '../../service/BrainTreeClient';
@@ -162,7 +163,8 @@ class PaymentSettings extends Component {
   }
 
   async saveAccount() {
-    const { company } = {...this.props};
+    const { company, t } = {...this.props};
+    const translate = t;
     const { address } = {...this.state};
     let { formError, account, routing, reqHandlerAccount, reqHandlerRouting } = { ...this.state };
     this.setState({ isSavingAccount: true });
@@ -199,8 +201,8 @@ class PaymentSettings extends Component {
           //   && e.originalError.details.originalError.error.details[0].at === '/routing_number') {
           //   formError = 'Unknown routing number.';
           // } else {
-          formError = 'We were unable to verify your account information, please update with'
-              + ' the correct banking info or contact Trelar support';
+          formError = translate('We were unable to verify your account information, please update with'
+              + ' the correct banking info or contact Trelar support');
           account = '';
           routing = '';
           reqHandlerAccount = {
@@ -215,8 +217,8 @@ class PaymentSettings extends Component {
         } else {
           const result = await this.btAccountCreated(response);
           this.setState({
-            successMessage: 'Congrats! Your account was approved for ACH debits. '
-              + 'You can start using Trelar now.',
+            successMessage: translate('Congrats! Your account was approved for ACH debits. '
+              + 'You can start using Trelar now.'),
             hasPaymentMethod: result.hasPaymentMethod,
             btCustomerInfo: result.btCustomerInfo
           });
@@ -237,21 +239,23 @@ class PaymentSettings extends Component {
 
   renderSummary() {
     const { btCustomerInfo, successMessage } = { ...this.state };
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <Row>
         <Col md={12}>
           { successMessage && <p>{successMessage}</p> }
-          <strong>Account Holder Name</strong><br/>
+          <strong>{translate('Account Holder Name')}</strong><br/>
           <span>{btCustomerInfo.accountHolderName}</span><br/>
           <br />
-          <strong>Routing Number</strong><br/>
+          <strong>{translate('Routing Number')}</strong><br/>
           <span>{btCustomerInfo.routingNumber}</span><br/>
           <br />
-          <strong>Account Number (Last 4)</strong><br/>
+          <strong>{translate('Account Number')} ({translate('Last 4')})</strong><br/>
           <span>{btCustomerInfo.last4}</span><br />
           <br/>
-          <strong>Need to change your Payment Method?</strong><br/>
-          <span>Contact our team to get help.</span><br/>
+          <strong>{translate('Need to change your Payment Method?')}</strong><br/>
+          <span>{translate('Contact our team to get help')}.</span><br/>
           <a href="mailto:support@trelar.com" target="_top">support@trelar.com</a>
         </Col>
       </Row>
@@ -268,16 +272,19 @@ class PaymentSettings extends Component {
       isSavingAccount,
       formError
     } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <React.Fragment>
         <Row>
           <Col md={12} className="text-center mt-4">
-            <h3>Welcome to Trelar! To start ordering materials for deliver,
-              please set up your bank account for ACH withdrawls.
+            <h3>
+              {translate('Welcome to Trelar! To start ordering materials for deliver,'
+               + ' please set up your bank account for ACH withdrawls')}.
             </h3>
             <p>
-              Nothing will post from your account until load deliveries with attached
-              invoices are approved by your company.
+              {translate('Nothing will post from your account until load deliveries with attached'
+              + ' invoices are approved by your company')}.
             </p>
           </Col>
         </Row>
@@ -286,7 +293,7 @@ class PaymentSettings extends Component {
           <Col md={5} className="account-card mx-auto mt-4" style={{paddingBottom: 10}}>
             <span className="form__form-group-error">{formError}</span>
             <br />
-            <h3>Enter your company bank information:</h3>
+            <h3>{translate('Enter your company bank information')}:</h3>
             <br/>
             <span>
               Routing #
@@ -345,9 +352,9 @@ class PaymentSettings extends Component {
                 </label>
               </Col>
               <Col md={8}>
-                { `By clicking "Save", I authorize Braintree, a service of PayPal, on behalf of 
-Trelar (i) to verify my bank account information using bank information and consumer reports and 
-(ii) to debit my bank account.`}
+                { translate('By clicking "Save", I authorize Braintree, a service of PayPal, on behalf of'
+                + ' Trelar (i) to verify my bank account information using bank information and consumer'
+                + ' reports and (ii) to debit my bank account')}
               </Col>
               <Col md={3} className="text-right">
                 { !isSavingAccount
@@ -357,7 +364,7 @@ Trelar (i) to verify my bank account information using bank information and cons
                   disabled={!termsAgreed}
                   onClick={this.saveAccount}
                   >
-                  Save
+                    {translate('Save')}
                   </Button>
                 )}
                 { isSavingAccount
@@ -372,7 +379,7 @@ Trelar (i) to verify my bank account information using bank information and cons
         <Row>
           <Col md={5} className="mx-auto text-center mb-4">
             <a href="mailto:support@trelar.com">
-              Having problems signing up? Please contact our team to get help.
+              {translate('Having problems signing up? Please contact our team to get help')}.
             </a>
           </Col>
         </Row>
@@ -382,12 +389,14 @@ Trelar (i) to verify my bank account information using bank information and cons
 
   render() {
     const { hasPaymentMethod } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <Container style={{padding: 0}}>
         <Row className="tab-content-header">
           <Col md={12}>
             <span style={{fontWeight: 'bold', fontSize: 20}}>
-              Payment Method
+              {translate('Payment Method')}
             </span>
           </Col>
         </Row>
@@ -416,4 +425,4 @@ PaymentSettings.defaultProps = {
   }
 };
 
-export default PaymentSettings;
+export default withTranslation()(PaymentSettings);

@@ -1,5 +1,4 @@
-import moment from 'moment';
-import TFormat from '../common/TFormat';
+import TFormat from './common/TFormat';
 
 function currencyFormatter(params) {
   if (params) {
@@ -69,7 +68,7 @@ const columnsJobs = [
         headerTooltip: 'Date',
         comparator: dateComparator,
         width: 125,
-        cellStyle: { 'text-align': 'center'},
+        cellStyle: { 'text-align': 'center' },
         sort: 'desc'
       }, {
         field: 'completedJobs',
@@ -119,7 +118,7 @@ const columnsJobs = [
         // valueFormatter: numberFormatter,
         // filter: 'agNumberColumnFilter',
         width: 110
-      }, {
+      }/* , {
         field: 'rateTon',
         headerName: 'Rate per Ton',
         headerTooltip: 'Rate $ per Ton',
@@ -173,7 +172,7 @@ const columnsJobs = [
         sortable: true,
         // comparator: numberComparator,
         valueFormatter: currencyFormatterRound
-      },/* {
+      }, /* {
         field: 'avgSizeOfJobByTon',
         headerName: 'Average Tons per Job',
         headerTooltip: 'Average size of job by tons',
@@ -182,7 +181,7 @@ const columnsJobs = [
         comparator: numberComparator,
         valueFormatter: decimalFormatter,
         width: 160
-      },*/ {
+      }, */ {
         field: 'totalTonsHauled',
         headerName: 'Total Tons Hauled',
         headerTooltip: 'Total tons hauled per day',
@@ -191,7 +190,7 @@ const columnsJobs = [
         comparator: numberComparator,
         valueFormatter: decimalFormatter,
         width: 140
-      }, {
+      } /* {
         field: 'avgJobTime',
         headerName: 'Job Duration',
         headerTooltip: 'Average time between a first load and job being closed',
@@ -207,7 +206,7 @@ const columnsJobs = [
         sortable: true,
         comparator: numberComparator,
         valueFormatter: decimalFormatter
-      }
+      } */
     ]
   }
 ];

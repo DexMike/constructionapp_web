@@ -5,12 +5,11 @@ import moment from 'moment';
 import TSubmitButton from '../common/TSubmitButton';
 import BookingEquipmentService from '../../api/BookingEquipmentService';
 import LoadService from '../../api/LoadService';
-// import UserService from '../../api/UserService';
 import TTable from '../common/TTable';
-// import CardTitle from 'reactstrap/es/CardTitle';
 import SelectField from '../common/TSelect';
 import EquipmentService from '../../api/EquipmentService';
 import EquipmentDetailService from '../../api/EquipmentDetailService';
+import ReactTooltip from "react-tooltip";
 
 class JobAllocate extends Component {
   constructor(props) {
@@ -20,17 +19,18 @@ class JobAllocate extends Component {
       btnSubmitting: false,
       driversWithLoads: [],
       bookingEquipments: [],
-      // selectedDrivers: [],
       drivers: [],
       equipments: [],
+      selectableDrivers: [],
+      selectableEquipments: [],
       selectedEquipment: null,
       selectedDriver: null,
       reqHandlerEquipment: { touched: false, error: '' },
-      reqHandlerDriver: { touched: false, error: '' }
+      reqHandlerDriver: { touched: false, error: '' },
+      isLoading: false
     };
     this.handleAllocateDrivers = this.handleAllocateDrivers.bind(this);
     this.unAllocateDriver = this.unAllocateDriver.bind(this);
-    // this.toggleAllocateDriversModal = this.toggleAllocateDriversModal.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
     this.handleSelectEquipment = this.handleSelectEquipment.bind(this);
     this.handleSelectDriver = this.handleSelectDriver.bind(this);
@@ -38,33 +38,48 @@ class JobAllocate extends Component {
 
   async componentDidMount() {
     const { booking, profile, t } = { ...this.props };
-    let { bookingEquipments, equipments, drivers } = { ...this.state };
+    let {
+      bookingEquipments,
+      equipments,
+      drivers,
+      selectableEquipments,
+      selectableDrivers
+    } = { ...this.state };
     const { driversWithLoads } = { ...this.state };
     const translate = t;
     if (booking) {
       try {
-        // 999 since not able to page dropdown and trucks per company should be a small amount.
-        equipments = await EquipmentService.getEquipmentByCompanyId(profile.companyId, 999, 0);
-        equipments = equipments.data.map(equipment => ({
-          label: (equipment.externalEquipmentNumber
-            ? equipment.externalEquipmentNumber
-            : translate('Number not set')),
-          value: equipment.id,
-          defaultDriverId: equipment.defaultDriverId
-        }));
-        drivers = await EquipmentDetailService.getDefaultDriverList(profile.companyId);
-        drivers = drivers.data.map(driver => ({
-          label: `${driver.firstName} ${driver.lastName}`,
-          value: driver.driverId
-        }));
         bookingEquipments = await BookingEquipmentService
           .getBookingEquipmentsByBookingId(booking.id);
-        // selectedDrivers = bookingEquipments
-        //   .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
+        // 999 since not able to page dropdown and trucks per company should be a small amount.
+        equipments = await EquipmentService.getEquipmentByCompanyId(profile.companyId, 999, 0);
+        equipments = equipments.data;
+        selectableEquipments = equipments
+          .filter(equipment => !bookingEquipments
+            .some(bookingEquipment => bookingEquipment.equipmentId === equipment.id))
+          .map(equipment => ({
+            label: (equipment.externalEquipmentNumber
+              ? equipment.externalEquipmentNumber
+              : translate('Number not set')),
+            value: equipment.id,
+            defaultDriverId: equipment.defaultDriverId
+          }));
+        drivers = await EquipmentDetailService.getDefaultDriverList(profile.companyId);
+        drivers = drivers.data.map(driver => ({
+          ...driver,
+          label: `${driver.firstName} ${driver.lastName}`
+        }));
+        selectableDrivers = drivers
+          .filter(driver => !bookingEquipments
+            .some(bookingEquipment => bookingEquipment.driverId === driver.driverId))
+          .map(driver => ({
+            label: driver.label,
+            value: driver.driverId
+          }));
         const driversResponse = await LoadService.getDriversWithLoadsByBookingId(booking.id);
         if (driversResponse && driversResponse.length > 0) {
           driversResponse.map(driver => (
-            driversWithLoads.push(driver.id)
+            driversWithLoads.push(driver.driverId)
           ));
         }
       } catch (err) {
@@ -73,22 +88,31 @@ class JobAllocate extends Component {
     }
     this.setState({
       bookingEquipments,
-      // selectedDrivers,
       driversWithLoads,
       equipments,
-      drivers
+      drivers,
+      selectableDrivers,
+      selectableEquipments
     });
   }
 
   async handleAllocateDrivers() {
-    const { booking, profile, job } = { ...this.props };
-    const { bookingEquipments, selectedDriver, selectedEquipment } = { ...this.state };
+    const { booking, profile, job, t } = { ...this.props };
+    const translate = t;
+    const {
+      bookingEquipments,
+      selectedDriver,
+      selectedEquipment,
+      equipments,
+      drivers
+    } = { ...this.state };
+    this.setState({ isLoading: true });
     const isValid = this.isFormValid();
     if (!isValid) {
+      this.setState({ isLoading: false });
       return;
     }
     let newBookingEquipment = {
-      // id: bookingEquipments.length + 1,
       bookingId: booking.id,
       schedulerId: profile.userId,
       driverId: selectedDriver.value,
@@ -112,80 +136,33 @@ class JobAllocate extends Component {
       console.log('Failed to save the booking equipment.');
     }
     bookingEquipments.push(newBookingEquipment);
+
+    const selectableEquipments = equipments
+      .filter(equipment => !bookingEquipments
+        .some(bookingEquipment => bookingEquipment.equipmentId === equipment.id))
+      .map(equipment => ({
+        label: (equipment.externalEquipmentNumber
+          ? equipment.externalEquipmentNumber
+          : translate('Number not set')),
+        value: equipment.id,
+        defaultDriverId: equipment.defaultDriverId
+      }));
+    const selectableDrivers = drivers
+      .filter(driver => !bookingEquipments
+        .some(bookingEquipment => bookingEquipment.driverId === driver.driverId))
+      .map(driver => ({
+        label: driver.label,
+        value: driver.driverId
+      }));
+
     this.toggleModal();
     this.setState({
-      bookingEquipments
+      bookingEquipments,
+      selectableDrivers,
+      selectableEquipments,
+      isLoading: false
     });
-    // try {
-    //   // console.log('saving...');
-    //   const { selectedDrivers } = { ...this.state };
-    //   const { booking, profile, job } = { ...this.props };
-    //   const newBookingEquipments = selectedDrivers.map(selectedDriver => ({
-    //     bookingId: booking.id,
-    //     schedulerId: profile.userId,
-    //     driverId: selectedDriver,
-    //     equipmentId: null, // NOTE: for now don't reference equipment
-    //     rateType: booking.rateType, // This could be from equipment
-    //     rateActual: 0,
-    //     startTime: new Date(),
-    //     endTime: new Date(),
-    //     startAddressId: job.startAddress.id,
-    //     endAddressId: job.endAddress.id,
-    //     notes: '',
-    //     createdBy: profile.userId,
-    //     createdOn: new Date(),
-    //     modifiedBy: profile.userId,
-    //     modifiedOn: new Date()
-    //   }));
-    //   await BookingEquipmentService.allocateDrivers(newBookingEquipments, booking.id);
-    // } catch (err) {
-    //   // console.error(err);
-    // }
-    //
-    // this.toggleAllocateDriversModal();
   }
-
-  // async toggleAllocateDriversModal() {
-  //   const { allocateDriversModal, driversWithLoads } = { ...this.state };
-  //   const { booking, profile } = { ...this.props };
-  //   const driversResponse = await LoadService.getDriversWithLoadsByBookingId(booking.id);
-  //   if (driversResponse && driversResponse.length > 0) {
-  //     driversResponse.map(driver => (
-  //       driversWithLoads.push(driver.id)
-  //     ));
-  //   }
-  //   this.setState({ btnSubmitting: true });
-  //   const bookingEquipments = await BookingEquipmentService
-  //     .getBookingEquipmentsByBookingId(booking.id);
-  //   const selectedDrivers = bookingEquipments
-  //     .map(bookingEquipmentItem => bookingEquipmentItem.driverId);
-  //   const drivers = await UserService.getDriversWithUserInfoByCompanyId(profile.companyId);
-  //   let enabledDrivers = [];
-  //   Object.values(drivers).forEach((itm) => {
-  //     const newDriver = { ...itm };
-  //     if (newDriver.driverStatus === 'Enabled' || newDriver.userStatus === 'Driver Enabled'
-  //     || newDriver.userStatus === 'Enabled') {
-  //       newDriver.fullName = `${newDriver.firstName} ${newDriver.lastName}`;
-  //       enabledDrivers.push(newDriver);
-  //     }
-  //   });
-  //   // Setting id to driverId since is getting the userId and saving it as driverId
-  //   enabledDrivers = enabledDrivers.map((driver) => {
-  //     const newDriver = driver;
-  //     newDriver.id = newDriver.driverId;
-  //     if (driversWithLoads.includes(newDriver.driverId)) {
-  //       newDriver.checkboxDisabled = true;
-  //     }
-  //     return newDriver;
-  //   });
-  //   this.setState({
-  //     allocateDriversModal: !allocateDriversModal,
-  //     selectedDrivers,
-  //     drivers: enabledDrivers,
-  //     btnSubmitting: false,
-  //     driversWithLoads
-  //   });
-  // }
 
   toggleModal() {
     const { allocateDriversModal } = { ...this.state };
@@ -201,7 +178,8 @@ class JobAllocate extends Component {
   async unAllocateDriver(id, isAlreadyDrivingMatch) {
     const { t } = { ...this.props };
     const translate = t;
-    let { bookingEquipments } = { ...this.state };
+    const { equipments, drivers } = { ...this.state };
+    let { bookingEquipments, selectableEquipments, selectableDrivers } = { ...this.state };
     if (isAlreadyDrivingMatch) {
       alert(translate('You cannot remove drivers that have already started a load'));
     } else {
@@ -210,8 +188,27 @@ class JobAllocate extends Component {
       } catch (err) {
         console.log('Failed to remove the booking equipment');
       }
+      // const deletedBookingEquipment = [...bookingEquipments]
+      //   .find(bookingEquipment => bookingEquipment.id !== id);
       bookingEquipments = bookingEquipments.filter(bookingEquipment => bookingEquipment.id !== id);
-      this.setState({ bookingEquipments });
+      selectableEquipments = equipments
+        .filter(equipment => !bookingEquipments
+          .some(bookingEquipment => bookingEquipment.equipmentId === equipment.id))
+        .map(equipment => ({
+          label: (equipment.externalEquipmentNumber
+            ? equipment.externalEquipmentNumber
+            : translate('Number not set')),
+          value: equipment.id,
+          defaultDriverId: equipment.defaultDriverId
+        }));
+      selectableDrivers = drivers
+        .filter(driver => !bookingEquipments
+          .some(bookingEquipment => bookingEquipment.driverId === driver.driverId))
+        .map(driver => ({
+          label: driver.label,
+          value: driver.driverId
+        }));
+      this.setState({ bookingEquipments, selectableEquipments, selectableDrivers });
     }
   }
 
@@ -225,10 +222,10 @@ class JobAllocate extends Component {
   }
 
   handleSelectEquipment(data) {
-    const { reqHandlerEquipment, drivers } = { ...this.state };
+    const { reqHandlerEquipment, selectableDrivers } = { ...this.state };
     reqHandlerEquipment.touched = false;
-    // TODO set default driver
-    const selectedDriver = drivers.find(driver => driver.value === data.defaultDriverId);
+    const selectedDriver = selectableDrivers
+      .find(driver => driver.value === data.defaultDriverId);
     this.setState({
       selectedDriver,
       selectedEquipment: data,
@@ -244,7 +241,7 @@ class JobAllocate extends Component {
     let reqHandlerEquipment = { touched: false };
     let reqHandlerDriver = { touched: false };
 
-    if (selectedEquipment === null) {
+    if (selectedEquipment == null) {
       reqHandlerEquipment = {
         touched: true,
         error: translate('Please select the truck')
@@ -252,7 +249,7 @@ class JobAllocate extends Component {
       isValid = false;
     }
 
-    if (selectedDriver === null) {
+    if (selectedDriver == null) {
       reqHandlerDriver = {
         touched: true,
         error: translate('Please select the driver')
@@ -267,110 +264,20 @@ class JobAllocate extends Component {
     return isValid;
   }
 
-  // renderAllocateDriversModalOld() {
-  //   const {
-  //     allocateDriversModal,
-  //     drivers,
-  //     selectedDrivers,
-  //     btnSubmitting,
-  //     driversWithLoads
-  //   } = this.state;
-  //   const driverData = drivers;
-  //   const driverColumns = [
-  //     {
-  //       displayName: 'Name',
-  //       name: 'fullName'
-  //     }, {
-  //       displayName: 'Phone',
-  //       name: 'mobilePhone'
-  //     }
-  //   ];
-  //   return (
-  //     <Modal
-  //       isOpen={allocateDriversModal}
-  //       toggle={this.toggleModal}
-  //       className="allocate-modal"
-  //       backdrop="static"
-  //     >
-  //       <div className="modal__body" style={{ padding: '0px' }}>
-  //         <Container className="dashboard">
-  //           <Row>
-  //             <Col md={12} lg={12}>
-  //               <Card style={{ paddingBottom: 0 }}>
-  //                 <h1 style={{
-  //                   marginTop: 20,
-  //                   marginLeft: 20
-  //                 }}
-  //                 >
-  //                   Allocate Drivers
-  //                 </h1>
-  //
-  //                 <div className="row">
-  //
-  //                   <TTable
-  //                     handleRowsChange={() => {
-  //                     }}
-  //                     data={driverData}
-  //                     columns={driverColumns}
-  //                     handlePageChange={() => {
-  //                     }}
-  //                     handleIdClick={() => {
-  //                     }}
-  //                     isSelectable
-  //                     onSelect={selected => this.setState({ selectedDrivers: selected })}
-  //                     selected={selectedDrivers}
-  //                     omitFromSelect={driversWithLoads}
-  //                   />
-  //                   <div className="col-md-8"/>
-  //                   <div className="col-md-4 text-right pr-4">
-  //                     <Button
-  //                       type="button"
-  //                       className="tertiaryButton"
-  //                       onClick={this.toggleModal}
-  //                     >
-  //                       Cancel
-  //                     </Button>
-  //                     <TSubmitButton
-  //                       onClick={this.handleAllocateDrivers}
-  //                       className="primaryButton"
-  //                       loading={btnSubmitting}
-  //                       loaderSize={10}
-  //                       bntText="Save"
-  //                     />
-  //                   </div>
-  //                 </div>
-  //               </Card>
-  //             </Col>
-  //           </Row>
-  //         </Container>
-  //       </div>
-  //     </Modal>
-  //   );
-  // }
-
   renderAllocateDriversModal() {
     const {
       allocateDriversModal,
-      equipments,
       selectedEquipment,
-      drivers,
       selectedDriver,
       btnSubmitting,
+      selectableEquipments,
+      selectableDrivers,
       reqHandlerEquipment,
-      reqHandlerDriver
+      reqHandlerDriver,
+      isLoading
     } = this.state;
     const { t } = { ...this.props };
     const translate = t;
-    // const driverData = drivers;
-    // const driverColumns = [
-    //   {
-    //     displayName: 'Name',
-    //     name: 'fullName'
-    //   }, {
-    //     displayName: 'Phone',
-    //     name: 'mobilePhone'
-    //   }
-    // ];
     return (
       <Modal
         isOpen={allocateDriversModal}
@@ -407,7 +314,7 @@ class JobAllocate extends Component {
                     }
                     meta={reqHandlerEquipment}
                     value={selectedEquipment}
-                    options={equipments}
+                    options={selectableEquipments}
                     placeholder={t('Truck')}
                   />
                 </Col>
@@ -423,7 +330,7 @@ class JobAllocate extends Component {
                     }
                     meta={reqHandlerDriver}
                     value={selectedDriver}
-                    options={drivers}
+                    options={selectableDrivers}
                     placeholder={t('Driver')}
                   />
                 </Col>
@@ -437,7 +344,7 @@ class JobAllocate extends Component {
                   <TSubmitButton
                     onClick={this.handleAllocateDrivers}
                     className="primaryButton"
-                    loading={btnSubmitting}
+                    loading={isLoading}
                     loaderSize={10}
                     bntText="Save"
                   />
@@ -474,16 +381,22 @@ class JobAllocate extends Component {
   render() {
     const { t } = { ...this.props };
     const translate = t;
-    const { btnSubmitting, drivers, equipments } = { ...this.state };
+    const {
+      btnSubmitting,
+      drivers,
+      equipments,
+      selectableDrivers,
+      selectableEquipments
+    } = { ...this.state };
     let { bookingEquipments } = { ...this.state };
     bookingEquipments = bookingEquipments.map((bookingEquipment) => {
       const driverMatch = drivers
-        .find(driver => driver.value === bookingEquipment.driverId);
+        .find(driver => driver.driverId === bookingEquipment.driverId);
       const driverName = (driverMatch && driverMatch.label) ? driverMatch.label : '-';
       const equipmentMatch = equipments
-        .find(equipment => equipment.value === bookingEquipment.equipmentId);
-      const externalEquipmentNumber = (equipmentMatch && equipmentMatch.label)
-        ? equipmentMatch.label : '-';
+        .find(equipment => equipment.id === bookingEquipment.equipmentId);
+      const externalEquipmentNumber = (equipmentMatch && equipmentMatch.externalEquipmentNumber)
+        ? equipmentMatch.externalEquipmentNumber : '-';
       return {
         ...bookingEquipment,
         createdOnFormatted: moment(bookingEquipment.createdOn).format(),
@@ -500,13 +413,40 @@ class JobAllocate extends Component {
             <CardBody className="card-full-height">
               {/* <CardTitle>Allocate Drivers</CardTitle> */}
               <Row>
+                <Col md={2}>
                 <TSubmitButton
                   onClick={this.toggleModal}
                   className="primaryButton"
                   loading={btnSubmitting}
                   loaderSize={10}
                   bntText="Allocate Drivers"
+                  disabled={selectableDrivers.length <= 0 || selectableEquipments.length <= 0}
                 />
+                </Col>
+                <Col md={10}>
+                  <Card style={{display: (selectableDrivers.length <= 0 || selectableEquipments.length <= 0) ? 'block' : 'none'}}>
+                    <CardBody className="bg-warning">
+                      <Row className="justify-content-md-left" style={{paddingTop: 6}}>
+                        <Col md="auto">
+                          <i className="material-icons iconSet" style={{color: 'rgb(145, 85, 2)', paddingLeft: 15, marginRight: -10, paddingTop: 3}}>ic_report_problem</i>
+                        </Col>
+                        <Col md="auto">
+                          <p style={{color: 'rgb(145, 85, 2)'}}>
+                            {(selectableEquipments.length === 0 && selectableDrivers.length > 0) && (
+                              translate('NO_TRUCKS')
+                            )}
+                            {(selectableDrivers.length === 0 && selectableEquipments.length > 0) && (
+                              translate('NO_DRIVERS')
+                            )}
+                            {(selectableDrivers.length === 0 && selectableEquipments.length === 0) && (
+                              translate('NO_TRUCKS_OR_DRIVERS')
+                            )}
+                          </p>
+                        </Col>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
               </Row>
               <Row>
                 {

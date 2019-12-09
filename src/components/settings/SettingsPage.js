@@ -14,8 +14,7 @@ import {
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import './Settings.css';
-import { Trans } from 'react-i18next';
-
+import { Trans, withTranslation} from 'react-i18next';
 
 import UserSettings from './UserSettings';
 import NotificationsSettings from './NotificationsSettings';
@@ -169,6 +168,8 @@ class SettingsPage extends Component {
   }
 
   renderAdminTabs(activeTab) {
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <Nav tabs>
         <NavItem>
@@ -184,7 +185,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '2' }, 'tab')}
             onClick={() => { this.toggle('2'); }}
           >
-            Notifications
+            {translate('Notifications')}
           </NavLink>
         </NavItem>
         {
@@ -204,6 +205,8 @@ class SettingsPage extends Component {
   }
 
   renderUserTabs(activeTab) {
+    const { t } = { ...this.props };
+    const translate = t;
     return (
       <Nav tabs>
         <NavItem>
@@ -219,7 +222,7 @@ class SettingsPage extends Component {
             className={classnames({ active: activeTab === '2' }, 'tab')}
             onClick={() => { this.toggle('2'); }}
           >
-            Notifications
+            {translate('Notifications')}
           </NavLink>
         </NavItem>
       </Nav>
@@ -279,12 +282,14 @@ class SettingsPage extends Component {
 
   render() {
     const { loaded, title } = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
     if (loaded) {
       return (
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title"><Trans>User Settings</Trans> / {title}</h3>
+              <h3 className="page-title"><Trans>User Settings</Trans> / {translate(title)}</h3>
             </Col>
           </Row>
           <Container>
@@ -325,4 +330,4 @@ SettingsPage.defaultProps = {
   }
 };
 
-export default SettingsPage;
+export default withTranslation()(SettingsPage);

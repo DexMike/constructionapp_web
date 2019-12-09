@@ -770,7 +770,7 @@ class HaulRate extends PureComponent {
               marginTop: rateCalculator.estimateTypeRadio === 'hour' ? 9 : 0
             }}
             >
-              {rateCalculator.estimateTypeRadio === 'hour' ? rateCalculator.estimatedTons
+              {rateCalculator.estimateTypeRadio === 'hour' ? TFormat.asNumber(rateCalculator.estimatedTons)
                 : (
                   <TField
                     input={
@@ -805,7 +805,7 @@ class HaulRate extends PureComponent {
               marginTop: rateCalculator.estimateTypeRadio === 'ton' ? 9 : 0
             }}
             >
-              {rateCalculator.estimateTypeRadio === 'ton' ? rateCalculator.estimatedHours
+              {rateCalculator.estimateTypeRadio === 'ton' ? TFormat.asNumber(rateCalculator.estimatedHours)
                 : (
                   <TField
                     input={
@@ -902,7 +902,7 @@ class HaulRate extends PureComponent {
               marginTop: rateCalculator.rateTypeRadio !== 'ton' ? 9 : 0
             }}
             >
-              {rateCalculator.rateTypeRadio !== 'ton' ? rateCalculator.ratePerTon
+              {rateCalculator.rateTypeRadio !== 'ton' ? TFormat.asNumber(rateCalculator.ratePerTon)
                 : (
                   <TField
                     input={
@@ -937,7 +937,7 @@ class HaulRate extends PureComponent {
               marginTop: rateCalculator.rateTypeRadio !== 'oneWay' ? 9 : 0
             }}
             >
-              {rateCalculator.rateTypeRadio !== 'oneWay' ? rateCalculator.oneWayCostTonMile
+              {rateCalculator.rateTypeRadio !== 'oneWay' ? TFormat.asNumber(rateCalculator.oneWayCostTonMile)
                 : (
                   <TField
                     input={
@@ -1019,7 +1019,7 @@ class HaulRate extends PureComponent {
                   marginTop: rateCalculator.rateTypeRadio !== 'hour' ? 9 : 0
                 }}
                 >
-                  {rateCalculator.rateTypeRadio !== 'hour' ? rateCalculator.ratePerHour
+                  {rateCalculator.rateTypeRadio !== 'hour' ? TFormat.asNumber(rateCalculator.ratePerHour)
                     : (
                       <TField
                         input={
@@ -1054,7 +1054,7 @@ class HaulRate extends PureComponent {
                   marginTop: rateCalculator.rateTypeRadio !== 'twoWay' ? 9 : 0
                 }}
                 >
-                  {rateCalculator.rateTypeRadio !== 'twoWay' ? rateCalculator.twoWayCostMile
+                  {rateCalculator.rateTypeRadio !== 'twoWay' ? TFormat.asNumber(rateCalculator.twoWayCostMile)
                     : (
                       <TField
                         input={
@@ -1187,7 +1187,7 @@ class HaulRate extends PureComponent {
                     position: 'absolute'
                   }}
                   >
-                    {TFormat.asFloatTwoDecimals(tabPickupDelivery.avgDistanceEnroute)}
+                    {TFormat.asNumber(tabPickupDelivery.avgDistanceEnroute)}
                   </span>
                 </div>
               </Row>
@@ -1200,7 +1200,7 @@ class HaulRate extends PureComponent {
                     position: 'absolute'
                   }}
                   >
-                    {rateCalculator.travelTimeEnroute}
+                    {TFormat.asNumber(rateCalculator.travelTimeEnroute)}
                   </span>
                 </div>
                 {/*<div className="col-md-5 form__form-group">*/}
@@ -1229,7 +1229,7 @@ class HaulRate extends PureComponent {
                     position: 'absolute'
                   }}
                   >
-                    {rateCalculator.travelTimeReturn}
+                    {TFormat.asNumber(rateCalculator.travelTimeReturn)}
                   </span>
                 </div>
                 {/*<div className="col-md-5 form__form-group">*/}

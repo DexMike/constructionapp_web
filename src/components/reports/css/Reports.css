@@ -108,7 +108,7 @@
 }
 
 .gridTableJobs {
-  width: 1320px !important;
+  width: 1020px !important;
   padding-bottom: 10px;
   overflow-y: hidden !important;
 }
@@ -192,9 +192,13 @@
   background-color: #9A9A9A !important;
 }
 
+.reports-modal-job .modal-dialog{
+  width: 90% !important;
+}
+
 .reports-modal-job .modal-content{
-  width: 900px!important;
-  background-color: #e5e5e0;
+  width: 900px !important;
+  background-color: #e5e5e0 !important;
 }
 
 .reports-modal-job .col-md-9{

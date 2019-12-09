@@ -24,6 +24,11 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getTrucksForJob(jobId) {
+    const response = await this.get(`/trucks${PATH}/${jobId}`);
+    return (response);
+  }
+
   // getJobsByCompanyIdAndStatus
   // input
   //    companyID: id of company
@@ -166,7 +171,7 @@ class JobService extends AgentService {
   }
 
   static async createNewJob(jobRequest) {
-    const response = await super.post(`${PATH}/create`, jobRequest);
+    const response = await super.post(`${PATH}/post`, jobRequest);
     return (response);
   }
 

@@ -2,6 +2,7 @@ import React from 'react';
 import * as PropTypes from 'prop-types';
 import {Row} from 'reactstrap';
 import ReactTooltip from "react-tooltip";
+import TFormat from '../../common/TFormat';
 
 const InfoMessageDelPrice = ({payType}) => {
   if (payType === 'Hour') {
@@ -109,7 +110,7 @@ const DeliveryCostsSummary = ({
               <div className="col-md-3 form__form-group">
                       <span style={{}}
                       >
-                        {estMaterialPricing}
+                        {TFormat.asNumber(estMaterialPricing)}
                       </span>
               </div>
             </Row>
@@ -126,7 +127,7 @@ const DeliveryCostsSummary = ({
               <div className="col-md-3 form__form-group">
                       <span style={{}}
                       >
-                        {deliveredPricePerTon}
+                        {TFormat.asNumber(deliveredPricePerTon)}
                       </span>
               </div>
             </Row>
@@ -143,7 +144,7 @@ const DeliveryCostsSummary = ({
               <div className="col-md-3 form__form-group">
                       <span style={{}}
                       >
-                        {deliveredPriceJob}
+                        {TFormat.asNumber(deliveredPriceJob)}
                       </span>
               </div>
             </Row>
@@ -163,7 +164,7 @@ const DeliveryCostsSummary = ({
               <div className="col-md-3 form__form-group">
                       <span style={{}}
                       >
-                        {oneWayCostPerTonHourPerMile}
+                        {TFormat.asNumber(oneWayCostPerTonHourPerMile)}
                       </span>
               </div>
             </Row>
@@ -180,7 +181,7 @@ const DeliveryCostsSummary = ({
               <div className="col-md-3 form__form-group">
                       <span style={{}}
                       >
-                        {haulCostPerTonHour}
+                        {TFormat.asNumber(haulCostPerTonHour)}
                       </span>
               </div>
             </Row>
@@ -197,7 +198,7 @@ const DeliveryCostsSummary = ({
               <div className="col-md-3 form__form-group">
                       <span style={{}}
                       >
-                        {estimatedCostForJob}
+                        {TFormat.asNumber(estimatedCostForJob)}
                       </span>
               </div>
             </Row>

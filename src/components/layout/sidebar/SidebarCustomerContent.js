@@ -37,7 +37,6 @@ class SidebarCustomerContent extends Component {
 
   render() {
     let { isAdmin } = this.props;
-    isAdmin = true;
     return (
       <React.Fragment>
         <div className="sidebar__content">
@@ -78,29 +77,25 @@ class SidebarCustomerContent extends Component {
             )
           }
         </div>
-        {
-          isAdmin && (
-            <div className="sidebar__content reports">
-              <ul className="sidebar__block">
-                <SidebarCategory
-                  title="Reporting"
-                  icon="ic_assessment"
-                >
-                  <SidebarLink
-                    title="Daily Report"
-                    route="/reports/dailyreport"
-                    onClick={this.hideSidebar}
-                  />
-                  <SidebarLink
-                    title="Comparison Report"
-                    route="/reports/comparison"
-                    onClick={this.hideSidebar}
-                  />
-                </SidebarCategory>
-              </ul>
-            </div>
-          )
-        }
+        <div className="sidebar__content reports">
+          <ul className="sidebar__block">
+            <SidebarCategory
+              title="Reporting"
+              icon="ic_assessment"
+            >
+              <SidebarLink
+                title="Daily Report"
+                route="/reports/dailyreport"
+                onClick={this.hideSidebar}
+              />
+              <SidebarLink
+                title="Comparison Report"
+                route="/reports/comparison"
+                onClick={this.hideSidebar}
+              />
+            </SidebarCategory>
+          </ul>
+        </div>
       </React.Fragment>
     );
   }

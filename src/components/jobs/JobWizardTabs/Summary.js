@@ -209,10 +209,10 @@ class Summary extends PureComponent {
           </Row>
           <Row className="col-md-12">
             <div className="col-md-6 form__form-group">
-              {startAddressValidations.length > 0 ? this.renderValidationBox(startAddressValidations, 2) : this.renderStartAddress()}
+              {startAddressValidations.length > 0 ? this.renderValidationBox(startAddressValidations, 1) : this.renderStartAddress()}
             </div>
             <div className="col-md-6 form__form-group">
-              {endAddressValidations.length > 0 ? this.renderValidationBox(endAddressValidations, 2) : this.renderEndAddress()}
+              {endAddressValidations.length > 0 ? this.renderValidationBox(endAddressValidations, 1) : this.renderEndAddress()}
 
             </div>
           </Row>
@@ -377,7 +377,7 @@ class Summary extends PureComponent {
           </Row>
           <Row className="col-md-12">
             <div className="col-md-4">
-              {materialTabValidations.length > 0 ? this.renderValidationBox(materialTabValidations, 1)
+              {materialTabValidations.length > 0 ? this.renderValidationBox(materialTabValidations, 2)
                 : this.renderMaterials()}
             </div>
             <div className="col-md-4">

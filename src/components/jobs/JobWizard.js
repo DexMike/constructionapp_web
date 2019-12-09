@@ -42,6 +42,8 @@ class JobWizard extends Component {
       jobStartDate: null,
       jobEndDate: null,
       poNumber: '',
+      minDate: null,
+      topFormRef: React.createRef(),
       reqHandlerJobName: {
         touched: false,
         error: ''
@@ -256,7 +258,7 @@ class JobWizard extends Component {
         };
         allTruckTypes.push(inside);
       });
-    tabTruckSpecs.allTruckTypes = allTruckTypes;
+    tabTruckSpecs.allTruckTypes = allTruckTypes.filter(it => it.label !== 'Other');
 
     let profile;
     try {
@@ -431,7 +433,8 @@ class JobWizard extends Component {
       jobStartDate,
       jobEndDate,
       poNumber,
-      tabHaulRate
+      tabHaulRate,
+      minDate: moment().format('MM/DD/YYYY')
     });
   }
 
@@ -456,7 +459,48 @@ class JobWizard extends Component {
 
   jobStartDateChange(data) {
     // return false;
-    const {reqHandlerStartDate} = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
+    const {reqHandlerStartDate, reqHandlerEndDate, jobEndDate} = this.state;
+    const currDate = new Date();
+
+    if (data && (new Date(data).getTime() < currDate.getTime())) {
+      this.setState({
+        jobStartDate: data,
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: translate('The start date of the job can not be set in the past or as the current date and time')
+        }
+      });
+      return;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() <= new Date(data).getTime())) {
+      this.setState({
+        jobStartDate: data,
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: translate('The start date of the job can not be set in the future of or equivalent to the end date')
+        }
+      });
+      return;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() >= currDate.getTime())) {
+      this.setState({
+        jobStartDate: data,
+        reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
+          touched: false
+        }),
+        reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
+          touched: false
+        })
+      });
+      return;
+    }
+
     this.setState({
       jobStartDate: data,
       reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
@@ -467,7 +511,48 @@ class JobWizard extends Component {
 
   jobEndDateChange(data) {
     // return false;
-    const {reqHandlerEndDate} = this.state;
+    const { t } = { ...this.props };
+    const translate = t;
+    const {reqHandlerEndDate, jobStartDate, reqHandlerStartDate} = this.state;
+    const currDate = new Date();
+
+    if (data && (new Date(data).getTime() <= currDate.getTime())) {
+      this.setState({
+        jobEndDate: data,
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: translate('The end date of the job can not be set in the past or equivalent to the current date and time')
+        }
+      });
+      return;
+    }
+
+    if (jobStartDate && (new Date(jobStartDate).getTime() >= new Date(data).getTime())) {
+      this.setState({
+        jobEndDate: data,
+        reqHandlerEndDate: {
+          ...reqHandlerEndDate,
+          touched: true,
+          error: translate('The end date of the job can not be set in the past of or equivalent to the start date')
+        }
+      });
+      return;
+    }
+
+    if (jobStartDate && (new Date(jobStartDate).getTime() >= currDate.getTime())) {
+      this.setState({
+        jobEndDate: data,
+        reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
+          touched: false
+        }),
+        reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
+          touched: false
+        })
+      });
+      return;
+    }
+
     this.setState({
       jobEndDate: data,
       reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
@@ -477,9 +562,15 @@ class JobWizard extends Component {
   }
 
   async validateTopForm() {
+    const {topFormRef} = this.state;
     const isValid = await this.validateSend();
     if (isValid) {
       await this.sixthPage();
+    } else {
+      topFormRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
   }
 
@@ -562,17 +653,17 @@ class JobWizard extends Component {
     const {tabPickupDelivery} = {...this.state};
     // const {startGPS} = {...this.state};
     const val = [];
-    if (!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0) {
-      if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
-        && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
-        val.push(translate('Same start and end addresses'));
-      }
-      if (tabPickupDelivery.startLocationAddress1.length === 0
+    if ((!tabPickupDelivery.selectedStartAddressId || tabPickupDelivery.selectedStartAddressId === 0)
+      && (tabPickupDelivery.startLocationAddress1.length === 0
         || tabPickupDelivery.startLocationCity.length === 0
         || tabPickupDelivery.startLocationZip.length === 0
-        || tabPickupDelivery.startLocationState.length === 0) {
+        || tabPickupDelivery.startLocationState.length === 0)) {
         val.push(translate('Missing start address fields'));
-      }
+    }
+
+    if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
+      && tabPickupDelivery.selectedStartAddressId === tabPickupDelivery.selectedEndAddressId) {
+      val.push(translate('Same start and end addresses'));
     }
 
     if (val.length > 0) {
@@ -593,14 +684,12 @@ class JobWizard extends Component {
     const val = [];
     // const {endGPS} = {...this.state};
 
-    if (!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0) {
-
-      if (tabPickupDelivery.endLocationAddress1.length === 0
+    if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
+      && (tabPickupDelivery.endLocationAddress1.length === 0
         || tabPickupDelivery.endLocationCity.length === 0
         || tabPickupDelivery.endLocationZip.length === 0
-        || tabPickupDelivery.endLocationState.length === 0) {
+        || tabPickupDelivery.endLocationState.length === 0)) {
         val.push(translate('Missing end address fields'));
-      }
     }
 
     if (val.length > 0) {
@@ -695,7 +784,7 @@ class JobWizard extends Component {
     if (isValid) {
       await this.saveJobDraft();
       this.setState({btnSubmitting: false});
-      this.closeNow();
+      // this.closeNow();
     }
   }
 
@@ -1109,7 +1198,7 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, selectedCarrierId, job} = this.props;
+    const {jobRequest, jobEdit, jobEditSaved, selectedCarrierId, job} = this.props;
     this.setState({btnSubmitting: true});
     const {
       profile,
@@ -1300,6 +1389,10 @@ class JobWizard extends Component {
     }
 
     try {
+      // Checking if there's a saved job to update instead of creating a new one
+      if (job && job.id) {
+        jobCreate.id = job.id;
+      }       
       newJob = await JobService.createNewJob(jobRequestObject);
     } catch (e) {
       console.error(e);
@@ -1495,7 +1588,7 @@ class JobWizard extends Component {
     //   this.updateJobView(newJob);
     //   this.closeNow();
     // } else {
-    //   if (copyJob) { 
+    //   if (copyJob) {
     // user clicked on Copy Job, then tried to Save a new Job, reload the view with new data
     //     newJob.copiedJob = true;
     //     this.updateJobView(newJob);
@@ -1609,7 +1702,7 @@ class JobWizard extends Component {
             onClick={this.firstPage}
             className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
           >
-            <p>{translate('Materials')}</p>
+            <p>{translate('Pickup / Delivery')}</p>
           </div>
           <div
             role="link"
@@ -1618,7 +1711,7 @@ class JobWizard extends Component {
             onClick={this.secondPage}
             className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
           >
-            <p>{translate('Pickup / Delivery')}</p>
+            <p>{translate('Materials')}</p>
           </div>
           <div
             role="link"
@@ -1685,7 +1778,9 @@ class JobWizard extends Component {
       reqHandlerJobName,
       reqHandlerStartDate,
       reqHandlerEndDate,
-      loaded
+      loaded,
+      minDate,
+      topFormRef
     } = this.state;
     if (loaded) {
       return (
@@ -1697,6 +1792,7 @@ class JobWizard extends Component {
                 className="form form--horizontal addtruck__form"
                 // onSubmit={e => this.saveTruck(e)}
                 autoComplete="off"
+                ref={topFormRef}
               >
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
@@ -1750,6 +1846,7 @@ class JobWizard extends Component {
                       }
                       placeholder={translate('Date and time of job')}
                       defaultDate={jobStartDate}
+                      minDate={minDate}
                       onChange={this.jobStartDateChange}
                       dateFormat="m/d/Y h:i K"
                       showTime
@@ -1775,6 +1872,7 @@ class JobWizard extends Component {
                       }
                       placeholder={translate('Date and time of job')}
                       defaultDate={jobEndDate}
+                      minDate={minDate}
                       onChange={this.jobEndDateChange}
                       dateFormat="m/d/Y h:i K"
                       showTime
@@ -1887,15 +1985,15 @@ class JobWizard extends Component {
                     <div className="wizard__form-wrapper">
                       {page === 1
                       && (
-                      <JobMaterials
-                        data={tabMaterials}
-                        handleInputChange={this.handleChildInputChange}
-                      />
+                        <PickupAndDelivery
+                          data={tabPickupDelivery}
+                          handleInputChange={this.handleChildInputChange}
+                        />
                       )}
                       {page === 2
                       && (
-                      <PickupAndDelivery
-                        data={tabPickupDelivery}
+                      <JobMaterials
+                        data={tabMaterials}
                         handleInputChange={this.handleChildInputChange}
                       />
                       )}
@@ -2037,7 +2135,7 @@ JobWizard.propTypes = {
   jobEdit: PropTypes.bool,
   copyJob: PropTypes.bool,
   jobEditSaved: PropTypes.bool,
-  job: PropTypes.object,
+  job: PropTypes.object.isRequired,
   updateJobView: PropTypes.func,
   updateCopiedJob: PropTypes.func
 };
@@ -2048,7 +2146,8 @@ JobWizard.defaultProps = {
   jobEdit: false,
   jobEditSaved: false,
   copyJob: false,
-  job: null
+  updateJobView: PropTypes.func,
+  updateCopiedJob: PropTypes.func
 };
 
 export default withTranslation()(JobWizard);

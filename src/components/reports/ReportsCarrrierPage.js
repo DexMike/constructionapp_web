@@ -27,20 +27,15 @@ import moment from 'moment';
 // ag grid
 import { AgGridReact } from 'ag-grid-react';
 
-import FilterComparisonReport from "../filters/FilterComparisonReport";
-import ProfileService from '../../api/ProfileService';
+import FilterComparisonReport from "./filters/FilterComparisonReport";
+import ProfileService from './services/ProfileService';
 
-import './ReportsDark.css';
-import '../addresses/Address.css';
+import './css/ReportsDark.css';
+import './css/Address.css';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham-dark.css';
-
-import TTable from '../common/TTable';
-import TFormat from '../common/TFormat';
-import NumberFormatting from '../../utils/NumberFormatting';
-import DailyReportFilter from "../filters/DailyReportFilter";
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -50,11 +45,11 @@ function PageTitle() {
 }
 
 function bracketsFormatter(params) {
-  return "(" + params.value + ")";
+  return `(${params.value})`;
 }
 
 function currencyFormatter(params) {
-  return "$ " + formatNumber(params.value);
+  return `$ ${formatNumber(params.value)}`;
   // console.log( TFormat.asMoneyNoDecimals(params.value));
   // return TFormat.asMoneyNoDecimals(params.value);
 }
@@ -67,7 +62,7 @@ function formatNumber(number) {
 
 function percentFormatter(params) {
   // console.log( TFormat.asMoneyNoDecimals(params.value));
-  return formatNumber(params.value * 100)  + "%";
+  return `${formatNumber(params.value * 100)}%`;
 }
 
 class ReportsCarrierPage extends Component {
@@ -387,17 +382,17 @@ class ReportsCarrierPage extends Component {
   onGridReadyProducers(params) {
     this.gridApiProducers = params.api;
     this.gridColumnApi = params.columnApi;
-  };
+  }
 
   onGridReadyProducts(params) {
     this.gridApiProducers = params.api;
     this.gridColumnApi = params.columnApi;
-  };
+  }
 
   onGridReadyProjects(params) {
     this.gridApiProjects = params.api;
     this.gridColumnApi = params.columnApi;
-  };
+  }
 
   handlePageClick(menuItem) {
     if (menuItem) {
@@ -437,11 +432,11 @@ class ReportsCarrierPage extends Component {
     var momentB = moment(date2,"MM/DD/YYYY");
     if (momentA > momentB) {
       return 1;
-    } else if (momentA < momentB) {
+    } if (momentA < momentB) {
       return -1;
-    } else {
+    } 
       return 0;
-    }
+    
   }
 
   // renderModal stolen from MarketplaceCarrierPage
@@ -535,8 +530,8 @@ class ReportsCarrierPage extends Component {
     totalProducers,
     totalProducts,
     totalProjects,
-    filters/*, metadata*/)
-  {
+    filters/*, metadata*/
+  ) {
     const totalCount = 0;
     this.setState({
       producers,
@@ -644,8 +639,8 @@ class ReportsCarrierPage extends Component {
                             rowData={producers}
                             // floatingFilter={true}
                             onGridReady={this.onGridReadyProducers}
-                            paginationAutoPageSize={true}
-                            pagination={true}
+                            paginationAutoPageSize
+                            pagination
                           />
                         </div>
                       </CardBody>
@@ -702,7 +697,7 @@ class ReportsCarrierPage extends Component {
                           )
                         }
                         <div
-                          id={"ProductsGrid"}
+                          id="ProductsGrid"
                           className="ag-theme-balham-dark"
                           style={{
                             height: '500px',
@@ -718,8 +713,8 @@ class ReportsCarrierPage extends Component {
                             rowData={products}
                             // floatingFilter={true}
                             onGridReady={this.onGridReadyProducts}
-                            paginationAutoPageSize={true}
-                            pagination={true}
+                            paginationAutoPageSize
+                            pagination
                           />
                         </div>
                       </CardBody>
@@ -776,7 +771,7 @@ class ReportsCarrierPage extends Component {
                           )
                         }
                         <div
-                          id={"ProjectsGrid"}
+                          id="ProjectsGrid"
                           className="ag-theme-balham-dark"
                           style={{
                             height: '500px',
@@ -792,8 +787,8 @@ class ReportsCarrierPage extends Component {
                             rowData={projects}
                             // floatingFilter={true}
                             onGridReady={this.onGridReadyProjects}
-                            paginationAutoPageSize={true}
-                            pagination={true}
+                            paginationAutoPageSize
+                            pagination
                           />
                         </div>
                       </CardBody>
@@ -899,7 +894,7 @@ class ReportsCarrierPage extends Component {
           {/* */}
           <FilterComparisonReport
             type="Carrier"
-            showComparison={true}
+            showComparison
             ref="filterChild"
             onReturnFilters={this.returnFilters}
             returnProducers={this.returnProducers}

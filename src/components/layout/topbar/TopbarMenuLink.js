@@ -7,6 +7,7 @@ import AuthService from '../../../utils/AuthService';
 
 class TopbarMenuLink extends Component {
   async logOut() {
+    localStorage.clear();
     await AuthService.logOut();
   }
 
@@ -41,7 +42,7 @@ class TopbarMenuLink extends Component {
         )}
         {title !== 'Log Out' && title !== 'Toggle Theme' && (
           <Link className="topbar__link" to={path}
-            onClick={() => {
+            onClick={() => {              
               if (toggle) {
                 toggle();
               }

@@ -64,7 +64,8 @@ class DashboardCarrierPage extends Component {
       rows: 10,
       totalCount: 10,
       totalJobs: 0,
-      defaultDriverPrompt: false
+      defaultDriverPrompt: false,
+      isLoading: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
@@ -78,7 +79,7 @@ class DashboardCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    let { defaultDriverPrompt } = { ...this.state };
+    let { defaultDriverPrompt, rows, totalCount, filters } = { ...this.state };
     const profile = await ProfileService.getProfile();
     const user = await UserService.getUserById(profile.userId);
     if (user.defaultDriverPrompt === true) {
@@ -87,13 +88,26 @@ class DashboardCarrierPage extends Component {
       defaultDriverPrompt = true;
     }
     const { jobsInfo, totalJobs } = await this.fetchJobsInfo(profile);
+
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
+      rows = filters.rows;      
+    }    
+    if (localStorage.getItem('metadata')) {
+      const metadata = JSON.parse(localStorage.getItem('metadata'));
+      totalCount = metadata.totalCount;
+    }
+
     this.setState({
       profile,
       user,
       jobsInfo,
       totalJobs,
       defaultDriverPrompt,
-      loaded: true
+      loaded: true,
+      rows,
+      totalCount,
+      filters
     });
   }
 
@@ -106,7 +120,8 @@ class DashboardCarrierPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
-
+    localStorage.setItem('filters', JSON.stringify(filters));
+    localStorage.setItem('metadata', JSON.stringify(metadata));
     this.setState({
       jobs,
       filters,
@@ -156,19 +171,6 @@ class DashboardCarrierPage extends Component {
     } else {
       filters[name] = value;
     }
-    // clearing filter fields for general jobs based on Status (Top cards)
-    filters.equipmentType = [];
-    filters.materialType = [];
-    filters.startAvailability = '';
-    filters.endAvailability = '';
-    delete filters.rateType;
-    filters.rate = '';
-    filters.minTons = '';
-    filters.minHours = '';
-    filters.minCapacity = '';
-    filters.numEquipments = '';
-    filters.zipCode = '';
-    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       filters,
@@ -450,7 +452,7 @@ class DashboardCarrierPage extends Component {
     );
 
     if (loaded) {
-      const { filters, totalCount, totalJobs} = this.state;
+      const { filters, totalCount, totalJobs, isLoading, rows} = this.state;
       return (
         <Container className="dashboard">
           <Row>
@@ -521,6 +523,8 @@ class DashboardCarrierPage extends Component {
                     handleRowsChange={this.handleRowsPerPage}
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
+                    isLoading={isLoading}
+                    defaultRows={rows}
                   />
                 </CardBody>
               </Card>
@@ -562,6 +566,7 @@ class DashboardCarrierPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
+            isLoading={(e) => this.setState({isLoading: e})}           
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}

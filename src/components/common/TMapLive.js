@@ -4,7 +4,7 @@ import pinA from '../../img/PinA.png';
 import pinB from '../../img/PinB.png';
 // import truckIcon from '../../img/icons8-truck-30.png';
 import LoadsService from '../../api/LoadService';
-// import { type } from 'os';
+import GeoUtils from '../../utils/GeoUtils';
 import './overrides.scss';
 
 const refreshInterval = 15; // refresh every 15 seconds
@@ -184,7 +184,7 @@ class TMapLive extends Component {
     const polyline = new H.map.Polyline(lineString, {
       style: {
         lineWidth: 4,
-        strokeColor: 'rgba(0, 128, 255, 0.7)'
+        strokeColor: 'rgba(0, 201, 151, 0.6)'
       }
     });
     // Add the polyline to the map
@@ -205,35 +205,9 @@ class TMapLive extends Component {
     const group = new H.map.Group();
     group.addObjects([markerA, markerB]);
     this.map.addObject(group);
-    let bounds = group.getBoundingBox(); // H.geo.Rect
-    // zoom out a little so the markers fit
-    const offsetFactor = 0.2;
-    let smallFactor = 0;
-    const boundParams = {
-      top: bounds.getTop(),
-      left: bounds.getLeft(),
-      bottom: bounds.getBottom(),
-      right: bounds.getRight()
-    };
-    if ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom) <= 0.0001))) {
-      smallFactor = 0.01;
-    }
-    boundParams.top += ((Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
-      + smallFactor) * offsetFactor);
-    boundParams.left -= ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
-      + smallFactor) * offsetFactor);
-    // not needed since bottom pin fits
-    // boundParams.bottom -= (Math.abs(Math.abs(boundParams.top) - Math.abs(boundParams.bottom))
-    //   * offsetFactor);
-    boundParams.right += ((Math.abs(Math.abs(boundParams.left) - Math.abs(boundParams.right))
-      + smallFactor) * offsetFactor);
-    this.boundingBoxDistance = Math.sqrt((((boundParams.top - boundParams.bottom) ** 2))
-      + (((boundParams.left - boundParams.right) ** 2)));
-    bounds = new H.geo.Rect(boundParams.top, boundParams.left, boundParams.bottom,
-      boundParams.right);
-    // And zoom to its bounding rectangle
+    const bounds = group.getBoundingBox(); // H.geo.Rect
     this.map.getViewModel().setLookAtData({
-      bounds
+      bounds: GeoUtils.setZoomBounds(bounds)
     });
   }
 
@@ -261,7 +235,6 @@ class TMapLive extends Component {
       const that = this;
       const timerTimer = function timerTimer() {
         count += 1;
-        // console.log(`>>>REFRESHING: ${Date.now()} COUNT: ${count}`);
         that.getLatestGPSForLoad();
       };
       timerVar = setInterval(timerTimer, (refreshInterval * 1000));
