@@ -25,14 +25,7 @@ class TMap extends Component {
   }
 
   componentDidMount() {
-    const {
-      zoom,
-      center,
-      id,
-      startAddress,
-      endAddress,
-      trackings
-    } = this.props;
+    const { zoom, center, id, startAddress, endAddress, trackings, multiPolygon } = this.props;
     const defaultLayers = this.platform.createDefaultLayers();
     const mapDiv = document.getElementById(`mapContainer${id}`);
     const mapOptions = {};
@@ -51,6 +44,8 @@ class TMap extends Component {
       this.calculateRouteFromAtoB();
       this.addMarkersToMap();
     }
+
+    this.addPolygonsToMap(multiPolygon);
 
     // https://trelar.atlassian.net/browse/SG-930
     // don't delete commented code, please
@@ -107,6 +102,25 @@ class TMap extends Component {
       this.onRouteSuccess,
       this.onRouteError
     );
+  }
+
+  addPolygonsToMap(multiPolygon) {
+    for (const polygon of multiPolygon) {
+      const lineArray = [];
+      for (const geoCoordinate of polygon) {
+        lineArray.push(geoCoordinate.latitude);
+        lineArray.push(geoCoordinate.longitude);
+        lineArray.push(100);
+      }
+      const lineString = new H.geo.LineString(lineArray, 'values lat lng alt');
+      this.map.addObject(new H.map.Polygon(lineString, {
+        style: {
+          fillColor: 'rgba(0,0,255,0.3)',
+          strokeColor: '#0000FF',
+          lineWidth: 2
+        }
+      }));
+    }
   }
 
   /**
@@ -198,7 +212,16 @@ TMap.propTypes = {
     latitude: PropTypes.number,
     longitude: PropTypes.number
   }),
-  trackings: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
+  trackings: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+  multiPolygon: PropTypes.arrayOf(
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        latitude: PropTypes.number,
+        longitude: PropTypes.number
+      })
+    )
+  )
+
 };
 
 TMap.defaultProps = {
@@ -212,7 +235,8 @@ TMap.defaultProps = {
   },
   startAddress: null,
   endAddress: null,
-  trackings: []
+  trackings: [],
+  multiPolygon: []
 };
 
 export default TMap;
