@@ -257,5 +257,6 @@
   "See Allocated Trucks": "See Allocated Trucks",
   "NO_TRUCKS": "You do not have any more trucks to allocate to the job",
   "NO_DRIVERS": "You do not have any more drivers to allocate to the job",
-  "NO_TRUCKS_OR_DRIVERS": "You do not have any more trucks or drivers to allocate to the job"
+  "NO_TRUCKS_OR_DRIVERS": "You do not have any more trucks or drivers to allocate to the job",
+  "Apply Calculations Above": "Apply Calculations Above"
 }

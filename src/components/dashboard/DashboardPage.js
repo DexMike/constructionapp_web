@@ -31,12 +31,12 @@ class DashboardPage extends Component {
     const { t } = { ...this.props };
     const translate = t;
     const profile = await ProfileService.getProfile();
-    if (profile && profile.isAdmin && profile.companyType === 'Customer') {
-      const company = await CompanyService.getCompanyById(profile.companyId);
-      if (company && !company.btCustomerId) {
-        alert(translate('Please go to the company settings and save your payment information'));
-      }
-    }
+    // if (profile && profile.isAdmin && profile.companyType === 'Customer') {
+    //   const company = await CompanyService.getCompanyById(profile.companyId);
+    //   if (company && !company.btCustomerId) {
+    //     alert(translate('Please go to the company settings and save your payment information'));
+    //   }
+    // }
     this.setState({ companyType: profile.companyType });
     await this.fetchCompanyTrucks();
   }

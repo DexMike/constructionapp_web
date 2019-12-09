@@ -171,14 +171,20 @@ class JobWizard extends Component {
       },
       tabHaulRate: {
         payType: 'Ton',
+        tripType: 'twoWay',
+        roundType: 'down',
         ratePerPayType: '0.00',
-        rateCalcOpen: false,
+        rateCalcVisibleDisabled: false,
         avgDistanceEnroute: 0.00,
         avgDistanceReturn: 0.00,
         avgTimeEnroute: 0.00,
         avgTimeReturn: 0.00,
         rateCalculator: {
+          rateCalcOpen: false,
           estimateTypeRadio: 'ton',
+          tripType: 'twoWay',
+          roundType: 'down',
+          numberOfLoads: 0,
           rateTypeRadio: 'ton',
           estimatedTons: 0,
           estimatedHours: 10,
@@ -194,7 +200,7 @@ class JobWizard extends Component {
           twoWayCostMile: '0.00'
         }
       },
-      page: 1,
+      page: 4,
       job: [],
       loaded: false,
       profile: []
@@ -1392,7 +1398,7 @@ class JobWizard extends Component {
       // Checking if there's a saved job to update instead of creating a new one
       if (job && job.id) {
         jobCreate.id = job.id;
-      }       
+      }
       newJob = await JobService.createNewJob(jobRequestObject);
     } catch (e) {
       console.error(e);
@@ -2007,6 +2013,13 @@ class JobWizard extends Component {
                       {page === 4
                       && (
                       <HaulRate
+                        closeModal={this.closeNow}
+                        jobRequest={jobRequest}
+                        jobEdit={jobEdit}
+                        btnSubmitting={btnSubmitting}
+                        goBack={this.goBack}
+                        saveJob={this.validateAndSaveJobDraft}
+                        nextPage={this.nextPage}
                         data={tabHaulRate}
                         tabMaterials={tabMaterials}
                         tabPickupDelivery={tabPickupDelivery}
@@ -2054,7 +2067,7 @@ class JobWizard extends Component {
                       )}
                     </div>
                   </div>
-                  {page < 5 && (
+                  {page < 4 && (
                   <React.Fragment>
                     <Row className="col-md-12">
                       <hr/>

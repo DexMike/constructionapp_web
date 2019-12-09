@@ -20,6 +20,17 @@ class TCalculator {
       + loadTime + unloadTime;
   }
 
+  /* returns one way cost / ton / mile (per ton per mile) for rate type of ton */
+  static getOneWayTripTime(
+    travelTimeEnroute,
+    loadTime,
+    unloadTime
+  ) {
+    return travelTimeEnroute
+      + loadTime + unloadTime;
+  }
+
+
   /*
     Calculates number of trips required based on tonnage amount to be moved.
     Uses truck capacity.
@@ -66,12 +77,21 @@ class TCalculator {
     estimatedTons,
     truckCapacity,
   ) {
-    const oneLoad = this.getRoundTripTime(
-      travelTimeEnroute,
-      travelTimeReturn,
-      loadTime,
-      unloadTime
-    );
+    let oneLoad;
+    if (!travelTimeReturn) {
+      oneLoad = this.getOneWayTripTime(
+        travelTimeEnroute,
+        loadTime,
+        unloadTime
+      );
+    } else {
+      oneLoad = this.getRoundTripTime(
+        travelTimeEnroute,
+        travelTimeReturn,
+        loadTime,
+        unloadTime
+      );
+    }
     const numTrips = this.getNumTripsByTons(estimatedTons, truckCapacity);
     const hours = parseFloat((numTrips * oneLoad).toFixed(2));
     return hours;
@@ -91,12 +111,21 @@ class TCalculator {
     estimatedHours,
     truckCapacity,
   ) {
-    const oneLoad = this.getRoundTripTime(
-      travelTimeEnroute,
-      travelTimeReturn,
-      loadTime,
-      unloadTime
-    );
+    let oneLoad;
+    if (!travelTimeReturn) {
+      oneLoad = this.getOneWayTripTime(
+        travelTimeEnroute,
+        loadTime,
+        unloadTime
+      );
+    } else {
+      oneLoad = this.getRoundTripTime(
+        travelTimeEnroute,
+        travelTimeReturn,
+        loadTime,
+        unloadTime
+      );
+    }
     const numTrips = this.getNumTripsByHours(estimatedHours, oneLoad);
     const tons = parseFloat((numTrips * truckCapacity).toFixed(2));
     return tons;

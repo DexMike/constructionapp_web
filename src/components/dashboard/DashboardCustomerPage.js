@@ -64,7 +64,6 @@ function TableLegend({displayed, totalCount, totalJobs}) {
 class DashboardCustomerPage extends Component {
   constructor(props) {
     super(props);
-
     // NOTE: if you update this list you have to update
     // Orion.EquipmentDao.filtersOrderByClause
     this.state = {
@@ -76,7 +75,7 @@ class DashboardCustomerPage extends Component {
       goToUpdateJob: false,
       jobId: 0,
       modalAddJob: false,
-      modalAddJobWizard: false,
+      modalAddJobWizard: true,
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
@@ -103,12 +102,12 @@ class DashboardCustomerPage extends Component {
   async componentDidMount() {
     let { rows, totalCount, filters } = this.state;
     const profile = await ProfileService.getProfile();
-    await this.fetchJobsInfo(profile);
+    // await this.fetchJobsInfo(profile);
 
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
-      rows = filters.rows;      
-    }    
+      rows = filters.rows;
+    }
     if (localStorage.getItem('metadata')) {
       const metadata = JSON.parse(localStorage.getItem('metadata'));
       totalCount = metadata.totalCount;
@@ -666,7 +665,7 @@ class DashboardCustomerPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
-            isLoading={(e) => this.setState({isLoading: e})}  
+            isLoading={(e) => this.setState({isLoading: e})}
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}

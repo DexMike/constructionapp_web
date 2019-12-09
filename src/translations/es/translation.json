@@ -257,5 +257,6 @@
   "See Allocated Trucks": "Ver los camiones asignados",
   "NO_TRUCKS": "No tiene más camiones para asignar a este trabajo",
   "NO_DRIVERS": "No tiene más conductores para asignar a este trabajo",
-  "NO_TRUCKS_OR_DRIVERS": "No tiene más camiones ni conductores para asignar a este trabajo"
+  "NO_TRUCKS_OR_DRIVERS": "No tiene más camiones ni conductores para asignar a este trabajo",
+  "Apply Calculations Above": "Aplicar los cálculos de arriba"
 }
