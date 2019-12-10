@@ -403,9 +403,9 @@ class DriverForm extends Component {
                 input={{
                   onChange: this.handleInputChange,
                   name: 'firstName',
-                  value: t(firstName)
+                  value: firstName
                 }}
-                placeholder="First Name"
+                placeholder={t('First Name')}
                 type="text"
                 meta={reqHandlerFName}
               />

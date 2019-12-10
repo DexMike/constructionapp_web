@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-
+import { withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -33,8 +33,9 @@ class EquipmentGeneralMap extends Component {
   }
 
   noTrucksOnShift(trucksNumber) {
-    const plural = trucksNumber === 1 ? `is ${trucksNumber} truck` : `are ${trucksNumber} trucks`;
-    const shiftText = `There ${plural} on an active shift.`;
+    const {t} = {...this.props};
+    const plural = trucksNumber === 1 ? `${t('There is')} ${trucksNumber} ${t('truck')}` : `${t('There are')} ${trucksNumber} ${t('trucks')}`;
+    const shiftText = `${plural} ${t('on an active shift')}.`;
     this.setState({ shiftText });
   }
 
@@ -53,12 +54,13 @@ class EquipmentGeneralMap extends Component {
   render() {
     const title = 'General Trucks Map';
     const { loaded, profileType, profileCompanyId, shiftText } = this.state;
+    const {t} = {...this.props};
     if (loaded) {
       return (
         <Container className="dashboard">
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Truck Locator</h3>
+              <h3 className="page-title">{t('Truck Locator')}</h3>
             </Col>
           </Row>
           <TMapGeneralLive
@@ -90,4 +92,4 @@ class EquipmentGeneralMap extends Component {
   }
 }
 
-export default EquipmentGeneralMap;
+export default withTranslation()(EquipmentGeneralMap);

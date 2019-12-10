@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-
+import { withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 
@@ -107,13 +107,14 @@ class PaymentsCustomer extends Component {
       date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88'
     }]; */
     const { loaded, payments } = this.state;
+    const {t} = {...this.props};
     if (loaded) {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Customer Charges</h3>
+              <h3 className="page-title">{t('Customer Charges')}</h3>
             </Col>
           </Row>
           {/* <PaymentsFilter /> */}
@@ -130,14 +131,14 @@ class PaymentsCustomer extends Component {
                         // },
                         {
                           name: 'createdAt',
-                          displayName: 'Date'
+                          displayName: t('Date')
                         }, {
                           name: 'amount',
-                          displayName: 'Amount',
+                          displayName: t('AMOUNT_CHARGE'),
                           label: 'amountF'
                         }, {
                           name: 'status',
-                          displayName: 'Status'
+                          displayName: t('Status')
                         }
                       ]
                     }
@@ -157,7 +158,7 @@ class PaymentsCustomer extends Component {
       <Container className="container">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Customer Payments</h3>
+            <h3 className="page-title">{t('Customer Charges')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -166,4 +167,4 @@ class PaymentsCustomer extends Component {
   }
 }
 
-export default PaymentsCustomer;
+export default withTranslation()(PaymentsCustomer);

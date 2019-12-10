@@ -7,7 +7,7 @@ import {
   Container, Modal,
   Row
 } from 'reactstrap';
-import {useTranslation} from 'react-i18next';
+import {useTranslation, withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
@@ -374,7 +374,8 @@ class DashboardCarrierPage extends Component {
   renderJobList() {
     const { profile, loaded } = this.state;
     let { jobs } = this.state;
-
+    const { t } = { ...this.props };
+    const translate = t;
     let onOfferJobCount = 0;
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
@@ -473,46 +474,46 @@ class DashboardCarrierPage extends Component {
                         // },
                         {
                           name: 'newStartDate',
-                          displayName: 'Start Date'
+                          displayName: t('Start Date')
                         },
                         {
                           name: 'name',
-                          displayName: 'Job Name'
+                          displayName: t('Job Name')
                         },
                         {
                           name: 'status',
-                          displayName: 'Job Status'
+                          displayName: t('Job Status')
                         },
                         {
                           name: 'companyLegalName',
-                          displayName: 'Customer'
+                          displayName: t('Customer')
                         },
                         {
                           name: 'distance',
-                          displayName: 'Distance from Me (mi)'
+                          displayName: `${t('Distance from Me')} (mi)`
                         },
                         {
                           name: 'haulDistance',
-                          displayName: 'Haul Distance (One Way) (mi)'
+                          displayName: `${t('Haul Distance')} (${t('One Way')}) (mi)`
                         },
                         {
                           name: 'potentialIncome',
-                          displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings',
+                          displayName: filters.status === 'Job Completed' ? t('Earnings') : t('Potential Earnings'),
                           label: 'potentialIncomeF'
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate',
+                          displayName: t('Rate'),
                           label: 'newRateF'
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size',
+                          displayName: t('Size'),
                           label: 'newSizeF'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table
-                          name: 'materials',
+                          name: t('materials'),
                           displayName: 'Materials'
                         }
                       ]
@@ -586,4 +587,4 @@ class DashboardCarrierPage extends Component {
   }
 }
 
-export default DashboardCarrierPage;
+export default withTranslation()(DashboardCarrierPage);

@@ -9,7 +9,7 @@ import {
   Modal,
   Row
 } from 'reactstrap';
-import {useTranslation} from 'react-i18next';
+import {useTranslation, withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
@@ -575,24 +575,24 @@ class DashboardCustomerPage extends Component {
                       [
                         {
                           name: 'name',
-                          displayName: 'Job Name'
+                          displayName: t('Job Name')
                         },
                         {
                           name: 'status',
-                          displayName: 'Job Status'
+                          displayName: t('Job Status')
                         },
                         {
                           name: 'companyCarrierLegalName',
-                          displayName: 'Carrier'
+                          displayName: t('Carrier')
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size',
+                          displayName: t('Size'),
                           label: 'newSizeFormated'
                         },
                         {
                           name: 'newStartDate',
-                          displayName: 'Start Date'
+                          displayName: t('Start Date')
                         },
                         // This is the producer they do not need to see distance to job
                         // {
@@ -601,17 +601,17 @@ class DashboardCustomerPage extends Component {
                         // },
                         {
                           name: 'haulDistance',
-                          displayName: 'Haul Distance (One Way) (mi)'
+                          displayName: `${t('Haul Distance')} (${t('One Way')}) (mi)`
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate',
+                          displayName: t('Rate'),
                           label: 'newRateFormatted'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table
                           name: 'materials',
-                          displayName: 'Materials'
+                          displayName: t('Materials')
                         }
                       ]
                     }
@@ -690,4 +690,4 @@ class DashboardCustomerPage extends Component {
 //   companyId: PropTypes.number.isRequired
 // };
 
-export default DashboardCustomerPage;
+export default withTranslation()(DashboardCustomerPage);
