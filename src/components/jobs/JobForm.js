@@ -1055,7 +1055,7 @@ class JobForm extends Component {
   }
 
   renderMap(job) {
-    if (job.status === 'In Progress') {
+    if (job.status === 'In Progress' || job.status === 'Paused') {
       return (
         <React.Fragment>
           <TMapLive

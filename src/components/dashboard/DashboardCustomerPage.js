@@ -158,7 +158,6 @@ class DashboardCustomerPage extends Component {
   returnJobs(jobs, filters, metadata, pausedJobsList) {
     const { totalCount } = metadata;
 
-    console.log(jobs);
     if (pausedJobsList && pausedJobsList.length > 0) {
       this.toggleResumeJobListModal(true);
     }
@@ -398,6 +397,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderTitle() {
+    const {pausedJobs} = this.state;
     return (
       <Row>
         <Col md={9}>
@@ -405,7 +405,9 @@ class DashboardCustomerPage extends Component {
         </Col>
         <Col md={3} style={{textAlign: 'right'}}>
           <AddJobButton handle={this.toggleNewJobWizardModal}/>
-          <PausedJobsButton handle={this.toggleResumeJobListModal}/>
+          {pausedJobs && pausedJobs.length > 0 && (
+            <PausedJobsButton handle={this.toggleResumeJobListModal}/>
+          )}
         </Col>
       </Row>
     );

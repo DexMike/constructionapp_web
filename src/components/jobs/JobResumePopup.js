@@ -13,6 +13,7 @@ import {
   Button
 } from 'reactstrap';
 import TField from '../common/TField';
+import TFormat from '../common/TFormat';
 import TSubmitButton from '../common/TSubmitButton';
 import TDateTimePicker from '../common/TDateTimePicker';
 import JobCreateFormOne from './JobCreateFormOne';
@@ -21,6 +22,7 @@ import ProfileService from '../../api/ProfileService';
 import JobService from '../../api/JobService';
 import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
+import LoadService from '../../api/LoadService';
 
 class JobResumePopup extends Component {
   constructor(props) {
@@ -38,9 +40,7 @@ class JobResumePopup extends Component {
       jobStartDate: null,
       jobId: null,
       loaded: false,
-      validateFormOne: false,
-      firstTabInfo: {},
-      goToJobDetail: false,
+      tonsDelivered: 0,
       reqHandlerRate: {
         touched: false,
         error: ''
@@ -68,7 +68,8 @@ class JobResumePopup extends Component {
       const job = await JobService.getJobById(prevProps.jobId);
       const jobEndDate = job.endTime;
       const jobStartDate = job.startTime;
-      this.setState({ job, jobEndDate, jobStartDate, jobId: job.id });
+      const tonsDelivered = await LoadService.getSubmittedTonsbyJobId(job.id);
+      this.setState({ job, jobEndDate, jobStartDate, jobId: job.id, tonsDelivered });
     }
   }
 
@@ -80,7 +81,7 @@ class JobResumePopup extends Component {
   handleInputChange(e) {
     const {job, reqHandlerRate} = this.state;
     const { value } = e.target;
-    job.rate = value;
+    job.rateEstimate = value;
     this.setState({
       job,
       reqHandlerRate: Object.assign({}, reqHandlerRate, {
@@ -123,7 +124,6 @@ class JobResumePopup extends Component {
     } = {...this.state};
     let isValid = true;
     const currDate = new Date();
-    console.log(job.rate);
     if (!job.rate || job.rate === '' || job.rate < 1) {
       this.setState({
         reqHandlerRate: {
@@ -135,7 +135,6 @@ class JobResumePopup extends Component {
       isValid = false;
     }
 
-    console.log(jobEndDate);
     if (!jobEndDate || jobEndDate === '') {
       this.setState({
         reqHandlerEndDate: {
@@ -176,9 +175,7 @@ class JobResumePopup extends Component {
   async handleResumeJob() {
     const { profile, updateResumedJob } = this.props;
     const { job } = this.state;
-    let { jobEndDate } = this.state;
-    let newJob = [];
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
+    const { jobEndDate } = this.state;
 
     if (!this.isJobValid()) {
       this.setState({btnSubmitting: false});
@@ -187,51 +184,17 @@ class JobResumePopup extends Component {
 
     this.setState({btnSubmitting: true});
 
-    // updating job
-    newJob = CloneDeep(job);
-    jobEndDate = moment(jobEndDate).format('YYYY-MM-DD HH:mm');
-    newJob.endTime = moment.tz(
-      jobEndDate,
-      profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-    ).utc().format();
-    newJob.status = 'In Progress';
-    newJob.modifiedBy = profile.userId;
-    newJob.modifiedOn = moment.utc().format();
-    newJob = await JobService.updateJob(newJob);
-
-    const cancelledSms = `${envString}Job ${newJob.name} has been resumed please log into your Trelar Account to continue this job.`;
-
-    // Notify Carrier about resumed job
-    try {
-      // await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id); // TODO
-    } catch (err) {
-      console.error(err);
-    }
-
-    // sending an email to CSR
-    /* const cancelJobEmail = {
-      toEmail: 'csr@trelar.com',
-      toName: 'Trelar CSR',
-      subject: `${envString}Trelar Job Cancelled`,
-      isHTML: true,
-      body: 'A producer cancelled a job on Trelar.<br><br>'
-        + `Producer Company Name: ${job.company.legalName}<br>`
-        + `Cancel Reason: ${newJob.cancelReason}<br>`
-        + `Job Name: ${newJob.name}<br>`
-        // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
-        + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
-        + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}<br>`
-        + `Carrier(s) Affected: ${companyCarrierData.legalName}<br>`
-        + `${allocatedDriversNames}`,
-      recipients: [
-        {name: 'CSR', email: 'csr@trelar.com'}
-      ],
-      attachments: []
+    let resumedJob = {
+      endTime: moment.tz(
+        jobEndDate,
+        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      ).utc().format(),
+      rateEstimate: job.rateEstimate
     };
-    await EmailService.sendEmail(cancelJobEmail); */
+    resumedJob = await JobService.resumeJob(job.id, resumedJob);
 
     if (typeof updateResumedJob === 'function') {
-      updateResumedJob(newJob);
+      updateResumedJob(resumedJob);
       this.setState({btnSubmitting: false});
       this.closeNow();
     } else {
@@ -256,7 +219,8 @@ class JobResumePopup extends Component {
       loaded,
       reqHandlerRate,
       reqHandlerEndDate,
-      btnSubmitting
+      btnSubmitting,
+      tonsDelivered
     } = this.state;
     if (loaded) {
       return (
@@ -284,16 +248,21 @@ class JobResumePopup extends Component {
                           >
                             <Row className="col-md-12">
                               <div className="col-md-6 form__form-group">
-                                <span className="form__form-group-label">{job && job.rateType === 'Ton' ? 'Tonnage' : 'Hours'}</span>
+                                <span className="form__form-group-label">
+                                  {job && job.rateType === 'Ton' ? 'Estimated Tonnage' : 'Estimated Hours'}&nbsp;
+                                  <span className="form-small-label">
+                                    (Tons delivered so far: {TFormat.asNumber(tonsDelivered)})
+                                  </span>
+                                </span>
                                 <TField
                                   input={
                                     {
                                       onChange: this.handleInputChange,
                                       name: 'name',
-                                      value: job.rate
+                                      value: job.rateEstimate
                                     }
                                   }
-                                  placeholder="Job Name"
+                                  placeholder="Rate Estimate"
                                   type="text"
                                   meta={reqHandlerRate}
                                   id="jobname"

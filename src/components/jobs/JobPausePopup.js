@@ -24,65 +24,43 @@ import AddressService from '../../api/AddressService';
 import JobMaterialsService from '../../api/JobMaterialsService';
 import LookupsService from '../../api/LookupsService';
 
-class JobResumePopup extends Component {
+class JobPausePopup extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      page: 1,
       job: [],
+      producerName: '',
       jobEndDate: null,
       jobStartDate: null,
       jobId: null,
       loaded: false,
-      validateFormOne: false,
-      firstTabInfo: {},
-      goToJobDetail: false,
       pauseReason: '',
-      pauseReasons: [],
-      reqHandlerPause: {
+      reqHandlerPauseReason: {
         touched: false,
         error: ''
       }
     };
     this.closeNow = this.closeNow.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSelectPauseReason = this.handleSelectPauseReason.bind(this);
-    this.jobEndDateChange = this.jobEndDateChange.bind(this);
     this.clearValidationLabels = this.clearValidationLabels.bind(this);
     this.isJobValid = this.isJobValid.bind(this);
     this.handlePauseJob = this.handlePauseJob.bind(this);
+    this.handlePauseReasonInputChange = this.handlePauseReasonInputChange.bind(this);
   }
 
   async componentDidMount() {
-    const {pauseReasons} = this.state;
-    try {
-      const lookups = await LookupsService.getLookupsCarrierCancelReasons();
-      if (Object.keys(lookups).length > 0) {
-        Object.values(lookups).forEach((itm) => {
-          pauseReasons.push({
-            value: itm.val1,
-            label: itm.val1
-          });
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    pauseReasons.push({
-      value: 'Other',
-      label: 'Other'
-    });
-    this.setState({ pauseReasons, loaded: true });
+    this.setState({loaded: true });
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    console.log(prevProps);
+    // console.log(prevProps);
     if ((prevProps.job !== this.state.job)) {
       const job = prevProps.job;
       const jobEndDate = job.endTime;
       const jobStartDate = job.startTime;
-      this.setState({ job, jobEndDate, jobStartDate });
+      const producerName = job.company.legalName;
+      this.setState({ job, jobEndDate, jobStartDate, producerName });
     }
   }
 
@@ -103,27 +81,12 @@ class JobResumePopup extends Component {
     });
   }
 
-  handleSelectPauseReason(option) {
-    const {value} = option;
-    const {reqHandlerPause} = this.state;
-    let {pauseReason/* , showOtherReasonInput */} = this.state;
-    reqHandlerPause.touched = false;
-    pauseReason = value;
-    /* if (cancelReason === 'Other') {
-      showOtherReasonInput = true;
-    } else {
-      showOtherReasonInput = false;
-    } */
-    this.setState({pauseReason, /* showOtherReasonInput, */reqHandlerPause});
-  }
-
-  jobEndDateChange(data) {
-    const {reqHandlerEndDate} = this.state;
+  handlePauseReasonInputChange(e) {
+    const {reqHandlerPauseReason} = this.state;
+    reqHandlerPauseReason.touched = false;
     this.setState({
-      jobEndDate: data,
-      reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
-        touched: false
-      })
+      pauseReason: e.target.value,
+      reqHandlerPauseReason
     });
   }
 
@@ -151,7 +114,7 @@ class JobResumePopup extends Component {
     } = {...this.state};
     let isValid = true;
     const currDate = new Date();
-    console.log(job.rate);
+    // console.log(job.rate);
     if (!job.rate || job.rate === '' || job.rate < 1) {
       this.setState({
         reqHandlerRate: {
@@ -163,7 +126,7 @@ class JobResumePopup extends Component {
       isValid = false;
     }
 
-    console.log(jobEndDate);
+    // console.log(jobEndDate);
     if (!jobEndDate || jobEndDate === '') {
       this.setState({
         reqHandlerEndDate: {
@@ -201,21 +164,14 @@ class JobResumePopup extends Component {
   }
 
   async handlePauseJob() {
-    const { profile, updatePausedJob } = this.props;
-    const { job, pauseReason, reqHandlerPause } = this.state;
-    let { jobEndDate } = this.state;
-    let newJob = [];
-    const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} - `;
-
-    /* if (!this.isJobValid()) {
-      this.setState({btnSubmitting: false});
-      return;
-    } */
+    const { updatePausedJob } = this.props;
+    const { job, pauseReason, reqHandlerPauseReason } = this.state;
+    let pausedJob = [];
 
     if (pauseReason === '') {
       this.setState({
-        reqHandlerPause: {
-          ...reqHandlerPause,
+        reqHandlerPauseReason: {
+          ...reqHandlerPauseReason,
           touched: true,
           error: 'You must provide the reason for pausing the job'
         }
@@ -223,68 +179,23 @@ class JobResumePopup extends Component {
     } else {
       this.setState({btnSubmitting: true});
 
-      // updating job
-      newJob = CloneDeep(job);
-      /* jobEndDate = moment(jobEndDate).format('YYYY-MM-DD HH:mm');
-      newJob.endTime = moment.tz(
-        jobEndDate,
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format(); */
-      newJob.status = 'Paused';
-      newJob.pauseReason = pauseReason;
-      newJob.modifiedBy = profile.userId;
-      newJob.modifiedOn = moment.utc().format();
-      newJob = await JobService.updateJob(newJob);
+      pausedJob = await JobService.pauseJob(job.id, pauseReason);
 
-      const cancelledSms = `${envString}Job ${newJob.name} has been paused please log into your Trelar Account to continue this job.`;
-
-      // Notify Carrier about resumed job
-      try {
-        // await this.notifyAdminViaSms(cancelledSms, companyCarrierData.id); // TODO
-      } catch (err) {
-        console.error(err);
-      }
-
-      // sending an email to CSR
-      /* const cancelJobEmail = {
-        toEmail: 'csr@trelar.com',
-        toName: 'Trelar CSR',
-        subject: `${envString}Trelar Job Cancelled`,
-        isHTML: true,
-        body: 'A producer cancelled a job on Trelar.<br><br>'
-          + `Producer Company Name: ${job.company.legalName}<br>`
-          + `Cancel Reason: ${newJob.pauseReason}<br>`
-          + `Job Name: ${newJob.name}<br>`
-          // TODO: since this is going to Trelar CSR where do we set the timezone for HQ?
-          + `Start Date of Job: ${TFormat.asDateTime(newJob.startTime)}<br>`
-          + `Time of Job Cancellation: ${TFormat.asDateTime(newJob.dateCancelled)}<br>`
-          + `Carrier(s) Affected: ${companyCarrierData.legalName}<br>`
-          + `${allocatedDriversNames}`,
-        recipients: [
-          {name: 'CSR', email: 'csr@trelar.com'}
-        ],
-        attachments: []
-      };
-      await EmailService.sendEmail(cancelJobEmail); */
-
-      updatePausedJob(newJob);
+      updatePausedJob(pausedJob);
       this.setState({btnSubmitting: false});
       this.closeNow();
     }
   }
 
   render() {
-    const { profile } = this.props;
     const {
       job,
-      jobEndDate,
+      producerName,
       loaded,
-      reqHandlerPause,
+      reqHandlerPauseReason,
       btnSubmitting,
-      pauseReason,
-      pauseReasons
+      pauseReason
     } = this.state;
-    console.log(job);
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -310,21 +221,19 @@ class JobResumePopup extends Component {
                           >
                             <Row className="col-md-12" style={{paddingTop: 15, paddingBottom: 15}}>
                               <span className="form__form-group-label">
-                                Reason for cancelling&nbsp;
-                                <span className="form-small-label">This will be shared with the carrier {job.company.legalName} who is assigned to this job.</span>
+                                Reason for putting the job on hold&nbsp;
+                                <span className="form-small-label">This will be shared with the carrier {producerName} who is assigned to this job.</span>
                               </span>
-                              <TSelect
+                              <TField
                                 input={
                                   {
-                                    onChange: this.handleSelectPauseReason,
+                                    onChange: this.handlePauseReasonInputChange,
                                     name: 'pauseReason',
                                     value: pauseReason
                                   }
                                 }
-                                meta={reqHandlerPause}
-                                value={pauseReason}
-                                options={pauseReasons}
-                                placeholder="Please select your reason for pausing this job"
+                                type="text"
+                                meta={reqHandlerPauseReason}
                               />
                             </Row>
                           </form>
@@ -373,18 +282,18 @@ class JobResumePopup extends Component {
   }
 }
 
-JobResumePopup.propTypes = {
+JobPausePopup.propTypes = {
   job: PropTypes.object,
   profile: PropTypes.object,
   toggle: PropTypes.func.isRequired,
   updatePausedJob: PropTypes.func
 };
 
-JobResumePopup.defaultProps = {
+JobPausePopup.defaultProps = {
   jobId: null,
   profile: null,
   updatePausedJob: null
 };
 
 
-export default JobResumePopup;
+export default JobPausePopup;

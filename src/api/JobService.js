@@ -155,6 +155,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async pauseJob(id, reason) {
+    const response = await super.post(`${PATH}/${id}/pause`, reason);
+    return (response);
+  }
+
+  static async resumeJob(id, job) {
+    const response = await super.post(`${PATH}/${id}/resume`, job);
+    return (response);
+  }
+
   static async closeJob(id) {
     const response = await super.post(`${PATH}/${id}/close`, null);
     return (response);
