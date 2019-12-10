@@ -507,10 +507,17 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asHours(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-        newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Hour'
-        );
+        if (newJob.rateType === 'Hour') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
       }
       if (newJob.amountType === 'Ton') {
         // newSize is the size with its original value, so that it can be sorted
@@ -519,10 +526,17 @@ class DashboardCustomerPage extends Component {
         const formatted = TFormat.asTons(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-        newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Ton'
-        );
+        if (newJob.rateType === 'Hour') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
       }
 
       newJob.estimatedIncome = NumberFormatting.asMoney(
