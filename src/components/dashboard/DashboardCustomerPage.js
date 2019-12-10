@@ -86,8 +86,7 @@ class DashboardCustomerPage extends Component {
       rows: 10,
       totalCount: 10,
       totalJobs: 0,
-      isLoading: false,
-      amountType: ''
+      isLoading: false
     };
 
     this.renderGoTo = this.renderGoTo.bind(this);
