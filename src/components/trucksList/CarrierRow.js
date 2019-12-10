@@ -6,6 +6,7 @@ import {
 import '../addTruck/AddTruck.css';
 import * as PropTypes from 'prop-types';
 import TFormat from '../common/TFormat';
+import { withTranslation } from 'react-i18next';
 import truckImage from '../../img/default_truck.png';
 import ProfileService from '../../api/ProfileService';
 import CompanyService from '../../api/CompanyService';
@@ -338,11 +339,12 @@ class CarrierRow extends Component {
   }
 
   renderMaterials(materials) {
+    const {t} = {...this.props};
     return (
       <table>
         <thead>
         <tr>
-          <th>Materials Hauled</th>
+          <th>{t('Materials Hauled')}</th>
         </tr>
         </thead>
         <tbody>
@@ -359,13 +361,14 @@ class CarrierRow extends Component {
   }
 
   renderTotals(equipmentTypes) {
+    const {t} = {...this.props};
     return (
       <table>
         <thead>
-        <tr>
-          <th>Type of Trucks</th>
-          <th># of Trucks</th>
-        </tr>
+          <tr>
+            <th>{t('Type of Trucks')}</th>
+            <th>&nbsp;-&nbsp;{t('# of Trucks')}</th>
+          </tr>
         </thead>
         <tbody>
           {
@@ -388,7 +391,8 @@ class CarrierRow extends Component {
       favorite,
       distance,
       equipmentTypes,
-      materials
+      materials,
+      t
     } = this.props;
     const {isLoading, carrierCompany} = this.state;
     if (!isLoading) {
@@ -401,16 +405,16 @@ class CarrierRow extends Component {
               <div className="row">
                 <div className="col-md-4">
                   <h5 className="carrier-name">
-                    <span>{carrierName}</span> {distance ? `[Distance: ${distance.toFixed(2)} mi]` : ''}
+                    <span>{carrierName}</span> {distance ? `[${t('Distance')}: ${distance.toFixed(2)} mi]` : ''}
                   </h5>
                   <br/>
                   <img src={truckImage} alt="" style={{width: 'auto', display: 'block', margin: '0 auto'}}/>
                   <br/>
-                  General Liability: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityGeneral)}
+                  {t('General Liability')}: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityGeneral)}
                   <br/>
-                  Auto Liability: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityAuto)}
+                  {t('Auto Liability')}: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityAuto)}
                   <br/>
-                  Other Liability: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityOther)}
+                  {t('Other Liability')}: {TFormat.asMoneyNoDecimals(carrierCompany.liabilityOther)}
                 </div>
                 <div className="col-md-8">
                   <div className="row truck-card">
@@ -426,7 +430,7 @@ class CarrierRow extends Component {
                         className="btn btn-primary"
                         styles="margin:0px !important"
                       >
-                        Request Job
+                        {t('Request Job')}
                       </Button>
                       <Button
                         color="link"
@@ -474,4 +478,4 @@ CarrierRow.defaultProps = {
   materials: []
 };
 
-export default CarrierRow;
+export default withTranslation()(CarrierRow);

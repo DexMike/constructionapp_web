@@ -7,6 +7,8 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
+
 import CloneDeep from 'lodash.clonedeep';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
@@ -712,6 +714,7 @@ class DailyReportFilter extends Component {
   }
 
   render() {
+    const {t} = {...this.props};
     const {
       loaded,
       // Lists
@@ -1000,7 +1003,7 @@ class DailyReportFilter extends Component {
                 <div className="flex-daily-report-container-2">
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Day Range
+                      {t('Day Range')}
                     </div>
                     <TSelect
                       input={
@@ -1023,7 +1026,7 @@ class DailyReportFilter extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Date Range
+                      {t('Date Range')}
                     </div>
                     <TIntervalDatePicker
                       startDate={intervals.startInterval}
@@ -1040,7 +1043,7 @@ class DailyReportFilter extends Component {
                       type="button"
                       onClick={this.handleResetFilters}
                     >
-                      Reset
+                      {t('Reset')}
                     </button>
                   </div>
                 </div>
@@ -1072,4 +1075,4 @@ DailyReportFilter.defaultProps = {
   type: null
 };
 
-export default DailyReportFilter;
+export default withTranslation()(DailyReportFilter);

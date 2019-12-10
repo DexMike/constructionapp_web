@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
 import CloneDeep from 'lodash.clonedeep';
 import GeoUtils from '../utils/GeoUtils';
 import TField from '../common/TField';
@@ -1160,7 +1161,8 @@ class FilterComparisonReport extends Component {
     } = this.state;
     const {
       showComparison,
-      activeTab
+      activeTab,
+      t
     } = this.props;
     // let start = filters.startAvailability;
 
@@ -1180,7 +1182,7 @@ class FilterComparisonReport extends Component {
                 <div className="flex-daily-report-container-1">
                   <div className="filter-item" id="companySelect">
                     <div className="filter-item-title">
-                      Companies
+                      {t('Companies')}
                     </div>
                     <TMultiSelect
                       input={
@@ -1200,7 +1202,7 @@ class FilterComparisonReport extends Component {
                       options={
                         companiesTypelist
                       }
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       // placeholder={materialTypeList[0]}
                       id="companySelect"
                       horizontalScroll="true"
@@ -1212,7 +1214,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item" id="materialTypeSelect">
                     <div className="filter-item-title">
-                      State
+                      {t('State')}
                     </div>
                     <TMultiSelect
                       input={
@@ -1231,7 +1233,7 @@ class FilterComparisonReport extends Component {
                       options={
                         statesTypeList
                       }
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       id="materialTypeSelect"
                       horizontalScroll="true"
                       value={filters.states}
@@ -1239,7 +1241,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Zip Code
+                      {t('Zip Code')}
                     </div>
                     <TField
                       input={
@@ -1257,7 +1259,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Range (mi)
+                      {t('Range')} (mi)
                     </div>
                     <TField
                       input={
@@ -1269,7 +1271,7 @@ class FilterComparisonReport extends Component {
                       }
                       meta={reqHandlerRange}
                       className="filter-text"
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       type="number"
                     />
                   </div>
@@ -1280,7 +1282,7 @@ class FilterComparisonReport extends Component {
                 <div className="flex-daily-report-container-2">
                   <div className="filter-item" id="statusSelect">
                     <div className="filter-item-title">
-                      Status
+                      {t('Status')}
                     </div>
                     <TMultiSelect
                       input={
@@ -1297,7 +1299,7 @@ class FilterComparisonReport extends Component {
                         }
                       }
                       options={statusTypeList}
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       // placeholder={materialTypeList[0]}
                       id="statusSelect"
                       horizontalScroll="true"
@@ -1308,7 +1310,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item" id="materialTypeSelect">
                     <div className="filter-item-title">
-                      Materials
+                      {t('Materials')}
                     </div>
                     <TMultiSelect
                       input={
@@ -1325,7 +1327,7 @@ class FilterComparisonReport extends Component {
                         }
                       }
                       options={materialTypeList}
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       // placeholder={materialTypeList[0]}
                       id="materialTypeSelect"
                       horizontalScroll="true"
@@ -1335,7 +1337,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Rate Type
+                      {t('Rate Type')}
                     </div>
                     <TSelect
                       input={
@@ -1364,7 +1366,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Rate
+                      {t('Rate')}
                     </div>
                     <TFieldNumber
                       input={
@@ -1376,13 +1378,13 @@ class FilterComparisonReport extends Component {
                       }
                       decimal
                       className="filter-text"
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       currency
                     />
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Min Capacity
+                      {t('Min Capacity')}
                     </div>
                     <TFieldNumber
                       input={
@@ -1398,7 +1400,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item" id="truckTypeSelect">
                     <div className="filter-item-title">
-                      Truck Type
+                      {t('Truck Type')}
                     </div>
                     <TMultiSelect
                       input={
@@ -1416,7 +1418,7 @@ class FilterComparisonReport extends Component {
                       }
                       options={equipmentTypeList}
                       // placeholder="Materials"
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       id="truckTypeSelect"
                       horizontalScroll="true"
                       selectedItems={filters.equipmentType}
@@ -1431,7 +1433,7 @@ class FilterComparisonReport extends Component {
                       {
                         showComparison === true && 'Baseline '
                       }
-                      Day Range
+                      {t('Day Range')}
                     </div>
                     <TSelect
                       input={
@@ -1457,7 +1459,7 @@ class FilterComparisonReport extends Component {
                       {
                         showComparison === true && 'Baseline '
                       }
-                      Date Range
+                      {t('Date Range')}
                     </div>
                     <TIntervalDatePicker
                       startDate={intervals.startInterval}
@@ -1474,7 +1476,7 @@ class FilterComparisonReport extends Component {
                   <React.Fragment>
                     <div className={`filter-item ${activeTab !== '3' ? 'forceShow' : 'forceHide'}`}>
                       <div className="filter-item-title">
-                        Comparison Day Range
+                        {t('Comparison Day Range')}
                       </div>
                       <TSelect
                         input={
@@ -1498,7 +1500,7 @@ class FilterComparisonReport extends Component {
 
                     <div className={`filter-item ${activeTab !== '3' ? 'forceShow' : 'forceHide'}`}>
                       <div className="filter-item-title">
-                        Comparison Date Range
+                        {t('Comparison Date Range')}
                       </div>
                       <TIntervalDatePicker
                         startDate={intervals.startIntervalComp}
@@ -1518,7 +1520,7 @@ class FilterComparisonReport extends Component {
                       type="button"
                       onClick={this.handleResetFilters}
                     >
-                      Reset
+                      {t('Reset')}
                     </button>
                   </div>
                 </div>
@@ -1556,4 +1558,4 @@ FilterComparisonReport.defaultProps = {
   returnProjects: null
 };
 
-export default FilterComparisonReport;
+export default withTranslation()(FilterComparisonReport);
