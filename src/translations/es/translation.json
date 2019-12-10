@@ -265,7 +265,7 @@
   "Rate": "Tarifa",
   "Haul Distance": "Distancia del recorrido",
   "One Way": "Un sentido",
-  "Distance from Me": "Distancia de mi",
+  "Distance from Me": "Distancia de mí",
   "Customer": "Cliente",
   "Hourly Rate": "Tarifa por hora",
   "Carrier Marketplace": "Mercado de transportistas",
@@ -282,8 +282,8 @@
   "truck": "camión",
   "on an active shift": "en un turno activo",
   "Carrier Payments": "Pagos del transportista",
-  "For detailed information on your payments, please log into your hyperwallet account at":
-  "Para información detallada de tus pagos, por favor inicie sesión en su cuenta de hiperwallet en",
+  "For detailed information on your payments, please log into your Hyperwallet account at":
+  "Para información detallada de tus pagos, por favor inicie sesión en su cuenta de Hyperwallet en",
   "There are no payments to show at this time": "No hay pagos para mostrar en este momento",
   "Search by Customer Name": "Buscar por nombre de cliente",
   "Search by Carrier Name": "Buscar por nombre de transportista",
@@ -319,7 +319,7 @@
   "latitude": "latitud",
   "longitud": "longitud",
   "Day Range": "Rango de día",
-  "Companies": "Compañias",
-  "Comparison Day Range": "Comparativo de rango de dias",
+  "Companies": "Compañías",
+  "Comparison Day Range": "Comparativo de rango de días",
   "Comparison Date Range": "Comparativo de rango de fechas"
 }
