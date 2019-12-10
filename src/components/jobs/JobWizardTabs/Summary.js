@@ -436,7 +436,8 @@ class Summary extends PureComponent {
           0.25,
           tabMaterials.quantity,
           truckCapacity,
-          parseFloat(haulCostPerTonHour)
+          parseFloat(haulCostPerTonHour),
+          (tabHaulRate.roundType === 'up')
         );
       } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
         deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
@@ -447,7 +448,8 @@ class Summary extends PureComponent {
           0.25,
           tabMaterials.quantity,
           truckCapacity,
-          parseFloat(haulCostPerTonHour)
+          parseFloat(haulCostPerTonHour),
+          (tabHaulRate.roundType === 'up')
         );
       }
       if ((tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Ton')
@@ -464,7 +466,8 @@ class Summary extends PureComponent {
           0.25,
           0.25,
           parseFloat(tabMaterials.quantity),
-          truckCapacity
+          truckCapacity,
+          (tabHaulRate.roundType === 'up')
         );
       } else if (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Ton') {
         estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
@@ -474,7 +477,8 @@ class Summary extends PureComponent {
           0.25,
           0.25,
           parseFloat(tabMaterials.quantity),
-          truckCapacity
+          truckCapacity,
+          (tabHaulRate.roundType === 'up')
         );
       }
 
@@ -488,7 +492,8 @@ class Summary extends PureComponent {
           0.25,
           parseFloat(tabMaterials.quantity),
           truckCapacity,
-          deliveredPricePerTon
+          deliveredPricePerTon,
+          (tabHaulRate.roundType === 'up')
         );
       }
     }
