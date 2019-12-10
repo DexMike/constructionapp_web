@@ -127,6 +127,7 @@ class HaulRate extends PureComponent {
   toggleRateCalc() {
     const {data, handleInputChange} = {...this.props};
     data.rateCalculator.rateCalcOpen = !data.rateCalculator.rateCalcOpen;
+    data.rateCalcVisibleDisabled = false;
     handleInputChange('tabHaulRate', data);
   }
 
@@ -311,12 +312,10 @@ class HaulRate extends PureComponent {
       handleInputChange('tabHaulRate', data);
       return;
     }
-    debugger;
     value = TFormat.asIntegerNoLeadingZeros(value.toString());
 
     data.rateCalculator.estimatedHours = value;
     const timeReturn = data.rateCalculator.tripType === 'oneWay' ? null : parseFloat(data.rateCalculator.travelTimeReturn);
-    debugger;
     data.rateCalculator.estimatedTons = TCalculator.getTonsByHourAmount(
       parseFloat(data.rateCalculator.travelTimeEnroute),
       timeReturn,
@@ -530,14 +529,18 @@ class HaulRate extends PureComponent {
   }
 
   applyCalculations() {
-    const {data, handleInputChange} = {...this.props};
-    if (data.payType === 'Ton') {
-      data.ratePerPayType = data.rateCalculator.ratePerTon;
-    } else if (data.payType === 'Hour') {
-      data.ratePerPayType = data.rateCalculator.ratePerHour;
+    const {data, handleInputChange, scrollToTopForm} = {...this.props};
+    if (!data.rateCalcVisibleDisabled) {
+      scrollToTopForm();
+      if (data.payType === 'Ton') {
+        data.ratePerPayType = data.rateCalculator.ratePerTon;
+      } else if (data.payType === 'Hour') {
+        data.ratePerPayType = data.rateCalculator.ratePerHour;
+      }
+      data.rateCalcVisibleDisabled = true;
+      data.rateCalculator.rateCalcOpen = false;
+      handleInputChange('tabHaulRate', data);
     }
-    data.rateCalcVisibleDisabled = true;
-    handleInputChange('tabHaulRate', data);
   }
 
   handleSetRateType(e) {
@@ -838,9 +841,11 @@ class HaulRate extends PureComponent {
             />
           </div>
           <div className="col-md-6 form__form-group">
-                        <span
-                          className="form__form-group-label input-title">{tabMaterials.quantityType}s
-                        </span>
+            <span className="form__form-group-label input-title"
+                  style={{color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'}}
+            >
+              # of Loads
+            </span>
             <ReactTooltip id='quantity' effect='solid'>
               <span>This is the quantity you defined in the Materials ( tab ).</span>
             </ReactTooltip>
@@ -865,50 +870,70 @@ class HaulRate extends PureComponent {
         </Row>
         <Row className="col-md-12">
           <div className="col-md-12 dashboard dashboard__job-create-section-title">
-              <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>QUANTITIES</span>
+            <span
+              style={{
+                fontStyle: 'italic',
+                fontWeight: 'bold',
+                color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'}}
+            >
+              QUANTITIES
+            </span>
           </div>
         </Row>
         <Row className="col-md-12" style={{paddingTop: 15}}>
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Estimated Tons
+                <span className="form__form-group-label"
+                      style={{color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'}}
+                >
+                  Estimated Tons
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='estimatedTonsInfo'>i</span>
+                  <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                    <span style={{padding: 6, color: 'white'}} data-tip data-for="estimatedTonsInfo">i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
-          <div className="customTooltip">
-            <ReactTooltip id='estimatedTonsInfo' effect='solid'>
-              <p style={{color: 'white'}}>{estimatedTonsInfo}</p>
-            </ReactTooltip>
-          </div>
+          {!data.rateCalcVisibleDisabled
+            && (
+              <div className="customTooltip">
+                <ReactTooltip id="estimatedTonsInfo" effect="solid">
+                  <p style={{color: 'white'}}>{estimatedTonsInfo}</p>
+                </ReactTooltip>
+              </div>
+            )
+          }
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Estimated Hours
+                <span className="form__form-group-label"
+                      style={{color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'}}
+                >
+                  Estimated Hours
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='estimatedHoursInfo'>i</span>
+                  <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                      <span style={{padding: 6, color: 'white'}} data-tip data-for="estimatedHoursInfo">i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
+          {!data.rateCalcVisibleDisabled
+          && (
           <div className="customTooltip">
-            <ReactTooltip id='estimatedHoursInfo' effect='solid'>
+            <ReactTooltip id="estimatedHoursInfo" effect="solid">
               <p style={{color: 'white'}}>{estimatedHoursInfo}</p>
             </ReactTooltip>
           </div>
+          )}
           {/*{rateCalculator.rateTypeRadio === 'ton'*/}
           {/*&& (*/}
           {/*  <div className="col-md-4 form__form-group">*/}
@@ -922,33 +947,37 @@ class HaulRate extends PureComponent {
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
-                       style={{marginTop: 9, width: 25, height: 18, marginLeft: 5}}
+                       style={{marginTop: 9, width: 25, height: 18, marginLeft: 5, color: 'orange'}}
+                       disabled={data.rateCalcVisibleDisabled}
                        checked={rateCalculator.estimateTypeRadio === 'ton'}
-                       onClick={() => this.handleSetEstimateType('ton')}/>
+                       onClick={() => this.handleSetEstimateType('ton')}
+                />
               </div>
               <div className="col-md-10 form__form-group">
-            <span style={{
-              marginLeft: 15,
-              marginTop: rateCalculator.estimateTypeRadio === 'hour' ? 9 : 0
-            }}
-            >
-              {rateCalculator.estimateTypeRadio === 'hour' ? TFormat.asNumber(rateCalculator.estimatedTons)
-                : (
-                  <TField
-                    input={
-                      {
-                        onChange: this.handleEstimatedTonsChange,
-                        name: 'estimatedTons',
-                        value: rateCalculator.estimatedTons
-                      }
-                    }
-                    placeholder=""
-                    type="text"
-                    id="estimateTypeRadioTon"
-                  />
-                )
-              }
-            </span>
+                <span style={{
+                  marginLeft: 15,
+                  marginTop: rateCalculator.estimateTypeRadio === 'hour' ? 9 : 0,
+                  color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                }}
+                >
+                  {rateCalculator.estimateTypeRadio === 'hour' ? TFormat.asNumber(rateCalculator.estimatedTons)
+                    : (
+                      <TField
+                        input={
+                          {
+                            onChange: this.handleEstimatedTonsChange,
+                            name: 'estimatedTons',
+                            value: rateCalculator.estimatedTons
+                          }
+                        }
+                        disabled={data.rateCalcVisibleDisabled}
+                        placeholder=""
+                        type="text"
+                        id="estimateTypeRadioTon"
+                      />
+                    )
+                  }
+                </span>
               </div>
             </Row>
           </div>
@@ -958,13 +987,15 @@ class HaulRate extends PureComponent {
                 <Input type="radio"
                        style={{marginTop: 9, width: 25, height: 18, marginLeft: 5}}
                        checked={rateCalculator.estimateTypeRadio === 'hour'}
+                       disabled={data.rateCalcVisibleDisabled}
                        onClick={() => this.handleSetEstimateType('hour')}/>
               </div>
               <div className="col-md-10 form__form-group">
 
             <span style={{
               marginLeft: 15,
-              marginTop: rateCalculator.estimateTypeRadio === 'ton' ? 9 : 0
+              marginTop: rateCalculator.estimateTypeRadio === 'ton' ? 9 : 0,
+              color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
             }}
             >
               {rateCalculator.estimateTypeRadio === 'ton' ? TFormat.asNumber(rateCalculator.estimatedHours)
@@ -977,6 +1008,7 @@ class HaulRate extends PureComponent {
                         value: rateCalculator.estimatedHours
                       }
                     }
+                    disabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="estimateTypeRadioHour"
@@ -1004,56 +1036,85 @@ class HaulRate extends PureComponent {
 
         <Row className="col-md-12" style={{paddingTop: 20}}>
           <div className="col-md-12 dashboard dashboard__job-create-section-title">
-            <span style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>RATES</span>
+            <span
+              style={{
+                fontStyle: 'italic',
+                fontWeight: 'bold',
+                color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+              }}
+            >
+              RATES
+            </span>
           </div>
         </Row>
         <Row className="col-md-12" style={{paddingTop: 15}}>
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Rate per ton
+                <span className="form__form-group-label"
+                      style={{
+                        color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                      }}
+                >
+                  Rate per ton
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerTonInfo'>i</span>
+                  <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                    <span style={{padding: 6, color: 'white'}} data-tip data-for="ratePerTonInfo">i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
-          <div className="customTooltip">
-            <ReactTooltip id='ratePerTonInfo' effect='solid'>
-              <p style={{color: 'white'}}>{ratePerTonInfo}</p>
-            </ReactTooltip>
-          </div>
+          {!data.rateCalcVisibleDisabled
+          && (
+            <div className="customTooltip">
+              <ReactTooltip id="ratePerTonInfo" effect="solid">
+                <p style={{color: 'white'}}>{ratePerTonInfo}</p>
+              </ReactTooltip>
+            </div>
+          )
+          }
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">One way cost / ton / mile
+                <span className="form__form-group-label"
+                      style={{
+                        color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                      }}
+                >
+                  One way cost / ton / mile
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='oneWayCostInfo'>i</span>
+                  <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                    <span style={{padding: 6, color: 'white'}} data-tip data-for="oneWayCostInfo">i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
-          <div className="customTooltip">
-            <ReactTooltip id='oneWayCostInfo' effect='solid'>
-              <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery tab.</p>
-            </ReactTooltip>
-          </div>
+          {!data.rateCalcVisibleDisabled
+          && (
+            <div className="customTooltip">
+              <ReactTooltip id="oneWayCostInfo" effect="solid">
+                <p style={{color: 'white'}}>
+                  This value is calculated based on distances chosen in pickup / delivery
+                  tab.
+                </p>
+              </ReactTooltip>
+            </div>
+          )
+          }
         </Row>
         <Row className="col-md-12">
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-2 form__form-group">
-                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour'}
+                <Input type="radio" disabled={rateCalculator.estimateTypeRadio === 'hour' || data.rateCalcVisibleDisabled}
                        style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
                        checked={rateCalculator.rateTypeRadio === 'ton'} onClick={() => this.handleSetRateType('ton')}
                 />
@@ -1061,7 +1122,8 @@ class HaulRate extends PureComponent {
               <div className="col-md-10 form__form-group">
             <span style={{
               marginLeft: 15,
-              marginTop: rateCalculator.rateTypeRadio !== 'ton' ? 9 : 0
+              marginTop: rateCalculator.rateTypeRadio !== 'ton' ? 9 : 0,
+              color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
             }}
             >
               {rateCalculator.rateTypeRadio !== 'ton' ? TFormat.asNumber(rateCalculator.ratePerTon)
@@ -1074,6 +1136,7 @@ class HaulRate extends PureComponent {
                         value: rateCalculator.ratePerTon
                       }
                     }
+                    disabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="rateTypeRadio"
@@ -1090,13 +1153,15 @@ class HaulRate extends PureComponent {
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
                        style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       disabled={data.rateCalcVisibleDisabled}
                        checked={rateCalculator.rateTypeRadio === 'oneWay'} onClick={() => this.handleSetRateType('oneWay')}
                 />
               </div>
               <div className="col-md-10 form__form-group">
             <span style={{
               marginLeft: 15,
-              marginTop: rateCalculator.rateTypeRadio !== 'oneWay' ? 9 : 0
+              marginTop: rateCalculator.rateTypeRadio !== 'oneWay' ? 9 : 0,
+              color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
             }}
             >
               {rateCalculator.rateTypeRadio !== 'oneWay' ? TFormat.asNumber(rateCalculator.oneWayCostTonMile)
@@ -1109,6 +1174,7 @@ class HaulRate extends PureComponent {
                         value: rateCalculator.oneWayCostTonMile
                       }
                     }
+                    disabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="rateTypeRadio"
@@ -1128,43 +1194,58 @@ class HaulRate extends PureComponent {
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Rate per hour
+                <span className="form__form-group-label"
+                      style={{color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'}}
+                >
+                  Rate per hour
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
-                  <span className="infoCircle">
-                      <span style={{padding: 6, color: 'white'}} data-tip data-for='ratePerHourInfo'>i</span>
+                  <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                    <span style={{padding: 6, color: 'white'}} data-tip data-for="ratePerHourInfo">i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
-          <div className="customTooltip">
-            <ReactTooltip id='ratePerHourInfo' effect='solid'>
-              <p style={{color: 'white'}}>{ratePerHourInfo}</p>
-            </ReactTooltip>
-          </div>
+          {!data.rateCalcVisibleDisabled
+          && (
+            <div className="customTooltip">
+              <ReactTooltip id="ratePerHourInfo" effect="solid">
+                <p style={{color: 'white'}}>{ratePerHourInfo}</p>
+              </ReactTooltip>
+            </div>
+          )
+          }
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-8 form__form-group">
-                <span className="form__form-group-label">Two way cost / mile
+                <span className="form__form-group-label"
+                      style={{color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'}}
+                >
+                  Two way cost / mile
                 </span>
               </div>
               <div className="col-md-4 form__form-group">
                 <span className="form__form-group-label">
-                  <span className="infoCircle">
+                  <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
                       <span style={{padding: 6, color: 'white'}} data-tip data-for='twoWayCostInfo'>i</span>
                   </span>
                 </span>
               </div>
             </Row>
           </div>
-          <div className="customTooltip">
-            <ReactTooltip id='twoWayCostInfo' effect='solid'>
-              <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery tab.</p>
-            </ReactTooltip>
-          </div>
+          {!data.rateCalcVisibleDisabled
+          && (
+            <div className="customTooltip">
+              <ReactTooltip id='twoWayCostInfo' effect='solid'>
+                <p style={{color: 'white'}}>This value is calculated based on distances chosen in pickup / delivery
+                  tab.</p>
+              </ReactTooltip>
+            </div>
+          )
+          }
         </Row>
         <Row className="col-md-12">
           <div className="col-md-6 form__form-group">
@@ -1172,13 +1253,16 @@ class HaulRate extends PureComponent {
               <div className="col-md-2 form__form-group">
                 <Input type="radio"
                        style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
+                       disabled={data.rateCalcVisibleDisabled}
                        checked={rateCalculator.rateTypeRadio === 'hour'}
-                       onClick={() => this.handleSetRateType('hour')}/>
+                       onClick={() => this.handleSetRateType('hour')}
+                />
               </div>
               <div className="col-md-10 form__form-group">
                 <span style={{
                   marginLeft: 15,
-                  marginTop: rateCalculator.rateTypeRadio !== 'hour' ? 9 : 0
+                  marginTop: rateCalculator.rateTypeRadio !== 'hour' ? 9 : 0,
+                  color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
                 }}
                 >
                   {rateCalculator.rateTypeRadio !== 'hour' ? TFormat.asNumber(rateCalculator.ratePerHour)
@@ -1191,6 +1275,7 @@ class HaulRate extends PureComponent {
                             value: rateCalculator.ratePerHour
                           }
                         }
+                        disabled={data.rateCalcVisibleDisabled}
                         placeholder=""
                         type="text"
                         id="rateTypeRadio"
@@ -1208,12 +1293,15 @@ class HaulRate extends PureComponent {
                 <Input type="radio"
                        style={{marginTop: 9, width: 18, height: 18, marginLeft: 5}}
                        checked={rateCalculator.rateTypeRadio === 'twoWay'}
-                       onClick={() => this.handleSetRateType('twoWay')}/>
+                       disabled={data.rateCalcVisibleDisabled}
+                       onClick={() => this.handleSetRateType('twoWay')}
+                />
               </div>
               <div className="col-md-10 form__form-group">
                 <span style={{
                   marginLeft: 15,
-                  marginTop: rateCalculator.rateTypeRadio !== 'twoWay' ? 9 : 0
+                  marginTop: rateCalculator.rateTypeRadio !== 'twoWay' ? 9 : 0,
+                  color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
                 }}
                 >
                   {rateCalculator.rateTypeRadio !== 'twoWay' ? TFormat.asNumber(rateCalculator.twoWayCostMile)
@@ -1226,6 +1314,7 @@ class HaulRate extends PureComponent {
                             value: rateCalculator.twoWayCostMile
                           }
                         }
+                        disabled={data.rateCalcVisibleDisabled}
                         placeholder=""
                         type="text"
                         id="rateTypeRadio"
@@ -1256,7 +1345,13 @@ class HaulRate extends PureComponent {
           <Row className="col-md-12">
             <div className="col-md-4 form__form-group">
               <Row className="col-md-12">
-                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                <span className="form__form-group-label"
+                      style={{
+                        fontStyle: 'italic',
+                        fontWeight: 'bold',
+                        color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                      }}
+                >
                   Load / Unload / Delivery
                 </span>
               </Row>
@@ -1264,17 +1359,24 @@ class HaulRate extends PureComponent {
             <div className="col-md-4 form__form-group">
               <Row className="col-md-12">
                 <div className="col-md-8 form__form-group">
-                  <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                  <span className="form__form-group-label"
+                        style={{fontStyle: 'italic',
+                          fontWeight: 'bold',
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
                     Travel Time
                   </span>
                 </div>
                 <div className="col-md-4 form__form-group">
                   <span className="form__form-group-label">
-                    <span className="infoCircle">
+                    <span className={data.rateCalcVisibleDisabled ? 'infoCircleDisabled' : 'infoCircle'}>
                       <span style={{padding: 6, color: 'white'}} data-tip data-for="travelTimeInfo">i</span>
                     </span>
                   </span>
                 </div>
+                {!data.rateCalcVisibleDisabled
+                && (
                 <div className="customTooltip">
                   <ReactTooltip id="travelTimeInfo" effect="solid">
                     <p style={{color: 'white'}}>
@@ -1283,11 +1385,19 @@ class HaulRate extends PureComponent {
                     </p>
                   </ReactTooltip>
                 </div>
+                )
+                }
               </Row>
             </div>
             <div className="col-md-4 form__form-group">
               <Row className="col-md-12">
-                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                <span className="form__form-group-label"
+                      style={{
+                        fontStyle: 'italic',
+                        fontWeight: 'bold',
+                        color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                      }}
+                >
                   Truck Capacity
                 </span>
               </Row>
@@ -1297,7 +1407,13 @@ class HaulRate extends PureComponent {
             <div className="col-md-4">
               <Row className="col-md-12">
                 <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Load Time (hrs)</span>
+                  <span className="form__form-group-label"
+                        style={{
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
+                    Load Time (hrs)
+                  </span>
                 </div>
                 <div className="col-md-5 form__form-group">
                   <TField
@@ -1309,6 +1425,7 @@ class HaulRate extends PureComponent {
                         // disabled: rateCalculator.estimateTypeRadio === 'hour'
                       }
                     }
+                    disabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="loadTime"
@@ -1318,7 +1435,13 @@ class HaulRate extends PureComponent {
               </Row>
               <Row className="col-md-12" style={{paddingTop: 20}}>
                 <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Unload Time (hrs)</span>
+                  <span className="form__form-group-label"
+                        style={{
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
+                    Unload Time (hrs)
+                  </span>
                 </div>
                 <div className="col-md-5 form__form-group">
                   <TField
@@ -1331,6 +1454,7 @@ class HaulRate extends PureComponent {
 
                       }
                     }
+                    disabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="unloadTime"
@@ -1342,11 +1466,18 @@ class HaulRate extends PureComponent {
             <div className="col-md-4">
               <Row className="col-md-12">
                 <div className="col-md-8 form__form-group">
-                  <span className="form__form-group-label">Miles one way</span>
+                  <span className="form__form-group-label"
+                        style={{
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
+                    Miles one way
+                  </span>
                 </div>
                 <div className="col-md-4 form__form-group">
                   <span style={{
-                    position: 'absolute'
+                    position: 'absolute',
+                    color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
                   }}
                   >
                     {TFormat.asNumber(tabPickupDelivery.avgDistanceEnroute)}
@@ -1355,11 +1486,18 @@ class HaulRate extends PureComponent {
               </Row>
               <Row className="col-md-12" style={{paddingTop: 20}}>
                 <div className="col-md-8 form__form-group">
-                  <span className="form__form-group-label">Enroute (hrs)</span>
+                  <span className="form__form-group-label"
+                        style={{
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
+                    Enroute (hrs)
+                  </span>
                 </div>
                 <div className="col-md-4 form__form-group">
                   <span style={{
-                    position: 'absolute'
+                    position: 'absolute',
+                    color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
                   }}
                   >
                     {TFormat.asNumber(rateCalculator.travelTimeEnroute)}
@@ -1384,11 +1522,19 @@ class HaulRate extends PureComponent {
               </Row>
               <Row className="col-md-12" style={{paddingTop: 20}}>
                 <div className="col-md-8 form__form-group">
-                  <span className="form__form-group-label">Return Trip Home (hrs)</span>
+                  <span className="form__form-group-label"
+                        style={{
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
+                    Return Trip Home (hrs)
+                  </span>
                 </div>
                 <div className="col-md-4 form__form-group">
                   <span style={{
-                    position: 'absolute'
+                    position: 'absolute',
+                    color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+
                   }}
                   >
                     {TFormat.asNumber(rateCalculator.travelTimeReturn)}
@@ -1415,7 +1561,13 @@ class HaulRate extends PureComponent {
             <div className="col-md-4">
               <Row className="col-md-12">
                 <div className="col-md-7 form__form-group">
-                  <span className="form__form-group-label">Truck Capacity</span>
+                  <span className="form__form-group-label"
+                        style={{
+                          color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
+                        }}
+                  >
+                    Truck Capacity
+                  </span>
                 </div>
                 <div className="col-md-5 form__form-group">
                   <TField
@@ -1427,6 +1579,7 @@ class HaulRate extends PureComponent {
                         // disabled: rateCalculator.estimateTypeRadio === 'hour'
                       }
                     }
+                    disabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="truckCapacity"
@@ -1447,6 +1600,11 @@ class HaulRate extends PureComponent {
             color="primary"
             className="applyCalc"
             onClick={this.applyCalculations}
+            style={{
+              backgroundColor: data.rateCalcVisibleDisabled ? 'rgb(244, 244, 244)' : null,
+              borderColor: data.rateCalcVisibleDisabled ? 'rgb(204, 204, 204)' : null,
+              color: data.rateCalcVisibleDisabled ? 'rgb(204, 204, 204)' : null
+            }}
           >
             {translate('Apply Calculations Above')}
           </Button>
@@ -1759,7 +1917,7 @@ class HaulRate extends PureComponent {
                   </div>
                 </Row>
                 <Row className="col-md-12" style={{paddingTop: 20}}/>
-                {rateCalculator.rateCalcOpen && this.renderRateCalc()}
+                {(rateCalculator.rateCalcOpen || data.rateCalcVisibleDisabled) && this.renderRateCalc()}
               </form>
             </CardBody>
           </Card>
@@ -1787,6 +1945,7 @@ HaulRate.propTypes = {
   jobRequest: PropTypes.bool.isRequired,
   jobEdit: PropTypes.bool.isRequired,
   btnSubmitting: PropTypes.bool.isRequired,
+  scrollToTopForm: PropTypes.bool.isRequired,
 
 
   data: PropTypes.shape({

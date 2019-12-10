@@ -242,6 +242,7 @@ class JobWizard extends Component {
     this.validateEndAddress = this.validateEndAddress.bind(this);
     this.validateForm = this.validateForm.bind(this);
     this.validateTopForm = this.validateTopForm.bind(this);
+    this.scrollToTopForm = this.scrollToTopForm.bind(this);
   }
 
   async componentDidMount() {
@@ -568,16 +569,20 @@ class JobWizard extends Component {
   }
 
   async validateTopForm() {
-    const {topFormRef} = this.state;
     const isValid = await this.validateSend();
     if (isValid) {
       await this.sixthPage();
     } else {
-      topFormRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+      this.scrollToTopForm();
     }
+  }
+
+  scrollToTopForm() {
+    const {topFormRef} = this.state;
+    topFormRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
   }
 
   validateMaterialsPage() {
@@ -1694,7 +1699,8 @@ class JobWizard extends Component {
     const {jobEdit} = this.props;
     const {
       page,
-      loaded
+      loaded,
+      tabHaulRate
     } = this.state;
     const validateResponse = this.validateForm();
     if (loaded) {
@@ -1705,8 +1711,8 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            onClick={this.firstPage}
-            className={`wizard__step${page === 1 ? ' wizard__step--active' : ''}`}
+            onClick={!tabHaulRate.rateCalculator.rateCalcOpen ? this.firstPage : null}
+            className={`wizard__step${(tabHaulRate.rateCalculator.rateCalcOpen) ? ' wizard__step--disabled' : ''}${page === 1 ? ' wizard__step--active' : ''}`}
           >
             <p>{translate('Pickup / Delivery')}</p>
           </div>
@@ -1714,8 +1720,8 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            onClick={this.secondPage}
-            className={`wizard__step${page === 2 ? ' wizard__step--active' : ''}`}
+            onClick={!tabHaulRate.rateCalculator.rateCalcOpen ? this.secondPage : null}
+            className={`wizard__step${(tabHaulRate.rateCalculator.rateCalcOpen) ? ' wizard__step--disabled' : ''}${page === 2 ? ' wizard__step--active' : ''}`}
           >
             <p>{translate('Materials')}</p>
           </div>
@@ -1723,8 +1729,8 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            onClick={this.thirdPage}
-            className={`wizard__step${page === 3 ? ' wizard__step--active' : ''}`}
+            onClick={!tabHaulRate.rateCalculator.rateCalcOpen ? this.thirdPage : null}
+            className={`wizard__step${(tabHaulRate.rateCalculator.rateCalcOpen) ? ' wizard__step--disabled' : ''}${page === 3 ? ' wizard__step--active' : ''}`}
           >
             <p>{translate('Truck Specs')}</p>
           </div>
@@ -1741,8 +1747,8 @@ class JobWizard extends Component {
             role="link"
             tabIndex="0"
             onKeyPress={this.handleKeyPress}
-            onClick={this.fifthPage}
-            className={`wizard__step${page === 5 ? ' wizard__step--active' : ''}`}
+            onClick={!tabHaulRate.rateCalculator.rateCalcOpen ? this.fifthPage : null}
+            className={`wizard__step${(tabHaulRate.rateCalculator.rateCalcOpen) ? ' wizard__step--disabled' : ''}${page === 5 ? ' wizard__step--active' : ''}`}
           >
             <p>{translate('Summary')}</p>
           </div>
@@ -1751,8 +1757,8 @@ class JobWizard extends Component {
               role="link"
               tabIndex="0"
               onKeyPress={this.handleKeyPress}
-              onClick={validateResponse.valid ? this.validateTopForm : null}
-              className={`wizard__step${!validateResponse.valid ? ' wizard__step--disabled' : ''}${page === 6 ? ' wizard__step--active ' : ''}`}
+              onClick={(validateResponse.valid && !tabHaulRate.rateCalculator.rateCalcOpen) ? this.validateTopForm : null}
+              className={`wizard__step${(!validateResponse.valid || tabHaulRate.rateCalculator.rateCalcOpen) ? ' wizard__step--disabled' : ''}${page === 6 ? ' wizard__step--active ' : ''}`}
             >
               <p>{translate('Send')}</p>
             </div>
@@ -1785,8 +1791,7 @@ class JobWizard extends Component {
       reqHandlerStartDate,
       reqHandlerEndDate,
       loaded,
-      minDate,
-      topFormRef
+      minDate
     } = this.state;
     if (loaded) {
       return (
@@ -1798,7 +1803,6 @@ class JobWizard extends Component {
                 className="form form--horizontal addtruck__form"
                 // onSubmit={e => this.saveTruck(e)}
                 autoComplete="off"
-                ref={topFormRef}
               >
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
@@ -1958,7 +1962,8 @@ class JobWizard extends Component {
       tabHaulRate,
       tabSummary,
       tabSend,
-      btnSubmitting
+      btnSubmitting,
+      topFormRef
     } = this.state;
     if (loaded) {
       return (
@@ -1971,6 +1976,7 @@ class JobWizard extends Component {
                   {/* onClick={this.gotoPage(1)} */}
                   <div
                     className="wizard__step wizard__step--active"
+                    ref={topFormRef}
                   >
                     <p>{jobRequest
                       ? `${translate('REQUEST_JOB')}`
@@ -2024,6 +2030,7 @@ class JobWizard extends Component {
                         tabMaterials={tabMaterials}
                         tabPickupDelivery={tabPickupDelivery}
                         handleInputChange={this.handleChildInputChange}
+                        scrollToTopForm={this.scrollToTopForm}
                       />
                       )}
                       {page === 5
