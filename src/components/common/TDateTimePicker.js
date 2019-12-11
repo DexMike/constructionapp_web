@@ -8,91 +8,28 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: null
+      startDate: 0,
+      currDate: 0
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
-  // componentDidMount was added in order to prepopulate
-  // datePicker date from a fixed date passed from other component.
-  async componentDidMount() {
-    const { input, profileTimeZone } = this.props;
-    let { startDate } = this.state;
-    let dueDate = 0;
-    // const profile = await ProfileService.getProfile();
+  componentDidMount() {
+    const { profileTimeZone } = this.props;
 
-    if (input.value) {
-      let parsedDate = new Date(input.value);
-      startDate = parsedDate;
-      if (Object.prototype.toString.call(input.value) !== '[object Date]') {
-        // startDate and EndDate were added for common datepicker values
-        if (input.value.jobDate) {
-          // dueDate = input.value.jobDate.getTime();
-          parsedDate = new Date(input.value.jobDate);
-          startDate = parsedDate;
-        }
-        if (input.value.endDate) {
-          dueDate = input.value.endDate.getTime();
-          parsedDate = new Date(dueDate);
-          startDate = parsedDate;
-        }
-        // startDateComp and endDateComp were added for Reporting Carrier/Customer comparison
-        if (input.value.startDateComp) {
-          dueDate = input.value.startDateComp.getTime();
-          parsedDate = new Date(dueDate);
-          startDate = parsedDate;
-        }
-        if (input.value.endDateComp) {
-          dueDate = input.value.endDateComp.getTime();
-          parsedDate = new Date(dueDate);
-          startDate = parsedDate;
-        }
-      } else {
-        startDate = input.value;
-      }
-
-      const timeZonedStartDate = new Date(moment(startDate).tz(
-        profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).format('YYYY-MM-DD HH:mm:ss'));
-      this.setState({ startDate: timeZonedStartDate });
-    }
+    const timeZonedStartDate = new Date(moment().tz(
+      profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+    ).format('YYYY-MM-DD HH:mm:ss'));
+    this.setState({ startDate: timeZonedStartDate });
   }
 
-  // ComponentWillReceiveProps was added in order to change the
-  // datePicker date from a given props value.
-  async componentWillReceiveProps(props) {
-    let { startDate } = this.state;
-    // const profile = await ProfileService.getProfile();
-    let dueDate = 0;
-
-    if (props.input.value) {
-      let parsedDate = new Date(props.input.value);
-      startDate = parsedDate;
-      if (props.input.value.givenDate) {
-        // dueDate = props.input.value.startDate.getTime();
-        parsedDate = new Date(props.input.value.givenDate);
-        // this.setState({ startDate: parsedDate });
-      }
-      if (props.input.value.endDate) {
-        dueDate = props.input.value.endDate.getTime();
-        parsedDate = new Date(dueDate);
-        // this.setState({ startDate: parsedDate });
-      }
-      if (props.input.value.startDateComp) {
-        dueDate = props.input.value.startDateComp.getTime();
-        parsedDate = new Date(dueDate);
-        // this.setState({ startDate: parsedDate });
-      }
-      if (props.input.value.endDateComp) {
-        dueDate = props.input.value.endDateComp.getTime();
-        parsedDate = new Date(dueDate);
-        // this.setState({ startDate: parsedDate });
-      }
-
-      const timeZonedStartDate = new Date(moment(startDate).tz(
-        props.profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+  componentDidUpdate(prevProps, prevState) {
+    const { profileTimeZone } = this.props;
+    if ((prevProps.defaultDate !== this.state.currDate)) {
+      const timeZonedStartDate = new Date(moment(prevProps.defaultDate).tz(
+        profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).format('YYYY-MM-DD HH:mm:ss'));
-      this.setState({ startDate: timeZonedStartDate });
+      this.setState({ currDate: prevProps.defaultDate, startDate: timeZonedStartDate });
     }
   }
 
@@ -105,7 +42,7 @@ class TDateTimePickerField extends PureComponent {
   }
 
   render() {
-    // const { startDate } = this.state;
+    const { startDate } = this.state;
     const {
       dateFormat,
       meta: { touched, error },
@@ -117,12 +54,14 @@ class TDateTimePickerField extends PureComponent {
       placeholder,
       defaultDate
     } = this.props;
+
     return (
       <div className="date-picker">
         <div className="form__form-group-input-wrap form__form-group-input-wrap--error-above">
           <Flatpickr
             disabled={disabled}
             className="c-date-picker"
+            value={startDate}
             id={id}
             placeholder={placeholder}
             options={{

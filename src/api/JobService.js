@@ -70,6 +70,16 @@ class JobService extends AgentService {
     return (response);
   }
 
+  static async getCarrierPausedJobs(companyId) {
+    const response = await super.get(`/carrier/${companyId}/pausedjobs`);
+    return (response);
+  }
+
+  static async getCustomerPausedJobs(companyId) {
+    const response = await super.get(`/customer/${companyId}/pausedjobs`);
+    return (response);
+  }
+
   static async getMarketplaceJobsInfo() {
     const response = await super.get('/marketplace/jobs');
     return (response);
@@ -142,6 +152,16 @@ class JobService extends AgentService {
 
   static async deleteJob(id) {
     const response = await super.post(`${PATH}/${id}/delete`, null);
+    return (response);
+  }
+
+  static async pauseJob(id, reason) {
+    const response = await super.post(`${PATH}/${id}/pause`, reason);
+    return (response);
+  }
+
+  static async resumeJob(id, job) {
+    const response = await super.post(`${PATH}/${id}/resume`, job);
     return (response);
   }
 

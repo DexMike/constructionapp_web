@@ -33,6 +33,8 @@ import JobClosePopup from './JobClosePopup';
 import JobDeletePopup from './JobDeletePopup';
 import JobWizard from './JobWizard';
 import LookupsService from '../../api/LookupsService';
+import JobResumePopup from './JobResumePopup';
+import JobPausePopup from './JobPausePopup';
 import JobAllocate from './JobAllocate';
 
 class JobSavePage extends Component {
@@ -79,6 +81,8 @@ class JobSavePage extends Component {
       modalCancelRequest: false,
       modalCancel1: false,
       modalCancel2: false,
+      modalResumeJob: false,
+      modalPauseJob: false,
       driversWithLoads: [],
       approveCancel: '',
       cancelReason: '',
@@ -128,6 +132,8 @@ class JobSavePage extends Component {
     this.closeJobModal = this.closeJobModal.bind(this);
     this.deleteJobModal = this.deleteJobModal.bind(this);
     this.handleSelectCancelReason = this.handleSelectCancelReason.bind(this);
+    this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
+    this.togglePauseJobModal = this.togglePauseJobModal.bind(this);
   }
 
   async componentDidMount() {
@@ -361,6 +367,20 @@ class JobSavePage extends Component {
     } catch (err) {
       // console.error(err);
     }
+  }
+
+  toggleResumeJobModal() {
+    const {modalResumeJob} = this.state;
+    this.setState({
+      modalResumeJob: !modalResumeJob
+    });
+  }
+
+  togglePauseJobModal() {
+    const {modalPauseJob} = this.state;
+    this.setState({
+      modalPauseJob: !modalPauseJob
+    });
   }
 
   toggleNewJobModal() {
@@ -901,9 +921,26 @@ class JobSavePage extends Component {
     );
   }
 
+  renderResumeButton() {
+    const {job} = this.state;
+    if (job.status === 'Paused') {
+      return (
+        <Button
+          onClick={() => this.toggleResumeJobModal()}
+          type="button"
+          className="primaryButton"
+          id="pausedJobsButton"
+        >
+          Resume Job
+        </Button>
+      );
+    }
+    return false;
+  }
+
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status === 'In Progress') {
+    if (job.status === 'In Progress' || job.status === 'Paused') {
       return (
         <TSubmitButton
           onClick={() => this.toggleCloseModal()}
@@ -950,6 +987,69 @@ class JobSavePage extends Component {
       );
     }
     return false;
+  }
+
+  renderPauseButton() {
+    const {job, profile, btnSubmitting} = this.state;
+    if (job.status === 'In Progress') {
+      return (
+        <Button
+          onClick={() => this.togglePauseJobModal()}
+          type="button"
+          className="primaryButton"
+          id="pausedJobsButton"
+        >
+          Pause Job
+        </Button>
+      );
+    }
+    return false;
+  }
+
+  renderResumeJobModal() {
+    const {
+      modalResumeJob,
+      job,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalResumeJob}
+        toggle={this.toggleResumeJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobResumePopup
+          jobId={job.id}
+          profile={profile}
+          updateResumedJob={this.updateJobView}
+          toggle={this.toggleResumeJobModal}
+        />
+      </Modal>
+    );
+  }
+
+  renderPauseJobModal() {
+    const {
+      modalPauseJob,
+      job,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalPauseJob}
+        toggle={this.togglePauseJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobPausePopup
+          job={job}
+          profile={profile}
+          updatePausedJob={this.updateJobView}
+          toggle={this.togglePauseJobModal}
+        />
+      </Modal>
+    );
   }
 
   renderCloseJobModal() {
@@ -1560,14 +1660,22 @@ class JobSavePage extends Component {
             {this.renderCancelModal2()}
             {this.renderCloseJobModal()}
             {this.renderDeleteJobModal()}
+            {this.renderResumeJobModal()}
+            {this.renderPauseJobModal()}
             <div className="row">
               <div className="col-md-6">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
               <div className="col-md-6 text-right">
-                {companyType !== 'Carrier' && this.renderCopyButton()}
-                {companyType === 'Customer' && this.renderCloseButton()}
-                {companyType === 'Customer' && this.renderDeleteButton()}
+                {companyType === 'Customer' && profile.isAdmin && (
+                  <React.Fragment>
+                    {this.renderCopyButton()}
+                    {this.renderCloseButton()}
+                    {this.renderDeleteButton()}
+                    {this.renderResumeButton()}
+                    {this.renderPauseButton()}
+                  </React.Fragment>
+                )}
                 {this.renderCancelButton()}
               </div>
             </div>
@@ -1575,6 +1683,7 @@ class JobSavePage extends Component {
             {
               job.status && (
                 job.status === 'In Progress'
+                || job.status === 'Paused'
                 || job.status === 'Job Completed'
                 || job.status === 'Allocated'
                 || job.status === 'Booked'

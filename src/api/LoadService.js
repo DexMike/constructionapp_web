@@ -66,6 +66,11 @@ class LoadService extends AgentService {
     const response = await this.post(`/job${PATH}/approve`, load);
     return (response);
   }
+
+  static async getSubmittedTonsbyJobId(jobId) {
+    const response = await this.get(`/job/${jobId}${PATH}/tons`);
+    return (response);
+  }
 }
 
 export default LoadService;

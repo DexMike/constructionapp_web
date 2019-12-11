@@ -222,6 +222,7 @@ class TTable extends Component {
       totalCount,
       // handleSelectAllClick,
       isSelectable,
+      hidePagination,
       isLoading
     } = this.props;
     const emptyRows = 0;
@@ -290,6 +291,7 @@ class TTable extends Component {
               </Table>
             </div>
             <TablePagination
+              style={{display: hidePagination ? 'none' : 'block' }}
               component="div"
               className="material-table__pagination"
               count={totalCount}
@@ -321,8 +323,8 @@ TTable.propTypes = {
   ).isRequired,
   totalCount: PropTypes.number,
   handleIdClick: PropTypes.func.isRequired,
-  handlePageChange: PropTypes.func.isRequired,
-  handleRowsChange: PropTypes.func.isRequired,
+  handlePageChange: PropTypes.func,
+  handleRowsChange: PropTypes.func,
   data: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.oneOfType([
@@ -342,6 +344,7 @@ TTable.propTypes = {
       ])
     })
   ),
+  hidePagination: PropTypes.bool,
   isLoading: PropTypes.bool
 };
 
@@ -354,6 +357,9 @@ TTable.defaultProps = {
   onSelect: () => {},
   isSelectable: false,
   omitFromSelect: [],
+  handlePageChange: null,
+  handleRowsChange: null,
+  hidePagination: false,
   isLoading: false
 };
 

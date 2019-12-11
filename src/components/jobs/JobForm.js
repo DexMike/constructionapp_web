@@ -556,7 +556,7 @@ class JobForm extends Component {
     }
     if (job.status === 'Booked' || job.status === 'Allocated'
       || job.status === 'In Progress' || job.status === 'Job Complete'
-    ) {
+      || job.status === 'Paused') {
       // showPhone = `Telephone: ${TFormat.asPhoneText(job.company.phone)}`;
       if (companyType === 'Carrier') {
         // showPhone = TFormat.asPhoneText(job.company.phone);
@@ -701,7 +701,7 @@ class JobForm extends Component {
             {(producerBillingType === 'Excluded') && (
               <React.Fragment>
                 <br/>
-                Estimated Total Cost:&nbsp; {TFormat.asMoney((job.rate * job.rateEstimate) + trelarFees.totalFee)}
+                Estimated Total Cost:&nbsp;{TFormat.asMoney((job.rate * job.rateEstimate) + trelarFees.totalFee)}
               </React.Fragment>
             )}
           </div>
@@ -1055,7 +1055,7 @@ class JobForm extends Component {
   }
 
   renderMap(job) {
-    if (job.status === 'In Progress') {
+    if (job.status === 'In Progress' || job.status === 'Paused') {
       return (
         <React.Fragment>
           <TMapLive
@@ -1098,6 +1098,7 @@ class JobForm extends Component {
     }
 
     if (job.status === 'In Progress'
+    || job.status === 'Paused'
     || job.status === 'Job Ended'
     || job.status === 'Job Completed'
     ) {
