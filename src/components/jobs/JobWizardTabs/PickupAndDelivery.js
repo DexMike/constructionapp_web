@@ -81,6 +81,7 @@ class PickupAndDelivery extends PureComponent {
       data.avgTimeEnroute = (parseInt(travelInfoEnroute.travelTime) / 3600).toFixed(2);
       data.avgTimeReturn = (parseInt(travelInfoReturn.travelTime) / 3600).toFixed(2);
     }
+    debugger;
     handleInputChange('tabPickupDelivery', data);
   }
 

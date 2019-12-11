@@ -671,7 +671,6 @@ class JobForm extends Component {
               <React.Fragment>
                 Estimated One Way Cost / Ton / Mile: {TFormat.asMoney(TCalculator.getOneWayCostByHourRate(
                 timeEnroute,
-                timeReturn,
                 0.25,
                 0.25,
                 job.rate,

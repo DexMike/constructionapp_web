@@ -200,7 +200,7 @@ class JobWizard extends Component {
           twoWayCostMile: '0.00'
         }
       },
-      page: 4,
+      page: 1,
       job: [],
       loaded: false,
       profile: []

@@ -413,7 +413,6 @@ class Summary extends PureComponent {
       } else {
         oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByHourRate(
           parseFloat(tabPickupDelivery.avgTimeEnroute),
-          parseFloat(tabPickupDelivery.avgTimeReturn),
           0.25,
           0.25,
           parseFloat(tabHaulRate.ratePerPayType),
