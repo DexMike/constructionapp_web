@@ -102,7 +102,7 @@ class DashboardCustomerPage extends Component {
   async componentDidMount() {
     let { rows, totalCount, filters } = this.state;
     const profile = await ProfileService.getProfile();
-    // await this.fetchJobsInfo(profile);
+    await this.fetchJobsInfo(profile);
 
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
