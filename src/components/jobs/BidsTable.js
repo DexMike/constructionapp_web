@@ -80,9 +80,9 @@ class BidsTable extends Component {
         newBid.insCoverage = 'Yes';
       }
 
-      newBid.insuranceInfo = `General: ${NumberFormatting.asMoney(bidCompany.liabilityGeneral, '.', 0)}\n`
-      + `Auto: ${NumberFormatting.asMoney(bidCompany.liabilityAuto, '.', 0)}\n`
-      + `Other: ${NumberFormatting.asMoney(bidCompany.liabilityOther, '.', 0)}\n`;
+      newBid.insuranceInfo = `General: ${NumberFormatting.asMoney(bidCompany.liabilityGeneral, '.', 2)}\n`
+      + `Auto: ${NumberFormatting.asMoney(bidCompany.liabilityAuto, '.', 2)}\n`
+      + `Other: ${NumberFormatting.asMoney(bidCompany.liabilityOther, '.', 2)}\n`;
 
       newBid.date = bid.createdOn;
       newBid.dateF = TFormat.asDate(bid.createdOn);
@@ -308,8 +308,7 @@ class BidsTable extends Component {
                             <span style={{fontWeight: 'bold'}}> Minimum Insurance Level Warning</span>
                           </Row>
                           <Row className="col-md-12">
-                            {selectedBidCompany.liabilityGeneral
-                              < producerCompany.liabilityGeneral && (
+                            {selectedBidCompany.liabilityGeneral < producerCompany.liabilityGeneral && (
                               <Row className="col-md-12">
                                 <i className="material-icons iconSet" style={{color: 'red'}}>ic_report_problem</i>
                                 General: {selectedBidCompany.legalName} has {selectedBidCompany.liabilityGeneral},
