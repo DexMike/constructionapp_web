@@ -409,24 +409,36 @@ class DashboardCarrierPage extends Component {
         completedJobCount += 1;
       }
 
-      if (newJob.rateType === 'Hour') {
+      if (newJob.amountType === 'Hour') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asHours(newJob.rateEstimate)
         );
-        newJob.newRateF = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Hour'
-        );
-      } else if (newJob.rateType === 'Ton') {
+        if (newJob.rateType === 'Hour') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
+      } else if (newJob.amountType === 'Ton') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asTons(newJob.rateEstimate)
         );
-        newJob.newRateF = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Ton'
-        );
+        if (newJob.rateType === 'Hour') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
       }
-
+      
       newJob.newRate = newJob.rate;
       newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
       newJob.potentialIncomeF = NumberFormatting.asMoney(
