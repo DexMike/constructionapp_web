@@ -75,7 +75,7 @@ class DashboardCustomerPage extends Component {
       goToUpdateJob: false,
       jobId: 0,
       modalAddJob: false,
-      modalAddJobWizard: true,
+      modalAddJobWizard: false,
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
@@ -469,7 +469,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-    
+
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -497,7 +497,7 @@ class DashboardCustomerPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
-      
+
       if (newJob.amountType === 'Hour') {
         // newSize is the size with its original value, so that it can be sorted
         newJob.newSize = newJob.rateEstimate;

@@ -114,13 +114,11 @@ class HaulRate extends PureComponent {
       && tabPickupDelivery.endLocationLatitude && tabPickupDelivery.endLocationLongitude) {
       if (tabPickupDelivery.avgTimeEnroute !== data.rateCalculator.travelTimeEnroute
         || tabPickupDelivery.avgTimeEnroute !== data.rateCalculator.travelTimeReturn) {
-        debugger;
         data.rateCalculator.invalidAddress = false;
         data.rateCalculator.travelTimeEnroute = tabPickupDelivery.avgTimeEnroute;
         data.rateCalculator.travelTimeReturn = tabPickupDelivery.avgTimeEnroute;
         data.rateCalculator.loadTime = 0.25;
         data.rateCalculator.unloadTime = 0.25;
-        debugger;
         const oneLoad = data.rateCalculator.tripType === 'oneWay'
           ? TCalculator.getOneWayTripTime(
             parseFloat(data.rateCalculator.travelTimeEnroute),
