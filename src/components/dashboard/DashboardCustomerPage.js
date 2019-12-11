@@ -162,7 +162,7 @@ class DashboardCustomerPage extends Component {
     this.setState({
       filters: newFilters
     }, function wait() {
-      this.refs.filterChild.fetchJobs();
+      // this.refs.filterChild.fetchJobs();
     });
   }
 
