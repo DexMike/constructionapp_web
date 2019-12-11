@@ -64,7 +64,7 @@ class HaulRate extends PureComponent {
     } else {
       data.rateCalculator.invalidAddress = false;
       data.rateCalculator.travelTimeEnroute = tabPickupDelivery.avgTimeEnroute;
-      data.rateCalculator.travelTimeReturn = tabPickupDelivery.avgTimeEnroute;
+      data.rateCalculator.travelTimeReturn = tabPickupDelivery.avgTimeReturn;
       data.rateCalculator.loadTime = 0.25;
       data.rateCalculator.unloadTime = 0.25;
       const oneLoad = data.rateCalculator.tripType === 'oneWay'
@@ -279,7 +279,6 @@ class HaulRate extends PureComponent {
           parseFloat(tabPickupDelivery.avgDistanceEnroute),
           parseFloat(tabPickupDelivery.avgDistanceReturn)
         );
-        debugger;
         break;
       case 'twoWay':
         // update hour rate
@@ -307,7 +306,6 @@ class HaulRate extends PureComponent {
           parseFloat(tabPickupDelivery.avgDistanceEnroute),
           parseFloat(tabPickupDelivery.avgDistanceReturn)
         );
-        debugger;
         break;
       default:
     }
@@ -471,7 +469,6 @@ class HaulRate extends PureComponent {
     } else {
       data.tripType = tripType;
       handleInputChange('tabHaulRate', data);
-      debugger;
     }
   }
 
@@ -844,7 +841,6 @@ class HaulRate extends PureComponent {
           truckCapacity,
           tabPickupDelivery.avgDistanceEnroute
         );
-        debugger;
       }
       if (data.payType === 'Ton') {
         deliveredPricePerTon = TCalculator.getDelPricePerTonByTonRate(

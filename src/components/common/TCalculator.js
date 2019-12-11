@@ -63,7 +63,6 @@ class TCalculator {
         : Math.floor(estimatedTons / truckCapacity);
       return numTrips;
     }
-    debugger;
     return 0;
   }
 
@@ -186,7 +185,6 @@ class TCalculator {
     const tonRate = estimatedTons > 0
       ? parseFloat(((rateHour * estimatedHours) / estimatedTons).toFixed(2))
       : 0;
-    debugger;
     return tonRate;
   }
 
@@ -445,7 +443,6 @@ class TCalculator {
     );
     // return delivered price per ton
     const deliveredPricePerTon = (estMaterialPricing + tonRate).toFixed(2);
-    debugger;
     return parseFloat(deliveredPricePerTon);
   }
 
