@@ -351,6 +351,7 @@ class MarketplaceCarrierPage extends Component {
             rows={rows}
             isLoading={(e) => this.setState({isLoading: e})}
             isMarketplace
+            t={t}
           />
           {this.renderJobList()}
         </Container>

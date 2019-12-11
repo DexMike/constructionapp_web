@@ -815,4 +815,4 @@ JobFilter.defaultProps = {
   isMarketplace: false
 };
 
-export default withTranslation()(JobFilter);
+export default JobFilter;

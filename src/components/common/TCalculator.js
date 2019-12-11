@@ -338,11 +338,11 @@ class TCalculator {
     avgDistanceEnroute,
     avgDistanceReturn
   ) {
-    const twoWay = ((truckCapacity * avgDistanceEnroute) > 0)
+    const oneWay = ((truckCapacity * avgDistanceEnroute) > 0)
       ? ((twoWayCost * (avgDistanceEnroute + avgDistanceReturn))
         / (truckCapacity * avgDistanceEnroute)).toFixed(2)
       : 0;
-    return parseFloat(twoWay);
+    return parseFloat(oneWay);
   }
 
   /* returns two way cost / mile by hour rate.

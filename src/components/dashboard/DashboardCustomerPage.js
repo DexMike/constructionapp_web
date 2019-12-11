@@ -64,6 +64,7 @@ function TableLegend({displayed, totalCount, totalJobs}) {
 class DashboardCustomerPage extends Component {
   constructor(props) {
     super(props);
+
     // NOTE: if you update this list you have to update
     // Orion.EquipmentDao.filtersOrderByClause
     this.state = {
@@ -106,8 +107,8 @@ class DashboardCustomerPage extends Component {
 
     if (localStorage.getItem('filters')) {
       filters = JSON.parse(localStorage.getItem('filters'));
-      rows = filters.rows;
-    }
+      rows = filters.rows;      
+    }    
     if (localStorage.getItem('metadata')) {
       const metadata = JSON.parse(localStorage.getItem('metadata'));
       totalCount = metadata.totalCount;
@@ -469,7 +470,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
+    
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -497,7 +498,7 @@ class DashboardCustomerPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
-
+      
       if (newJob.amountType === 'Hour') {
         // newSize is the size with its original value, so that it can be sorted
         newJob.newSize = newJob.rateEstimate;
@@ -664,6 +665,7 @@ class DashboardCustomerPage extends Component {
   }
 
   render() {
+    const {t} = this.props;
     const {loaded, page, rows} = this.state;
     if (loaded) {
       return (
@@ -680,6 +682,7 @@ class DashboardCustomerPage extends Component {
             rows={rows}
             ref="filterChild"
             isLoading={(e) => this.setState({isLoading: e})}
+            t={t}
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}
