@@ -8,32 +8,32 @@ class TDateTimePickerField extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      startDate: 0
+      startDate: 0,
+      currDate: 0
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
-    let { defaultDate, profileTimeZone } = this.props;
+    const { profileTimeZone } = this.props;
 
-    const timeZonedStartDate = new Date(moment(defaultDate).tz(
+    const timeZonedStartDate = new Date(moment().tz(
       profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
     ).format('YYYY-MM-DD HH:mm:ss'));
     this.setState({ startDate: timeZonedStartDate });
   }
 
   componentDidUpdate(prevProps, prevState) {
-    let { defaultDate, profileTimeZone } = this.props;
-    if ((prevProps.defaultDate !== defaultDate)) {
-      const timeZonedStartDate = new Date(moment(defaultDate).tz(
+    const { profileTimeZone } = this.props;
+    if ((prevProps.defaultDate !== this.state.currDate)) {
+      const timeZonedStartDate = new Date(moment(prevProps.defaultDate).tz(
         profileTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
       ).format('YYYY-MM-DD HH:mm:ss'));
-      this.setState({ startDate: timeZonedStartDate });
+      this.setState({ currDate: prevProps.defaultDate, startDate: timeZonedStartDate });
     }
   }
 
   handleChange(date) {
-    console.log('changing date picker', date);
     this.setState({
       startDate: date[0]
     });

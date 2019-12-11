@@ -106,6 +106,7 @@ class DashboardCustomerPage extends Component {
       totalCount: 10,
       totalJobs: 0,
       pausedJobId: null,
+      pausedJobsListOnFirstLoad: true,
       isLoading: false
     };
 
@@ -156,9 +157,10 @@ class DashboardCustomerPage extends Component {
   }
 
   returnJobs(jobs, filters, metadata, pausedJobsList) {
+    const { pausedJobsListOnFirstLoad } = this.state;
     const { totalCount } = metadata;
 
-    if (pausedJobsList && pausedJobsList.length > 0) {
+    if (pausedJobsList && pausedJobsList.length > 0 && pausedJobsListOnFirstLoad) {
       this.toggleResumeJobListModal(true);
     }
 
@@ -167,6 +169,7 @@ class DashboardCustomerPage extends Component {
     this.setState({
       jobs,
       pausedJobs: pausedJobsList,
+      pausedJobsListOnFirstLoad: false,
       filters,
       totalCount
     });

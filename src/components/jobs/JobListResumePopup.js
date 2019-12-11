@@ -28,20 +28,13 @@ class JobListResumePopup extends Component {
     super(props);
 
     this.state = {
-      page: 0,
-      rows: 10,
       jobs: [],
       loaded: false,
-      validateFormOne: false,
-      firstTabInfo: {},
-      profile: [],
       goToJobDetail: false
     };
     this.closeNow = this.closeNow.bind(this);
     this.renderGoTo = this.renderGoTo.bind(this);
     this.handleJobClick = this.handleJobClick.bind(this);
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
   }
 
   async componentDidMount() {
@@ -49,45 +42,19 @@ class JobListResumePopup extends Component {
     this.setState({ jobs: pausedJobs, profile, loaded: true });
   }
 
-  /* componentDidUpdate(prevProps) {
-    const {pausedJobs} = this.props;
-    console.log(pausedJobs);
-    this.setState({ jobs: pausedJobs });
-    if (prevProps.color !== this.props.color) {
-      // 😔 Extra re-render for every update
-      this.setState({
-        textColor: slowlyCalculateTextColor(this.props.color),
-      });
-    }
-  } */
-
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.pausedJobs !== this.state.jobs) {
       this.setState({ jobs: prevProps.pausedJobs });
     }
   }
 
-  /* componentWillReceiveProps(nextProps) {
-    const {pausedJobs} = this.props;
-    this.setState({ jobs: pausedJobs });
-  } */
-
   closeNow() {
     const { toggle } = this.props;
     toggle();
   }
 
-  handlePageChange(page) {
-    this.setState({ page });
-  }
-
-  handleRowsPerPage(rows) {
-    this.setState({ rows });
-  }
-
   handleJobClick(pausedJobId) {
     const { onJobSelect } = this.props;
-    console.log('clicking a row in child component: ', pausedJobId);
     onJobSelect(pausedJobId);
   }
 
@@ -105,7 +72,6 @@ class JobListResumePopup extends Component {
 
     jobs = jobs.map((job) => {
       const newJob = job;
-      const tempRate = newJob.rate;
 
       newJob.newStartDate = TFormat.asDateTime(job.startTime, profile.timeZone);
       newJob.newEndDate = TFormat.asDateTime(job.endTime, profile.timeZone);
