@@ -147,7 +147,7 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
-    //this.refs.filterChild.filterWithStatus(filters);
+    this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       filters,
       page: 0
@@ -162,7 +162,7 @@ class DashboardCustomerPage extends Component {
     this.setState({
       filters: newFilters
     }, function wait() {
-      // this.refs.filterChild.fetchJobs();
+      this.refs.filterChild.fetchJobs();
     });
   }
 
@@ -215,7 +215,7 @@ class DashboardCustomerPage extends Component {
     if (modalAddJob) {
       const profile = await ProfileService.getProfile();
       this.fetchJobsInfo(profile);
-      //this.refs.filterChild.filterWithStatus(filters);
+      this.refs.filterChild.filterWithStatus(filters);
       this.setState({loaded: true});
     }
     this.setState({
@@ -228,7 +228,7 @@ class DashboardCustomerPage extends Component {
     if (modalAddJobWizard) {
       const profile = await ProfileService.getProfile();
       this.fetchJobsInfo(profile);
-      // this.refs.filterChild.filterWithStatus(filters);
+      this.refs.filterChild.filterWithStatus(filters);
       this.setState({loaded: true});
     }
     this.setState({
