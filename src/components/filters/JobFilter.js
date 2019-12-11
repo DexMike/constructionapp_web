@@ -560,6 +560,7 @@ class JobFilter extends Component {
       loaded
     } = this.state;
     // let start = filters.startAvailability;
+    console.log(563, this.props);
     const {t} = {...this.props};
     if (loaded) {
       return (
@@ -815,4 +816,4 @@ JobFilter.defaultProps = {
   isMarketplace: false
 };
 
-export default withTranslation()(JobFilter);
+export default JobFilter;
