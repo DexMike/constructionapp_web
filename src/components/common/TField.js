@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 class TField extends PureComponent {
   render() {
     const {
-      input, placeholder, offClick, type, meta: { touched, error }, id, disabled, secondaryDisabled
+      input, placeholder, offClick, type, meta: { touched, error }, id, disabled, secondaryDisabled, tertiaryDisabled
     } = this.props;
 
     let backgroundColorDisabled = null;
@@ -21,7 +21,7 @@ class TField extends PureComponent {
             borderRadius: 0,
             backgroundColor: backgroundColorDisabled,
             borderColor: (disabled || secondaryDisabled) ? '#C8C8C8' : null,
-            color: (disabled || secondaryDisabled) ? '#C8C8C8' : null,
+            color: (secondaryDisabled || tertiaryDisabled) ? '#C8C8C8' : null
           }}
           {...input}
           placeholder={placeholder}
@@ -43,6 +43,7 @@ TField.propTypes = {
   }).isRequired,
   disabled: PropTypes.bool,
   secondaryDisabled: PropTypes.bool,
+  tertiaryDisabled: PropTypes.bool,
   meta: PropTypes.shape({
     touched: PropTypes.bool,
     error: PropTypes.string
@@ -56,6 +57,7 @@ TField.defaultProps = {
   offClick: () => {},
   disabled: false,
   secondaryDisabled: false,
+  tertiaryDisabled: false,
   placeholder: '',
   meta: {
     value: null,

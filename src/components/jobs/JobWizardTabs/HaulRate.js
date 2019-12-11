@@ -1087,6 +1087,7 @@ class HaulRate extends PureComponent {
               }
               placeholder=""
               disabled
+              tertiaryDisabled={data.rateCalcVisibleDisabled}
               type="text"
               id="numberOfLoads"
             />
@@ -1106,6 +1107,7 @@ class HaulRate extends PureComponent {
                 }
               }
               placeholder=""
+              tertiaryDisabled={data.rateCalcVisibleDisabled}
               disabled
               type="text"
               id="totalAmount"
@@ -1219,6 +1221,7 @@ class HaulRate extends PureComponent {
                           }
                         }
                         disabled={data.rateCalcVisibleDisabled}
+                        tertiaryDisabled={data.rateCalcVisibleDisabled}
                         placeholder=""
                         type="text"
                         id="estimateTypeRadioTon"
@@ -1385,6 +1388,7 @@ class HaulRate extends PureComponent {
                       }
                     }
                     disabled={data.rateCalcVisibleDisabled}
+                    tertiaryDisabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="rateTypeRadio"
@@ -1423,6 +1427,7 @@ class HaulRate extends PureComponent {
                       }
                     }
                     disabled={data.rateCalcVisibleDisabled}
+                    tertiaryDisabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="rateTypeRadio"
@@ -1524,6 +1529,7 @@ class HaulRate extends PureComponent {
                           }
                         }
                         disabled={data.rateCalcVisibleDisabled}
+                        tertiaryDisabled={data.rateCalcVisibleDisabled}
                         placeholder=""
                         type="text"
                         id="rateTypeRadio"
@@ -1563,6 +1569,7 @@ class HaulRate extends PureComponent {
                           }
                         }
                         disabled={data.rateCalcVisibleDisabled}
+                        tertiaryDisabled={data.rateCalcVisibleDisabled}
                         placeholder=""
                         type="text"
                         id="rateTypeRadio"
@@ -1674,6 +1681,7 @@ class HaulRate extends PureComponent {
                       }
                     }
                     disabled={data.rateCalcVisibleDisabled}
+                    tertiaryDisabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="loadTime"
@@ -1703,6 +1711,7 @@ class HaulRate extends PureComponent {
                       }
                     }
                     disabled={data.rateCalcVisibleDisabled}
+                    tertiaryDisabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="unloadTime"
@@ -1828,6 +1837,7 @@ class HaulRate extends PureComponent {
                       }
                     }
                     disabled={data.rateCalcVisibleDisabled}
+                    tertiaryDisabled={data.rateCalcVisibleDisabled}
                     placeholder=""
                     type="text"
                     id="truckCapacity"
