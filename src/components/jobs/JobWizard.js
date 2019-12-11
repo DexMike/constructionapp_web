@@ -26,12 +26,8 @@ import TSpinner from '../common/TSpinner';
 import LookupsService from '../../api/LookupsService';
 import GeoCodingService from '../../api/GeoCodingService';
 import SendJob from './JobWizardTabs/SendJob';
-import BidService from '../../api/BidService';
-import TwilioService from '../../api/TwilioService';
-import CompanyService from '../../api/CompanyService';
 import UserUtils from '../../api/UtilsService';
-import UserService from '../../api/UserService';
-import GeoUtils from "../../utils/GeoUtils";
+import GeoUtils from '../../utils/GeoUtils';
 
 class JobWizard extends Component {
   constructor(props) {
@@ -464,58 +460,6 @@ class JobWizard extends Component {
     return allTruckTypes;
   }
 
-  jobStartDateChange(data) {
-    // return false;
-    const { t } = { ...this.props };
-    const translate = t;
-    const {reqHandlerStartDate, reqHandlerEndDate, jobEndDate} = this.state;
-    const currDate = new Date();
-
-    if (data && (new Date(data).getTime() < currDate.getTime())) {
-      this.setState({
-        jobStartDate: data,
-        reqHandlerStartDate: {
-          ...reqHandlerStartDate,
-          touched: true,
-          error: translate('The start date of the job can not be set in the past or as the current date and time')
-        }
-      });
-      return;
-    }
-
-    if (jobEndDate && (new Date(jobEndDate).getTime() <= new Date(data).getTime())) {
-      this.setState({
-        jobStartDate: data,
-        reqHandlerStartDate: {
-          ...reqHandlerStartDate,
-          touched: true,
-          error: translate('The start date of the job can not be set in the future of or equivalent to the end date')
-        }
-      });
-      return;
-    }
-
-    if (jobEndDate && (new Date(jobEndDate).getTime() >= currDate.getTime())) {
-      this.setState({
-        jobStartDate: data,
-        reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
-          touched: false
-        }),
-        reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
-          touched: false
-        })
-      });
-      return;
-    }
-
-    this.setState({
-      jobStartDate: data,
-      reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
-        touched: false
-      })
-    });
-  }
-
   jobEndDateChange(data) {
     // return false;
     const { t } = { ...this.props };
@@ -669,7 +613,7 @@ class JobWizard extends Component {
         || tabPickupDelivery.startLocationCity.length === 0
         || tabPickupDelivery.startLocationZip.length === 0
         || tabPickupDelivery.startLocationState.length === 0)) {
-        val.push(translate('Missing start address fields'));
+      val.push(translate('Missing start address fields'));
     }
 
     if (tabPickupDelivery.selectedEndAddressId > 0 && tabPickupDelivery.selectedStartAddressId > 0
@@ -700,7 +644,7 @@ class JobWizard extends Component {
         || tabPickupDelivery.endLocationCity.length === 0
         || tabPickupDelivery.endLocationZip.length === 0
         || tabPickupDelivery.endLocationState.length === 0)) {
-        val.push(translate('Missing end address fields'));
+      val.push(translate('Missing end address fields'));
     }
 
     if (val.length > 0) {
@@ -788,7 +732,6 @@ class JobWizard extends Component {
     let isValid = false;
     if (!await this.isDraftValid()) {
       this.setState({btnSubmitting: false});
-      return;
     }
     isValid = true;
     // const {saveJobDraft} = this.props;
@@ -966,7 +909,7 @@ class JobWizard extends Component {
       reqHandlerStartCity,
       reqHandlerStartState,
       reqHandlerStartZip,
-      reqHandlerStartDate,
+      reqHandlerStartDate
     } = {...this.state};
     let isValid = true;
     if (!name || name === '') {
@@ -1010,7 +953,6 @@ class JobWizard extends Component {
         || tabPickupDelivery.startLocationCity.length > 0
         || tabPickupDelivery.startLocationZip.length > 0
         || tabPickupDelivery.startLocationState.length > 0)) {
-
       if (tabPickupDelivery.startLocationAddress1.length === 0) {
         tabPickupDelivery.reqHandlerStartAddress = {
           ...reqHandlerStartAddress,
@@ -1101,7 +1043,6 @@ class JobWizard extends Component {
         || tabPickupDelivery.endLocationCity.length > 0
         || tabPickupDelivery.endLocationZip.length > 0
         || tabPickupDelivery.endLocationState.length > 0)) {
-
       if (tabPickupDelivery.endLocationAddress1.length === 0) {
         tabPickupDelivery.reqHandlerEndAddress = {
           ...reqHandlerEndAddress,
@@ -1323,6 +1264,36 @@ class JobWizard extends Component {
       status = 'On Offer';
     }
 
+    let avgDistance = tabPickupDelivery.avgDistanceEnroute;
+    // let's try and figure out the distance now, if it's not already calcutlated
+    if (avgDistance !== 0) {
+      if (address1.id !== 0 || address1.id !== null) {
+        address1 = await AddressService.getAddressById(address1.id);
+      }
+
+      if (address2.id !== 0 || address2.id !== null) {
+        address2 = await AddressService.getAddressById(address2.id);
+      }
+
+      try {
+        const startAddressCoords = await GeoUtils.getCoordsFromAddress(
+          `${address1.address1}, ${address1.city} ${address1.state} ${address1.zipCode}`
+        );
+        const endAddressCoords = await GeoUtils.getCoordsFromAddress(
+          `${address2.address1}, ${address2.city} ${address2.state} ${address2.zipCode}`
+        );
+        const waypoint0 = `${startAddressCoords.lat},${startAddressCoords.lng}`;
+        const waypoint1 = `${endAddressCoords.lat},${endAddressCoords.lng}`;
+        const newDistance = await GeoUtils.getDistance(
+          waypoint0, waypoint1
+        );
+        // convert to miles
+        avgDistance = (newDistance.distance / 1609);
+      } catch (e) {
+        console.log("Error: Unable to obtain job's distance, avgDistance will be ignored", e);
+      }
+    }
+
     jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
     const jobCreate = {
       companiesId: profile.companyId,
@@ -1331,6 +1302,7 @@ class JobWizard extends Component {
       isFavorited,
       startAddress: address1.id,
       endAddress: address2.id,
+      avgDistance,
       startTime: moment.tz(
         jobStartDate,
         profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -1620,6 +1592,58 @@ class JobWizard extends Component {
 
   setPageNumber(page) {
     this.setState({page});
+  }
+
+  jobStartDateChange(data) {
+    // return false;
+    const { t } = { ...this.props };
+    const translate = t;
+    const {reqHandlerStartDate, reqHandlerEndDate, jobEndDate} = this.state;
+    const currDate = new Date();
+
+    if (data && (new Date(data).getTime() < currDate.getTime())) {
+      this.setState({
+        jobStartDate: data,
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: translate('The start date of the job can not be set in the past or as the current date and time')
+        }
+      });
+      return;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() <= new Date(data).getTime())) {
+      this.setState({
+        jobStartDate: data,
+        reqHandlerStartDate: {
+          ...reqHandlerStartDate,
+          touched: true,
+          error: translate('The start date of the job can not be set in the future of or equivalent to the end date')
+        }
+      });
+      return;
+    }
+
+    if (jobEndDate && (new Date(jobEndDate).getTime() >= currDate.getTime())) {
+      this.setState({
+        jobStartDate: data,
+        reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
+          touched: false
+        }),
+        reqHandlerEndDate: Object.assign({}, reqHandlerEndDate, {
+          touched: false
+        })
+      });
+      return;
+    }
+
+    this.setState({
+      jobStartDate: data,
+      reqHandlerStartDate: Object.assign({}, reqHandlerStartDate, {
+        touched: false
+      })
+    });
   }
 
   validateForm() {
@@ -1983,7 +2007,8 @@ class JobWizard extends Component {
                       : jobEdit
                         ? `${translate('EDIT_JOB')}`
                         : `${translate('CREATE_JOB')}`
-                      }</p>
+                      }
+                    </p>
                   </div>
                 </div>
                 <div className="wizard__form-wrapper">

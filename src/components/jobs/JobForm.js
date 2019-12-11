@@ -645,7 +645,7 @@ class JobForm extends Component {
                 ? 'Total'
                 : 'Estimated'
             }
-            &nbsp;Amount: {TFormat.asNumber(job.rateEstimate)} {job.rateType}(s)
+            &nbsp;Amount: {TFormat.asNumber(job.rateEstimate)} {job.amountType}(s)
             <br/>
             Rate: {
               (
@@ -660,7 +660,7 @@ class JobForm extends Component {
             <h3 className="subhead">
               Job Status: {displayStatus}
             </h3>
-            Estimated Amount: {TFormat.asNumber(job.rateEstimate)} {job.rateType}(s)
+            Estimated Amount: {TFormat.asNumber(job.rateEstimate)} {job.amountType}(s)
             <br/>
             Rate:&nbsp;{job.rate > 0 && TFormat.asMoney(job.rate)} / {job.rateType}
             <br/>

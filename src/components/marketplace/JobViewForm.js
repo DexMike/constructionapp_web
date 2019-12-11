@@ -463,7 +463,7 @@ class JobViewForm extends Component {
                   : TFormat.asMoney(job.rate - trelarFees.perTonPerHourFee)
               } / {job.rateType}
               <br/>
-              Estimated: {job.rateEstimate} {job.rateType}(s)
+              Estimated: {job.rateEstimate} {job.amountType}(s)
             </p>
           </Col>
           <Col md={4}>

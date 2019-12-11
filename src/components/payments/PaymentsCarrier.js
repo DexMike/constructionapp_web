@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { withTranslation } from 'react-i18next';
 
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
@@ -89,20 +90,21 @@ class PaymentsCarrier extends Component {
       date: '05/24/2019', name: 'Fixed Job', load: '1235-A', amount: '$12,335.88'
     }]; */
     const { loaded, payments } = this.state;
+    const {t} = {...this.props};
     if (loaded) {
       return (
         <Container className="dashboard">
           {this.renderGoTo()}
           <Row>
             <Col md={12}>
-              <h3 className="page-title">{title}</h3>
+              <h3 className="page-title">{t(title)}</h3>
             </Col>
           </Row>
           <PaymentsFilter isCarrier />
           <Row>
             <Col md={12}>
-              <h5>For detailed information on your payments, please log into your &nbsp;
-                <a href="https://trelar.hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://trelar.hyperwallet.com</a>&nbsp;account.
+              <h5>{t('For detailed information on your payments, please log into your hyperwallet account at')}&nbsp;&nbsp;
+                <a href="https://trelar.hyperwallet.com/" target="_blank" rel="noopener noreferrer">https://trelar.hyperwallet.com</a>.
               </h5>
               <h5>&nbsp; </h5>
             </Col>
@@ -113,7 +115,7 @@ class PaymentsCarrier extends Component {
                 <CardBody>
                   <h5>&nbsp; </h5>
                   <h5>&nbsp; </h5>
-                  <h5>There are no payments to show at this time</h5>
+                  <h5>{t('There are no payments to show at this time')}</h5>
                   <h5>&nbsp; </h5>
                   <h5>&nbsp; </h5>
 
@@ -153,7 +155,7 @@ class PaymentsCarrier extends Component {
       <Container className="container">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">{title}</h3>
+            <h3 className="page-title">{t(title)}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -162,4 +164,4 @@ class PaymentsCarrier extends Component {
   }
 }
 
-export default PaymentsCarrier;
+export default withTranslation()(PaymentsCarrier);

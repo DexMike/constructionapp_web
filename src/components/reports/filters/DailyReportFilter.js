@@ -1,19 +1,5 @@
-/* eslint-disable no-multiple-empty-lines,
-no-trailing-spaces,
-object-curly-spacing,
-no-unused-vars,
-spaced-comment,
-react/jsx-closing-bracket-location,
-semi, quotes, no-empty,
-react/no-string-refs,
-prefer-const, comma-dangle, padded-blocks,
-react/jsx-one-expression-per-line,
-space-before-function-paren,
-keyword-spacing, no-multi-spaces */
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
-  Button,
-  ButtonToolbar,
   Card,
   CardBody,
   Col,
@@ -21,50 +7,20 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
+
 import CloneDeep from 'lodash.clonedeep';
-import GeoUtils from "../utils/GeoUtils";
-import TField from '../common/TField';
-import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
-import TMultiSelect from '../common/TMultiSelect';
-
-import AddressService from '../../api/AddressService';
-import CompanyService from '../../api/CompanyService';
-// import JobService from '../../api/JobService';
-import LookupsService from '../../api/LookupsService';
-import ProfileService from '../../api/ProfileService';
-import ReportsService from "../../api/ReportsService";
-
+import AddressService from '../services/AddressService';
+import CompanyService from '../services/CompanyService';
+import ReportsService from '../services/ReportsService';
+import LookupsService from '../services/LookupsService';
+import ProfileService from '../services/ProfileService';
+import GeoUtils from '../utils/GeoUtils';
 import './Filters.css';
 
-function formatNumber(number) {
-  return Math.floor(number)
-    .toString()
-    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-}
-
-function bracketsFormatter(params) {
-  return `(${params.value})`;
-}
-
-function currencyFormatter(params) {
-  if (params) {
-    let number = params.toFixed(2);
-    return `$ ${formatNumber(number)}`;
-  }
-  return `$ 0.00`;
-}
-
-function percentFormatter(params) {
-  return `${formatNumber(params.value * 100)}%`;
-}
-
-function realRound(value, decimals) {
-  return Number(`${Math.round(`${value}e${decimals}`)}e-${decimals}`);
-}
-
-class FilterComparisonReport extends Component {
+class DailyReportFilter extends Component {
   constructor(props) {
     super(props);
 
@@ -97,27 +53,23 @@ class FilterComparisonReport extends Component {
 
     this.timeRangesComp = [
       {
-        name: 'None',
-        value: -1
-      },
-      {
         name: 'Custom',
         value: 0
       },
       {
-        name: 'Comparison last Week',
+        name: 'Previous Week',
         value: 7
       },
       {
-        name: 'Comparison 30 days',
+        name: 'Previous 30 days',
         value: 30
       },
       {
-        name: 'Comparison 60 days',
+        name: 'Previous 60 days',
         value: 60
       },
       {
-        name: 'Comparison 90 days',
+        name: 'Previous 90 days',
         value: 90
       }
       // { name: 'Next Week', value: -7 },
@@ -143,21 +95,6 @@ class FilterComparisonReport extends Component {
       .seconds(0)
       .toDate();
 
-    // the sunday from last week
-    const startDateComp = moment().subtract(60, 'days').hours(0)
-      .minutes(0)
-      .seconds(0)
-      .toDate();
-
-    // the saturday from next week
-    const endDateComp = moment().subtract(30, 'days').hours(0)
-      .minutes(0)
-      .seconds(0)
-      .toDate();
-
-    // const startDateComp = startDate;
-    // const endDateComp = endDate;
-
     // Comment
     this.state = {
       // Look up lists
@@ -169,9 +106,7 @@ class FilterComparisonReport extends Component {
       companiesTypelist: [],
       intervals: {
         startInterval: startDate,
-        endInterval: endDate,
-        startIntervalComp: startDateComp,
-        endIntervalComp: endDateComp
+        endInterval: endDate
       },
       address: {},
       company: {},
@@ -181,43 +116,31 @@ class FilterComparisonReport extends Component {
       loaded: false,
       selectIndex: 0, // Parameter for setting the dropdown default option.
       selectedRange: 0, // Parameter for setting startDate.
-      selectIndexComp: 0, // Parameter for setting the dropdown default option.
+      selectIndexComp: 3, // Parameter for setting the dropdown default option.
       selectedRangeComp: 0, // Parameter for setting startDate.
-      compEnabled: false,
-      compActualValue: -1,
+      companyType: '',
 
       // TODO: Refactor to a single filter object
       // Filter defaults
       filters: {
-        companyType: null,
         companies: [],
         states: [],
         zipCode: '',
-        range: 500,
+        range: 3000,
+
         statuses: [],
         materials: [],
-        equipments: [], //this one is missing in orion
+        equipments: [], // this one is missing in orion
         rateTypes: [],
         rate: 0,
         truckTypes: [],
         timeRange: 0,
         startAvailability: startDate,
         endAvailability: endDate,
-        startAvailDateComp: startDateComp,
-        endAvailDateComp: endDateComp,
         page: 0,
         rows: 10,
         companyLatitude: 30.356855,
-        companyLongitude: -97.737251,
-
-        // searchType: 'Carrier Job',
-        // minTons: '',
-        // minHours: '',
-        // minCapacity: '',
-        // userId: '',
-        // numEquipments: '',
-        // materialType: [],
-        // equipmentType: [],
+        companyLongitude: -97.737251
       },
       reqHandlerZip: {
         touched: false,
@@ -233,24 +156,18 @@ class FilterComparisonReport extends Component {
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleSelectFilterChange = this.handleSelectFilterChange.bind(this);
     this.handleMultiChange = this.handleMultiChange.bind(this);
-    // this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
+    this.handleMultiTruckChange = this.handleMultiTruckChange.bind(this);
     this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
-    this.handleIntervalComparisonInputChange = this.handleIntervalComparisonInputChange.bind(this);
     this.handleFilterChangeDelayed = this.handleFilterChangeDelayed.bind(this);
     this.handleResetFilters = this.handleResetFilters.bind(this);
     this.handleRangeFilterChange = this.handleRangeFilterChange.bind(this);
-    this.handleRangeComparisonFilterChange = this.handleRangeComparisonFilterChange.bind(this);
-    // Date Range and Comparison Date range
+
     this.getUTCStartInterval = this.getUTCStartInterval.bind(this);
     this.getUTCEndInterval = this.getUTCEndInterval.bind(this);
-    this.getUTCStartIntervalComp = this.getUTCStartInterval.bind(this);
-    this.getUTCEndIntervalComp = this.getUTCEndInterval.bind(this);
-
   }
 
   async componentDidMount() {
-    const {intervals, selectIndex, selectIndexComp} = {...this.state};
-    const { type } = this.props;
+    const { intervals, selectIndex, selectIndexComp } = { ...this.state };
     let {
       companyZipCode,
       lastZipCode,
@@ -259,20 +176,15 @@ class FilterComparisonReport extends Component {
       filters,
       selectedRange,
       selectedRangeComp
-    } = {...this.state};
+    } = { ...this.state };
     const profile = await ProfileService.getProfile();
-    // startInterval: startDate,
-    //   endInterval: endDate
+    filters.userId = profile.userId;
 
     const startAv = new Date(intervals.startInterval);
     const endAv = new Date(intervals.endInterval);
     filters.startAvailability = this.getUTCStartInterval(startAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
-
-    const startAvComp = new Date(intervals.startIntervalComp);
-    const endAvComp = new Date(intervals.endIntervalComp);
-    filters.startAvailabilityComp = this.getUTCStartInterval(startAvComp);
-    filters.endAvailabilityComp = this.getUTCEndInterval(endAvComp);
+    filters.companyType = profile.companyType;
 
     if (profile.companyId) {
       company = await CompanyService.getCompanyById(profile.companyId);
@@ -286,7 +198,7 @@ class FilterComparisonReport extends Component {
       }
     }
 
-    //save blank filters
+    // save blank filters
     const newBlankFilters = CloneDeep(filters);
 
     // This should save the filters, there's no need to save at every change
@@ -294,25 +206,14 @@ class FilterComparisonReport extends Component {
       filters = JSON.parse(localStorage.getItem('filters'));
     }
 
-    //default range -?-
     selectedRange = this.timeRanges[selectIndex].value;
-    selectedRangeComp = this.timeRanges[selectIndexComp].value;
+    selectedRangeComp = this.timeRangesComp[selectIndexComp].value;
 
-    // get the data
-    // TODO create 3:
-    await this.fetchCarrierData();
-
-    await this.fetchStates();
+    await this.fetchJobsAndLoads();
     await this.fetchLookups();
-    let allCompanies = await this.fetchCompanies();
-
+    const allCompanies = await this.fetchCompanies();
     this.fetchFilterLists();
-    if (type === 'Producer' || type === 'Customer') {
-      filters.companyType = 'Customer';
-    }
-    if (type === 'Carrier') {
-      filters.companyType = 'Carrier';
-    }
+
     this.setState({
       companyZipCode,
       lastZipCode,
@@ -323,18 +224,18 @@ class FilterComparisonReport extends Component {
       selectedRange,
       loaded: true,
       companiesTypelist: allCompanies,
+      companyType: profile.companyType,
       blankFilters: newBlankFilters
     });
   }
 
   async componentWillReceiveProps(nextProps) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     if (filters.rows !== nextProps.rows || filters.page !== nextProps.page) {
       filters.rows = nextProps.rows;
       filters.page = nextProps.page;
-      this.setState({filters});
-      // TODO
-      await this.fetchCarrierData();
+      this.setState({ filters });
+      await this.fetchJobsAndLoads();
     }
   }
 
@@ -381,51 +282,8 @@ class FilterComparisonReport extends Component {
     return endDate;
   }
 
-  getUTCStartIntervalComp(s) {
-    if (s) {
-      let timeZoneOffset = s.getTimezoneOffset() / 60;
-      if (timeZoneOffset < 0) {
-        timeZoneOffset = Math.ceil(timeZoneOffset);
-      } else {
-        timeZoneOffset = Math.floor(timeZoneOffset);
-      }
-      const min = Math.abs(s.getTimezoneOffset() % 60);
-      // if behind
-      if (timeZoneOffset > 0) {
-        if (min > 0) {
-          s.setHours(23 - timeZoneOffset, min, 0); // 00:00:00s
-        } else {
-          s.setHours(24 - timeZoneOffset, min, 0); // 00:00:00s
-        }
-        s.setDate(s.getDate() - 1);
-      } else { // if ahead
-        s.setHours(-1 * timeZoneOffset, min, 0); // 00:00:00
-      }
-    }
-    return s;
-  }
-
-  getUTCEndIntervalComp(endDate) {
-    if (endDate) {
-      let timeZoneOffset = endDate.getTimezoneOffset() / 60;
-      if (timeZoneOffset < 0) {
-        timeZoneOffset = Math.ceil(timeZoneOffset);
-      } else {
-        timeZoneOffset = Math.floor(timeZoneOffset);
-      }
-      const min = Math.abs(endDate.getTimezoneOffset() % 60);
-      if (timeZoneOffset > 0) {
-        endDate.setHours(23 - timeZoneOffset, 59 - min, 59); // 23:59:59
-      } else { // if ahead
-        endDate.setDate(endDate.getDate() + 1);
-        endDate.setHours(-1 * (timeZoneOffset + 1), 59 + min, 59); // 23:59:59
-      }
-    }
-    return endDate;
-  }
-
   getValues(collection) {
-    let newCollection = [];
+    const newCollection = [];
     if (collection.length > 0) {
       for (const item of collection) {
         newCollection.push(item.value);
@@ -434,35 +292,26 @@ class FilterComparisonReport extends Component {
     return newCollection;
   }
 
-  getIds(collection) {
-    let newCollection = [];
-    for (const item of collection) {
-      newCollection.push(Number(item.id));
-    }
-    return newCollection;
-  }
-
   async fetchFilterLists() {
-    const {filters, materialTypeList, rateTypeList} = this.state;
-    // let { equipmentTypeList } = this.state;
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
 
     const lookupEquipmentList = await LookupsService.getLookupsByType('EquipmentType');
-    const equipmentTypeList = lookupEquipmentList.map(eq => ({
-      name: 'equipmentType',
-      id: eq.id,
-      value: eq.val1.trim(),
-      label: eq.val1.trim()
-    }));
+    Object.values(lookupEquipmentList)
+      .forEach((itm) => {
+        if (itm.val1 !== 'Any') equipmentTypeList.push(itm.val1);
+      });
 
     const lookupMaterialTypeList = await LookupsService.getLookupsByType('MaterialType');
     Object.values(lookupMaterialTypeList)
       .forEach((itm) => {
         materialTypeList.push(itm.val1);
       });
+
     const materialTypes = materialTypeList.map(materialType => ({
+      // id: id
       name: 'materialType',
       value: materialType.trim(),
       label: materialType.trim()
@@ -477,6 +326,7 @@ class FilterComparisonReport extends Component {
     // [filters.materials] = materialTypeList;
     // [filters.rateType] = rateTypeList;
     this.setState({
+      filters,
       equipmentTypeList,
       materialTypeList: materialTypes,
       rateTypeList
@@ -507,8 +357,7 @@ class FilterComparisonReport extends Component {
     const filter = {};
     let companies = await CompanyService.getCompaniesByFilters(filter);
     companies = companies.data.map(co => ({
-      id: co.id,
-      value: co.legalName,
+      value: String(co.id),
       label: co.legalName
     }));
     return companies;
@@ -535,34 +384,23 @@ class FilterComparisonReport extends Component {
     this.setState({ statesTypeList, statusTypeList });
   }
 
-  // merged in fetchCarrierData from fetchProducerData so we can just share
-  async fetchCarrierData() {
+  async fetchJobsAndLoads() {
     const {
       lastZipCode,
       companyZipCode,
       filters,
-      reqHandlerZip,
-      compEnabled,
-      compActualValue
+      reqHandlerZip
     } = this.state;
     const {
       type,
-      returnCarriers,
-      // returnProducers,
+      returnProducers,
       returnProducts,
       returnProjects,
       onReturnFilters,
-      fetching,
-      // timeRangesComp
+      fetching
     } = this.props;
     fetching(true);
-
-    let comp = false;
-    if(compActualValue !== -1) {
-      comp = true;
-    }
-
-    let {company, address, profile} = this.state;
+    let { company, address, profile } = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
 
@@ -585,6 +423,7 @@ class FilterComparisonReport extends Component {
           filters.companyLatitude = geoLocation.lat;
           filters.companyLongitude = geoLocation.lng;
         } catch (e) {
+          fetching(false);
           this.setState({
             reqHandlerZip: {
               ...reqHandlerZip,
@@ -611,259 +450,67 @@ class FilterComparisonReport extends Component {
     let resultLoads = [];
 
     // for multifields we have to extract just the values
-    // WE MUST clone the object if we are going to change the info
-    const allFilters = {...filters};
-
-    //extract ids from collections
-    allFilters.companies = this.getIds(allFilters.companies);
+    const allFilters = CloneDeep(filters);
+    allFilters.companies = this.getValues(allFilters.companies);
     allFilters.states = this.getValues(allFilters.states);
-    allFilters.materials = this.getValues(allFilters.materials);
-    allFilters.truckTypes = this.getIds(allFilters.equipments);
-    allFilters.rateTypes = this.getValues(allFilters.rateTypes);
     allFilters.statuses = this.getValues(allFilters.statuses);
+    allFilters.materials = this.getValues(allFilters.materials);
+    allFilters.equipments = this.getValues(allFilters.equipments);
+    allFilters.rateTypes = this.getValues(allFilters.rateTypes);
 
-    //if comp is disabled, do not get comp data
-    allFilters.compare = compEnabled;
-
-    if (type === 'Carrier') {
-      allFilters.companyType = 'Carrier';
-    } else if (type === 'Producer' || type === 'Customer') {
-      allFilters.companyType = 'Customer';
-    } else if (type === 'Contractor') {
-      allFilters.companyType = 'Contractor';
-    } else {
-      const {metadata} = result;
-      onReturnFilters(result, resultLoads, allFilters/*, metadata*/);
-    }
+    // exclusive for nimda (or make false for SG)
+    allFilters.isNimda = true;
 
     try {
-
-      let resultCarriers = [];
-      let resultProducts = [];
-      let resultProjects = [];
-
-      resultCarriers = await ReportsService.getCarriersComparisonReport(allFilters);
-      resultProducts = await ReportsService.getProductsComparisonReport(allFilters);
-
-      //projects should NOT have comparisonData
-      allFilters.compare = false;
-      resultProjects = await ReportsService.getProjectComparisonReport(allFilters);
-
-      let carriers = resultCarriers.data;
-      const metadataCarriers = resultCarriers;
-      let products = resultProducts.data;
-      const metadataProduct = resultProducts.metadata;
-      let projects = resultProjects.data;
-      const metadataProject = resultProjects.metadata;
-
-      //Maping comparison
-      carriers = this.mapObject(carriers);
-      products = this.mapObject(products);
-      projects = this.mapObject(projects);
-
-      returnCarriers(carriers, allFilters, metadataCarriers, compEnabled);
-      returnProducts(products, allFilters, metadataProduct, compEnabled);
-      returnProjects(projects, allFilters, metadataProject, compEnabled);
-
+      result = await ReportsService.getJobsDailyReport(allFilters);
+      resultLoads = await ReportsService.getLoadsDailyReport(allFilters);
     } catch (err) {
+      // console.log(err);
+      alert('Unable to obtain info');
       fetching(false);
       return null;
     }
-    const jobs = result.data;
-    const {metadata} = result;
 
-    //onReturnFilters(result, filters/*, metadata*/);
+    // data for Carrier Reports page
+    if (type === 'Carrier') {
+      try {
+        let resultProducers = [];
+        let resultProducts = [];
+        let resultProjects = [];
+        resultProducers = await ReportsService.getProducersComparisonReport(filters);
+        resultProducts = await ReportsService.getProductsComparisonReport(filters);
+        resultProjects = await ReportsService.getProjectComparisonReport(filters);
+        const producers = resultProducers.data;
+        const { metadataProducer } = resultProducers;
+        const products = resultProducts.data;
+        const { metadataProduct } = resultProducts;
+        const projects = resultProjects.data;
+        const { metadataProject } = resultProjects;
+
+        returnProducers(producers, filters, metadataProducer);
+        returnProducts(products, filters, metadataProduct);
+        returnProjects(projects, filters, metadataProject);
+      } catch (err) {
+        // console.log(err);
+        fetching(false);
+        return null;
+      }
+    } else {
+      const { metadata } = result;
+      onReturnFilters(result, resultLoads, filters/* , metadata */);
+    }
+
+    const jobs = result.data;
+    const { metadata } = result;
+
+    // onReturnFilters(result, filters/*, metadata*/);
     fetching(false);
-    this.setState({lastZipCode: filters.zipCode});
+    this.setState({ lastZipCode: filters.zipCode });
     return jobs;
   }
 
-  mapObject(object) {
-    const currencyKeys = ['avgEarningsHour', 'avgEarningsHourComp', 'totEarnings', 'totEarningsComp',
-      'avgEarningsJob', 'avgEarningsJobComp', 'avgEarningsTon', 'avgEarningsTonComp'];
-    let mappedObject = object;
-
-    let maxTotEarnings = 0;
-    let maxNumJobs = 0;
-    let maxNumLoads = 0;
-    let maxTonsDelivered = 0;
-    let maxAvgEarningsHours = 0;
-    let maxAvgEarningsJob = 0;
-    let maxAvgEarningsTon = 0;
-    let maxAvgMilesTraveled = 0;
-    let maxCostPerTonMile = 0;
-
-    //we need to get the maximums
-    for (const obj of mappedObject) {
-      if (Number(obj.totEarnings) > maxTotEarnings) {
-        maxTotEarnings = obj.totEarnings;
-      }
-      if (Number(obj.numJobs) > maxNumJobs) {
-        maxNumJobs = obj.numJobs;
-      }
-      if (Number(obj.numLoads) > maxNumLoads) {
-        maxNumLoads = obj.numLoads;
-      }
-      if (Number(obj.tonsDelivered) > maxTonsDelivered) {
-        maxTonsDelivered = obj.tonsDelivered;
-      }
-      if (Number(obj.avgEarningsHour) > maxAvgEarningsHours) {
-        maxAvgEarningsHours = obj.avgEarningsHour;
-      }
-      if (Number(obj.avgEarningsJob) > maxAvgEarningsJob) {
-        maxAvgEarningsJob = obj.avgEarningsJob;
-      }
-      if (Number(obj.avgEarningsTon) > maxAvgEarningsTon) {
-        maxAvgEarningsTon = obj.avgEarningsTon;
-      }
-      if (Number(obj.avgMilesTraveled) > maxAvgMilesTraveled) {
-        maxAvgMilesTraveled = obj.avgMilesTraveled;
-      }
-      if (Number(obj.costPerTonMile) > maxCostPerTonMile) {
-        maxCostPerTonMile = obj.costPerTonMile;
-      }
-
-      // we should consider the comparison values as well,
-      // so that the greatest value makes the biggest bar
-      if (Number(obj.totEarningsComp) > maxTotEarnings) {
-        maxTotEarnings = obj.totEarningsComp;
-      }
-      if (Number(obj.numJobsComp) > maxNumJobs) {
-        maxNumJobs = obj.numJobsComp;
-      }
-      if (Number(obj.numLoadsComp) > maxNumLoads) {
-        maxNumLoads = obj.numLoadsComp;
-      }
-      if (Number(obj.tonsDeliveredComp) > maxTonsDelivered) {
-        maxTonsDelivered = obj.tonsDeliveredComp;
-      }
-      if (Number(obj.avgEarningsHourComp) > maxAvgEarningsHours) {
-        maxAvgEarningsHours = obj.avgEarningsHourComp;
-      }
-      if (Number(obj.avgEarningsJobComp) > maxAvgEarningsJob) {
-        maxAvgEarningsJob = obj.avgEarningsJobComp;
-      }
-      if (Number(obj.avgEarningsTonComp) > maxAvgEarningsTon) {
-        maxAvgEarningsTon = obj.avgEarningsTonComp;
-      }
-      if (Number(obj.avgMilesTraveledComp) > maxAvgMilesTraveled) {
-        maxAvgMilesTraveled = obj.avgMilesTraveledComp;
-      }
-      if (Number(obj.costPerTonMileComp) > maxCostPerTonMile) {
-        maxCostPerTonMile = obj.costPerTonMileComp;
-      }
-    }
-
-    mappedObject.map((item) => {
-      const newObject = item;
-
-      // no nulls on screen
-      Object.keys(item)
-        .map((key) => {
-          if (typeof item[key] === 'number') {
-            item[key] = realRound(item[key], 2);
-          }
-          if (item[key] === null) {
-            item[key] = 0;
-          }
-          return true;
-        });
-
-
-      // totEarnings
-      newObject.avgTotEarningsComparison = {
-        total: newObject.totEarnings,
-        totalComp: newObject.totEarningsComp,
-        max: maxTotEarnings,
-        type: 'price'
-      };
-
-      // totalJobs
-      newObject.totalJobsComparison = {
-        total: newObject.numJobs,
-        totalComp: newObject.numJobsComp,
-        max: maxNumJobs,
-        type: 'integer'
-      };
-
-      // totalJobs
-      newObject.totalLoadsComparison = {
-        total: newObject.numLoads,
-        totalComp: newObject.numLoadsComp,
-        max: maxNumLoads,
-        type: 'integer'
-      };
-
-      // totalTons
-      newObject.avgTonsDeliveredComparison = {
-        total: newObject.tonsDelivered,
-        totalComp: newObject.tonsDeliveredComp,
-        max: maxTonsDelivered,
-        type: 'number'
-      }
-
-      // totalTons
-      newObject.avgEarningsHourComparison = {
-        total: newObject.avgEarningsHour,
-        totalComp: newObject.avgEarningsHourComp,
-        max: maxAvgEarningsHours,
-        type: 'price'
-      }
-
-      // totalJob
-      newObject.avgEarningsJobComparison = {
-        total: newObject.avgEarningsJob,
-        totalComp: newObject.avgEarningsJobComp,
-        max: maxAvgEarningsJob,
-        type: 'price'
-      }
-
-      // totalTons
-      newObject.avgEarningsTonComparison = {
-        total: newObject.avgEarningsTon,
-        totalComp: newObject.avgEarningsTonComp,
-        max: maxAvgEarningsTon,
-        type: 'price'
-      }
-
-      // totalMiles
-      newObject.avgMilesTraveledComparison = {
-        total: newObject.avgMilesTraveled,
-        totalComp: newObject.avgMilesTraveledComp,
-        max: maxAvgMilesTraveled,
-        type: 'number'
-      }
-
-      // totalTons
-      newObject.costPerTonMileComparison = {
-        total: newObject.costPerTonMile,
-        
-        totalComp: newObject.costPerTonMileComp,
-        max: maxCostPerTonMile,
-        type: 'price'
-      }
-
-      //totEarnings as number:
-      newObject.totEarningsNum = this.checkForString(newObject.totEarnings);
-      newObject.totEarningsNumComp = this.checkForString(newObject.totEarningsComp);
-      newObject.avgEarningsHourNum = this.checkForString(newObject.avgEarningsHour);
-      newObject.avgEarningsTonNum = this.checkForString(newObject.avgEarningsTon);
-      newObject.avgEarningsJobNum = this.checkForString(newObject.avgEarningsJob);
-
-      // return newObject;
-    });
-    return mappedObject;
-  }
-
-  checkForString(val) {
-    if (typeof val === 'string') {
-      return Number(val.replace(/[^0-9]/g, ''));
-    }
-    return val;
-  }
-
   saveFilters() {
-    const {filters} = {...this.state};
+    const { filters } = { ...this.state };
     // don't save status
     delete filters.status;
     localStorage.setItem('filters', JSON.stringify(filters));
@@ -871,8 +518,8 @@ class FilterComparisonReport extends Component {
 
   async handleFilterChangeDelayed(e) {
     const self = this;
-    const {value} = e.target;
-    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const { value } = e.target;
+    const { filters, reqHandlerZip, reqHandlerRange } = this.state;
     const filter = e.target.name;
     let invalidZip = false;
     let invalidRange = false;
@@ -916,7 +563,7 @@ class FilterComparisonReport extends Component {
       typing: false,
       typingTimeout: setTimeout(async () => {
         if (!invalidZip && !invalidRange) {
-          await this.fetchCarrierData();
+          await this.fetchJobsAndLoads();
         }
       }, 1000),
       filters
@@ -926,28 +573,29 @@ class FilterComparisonReport extends Component {
   }
 
   async handleFilterChange(e) {
-    const {value} = e.target;
-    const {filters} = this.state;
+    const { value } = e.target;
+    const { filters } = this.state;
     filters[e.target.name] = value;
-    await this.fetchCarrierData();
-    this.setState({filters}, function saved() {
+    await this.fetchJobsAndLoads();
+    this.setState({ filters }, function saved() {
       this.saveFilters();
     });
   }
 
   async handleSelectFilterChange(option) {
-    const {value, name} = option;
-    const {filters} = this.state;
+    const { value, name } = option;
+    const { filters } = this.state;
     filters[name] = value;
-    this.setState({filters}, function saved() {
+    this.setState({ filters }, function saved() {
       this.saveFilters();
     });
-    await this.fetchCarrierData();
+    await this.fetchJobsAndLoads();
   }
 
-  async handleMultiChange(data, name) {
-    const {filters} = this.state;
-    switch(name) {
+  async handleMultiChange(data, meta) {
+    // console.log("TCL: handleMultiChange -> data", data, meta)
+    const { filters } = this.state;
+    switch (meta) {
       case 'status':
         filters.statuses = data;
         break;
@@ -960,13 +608,10 @@ class FilterComparisonReport extends Component {
       case 'companies':
         filters.companies = data;
         break;
-      case 'equipments':
-        filters.equipments = data;
-        break;
       default:
     }
 
-    await this.fetchCarrierData();
+    await this.fetchJobsAndLoads();
     this.setState({
       filters
     }, function changed() {
@@ -974,8 +619,19 @@ class FilterComparisonReport extends Component {
     });
   }
 
+  handleMultiTruckChange(data) {
+    const { filters } = this.state;
+    filters.equipmentType = data;
+    this.setState({
+      filters
+    }, async function changed() {
+      await this.fetchJobsAndLoads();
+      this.saveFilters();
+    });
+  }
+
   async handleIntervalInputChange(e) {
-    const {filters, intervals} = {...this.state};
+    const { filters, intervals } = { ...this.state };
     let sAv = null;
     if (e.start) {
       sAv = new Date(e.start);
@@ -987,8 +643,8 @@ class FilterComparisonReport extends Component {
     filters.startAvailability = this.getUTCStartInterval(sAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
 
-    const {start} = e;
-    const {end} = e;
+    const { start } = e;
+    const { end } = e;
     if (start) {
       start.setHours(0, 0, 0);
     }
@@ -997,47 +653,16 @@ class FilterComparisonReport extends Component {
     }
     intervals.startInterval = start;
     intervals.endInterval = end;
-
-    this.setState({intervals, filters}, function saved() {
+    this.setState({ intervals, filters }, function saved() {
       this.saveFilters();
     });
 
-    await this.fetchCarrierData();
-  }
-
-  async handleIntervalComparisonInputChange(e) {
-    const {filters, intervals} = {...this.state};
-    let sAv = null;
-    if (e.start) {
-      sAv = new Date(e.start);
-    }
-    let endAv = null;
-    if (e.end) {
-      endAv = new Date(e.end);
-    }
-    filters.startAvailDateComp = this.getUTCStartInterval(sAv);
-    filters.endAvailDateComp = this.getUTCEndInterval(endAv);
-
-    const {start} = e;
-    const {end} = e;
-    if (start) {
-      start.setHours(0, 0, 0);
-    }
-    if (end) {
-      end.setHours(23, 59, 59); // 23:59:59
-    }
-    intervals.startIntervalComp = start;
-    intervals.endIntervalComp = end;
-    this.setState({intervals, filters}, function saved() {
-      this.saveFilters();
-    });
-
-    await this.fetchCarrierData();
+    await this.fetchJobsAndLoads();
   }
 
   async filterWithStatus(filters) {
-    this.state = {filters};
-    await this.fetchCarrierData();
+    this.state = { filters };
+    await this.fetchJobsAndLoads();
   }
 
   async handleRangeFilterChange(option) {
@@ -1061,93 +686,35 @@ class FilterComparisonReport extends Component {
       .seconds(0)
       .toDate();
     const endDate = currentDate;
-
     startDate.setDate(currentDate.getDate() - selectedRange);
     if (name === 'Custom') {
-      intervals.startInterval = startDate;
-      intervals.endInterval = endDate;
-      filters.startAvailability = startDate;
-      filters.endAvailability = endDate;
+      intervals.startInterval = this.startDate;
+      intervals.endInterval = this.endDate;
+      filters.startAvailability = this.startDate;
+      filters.endAvailability = this.endDate;
     } else {
       intervals.startInterval = startDate;
       intervals.endInterval = endDate;
       filters.startAvailability = startDate;
       filters.endAvailability = endDate;
     }
-    this.setState({
-      intervals,
-      filters,
-      selectIndex
-    }, function saved() {
+
+    this.setState({ intervals, filters, selectIndex }, function saved() {
       this.saveFilters();
     });
-    await this.fetchCarrierData();
-  }
-
-  async handleRangeComparisonFilterChange(option) {
-    const { value, name } = option;
-    const { intervals, filters } = this.state;
-    let {
-      selectedRangeComp,
-      selectIndexComp
-    } = this.state;
-
-    selectIndexComp = this.timeRangesComp.findIndex(x => x.name === name);
-    let comp = false;
-    if(name !== 'None') {
-      comp = true;
-    }
-    selectedRangeComp = value;
-
-    // substract days
-    const dateOffset = (24 * 60 * 60 * 1000) * Number(selectedRangeComp);
-    const endDate = intervals.startInterval;
-
-    let startDate = new Date();
-    startDate.setTime(endDate.getTime() - dateOffset);
-
-    if (name === 'Custom') {
-      intervals.startIntervalComp = startDate;
-      intervals.endIntervalComp = endDate;
-      filters.startAvailabilityComp = startDate;
-      filters.endAvailabilityComp = endDate;
-    } else {
-      intervals.startIntervalComp = startDate;
-      intervals.endIntervalComp = endDate;
-
-      filters.startAvailabilityComp = startDate;
-      filters.endAvailabilityComp = endDate;
-    }
-    this.setState({
-      intervals,
-      filters,
-      selectIndexComp,
-      compEnabled: comp,
-      compActualValue: selectIndexComp
-    }, async function saved() {
-      this.saveFilters();
-      const dates = {
-        end: endDate,
-        start: startDate
-      }
-      this.handleIntervalComparisonInputChange(dates);
-      try {
-        await this.fetchCarrierData();
-      } catch(e) {
-        console.log('ERROR: unable to fetch carrier or customer data: ', e);
-      }
-    });
+    await this.fetchJobsAndLoads();
   }
 
   async handleResetFilters() {
     const { blankFilters } = this.state;
     this.setState({
       filters: blankFilters
-    })
-    this.fetchCarrierData();
+    });
+    this.fetchJobsAndLoads();
   }
 
   render() {
+    const {t} = {...this.props};
     const {
       loaded,
       // Lists
@@ -1167,24 +734,18 @@ class FilterComparisonReport extends Component {
       selectIndex,
       selectIndexComp
     } = this.state;
-    const {
-      showComparison,
-      activeTab
-    } = this.props;
     // let start = filters.startAvailability;
 
     // Row 1: Company, State, Zip, Range
     // Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
-    // Row 3: Time Range, Range,
-    //        if showComparison: Time RangeComp, RangeComp,
-    //        Reset
+    // Row 3: Time Range, Range, Reset
     return (
       <Row>
         <Col md={12}>
           <Card>
             <CardBody>
               <form id="filter-form" className="form">
-                {/*Row 1: Company, State, Zip, Range */}
+                {/* Row 1: Company, State, Zip, Range
 
                 <div className="flex-daily-report-container-1">
                   <div className="filter-item" id="companySelect">
@@ -1199,7 +760,6 @@ class FilterComparisonReport extends Component {
                           value: filters.companies
                         }
                       }
-                      identifier="companieso"
                       meta={
                         {
                           touched: false,
@@ -1213,9 +773,7 @@ class FilterComparisonReport extends Component {
                       // placeholder={materialTypeList[0]}
                       id="companySelect"
                       horizontalScroll="true"
-                      selectedItems={filters.materialType}
-                      name="companies"
-                      value={filters.companies}
+                      // selectedItems={filters.materialType.length}
                     />
 
                   </div>
@@ -1241,9 +799,10 @@ class FilterComparisonReport extends Component {
                         statesTypeList
                       }
                       placeholder="Any"
+                      // placeholder={materialTypeList[0]}
                       id="materialTypeSelect"
                       horizontalScroll="true"
-                      value={filters.states}
+                      // selectedItems={filters.materialType.length}
                     />
                   </div>
                   <div className="filter-item">
@@ -1283,8 +842,9 @@ class FilterComparisonReport extends Component {
                     />
                   </div>
                 </div>
+                */}
 
-                {/*Row 2: Status, Material, Rate Type, Rate, Tons, TruckType*/}
+                {/* Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
 
                 <div className="flex-daily-report-container-2">
                   <div className="filter-item" id="statusSelect">
@@ -1310,10 +870,8 @@ class FilterComparisonReport extends Component {
                       // placeholder={materialTypeList[0]}
                       id="statusSelect"
                       horizontalScroll="true"
-                      selectedItems={filters.materialType}
-                      value={filters.statuses}
+                      // selectedItems={filters.materialType.length}
                     />
-
                   </div>
                   <div className="filter-item" id="materialTypeSelect">
                     <div className="filter-item-title">
@@ -1338,8 +896,7 @@ class FilterComparisonReport extends Component {
                       // placeholder={materialTypeList[0]}
                       id="materialTypeSelect"
                       horizontalScroll="true"
-                      selectedItems={filters.materialType}
-                      value={filters.materials}
+                      // selectedItems={filters.materialType.length}
                     />
                   </div>
                   <div className="filter-item">
@@ -1412,8 +969,9 @@ class FilterComparisonReport extends Component {
                     <TMultiSelect
                       input={
                         {
-                          onChange: this.handleMultiChange,
-                          name: 'equipments',
+                          onChange: this.handleMultiTruckChange,
+                          // onChange: this.handleSelectFilterChange,
+                          name: 'equipmentType',
                           value: filters.equipments
                         }
                       }
@@ -1423,24 +981,29 @@ class FilterComparisonReport extends Component {
                           error: 'Unable to select'
                         }
                       }
-                      options={equipmentTypeList}
+                      options={
+                        equipmentTypeList.map(equipmentType => ({
+                          name: 'equipmentType',
+                          value: equipmentType.trim(),
+                          label: equipmentType.trim()
+                        }))
+                      }
                       // placeholder="Materials"
                       placeholder="Any"
                       id="truckTypeSelect"
                       horizontalScroll="true"
-                      selectedItems={filters.equipmentType}
-                      value={filters.equipments}
+                      // selectedItems={filters.equipmentType.length}
                     />
                   </div>
+                  */}
 
-                  {/*Row 3: Time Range, Range, [Time Range, Range, ], Reset*/}
+                {/* Row 3: Time Range, Range, Reset */}
 
+
+                <div className="flex-daily-report-container-2">
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      {
-                        showComparison === true && 'Baseline '
-                      }
-                      Day Range
+                      {t('Day Range')}
                     </div>
                     <TSelect
                       input={
@@ -1463,10 +1026,7 @@ class FilterComparisonReport extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      {
-                        showComparison === true && 'Baseline '
-                      }
-                      Date Range
+                      {t('Date Range')}
                     </div>
                     <TIntervalDatePicker
                       startDate={intervals.startInterval}
@@ -1474,60 +1034,16 @@ class FilterComparisonReport extends Component {
                       name="dateInterval"
                       onChange={this.handleIntervalInputChange}
                       dateFormat="m/d/Y"
-                      isCustom={
-                        this.timeRanges[selectIndex].name === 'Custom'
-                      }
+                      isCustom
                     />
                   </div>
-                  {/*Comparison*/}
-                  <React.Fragment>
-                    <div className={`filter-item ${activeTab !== '3' ? 'forceShow' : 'forceHide'}`}>
-                      <div className="filter-item-title">
-                        Comparison Day Range
-                      </div>
-                      <TSelect
-                        input={
-                          {
-                            onChange: this.handleRangeComparisonFilterChange,
-                            name: this.timeRangesComp[selectIndexComp].name,
-                            value: this.timeRangesComp[selectIndexComp].value
-                          }
-                        }
-                        value={this.timeRangesComp[selectIndexComp].value.toString()}
-                        options={
-                          this.timeRangesComp.map(timeRangeComp => ({
-                            name: timeRangeComp.name,
-                            value: timeRangeComp.value.toString(),
-                            label: timeRangeComp.name
-                          }))
-                        }
-                        placeholder={this.timeRangesComp[selectIndexComp].name}
-                      />
-                    </div>
-                    
-                    <div className={`filter-item ${activeTab !== '3' ? 'forceShow' : 'forceHide'}`}>
-                      <div className="filter-item-title">
-                        Comparison Date Range
-                      </div>
-                      <TIntervalDatePicker
-                        startDate={intervals.startIntervalComp}
-                        endDate={intervals.endIntervalComp}
-                        name="dateIntervalComp"
-                        onChange={this.handleIntervalComparisonInputChange}
-                        dateFormat="m/d/Y"
-                        isCustom={
-                          this.timeRangesComp[selectIndexComp].name === 'Custom'
-                        }
-                      />
-                    </div>
-                  </React.Fragment>
                   <div className="filter-item-button">
                     <button
                       className="btn btn-secondary"
                       type="button"
                       onClick={this.handleResetFilters}
                     >
-                      Reset
+                      {t('Reset')}
                     </button>
                   </div>
                 </div>
@@ -1538,32 +1054,25 @@ class FilterComparisonReport extends Component {
       </Row>
     );
   }
-
 }
 
-FilterComparisonReport.propTypes = {
-  // onReturnFilters: PropTypes.func.isRequired,
+DailyReportFilter.propTypes = {
+  onReturnFilters: PropTypes.func.isRequired,
   rows: PropTypes.number,
   page: PropTypes.number,
   type: PropTypes.string,
-  showComparison: PropTypes.bool,
-  activeTab: PropTypes.string,
-  returnCarriers: PropTypes.func,
+
+  // optional
   returnProducers: PropTypes.func,
   returnProducts: PropTypes.func,
   returnProjects: PropTypes.func
+
 };
 
-FilterComparisonReport.defaultProps = {
+DailyReportFilter.defaultProps = {
   rows: 10,
   page: 0,
-  type: null,
-  showComparison: false,
-  activeTab: null,
-  returnCarriers: null,
-  returnProducers: null,
-  returnProducts: null,
-  returnProjects: null
+  type: null
 };
 
-export default FilterComparisonReport;
+export default withTranslation()(DailyReportFilter);

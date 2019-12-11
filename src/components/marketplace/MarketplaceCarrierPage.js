@@ -8,6 +8,7 @@ import {
   Modal,
   Row
 } from 'reactstrap';
+import { withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import JobViewForm from './JobViewForm';
@@ -169,10 +170,11 @@ class MarketplaceCarrierPage extends Component {
   }
 
   renderTitle() {
+    const { t } = { ...this.props };
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Find a Job</h3>
+          <h3 className="page-title">{t('Find a Job')}</h3>
         </Col>
       </Row>
     );
@@ -180,29 +182,42 @@ class MarketplaceCarrierPage extends Component {
 
   renderJobList() {
     let { jobs, rows } = this.state;
+    const { t } = { ...this.props };
     if (jobs) {
       jobs = jobs.map((job) => {
         const newJob = job;
 
         const tempRate = newJob.rate;
-        if (newJob.rateType === 'Hour') {
+        if (newJob.amountType === 'Hour') {
           newJob.newSize = newJob.rateEstimate;
           newJob.newSizeF = TFormat.getValue(
             TFormat.asHours(newJob.rateEstimate)
           );
-          newJob.newRateF = NumberFormatting.asMoney(
-            newJob.rate, '.', 2, ',', '$', '/Hour'
-          );
-        } else if (newJob.rateType === 'Ton') {
+          if (newJob.rateType === 'Hour') {
+            newJob.newRateF = NumberFormatting.asMoney(
+              newJob.rate, '.', 2, ',', '$', '/Hour'
+            );
+          } else if (newJob.rateType === 'Ton') {
+            newJob.newRateF = NumberFormatting.asMoney(
+              newJob.rate, '.', 2, ',', '$', '/Ton'
+            );
+          }
+          
+        } else if (newJob.amountType === 'Ton') {
           newJob.newSize = newJob.rateEstimate;
           newJob.newSizeF = TFormat.getValue(
             TFormat.asTons(newJob.rateEstimate)
           );
-          newJob.newRateF = NumberFormatting.asMoney(
-            newJob.rate, '.', 2, ',', '$', '/Ton'
-          );
+          if (newJob.rateType === 'Hour') {
+            newJob.newRateF = NumberFormatting.asMoney(
+              newJob.rate, '.', 2, ',', '$', '/Hour'
+            );
+          } else if (newJob.rateType === 'Ton') {
+            newJob.newRateF = NumberFormatting.asMoney(
+              newJob.rate, '.', 2, ',', '$', '/Ton'
+            );
+          }
         }
-
         newJob.newRate = newJob.rate;
         // Job's Potential Earnings
         // SG-570: Potential Earnings as displayed to Carrier do not show the Trelar costs
@@ -236,56 +251,56 @@ class MarketplaceCarrierPage extends Component {
             <Card>
               <CardBody>
                 <div className="ml-4 mt-4">
-                  Carrier Market Place<br />
-                  Displaying {jobs.length} out of {totalCount}&nbsp;
-                  filtered jobs ({totalJobs} total jobs)
+                  {t('Carrier Marketplace')}<br />
+                  {t('Displaying')} {jobs.length} {t('out of')} {totalCount}&nbsp;
+                  {t('filtered jobs')} ({totalJobs} {t('total jobs')})
                 </div>
                 <TTable
                   columns={
                     [
                       {
                         name: 'name',
-                        displayName: 'Job Name'
+                        displayName: t('Job Name')
                       },
                       {
                         name: 'newStartDate',
-                        displayName: 'Start Date'
+                        displayName: t('Start Date')
                       },
                       {
                         name: 'potentialIncome',
-                        displayName: 'Potential Earnings',
+                        displayName: t('Potential Earnings'),
                         label: 'potentialIncomeF'
                       },
                       {
                         name: 'newRate',
-                        displayName: 'Hourly Rate',
+                        displayName: t('Hourly Rate'),
                         label: 'newRateF'
                       },
                       {
                         name: 'newSize',
-                        displayName: 'Size',
+                        displayName: t('Size'),
                         label: 'newSizeF'
                       },
                       {
                         name: 'distance',
-                        displayName: 'Distance from Me (mi)'
+                        displayName: `${t('Distance from Me')} (mi)`
                       },
                       {
                         name: 'haulDistance',
-                        displayName: 'Haul Distance (One Way) (mi)'
+                        displayName: `${t('Haul Distance')} (${t('One Way')}) (mi)`
                       },
                       {
                         // the materials needs to come from the the JobMaterials Table
                         name: 'materials',
-                        displayName: 'Materials'
+                        displayName: t('Materials')
                       },
                       {
                         name: 'equipmentTypes',
-                        displayName: 'Truck Type'
+                        displayName: t('Truck Type')
                       },
                       {
                         name: 'numEquipments',
-                        displayName: 'Number of Trucks'
+                        displayName: t('Number of Trucks')
                       }
                     ]
                   }
@@ -320,6 +335,7 @@ class MarketplaceCarrierPage extends Component {
 
   render() {
     const { loaded, page, rows, isAdmin } = this.state;
+    const { t } = { ...this.props};
     if (isAdmin === false) {
       return <Redirect push to="/" />;
     }
@@ -344,7 +360,7 @@ class MarketplaceCarrierPage extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Find A Job</h3>
+            <h3 className="page-title">{t('Find a Job')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}
@@ -353,4 +369,4 @@ class MarketplaceCarrierPage extends Component {
   }
 }
 
-export default MarketplaceCarrierPage;
+export default withTranslation()(MarketplaceCarrierPage);

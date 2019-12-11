@@ -11,7 +11,7 @@ class ReportsPage extends Component {
 
   async componentDidMount() {
     const { match } = this.props;
-    let type = null;
+    const type = null;
 
     /*
     if (match.params.type === 'producer') {
