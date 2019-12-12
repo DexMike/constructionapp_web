@@ -322,5 +322,7 @@
   "Day Range": "Rango de día",
   "Companies": "Compañías",
   "Comparison Day Range": "Comparativo de rango de días",
-  "Comparison Date Range": "Comparativo de rango de fechas"
+  "Comparison Date Range": "Comparativo de rango de fechas",
+  "NO_TRUCKS_OR_DRIVERS": "No tiene más camiones ni conductores para asignar a este trabajo",
+  "Apply Calculations Above": "Aplicar los cálculos de arriba"
 }

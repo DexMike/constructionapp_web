@@ -24,6 +24,7 @@ const InfoMessageDelPrice = ({payType}) => {
 };
 
 const DeliveryCostsSummary = ({
+  disabled,
   estMaterialPricing,
   deliveredPricePerTon,
   deliveredPriceJob,
@@ -40,7 +41,7 @@ const DeliveryCostsSummary = ({
             <Row className="col-md-12 ">
               <div className={`col-md-${(quantityType === 'Hour'
                      && payType === 'Ton') ? '12' : '8'} form__form-group`}>
-                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: disabled ? '#C8C8C8' : 'rgb(0, 111, 83)'}}>
                   Delivered Price
                 </span>
               </div>
@@ -49,16 +50,20 @@ const DeliveryCostsSummary = ({
                 <div>
                   <div className="col-md-4 form__form-group">
                     <span className="form__form-group-label">
-                      <span className="infoCircle">
-                        <span style={{padding: 6, color: 'white'}} data-tip data-for='delPriceInfo'>i</span>
+                      <span className={disabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                        <span style={{padding: 6, color: 'white'}} data-tip data-for="delPriceInfo">i</span>
                       </span>
                     </span>
                   </div>
-                  <div className="customTooltip">
-                    <ReactTooltip id='delPriceInfo' effect='solid'>
-                      <InfoMessageDelPrice payType={payType}/>
-                    </ReactTooltip>
-                  </div>
+                  {!disabled
+                    && (
+                      <div className="customTooltip">
+                        <ReactTooltip id="delPriceInfo" effect="solid">
+                          <InfoMessageDelPrice payType={payType}/>
+                        </ReactTooltip>
+                      </div>
+                    )
+                  }
                 </div>
               }
             </Row>
@@ -67,30 +72,36 @@ const DeliveryCostsSummary = ({
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12 ">
               <div className={`col-md-${payType === 'Hour' ? '8' : '12'} form__form-group`}>
-                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: 'rgb(0, 111, 83)'}}>
+                <span className="form__form-group-label" style={{fontStyle: 'italic', fontWeight: 'bold', color: disabled ? '#C8C8C8' : 'rgb(0, 111, 83)'}}>
                   Haul Costs
                 </span>
               </div>
-                  { payType === 'Hour' &&
-                  <div>
-                    <div className="col-md-4 form__form-group">
-                        <span className="form__form-group-label">
-                          <span className="infoCircle">
-                            <span style={{padding: 6, color: 'white'}} data-tip data-for='haulCostInfo'>i</span>
-                          </span>
-                        </span>
-                    </div>
-                    <div className="customTooltip">
-                      <ReactTooltip id='haulCostInfo' effect='solid'>
-                        <p style={{color: 'white'}}>
-                          Estimated total cost is based on estimated hours
-                          this job will take to deliver the tons you requested.<br/>
-                          It is based on our mapping and routing information.
-                        </p>
-                      </ReactTooltip>
-                    </div>
+              {payType === 'Hour'
+                && (
+                <div>
+                  <div className="col-md-4 form__form-group">
+                    <span className="form__form-group-label">
+                      <span className={disabled ? 'infoCircleDisabled' : 'infoCircle'}>
+                        <span style={{padding: 6, color: 'white'}} data-tip data-for="haulCostInfo">i</span>
+                      </span>
+                    </span>
                   </div>
-                  }
+                  {!disabled
+                    && (
+                      <div className="customTooltip">
+                        <ReactTooltip id="haulCostInfo" effect="solid">
+                          <p style={{color: 'white'}}>
+                            Estimated total cost is based on estimated hours
+                            this job will take to deliver the tons you requested.<br/>
+                            It is based on our mapping and routing information.
+                          </p>
+                        </ReactTooltip>
+                      </div>
+                    )
+                    }
+                </div>
+                )
+              }
             </Row>
           </div>
         </Row>
@@ -99,53 +110,71 @@ const DeliveryCostsSummary = ({
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">Material Price per ton</span>
+                <span className="form__form-group-label"
+                      style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  Material Price per ton
+                </span>
               </div>
               <div className="col-md-1 form__form-group">
-                      <span style={{}}
-                      >
-                        $
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  $
+                </span>
               </div>
               <div className="col-md-3 form__form-group">
-                      <span style={{}}
-                      >
-                        {TFormat.asNumber(estMaterialPricing)}
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  {TFormat.asNumber(estMaterialPricing)}
+                </span>
               </div>
             </Row>
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">Delivered Price per ton</span>
+                <span className="form__form-group-label"
+                      style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  Delivered Price per ton
+                </span>
               </div>
               <div className="col-md-1 form__form-group">
-                      <span style={{}}
-                      >
-                        $
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  $
+                </span>
               </div>
               <div className="col-md-3 form__form-group">
-                      <span style={{}}
-                      >
-                        {TFormat.asNumber(deliveredPricePerTon)}
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  {TFormat.asNumber(deliveredPricePerTon)}
+                </span>
               </div>
             </Row>
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">Delivered Price for job</span>
+                <span className="form__form-group-label"
+                      style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  Delivered Price for job
+                </span>
               </div>
               <div className="col-md-1 form__form-group">
-                      <span style={{}}
-                      >
-                        $
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  $
+                </span>
               </div>
               <div className="col-md-3 form__form-group">
-                      <span style={{}}
-                      >
-                        {TFormat.asNumber(deliveredPriceJob)}
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  {TFormat.asNumber(deliveredPriceJob)}
+                </span>
               </div>
             </Row>
           </div>
@@ -153,53 +182,70 @@ const DeliveryCostsSummary = ({
           <div className="col-md-6 form__form-group">
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">One way cost / ton / mile</span>
+                <span className="form__form-group-label"
+                      style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  One way cost / ton / mile
+                </span>
               </div>
               <div className="col-md-1 form__form-group">
-                      <span style={{}}
-                      >
-                        $
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  $
+                </span>
               </div>
               <div className="col-md-3 form__form-group">
-                      <span style={{}}
-                      >
-                        {TFormat.asNumber(oneWayCostPerTonHourPerMile)}
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  {TFormat.asNumber(oneWayCostPerTonHourPerMile)}
+                </span>
               </div>
             </Row>
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">Haul Cost per {payType}</span>
+                <span className="form__form-group-label"
+                      style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  Haul Cost per {payType}
+                </span>
               </div>
               <div className="col-md-1 form__form-group">
-                      <span style={{}}
-                      >
-                        $
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  $
+                </span>
               </div>
               <div className="col-md-3 form__form-group">
-                      <span style={{}}
-                      >
-                        {TFormat.asNumber(haulCostPerTonHour)}
-                      </span>
+                <span style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  {TFormat.asNumber(haulCostPerTonHour)}
+                </span>
               </div>
             </Row>
             <Row className="col-md-12">
               <div className="col-md-7 form__form-group">
-                <span className="form__form-group-label">Estimated Cost for Job</span>
+                <span className="form__form-group-label"
+                      style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  Estimated Cost for Job
+                </span>
               </div>
               <div className="col-md-1 form__form-group">
-                      <span style={{}}
-                      >
-                        $
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  $
+                </span>
               </div>
               <div className="col-md-3 form__form-group">
-                      <span style={{}}
-                      >
-                        {TFormat.asNumber(estimatedCostForJob)}
-                      </span>
+                <span
+                  style={{color: disabled ? '#C8C8C8' : null}}
+                >
+                  {TFormat.asNumber(estimatedCostForJob)}
+                </span>
               </div>
             </Row>
           </div>
@@ -221,6 +267,11 @@ DeliveryCostsSummary.propTypes = {
   oneWayCostPerTonHourPerMile: PropTypes.number.isRequired,
   estimatedCostForJob: PropTypes.number.isRequired,
   haulCostPerTonHour: PropTypes.number.isRequired,
+  disabled: PropTypes.bool
+};
+
+DeliveryCostsSummary.defaultProps = {
+  disabled: false
 };
 
 export default DeliveryCostsSummary;

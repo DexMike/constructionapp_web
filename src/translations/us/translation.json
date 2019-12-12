@@ -321,5 +321,7 @@
   "Day Range": "Day Range",
   "Companies": "Companies",
   "Comparison Day Range": "Comparison Day Range",
-  "Comparison Date Range": "Comparison Date Range"
+  "Comparison Date Range": "Comparison Date Range",
+  "NO_TRUCKS_OR_DRIVERS": "You do not have any more trucks or drivers to allocate to the job",
+  "Apply Calculations Above": "Apply Calculations Above"
 }
