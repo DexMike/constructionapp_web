@@ -566,6 +566,7 @@ class DashboardCarrierPage extends Component {
   }
 
   render() {
+    const {t} = this.props;
     const { loaded, page, rows } = this.state;
     if (loaded) {
       return (
@@ -579,7 +580,8 @@ class DashboardCarrierPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
-            isLoading={(e) => this.setState({isLoading: e})}           
+            isLoading={(e) => this.setState({isLoading: e})} 
+            t={t}          
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}
