@@ -472,8 +472,11 @@ class JobSavePage extends Component {
     this.setState({
       job,
       companyCarrier: null,
-      goToRefreshJob: true
+      goToRefreshJob: true,
+      bid: null,
+      bids: []
     });
+    console.log('do it', this.state);
   }
 
   async updateJobView(newJob, companyCarrier) { // updating the job view
@@ -728,6 +731,7 @@ class JobSavePage extends Component {
       return <Redirect push to="/jobs"/>;
     }
     if (goToRefreshJob) {
+      console.log('refresh')
       return <Redirect to={`/jobs/save/${job.newId}`}/>;
     }
     return false;

@@ -672,8 +672,12 @@ class JobWizard extends Component {
 
   updateJobView(newJob) {
     const {updateJobView, updateCopiedJob} = this.props;
-    if (newJob.copiedJob) {
+    const copiedJob = this.state;
+    console.log('copied?', copiedJob);
+    if (copiedJob) {
       updateCopiedJob(newJob);
+      console.log('yes', updateCopiedJob, newJob);
+      this.closeNow();
     }
     if (updateJobView) {
       updateJobView(newJob, null);
@@ -1150,7 +1154,7 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, jobEditSaved, selectedCarrierId, job} = this.props;
+    const {jobRequest, jobEdit, jobEditSaved, selectedCarrierId, job, copyJob} = this.props;
     this.setState({btnSubmitting: true});
     const {
       profile,
@@ -1370,22 +1374,43 @@ class JobWizard extends Component {
         jobRequestObject.sendToMkt = true;
       }
     }
-
+    const copiedJob = true;
     try {
       // Checking if there's a saved job to update instead of creating a new one
+      /*
       if (job && job.id) {
         jobCreate.id = job.id;
       }
-      newJob = await JobService.createNewJob(jobRequestObject);
+      /*
+      console.log('job', job);
+      console.log('new job', newJob);
+      console.log('request', jobRequestObject);
+      console.log('Job edit', jobEdit);
+      console.log('Edit saved', jobEditSaved);
+      */
+      if (copyJob) {
+        jobCreate.id = null;
+        newJob = await JobService.createNewJob(jobRequestObject);
+        
+        /*
+        this.setState({ btnSubmitting: false });
+        this.updateJobView(newJob);
+        this.closeNow();
+        */
+        // return;
+      }
     } catch (e) {
       console.error(e);
     }
-
+    console.log('nuevo id', newJob.id);
+    console.log('copied job', copiedJob);
     this.setState({
       btnSubmitting: false
     });
+    
     this.updateJobView(newJob);
-    this.closeNow();
+    console.log('here 2');
+    // this.closeNow();
   }
 
   // Used to either store a Copied or 'Saved' job to the database
@@ -1587,6 +1612,7 @@ class JobWizard extends Component {
 
   closeNow() {
     const {toggle} = this.props;
+    console.log('cerrar');
     toggle();
   }
 
