@@ -136,12 +136,18 @@ class DriverListPage extends Component {
     */
   }
 
-  toggleAddDriverModal() {
+  async toggleAddDriverModal() {
     const { modal } = this.state;
+    let { drivers, totalCount } = this.state;
+
     if (modal === true) {
-      this.fetchDrivers();
+      ({ drivers, totalCount} = await this.fetchDrivers());
     }
-    this.setState({ modal: !modal });
+    this.setState({
+      modal: !modal,
+      drivers,
+      totalCount
+    });
   }
 
   renderGoTo() {
