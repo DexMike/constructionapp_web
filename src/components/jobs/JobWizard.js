@@ -672,14 +672,22 @@ class JobWizard extends Component {
 
   updateJobView(newJob) {
     const {updateJobView, updateCopiedJob} = this.props;
-    const {copiedJob} = this.state;
-    const {jobEditSaved} = this.state;
+    const {copiedJob, jobEditSaved, jobRequest} = this.state;
+    
+    console.log('creating?', jobRequest, newJob);
     if (copiedJob === true) {
       updateCopiedJob(newJob);
     }
     if (jobEditSaved === true) {
       updateJobView(newJob, null);
     }
+    
+    if (jobRequest === true) {
+      console.log('created?');
+      console.log('update?', updateJobView);
+      updateJobView(newJob, null);
+    }
+    
   }
 
   //
@@ -1335,10 +1343,19 @@ class JobWizard extends Component {
       equipments.push(Number(id));
     }
     jobRequestObject.trucksIds = equipments;
+    
+    console.log('new job', newJob);
+    
 
     let newJob;
+
+    newJob = await JobService.createNewJob(jobRequestObject);
+    this.state.jobRequest = true;
+
+    console.log('new', newJob);
     try {
       if (jobEdit) {
+        console.log('to edit');
         jobCreate.id = job.id;
         this.state.jobEditSaved = true;
         newJob = await JobService.updateJob(jobCreate); // updating job
@@ -1375,16 +1392,21 @@ class JobWizard extends Component {
       }
     }
     
+    if (job && job.id) {
+      jobCreate.id = job.id;
+      console.log('jobCreate id', jobCreate.id);
+    }
+
     try {
       // Checking if there's a saved job to update instead of creating a new one
       
-      if (job && job.id) {
-        jobCreate.id = job.id;
-      }
+      
       
       if (copyJob) {
+        console.log('to copy');
         this.state.copiedJob = true;
         jobCreate.id = null;
+        console.log('new job copied', newJob);
         newJob = await JobService.createNewJob(jobRequestObject);
         
         /*
