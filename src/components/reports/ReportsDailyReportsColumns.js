@@ -1,3 +1,4 @@
+import moment from 'moment';
 import TFormat from './common/TFormat';
 
 function currencyFormatter(params) {
@@ -50,6 +51,12 @@ function dateComparator(date1, date2) {
   return 0;
 }
 
+function checkDate(date) {
+  return date.value === 0 ? 'N/A' : moment.unix(
+    date.value / 1000
+  ).format('MM/DD/YYYY');
+}
+
 // Helper function to do date comparison in sorting
 // Move to TFormat?
 
@@ -67,9 +74,10 @@ const columnsJobs = [
         headerName: 'Date',
         headerTooltip: 'Date',
         comparator: dateComparator,
-        width: 125,
         cellStyle: { 'text-align': 'center' },
-        sort: 'desc'
+        sort: 'desc',
+        valueFormatter: checkDate,
+        width: 110
       }, {
         field: 'completedJobs',
         headerName: 'Completed',
