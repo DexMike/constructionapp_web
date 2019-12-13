@@ -7,7 +7,6 @@ import moment from 'moment';
 import {Container, Row, Col, Button, Modal, ButtonToolbar} from 'reactstrap';
 import ImageZoom from 'react-medium-image-zoom';
 import LoadService from '../../api/LoadService';
-import EmailService from '../../api/EmailService';
 import LoadInvoiceService from '../../api/LoadInvoiceService';
 import GPSTrackingService from '../../api/GPSTrackingService';
 import ProfileService from '../../api/ProfileService';
@@ -34,7 +33,6 @@ class LoadsExpandableRow extends Component {
       driver: null,
       gpsTrackings: null,
       loadInvoices: [],
-      disputeEmail: null,
       profile: null,
       company: null,
       toggledId: 0
@@ -48,33 +46,13 @@ class LoadsExpandableRow extends Component {
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let { driver, company, profile, loadInvoices, disputeEmail } = {...this.state};
+    let { driver, company, profile, loadInvoices } = {...this.state};
 
     this.getTrackings(load.id);
 
     try {
       loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
       driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
-      profile = await ProfileService.getProfile();
-      company = await CompanyService.getCompanyById(profile.companyId);
-
-      const date = new Date();
-      const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
-      disputeEmail = {
-        toEmail: 'csr@trelar.com',
-        toName: 'Trelar CSR',
-        subject: `${envString}[Dispute] ${company.legalName}, Job: '${props.job.name}' - Load Ticket Number ${load.ticketNumber}`,
-        isHTML: true,
-        body: 'Support,<br><br>The following customer has disputed a load.<br><br>'
-          + `Time of dispute: ${moment(new Date(date)).format('lll')}<br>`
-          + `Company: ${company.legalName}<br>`
-          + `Job: ${props.job.name}<br>`
-          + `Load Ticket Number: ${load.ticketNumber}`,
-        recipients: [
-          {name: 'CSR', email: 'csr@trelar.com'}
-        ],
-        attachments: []
-      };
       this.setState({driver, loaded: true});
       this.handleApproveLoad = this.handleApproveLoad.bind(this);
       this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
@@ -83,7 +61,6 @@ class LoadsExpandableRow extends Component {
     }
 
     this.setState({
-      disputeEmail,
       profile,
       loadInvoices
     });
@@ -120,12 +97,16 @@ class LoadsExpandableRow extends Component {
   }
 
   async confirmDisputeLoad() {
-    const {load, disputeEmail} = {...this.state};
-    load.loadStatus = 'Disputed';
-    await LoadService.updateLoad(load);
-    await EmailService.sendEmail(disputeEmail);
-    this.setState({load, loadStatus: 'Disputed'});
-    this.toggleDisputeModal();
+    const {load} = {...this.state};
+    try {
+      const response = await LoadService.disputeLoad(load.id);
+      if (response) {
+        this.setState({load: response});
+        this.toggleDisputeModal();
+      }
+    } catch (e) {
+      console.error('Unable to dispute load...');
+    }
   }
 
   toggleDisputeModal() {

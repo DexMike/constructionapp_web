@@ -71,6 +71,11 @@ class LoadService extends AgentService {
     const response = await this.get(`/job/${jobId}${PATH}/tons`);
     return (response);
   }
+
+  static async disputeLoad(id) {
+    const response = await this.post(`/dispute/${id}/loads`);
+    return (response);
+  }
 }
 
 export default LoadService;
