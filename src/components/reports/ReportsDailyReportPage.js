@@ -19,6 +19,7 @@ import { Scrollbars } from 'react-custom-scrollbars';
 // import 'ag-grid-community/dist/styles/ag-grid.css';
 // import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { CSVLink } from 'react-csv';
+import moment from 'moment';
 import StringGenerator from './utils/StringGenerator';
 import TFormat from './common/TFormat';
 import { DashboardObjectStatic } from './DashboardObjectStatic';
@@ -269,8 +270,6 @@ class ReportsDailyReportPage extends Component {
   }
 
   extractCSVInfoJobs(data) {
-    const { columnsJobs } = this.state;
-
     const formatter = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -278,7 +277,9 @@ class ReportsDailyReportPage extends Component {
     });
 
     const newData = data.map(d => ({
-      Date: d.date,
+      'Start Date': d.date === 0 ? 'N/A' : moment.unix(
+        d.date / 1000
+      ).format('MM/DD/YYYY'),
       Completed: d.completedJobs,
       'Not Completed': Number(d.notCompletedJobs),
       'In Progress': Number(d.jobsInProgress),
@@ -289,12 +290,6 @@ class ReportsDailyReportPage extends Component {
       'Total Tons Hauled': Number(d.totalTonsHauled),
       'Job Duration': TFormat.asMinutesToDHms(d.avgJobTime),
       'Distance (mi)': Number(d.realDistance)
-      // 'Rate: $/Hour': d.rateHour
-      /* ,
-      'Potential Earnings': d.potentialEarnings,
-      'Total Market Value': d.totalMarketValue
-      */
-
     }));
     return newData;
   }

@@ -28,7 +28,6 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { CSVLink } from 'react-csv';
-import StringGenerator from './utils/StringGenerator';
 import TSelectField from './common/TSelect';
 import TCharts from './common/TCharts';
 import FilterComparisonReport from './filters/FilterComparisonReport';
@@ -84,6 +83,12 @@ function percentFormatter(params) {
 function compa(a, b) {
   // return a.total > b.total ? 1 : (a.total < b.total ? -1 : 0);
   return a.total > b.total ? 1 : (a.total < b.total ? -1 : 0);
+}
+
+function checkDate(date) {
+  return date.value === 0 ? 'N/A' : moment.unix(
+    date.value / 1000
+  ).format('MM/DD/YYYY');
 }
 
 window.html2canvas = html2canvas;
@@ -271,14 +276,30 @@ class ReportsComparison extends Component {
         }
       ],
 
-      // TODO: replace headerName and headerTooltip to be Job
       columnsProjects: [
         {
           field: 'name',
           headerName: 'Job Name',
           headerTooltip: 'Name of Job'
           // width: 200,
-        }, {
+        },
+
+        {
+          field: 'firstLoadDate',
+          headerName: 'Start date',
+          headerTooltip: 'Date of the first load for this job',
+          valueFormatter: checkDate,
+          width: 110
+        },
+        {
+          field: 'endTime',
+          headerName: 'End Date',
+          headerTooltip: 'Estimated end Date',
+          valueFormatter: checkDate,
+          width: 110
+        },
+
+        {
           field: 'avgTotEarningsComparison',
           headerName: 'Total Earnings',
           headerTooltip: 'Total Earnings for this time period',
@@ -741,7 +762,7 @@ class ReportsComparison extends Component {
           const width = doc.internal.pageSize.getWidth();
           const height = doc.internal.pageSize.getHeight();
           doc.addImage(img, 'JPEG', 2, 0, width, height);
-          doc.save(`Report_${StringGenerator.getDateString()}.pdf`);
+          doc.save('Report.pdf');
 
           this.setState({
             pdfRendering: false,
@@ -824,7 +845,14 @@ class ReportsComparison extends Component {
     if (activeTab === '3') {
       newData = data.map(d => ({
         'Job Name': d.name,
-        Date: moment.unix(d.startTime / 1000).format('MMMM Do, YYYY h:mm:ss A'),
+        // 'Date': moment.unix(d.startTime / 1000).format('MMMM Do, YYYY h:mm:ss A'),
+        // N/A Means that no loads exists for that job, so there's
+        'Start Date': d.firstLoadDate === 0 ? 'N/A' : moment.unix(
+          d.firstLoadDate / 1000
+        ).format('MM/DD/YYYY'),
+        'End Date': d.endTime === 0 ? 'N/A' : moment.unix(
+          d.endTime / 1000
+        ).format('MM/DD/YYYY'),
         'Total Cost': formatter.format(d.totEarnings),
         '# of Loads': Number(d.numLoads),
         'Tons Delivered': Number(d.tonsDelivered),
@@ -832,6 +860,7 @@ class ReportsComparison extends Component {
         'Ave. Rate per Ton': formatter.format(d.avgEarningsTon),
         'Average Miles Traveled': Number(d.avgMilesTraveled)
       }));
+
       return newData;
     }
     return [];
@@ -1017,7 +1046,7 @@ Close &nbsp;
                       </Button>
                     </ButtonGroup>
                     <ButtonGroup className="btn-group--icons">
-                      <CSVLink data={dataToPrint} filename={`Report_${csvName}_${StringGenerator.getDateString()}.csv`}>
+                      <CSVLink data={dataToPrint} filename={`Report_${csvName}.csv`}>
                         <Button
                           outline
                         >
