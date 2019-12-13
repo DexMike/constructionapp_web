@@ -244,7 +244,7 @@ class JobWizard extends Component {
   async componentDidMount() {
     const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate, tabSummary} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
-    const {jobEdit, jobEditSaved, copyJob} = this.props;
+    const {jobEdit, jobEditSaved, copyJob, copiedJob} = this.props;
 
     let truckTypes;
     try {
@@ -672,14 +672,12 @@ class JobWizard extends Component {
 
   updateJobView(newJob) {
     const {updateJobView, updateCopiedJob} = this.props;
-    const copiedJob = this.state;
-    console.log('copied?', copiedJob);
-    if (copiedJob) {
+    const {copiedJob} = this.state;
+    const {jobEditSaved} = this.state;
+    if (copiedJob === true) {
       updateCopiedJob(newJob);
-      console.log('yes', updateCopiedJob, newJob);
-      this.closeNow();
     }
-    if (updateJobView) {
+    if (jobEditSaved === true) {
       updateJobView(newJob, null);
     }
   }
@@ -1154,8 +1152,9 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, jobEditSaved, selectedCarrierId, job, copyJob} = this.props;
+    const {jobRequest, jobEdit, selectedCarrierId, job, copyJob} = this.props;
     this.setState({btnSubmitting: true});
+    
     const {
       profile,
       tabSend,
@@ -1341,6 +1340,7 @@ class JobWizard extends Component {
     try {
       if (jobEdit) {
         jobCreate.id = job.id;
+        this.state.jobEditSaved = true;
         newJob = await JobService.updateJob(jobCreate); // updating job
         if (newJob) {
           if (Object.keys(tabMaterials.selectedMaterial).length > 0) {
@@ -1352,7 +1352,7 @@ class JobWizard extends Component {
           }
         }
         this.setState({ btnSubmitting: false });
-        this.updateJobView(newJob);
+        this.updateJobView(newJob, null);
         this.closeNow();
         return;
       }
@@ -1374,21 +1374,16 @@ class JobWizard extends Component {
         jobRequestObject.sendToMkt = true;
       }
     }
-    const copiedJob = true;
+    
     try {
       // Checking if there's a saved job to update instead of creating a new one
-      /*
+      
       if (job && job.id) {
         jobCreate.id = job.id;
       }
-      /*
-      console.log('job', job);
-      console.log('new job', newJob);
-      console.log('request', jobRequestObject);
-      console.log('Job edit', jobEdit);
-      console.log('Edit saved', jobEditSaved);
-      */
+      
       if (copyJob) {
+        this.state.copiedJob = true;
         jobCreate.id = null;
         newJob = await JobService.createNewJob(jobRequestObject);
         
@@ -1396,21 +1391,18 @@ class JobWizard extends Component {
         this.setState({ btnSubmitting: false });
         this.updateJobView(newJob);
         this.closeNow();
+        return;
         */
-        // return;
       }
     } catch (e) {
       console.error(e);
     }
-    console.log('nuevo id', newJob.id);
-    console.log('copied job', copiedJob);
+    
     this.setState({
       btnSubmitting: false
     });
-    
     this.updateJobView(newJob);
-    console.log('here 2');
-    // this.closeNow();
+    this.closeNow();
   }
 
   // Used to either store a Copied or 'Saved' job to the database
@@ -1612,7 +1604,7 @@ class JobWizard extends Component {
 
   closeNow() {
     const {toggle} = this.props;
-    console.log('cerrar');
+    
     toggle();
   }
 
@@ -2204,11 +2196,13 @@ JobWizard.propTypes = {
   selectedCarrierId: PropTypes.number,
   jobRequest: PropTypes.bool,
   jobEdit: PropTypes.bool,
-  copyJob: PropTypes.bool,
   jobEditSaved: PropTypes.bool,
+  copyJob: PropTypes.bool,
+  copiedJob: PropTypes.bool,
   job: PropTypes.object.isRequired,
   updateJobView: PropTypes.func,
   updateCopiedJob: PropTypes.func
+  
 };
 
 JobWizard.defaultProps = {
@@ -2217,8 +2211,9 @@ JobWizard.defaultProps = {
   jobEdit: false,
   jobEditSaved: false,
   copyJob: false,
+  copiedJob: false,
   updateJobView: PropTypes.func,
-  updateCopiedJob: PropTypes.func
+  updateCopiedJob: false
 };
 
 export default withTranslation()(JobWizard);
