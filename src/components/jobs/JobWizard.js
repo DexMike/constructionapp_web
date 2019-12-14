@@ -199,7 +199,9 @@ class JobWizard extends Component {
       page: 1,
       job: [],
       loaded: false,
-      profile: []
+      profile: [],
+      redirectToNewJob: false,
+      newJobId: 0
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -244,7 +246,7 @@ class JobWizard extends Component {
   async componentDidMount() {
     const {tabMaterials, tabPickupDelivery, tabTruckSpecs, tabHaulRate, tabSummary} = this.state;
     let {name, jobStartDate, jobEndDate, poNumber} = this.state;
-    const {jobEdit, jobEditSaved, copyJob, copiedJob} = this.props;
+    const {jobEdit, jobEditSaved, copyJob} = this.props;
 
     let truckTypes;
     try {
@@ -671,22 +673,13 @@ class JobWizard extends Component {
   }
 
   updateJobView(newJob) {
-    const {updateJobView, updateCopiedJob} = this.props;
-    const {copiedJob, jobEditSaved, jobRequest} = this.state;
-    
-    console.log('creating?', newJob);
-    console.log('edit or copy?', copiedJob, jobEditSaved);
-    if (copiedJob === true) {
-      console.log('copy?');
+    const {updateJobView, updateCopiedJob, copyJob} = this.props;
+
+    if (copyJob) {
       updateCopiedJob(newJob);
+      this.closeNow();
     }
-    if (jobEditSaved === true) {
-      console.log('edite?');
-      updateJobView(newJob, null);
-    }
-    
-    if (updateJobView){
-      console.log('create?');
+    if (updateJobView) {
       updateJobView(newJob, null);
     }
   }
@@ -1161,9 +1154,15 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, selectedCarrierId, job, copyJob} = this.props;
+    const {
+      jobRequest,
+      jobEdit,
+      jobEditSaved,
+      selectedCarrierId,
+      job,
+      copyJob
+    } = this.props;
     this.setState({btnSubmitting: true});
-    
     const {
       profile,
       tabSend,
@@ -1344,20 +1343,11 @@ class JobWizard extends Component {
       equipments.push(Number(id));
     }
     jobRequestObject.trucksIds = equipments;
-        
 
     let newJob;
-
-    // newJob = await JobService.createNewJob(jobRequestObject);
-    this.state.jobRequest = true;
-
-
-    // console.log('new', newJob);
     try {
       if (jobEdit) {
-        console.log('to edit');
         jobCreate.id = job.id;
-        this.state.jobEditSaved = true;
         newJob = await JobService.updateJob(jobCreate); // updating job
         if (newJob) {
           if (Object.keys(tabMaterials.selectedMaterial).length > 0) {
@@ -1369,7 +1359,7 @@ class JobWizard extends Component {
           }
         }
         this.setState({ btnSubmitting: false });
-        this.updateJobView(newJob, null);
+        this.updateJobView(newJob);
         this.closeNow();
         return;
       }
@@ -1391,42 +1381,29 @@ class JobWizard extends Component {
         jobRequestObject.sendToMkt = true;
       }
     }
-    
-    
-    
+    let redirectToNewJob = false;
+    let newJobId = 0;
     try {
       // Checking if there's a saved job to update instead of creating a new one
-      
-      /*
-      if (!copyJob) {
+      if (job && job.id && !copyJob) {
+        jobCreate.id = job.id;
+      } else if (copyJob) {
         jobCreate.id = null;
-        console.log('job create', jobCreate);
-        console.log('job create id', jobCreate.id);
-        newJob = await JobService.createNewJob(jobRequestObject);
       }
-      */
 
-      if (copyJob) {
-        console.log('to copy');
-        this.state.copiedJob = true;
-        jobCreate.id = null;
-        
-        /*
-        this.setState({ btnSubmitting: false });
-        this.updateJobView(newJob);
-        this.closeNow();
-        return;
-        */
-      }
       newJob = await JobService.createNewJob(jobRequestObject);
-      
-      console.log('new job', newJob);
+      if (!copyJob) {
+        redirectToNewJob = true;
+        newJobId = newJob.id;
+      }
     } catch (e) {
       console.error(e);
     }
     
     this.setState({
-      btnSubmitting: false
+      btnSubmitting: false,
+      redirectToNewJob,
+      newJobId
     });
     this.updateJobView(newJob);
     this.closeNow();
@@ -1631,7 +1608,6 @@ class JobWizard extends Component {
 
   closeNow() {
     const {toggle} = this.props;
-    
     toggle();
   }
 
@@ -2032,11 +2008,18 @@ class JobWizard extends Component {
       tabSummary,
       tabSend,
       btnSubmitting,
-      topFormRef
+      topFormRef,
+      redirectToNewJob,
+      newJobId
     } = this.state;
     if (loaded) {
       return (
         <Container className="dashboard">
+          {
+            (redirectToNewJob && newJobId) && (
+              <Redirect push to={`/jobs/save/${newJobId}`}/>
+            )
+          }
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
             {/* {this.renderGoTo()} */}
             <Card style={{paddingBottom: 0}}>
@@ -2223,13 +2206,11 @@ JobWizard.propTypes = {
   selectedCarrierId: PropTypes.number,
   jobRequest: PropTypes.bool,
   jobEdit: PropTypes.bool,
-  jobEditSaved: PropTypes.bool,
   copyJob: PropTypes.bool,
-  copiedJob: PropTypes.bool,
+  jobEditSaved: PropTypes.bool,
   job: PropTypes.object.isRequired,
   updateJobView: PropTypes.func,
   updateCopiedJob: PropTypes.func
-  
 };
 
 JobWizard.defaultProps = {
@@ -2238,9 +2219,8 @@ JobWizard.defaultProps = {
   jobEdit: false,
   jobEditSaved: false,
   copyJob: false,
-  copiedJob: false,
   updateJobView: PropTypes.func,
-  updateCopiedJob: false
+  updateCopiedJob: PropTypes.func
 };
 
 export default withTranslation()(JobWizard);
