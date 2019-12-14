@@ -674,20 +674,21 @@ class JobWizard extends Component {
     const {updateJobView, updateCopiedJob} = this.props;
     const {copiedJob, jobEditSaved, jobRequest} = this.state;
     
-    console.log('creating?', jobRequest, newJob);
+    console.log('creating?', newJob);
+    console.log('edit or copy?', copiedJob, jobEditSaved);
     if (copiedJob === true) {
+      console.log('copy?');
       updateCopiedJob(newJob);
     }
     if (jobEditSaved === true) {
+      console.log('edite?');
       updateJobView(newJob, null);
     }
     
-    if (jobRequest === true) {
-      console.log('created?');
-      console.log('update?', updateJobView);
+    if (updateJobView){
+      console.log('create?');
       updateJobView(newJob, null);
     }
-    
   }
 
   //
@@ -1343,16 +1344,15 @@ class JobWizard extends Component {
       equipments.push(Number(id));
     }
     jobRequestObject.trucksIds = equipments;
-    
-    console.log('new job', newJob);
-    
+        
 
     let newJob;
 
-    newJob = await JobService.createNewJob(jobRequestObject);
+    // newJob = await JobService.createNewJob(jobRequestObject);
     this.state.jobRequest = true;
 
-    console.log('new', newJob);
+
+    // console.log('new', newJob);
     try {
       if (jobEdit) {
         console.log('to edit');
@@ -1392,22 +1392,24 @@ class JobWizard extends Component {
       }
     }
     
-    if (job && job.id) {
-      jobCreate.id = job.id;
-      console.log('jobCreate id', jobCreate.id);
-    }
-
+    
+    
     try {
       // Checking if there's a saved job to update instead of creating a new one
       
-      
-      
+      /*
+      if (!copyJob) {
+        jobCreate.id = null;
+        console.log('job create', jobCreate);
+        console.log('job create id', jobCreate.id);
+        newJob = await JobService.createNewJob(jobRequestObject);
+      }
+      */
+
       if (copyJob) {
         console.log('to copy');
         this.state.copiedJob = true;
         jobCreate.id = null;
-        console.log('new job copied', newJob);
-        newJob = await JobService.createNewJob(jobRequestObject);
         
         /*
         this.setState({ btnSubmitting: false });
@@ -1416,6 +1418,9 @@ class JobWizard extends Component {
         return;
         */
       }
+      newJob = await JobService.createNewJob(jobRequestObject);
+      
+      console.log('new job', newJob);
     } catch (e) {
       console.error(e);
     }
