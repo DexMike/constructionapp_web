@@ -200,7 +200,7 @@ const columnsJobs = [
         comparator: numberComparator,
         valueFormatter: dhmsFormatter
       }, */{
-        field: 'realDistance',
+        field: 'avgDistance',
         headerName: 'Distance (mi)',
         headerTooltip: 'Average distance for a job',
         filter: true,
