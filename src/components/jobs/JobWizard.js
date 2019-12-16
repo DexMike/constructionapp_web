@@ -199,7 +199,9 @@ class JobWizard extends Component {
       page: 1,
       job: [],
       loaded: false,
-      profile: []
+      profile: [],
+      redirectToNewJob: false,
+      newJobId: 0
     };
     this.nextPage = this.nextPage.bind(this);
     this.previousPage = this.previousPage.bind(this);
@@ -671,9 +673,11 @@ class JobWizard extends Component {
   }
 
   updateJobView(newJob) {
-    const {updateJobView, updateCopiedJob} = this.props;
-    if (newJob.copiedJob) {
+    const {updateJobView, updateCopiedJob, copyJob} = this.props;
+
+    if (copyJob) {
       updateCopiedJob(newJob);
+      this.closeNow();
     }
     if (updateJobView) {
       updateJobView(newJob, null);
@@ -1150,7 +1154,14 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {jobRequest, jobEdit, jobEditSaved, selectedCarrierId, job} = this.props;
+    const {
+      jobRequest,
+      jobEdit,
+      jobEditSaved,
+      selectedCarrierId,
+      job,
+      copyJob
+    } = this.props;
     this.setState({btnSubmitting: true});
     const {
       profile,
@@ -1370,19 +1381,29 @@ class JobWizard extends Component {
         jobRequestObject.sendToMkt = true;
       }
     }
-
+    let redirectToNewJob = false;
+    let newJobId = 0;
     try {
       // Checking if there's a saved job to update instead of creating a new one
-      if (job && job.id) {
+      if (job && job.id && !copyJob) {
         jobCreate.id = job.id;
+      } else if (copyJob) {
+        jobCreate.id = null;
       }
+
       newJob = await JobService.createNewJob(jobRequestObject);
+      if (!copyJob) {
+        redirectToNewJob = true;
+        newJobId = newJob.id;
+      }
     } catch (e) {
       console.error(e);
     }
-
+    
     this.setState({
-      btnSubmitting: false
+      btnSubmitting: false,
+      redirectToNewJob,
+      newJobId
     });
     this.updateJobView(newJob);
     this.closeNow();
@@ -1987,11 +2008,18 @@ class JobWizard extends Component {
       tabSummary,
       tabSend,
       btnSubmitting,
-      topFormRef
-    } = this.state;
+      topFormRef,
+      redirectToNewJob,
+      newJobId
+    } = { ...this.state };
     if (loaded) {
       return (
         <Container className="dashboard">
+          {
+            (redirectToNewJob && newJobId) && (
+              <Redirect push to={`/jobs/save/${newJobId}`}/>
+            )
+          }
           <div className="dashboard dashboard__job-create" style={{width: 900}}>
             {/* {this.renderGoTo()} */}
             <Card style={{paddingBottom: 0}}>
