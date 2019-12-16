@@ -474,7 +474,6 @@ class JobSavePage extends Component {
       companyCarrier: null,
       goToRefreshJob: true
     });
-    
   }
 
   async updateJobView(newJob, companyCarrier) { // updating the job view
@@ -482,7 +481,6 @@ class JobSavePage extends Component {
     const company = await CompanyService.getCompanyById(job.companiesId);
     const startAddress = await AddressService.getAddressById(job.startAddress);
     let endAddress = null;
-    
     if (job.endAddress) {
       endAddress = await AddressService.getAddressById(job.endAddress);
     }
