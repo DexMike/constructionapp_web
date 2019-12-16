@@ -673,7 +673,7 @@ class JobWizard extends Component {
   }
 
   updateJobView(newJob) {
-    const {updateJobView, updateCopiedJob, copyJob} = this.props;
+    const {updateJobView, updateCopiedJob, copyJob} = { ...this.props };
 
     if (copyJob) {
       updateCopiedJob(newJob);
