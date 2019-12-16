@@ -2011,7 +2011,7 @@ class JobWizard extends Component {
       topFormRef,
       redirectToNewJob,
       newJobId
-    } = this.state;
+    } = { ...this.state };
     if (loaded) {
       return (
         <Container className="dashboard">
