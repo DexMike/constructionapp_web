@@ -995,6 +995,10 @@ class HaulRate extends PureComponent {
       'Any changes in rate per hour to take final affect must be modified above.' :
       'This number is calculated by Trelar using mapping data from your pickup and delivery addresses, and your other inputted values.';
 
+    const milesIsNan = isNaN(parseFloat(tabPickupDelivery.avgDistanceEnroute));
+    const travelTimeEnrouteIsNan = isNaN(parseFloat(rateCalculator.travelTimeEnroute));
+    const travelTimeReturnIsNan = isNaN(parseFloat(rateCalculator.travelTimeReturn));
+
     return (
       <React.Fragment>
         <Row className="col-md-12">
@@ -1737,7 +1741,9 @@ class HaulRate extends PureComponent {
                     color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
                   }}
                   >
-                    {TFormat.asNumber(tabPickupDelivery.avgDistanceEnroute)}
+                    {milesIsNan
+                      ? TFormat.asNumber(0.00)
+                      : TFormat.asNumber(tabPickupDelivery.avgDistanceEnroute)}
                   </span>
                 </div>
               </Row>
@@ -1757,7 +1763,9 @@ class HaulRate extends PureComponent {
                     color: data.rateCalcVisibleDisabled ? '#C8C8C8' : '#282828'
                   }}
                   >
-                    {TFormat.asNumber(rateCalculator.travelTimeEnroute)}
+                    {travelTimeEnrouteIsNan
+                      ? TFormat.asNumber(0.00)
+                      : TFormat.asNumber(rateCalculator.travelTimeEnroute)}
                   </span>
                 </div>
                 {/*<div className="col-md-5 form__form-group">*/}
@@ -1794,7 +1802,9 @@ class HaulRate extends PureComponent {
 
                   }}
                   >
-                    {TFormat.asNumber(rateCalculator.travelTimeReturn)}
+                    {travelTimeReturnIsNan
+                      ? TFormat.asNumber(0.00)
+                      : TFormat.asNumber(rateCalculator.travelTimeReturn)}
                   </span>
                 </div>
                 {/*<div className="col-md-5 form__form-group">*/}

@@ -87,6 +87,15 @@ class SendJob extends PureComponent {
         });
         isValid = false;
       }
+    } else if (data.sendToMkt === 0 && !data.showSendtoFavorites) {
+      this.setState({
+        reqCheckABox: {
+          ...reqCheckABox,
+          touched: true,
+          error: 'You have to select at least one option'
+        }
+      });
+      isValid = false;
     }
     return isValid;
   }
@@ -246,7 +255,9 @@ class SendJob extends PureComponent {
                     className="primaryButton"
                     loading={isLoading}
                     loaderSize={10}
-                    disabled={!data.sendToMkt && !data.sendToFavorites}
+                    disabled={
+                      (!data.sendToMkt && (data.showSendtoFavorites && !data.sendToFavorites))
+                    || (!data.showSendtoFavorites && !data.sendToMkt)}
                     bntText="Send Job"
                   />
                 </ButtonToolbar>

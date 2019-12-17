@@ -41,6 +41,8 @@ class LoadsExpandableRow extends Component {
     this.toggle = this.toggle.bind(this);
     this.programmedRefresh = this.programmedRefresh.bind(this);
     this.getTrackings = this.getTrackings.bind(this);
+    this.handleApproveLoad = this.handleApproveLoad.bind(this);
+    this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
   }
 
   async componentDidMount() {
@@ -54,8 +56,6 @@ class LoadsExpandableRow extends Component {
       loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
       driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
       this.setState({driver, loaded: true});
-      this.handleApproveLoad = this.handleApproveLoad.bind(this);
-      this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
     } catch (err) {
       console.log(err);
     }
@@ -180,6 +180,7 @@ class LoadsExpandableRow extends Component {
 
   render() {
     const {loaded} = {...this.state};
+    const { profile } = {...this.props};
     if (loaded) {
       const {
         load,
@@ -188,7 +189,6 @@ class LoadsExpandableRow extends Component {
         driver,
         gpsTrackings,
         loadInvoices,
-        profile,
         job
       } = {...this.state};
       const startCoords = job.startAddress;
@@ -386,7 +386,9 @@ LoadsExpandableRow.propTypes = {
   job: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   onRowExpanded: PropTypes.func,
-  isExpanded: PropTypes.bool
+  isExpanded: PropTypes.bool,
+  // eslint-disable-next-line react/forbid-prop-types,react/no-unused-prop-types
+  profile: PropTypes.object.isRequired
 };
 
 LoadsExpandableRow.defaultProps = {
