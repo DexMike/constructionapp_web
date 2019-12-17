@@ -9,9 +9,11 @@ import {
   CardBody,
   ButtonToolbar
 } from 'reactstrap';
+import { CSVLink } from 'react-csv';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import {Link, Redirect} from 'react-router-dom';
+import NumberFormatting from '../../utils/NumberFormatting';
 import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
@@ -63,6 +65,7 @@ class JobSavePage extends Component {
       bid: null,
       bids: [],
       booking: null,
+      loads: [],
       favoriteCompany: [],
       profile: {},
       customerAdmin: null,
@@ -89,6 +92,7 @@ class JobSavePage extends Component {
       approveCancelReason: '',
       showOtherReasonInput: false,
       showLateCancelNotice: false,
+      jobData: [],
       reqHandlerCarrierCancel: {
         touched: false,
         error: ''
@@ -134,6 +138,7 @@ class JobSavePage extends Component {
     this.handleSelectCancelReason = this.handleSelectCancelReason.bind(this);
     this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
     this.togglePauseJobModal = this.togglePauseJobModal.bind(this);
+    this.JobFormData = this.JobFormData.bind(this);
   }
 
   async componentDidMount() {
@@ -148,6 +153,60 @@ class JobSavePage extends Component {
     }
   }
 
+  JobFormData(jobData) {
+    const { profile } = this.state;
+    let csvString = `Job (${jobData.job.id}):,${jobData.job.name}`;
+    csvString += `\nPO Number:,${jobData.job.poNumber}`;
+    csvString += `\nStart Date:,${TFormat.asDayWeek(jobData.job.startTime, profile.timeZone)}`;
+    csvString += `\nEnd Date:,${TFormat.asDayWeek(jobData.job.endTime, profile.timeZone)}`;
+    csvString += `\nRate Estimate:,${jobData.job.rateEstimate}`;
+    csvString += `\nRate:,${jobData.job.rate}`;
+    csvString += `\nMaterial:,${jobData.job.materials}`;
+    csvString += `\nTrelar Fee:,${NumberFormatting.asMoney(jobData.trelarFees.totalFee)}`; // remember to check for inc/exc
+    if (jobData.producerBillingType === 'Included') {
+      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}`;
+    } else {
+      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}`;
+      csvString += `\nEstimated Total Cost:,${NumberFormatting.asMoney((jobData.job.rate * jobData.job.rateEstimate) + jobData.trelarFees.totalFee)}`;
+    }
+
+    if (jobData.carrier) {
+      csvString += `\nCarrier Name:,${jobData.carrier.legalName}`;
+      csvString += `\nTotal Tons Delivered:,${jobData.tonsDelivered}`;
+      csvString += `\nTotal Loads Done:,${jobData.completedLoads}`;
+
+      csvString += '\n\n';
+
+      if (jobData.trucks.length > 0) {
+        csvString += 'Driver,Truck Number';
+        for (const i in jobData.trucks) {
+          if ({}.hasOwnProperty.call(jobData.trucks, i)) {
+            csvString += `\n${jobData.trucks[i].externalEquipmentNumber},${jobData.trucks[i].driver}`;
+          }
+        }
+      }
+
+      csvString += '\n\n';
+
+      if (jobData.loads.length > 0) {
+        csvString += 'Load,Date,Tons,Rate,Total,Status,Ticket Number';
+        for (const i in jobData.loads) {
+          if ({}.hasOwnProperty.call(jobData.loads, i)) {
+            csvString += `\n${jobData.loads[i].id},`;
+            csvString += `${TFormat.asDayWeek(jobData.loads[i].startTime)},`;
+            csvString += `${NumberFormatting.asMoney(jobData.loads[i].tonsEntered, '.', 2, '', '')},`;
+            csvString += `${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')},`;
+            csvString += `${NumberFormatting.asMoney(jobData.loads[i].totalLoadCost, '.', 2, '', '$ ')},`;
+            csvString += `${jobData.loads[i].loadStatus},`;
+            csvString += `${jobData.loads[i].ticketNumber}`;
+          }
+        }
+      }
+    }
+
+    this.setState({jobData: csvString});
+  }
+
   async loadSavePage(jobId) {
     const {match} = this.props;
     let {
@@ -155,6 +214,7 @@ class JobSavePage extends Component {
       company,
       bid,
       booking,
+      loads,
       profile,
       favoriteCompany,
       selectedDrivers,
@@ -311,7 +371,9 @@ class JobSavePage extends Component {
                 driversWithLoads.push(driver.id)
               ));
             }
+            loads = await LoadService.getLoadsByBookingId(booking.id);
           }
+
           // Check if carrier is favorite for this job's customer
           if (profile.companyType === 'Carrier') {
             // check if Carrier Company [profile.companyId]
@@ -347,6 +409,7 @@ class JobSavePage extends Component {
             companyCarrier,
             companyCarrierData,
             booking,
+            loads,
             profile,
             companyType: profile.companyType,
             favoriteCompany,
@@ -746,13 +809,15 @@ class JobSavePage extends Component {
   }
 
   renderJobForm(companyType, job) {
-    const {companyCarrier, bid} = this.state;
+    const {companyCarrier, bid, loads} = this.state;
     return (
       <JobForm
         job={job}
         bid={bid}
         companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
+        jobsLoads={loads}
+        onChangeJobData={this.JobFormData}
       />
     );
   }
@@ -918,6 +983,21 @@ class JobSavePage extends Component {
         loaderSize={10}
         bntText="Copy Job"
       />
+    );
+  }
+
+  renderCSVButton() {
+    const {jobData} = {...this.state};
+    return (
+      <CSVLink data={jobData} filename="Job_Info.csv">
+        <Button
+          outline
+          className="secondaryButton"
+        >
+          Export data as CSV &nbsp;
+          <span className="lnr lnr-chart-bars" />
+        </Button>
+      </CSVLink>
     );
   }
 
@@ -1669,6 +1749,7 @@ class JobSavePage extends Component {
               <div className="col-md-6 text-right">
                 {companyType === 'Customer' && profile.isAdmin && (
                   <React.Fragment>
+                    {this.renderCSVButton()}
                     {this.renderCopyButton()}
                     {this.renderCloseButton()}
                     {this.renderDeleteButton()}
