@@ -155,25 +155,25 @@ class JobSavePage extends Component {
 
   JobFormData(jobData) {
     const { profile } = this.state;
-    let csvString = `Job (${jobData.job.id}):,${jobData.job.name}`;
-    csvString += `\nPO Number:,${jobData.job.poNumber}`;
-    csvString += `\nStart Date:,${TFormat.asDateTime(jobData.job.startTime, profile.timeZone)}`;
-    csvString += `\nEnd Date:,${TFormat.asDateTime(jobData.job.endTime, profile.timeZone)}`;
-    csvString += `\nRate Estimate:,${NumberFormatting.asMoney(jobData.job.rateEstimate, '.', 2, '', '$ ')}`;
-    csvString += `\nRate:,${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')}`;
-    csvString += `\nMaterial:,${jobData.job.materials}`;
+    let csvString = `Job (${jobData.job.id}):,"${jobData.job.name}"`;
+    csvString += `\nPO Number:,"${jobData.job.poNumber}"`;
+    csvString += `\nStart Date:,"${TFormat.asDateTime(jobData.job.startTime, profile.timeZone)}"`;
+    csvString += `\nEnd Date:,"${TFormat.asDateTime(jobData.job.endTime, profile.timeZone)}"`;
+    csvString += `\nRate Estimate:,"${NumberFormatting.asMoney(jobData.job.rateEstimate, '.', 2, '', '$ ')}"`;
+    csvString += `\nRate:,"${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')}"`;
+    csvString += `\nMaterial:,"${jobData.job.materials}"`;
     if (jobData.producerBillingType === 'Included') {
-      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate, '.', 2, '', '$ ')}`;
+      csvString += `\nEstimated Delivery Cost:,"${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}"`;
     } else {
-      csvString += `\nTrelar Fee:,${NumberFormatting.asMoney(jobData.trelarFees.totalFee, '.', 2, '', '$ ')}`; // remember to check for inc/exc
-      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate, '.', 2, '', '$ ')}`;
-      csvString += `\nEstimated Total Cost:,${NumberFormatting.asMoney((jobData.job.rate * jobData.job.rateEstimate) + jobData.trelarFees.totalFee, '.', 2, '', '$ ')}`;
+      csvString += `\nTrelar Fee:,"${NumberFormatting.asMoney(jobData.trelarFees.totalFee)}"`; // remember to check for inc/exc
+      csvString += `\nEstimated Delivery Cost:,"${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}"`;
+      csvString += `\nEstimated Total Cost:,"${NumberFormatting.asMoney((jobData.job.rate * jobData.job.rateEstimate) + jobData.trelarFees.totalFee)}"`;
     }
 
     if (jobData.carrier) {
-      csvString += `\nCarrier Name:,${jobData.carrier.legalName}`;
-      csvString += `\nTotal Tons Delivered:,${jobData.tonsDelivered}`;
-      csvString += `\nTotal Loads Done:,${jobData.completedLoads}`;
+      csvString += `\nCarrier Name:,"${jobData.carrier.legalName}"`;
+      csvString += `\nTotal Tons Delivered:,"${jobData.tonsDelivered}"`;
+      csvString += `\nTotal Loads Done:,"${jobData.completedLoads}"`;
 
       csvString += '\n\n';
 
@@ -181,7 +181,7 @@ class JobSavePage extends Component {
         csvString += 'Driver,Truck Number';
         for (const i in jobData.trucks) {
           if ({}.hasOwnProperty.call(jobData.trucks, i)) {
-            csvString += `\n${jobData.trucks[i].externalEquipmentNumber},${jobData.trucks[i].driver}`;
+            csvString += `\n"${jobData.trucks[i].externalEquipmentNumber}","${jobData.trucks[i].driver}"`;
           }
         }
       }
@@ -193,12 +193,12 @@ class JobSavePage extends Component {
         for (const i in jobData.loads) {
           if ({}.hasOwnProperty.call(jobData.loads, i)) {
             csvString += `\n${jobData.loads[i].id},`;
-            csvString += `${TFormat.asDateTime(jobData.loads[i].startTime)},`;
-            csvString += `${NumberFormatting.asMoney(jobData.loads[i].tonsEntered, '.', 2, '', '')},`;
-            csvString += `${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')},`;
-            csvString += `${NumberFormatting.asMoney(jobData.loads[i].totalLoadCost, '.', 2, '', '$ ')},`;
+            csvString += `"${TFormat.asDateTime(jobData.loads[i].startTime)}",`;
+            csvString += `"${NumberFormatting.asMoney(jobData.loads[i].tonsEntered, '.', 2, ',', '')}",`;
+            csvString += `"${NumberFormatting.asMoney(jobData.job.rate)}",`;
+            csvString += `"${NumberFormatting.asMoney(jobData.loads[i].totalLoadCost)}",`;
             csvString += `${jobData.loads[i].loadStatus},`;
-            csvString += `${jobData.loads[i].ticketNumber}`;
+            csvString += `"${jobData.loads[i].ticketNumber}"`;
           }
         }
       }
