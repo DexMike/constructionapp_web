@@ -85,6 +85,9 @@ class JobForm extends Component {
       approvingLoads: false,
       approvingLoadsError: false,
       trelarFees: 0,
+      tonsDelivered: 0,
+      hoursDelivered: 0,
+      completedLoads: 0,
       summary: [],
       summaryReturn: [],
       producerBillingType: '',
@@ -98,34 +101,37 @@ class JobForm extends Component {
     this.toggleApproveLoadsModal = this.toggleApproveLoadsModal.bind(this);
     this.toggleAllocatedTrucks = this.toggleAllocatedTrucks.bind(this);
     this.approveAllSubmittedLoads = this.approveAllSubmittedLoads.bind(this);
+    this.onUpdateJobInfo = this.onUpdateJobInfo.bind(this);
   }
 
   async componentDidMount() {
     const { job } = this.props;
     await this.loadJobForm();
-    let trucks = [];
-    try {
-      trucks = await JobService.getTrucksForJob(job.id);
-    } catch (e) {
-      console.log('ERROR: ', e);
-    }
-    this.setState({
-      trucks
-    });
+    this.onUpdateJobInfo();
   }
 
   async componentWillReceiveProps(nextProps) {
-    if (nextProps.job) {
+    if (nextProps.job.id !== this.state.job.id) {
       await this.loadJobForm();
+      this.onUpdateJobInfo();
     }
     if (nextProps.companyCarrier) {
-      let { carrier } = this.state;
+      let { carrier, job } = this.state;
       if (!carrier) {
         carrier = await CompanyService.getCompanyById(nextProps.companyCarrier);
         this.setState({
           carrier
         });
+        this.onUpdateJobInfo();
       }
+    }
+  }
+
+  onUpdateJobInfo() {
+    const job = this.state;
+    const { onChangeJobData } = this.props;
+    if (job) {
+      onChangeJobData(job);
     }
   }
 
@@ -148,7 +154,7 @@ class JobForm extends Component {
 
   async loadJobForm() {
     const profile = await ProfileService.getProfile();
-    const { job, companyCarrier } = this.props;
+    const { job, companyCarrier, jobsLoads } = this.props;
     let {
       loads,
       carrier,
@@ -163,8 +169,12 @@ class JobForm extends Component {
       trelarFees,
       summary,
       summaryReturn,
-      producerBillingType
+      producerBillingType,
+      tonsDelivered,
+      hoursDelivered,
+      completedLoads
     } = this.state;
+    loads = jobsLoads;
     const bookings = await BookingService.getBookingsByJobId(job.id);
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
@@ -193,14 +203,15 @@ class JobForm extends Component {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
     company = await CompanyService.getCompanyById(job.companiesId); // Producer
-    if (bookings.length > 0) {
-      const bookingEquipments = await BookingEquipmentService
-        .getBookingEquipmentsByBookingId(bookings[0].id);
-      if (bookingEquipments.length > 0) {
-        loads = await LoadService.getLoadsByBookingId(
-          bookings[0].id // booking.id 6
-        );
-        loads = loads.reverse();
+
+    if (loads.length > 0) {
+      loads = loads.reverse();
+      for (const i in loads) {
+        if (loads[i].loadStatus === 'Submitted' || loads[i].loadStatus === 'Approved') {
+          completedLoads += 1;
+          tonsDelivered += loads[i].tonsEntered;
+          hoursDelivered += loads[i].hoursEntered;
+        }
       }
     }
 
@@ -229,6 +240,13 @@ class JobForm extends Component {
 
     const allTruckTypes = await JobService.getMaterialsByJobId(job.id);
 
+    let trucks = [];
+    try {
+      trucks = await JobService.getTrucksForJob(job.id);
+    } catch (e) {
+      console.log('ERROR: ', e);
+    }
+
     this.setState({
       images,
       companyType: profile.companyType,
@@ -248,7 +266,11 @@ class JobForm extends Component {
       distanceReturn,
       timeEnroute,
       timeReturn,
-      producerBillingType
+      producerBillingType,
+      trucks,
+      tonsDelivered,
+      hoursDelivered,
+      completedLoads
     });
   }
 
@@ -787,7 +809,7 @@ class JobForm extends Component {
   }
 
   renderLoads() {
-    const { loads, job } = { ...this.state };
+    const { loads, job, profile } = { ...this.state };
     return (
       <React.Fragment>
         <h3 className="subhead" style={{
@@ -802,24 +824,21 @@ class JobForm extends Component {
         {
           this.renderApproveAllLoadsButton()
         }
-        {job && <LoadsTable loads={loads} job={job} expandedRow={this.onExpandedChanged} />}
+        {job && (
+          <LoadsTable
+            loads={loads}
+            job={job}
+            expandedRow={this.onExpandedChanged}
+            profile={profile}
+          />
+        )}
       </React.Fragment>
     );
   }
 
   renderJobTons() {
-    const { loads, job } = this.state;
+    const { loads, job, tonsDelivered, hoursDelivered } = this.state;
     const total = job.rateEstimate;
-    let tonsDelivered = 0;
-    let hoursDelivered = 0;
-    if (loads.length > 0) {
-      for (const i in loads) {
-        if (loads[i].loadStatus === 'Submitted' || loads[i].loadStatus === 'Approved') {
-          tonsDelivered += loads[i].tonsEntered;
-          hoursDelivered += loads[i].hoursEntered;
-        }
-      }
-    }
     return (
       <React.Fragment>
         <Row>
@@ -879,17 +898,7 @@ class JobForm extends Component {
   }
 
   renderJobLoads() {
-    const { loads } = this.state;
-    let completedLoads = 0;
-    let tonsDelivered = 0;
-    if (loads.length > 0) {
-      for (const i in loads) {
-        if (loads[i].loadStatus === 'Submitted' || loads[i].loadStatus === 'Approved') {
-          completedLoads += 1;
-          tonsDelivered += loads[i].tonsEntered;
-        }
-      }
-    }
+    const { loads, tonsDelivered, completedLoads } = this.state;
     let tonnage = 0;
     tonnage = parseFloat((tonsDelivered / loads.length).toFixed(2));
     return (
@@ -1271,7 +1280,8 @@ JobForm.propTypes = {
     PropTypes.array
   ]),
   companyCarrier: PropTypes.number,
-  handlePageClick: PropTypes.func.isRequired
+  handlePageClick: PropTypes.func.isRequired,
+  onChangeJobData: PropTypes.func.isRequired
 };
 
 JobForm.defaultProps = {

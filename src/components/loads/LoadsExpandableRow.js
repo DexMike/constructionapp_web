@@ -35,7 +35,6 @@ class LoadsExpandableRow extends Component {
       gpsTrackings: null,
       loadInvoices: [],
       disputeEmail: null,
-      profile: null,
       company: null,
       toggledId: 0
     };
@@ -43,20 +42,21 @@ class LoadsExpandableRow extends Component {
     this.toggle = this.toggle.bind(this);
     this.programmedRefresh = this.programmedRefresh.bind(this);
     this.getTrackings = this.getTrackings.bind(this);
+    this.handleApproveLoad = this.handleApproveLoad.bind(this);
+    this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
   }
 
   async componentDidMount() {
     const {props} = this;
     const {load} = this.state;
-    let { driver, company, profile, loadInvoices, disputeEmail } = {...this.state};
+    let { driver, company, loadInvoices, disputeEmail } = {...this.state};
 
     this.getTrackings(load.id);
 
     try {
       loadInvoices = await LoadInvoiceService.getLoadInvoicesByLoad(props.load.id);
       driver = await UserService.getDriverByBookingEquipmentId(props.load.bookingEquipmentId);
-      profile = await ProfileService.getProfile();
-      company = await CompanyService.getCompanyById(profile.companyId);
+      company = await CompanyService.getCompanyById(props.profile.companyId);
 
       const date = new Date();
       const envString = (process.env.APP_ENV === 'Prod') ? '' : `[Env] ${process.env.APP_ENV} `;
@@ -76,15 +76,12 @@ class LoadsExpandableRow extends Component {
         attachments: []
       };
       this.setState({driver, loaded: true});
-      this.handleApproveLoad = this.handleApproveLoad.bind(this);
-      this.confirmDisputeLoad = this.confirmDisputeLoad.bind(this);
     } catch (err) {
       console.log(err);
     }
 
     this.setState({
       disputeEmail,
-      profile,
       loadInvoices
     });
   }
@@ -199,6 +196,7 @@ class LoadsExpandableRow extends Component {
 
   render() {
     const {loaded} = {...this.state};
+    const { profile } = {...this.props};
     if (loaded) {
       const {
         load,
@@ -207,7 +205,6 @@ class LoadsExpandableRow extends Component {
         driver,
         gpsTrackings,
         loadInvoices,
-        profile,
         job
       } = {...this.state};
       const startCoords = job.startAddress;
@@ -405,7 +402,9 @@ LoadsExpandableRow.propTypes = {
   job: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   onRowExpanded: PropTypes.func,
-  isExpanded: PropTypes.bool
+  isExpanded: PropTypes.bool,
+  // eslint-disable-next-line react/forbid-prop-types,react/no-unused-prop-types
+  profile: PropTypes.object.isRequired
 };
 
 LoadsExpandableRow.defaultProps = {
