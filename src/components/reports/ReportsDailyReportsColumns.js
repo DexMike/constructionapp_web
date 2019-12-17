@@ -198,7 +198,8 @@ const columnsJobs = [
         comparator: numberComparator,
         valueFormatter: decimalFormatter,
         width: 140
-      } /* {
+      }, /*
+      {
         field: 'avgJobTime',
         headerName: 'Job Duration',
         headerTooltip: 'Average time between a first load and job being closed',
@@ -206,15 +207,16 @@ const columnsJobs = [
         sortable: true,
         comparator: numberComparator,
         valueFormatter: dhmsFormatter
-      }, {
-        field: 'realDistance',
+      }, */
+      {
+        field: 'avgDistance',
         headerName: 'Distance (mi)',
         headerTooltip: 'Average distance for a job',
         filter: true,
         sortable: true,
         comparator: numberComparator,
         valueFormatter: decimalFormatter
-      } */
+      }
     ]
   }
 ];
