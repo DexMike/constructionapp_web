@@ -157,17 +157,17 @@ class JobSavePage extends Component {
     const { profile } = this.state;
     let csvString = `Job (${jobData.job.id}):,${jobData.job.name}`;
     csvString += `\nPO Number:,${jobData.job.poNumber}`;
-    csvString += `\nStart Date:,${TFormat.asDayWeek(jobData.job.startTime, profile.timeZone)}`;
-    csvString += `\nEnd Date:,${TFormat.asDayWeek(jobData.job.endTime, profile.timeZone)}`;
-    csvString += `\nRate Estimate:,${jobData.job.rateEstimate}`;
-    csvString += `\nRate:,${jobData.job.rate}`;
+    csvString += `\nStart Date:,${TFormat.asDateTime(jobData.job.startTime, profile.timeZone)}`;
+    csvString += `\nEnd Date:,${TFormat.asDateTime(jobData.job.endTime, profile.timeZone)}`;
+    csvString += `\nRate Estimate:,${NumberFormatting.asMoney(jobData.job.rateEstimate, '.', 2, '', '$ ')}`;
+    csvString += `\nRate:,${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')}`;
     csvString += `\nMaterial:,${jobData.job.materials}`;
-    csvString += `\nTrelar Fee:,${NumberFormatting.asMoney(jobData.trelarFees.totalFee)}`; // remember to check for inc/exc
     if (jobData.producerBillingType === 'Included') {
-      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}`;
+      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate, '.', 2, '', '$ ')}`;
     } else {
-      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}`;
-      csvString += `\nEstimated Total Cost:,${NumberFormatting.asMoney((jobData.job.rate * jobData.job.rateEstimate) + jobData.trelarFees.totalFee)}`;
+      csvString += `\nTrelar Fee:,${NumberFormatting.asMoney(jobData.trelarFees.totalFee, '.', 2, '', '$ ')}`; // remember to check for inc/exc
+      csvString += `\nEstimated Delivery Cost:,${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate, '.', 2, '', '$ ')}`;
+      csvString += `\nEstimated Total Cost:,${NumberFormatting.asMoney((jobData.job.rate * jobData.job.rateEstimate) + jobData.trelarFees.totalFee, '.', 2, '', '$ ')}`;
     }
 
     if (jobData.carrier) {
@@ -193,7 +193,7 @@ class JobSavePage extends Component {
         for (const i in jobData.loads) {
           if ({}.hasOwnProperty.call(jobData.loads, i)) {
             csvString += `\n${jobData.loads[i].id},`;
-            csvString += `${TFormat.asDayWeek(jobData.loads[i].startTime)},`;
+            csvString += `${TFormat.asDateTime(jobData.loads[i].startTime)},`;
             csvString += `${NumberFormatting.asMoney(jobData.loads[i].tonsEntered, '.', 2, '', '')},`;
             csvString += `${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')},`;
             csvString += `${NumberFormatting.asMoney(jobData.loads[i].totalLoadCost, '.', 2, '', '$ ')},`;
@@ -992,7 +992,8 @@ class JobSavePage extends Component {
       <CSVLink data={jobData} filename="Job_Info.csv">
         <Button
           outline
-          className="secondaryButton"
+          className="btn secondaryButton"
+          style={{marginRight: '15px'}}
         >
           Export data as CSV &nbsp;
           <span className="lnr lnr-chart-bars" />
