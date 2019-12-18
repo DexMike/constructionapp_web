@@ -854,7 +854,7 @@ class JobForm extends Component {
                   <span>
                     Load Tonnage Delivered:&nbsp;
                     <span>
-                      {TFormat.asNumber(tonsDelivered)}
+                      {TFormat.asNumber(tonsDelivered) || '0.00'}
                     </span>
                   </span>
                   <br/>
@@ -898,9 +898,9 @@ class JobForm extends Component {
   }
 
   renderJobLoads() {
-    const { loads, tonsDelivered, completedLoads } = this.state;
+    const { tonsDelivered, completedLoads } = this.state;
     let tonnage = 0;
-    tonnage = parseFloat((tonsDelivered / loads.length).toFixed(2));
+    tonnage = (completedLoads > 0 && parseFloat((tonsDelivered / completedLoads).toFixed(2))) || '0.00';
     return (
       <React.Fragment>
         <Row>
