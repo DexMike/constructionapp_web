@@ -88,6 +88,7 @@ class JobForm extends Component {
       tonsDelivered: 0,
       hoursDelivered: 0,
       completedLoads: 0,
+      submittedLoads: 0,
       summary: [],
       summaryReturn: [],
       producerBillingType: '',
@@ -172,7 +173,8 @@ class JobForm extends Component {
       producerBillingType,
       tonsDelivered,
       hoursDelivered,
-      completedLoads
+      completedLoads,
+      submittedLoads
     } = this.state;
     loads = jobsLoads;
     const bookings = await BookingService.getBookingsByJobId(job.id);
@@ -211,6 +213,9 @@ class JobForm extends Component {
           completedLoads += 1;
           tonsDelivered += loads[i].tonsEntered;
           hoursDelivered += loads[i].hoursEntered;
+          if (loads[i].loadStatus === 'Submitted') {
+            submittedLoads += 1;
+          }
         }
       }
     }
@@ -270,7 +275,8 @@ class JobForm extends Component {
       trucks,
       tonsDelivered,
       hoursDelivered,
-      completedLoads
+      completedLoads,
+      submittedLoads
     });
   }
 
@@ -399,13 +405,8 @@ class JobForm extends Component {
   }
 
   renderApproveAllLoadsButton() {
-    const { companyType, loads } = this.state;
-    let submittedLoads = 0;
-    loads.forEach((load) => {
-      if (load.loadStatus === 'Submitted') submittedLoads += 1;
-    });
-    if (companyType !== 'Carrier' && loads.length > 0
-      && submittedLoads > 0) {
+    const { companyType, loads, submittedLoads } = this.state;
+    if (companyType !== 'Carrier' && Object.keys(loads).length > 0 && submittedLoads > 0) {
       return (
         <Button
           onClick={() => this.toggleApproveLoadsModal()}
