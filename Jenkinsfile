@@ -41,7 +41,7 @@ def cloudfront_id() {
 
     "master":  "E1AHYHKY2WVINB",
     "infra":   "E1EGZGUUXJ1IES",
-    "demo":    "E3VLWJXIOSHO30",
+    "demo":    "EVUYURV8VXRRO",
     "qa":      "E2W2Q6ROFYLZDI",
     "cat":     "E1XUS55INHEOEY",
     "staging": "E3KJAHZFANQPXC"
