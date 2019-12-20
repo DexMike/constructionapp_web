@@ -748,7 +748,7 @@ class HaulRate extends PureComponent {
       data.rateCalculator.numberOfLoads = TCalculator.getNumTripsByTons(
         parseFloat(data.rateCalculator.estimatedTons),
         parseFloat(data.rateCalculator.truckCapacity),
-        (data.roundType === 'up')
+        (data.rateCalculator.roundType === 'up')
       );
       data.rateCalculator.estimatedHours = TCalculator.getHoursByTonAmount(
         parseFloat(data.rateCalculator.travelTimeEnroute),
