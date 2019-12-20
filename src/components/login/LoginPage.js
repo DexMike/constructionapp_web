@@ -60,6 +60,7 @@ class LoginPage extends SignIn {
     this.onDismiss = this.onDismiss.bind(this);
     this.handleUserNotConfirmed = this.handleUserNotConfirmed.bind(this);
     this.changeState = this.changeState.bind(this);
+    this.validateIsDriver = this.validateIsDriver.bind(this);
   }
 
   async componentDidMount() {
@@ -306,6 +307,19 @@ class LoginPage extends SignIn {
     this.setState({error: null});
   }
 
+  validateIsDriver() {
+    const {driverIn} = this.state;
+    if (driverIn) {
+      this.setState({
+        isDriver: false,
+        btnSubmitting: false,
+        showPassword: false,
+        username: '',
+        password: ''
+      });
+    }
+  }
+
   renderUserNotReviewed() {
     return (
       <h6> Thank you for checking back with us. Your account is still in review.
@@ -316,6 +330,7 @@ class LoginPage extends SignIn {
   }
 
   renderIsDriver() {
+    this.state.driverIn = true;
     return (
       <div className="form">
         <h6> Drivers do not have access to the Trelar web app at this time.
@@ -323,7 +338,8 @@ class LoginPage extends SignIn {
         </h6>
         <Button
           className="btn btn-primary account__btn account__btn--small"
-          onClick={() => this.renderPage()}
+          style={{ marginTop: '20px'}}
+          onClick={() => this.validateIsDriver()}
         >
           Logout
         </Button>
@@ -433,9 +449,6 @@ class LoginPage extends SignIn {
 
   renderPage() {
     const {userUnderReview, isDriver} = this.state;
-    console.log('render?');
-    console.log('user?', userUnderReview);
-    console.log('driver?', isDriver);
     return (
       <div className="theme-light">
         <div className="wrapper">
