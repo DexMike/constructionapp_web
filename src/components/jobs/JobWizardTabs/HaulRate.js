@@ -202,7 +202,18 @@ class HaulRate extends PureComponent {
     const {tabPickupDelivery, handleInputChange} = {...this.props};
     const data = currData;
     const timeReturn = data.rateCalculator.tripType === 'oneWay' ? null : parseFloat(data.rateCalculator.travelTimeReturn);
-
+    const oneLoad = data.rateCalculator.tripType === 'oneWay'
+      ? TCalculator.getOneWayTripTime(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime)
+      )
+      : TCalculator.getRoundTripTime(
+        parseFloat(data.rateCalculator.travelTimeEnroute),
+        parseFloat(data.rateCalculator.travelTimeReturn),
+        parseFloat(data.rateCalculator.loadTime),
+        parseFloat(data.rateCalculator.unloadTime)
+      );
     // update unselected rates
 
     // if tonnage is selected
@@ -210,8 +221,12 @@ class HaulRate extends PureComponent {
       case 'ton':
         // update hour rate
         data.rateCalculator.ratePerHour = TCalculator.getHourRateByTonRate(
-          parseFloat(data.rateCalculator.estimatedHours),
-          parseFloat(data.rateCalculator.estimatedTons),
+          // parseFloat(data.rateCalculator.estimatedHours),
+          // parseFloat(data.rateCalculator.estimatedTons),
+          TCalculator.getTotalHourAmountByLoads(data.rateCalculator.numberOfLoads,
+            oneLoad),
+          TCalculator.getTotalTonAmountByLoads(data.rateCalculator.numberOfLoads,
+            data.rateCalculator.truckCapacity),
           parseFloat(data.rateCalculator.ratePerTon)
         );
         // update one way cost
@@ -230,8 +245,12 @@ class HaulRate extends PureComponent {
       case 'hour': // if hourly rate is selected
         // update ton rate
         data.rateCalculator.ratePerTon = TCalculator.getTonRateByHourRate(
-          parseFloat(data.rateCalculator.estimatedHours),
-          parseFloat(data.rateCalculator.estimatedTons),
+          // parseFloat(data.rateCalculator.estimatedHours),
+          // parseFloat(data.rateCalculator.estimatedTons),
+          TCalculator.getTotalHourAmountByLoads(data.rateCalculator.numberOfLoads,
+            oneLoad),
+          TCalculator.getTotalTonAmountByLoads(data.rateCalculator.numberOfLoads,
+            data.rateCalculator.truckCapacity),
           parseFloat(data.rateCalculator.ratePerHour)
         );
         // update one way cost
