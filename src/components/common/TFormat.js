@@ -28,7 +28,7 @@ class TFormat {
 
   // returns float with one leadings zero if no value before decimal point
   // and two 0s as decimal values if no decimal specified
-  static asFloatOneLeadingZero(inputValue) {
+  static asFloatOneLeadingZero(inputValue, noThousandsSeparator) {
     let value = inputValue;
     value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     // debugger;
@@ -42,7 +42,9 @@ class TFormat {
       value = '0';
     }
     const parts = value.toString().split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (!noThousandsSeparator) {
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
     return parts.join('.');
   }
 
@@ -69,7 +71,7 @@ class TFormat {
     return value;
   }
 
-  static asIntegerNoLeadingZeros(inputValue) {
+  static asIntegerNoLeadingZeros(inputValue, noThousandsSeparator) {
     let value = inputValue;
     value = value.replace(/\D/g, '');
     const onlyZeros = /^0+$/;
@@ -80,6 +82,9 @@ class TFormat {
       }
     } else {
       value = '0';
+    }
+    if (noThousandsSeparator) {
+      return value;
     }
     const formattedWithCommas = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return formattedWithCommas;

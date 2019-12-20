@@ -185,7 +185,7 @@ class HaulRate extends PureComponent {
   handleOneWayCostChange(oneWay) {
     const {data} = {...this.props};
     let {value} = oneWay.target;
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     data.rateCalculator.oneWayCostTonMile = value;
     this.handleUpdateRates(data);
   }
@@ -193,7 +193,7 @@ class HaulRate extends PureComponent {
   handleTwoWayCostChange(oneWay) {
     const {data} = {...this.props};
     let {value} = oneWay.target;
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     data.rateCalculator.twoWayCostMile = value;
     this.handleUpdateRates(data);
   }
@@ -337,7 +337,7 @@ class HaulRate extends PureComponent {
       handleInputChange('tabHaulRate', data);
       return;
     }
-    value = TFormat.asIntegerNoLeadingZeros(value.toString());
+    value = TFormat.asIntegerNoLeadingZeros(value.toString(), true);
     data.rateCalculator.estimatedTons = value;
     data.rateCalculator.numberOfLoads = TCalculator.getNumTripsByTons(
       parseFloat(data.rateCalculator.estimatedTons),
@@ -362,7 +362,7 @@ class HaulRate extends PureComponent {
   handleRateTonsChange(rateTon) {
     const {data} = {...this.props};
     let {value} = rateTon.target;
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     data.rateCalculator.ratePerTon = value;
     this.handleUpdateRates(data);
   }
@@ -370,7 +370,7 @@ class HaulRate extends PureComponent {
   handleRateHoursChange(rateHour) {
     const {data} = {...this.props};
     let {value} = rateHour.target;
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     data.rateCalculator.ratePerHour = value;
     this.handleUpdateRates(data);
   }
@@ -383,7 +383,7 @@ class HaulRate extends PureComponent {
       handleInputChange('tabHaulRate', data);
       return;
     }
-    value = TFormat.asIntegerNoLeadingZeros(value.toString());
+    value = TFormat.asIntegerNoLeadingZeros(value.toString(), true);
 
     data.rateCalculator.estimatedHours = value;
 
@@ -422,7 +422,7 @@ class HaulRate extends PureComponent {
     const {data} = {...this.props};
     const {rateCalculator} = {...data};
     let {value} = ratePerPayType.target;
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     data.ratePerPayType = value;
     if (data.payType === 'Ton') {
       rateCalculator.ratePerTon = value;
@@ -551,7 +551,7 @@ class HaulRate extends PureComponent {
   handleLoadTimeChange(loadTime) {
     let {value} = loadTime.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    value = TFormat.asIntegerNoLeadingZeros(value.toString());
+    value = TFormat.asIntegerNoLeadingZeros(value.toString(), true);
     const {data} = {...this.props};
     // const {rateCalculator} = {...data};
     data.rateCalculator.loadTime = value / 60;
@@ -610,7 +610,7 @@ class HaulRate extends PureComponent {
   handleUnloadTimeChange(unloadTime) {
     let {value} = unloadTime.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    value = TFormat.asIntegerNoLeadingZeros(value.toString());
+    value = TFormat.asIntegerNoLeadingZeros(value.toString(), true);
     const {data} = {...this.props};
     // const {rateCalculator} = {...data};
     data.rateCalculator.unloadTime = value / 60;
@@ -668,7 +668,7 @@ class HaulRate extends PureComponent {
   handleEnrouteTravelTimeChange(travelTimeEnroute) {
     let {value} = travelTimeEnroute.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeEnroute = value;
@@ -689,7 +689,7 @@ class HaulRate extends PureComponent {
   handleReturnTravelTimeChange(travelTimeReturn) {
     let {value} = travelTimeReturn.target;
     // value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    value = TFormat.asFloatOneLeadingZero(value.toString());
+    value = TFormat.asFloatOneLeadingZero(value.toString(), true);
     const {data, handleInputChange} = {...this.props};
     const {rateCalculator} = {...data};
     rateCalculator.travelTimeReturn = value;
@@ -709,7 +709,7 @@ class HaulRate extends PureComponent {
   handleTruckCapacityChange(truckCapacity) {
     let {value} = truckCapacity.target;
     // value = value.replace(/\D/g, '');
-    value = TFormat.asIntegerNoLeadingZeros(value.toString());
+    value = TFormat.asIntegerNoLeadingZeros(value.toString(), true);
     const {data} = {...this.props};
     const timeReturn = data.rateCalculator.tripType === 'oneWay' ? null : parseFloat(data.rateCalculator.travelTimeReturn);
     data.rateCalculator.truckCapacity = value;
