@@ -13,7 +13,7 @@ class AgentService {
           'Content-Type': 'application/json'
         };
       }
-      if (accessToken && idToken) {
+      if (accessToken && idToken && !isPDF) {
         return {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
@@ -69,7 +69,7 @@ class AgentService {
     return response.text();
   }
 
-  static async post(path, entity) {
+  static async post(path, entity, json = true) {
     const input = `${API_ENDPOINT}${path}`;
     const headers = await this.getHeaders(path);
     const init = {
@@ -78,7 +78,10 @@ class AgentService {
       body: JSON.stringify(entity)
     };
     const response = await fetch(input, init);
-    return response.json();
+    if (json) {
+      return response.json();
+    }
+    return response;
   }
 
   static async put(path, entity) {

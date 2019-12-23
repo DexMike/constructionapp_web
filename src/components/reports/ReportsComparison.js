@@ -47,6 +47,7 @@ import BarFilter from './utils/BarFilter';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import AddressService from '../../api/AddressService';
+import ReportsService from './services/ReportsService';
 
 function PageTitle() {
   const { t } = useTranslation();
@@ -742,27 +743,48 @@ class ReportsComparison extends Component {
     this.setState({ chartVisType: e.value });
   }
 
+  gotPDF(data, name) {
+    // let's convert the base64 data into a pdf and open it
+    const binaryString = window.atob(data);
+    const binaryLen = binaryString.length;
+    const bytes = new Uint8Array(binaryLen);
+    for (let i = 0; i < binaryLen; i += 1) {
+      const ascii = binaryString.charCodeAt(i);
+      bytes[i] = ascii;
+    }
+    const blob = new Blob([bytes], {type: 'application/pdf'});
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+  }
+
+  opensWindow(url) { window.open(url, '_blank'); }
+
   exportToPDF() {
-    const { activeTab } = this.state;
+    const { activeTab, filters } = this.state;
     const previousTab = activeTab;
     window.scrollTo(0, 0);
-    const that = this;
     this.setState({
       pdfRendering: true // hack for full PDF rendering (table width)
-    }, function done() {
+    }, () => {
       const input = document.getElementById('visualizations');
       html2canvas(input)
-        .then((canvas) => {
+        .then(async (canvas) => {
           const img = canvas.toDataURL('image/jpg');
-          const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
-          });
-          const width = doc.internal.pageSize.getWidth();
-          const height = doc.internal.pageSize.getHeight();
-          doc.addImage(img, 'JPEG', 2, 0, width, height);
-          doc.save('Report.pdf');
+
+          const pdfRequest = {
+            pdfTitle: `Reports from ${filters.startAvailability} to ${filters.endAvailability}`,
+            contents: `<img src='${img}' alt='Reports Image'>`
+          };
+
+          try {
+            const d = new Date().toISOString().split('T')[0];
+            const pdf = await ReportsService.getPDF(pdfRequest);
+            pdf.text().then(body => this.gotPDF(body, `ComparisonReport_${d}`));
+          } catch (e) {
+            console.log('ERROR: Unable to retrieve PDF.', e);
+          }
 
           this.setState({
             pdfRendering: false,
