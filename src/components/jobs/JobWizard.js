@@ -82,7 +82,8 @@ class JobWizard extends Component {
         favoriteAdminTels: []
       },
       tabSummary: {
-        instructions: ''
+        instructions: '',
+        privateInstructions: ''
       },
       tabPickupDelivery: {
         allUSstates: [],
@@ -320,6 +321,7 @@ class JobWizard extends Component {
         }
 
         tabSummary.instructions = !job.notes ? '' : job.notes;
+        tabSummary.privateInstructions = !job.privateNotes ? '' : job.privateNotes;
 
         tabMaterials.estMaterialPricing = !job.estMaterialPricing ? '0.00' : job.estMaterialPricing;
         tabMaterials.quantityType = job.amountType;
@@ -1330,6 +1332,7 @@ class JobWizard extends Component {
       poNumber,
       estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
       notes: tabSummary.instructions,
+      privateNotes: tabSummary.privateInstructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
       modifiedBy: profile.userId,
@@ -1546,6 +1549,7 @@ class JobWizard extends Component {
       amountType,
       rateEstimate: rateEstimate.toString().replace(/,/g, ''),
       notes: tabSummary.instructions,
+      privateNotes: tabSummary.privateInstructions,
       createdBy: profile.userId,
       createdOn: moment.utc().format(),
       modifiedBy: profile.userId,

@@ -664,7 +664,7 @@ class JobViewForm extends Component {
     return (
       <React.Fragment>
         <h3 className="subhead">
-          Instructions
+          Notes
         </h3>
         <Row>
           <Col md={12}>
