@@ -5,7 +5,8 @@ import React from 'react';
 // import { Link, Redirect } from 'react-router-dom';
 import {
   Col,
-  Row
+  Row,
+  Button
 } from 'reactstrap';
 import moment from 'moment';
 import {SignIn} from 'aws-amplify-react';
@@ -59,6 +60,7 @@ class LoginPage extends SignIn {
     this.onDismiss = this.onDismiss.bind(this);
     this.handleUserNotConfirmed = this.handleUserNotConfirmed.bind(this);
     this.changeState = this.changeState.bind(this);
+    this.validateIsDriver = this.validateIsDriver.bind(this);
   }
 
   async componentDidMount() {
@@ -305,6 +307,19 @@ class LoginPage extends SignIn {
     this.setState({error: null});
   }
 
+  validateIsDriver() {
+    const {driverIn} = this.state;
+    if (driverIn) {
+      this.setState({
+        isDriver: false,
+        btnSubmitting: false,
+        showPassword: false,
+        username: '',
+        password: ''
+      });
+    }
+  }
+
   renderUserNotReviewed() {
     return (
       <h6> Thank you for checking back with us. Your account is still in review.
@@ -315,10 +330,20 @@ class LoginPage extends SignIn {
   }
 
   renderIsDriver() {
+    this.state.driverIn = true;
     return (
-      <h6> Drivers do not have access to the Trelar web app at this time.
-        You can email us at csr@trelar.com. Thank you.
-      </h6>
+      <div className="form">
+        <h6> Drivers do not have access to the Trelar web app at this time.
+          You can email us at csr@trelar.com. Thank you.
+        </h6>
+        <Button
+          className="btn btn-primary account__btn account__btn--small"
+          style={{ marginTop: '20px'}}
+          onClick={() => this.validateIsDriver()}
+        >
+          Logout
+        </Button>
+      </div>
     );
   }
 
@@ -424,7 +449,6 @@ class LoginPage extends SignIn {
 
   renderPage() {
     const {userUnderReview, isDriver} = this.state;
-
     return (
       <div className="theme-light">
         <div className="wrapper">
