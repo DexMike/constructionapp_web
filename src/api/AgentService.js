@@ -13,7 +13,7 @@ class AgentService {
           'Content-Type': 'application/json'
         };
       }
-      if (accessToken && idToken && !isPDF) {
+      if (accessToken && idToken) {
         return {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
