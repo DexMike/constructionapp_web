@@ -27,6 +27,7 @@ class Summary extends PureComponent {
       endAddressValidations: []
     };
     this.handleInstructionChange = this.handleInstructionChange.bind(this);
+    this.handlePrivateInstructionsChange = this.handlePrivateInstructionsChange.bind(this);
   }
 
   async componentDidMount() {
@@ -94,6 +95,13 @@ class Summary extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {value} = e.target;
     data.instructions = value;
+    handleInputChange('tabSummary', data);
+  }
+
+  handlePrivateInstructionsChange(e) {
+    const {data, handleInputChange} = {...this.props};
+    const {value} = e.target;
+    data.privateInstructions = value;
     handleInputChange('tabSummary', data);
   }
 
@@ -529,7 +537,20 @@ class Summary extends PureComponent {
 
   render() {
     const {loaded, formIsValid} = {...this.state};
-    const {data, goBack, saveJob, closeModal, jobRequest, jobEdit, validateTopForm, isLoading} = {...this.props};
+    const {
+      data,
+      goBack,
+      saveJob,
+      closeModal,
+      jobRequest,
+      jobEdit,
+      validateTopForm,
+      isLoading
+    } = {...this.props};
+
+    const publicNotesInfo = 'These notes will be seen by carriers you send the job to, before they book it.';
+    const privateNotesInfo = 'These notes will be seen only by carriers after they book the job.';
+
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -552,7 +573,10 @@ class Summary extends PureComponent {
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
                     <h3 className="subhead">
-                      Instructions
+                      Public Notes&nbsp;
+                      <span className="infoCircle">
+                        <span style={{padding: 6, color: 'white'}} data-tip data-for="publicNotesInfo">i</span>
+                      </span>
                     </h3>
                   </div>
                   <div className="col-md-12 form__form-group">
@@ -561,11 +585,41 @@ class Summary extends PureComponent {
                       type="text"
                       value={data.instructions}
                       onChange={this.handleInstructionChange}
-                      placeholder="Instructions"
+                      placeholder="Public Notes"
                       maxLength="255"
                     />
                   </div>
                 </Row>
+                <div className="customTooltip">
+                  <ReactTooltip id="publicNotesInfo" effect="solid">
+                    <p style={{color: 'white'}}>{publicNotesInfo}</p>
+                  </ReactTooltip>
+                </div>
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Private Notes&nbsp;
+                      <span className="infoCircle">
+                        <span style={{padding: 6, color: 'white'}} data-tip data-for="privateNotesInfo">i</span>
+                      </span>
+                    </h3>
+                  </div>
+                  <div className="col-md-12 form__form-group">
+                    <textarea
+                      name="privateInstructions"
+                      type="text"
+                      value={data.privateInstructions}
+                      onChange={this.handlePrivateInstructionsChange}
+                      placeholder="Private Notes"
+                      maxLength="255"
+                    />
+                  </div>
+                </Row>
+                <div className="customTooltip">
+                  <ReactTooltip id="privateNotesInfo" effect="solid">
+                    <p style={{color: 'white'}}>{privateNotesInfo}</p>
+                  </ReactTooltip>
+                </div>
               </form>
               <Row className="col-md-12" style={{paddingTop: 20}}>
                 <hr/>

@@ -763,7 +763,7 @@ class JobForm extends Component {
   }
 
   renderJobBottom(job) {
-    const { distance, time } = this.state;
+    const { profile, distance, time } = this.state;
     return (
       <React.Fragment>
         <h3 className="subhead">
@@ -793,7 +793,7 @@ class JobForm extends Component {
           </Col>
         </Row>
         <h3 className="subhead">
-          Comments
+          Public Notes
         </h3>
         <Row>
           <Col>
@@ -805,6 +805,29 @@ class JobForm extends Component {
             <br/>
           </Col>
         </Row>
+        {((job.status === 'Booked'
+          || job.status === 'Allocated'
+          || job.status === 'In Progress'
+          || job.status === 'Paused'
+          || job.status === 'Job Ended'
+          || job.status === 'Job Completed') || (profile.companyType === 'Customer')) && (
+          <React.Fragment>
+            <h3 className="subhead">
+              Private Notes
+            </h3>
+            <Row>
+              <Col>
+                <div>
+                  <div>
+                    {job.privateNotes}
+                  </div>
+                </div>
+                <br/>
+              </Col>
+            </Row>
+          </React.Fragment>
+        )}
+        
       </React.Fragment>
     );
   }
