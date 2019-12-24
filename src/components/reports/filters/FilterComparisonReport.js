@@ -414,7 +414,9 @@ class FilterComparisonReport extends Component {
     if (collection !== undefined) {
       if (collection.length > 0) {
         for (const item of collection) {
-          newCollection.push(item.value);
+          if (item.value !== undefined) {
+            newCollection.push(item.value);
+          }
         }
       }
     }
@@ -609,6 +611,7 @@ class FilterComparisonReport extends Component {
     allFilters.companies = this.getIds(allFilters.companies);
     allFilters.states = this.getValues(allFilters.states);
     allFilters.materials = this.getValues(allFilters.materials);
+    // console.log('TCL: FilterComparisonReport -> fetchCarrierData -> allFilters.materials', allFilters.materials);
     allFilters.truckTypes = this.getIds(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
     allFilters.statuses = this.getValues(allFilters.statuses);

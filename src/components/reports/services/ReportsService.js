@@ -49,6 +49,11 @@ class ReportsService extends AgentService {
     const response = await super.post(`${PATH}/jobs/comparisonProjects`, filters);
     return (response);
   }
+
+  static async getPDF(pdfRequest) {
+    const response = await super.post('/pdf', pdfRequest, false);
+    return (response);
+  }
 }
 
 export default ReportsService;
