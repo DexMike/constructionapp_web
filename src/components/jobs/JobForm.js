@@ -185,8 +185,8 @@ class JobForm extends Component {
       const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
       const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
 
-      summary = await GeoUtils.getDistance(waypoint0, waypoint1);
-      summaryReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+      // summary = await GeoUtils.getDistance(waypoint0, waypoint1);
+      // summaryReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
 
       distanceEnroute = (summary.distance * 0.000621371192).toFixed(2);
       distanceReturn = (summaryReturn.distance * 0.000621371192).toFixed(2);
@@ -1104,13 +1104,13 @@ class JobForm extends Component {
     if (job.status === 'Job Ended' || job.status === 'Job Completed') {
       return (
         <React.Fragment>
-          <TMap
+          {/* <TMap
             id={`job${job.id}`}
             width="100%"
             height="100%"
             startAddress={job.startAddress}
             endAddress={job.endAddress}
-          />
+          /> */}
         </React.Fragment>
       );
     }

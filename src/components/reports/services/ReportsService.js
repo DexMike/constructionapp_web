@@ -54,6 +54,11 @@ class ReportsService extends AgentService {
     const response = await super.post('/pdf', pdfRequest, false);
     return (response);
   }
+
+  static async getLoadsTicketsPDF(pdfRequest) {
+    const response = await super.post('/loadsticketspdf', pdfRequest, false);
+    return (response);
+  }
 }
 
 export default ReportsService;

@@ -38,6 +38,7 @@ import LookupsService from '../../api/LookupsService';
 import JobResumePopup from './JobResumePopup';
 import JobPausePopup from './JobPausePopup';
 import JobAllocate from './JobAllocate';
+import ReportsService from '../reports/services/ReportsService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -139,6 +140,7 @@ class JobSavePage extends Component {
     this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
     this.togglePauseJobModal = this.togglePauseJobModal.bind(this);
     this.JobFormData = this.JobFormData.bind(this);
+    this.exportToPDF = this.exportToPDF.bind(this);
   }
 
   async componentDidMount() {
@@ -205,6 +207,42 @@ class JobSavePage extends Component {
     }
 
     this.setState({jobData: csvString});
+  }
+
+  gotPDF(data, name) {
+    // let's convert the base64 data into a pdf and open it
+    console.log(data);
+    const binaryString = window.atob(data);
+    const binaryLen = binaryString.length;
+    const bytes = new Uint8Array(binaryLen);
+    for (let i = 0; i < binaryLen; i += 1) {
+      const ascii = binaryString.charCodeAt(i);
+      bytes[i] = ascii;
+    }
+    const blob = new Blob([bytes], {type: 'application/pdf'});
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+  }
+
+  async exportToPDF() {
+    const { job } = this.state;
+
+    const pdfRequest = {
+      // pdfTitle: `Reports from ${filters.startAvailability} to ${filters.endAvailability}`,
+      // contents: `<img src='${img}' alt='Reports Image'>`
+      // uniqId: job.id
+    };
+
+    try {
+      console.log('creating pdf');
+      const d = new Date().toISOString().split('T')[0];
+      const pdf = await ReportsService.getLoadsTicketsPDF(pdfRequest);
+      pdf.text().then(body => this.gotPDF(body, `${job.name}_LoadsTickets_${d}`));
+    } catch (e) {
+      console.log('ERROR: Unable to retrieve PDF.', e);
+    }
   }
 
   async loadSavePage(jobId) {
@@ -1002,6 +1040,19 @@ class JobSavePage extends Component {
     );
   }
 
+  renderPDF() {
+    const {jobData} = {...this.state};
+    return (
+      <Button
+        outline
+        onClick={() => this.exportToPDF()}
+      >
+        Export loads tickets as PDF &nbsp;
+        <span className="lnr lnr-cloud-download" />
+      </Button>
+    );
+  }
+
   renderResumeButton() {
     const {job} = this.state;
     if (job.status === 'Paused') {
@@ -1710,6 +1761,7 @@ class JobSavePage extends Component {
       profile,
       accessForbidden
     } = this.state;
+    const jobData = {...this.state};
     // console.log('>>>CO:', companyType);
     if (accessForbidden) {
       return (
@@ -1733,7 +1785,7 @@ class JobSavePage extends Component {
             {this.renderCopyJobModal()}
             {this.renderEditExistingJobModal()}
             {this.renderEditSavedJobModal()}
-            {/*{this.renderAllocateDriversModal(profile)}*/}
+            {/* {this.renderAllocateDriversModal(profile)} */}
             {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
             {this.renderCancelCarrierModal()}
@@ -1750,6 +1802,10 @@ class JobSavePage extends Component {
               <div className="col-md-6 text-right">
                 {companyType === 'Customer' && profile.isAdmin && (
                   <React.Fragment>
+                    {jobData.loads
+                    && jobData.loads.length > 0
+                    && jobData.loads[0].loadStatus !== 'Started'
+                    && this.renderPDF()}
                     {this.renderCSVButton()}
                     {this.renderCopyButton()}
                     {this.renderCloseButton()}
