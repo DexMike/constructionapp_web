@@ -736,16 +736,11 @@ class JobWizard extends Component {
   async validateAndSaveJobDraft() {
     this.setState({btnSubmitting: true});
     let isValid = false;
-    if (!await this.isDraftValid()) {
-      this.setState({btnSubmitting: false});
-    }
-    isValid = true;
-    // const {saveJobDraft} = this.props;
+    isValid = await this.isDraftValid();
     if (isValid) {
-      await this.saveJobDraft();
-      this.setState({btnSubmitting: false});
-      // this.closeNow();
+      this.saveJobDraft();
     }
+    this.setState({btnSubmitting: false});
   }
 
   async getStartCoords() {
@@ -955,10 +950,10 @@ class JobWizard extends Component {
     // START ADDRESS VALIDATION
     if ((!tabPickupDelivery.selectedStartAddressId
       || tabPickupDelivery.selectedStartAddressId === 0)
-      && (tabPickupDelivery.startLocationAddress1.length > 0
-        || tabPickupDelivery.startLocationCity.length > 0
-        || tabPickupDelivery.startLocationZip.length > 0
-        || tabPickupDelivery.startLocationState.length > 0)) {
+      && (tabPickupDelivery.startLocationAddress1.length === 0
+        || tabPickupDelivery.startLocationCity.length === 0
+        || tabPickupDelivery.startLocationZip.length === 0
+        || tabPickupDelivery.startLocationState.length === 0)) {
       if (tabPickupDelivery.startLocationAddress1.length === 0) {
         tabPickupDelivery.reqHandlerStartAddress = {
           ...reqHandlerStartAddress,
@@ -1045,10 +1040,10 @@ class JobWizard extends Component {
 
     // END ADDRESS VALIDATION
     if ((!tabPickupDelivery.selectedEndAddressId || tabPickupDelivery.selectedEndAddressId === 0)
-      && (tabPickupDelivery.endLocationAddress1.length > 0
-        || tabPickupDelivery.endLocationCity.length > 0
-        || tabPickupDelivery.endLocationZip.length > 0
-        || tabPickupDelivery.endLocationState.length > 0)) {
+      && (tabPickupDelivery.endLocationAddress1.length === 0
+        || tabPickupDelivery.endLocationCity.length === 0
+        || tabPickupDelivery.endLocationZip.length === 0
+        || tabPickupDelivery.endLocationState.length === 0)) {
       if (tabPickupDelivery.endLocationAddress1.length === 0) {
         tabPickupDelivery.reqHandlerEndAddress = {
           ...reqHandlerEndAddress,
@@ -1122,7 +1117,7 @@ class JobWizard extends Component {
       }
     }
     if (goToAddressTab) {
-      this.secondPage();
+      this.firstPage();
     }
 
     return isValid;
@@ -2223,8 +2218,8 @@ JobWizard.defaultProps = {
   jobEdit: false,
   jobEditSaved: false,
   copyJob: false,
-  updateJobView: PropTypes.func,
-  updateCopiedJob: PropTypes.func
+  updateJobView: null,
+  updateCopiedJob: null
 };
 
 export default withTranslation()(JobWizard);
