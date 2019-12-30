@@ -76,6 +76,7 @@ class JobSavePage extends Component {
       // for some reason I couldn't set it when nested
       companyType: null,
       btnSubmitting: false,
+      pdfLoader: false,
       selectedDrivers: [],
       accessForbidden: false,
       modalAddJob: false,
@@ -211,7 +212,6 @@ class JobSavePage extends Component {
 
   gotPDF(data, name) {
     // let's convert the base64 data into a pdf and open it
-    console.log(data);
     const binaryString = window.atob(data);
     const binaryLen = binaryString.length;
     const bytes = new Uint8Array(binaryLen);
@@ -228,21 +228,20 @@ class JobSavePage extends Component {
 
   async exportToPDF() {
     const { job } = this.state;
+    this.setState({pdfLoader: true});
 
     const pdfRequest = {
-      // pdfTitle: `Reports from ${filters.startAvailability} to ${filters.endAvailability}`,
-      // contents: `<img src='${img}' alt='Reports Image'>`
-      // uniqId: job.id
+      jobId: job.id
     };
 
     try {
-      console.log('creating pdf');
       const d = new Date().toISOString().split('T')[0];
       const pdf = await ReportsService.getLoadsTicketsPDF(pdfRequest);
       pdf.text().then(body => this.gotPDF(body, `${job.name}_LoadsTickets_${d}`));
     } catch (e) {
       console.log('ERROR: Unable to retrieve PDF.', e);
     }
+    this.setState({pdfLoader: false});
   }
 
   async loadSavePage(jobId) {
@@ -1041,15 +1040,15 @@ class JobSavePage extends Component {
   }
 
   renderPDF() {
-    const {jobData} = {...this.state};
+    const {pdfLoader} = this.state;
     return (
-      <Button
-        outline
+      <TSubmitButton
         onClick={() => this.exportToPDF()}
-      >
-        Export loads tickets as PDF &nbsp;
-        <span className="lnr lnr-cloud-download" />
-      </Button>
+        className="secondaryButton"
+        loading={pdfLoader}
+        loaderSize={10}
+        bntText={['Export loads tickets as PDF ', <span key="cloudIcon" className="lnr lnr-cloud-download"/>]}
+      />
     );
   }
 
