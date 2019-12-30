@@ -765,27 +765,34 @@ class ReportsComparison extends Component {
     const { activeTab, filters } = this.state;
     const previousTab = activeTab;
     window.scrollTo(0, 0);
+    const that = this;
     this.setState({
       pdfRendering: true // hack for full PDF rendering (table width)
     }, () => {
       const input = document.getElementById('visualizations');
       html2canvas(input)
         .then(async (canvas) => {
-          const img = canvas.toDataURL('image/jpg');
+          setTimeout(async () => {
 
-          const pdfRequest = {
-            pdfTitle: `Reports from ${filters.startAvailability} to ${filters.endAvailability}`,
-            contents: `<img src='${img}' alt='Reports Image'>`
-          };
+            console.log('>>TRAING TO RUN...');
+            const img = canvas.toDataURL('image/jpg');
 
-          try {
-            const d = new Date().toISOString().split('T')[0];
-            const pdf = await ReportsService.getPDF(pdfRequest);
-            pdf.text().then(body => this.gotPDF(body, `ComparisonReport_${d}`));
-          } catch (e) {
-            console.log('ERROR: Unable to retrieve PDF.', e);
-          }
+            const pdfRequest = {
+              pdfTitle: `Reports from ${filters.startAvailability} to ${filters.endAvailability}`,
+              contents: `<img src='${img}' alt='Reports Image'>`
+            };
 
+            try {
+              const d = new Date().toISOString().split('T')[0];
+              const pdf = await ReportsService.getPDF(pdfRequest);
+              pdf.text().then(body => that.gotPDF(body, `ComparisonReport_${d}`));
+            } catch (e) {
+              console.log('ERROR: Unable to retrieve PDF.', e);
+            }
+          }, 3000);
+
+
+          /*
           this.setState({
             pdfRendering: false,
             activeTab: '4' // this is a hack to get the width back
@@ -797,6 +804,7 @@ class ReportsComparison extends Component {
               });
             }, 2000);
           });
+          */
         });
     });
   }

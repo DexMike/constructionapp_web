@@ -251,12 +251,27 @@
 .reports-cont-btn button{
   margin: auto;
 }
+
 .visualizations {
-  min-width: 100% !important;
+  width: 100% !important;
+  background-color: yellow;
 }
 
 .visualizations_extended {
-  min-width: 1560px !important;
+  min-width: 4000px !important;
+  background-color: green;
+}
+
+@media screen and (max-width: 1080px) {
+  .visualizations {
+    min-width: 100% !important;
+    background-color: purple;
+  }
+  
+  .visualizations_extended {
+    min-width: 1560px !important;
+    background-color: red;
+  }
 }
 
 .pdf_loading_tab {
