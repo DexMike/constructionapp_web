@@ -679,7 +679,7 @@ class JobWizard extends Component {
 
     if (copyJob) {
       updateCopiedJob(newJob);
-      this.closeNow();
+      // this.closeNow();
     }
     if (updateJobView) {
       updateJobView(newJob, null);
