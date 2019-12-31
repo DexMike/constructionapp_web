@@ -254,23 +254,26 @@
 
 .visualizations {
   width: 100% !important;
-  background-color: white;
+  height: auto !important;
 }
 
 .visualizations_extended {
-  min-width: 4000px !important;
-  background-color: white;
+  width: 1260px !important;
+}
+
+.visualizations_extended_chart {
+  width: 1160px !important;
 }
 
 @media screen and (max-width: 1080px) {
   .visualizations {
-    min-width: 100% !important;
-    background-color: white;
+    width: 100% !important;
+    background-color: purple;
   }
   
   .visualizations_extended {
-    min-width: 1560px !important;
-    background-color: white;
+    width: 1320px !important;
+    background-color: red;
   }
 }
 

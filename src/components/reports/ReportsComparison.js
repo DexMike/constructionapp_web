@@ -747,16 +747,16 @@ class ReportsComparison extends Component {
     const { activeTab, filters } = this.state;
     const previousTab = activeTab;
     window.scrollTo(0, 0);
-    // const that = this;
     this.setState({
       pdfRendering: true // hack for full PDF rendering (table width)
     }, () => {
+      window.scrollTo(0, 0); // keep this one, force scroll to corner
       const input = document.getElementById('visualizations');
-      html2canvas(input)
-        .then(async (canvas) => {
-          setTimeout(async () => {
+      setTimeout(async () => {
+        html2canvas(input)
+          .then(async (canvas) => {
+            window.scrollTo(0, 0);
             const img = canvas.toDataURL('image/jpg');
-
             const pdfRequest = {
               pdfTitle: `${filters.startAvailability} to ${filters.endAvailability}`,
               contents: `<img src='${img}' alt='Reports Image'>`
@@ -773,21 +773,20 @@ class ReportsComparison extends Component {
             } catch (e) {
               console.log('ERROR: Unable to retrieve PDF.', e);
             }
-          }, 1500);
 
-          this.setState({
-            pdfRendering: false,
-            activeTab: '4' // this is a hack to get the width back
-          }, () => {
-            // this.forceUpdate();
-            setTimeout(() => {
-              this.setState({
-                activeTab: previousTab
-              });
-            }, 2000);
+            this.setState({
+              pdfRendering: false,
+              activeTab: '4' // this is a hack to get the width back
+            }, () => {
+              // this.forceUpdate();
+              setTimeout(() => {
+                this.setState({
+                  activeTab: previousTab
+                });
+              }, 2000);
+            });
           });
-          /**/
-        });
+      }, 1500);
     });
   }
 
@@ -974,7 +973,7 @@ class ReportsComparison extends Component {
                   outline
                   onClick={this.closeModal}
                 >
-Close &nbsp;
+                  Close &nbsp;
                 </Button>
               </div>
             </div>
@@ -1035,10 +1034,11 @@ Close &nbsp;
 
     return (
       <Row
-        id="visualizations"
-        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`}
+          className={
+            `${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`
+          }
       >
-        <Col md={12}>
+        <Col md={12} id="visualizations">
           <Card>
             <CardBody>
               <Row data-html2canvas-ignore="true" className="menuOnTop">
@@ -1157,17 +1157,23 @@ Close &nbsp;
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div
+                        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended_chart'}`}
+                      >
                         {this.renderChart(chartType, products, title)}
                       </div>
                     </TabPane>
                     <TabPane tabId="2">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div
+                        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended_chart'}`}
+                      >
                         {this.renderChart(chartType, carriers, title)}
                       </div>
                     </TabPane>
                     <TabPane tabId="3">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div
+                        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended_chart'}`}
+                      >
                         {this.renderChart(chartType, projects, title)}
                       </div>
                     </TabPane>
