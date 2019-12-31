@@ -9,9 +9,11 @@ import {
   CardBody,
   ButtonToolbar
 } from 'reactstrap';
+import { CSVLink } from 'react-csv';
 import moment from 'moment';
 import * as PropTypes from 'prop-types';
 import {Link, Redirect} from 'react-router-dom';
+import NumberFormatting from '../../utils/NumberFormatting';
 import TFormat from '../common/TFormat';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
@@ -33,7 +35,10 @@ import JobClosePopup from './JobClosePopup';
 import JobDeletePopup from './JobDeletePopup';
 import JobWizard from './JobWizard';
 import LookupsService from '../../api/LookupsService';
+import JobResumePopup from './JobResumePopup';
+import JobPausePopup from './JobPausePopup';
 import JobAllocate from './JobAllocate';
+import ReportsService from '../reports/services/ReportsService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -61,6 +66,7 @@ class JobSavePage extends Component {
       bid: null,
       bids: [],
       booking: null,
+      loads: [],
       favoriteCompany: [],
       profile: {},
       customerAdmin: null,
@@ -70,6 +76,7 @@ class JobSavePage extends Component {
       // for some reason I couldn't set it when nested
       companyType: null,
       btnSubmitting: false,
+      pdfLoader: false,
       selectedDrivers: [],
       accessForbidden: false,
       modalAddJob: false,
@@ -79,12 +86,15 @@ class JobSavePage extends Component {
       modalCancelRequest: false,
       modalCancel1: false,
       modalCancel2: false,
+      modalResumeJob: false,
+      modalPauseJob: false,
       driversWithLoads: [],
       approveCancel: '',
       cancelReason: '',
       approveCancelReason: '',
       showOtherReasonInput: false,
       showLateCancelNotice: false,
+      jobData: [],
       reqHandlerCarrierCancel: {
         touched: false,
         error: ''
@@ -128,6 +138,10 @@ class JobSavePage extends Component {
     this.closeJobModal = this.closeJobModal.bind(this);
     this.deleteJobModal = this.deleteJobModal.bind(this);
     this.handleSelectCancelReason = this.handleSelectCancelReason.bind(this);
+    this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
+    this.togglePauseJobModal = this.togglePauseJobModal.bind(this);
+    this.JobFormData = this.JobFormData.bind(this);
+    this.exportToPDF = this.exportToPDF.bind(this);
   }
 
   async componentDidMount() {
@@ -142,6 +156,94 @@ class JobSavePage extends Component {
     }
   }
 
+  JobFormData(jobData) {
+    const { profile } = this.state;
+    let csvString = `Job (${jobData.job.id}):,"${jobData.job.name}"`;
+    csvString += `\nPO Number:,"${jobData.job.poNumber}"`;
+    csvString += `\nStart Date:,"${TFormat.asDateTime(jobData.job.startTime, profile.timeZone)}"`;
+    csvString += `\nEnd Date:,"${TFormat.asDateTime(jobData.job.endTime, profile.timeZone)}"`;
+    csvString += `\nRate Estimate:,"${NumberFormatting.asMoney(jobData.job.rateEstimate, '.', 2, '', '$ ')}"`;
+    csvString += `\nRate:,"${NumberFormatting.asMoney(jobData.job.rate, '.', 2, '', '$ ')}"`;
+    csvString += `\nMaterial:,"${jobData.job.materials}"`;
+    if (jobData.producerBillingType === 'Included') {
+      csvString += `\nEstimated Delivery Cost:,"${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}"`;
+    } else {
+      csvString += `\nTrelar Fee:,"${NumberFormatting.asMoney(jobData.trelarFees.totalFee)}"`; // remember to check for inc/exc
+      csvString += `\nEstimated Delivery Cost:,"${NumberFormatting.asMoney(jobData.job.rate * jobData.job.rateEstimate)}"`;
+      csvString += `\nEstimated Total Cost:,"${NumberFormatting.asMoney((jobData.job.rate * jobData.job.rateEstimate) + jobData.trelarFees.totalFee)}"`;
+    }
+
+    if (jobData.carrier) {
+      csvString += `\nCarrier Name:,"${jobData.carrier.legalName}"`;
+      csvString += `\nTotal Tons Delivered:,"${jobData.tonsDelivered}"`;
+      csvString += `\nTotal Loads Done:,"${jobData.completedLoads}"`;
+
+      csvString += '\n\n';
+
+      if (jobData.trucks.length > 0) {
+        csvString += 'Driver,Truck Number';
+        for (const i in jobData.trucks) {
+          if ({}.hasOwnProperty.call(jobData.trucks, i)) {
+            csvString += `\n"${jobData.trucks[i].externalEquipmentNumber}","${jobData.trucks[i].driver}"`;
+          }
+        }
+      }
+
+      csvString += '\n\n';
+
+      if (jobData.loads.length > 0) {
+        csvString += 'Load,Date,Tons,Rate,Total,Status,Ticket Number';
+        for (const i in jobData.loads) {
+          if ({}.hasOwnProperty.call(jobData.loads, i)) {
+            csvString += `\n${jobData.loads[i].id},`;
+            csvString += `"${TFormat.asDateTime(jobData.loads[i].startTime)}",`;
+            csvString += `"${NumberFormatting.asMoney(jobData.loads[i].tonsEntered, '.', 2, ',', '')}",`;
+            csvString += `"${NumberFormatting.asMoney(jobData.job.rate)}",`;
+            csvString += `"${NumberFormatting.asMoney(jobData.loads[i].totalLoadCost)}",`;
+            csvString += `${jobData.loads[i].loadStatus},`;
+            csvString += `"${jobData.loads[i].ticketNumber}"`;
+          }
+        }
+      }
+    }
+
+    this.setState({jobData: csvString});
+  }
+
+  gotPDF(data, name) {
+    // let's convert the base64 data into a pdf and open it
+    const binaryString = window.atob(data);
+    const binaryLen = binaryString.length;
+    const bytes = new Uint8Array(binaryLen);
+    for (let i = 0; i < binaryLen; i += 1) {
+      const ascii = binaryString.charCodeAt(i);
+      bytes[i] = ascii;
+    }
+    const blob = new Blob([bytes], {type: 'application/pdf'});
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+  }
+
+  async exportToPDF() {
+    const { job } = this.state;
+    this.setState({pdfLoader: true});
+
+    const pdfRequest = {
+      jobId: job.id
+    };
+
+    try {
+      const d = new Date().toISOString().split('T')[0];
+      const pdf = await ReportsService.getLoadsTicketsPDF(pdfRequest);
+      pdf.text().then(body => this.gotPDF(body, `${job.name}_Tickets_${d}`));
+    } catch (e) {
+      console.log('ERROR: Unable to retrieve PDF.', e);
+    }
+    this.setState({pdfLoader: false});
+  }
+
   async loadSavePage(jobId) {
     const {match} = this.props;
     let {
@@ -149,6 +251,7 @@ class JobSavePage extends Component {
       company,
       bid,
       booking,
+      loads,
       profile,
       favoriteCompany,
       selectedDrivers,
@@ -305,7 +408,9 @@ class JobSavePage extends Component {
                 driversWithLoads.push(driver.id)
               ));
             }
+            loads = await LoadService.getLoadsByBookingId(booking.id);
           }
+
           // Check if carrier is favorite for this job's customer
           if (profile.companyType === 'Carrier') {
             // check if Carrier Company [profile.companyId]
@@ -341,6 +446,7 @@ class JobSavePage extends Component {
             companyCarrier,
             companyCarrierData,
             booking,
+            loads,
             profile,
             companyType: profile.companyType,
             favoriteCompany,
@@ -361,6 +467,20 @@ class JobSavePage extends Component {
     } catch (err) {
       // console.error(err);
     }
+  }
+
+  toggleResumeJobModal() {
+    const {modalResumeJob} = this.state;
+    this.setState({
+      modalResumeJob: !modalResumeJob
+    });
+  }
+
+  togglePauseJobModal() {
+    const {modalPauseJob} = this.state;
+    this.setState({
+      modalPauseJob: !modalPauseJob
+    });
   }
 
   toggleNewJobModal() {
@@ -643,13 +763,16 @@ class JobSavePage extends Component {
     // A favorite Carrier "accepts" the job
     if (action === 'Accept') {
       try {
-        await BidService.acceptBid(job.id, bid.id);
+        const acceptedBid = await BidService.acceptBid(job.id, bid.id);
+        job.status = "Booked";
+        this.setState({job, companyCarrier: acceptedBid.companyCarrierId});
       } catch (e) {
         // console.log(e);
       }
     } else if (action === 'Decline') { // A Carrier "declines" a job request
       try {
-        await BidService.declineBid(job.id, bid.id);
+        const declinedBid = await BidService.declineBid(job.id, bid.id);
+        this.setState({bid: declinedBid});
       } catch (e) {
         // console.log(e);
       }
@@ -723,13 +846,15 @@ class JobSavePage extends Component {
   }
 
   renderJobForm(companyType, job) {
-    const {companyCarrier, bid} = this.state;
+    const {companyCarrier, bid, loads} = this.state;
     return (
       <JobForm
         job={job}
         bid={bid}
         companyCarrier={companyCarrier}
         handlePageClick={this.handlePageClick}
+        jobsLoads={loads}
+        onChangeJobData={this.JobFormData}
       />
     );
   }
@@ -898,9 +1023,55 @@ class JobSavePage extends Component {
     );
   }
 
+  renderCSVButton() {
+    const {jobData} = {...this.state};
+    return (
+      <CSVLink data={jobData} filename="Job_Info.csv">
+        <Button
+          outline
+          className="btn secondaryButton"
+          style={{marginRight: '15px'}}
+        >
+          Export data as CSV &nbsp;
+          <span className="lnr lnr-chart-bars" />
+        </Button>
+      </CSVLink>
+    );
+  }
+
+  renderPDF() {
+    const {pdfLoader} = this.state;
+    return (
+      <TSubmitButton
+        onClick={() => this.exportToPDF()}
+        className="secondaryButton"
+        loading={pdfLoader}
+        loaderSize={10}
+        bntText={['Export loads tickets as PDF ', <span key="cloudIcon" className="lnr lnr-cloud-download"/>]}
+      />
+    );
+  }
+
+  renderResumeButton() {
+    const {job} = this.state;
+    if (job.status === 'Paused') {
+      return (
+        <Button
+          onClick={() => this.toggleResumeJobModal()}
+          type="button"
+          className="primaryButton"
+          id="pausedJobsButton"
+        >
+          Resume Job
+        </Button>
+      );
+    }
+    return false;
+  }
+
   renderCloseButton() {
     const {job} = this.state;
-    if (job.status === 'In Progress') {
+    if (job.status === 'In Progress' || job.status === 'Paused') {
       return (
         <TSubmitButton
           onClick={() => this.toggleCloseModal()}
@@ -947,6 +1118,69 @@ class JobSavePage extends Component {
       );
     }
     return false;
+  }
+
+  renderPauseButton() {
+    const {job, profile, btnSubmitting} = this.state;
+    if (job.status === 'In Progress') {
+      return (
+        <Button
+          onClick={() => this.togglePauseJobModal()}
+          type="button"
+          className="primaryButton"
+          id="pausedJobsButton"
+        >
+          Pause Job
+        </Button>
+      );
+    }
+    return false;
+  }
+
+  renderResumeJobModal() {
+    const {
+      modalResumeJob,
+      job,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalResumeJob}
+        toggle={this.toggleResumeJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobResumePopup
+          jobId={job.id}
+          profile={profile}
+          updateResumedJob={this.updateJobView}
+          toggle={this.toggleResumeJobModal}
+        />
+      </Modal>
+    );
+  }
+
+  renderPauseJobModal() {
+    const {
+      modalPauseJob,
+      job,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalPauseJob}
+        toggle={this.togglePauseJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobPausePopup
+          job={job}
+          profile={profile}
+          updatePausedJob={this.updateJobView}
+          toggle={this.togglePauseJobModal}
+        />
+      </Modal>
+    );
   }
 
   renderCloseJobModal() {
@@ -1526,6 +1760,7 @@ class JobSavePage extends Component {
       profile,
       accessForbidden
     } = this.state;
+    const jobData = {...this.state};
     // console.log('>>>CO:', companyType);
     if (accessForbidden) {
       return (
@@ -1549,7 +1784,7 @@ class JobSavePage extends Component {
             {this.renderCopyJobModal()}
             {this.renderEditExistingJobModal()}
             {this.renderEditSavedJobModal()}
-            {/*{this.renderAllocateDriversModal(profile)}*/}
+            {/* {this.renderAllocateDriversModal(profile)} */}
             {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
             {this.renderCancelCarrierModal()}
@@ -1557,14 +1792,27 @@ class JobSavePage extends Component {
             {this.renderCancelModal2()}
             {this.renderCloseJobModal()}
             {this.renderDeleteJobModal()}
+            {this.renderResumeJobModal()}
+            {this.renderPauseJobModal()}
             <div className="row">
               <div className="col-md-6">
                 {this.renderActionButtons(job, companyType, favoriteCompany, btnSubmitting, bid)}
               </div>
               <div className="col-md-6 text-right">
-                {companyType !== 'Carrier' && this.renderCopyButton()}
-                {companyType === 'Customer' && this.renderCloseButton()}
-                {companyType === 'Customer' && this.renderDeleteButton()}
+                {companyType === 'Customer' && profile.isAdmin && (
+                  <React.Fragment>
+                    {jobData.loads
+                    && jobData.loads.length > 0
+                    && jobData.loads[0].loadStatus !== 'Started'
+                    && this.renderPDF()}
+                    {this.renderCSVButton()}
+                    {this.renderCopyButton()}
+                    {this.renderCloseButton()}
+                    {this.renderDeleteButton()}
+                    {this.renderResumeButton()}
+                    {this.renderPauseButton()}
+                  </React.Fragment>
+                )}
                 {this.renderCancelButton()}
               </div>
             </div>
@@ -1572,6 +1820,7 @@ class JobSavePage extends Component {
             {
               job.status && (
                 job.status === 'In Progress'
+                || job.status === 'Paused'
                 || job.status === 'Job Completed'
                 || job.status === 'Allocated'
                 || job.status === 'Booked'

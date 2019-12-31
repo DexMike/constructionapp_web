@@ -10,13 +10,12 @@ import {
 import moment from 'moment';
 import NumberFormat from 'react-number-format';
 import { withTranslation } from 'react-i18next';
+import TSpinner from '../common/TSpinner';
 import TField from '../common/TField';
 import UserService from '../../api/UserService';
 import DriverService from '../../api/DriverService';
 import UserManagementService from '../../api/UserManagementService';
 import TSubmitButton from '../common/TSubmitButton';
-import CompanyService from '../../api/CompanyService';
-import TwilioService from '../../api/TwilioService';
 
 class DriverForm extends Component {
   constructor(props) {
@@ -94,61 +93,6 @@ class DriverForm extends Component {
     }
   }
 
-  phoneToNumberFormat(phone) {
-    const num = Number(phone.replace(/\D/g, ''));
-    return num;
-  }
-
-  async sendDriverInvite(user) {
-    let {inviteStatus, inviteMessage} = this.state;
-    const {currentUser} = this.props;
-
-    try {
-      // Sending SMS to Truck's company
-      const chars = {'(': '', ')': '', '-': '', ' ': ''};
-      const mobilePhone = user.mobilePhone.replace(/[abc]/g, m => chars[m]);
-
-      // get company legal name
-      const tempCompany = await CompanyService.getCompanyById(currentUser.companyId);
-      const companyLegalName = tempCompany.legalName;
-
-      if (this.checkPhoneFormat(mobilePhone)) {
-        const notification = {
-          to: this.phoneToNumberFormat(mobilePhone),
-          body: `Hi, you’ve been invited by ${companyLegalName} to join Trelar Logistics. Go here to download the app https://www.trelar.com/drivers-app/`
-        };
-
-        await TwilioService.createInviteSms(notification);
-
-        inviteStatus = true;
-        inviteMessage = `
-        Your invitation to ${user.firstName} ${user.lastName}, sent to phone number ${user.mobilePhone}, was Successful.`;
-      } else {
-        inviteStatus = false;
-        inviteMessage = `Mobile phone format ${user.mobilePhone} is invalid. Try editing it ...`;
-      }
-    } catch (err) {
-      inviteStatus = false;
-      inviteMessage = `Error. Your invitation to ${user.firstName} ${user.lastName}
-        to phone number ${user.mobilePhone} had a problem. Please try again by clicking the button below.`;
-    }
-    this.setState({
-      sendingSMS: false,
-      inviteStatus,
-      inviteMessage
-    });
-  }
-
-  checkPhoneFormat(phone) {
-    const phoneNotParents = String(this.phoneToNumberFormat(phone));
-    const areaCode3 = phoneNotParents.substring(0, 3);
-    const areaCode4 = phoneNotParents.substring(0, 4);
-    if (areaCode3.includes('555') || areaCode4.includes('1555')) {
-      return false;
-    }
-    return true;
-  }
-
   async saveUser() {
     const {toggle, currentUser, onSuccess} = this.props;
     this.setState({btnSubmitting: true});
@@ -161,7 +105,7 @@ class DriverForm extends Component {
       firstName,
       lastName, email, mobilePhone, selectedUser
     } = this.state;
-    const user = selectedUser;
+    let user = selectedUser;
     user.mobilePhone = `+1${mobilePhone}`;
     user.lastName = lastName;
     user.email = email;
@@ -188,24 +132,79 @@ class DriverForm extends Component {
       user.createdOn = moment.utc().format();
       user.modifiedBy = currentUser.id;
       user.modifiedOn = moment.utc().format();
-      const newUser = await UserService.createUser(user);
-      user.id = newUser.id;
-
-      const driver = {};
-      driver.usersId = newUser.id;
-      driver.driverStatus = 'Invited';
-      driver.createdBy = currentUser.id;
-      driver.createdOn = moment.utc().format();
-      // we are not seeing driver id to user record.. we should do that here
       try {
-        await DriverService.createDriver(driver);
-        await this.sendDriverInvite(user);
+        const response = await DriverService.createAndInviteDriver(user);
+        if (response.user && response.driver) {
+          user = response.user;
+          onSuccess(response.user, response.driver);
+          toggle();
+        } else {
+          this.setState({
+            step: 2,
+            inviteStatus: false,
+            inviteMessage: 'There was an error when trying to invite a driver. Please try again.'
+          });
+        }
       } catch (err) {
         console.error('Failed to created driver / notify driver invited');
+        this.setState({
+          step: 2,
+          inviteStatus: false,
+          inviteMessage: 'There was an error when trying to invite a driver. Please try again.'
+        });
       }
-      onSuccess(user, driver);
-      this.setState({step: 2, selectedUser: user});
     }
+    this.setState({
+      selectedUser: user
+    });
+  }
+
+  async resendDriverInvite() {
+    this.setState({btnSubmitting: true});
+    const {toggle, onSuccess} = this.props;
+    const { selectedUser } = this.state;
+    if (selectedUser.id != null) {
+      try {
+        const response = await DriverService.resendInviteToDriver(selectedUser.id);
+        if (response.user && response.driver) {
+          onSuccess(response.user, response.driver);
+          toggle();
+        } else {
+          this.setState({
+            step: 2,
+            inviteStatus: false,
+            inviteMessage: 'Failed to resend invite to driver. Please try again.'
+          });
+        }
+      } catch (e) {
+        this.setState({
+          step: 2,
+          inviteStatus: false,
+          inviteMessage: 'Failed to resend invite to driver. Please try again.'
+        });
+      }
+    } else {
+      try {
+        const response = await DriverService.createAndInviteDriver(selectedUser);
+        if (response.user && response.driver) {
+          onSuccess(response.user, response.driver);
+          toggle();
+        } else {
+          this.setState({
+            step: 2,
+            inviteStatus: false,
+            inviteMessage: 'There was an error when trying to invite a driver. Please try again.'
+          });
+        }
+      } catch (err) {
+        this.setState({
+          step: 2,
+          inviteStatus: false,
+          inviteMessage: 'There was an error when trying to invite a driver. Please try again.'
+        });
+      }
+    }
+    this.setState({btnSubmitting: false});
   }
 
   async isFormValid() {
@@ -309,7 +308,7 @@ class DriverForm extends Component {
   }
 
   renderDriverInvite() {
-    const {inviteStatus, inviteMessage, selectedUser, sendingSMS} = this.state;
+    const {inviteStatus, inviteMessage, selectedUser, sendingSMS, btnSubmitting} = this.state;
     const {toggle, t} = this.props;
     if (sendingSMS) {
       return (
@@ -323,18 +322,21 @@ class DriverForm extends Component {
       );
     }
     return (
-      <Row className="p-4">
+      <Row className="form">
         <Col md={12}>
-          {/* <span>Invite a Driver</span> */}
-          <br/>
-          <h3>{inviteStatus ? `${t('Success')}!` : t('Warning')}</h3>
-          <p>
+          <h3
+            className="page-title pl-4 pr-4 pt-2 pb-2"
+            style={{backgroundColor: '#006F53', color: '#FFF', fontSize: 14}}
+          >
+            {inviteStatus ? `${t('Success')}!` : t('Warning')}
+          </h3>
+          <p className="p-4">
             {inviteMessage}
           </p>
         </Col>
         {
           inviteStatus === true ? (
-            <Col md={12} className="text-right pt-4">
+            <Col md={12} className="text-right pt-4 pr-4">
               <Button
                 onClick={() => {
                   toggle();
@@ -348,20 +350,33 @@ class DriverForm extends Component {
         }
         {
           inviteStatus === false ? (
-            <Col md={12} className="text-right pt-4">
+            <Col md={12} className="text-right pt-4 pr-4">
+              {
+                selectedUser.id == null && (
+                  <Button
+                    onClick={() => this.setState({
+                      step: 1
+                    })}
+                    className="secondaryButton"
+                  >
+                    {t('Edit')}
+                  </Button>
+                )
+              }
               <Button
-                onClick={() => this.setState({
-                  step: 1
-                })}
-                className="secondaryButton"
-              >
-                {t('Edit')}
-              </Button>
-              <Button
-                onClick={() => this.sendDriverInvite(selectedUser)}
+                onClick={() => this.resendDriverInvite()}
                 className="primaryButton"
+                disabled={btnSubmitting}
               >
-                {t('Resend Invite')}
+                {
+                  btnSubmitting ? (
+                    <TSpinner
+                      color="#808080"
+                      loaderSize={10}
+                      loading
+                    />
+                  ) : t('Resend Invite')
+                }
               </Button>
             </Col>
           ) : null
@@ -403,9 +418,9 @@ class DriverForm extends Component {
                 input={{
                   onChange: this.handleInputChange,
                   name: 'firstName',
-                  value: t(firstName)
+                  value: firstName
                 }}
-                placeholder="First Name"
+                placeholder={t('First Name')}
                 type="text"
                 meta={reqHandlerFName}
               />

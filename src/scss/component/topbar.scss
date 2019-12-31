@@ -115,6 +115,16 @@
   margin: auto 0;
 }
 
+_:-ms-lang(x), _:-webkit-full-screen, .topbar__avatar-name {
+  margin: auto 0 !important;
+}
+
+@-moz-document url-prefix() {
+  .topbar__avatar-name {
+    margin: auto 0 !important;
+  }
+}
+
 .topbar__avatar-img {
   border-radius: 50%;
   height: 36px;

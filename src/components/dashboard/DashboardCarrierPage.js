@@ -7,7 +7,7 @@ import {
   Container, Modal,
   Row
 } from 'reactstrap';
-import {useTranslation} from 'react-i18next';
+import {useTranslation, withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import {DashboardObjectStatic} from './DashboardObjectStatic';
@@ -79,7 +79,7 @@ class DashboardCarrierPage extends Component {
   }
 
   async componentDidMount() {
-    let { defaultDriverPrompt } = { ...this.state };
+    let { defaultDriverPrompt, rows, totalCount, filters } = { ...this.state };
     const profile = await ProfileService.getProfile();
     const user = await UserService.getUserById(profile.userId);
     if (user.defaultDriverPrompt === true) {
@@ -88,13 +88,26 @@ class DashboardCarrierPage extends Component {
       defaultDriverPrompt = true;
     }
     const { jobsInfo, totalJobs } = await this.fetchJobsInfo(profile);
+
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
+      rows = filters.rows;      
+    }    
+    if (localStorage.getItem('metadata')) {
+      const metadata = JSON.parse(localStorage.getItem('metadata'));
+      totalCount = metadata.totalCount;
+    }
+
     this.setState({
       profile,
       user,
       jobsInfo,
       totalJobs,
       defaultDriverPrompt,
-      loaded: true
+      loaded: true,
+      rows,
+      totalCount,
+      filters
     });
   }
 
@@ -107,6 +120,8 @@ class DashboardCarrierPage extends Component {
 
   returnJobs(jobs, filters, metadata) {
     const { totalCount } = metadata;
+    localStorage.setItem('filters', JSON.stringify(filters));
+    localStorage.setItem('metadata', JSON.stringify(metadata));
     this.setState({
       jobs,
       filters,
@@ -156,19 +171,6 @@ class DashboardCarrierPage extends Component {
     } else {
       filters[name] = value;
     }
-    // clearing filter fields for general jobs based on Status (Top cards)
-    filters.equipmentType = [];
-    filters.materialType = [];
-    filters.startAvailability = '';
-    filters.endAvailability = '';
-    delete filters.rateType;
-    filters.rate = '';
-    filters.minTons = '';
-    filters.minHours = '';
-    filters.minCapacity = '';
-    filters.numEquipments = '';
-    filters.zipCode = '';
-    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       filters,
@@ -372,7 +374,8 @@ class DashboardCarrierPage extends Component {
   renderJobList() {
     const { profile, loaded } = this.state;
     let { jobs } = this.state;
-
+    const { t } = { ...this.props };
+    const translate = t;
     let onOfferJobCount = 0;
     let acceptedJobCount = 0;
     let inProgressJobCount = 0;
@@ -406,24 +409,36 @@ class DashboardCarrierPage extends Component {
         completedJobCount += 1;
       }
 
-      if (newJob.rateType === 'Hour') {
+      if (newJob.amountType === 'Hour') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asHours(newJob.rateEstimate)
         );
-        newJob.newRateF = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Hour'
-        );
-      } else if (newJob.rateType === 'Ton') {
+        if (newJob.rateType === 'Hour') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
+      } else if (newJob.amountType === 'Ton') {
         newJob.newSize = newJob.rateEstimate;
         newJob.newSizeF = TFormat.getValue(
           TFormat.asTons(newJob.rateEstimate)
         );
-        newJob.newRateF = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Ton'
-        );
+        if (newJob.rateType === 'Hour') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRateF = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
       }
-
+      
       newJob.newRate = newJob.rate;
       newJob.potentialIncome = Math.round(tempRate * newJob.rateEstimate);
       newJob.potentialIncomeF = NumberFormatting.asMoney(
@@ -450,7 +465,7 @@ class DashboardCarrierPage extends Component {
     );
 
     if (loaded) {
-      const { filters, totalCount, totalJobs, isLoading} = this.state;
+      const { filters, totalCount, totalJobs, isLoading, rows} = this.state;
       return (
         <Container className="dashboard">
           <Row>
@@ -471,46 +486,46 @@ class DashboardCarrierPage extends Component {
                         // },
                         {
                           name: 'newStartDate',
-                          displayName: 'Start Date'
+                          displayName: t('Start Date')
                         },
                         {
                           name: 'name',
-                          displayName: 'Job Name'
+                          displayName: t('Job Name')
                         },
                         {
                           name: 'status',
-                          displayName: 'Job Status'
+                          displayName: t('Job Status')
                         },
                         {
                           name: 'companyLegalName',
-                          displayName: 'Customer'
+                          displayName: t('Customer')
                         },
                         {
                           name: 'distance',
-                          displayName: 'Distance from Me (mi)'
+                          displayName: `${t('Distance from Me')} (mi)`
                         },
                         {
                           name: 'haulDistance',
-                          displayName: 'Haul Distance (One Way) (mi)'
+                          displayName: `${t('Haul Distance')} (${t('One Way')}) (mi)`
                         },
                         {
                           name: 'potentialIncome',
-                          displayName: filters.status === 'Job Completed' ? 'Earnings' : 'Potential Earnings',
+                          displayName: filters.status === 'Job Completed' ? t('Earnings') : t('Potential Earnings'),
                           label: 'potentialIncomeF'
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate',
+                          displayName: t('Rate'),
                           label: 'newRateF'
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size',
+                          displayName: t('Size'),
                           label: 'newSizeF'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table
-                          name: 'materials',
+                          name: t('materials'),
                           displayName: 'Materials'
                         }
                       ]
@@ -522,6 +537,7 @@ class DashboardCarrierPage extends Component {
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
                     isLoading={isLoading}
+                    defaultRows={rows}
                   />
                 </CardBody>
               </Card>
@@ -550,6 +566,7 @@ class DashboardCarrierPage extends Component {
   }
 
   render() {
+    const {t} = this.props;
     const { loaded, page, rows } = this.state;
     if (loaded) {
       return (
@@ -563,7 +580,8 @@ class DashboardCarrierPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
-            isLoading={(e) => this.setState({isLoading: e})}           
+            isLoading={(e) => this.setState({isLoading: e})} 
+            t={t}          
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}
@@ -583,4 +601,4 @@ class DashboardCarrierPage extends Component {
   }
 }
 
-export default DashboardCarrierPage;
+export default withTranslation()(DashboardCarrierPage);

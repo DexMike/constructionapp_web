@@ -1,15 +1,3 @@
-/* eslint-disable no-multiple-empty-lines,
-no-trailing-spaces,
-object-curly-spacing,
-no-unused-vars,
-spaced-comment,
-react/jsx-closing-bracket-location,
-semi, quotes, no-empty,
-react/no-string-refs,
-prefer-const, comma-dangle, padded-blocks,
-react/jsx-one-expression-per-line,
-space-before-function-paren,
-keyword-spacing, no-multi-spaces */
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import {
@@ -23,23 +11,23 @@ import {
   Modal
 } from 'reactstrap';
 
-import {useTranslation} from 'react-i18next';
-import moment from 'moment';
+import { useTranslation } from 'react-i18next';
 
 // ag grid
 import { AgGridReact } from 'ag-grid-react';
 import { Scrollbars } from 'react-custom-scrollbars';
 // import 'ag-grid-community/dist/styles/ag-grid.css';
 // import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import { CSVLink, CSVDownload } from "react-csv";
-import StringGenerator from '../utils/StringGenerator';
-import TFormat from '../common/TFormat';
-import {DashboardObjectStatic} from './DashboardObjectStatic';
+import { CSVLink } from 'react-csv';
+import moment from 'moment';
+import StringGenerator from './utils/StringGenerator';
+import TFormat from './common/TFormat';
+import { DashboardObjectStatic } from './DashboardObjectStatic';
 import DashboardObjectClickable from './DashboardObjectClickable';
-import DailyReportFilter from '../filters/DailyReportFilter';
-import JobService from '../../api/JobService';
-import ProfileService from '../../api/ProfileService';
-import './Reports.css';
+import DailyReportFilter from './filters/DailyReportFilter';
+import JobService from './services/JobService';
+import ProfileService from './services/ProfileService';
+import './css/Reports.css';
 import ReportsDailyReportsColumns from './ReportsDailyReportsColumns';
 
 import ReportsJobPopup from './ReportsJobPopup';
@@ -53,28 +41,28 @@ function currencyFormatter(params) {
   if (params) {
     return TFormat.currencyFormatter(params.value);
   }
-  return "$ 0.00";
+  return '$ 0.00';
 }
 
 function numberFormatter(params) {
   if (params) {
     return TFormat.formatNumber(params.value);
   }
-  return "0";
+  return '0';
 }
 
 function decimalFormatter(params) {
   if (params) {
     return TFormat.formatNumberDecimal(params.value);
   }
-  return "0";
+  return '0';
 }
 
 function dhmsFormatter(params) {
   if (params) {
     return TFormat.asMinutesToDHms(params.value);
   }
-  return "0";
+  return '0';
 }
 
 // Assumes SQL side did the *100 already
@@ -83,14 +71,14 @@ function percentFormatter(params) {
 }
 
 function PageTitle() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <h3 className="page-title">{t('Daily Report')}</h3>
   );
 }
 
-function DashboardLoading () {
-  const {t} = useTranslation();
+function DashboardLoading() {
+  const { t } = useTranslation();
   return (
     <Container className="dashboard">
       {t('Loading...')}
@@ -98,11 +86,25 @@ function DashboardLoading () {
   );
 }
 
-function TableLegend({displayed, totalCount, totalJobs}) {
-  const {t} = useTranslation();
-  return(
+function TableLegend({ displayed, totalCount, totalJobs }) {
+  const { t } = useTranslation();
+  return (
     <div className="ml-4 mt-4">
-      {t('Displaying')} {displayed} {t('out of')} {totalCount} {t('filtered jobs')} ({totalJobs} {t('total jobs')})
+      {t('Displaying')}
+      {' '}
+      {displayed}
+      {' '}
+      {t('out of')}
+      {' '}
+      {totalCount}
+      {' '}
+      {t('filtered jobs')}
+      {' '}
+(
+      {totalJobs}
+      {' '}
+      {t('total jobs')}
+)
     </div>
   );
 }
@@ -145,9 +147,9 @@ class ReportsDailyReportPage extends Component {
         sortable: true,
         filter: true,
         width: 125,
-        cellStyle: { 'text-align': 'right'},
+        cellStyle: { 'text-align': 'right' },
         resizable: true,
-        suppressSizeToFit: true,
+        suppressSizeToFit: true
       },
       columnsJobs: [],
       columnsLoads: []
@@ -182,7 +184,7 @@ class ReportsDailyReportPage extends Component {
     columnsJobs = ReportsDailyReportsColumns.getJobsColumns();
     columnsLoads = ReportsDailyReportsColumns.getLoadsColumns();
 
-    //change labels according to user type
+    // change labels according to user type
     if (profile.companyType === 'Customer') {
       for (const obj of columnsJobs[1].children) {
         this.setLabelsCustomer(obj);
@@ -206,7 +208,7 @@ class ReportsDailyReportPage extends Component {
     this.gridColumnApi = params.columnApi;
   }
 
-  setLabelsCustomer (obj) {
+  setLabelsCustomer(obj) {
     const newObj = obj;
     if (obj.field === 'avgRevenuePerDay') {
       newObj.headerName = 'Cost per Day';
@@ -215,41 +217,14 @@ class ReportsDailyReportPage extends Component {
     return newObj;
   }
 
-  returnFilters(jobs, loads, filters/*, metadata*/) {
-    const totalCount = 0;
-    this.setState({
-      jobs,
-      loads,
-      filters,
-      totalCount
-    });
-  }
-  /**/
-
-  equipmentMaterialsAsString(materials) {
-    let materialsString = '';
-    if (materials) {
-      let index = 0;
-      for (const material of materials) {
-        if (index !== materials.length - 1) {
-          materialsString += `${material}, `;
-        } else {
-          materialsString += material;
-        }
-        index += 1;
-      }
-    }
-    return materialsString;
-  }
-
   handlePageClick(menuItem) {
     if (menuItem) {
       this.setState({ [`goTo${menuItem}`]: true });
     }
   }
 
-  async handleFilterStatusChange({value, name}) {
-    const { filters } = { ...this.state};
+  async handleFilterStatusChange({ value, name }) {
+    const { filters } = { ...this.state };
     if (filters[name] === value) {
       filters[name] = '';
     } else {
@@ -295,16 +270,16 @@ class ReportsDailyReportPage extends Component {
   }
 
   extractCSVInfoJobs(data) {
-    const { columnsJobs } = this.state;
-
     const formatter = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2
-    })
+    });
 
     const newData = data.map(d => ({
-      Date: d.date,
+      'Start Date': d.date === 0 ? 'N/A' : moment.unix(
+        d.date / 1000
+      ).format('MM/DD/YYYY'),
       Completed: d.completedJobs,
       'Not Completed': Number(d.notCompletedJobs),
       'In Progress': Number(d.jobsInProgress),
@@ -314,14 +289,8 @@ class ReportsDailyReportPage extends Component {
       'Cost per Day': formatter.format(d.avgRevenuePerDay),
       'Total Tons Hauled': Number(d.totalTonsHauled),
       'Job Duration': TFormat.asMinutesToDHms(d.avgJobTime),
-      'Distance (mi)': Number(d.realDistance),
-      //'Rate: $/Hour': d.rateHour
-      /*,
-      'Potential Earnings': d.potentialEarnings,
-      'Total Market Value': d.totalMarketValue
-      */
-
-    }))
+      'Distance (mi)': Number(d.realDistance)
+    }));
     return newData;
   }
 
@@ -331,17 +300,17 @@ class ReportsDailyReportPage extends Component {
       Loads: d.totalNumberOfLoads,
       Completed: d.totalNumberOfCompletedLoads,
       'Distance travelled': d.totalDistanceTravelled
-    }))
+    }));
     return newData;
   }
 
   // modal with job detail information
   togglePopup() {
     const { modal } = this.state;
-    
+
     if (modal) {
       this.setState(({
-        modal: !modal,
+        modal: !modal
       }));
     } else {
       this.setState(({
@@ -349,7 +318,7 @@ class ReportsDailyReportPage extends Component {
       }));
     }
   }
-  
+
   closeModal() {
     const { modal } = this.state;
     this.setState({
@@ -370,6 +339,32 @@ class ReportsDailyReportPage extends Component {
     } catch (e) {
       console.log('ERROR: ', e);
     }
+  }
+
+  equipmentMaterialsAsString(materials) {
+    let materialsString = '';
+    if (materials) {
+      let index = 0;
+      for (const material of materials) {
+        if (index !== materials.length - 1) {
+          materialsString += `${material}, `;
+        } else {
+          materialsString += material;
+        }
+        index += 1;
+      }
+    }
+    return materialsString;
+  }
+
+  returnFilters(jobs, loads, filters/* , metadata */) {
+    const totalCount = 0;
+    this.setState({
+      jobs,
+      loads,
+      filters,
+      totalCount
+    });
   }
 
   async fetchJobsInfo() {
@@ -501,7 +496,7 @@ class ReportsDailyReportPage extends Component {
       );
     }
     return (
-      <DashboardLoading  />
+      <DashboardLoading />
     );
   }
 
@@ -522,7 +517,7 @@ class ReportsDailyReportPage extends Component {
     return (
       <React.Fragment>
         <Modal isOpen={modal} toggle={this.togglePopup} backdrop="static" className="reports-modal-job">
-          <div className="dashboard dashboard__job-create" style={{width: 900}}>
+          <div className="dashboard dashboard__job-create" style={{ width: 900 }}>
             <ReportsJobPopup
               jobsDate={jobsDate}
               bid={null}
@@ -535,7 +530,8 @@ class ReportsDailyReportPage extends Component {
                 className="btn btn-outline-secondary"
                 outline
                 onClick={this.closeModal}
-                >Close &nbsp;
+              >
+Close &nbsp;
               </Button>
             </div>
           </div>
@@ -545,7 +541,7 @@ class ReportsDailyReportPage extends Component {
   }
 
   renderResults() {
-    let {
+    const {
       jobs,
       loads,
       loading,
@@ -561,7 +557,7 @@ class ReportsDailyReportPage extends Component {
     return (
       <React.Fragment>
         <Row>
-          {/*Jobs*/}
+          {/* Jobs */}
           <Col md={12}>
             <Card>
               <CardBody>
@@ -575,7 +571,8 @@ class ReportsDailyReportPage extends Component {
                         <CSVLink data={dataToPrintJobs} filename={`DailyJobsReport_${StringGenerator.getDateString()}.csv`}>
                           <Button
                             outline
-                          >Export data as CSV &nbsp;
+                          >
+Export data as CSV &nbsp;
                             <span className="lnr lnr-chart-bars" />
                           </Button>
                         </CSVLink>
@@ -588,7 +585,7 @@ class ReportsDailyReportPage extends Component {
                       {
                         loading && (
                           <div className="spinner-container">
-                            <div className="spinner-border" role="status" style={{color: '#006F53'}}>
+                            <div className="spinner-border" role="status" style={{ color: '#006F53' }}>
                               <span className="sr-only">Loading...</span>
                             </div>
                           </div>
@@ -628,7 +625,7 @@ class ReportsDailyReportPage extends Component {
           </Col>
         </Row>
 
-        {/*Loads
+        {/* Loads
         <Row>
           <Col md={12}>
             <Card>
@@ -714,12 +711,12 @@ class ReportsDailyReportPage extends Component {
               {this.renderTitle()}
             </Col>
           </Row>
-          
+
           {/* this.renderCards() */}
           <DailyReportFilter
             onReturnFilters={this.returnFilters}
             fetching={(value) => {
-              this.setState({ loading: value })
+              this.setState({ loading: value });
             }}
             page={page}
             rows={rows}

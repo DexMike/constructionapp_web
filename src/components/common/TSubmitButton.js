@@ -33,7 +33,10 @@ class TSubmitButton extends Component {
 }
 
 TSubmitButton.propTypes = {
-  bntText: PropTypes.string.isRequired,
+  bntText: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array
+  ]).isRequired,
   className: PropTypes.string,
   customCss: PropTypes.shape(),
   onClick: PropTypes.oneOfType([

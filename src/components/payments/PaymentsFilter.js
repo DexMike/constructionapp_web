@@ -1,6 +1,7 @@
 import { Button, Card, CardBody, Col, Row } from 'reactstrap';
 import moment from 'moment';
 import React, { Component } from 'react';
+import { withTranslation } from 'react-i18next';
 // import MultiSelect from '../common/TMultiSelect';
 import * as PropTypes from 'prop-types';
 import TSelect from '../common/TSelect';
@@ -50,7 +51,7 @@ class PaymentsFilter extends Component {
       statusTypeList,
       filters
     } = this.state;
-    const { isCarrier } = this.props;
+    const { isCarrier, t } = this.props;
 
     const companySearchType = isCarrier ? 'Customer' : 'Carrier';
 
@@ -66,12 +67,12 @@ class PaymentsFilter extends Component {
                   <Row lg={12} id="filter-input-row">
                     <Col md="3">
                       <div className="filter-item-title">
-                        Search by {companySearchType} Name
+                        {t(`Search by ${companySearchType} Name`)}
                       </div>
                       <input
                         name="name"
                         type="text"
-                        placeholder="Name"
+                        placeholder={t('Name')}
                         value={filters.name}
                         onChange={() => {
                         }}
@@ -79,7 +80,7 @@ class PaymentsFilter extends Component {
                     </Col>
                     <Col md="4">
                       <div className="filter-item-title">
-                        Date Range
+                        {t('Date Range')}
                       </div>
                       <TIntervalDatePicker
                         startDate={filters.startDate}
@@ -92,7 +93,7 @@ class PaymentsFilter extends Component {
                     </Col>
                     <Col md="5">
                       <div className="filter-item-title">
-                        Status Type
+                        {t('Status Type')}
                       </div>
                       <TSelect
                         input={
@@ -134,7 +135,7 @@ class PaymentsFilter extends Component {
                         className="btn btn-primary float-right mt-20"
                         styles="margin:0px !important"
                       >
-                        Reset Filters
+                        {t('Reset')}
                       </Button>
                     </Col>
                   </Row>
@@ -157,4 +158,4 @@ PaymentsFilter.defaultProps = {
   isCarrier: false
 };
 
-export default PaymentsFilter;
+export default withTranslation()(PaymentsFilter);

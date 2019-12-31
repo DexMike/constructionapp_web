@@ -9,7 +9,7 @@ import {
   Modal,
   Row
 } from 'reactstrap';
-import {useTranslation} from 'react-i18next';
+import {useTranslation, withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import TFormat from '../common/TFormat';
 import JobService from '../../api/JobService';
@@ -21,6 +21,8 @@ import {DashboardObjectStatic} from './DashboardObjectStatic';
 import JobFilter from '../filters/JobFilter';
 import NumberFormatting from '../../utils/NumberFormatting';
 import GeoUtils from '../../utils/GeoUtils';
+import JobResumePopup from '../jobs/JobResumePopup';
+import JobListResumePopup from '../jobs/JobListResumePopup';
 
 function PageTitle() {
   const {t} = useTranslation();
@@ -39,6 +41,20 @@ function AddJobButton({handle}) {
       id="addJobButton"
     >
       {t('ADD A JOB')}
+    </Button>
+  );
+}
+
+function PausedJobsButton({handle}) {
+  const {t} = useTranslation();
+  return (
+    <Button
+      onClick={handle}
+      type="button"
+      className="secondaryButton"
+      id="pausedJobsButton"
+    >
+      {t('PAUSED JOBS')}
     </Button>
   );
 }
@@ -71,12 +87,15 @@ class DashboardCustomerPage extends Component {
       loaded: false,
       jobs: [],
       jobsInfo: [],
+      pausedJobs: [],
       goToDashboard: false,
       goToAddJob: false,
       goToUpdateJob: false,
       jobId: 0,
       modalAddJob: false,
       modalAddJobWizard: false,
+      modalResumeJob: false,
+      modalResumeJobList: false,
       // TODO: Refactor to a single filter object
       // Filter values
       filters: {
@@ -86,6 +105,8 @@ class DashboardCustomerPage extends Component {
       rows: 10,
       totalCount: 10,
       totalJobs: 0,
+      pausedJobId: null,
+      pausedJobsListOnFirstLoad: true,
       isLoading: false
     };
 
@@ -93,19 +114,38 @@ class DashboardCustomerPage extends Component {
     this.handleJobEdit = this.handleJobEdit.bind(this);
     this.toggleNewJobModal = this.toggleNewJobModal.bind(this);
     this.toggleNewJobWizardModal = this.toggleNewJobWizardModal.bind(this);
+    this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
+    this.toggleResumeJobListModal = this.toggleResumeJobListModal.bind(this);
     this.handleFilterStatusChange = this.handleFilterStatusChange.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.handleRowsPerPage = this.handleRowsPerPage.bind(this);
     this.returnJobs = this.returnJobs.bind(this);
     this.sortFilters = this.sortFilters.bind(this);
+    this.handleEditPausedJob = this.handleEditPausedJob.bind(this);
+    this.handleGoToPausedJobList = this.handleGoToPausedJobList.bind(this);
   }
 
   async componentDidMount() {
+    let { rows, totalCount, filters } = this.state;
     const profile = await ProfileService.getProfile();
     await this.fetchJobsInfo(profile);
+
+    if (localStorage.getItem('filters')) {
+      filters = JSON.parse(localStorage.getItem('filters'));
+      rows = filters.rows;      
+    }    
+    if (localStorage.getItem('metadata')) {
+      const metadata = JSON.parse(localStorage.getItem('metadata'));
+      totalCount = metadata.totalCount;
+    }
+
     this.setState({
+      // pausedJobs,
       profile,
-      loaded: true
+      loaded: true,
+      rows,
+      totalCount,
+      filters
     });
   }
 
@@ -116,10 +156,20 @@ class DashboardCustomerPage extends Component {
     this.setState({ totalJobs, jobsInfo });
   }
 
-  returnJobs(jobs, filters, metadata) {
+  returnJobs(jobs, filters, metadata, pausedJobsList) {
+    const { pausedJobsListOnFirstLoad } = this.state;
     const { totalCount } = metadata;
+
+    if (pausedJobsList && pausedJobsList.length > 0 && pausedJobsListOnFirstLoad) {
+      this.toggleResumeJobListModal(true);
+    }
+
+    localStorage.setItem('filters', JSON.stringify(filters));
+    localStorage.setItem('metadata', JSON.stringify(metadata));
     this.setState({
       jobs,
+      pausedJobs: pausedJobsList,
+      pausedJobsListOnFirstLoad: false,
       filters,
       totalCount
     });
@@ -132,19 +182,6 @@ class DashboardCustomerPage extends Component {
     } else {
       filters[name] = value;
     }
-    // clearing filter fields for general jobs based on Status (Top cards)
-    filters.equipmentType = [];
-    filters.materialType = [];
-    filters.startAvailability = '';
-    filters.endAvailability = '';
-    delete filters.rateType;
-    filters.rate = '';
-    filters.minTons = '';
-    filters.minHours = '';
-    filters.minCapacity = '';
-    filters.numEquipments = '';
-    filters.zipCode = '';
-    filters.range = '';
     this.refs.filterChild.filterWithStatus(filters);
     this.setState({
       filters,
@@ -200,6 +237,19 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  handleEditPausedJob(pausedJobId) {
+    this.toggleResumeJobListModal();
+    this.toggleResumeJobModal();
+    this.setState({
+      pausedJobId
+    });
+  }
+
+  handleGoToPausedJobList() {
+    this.toggleResumeJobModal();
+    this.toggleResumeJobListModal();
+  }
+
   handlePageChange(page) {
     this.setState({ page });
   }
@@ -234,6 +284,26 @@ class DashboardCustomerPage extends Component {
     });
   }
 
+  toggleResumeJobModal() {
+    const {modalResumeJob} = this.state;
+    this.setState({
+      modalResumeJob: !modalResumeJob
+    });
+  }
+
+  toggleResumeJobListModal(toggle) {
+    const {modalResumeJobList} = this.state;
+    if (toggle) {
+      this.setState({
+        modalResumeJobList: toggle
+      });
+    } else {
+      this.setState({
+        modalResumeJobList: !modalResumeJobList
+      });
+    }
+  }
+
   renderGoTo() {
     const status = this.state;
     if (status.goToDashboard) {
@@ -246,6 +316,51 @@ class DashboardCustomerPage extends Component {
       return <Redirect push to={`/jobs/save/${status.jobId}`}/>;
     }
     return false;
+  }
+
+  renderResumeJobListModal() {
+    const {
+      modalResumeJobList,
+      pausedJobs,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalResumeJobList}
+        toggle={this.toggleResumeJobListModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobListResumePopup
+          pausedJobs={pausedJobs}
+          profile={profile}
+          toggle={this.toggleResumeJobListModal}
+          onJobSelect={this.handleEditPausedJob}
+        />
+      </Modal>
+    );
+  }
+
+  renderResumeJobModal() {
+    const {
+      modalResumeJob,
+      pausedJobId,
+      profile
+    } = this.state;
+    return (
+      <Modal
+        isOpen={modalResumeJob}
+        toggle={this.toggleResumeJobModal}
+        className="modal-dialog--primary modal-dialog--header"
+        backdrop="static"
+      >
+        <JobResumePopup
+          jobId={pausedJobId}
+          profile={profile}
+          toggle={this.toggleResumeJobModal}
+        />
+      </Modal>
+    );
   }
 
   renderNewJobModal() {
@@ -285,13 +400,17 @@ class DashboardCustomerPage extends Component {
   }
 
   renderTitle() {
+    const {pausedJobs} = this.state;
     return (
       <Row>
-        <Col md={10}>
+        <Col md={9}>
           <PageTitle />
         </Col>
-        <Col md={2}>
+        <Col md={3} style={{textAlign: 'right'}}>
           <AddJobButton handle={this.toggleNewJobWizardModal}/>
+          {pausedJobs && pausedJobs.length > 0 && (
+            <PausedJobsButton handle={this.toggleResumeJobListModal}/>
+          )}
         </Col>
       </Row>
     );
@@ -448,7 +567,7 @@ class DashboardCustomerPage extends Component {
   }
 
   renderJobList() {
-    const {profile, loaded, totalJobs, totalCount, isLoading} = this.state;
+    const {profile, loaded, totalJobs, totalCount, isLoading, rows} = this.state;
     const { t } = { ...this.props };
     const translate = t;
     let {jobs} = this.state;
@@ -467,7 +586,7 @@ class DashboardCustomerPage extends Component {
     let jobsPerTruck = 0;
     let idleTrucks = 0;
     let completedOffersPercent = 0;
-
+    
     jobs = jobs.map((job) => {
       const newJob = job;
       const tempRate = newJob.rate;
@@ -495,29 +614,44 @@ class DashboardCustomerPage extends Component {
       if (newJob.status === 'Job Completed') {
         completedJobCount += 1;
       }
-      if (newJob.rateType === 'Hour') {
+      
+      if (newJob.amountType === 'Hour') {
         // newSize is the size with its original value, so that it can be sorted
         newJob.newSize = newJob.rateEstimate;
         // newSizeFormated is the size as we want it to show
         const formatted = TFormat.asHours(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-        newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Hour'
-        );
+        if (newJob.rateType === 'Hour') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
       }
-      if (newJob.rateType === 'Ton') {
+      if (newJob.amountType === 'Ton') {
         // newSize is the size with its original value, so that it can be sorted
         newJob.newSize = newJob.rateEstimate;
         // newSizeFormated is the size as we want it to show
         const formatted = TFormat.asTons(newJob.rateEstimate);
         newJob.newSizeFormated = TFormat.getValue(formatted);
 
-        newJob.newRate = newJob.rate;
-        newJob.newRateFormatted = NumberFormatting.asMoney(
-          newJob.rate, '.', 2, ',', '$', '/Ton'
-        );
+        if (newJob.rateType === 'Hour') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Hour'
+          );
+        } else if (newJob.rateType === 'Ton') {
+          newJob.newRate = newJob.rate;
+          newJob.newRateFormatted = NumberFormatting.asMoney(
+            newJob.rate, '.', 2, ',', '$', '/Ton'
+          );
+        }
       }
 
       newJob.estimatedIncome = NumberFormatting.asMoney(
@@ -554,7 +688,6 @@ class DashboardCustomerPage extends Component {
     completedOffersPercent = TFormat.asPercent((completedJobCount / totalJobs) * 100, 2);
 
     potentialIncome = TFormat.asMoney(potentialIncome);
-
     if (loaded) {
       return (
         <Container className="dashboard">
@@ -572,24 +705,24 @@ class DashboardCustomerPage extends Component {
                       [
                         {
                           name: 'name',
-                          displayName: 'Job Name'
+                          displayName: t('Job Name')
                         },
                         {
                           name: 'status',
-                          displayName: 'Job Status'
+                          displayName: t('Job Status')
                         },
                         {
                           name: 'companyCarrierLegalName',
-                          displayName: 'Carrier'
+                          displayName: t('Carrier')
                         },
                         {
                           name: 'newSize',
-                          displayName: 'Size',
+                          displayName: t('Size'),
                           label: 'newSizeFormated'
                         },
                         {
                           name: 'newStartDate',
-                          displayName: 'Start Date'
+                          displayName: t('Start Date')
                         },
                         // This is the producer they do not need to see distance to job
                         // {
@@ -598,17 +731,17 @@ class DashboardCustomerPage extends Component {
                         // },
                         {
                           name: 'haulDistance',
-                          displayName: 'Haul Distance (One Way) (mi)'
+                          displayName: `${t('Haul Distance')} (${t('One Way')}) (mi)`
                         },
                         {
                           name: 'newRate',
-                          displayName: 'Rate',
+                          displayName: t('Rate'),
                           label: 'newRateFormatted'
                         },
                         {
                           // the materials needs to come from the the JobMaterials Table
                           name: 'materials',
-                          displayName: 'Materials'
+                          displayName: t('Materials')
                         }
                       ]
                     }
@@ -619,6 +752,7 @@ class DashboardCustomerPage extends Component {
                     handlePageChange={this.handlePageChange}
                     totalCount={totalCount}
                     isLoading={isLoading}
+                    defaultRows={rows}
                   />
                 </CardBody>
               </Card>
@@ -647,6 +781,7 @@ class DashboardCustomerPage extends Component {
   }
 
   render() {
+    const {t} = this.props;
     const {loaded, page, rows} = this.state;
     if (loaded) {
       return (
@@ -654,6 +789,8 @@ class DashboardCustomerPage extends Component {
           {/* {this.renderModal()} */}
           {this.renderNewJobModal()}
           {this.renderNewJobWizardModal()}
+          {this.renderResumeJobModal()}
+          {this.renderResumeJobListModal()}
           {this.renderGoTo()}
           {this.renderTitle()}
           {this.renderCards()}
@@ -662,7 +799,8 @@ class DashboardCustomerPage extends Component {
             page={page}
             rows={rows}
             ref="filterChild"
-            isLoading={(e) => this.setState({isLoading: e})}  
+            isLoading={(e) => this.setState({isLoading: e})}
+            t={t}
           />
           {/* {this.renderFilter()} */}
           {this.renderJobList()}
@@ -686,4 +824,4 @@ class DashboardCustomerPage extends Component {
 //   companyId: PropTypes.number.isRequired
 // };
 
-export default DashboardCustomerPage;
+export default withTranslation()(DashboardCustomerPage);

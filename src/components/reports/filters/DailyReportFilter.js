@@ -1,19 +1,5 @@
-/* eslint-disable no-multiple-empty-lines,
-no-trailing-spaces,
-object-curly-spacing,
-no-unused-vars,
-spaced-comment,
-react/jsx-closing-bracket-location,
-semi, quotes, no-empty,
-react/no-string-refs, indent,
-prefer-const, comma-dangle, padded-blocks,
-react/jsx-one-expression-per-line,
-space-before-function-paren,
-keyword-spacing, no-multi-spaces */
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
-  Button,
-  ButtonToolbar,
   Card,
   CardBody,
   Col,
@@ -21,17 +7,16 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
+
 import CloneDeep from 'lodash.clonedeep';
-import TField from '../common/TField';
-import TFieldNumber from '../common/TFieldNumber';
 import TSelect from '../common/TSelect';
 import TIntervalDatePicker from '../common/TIntervalDatePicker';
-import TMultiSelect from '../common/TMultiSelect';
-import AddressService from '../../api/AddressService';
-import CompanyService from '../../api/CompanyService';
-import ReportsService from '../../api/ReportsService';
-import LookupsService from '../../api/LookupsService';
-import ProfileService from '../../api/ProfileService';
+import AddressService from '../services/AddressService';
+import CompanyService from '../services/CompanyService';
+import ReportsService from '../services/ReportsService';
+import LookupsService from '../services/LookupsService';
+import ProfileService from '../services/ProfileService';
 import GeoUtils from '../utils/GeoUtils';
 import './Filters.css';
 
@@ -145,7 +130,7 @@ class DailyReportFilter extends Component {
 
         statuses: [],
         materials: [],
-        equipments: [], //this one is missing in orion
+        equipments: [], // this one is missing in orion
         rateTypes: [],
         rate: 0,
         truckTypes: [],
@@ -155,7 +140,7 @@ class DailyReportFilter extends Component {
         page: 0,
         rows: 10,
         companyLatitude: 30.356855,
-        companyLongitude: -97.737251,
+        companyLongitude: -97.737251
       },
       reqHandlerZip: {
         touched: false,
@@ -182,7 +167,7 @@ class DailyReportFilter extends Component {
   }
 
   async componentDidMount() {
-    const {intervals, selectIndex, selectIndexComp} = {...this.state};
+    const { intervals, selectIndex, selectIndexComp } = { ...this.state };
     let {
       companyZipCode,
       lastZipCode,
@@ -191,7 +176,7 @@ class DailyReportFilter extends Component {
       filters,
       selectedRange,
       selectedRangeComp
-    } = {...this.state};
+    } = { ...this.state };
     const profile = await ProfileService.getProfile();
     filters.userId = profile.userId;
 
@@ -213,7 +198,7 @@ class DailyReportFilter extends Component {
       }
     }
 
-    //save blank filters
+    // save blank filters
     const newBlankFilters = CloneDeep(filters);
 
     // This should save the filters, there's no need to save at every change
@@ -226,7 +211,7 @@ class DailyReportFilter extends Component {
 
     await this.fetchJobsAndLoads();
     await this.fetchLookups();
-    let allCompanies = await this.fetchCompanies();
+    const allCompanies = await this.fetchCompanies();
     this.fetchFilterLists();
 
     this.setState({
@@ -245,11 +230,11 @@ class DailyReportFilter extends Component {
   }
 
   async componentWillReceiveProps(nextProps) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     if (filters.rows !== nextProps.rows || filters.page !== nextProps.page) {
       filters.rows = nextProps.rows;
       filters.page = nextProps.page;
-      this.setState({filters});
+      this.setState({ filters });
       await this.fetchJobsAndLoads();
     }
   }
@@ -298,7 +283,7 @@ class DailyReportFilter extends Component {
   }
 
   getValues(collection) {
-    let newCollection = [];
+    const newCollection = [];
     if (collection.length > 0) {
       for (const item of collection) {
         newCollection.push(item.value);
@@ -308,7 +293,7 @@ class DailyReportFilter extends Component {
   }
 
   async fetchFilterLists() {
-    const {filters, materialTypeList, equipmentTypeList, rateTypeList} = this.state;
+    const { filters, materialTypeList, equipmentTypeList, rateTypeList } = this.state;
 
     // TODO need to refactor above to do the filtering on the Orion
     // LookupDao Hibernate side
@@ -415,7 +400,7 @@ class DailyReportFilter extends Component {
       fetching
     } = this.props;
     fetching(true);
-    let {company, address, profile} = this.state;
+    let { company, address, profile } = this.state;
     const marketplaceUrl = '/marketplace';
     const url = window.location.pathname;
 
@@ -473,6 +458,9 @@ class DailyReportFilter extends Component {
     allFilters.equipments = this.getValues(allFilters.equipments);
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
 
+    // exclusive for nimda (or make false for SG)
+    allFilters.isNimda = false;
+
     try {
       result = await ReportsService.getJobsDailyReport(allFilters);
       resultLoads = await ReportsService.getLoadsDailyReport(allFilters);
@@ -493,11 +481,11 @@ class DailyReportFilter extends Component {
         resultProducts = await ReportsService.getProductsComparisonReport(filters);
         resultProjects = await ReportsService.getProjectComparisonReport(filters);
         const producers = resultProducers.data;
-        const {metadataProducer} = resultProducers;
+        const { metadataProducer } = resultProducers;
         const products = resultProducts.data;
-        const {metadataProduct} = resultProducts;
+        const { metadataProduct } = resultProducts;
         const projects = resultProjects.data;
-        const {metadataProject} = resultProjects;
+        const { metadataProject } = resultProjects;
 
         returnProducers(producers, filters, metadataProducer);
         returnProducts(products, filters, metadataProduct);
@@ -508,21 +496,21 @@ class DailyReportFilter extends Component {
         return null;
       }
     } else {
-      const {metadata} = result;
-      onReturnFilters(result, resultLoads, filters/*, metadata*/);
+      const { metadata } = result;
+      onReturnFilters(result, resultLoads, filters/* , metadata */);
     }
 
     const jobs = result.data;
-    const {metadata} = result;
+    const { metadata } = result;
 
-    //onReturnFilters(result, filters/*, metadata*/);
+    // onReturnFilters(result, filters/*, metadata*/);
     fetching(false);
-    this.setState({lastZipCode: filters.zipCode});
+    this.setState({ lastZipCode: filters.zipCode });
     return jobs;
   }
 
   saveFilters() {
-    const {filters} = {...this.state};
+    const { filters } = { ...this.state };
     // don't save status
     delete filters.status;
     localStorage.setItem('filters', JSON.stringify(filters));
@@ -530,8 +518,8 @@ class DailyReportFilter extends Component {
 
   async handleFilterChangeDelayed(e) {
     const self = this;
-    const {value} = e.target;
-    const {filters, reqHandlerZip, reqHandlerRange} = this.state;
+    const { value } = e.target;
+    const { filters, reqHandlerZip, reqHandlerRange } = this.state;
     const filter = e.target.name;
     let invalidZip = false;
     let invalidRange = false;
@@ -585,20 +573,20 @@ class DailyReportFilter extends Component {
   }
 
   async handleFilterChange(e) {
-    const {value} = e.target;
-    const {filters} = this.state;
+    const { value } = e.target;
+    const { filters } = this.state;
     filters[e.target.name] = value;
     await this.fetchJobsAndLoads();
-    this.setState({filters}, function saved() {
+    this.setState({ filters }, function saved() {
       this.saveFilters();
     });
   }
 
   async handleSelectFilterChange(option) {
-    const {value, name} = option;
-    const {filters} = this.state;
+    const { value, name } = option;
+    const { filters } = this.state;
     filters[name] = value;
-    this.setState({filters}, function saved() {
+    this.setState({ filters }, function saved() {
       this.saveFilters();
     });
     await this.fetchJobsAndLoads();
@@ -606,8 +594,8 @@ class DailyReportFilter extends Component {
 
   async handleMultiChange(data, meta) {
     // console.log("TCL: handleMultiChange -> data", data, meta)
-    const {filters} = this.state;
-    switch(meta) {
+    const { filters } = this.state;
+    switch (meta) {
       case 'status':
         filters.statuses = data;
         break;
@@ -632,7 +620,7 @@ class DailyReportFilter extends Component {
   }
 
   handleMultiTruckChange(data) {
-    const {filters} = this.state;
+    const { filters } = this.state;
     filters.equipmentType = data;
     this.setState({
       filters
@@ -643,7 +631,7 @@ class DailyReportFilter extends Component {
   }
 
   async handleIntervalInputChange(e) {
-    const {filters, intervals} = {...this.state};
+    const { filters, intervals } = { ...this.state };
     let sAv = null;
     if (e.start) {
       sAv = new Date(e.start);
@@ -655,8 +643,8 @@ class DailyReportFilter extends Component {
     filters.startAvailability = this.getUTCStartInterval(sAv);
     filters.endAvailability = this.getUTCEndInterval(endAv);
 
-    const {start} = e;
-    const {end} = e;
+    const { start } = e;
+    const { end } = e;
     if (start) {
       start.setHours(0, 0, 0);
     }
@@ -665,7 +653,7 @@ class DailyReportFilter extends Component {
     }
     intervals.startInterval = start;
     intervals.endInterval = end;
-    this.setState({intervals, filters}, function saved() {
+    this.setState({ intervals, filters }, function saved() {
       this.saveFilters();
     });
 
@@ -673,7 +661,7 @@ class DailyReportFilter extends Component {
   }
 
   async filterWithStatus(filters) {
-    this.state = {filters};
+    this.state = { filters };
     await this.fetchJobsAndLoads();
   }
 
@@ -711,7 +699,7 @@ class DailyReportFilter extends Component {
       filters.endAvailability = endDate;
     }
 
-    this.setState({intervals, filters, selectIndex}, function saved() {
+    this.setState({ intervals, filters, selectIndex }, function saved() {
       this.saveFilters();
     });
     await this.fetchJobsAndLoads();
@@ -721,11 +709,12 @@ class DailyReportFilter extends Component {
     const { blankFilters } = this.state;
     this.setState({
       filters: blankFilters
-    })
+    });
     this.fetchJobsAndLoads();
   }
 
   render() {
+    const {t} = {...this.props};
     const {
       loaded,
       // Lists
@@ -756,7 +745,7 @@ class DailyReportFilter extends Component {
           <Card>
             <CardBody>
               <form id="filter-form" className="form">
-                {/*Row 1: Company, State, Zip, Range
+                {/* Row 1: Company, State, Zip, Range
 
                 <div className="flex-daily-report-container-1">
                   <div className="filter-item" id="companySelect">
@@ -855,7 +844,7 @@ class DailyReportFilter extends Component {
                 </div>
                 */}
 
-                {/*Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
+                {/* Row 2: Status, Material, Rate Type, Rate, Tons, TruckType
 
                 <div className="flex-daily-report-container-2">
                   <div className="filter-item" id="statusSelect">
@@ -1008,13 +997,13 @@ class DailyReportFilter extends Component {
                   </div>
                   */}
 
-                {/*Row 3: Time Range, Range, Reset*/}
+                {/* Row 3: Time Range, Range, Reset */}
 
 
                 <div className="flex-daily-report-container-2">
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Day Range
+                      {t('Day Range')}
                     </div>
                     <TSelect
                       input={
@@ -1037,7 +1026,7 @@ class DailyReportFilter extends Component {
                   </div>
                   <div className="filter-item">
                     <div className="filter-item-title">
-                      Date Range
+                      {t('Date Range')}
                     </div>
                     <TIntervalDatePicker
                       startDate={intervals.startInterval}
@@ -1054,7 +1043,7 @@ class DailyReportFilter extends Component {
                       type="button"
                       onClick={this.handleResetFilters}
                     >
-                      Reset
+                      {t('Reset')}
                     </button>
                   </div>
                 </div>
@@ -1073,7 +1062,7 @@ DailyReportFilter.propTypes = {
   page: PropTypes.number,
   type: PropTypes.string,
 
-  //optional
+  // optional
   returnProducers: PropTypes.func,
   returnProducts: PropTypes.func,
   returnProjects: PropTypes.func
@@ -1086,4 +1075,4 @@ DailyReportFilter.defaultProps = {
   type: null
 };
 
-export default DailyReportFilter;
+export default withTranslation()(DailyReportFilter);

@@ -13,6 +13,7 @@ import {
   Row
 } from 'reactstrap';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
 import TSpinner from '../common/TSpinner';
 import TField from '../common/TField';
 import TSelect from '../common/TSelect';
@@ -31,6 +32,7 @@ import CarrierRow from './CarrierRow';
 import GeoUtils from '../../utils/GeoUtils';
 import BidService from '../../api/BidService';
 import JobWizard from '../jobs/JobWizard';
+import TFieldNumber from '../common/TFieldNumber';
 
 class CarriersCustomerPage extends Component {
   constructor(props) {
@@ -737,6 +739,7 @@ class CarriersCustomerPage extends Component {
       modalSelectMaterials,
       toggleSelectMaterialsModal
     } = this.state;
+    const {t} = {...this.props};
     return (
       <Modal
         isOpen={modalSelectMaterials}
@@ -751,11 +754,11 @@ class CarriersCustomerPage extends Component {
             onClick={!toggleSelectMaterialsModal}
           />
           <h4 className="bold-text modal__title white_title">
-            Select material
+            {t('Select material')}
           </h4>
         </div>
         <div className="modal__body" style={{ padding: '25px 25px 20px 25px' }}>
-          Please select a material type for this job
+          {t('Please select a material type for this job')}
         </div>
 
         <Row className="col-md-12">
@@ -769,7 +772,7 @@ class CarriersCustomerPage extends Component {
               type="button"
               className="next float-right"
             >
-              Close
+              {t('Close')}
             </Button>
           </div>
         </Row>
@@ -811,10 +814,11 @@ class CarriersCustomerPage extends Component {
   }
 
   renderTitle() {
+    const {t} = {...this.props};
     return (
       <Row>
         <Col md={12}>
-          <h3 className="page-title">Carrier Search</h3>
+          <h3 className="page-title">{t('Carrier Search')}</h3>
         </Col>
       </Row>
     );
@@ -837,7 +841,7 @@ class CarriersCustomerPage extends Component {
       reqHandlerRange
 
     } = this.state;
-
+    const {t} = {...this.props};
     return (
       <Row>
         <Col md={12}>
@@ -847,7 +851,7 @@ class CarriersCustomerPage extends Component {
                 <div className="flex-carrier-filters">
                   <div id="materialTypeSelect">
                     <div className="filter-item-title">
-                      Materials
+                      {t('Materials')}
                     </div>
                     <MultiSelect
                       input={
@@ -871,7 +875,7 @@ class CarriersCustomerPage extends Component {
                           label: materialType.trim()
                         }))
                       }
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       // placeholder={materialTypeList[0]}
                       id="materialTypeSelect"
                       horizontalScroll="true"
@@ -881,7 +885,7 @@ class CarriersCustomerPage extends Component {
                   <div id="truckTypeSelect">
                     {/* TODO: There will be changes for Truck Type and Number of trucks */}
                     <div className="filter-item-title">
-                      Truck Type
+                      {t('Truck Type')}
                     </div>
                     <MultiSelect
                       input={
@@ -905,7 +909,7 @@ class CarriersCustomerPage extends Component {
                           label: equipmentType.trim()
                         }))
                       }
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       id="truckTypeSelect"
                       horizontalScroll="true"
                       selectedItems={filters.equipmentType.length}
@@ -913,19 +917,31 @@ class CarriersCustomerPage extends Component {
                   </div>
                   <div>
                     <div className="filter-item-title">
-                      Number of trucks
+                      {t('Number of trucks')}
                     </div>
-                    <input
-                      name="numEquipments"
-                      type="number"
-                      placeholder="Any"
-                      value={filters.numEquipments}
-                      onChange={this.handleNumChange}
+                    <TFieldNumber
+                      input={{
+                        onChange: this.handleNumChange,
+                        name: 'numEquipments',
+                        value: filters.numEquipments
+                      }}
                     />
+                    {
+                      /*
+                      <input
+                        name="numEquipments"
+                        type="number"
+                        placeholder="Any"
+                        value={filters.numEquipments}
+                        onChange={this.handleNumChange}
+
+                      />
+                      */
+                    }                    
                   </div>
                   <div>
                     <div className="filter-item-title">
-                      Rate Type
+                      {t('Rate Type')}
                     </div>
                     <TSelect
                       input={
@@ -949,24 +965,24 @@ class CarriersCustomerPage extends Component {
                           label: rateType
                         }))
                       }
-                      placeholder="Any"
+                      placeholder={t('Any')}
                     />
                   </div>
                   <div>
                     <div className="filter-item-title">
-                      Search by name
+                      {t('Search by name')}
                     </div>
                     <input
                       name="name"
                       type="text"
-                      placeholder="Name"
+                      placeholder={t('Name')}
                       value={filters.name}
                       onChange={this.handleFilterChangeDelayed}
                     />
                   </div>
                   <div>
                     <div className="filter-item-title">
-                      Zip Code
+                      {t('Zip Code')}
                     </div>
                     <TField
                       input={
@@ -984,7 +1000,7 @@ class CarriersCustomerPage extends Component {
                   </div>
                   <div>
                     <div className="filter-item-title">
-                      Range (mi)
+                      {t('Range')} (mi)
                     </div>
                     <TField
                       input={
@@ -996,7 +1012,7 @@ class CarriersCustomerPage extends Component {
                       }
                       meta={reqHandlerRange}
                       className="filter-text"
-                      placeholder="Any"
+                      placeholder={t('Any')}
                       type="number"
                     />
                   </div>
@@ -1018,7 +1034,7 @@ class CarriersCustomerPage extends Component {
                     onClick={() => this.clear()}
                     className="btn btn-primary"
                   >
-                    Reset Filters
+                    {t('Reset')}
                   </Button>
                 </div>
               </form>
@@ -1031,26 +1047,25 @@ class CarriersCustomerPage extends Component {
 
   renderUnfavoriteModal() {
     const {unfavoriteModal, selectedFavoriteCompanyName, isLoading} = this.state;
+    const {t} = {...this.props};
     return (
       <React.Fragment>
         <Modal isOpen={unfavoriteModal} toggle={this.toggleUnfavoriteModal} className="status-modal" backdrop="static">
           <ModalHeader toggle={this.toggleModal} style={{ backgroundColor: '#006F53' }} className="text-left">
             <div style={{ fontSize: 16, color: '#FFF' }}>
-              Are you sure you want to unfavorite &apos;{selectedFavoriteCompanyName}&apos;?
+              {t('Are you sure you want to unfavorite')} &apos;{selectedFavoriteCompanyName}&apos;?
             </div>
           </ModalHeader>
           <ModalBody className="text-left">
             <p>
-              If you do, they will not be able to auto
-              accept any currently posted or future jobs that you send to your favorites group.
-              They will have to request the job and get your approval.
+              {t('UNFAV_MESSAGE')}.
             </p>
           </ModalBody>
           <ModalFooter>
             <Row>
               <Col md={12} className="text-right">
                 <Button color="secondary" onClick={this.toggleUnfavoriteModal}>
-                  No, keep as a favorite
+                  {t('No, keep as a favorite')}
                 </Button>
                 &nbsp;
                 <Button
@@ -1065,7 +1080,7 @@ class CarriersCustomerPage extends Component {
                         loaderSize={10}
                         loading
                       />
-                    ) : 'Yes, unfavorite'
+                    ) : t('Yes, unfavorite')
                   }
                 </Button>
               </Col>
@@ -1082,51 +1097,53 @@ class CarriersCustomerPage extends Component {
       filters,
       carriers
     } = this.state;
-
+    const {t} = {...this.props};
     return (
       <Container>
         <Card>
           <CardBody>
             <Row className="truck-card">
-              <Col md={6} id="equipment-display-count">
-                Displaying&nbsp;
+              <Col md={12} id="equipment-display-count">
+                {t('Displaying')}&nbsp;
                 {carriers.length}
-                &nbsp;of&nbsp;
-                {carriers.length}
+                &nbsp;{t('out of')}&nbsp;
+                {carriers.length} {t('carriers')}
               </Col>
-              <Col md={6}>
-                <Row>
-                  {/*
-                  <Col md={6} id="sortby">Sort By</Col>
-                  */}
+              {
+                /*
                   <Col md={6}>
-                    <TSelect
-                      input={
-                        {
-                          onChange: this.handleSelectFilterChange,
-                          name: 'sortBy',
-                          value: filters.sortBy
-                        }
-                      }
-                      meta={
-                        {
-                          touched: false,
-                          error: 'Unable to select'
-                        }
-                      }
-                      value={filters.sortBy}
-                      options={
-                        sortByList.map(sortBy => ({
-                          name: 'sortBy',
-                          value: sortBy,
-                          label: sortBy
-                        }))
-                      }
-                      placeholder={sortByList[0]}
-                    />
+                    <Row>                    
+                      <Col md={6} id="sortby">Sort By</Col>                    
+                      <Col md={6}>
+                        <TSelect
+                          input={
+                            {
+                              onChange: this.handleSelectFilterChange,
+                              name: 'sortBy',
+                              value: filters.sortBy
+                            }
+                          }
+                          meta={
+                            {
+                              touched: false,
+                              error: 'Unable to select'
+                            }
+                          }
+                          value={filters.sortBy}
+                          options={
+                            sortByList.map(sortBy => ({
+                              name: 'sortBy',
+                              value: sortBy,
+                              label: sortBy
+                            }))
+                          }
+                          placeholder={sortByList[0]}
+                        />
+                      </Col>
+                    </Row>
                   </Col>
-                </Row>
-              </Col>
+                */
+              }
               <hr/>
             </Row>
             {/**/
@@ -1178,4 +1195,4 @@ class CarriersCustomerPage extends Component {
   }
 }
 
-export default CarriersCustomerPage;
+export default withTranslation()(CarriersCustomerPage);

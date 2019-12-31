@@ -45,51 +45,62 @@ const renderMultiSelectField = function renderMultiSelectField(
     meta: { touched, error }
   }
 ) {
-
   let selected = 0;
   if (selectedItems !== undefined) {
     selected = selectedItems.length;
   }
-
+  let containerG = document.getElementById(id);
+  if (containerG) {
+    containerG = document.getElementById(id).getElementsByClassName('Select-multi-value-wrapper')[0];
+    containerG.scrollTop = 0;
+    if (selected >= 3) {
+      document.getElementById(id).getElementsByClassName('Select-control')[0].scrollLeft = 60 * selected * 1.25;
+    } else {
+      document.getElementById(id).getElementsByClassName('Select-control')[0].scrollLeft = 0;
+    }
+  }
   function slideTo(direction) {
     const selector = document.getElementById(id).getElementsByClassName('Select-control')[0];
     if (direction) {
-      const maxDistance = 40 * selected * 1.5;
+      const maxDistance = 60 * selected * 1.5;
       if (selector.scrollLeft < maxDistance) {
-        selector.scrollLeft += 20;
+        selector.scrollLeft += 60;
       }
     } else {
-      selector.scrollLeft -= 20;
+      selector.scrollLeft -= 60;
     }
     const container = document.getElementById(id).getElementsByClassName('Select-multi-value-wrapper')[0];
     container.scrollTop = 0;
   }
 
   function appendArrows() {
+    let selector;
     const arrows = document.getElementById(`${id}Scroll`);
-    let selector = document.getElementById(id).getElementsByClassName('form__form-group-select')[0].contains(arrows);
-    if (selector) return;
-    selector = document.getElementById(id).getElementsByClassName('form__form-group-select')[0].appendChild(document.createElement('section'));
-    selector.setAttribute('id', `${id}Scroll`);
-    const element = (
-      <React.Fragment>
-        <i
-          className="material-icons select-navigator"
-          style={{color: '#666666', fontSize: 18, position: 'absolute', right: 16, top: -20, zIndex: 50 }}
-          onClick={() => slideTo(false)}
-        >
-          navigate_before
-        </i>
-        <i
-          className="material-icons select-navigator"
-          style={{color: '#666666', fontSize: 18, position: 'absolute', right: 0, top: -20, zIndex: 50}}
-          onClick={() => slideTo(true)}
-        >
-          navigate_next
-        </i>
-      </React.Fragment>
-    );
-    ReactDOM.render(element, document.querySelector(`#${id}Scroll`));
+    if (!arrows || arrows == null) {
+      const container = document.getElementById(id);
+      if (!container) return;
+      selector = document.getElementById(id).getElementsByClassName('form__form-group-select')[0].appendChild(document.createElement('section'));
+      selector.setAttribute('id', `${id}Scroll`);
+      const element = (
+        <React.Fragment>
+          <i
+            className="material-icons select-navigator"
+            style={{color: '#666666', fontSize: 18, position: 'absolute', right: 16, top: -20, zIndex: 50 }}
+            onClick={() => slideTo(false)}
+          >
+            navigate_before
+          </i>
+          <i
+            className="material-icons select-navigator"
+            style={{color: '#666666', fontSize: 18, position: 'absolute', right: 0, top: -20, zIndex: 50}}
+            onClick={() => slideTo(true)}
+          >
+            navigate_next
+          </i>
+        </React.Fragment>
+      );
+      ReactDOM.render(element, document.querySelector(`#${id}Scroll`));
+    }
   }
 
   if (horizontalScroll === 'true' && selected >= 3) {

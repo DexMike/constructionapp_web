@@ -108,7 +108,7 @@
 }
 
 .gridTableJobs {
-  width: 1320px !important;
+  width: 1020px !important;
   padding-bottom: 10px;
   overflow-y: hidden !important;
 }
@@ -198,7 +198,7 @@
 
 .reports-modal-job .modal-content{
   width: 900px !important;
-  background-color: #e5e5e0;
+  background-color: #e5e5e0 !important;
 }
 
 .reports-modal-job .col-md-9{
@@ -245,18 +245,36 @@
   border-width: 4px;
   border-radius: 2px;
   border-top: solid 1px rgb(204, 204, 204);
-  text-align: right;
+  text-align: left;
 }
 
 .reports-cont-btn button{
   margin: auto;
 }
+
 .visualizations {
-  min-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
 }
 
 .visualizations_extended {
-  min-width: 1560px !important;
+  width: 1260px !important;
+}
+
+.visualizations_extended_chart {
+  width: 1160px !important;
+}
+
+@media screen and (max-width: 1080px) {
+  .visualizations {
+    width: 100% !important;
+    background-color: purple;
+  }
+  
+  .visualizations_extended {
+    width: 1320px !important;
+    background-color: red;
+  }
 }
 
 .pdf_loading_tab {

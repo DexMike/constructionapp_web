@@ -9,6 +9,22 @@ class TCalculator {
     Uses default load and unload times.
   */
 
+  /* returns total tonnage moved by number of loads */
+  static getTotalTonAmountByLoads(
+    numLoads,
+    truckCapacity
+  ) {
+    return parseFloat(numLoads) * parseFloat(truckCapacity);
+  }
+
+  /* returns total hours worked by number of loads */
+  static getTotalHourAmountByLoads(
+    numLoads,
+    tripTime
+  ) {
+    return parseFloat(numLoads) * parseFloat(tripTime);
+  }
+
   /* returns one way cost / ton / mile (per ton per mile) for rate type of ton */
   static getRoundTripTime(
     travelTimeEnroute,
@@ -20,36 +36,53 @@ class TCalculator {
       + loadTime + unloadTime;
   }
 
+  /* returns one way cost / ton / mile (per ton per mile) for rate type of ton */
+  static getOneWayTripTime(
+    travelTimeEnroute,
+    loadTime,
+    unloadTime
+  ) {
+    return travelTimeEnroute
+      + loadTime + unloadTime;
+  }
+
+
   /*
     Calculates number of trips required based on tonnage amount to be moved.
     Uses truck capacity.
-    Here we assume that a trip is equivalent to a round trip.
   */
 
   static getNumTripsByTons(
     estimatedTons,
-    truckCapacity
+    truckCapacity,
+    roundUp
   ) {
-    const numTrips = (estimatedTons > 0 && truckCapacity > 0)
-      ? Math.ceil(estimatedTons / truckCapacity)
-      : 0;
-    return numTrips;
+    if (estimatedTons > 0 && truckCapacity > 0) {
+      const numTrips = roundUp
+        ? Math.ceil(estimatedTons / truckCapacity)
+        : Math.floor(estimatedTons / truckCapacity);
+      return numTrips;
+    }
+    return 0;
   }
 
   /*
     Calculates number of trips required based on hours to be worked.
     Uses round trip time.
-    Here we assume that a trip is equivalent to a round trip.
   */
 
   static getNumTripsByHours(
     estimatedHours,
-    roundTripTime
+    tripTime,
+    roundUp,
   ) {
-    const numTrips = (estimatedHours > 0 && roundTripTime > 0)
-      ? Math.ceil(estimatedHours / roundTripTime)
-      : 0;
-    return numTrips;
+    if (estimatedHours > 0 && tripTime > 0) {
+      const numTrips = roundUp
+        ? Math.ceil(estimatedHours / tripTime)
+        : Math.floor(estimatedHours / tripTime);
+      return numTrips;
+    }
+    return 0;
   }
 
   /*
@@ -65,14 +98,24 @@ class TCalculator {
     unloadTime,
     estimatedTons,
     truckCapacity,
+    roundUp
   ) {
-    const oneLoad = this.getRoundTripTime(
-      travelTimeEnroute,
-      travelTimeReturn,
-      loadTime,
-      unloadTime
-    );
-    const numTrips = this.getNumTripsByTons(estimatedTons, truckCapacity);
+    let oneLoad;
+    if (!travelTimeReturn) {
+      oneLoad = this.getOneWayTripTime(
+        travelTimeEnroute,
+        loadTime,
+        unloadTime
+      );
+    } else {
+      oneLoad = this.getRoundTripTime(
+        travelTimeEnroute,
+        travelTimeReturn,
+        loadTime,
+        unloadTime
+      );
+    }
+    const numTrips = this.getNumTripsByTons(estimatedTons, truckCapacity, roundUp);
     const hours = parseFloat((numTrips * oneLoad).toFixed(2));
     return hours;
   }
@@ -90,14 +133,24 @@ class TCalculator {
     unloadTime,
     estimatedHours,
     truckCapacity,
+    roundUp,
   ) {
-    const oneLoad = this.getRoundTripTime(
-      travelTimeEnroute,
-      travelTimeReturn,
-      loadTime,
-      unloadTime
-    );
-    const numTrips = this.getNumTripsByHours(estimatedHours, oneLoad);
+    let oneLoad;
+    if (!travelTimeReturn) {
+      oneLoad = this.getOneWayTripTime(
+        travelTimeEnroute,
+        loadTime,
+        unloadTime
+      );
+    } else {
+      oneLoad = this.getRoundTripTime(
+        travelTimeEnroute,
+        travelTimeReturn,
+        loadTime,
+        unloadTime
+      );
+    }
+    const numTrips = this.getNumTripsByHours(estimatedHours, oneLoad, roundUp);
     const tons = parseFloat((numTrips * truckCapacity).toFixed(2));
     return tons;
   }
@@ -159,12 +212,21 @@ class TCalculator {
     truckCapacity,
     avgDistanceEnroute
   ) {
-    const oneLoad = this.getRoundTripTime(
-      travelTimeEnroute,
-      travelTimeReturn,
-      loadTime,
-      unloadTime
-    );
+    let oneLoad;
+    if (!travelTimeReturn) {
+      oneLoad = this.getOneWayTripTime(
+        travelTimeEnroute,
+        loadTime,
+        unloadTime
+      );
+    } else {
+      oneLoad = this.getRoundTripTime(
+        travelTimeEnroute,
+        travelTimeReturn,
+        loadTime,
+        unloadTime
+      );
+    }
     const rate = oneLoad > 0
       ? ((oneWayCost * truckCapacity * avgDistanceEnroute) / oneLoad).toFixed(2)
       : 0;
@@ -204,10 +266,6 @@ class TCalculator {
   /* returns ton rate from two way cost / mile. */
 
   static getTonRateByTwoWayCost(
-    travelTimeEnroute,
-    travelTimeReturn,
-    loadTime,
-    unloadTime,
     twoWayCost,
     truckCapacity,
     avgDistanceEnroute,
@@ -280,11 +338,11 @@ class TCalculator {
     avgDistanceEnroute,
     avgDistanceReturn
   ) {
-    const twoWay = ((truckCapacity * avgDistanceEnroute) > 0)
+    const oneWay = ((truckCapacity * avgDistanceEnroute) > 0)
       ? ((twoWayCost * (avgDistanceEnroute + avgDistanceReturn))
         / (truckCapacity * avgDistanceEnroute)).toFixed(2)
       : 0;
-    return parseFloat(twoWay);
+    return parseFloat(oneWay);
   }
 
   /* returns two way cost / mile by hour rate.
@@ -321,16 +379,14 @@ class TCalculator {
 
   static getOneWayCostByHourRate(
     travelTimeEnroute,
-    travelTimeReturn,
     loadTime,
     unloadTime,
     hourRate,
     truckCapacity,
     avgDistanceEnroute
   ) {
-    const oneLoad = this.getRoundTripTime(
+    const oneLoad = this.getOneWayTripTime(
       travelTimeEnroute,
-      travelTimeReturn,
       loadTime,
       unloadTime
     );
@@ -366,7 +422,8 @@ class TCalculator {
     unloadTime,
     estimatedTons,
     truckCapacity,
-    rateHour
+    rateHour,
+    roundUp
   ) {
     // first get hour amount
     const estimatedHours = this.getHoursByTonAmount(
@@ -375,7 +432,8 @@ class TCalculator {
       loadTime,
       unloadTime,
       estimatedTons,
-      truckCapacity
+      truckCapacity,
+      roundUp
     );
     // second get ton rate
     const tonRate = this.getTonRateByHourRate(
@@ -396,7 +454,8 @@ class TCalculator {
     unloadTime,
     estimatedHours,
     truckCapacity,
-    rateHour
+    rateHour,
+    roundUp
   ) {
     // first get ton amount
     const estimatedTons = this.getTonsByHourAmount(
@@ -405,7 +464,8 @@ class TCalculator {
       loadTime,
       unloadTime,
       estimatedHours,
-      truckCapacity
+      truckCapacity,
+      roundUp
     );
     // second get ton rate
     const tonRate = this.getTonRateByHourRate(
@@ -433,7 +493,8 @@ class TCalculator {
     loadTime,
     unloadTime,
     estimatedTons,
-    truckCapacity
+    truckCapacity,
+    roundUp
   ) {
     // first get hour amount
     const hourAmount = this.getHoursByTonAmount(
@@ -442,7 +503,8 @@ class TCalculator {
       loadTime,
       unloadTime,
       estimatedTons,
-      truckCapacity
+      truckCapacity,
+      roundUp
     );
     const estimatedCostForJob = (parseFloat(hourRate) * hourAmount).toFixed(2);
     return parseFloat(estimatedCostForJob);
@@ -455,7 +517,8 @@ class TCalculator {
     loadTime,
     unloadTime,
     estimatedHours,
-    truckCapacity
+    truckCapacity,
+    roundUp
   ) {
     // first get hour amount
     const tonAmount = this.getTonsByHourAmount(
@@ -464,7 +527,8 @@ class TCalculator {
       loadTime,
       unloadTime,
       estimatedHours,
-      truckCapacity
+      truckCapacity,
+      roundUp
     );
     const estimatedCostForJob = (parseFloat(tonRate) * tonAmount).toFixed(2);
     return parseFloat(estimatedCostForJob);
@@ -486,7 +550,8 @@ class TCalculator {
     unloadTime,
     estimatedHours,
     truckCapacity,
-    deliveredPricePerTon
+    deliveredPricePerTon,
+    roundUp
   ) {
     const estimatedTons = this.getTonsByHourAmount(
       travelTimeEnroute,
@@ -495,6 +560,7 @@ class TCalculator {
       unloadTime,
       estimatedHours,
       truckCapacity,
+      roundUp
     );
     const delPricePerJob = (parseFloat(deliveredPricePerTon)
       * estimatedTons).toFixed(2);

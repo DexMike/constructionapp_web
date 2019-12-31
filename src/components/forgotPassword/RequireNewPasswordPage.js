@@ -2,12 +2,15 @@ import React from 'react';
 import { RequireNewPassword } from 'aws-amplify-react';
 import {Auth} from 'aws-amplify';
 import TAlert from '../common/TAlert';
+import EyeIcon from "mdi-react/EyeIcon";
+import KeyVariantIcon from "mdi-react/KeyVariantIcon";
 
 class RequireNewPasswordPage extends RequireNewPassword {
   constructor(props) {
     super(props);
 
     this.state = {
+      showPassword: false,
       authData: this.props.authData,
       authState: this.props.authState,
       modalShowing: false,
@@ -22,6 +25,15 @@ class RequireNewPasswordPage extends RequireNewPassword {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onBackToSignIn = this.onBackToSignIn.bind(this);
+    this.showPassword = this.showPassword.bind(this);
+  }
+
+  showPassword(e) {
+    e.preventDefault();
+    const {showPassword} = this.state;
+    this.setState({
+      showPassword: !showPassword
+    });
   }
 
   onBackToSignIn() {
@@ -65,6 +77,7 @@ class RequireNewPasswordPage extends RequireNewPassword {
   }
 
   renderResetPasswordForm() {
+    const {showPassword} = this.state;
     return (
       <div className="form">
         <TAlert color="danger" visible={!!this.state.error} onDismiss={this.onDismiss}>
@@ -89,13 +102,23 @@ class RequireNewPasswordPage extends RequireNewPassword {
         </div>
         <div className="form__form-group">
           <div className="form__form-group-field">
+            <div className="form__form-group-icon">
+              <KeyVariantIcon/>
+            </div>
             <input
               name="newPassword"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="New Password"
               value={this.state.newPassword}
               onChange={this.handleInputChange}
             />
+            <button
+            type="button"
+            className={`form__form-group-button${showPassword ? ' active' : ''}`}
+            onClick={e => this.showPassword(e)}
+            >
+            <EyeIcon/>
+          </button>
           </div>
         </div>
         <button type="button" className="btn btn-primary account__btn account__btn--small"

@@ -66,6 +66,7 @@ class LoadsTable extends Component {
 
   render() {
     const {loads, job} = {...this.state};
+    const { profile } = {...this.props};
     // debugger;
     return (
       <Paper style={{overflowX: 'auto'}}>
@@ -97,6 +98,7 @@ class LoadsTable extends Component {
                   job={job}
                   onRowExpanded={this.onRowExpanded}
                   isExpanded={load.isExpanded}
+                  profile={profile}
                 />
               ))}
             </TableBody>
@@ -113,7 +115,9 @@ LoadsTable.propTypes = {
   loads: PropTypes.array.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   job: PropTypes.object.isRequired,
-  expandedRow: PropTypes.func
+  expandedRow: PropTypes.func,
+  // eslint-disable-next-line react/forbid-prop-types
+  profile: PropTypes.object.isRequired
 };
 
 LoadsTable.defaultProps = {

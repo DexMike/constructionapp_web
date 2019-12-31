@@ -32,6 +32,16 @@ class DriverService extends AgentService {
     const response = await this.delete(PATH, id);
     return (response);
   }
+
+  static async createAndInviteDriver(user) {
+    const response = await this.post('/drivers/invite', user);
+    return (response);
+  }
+
+  static async resendInviteToDriver(id) {
+    const response = await this.get(`/drivers/user/${id}/invite`);
+    return (response);
+  }
 }
 
 export default DriverService;

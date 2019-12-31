@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import * as PropTypes from 'prop-types';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
 import TSpinner from '../common/TSpinner';
 import TField from '../common/TField';
 import TFieldNumber from '../common/TFieldNumber';
@@ -116,6 +117,7 @@ class JobFilter extends Component {
   }
 
   async componentDidMount() {
+    const {isMarketplace} = this.props;
     const {intervals} = {...this.state};
     let {companyZipCode, lastZipCode, address, company, filters} = {...this.state};
     const profile = await ProfileService.getProfile();
@@ -137,32 +139,46 @@ class JobFilter extends Component {
         filters.companyLongitude = address.longitude;
       }
     }
-    if (localStorage.getItem('filters')) {
-      filters = JSON.parse(localStorage.getItem('filters'));
-      // console.log('>>GOT SAVED FILTERS:', savedFilters);
+    if (localStorage.getItem('dashboardFilters') && !isMarketplace) {
+      filters = JSON.parse(localStorage.getItem('dashboardFilters'));
+      // console.log('>>GOT SAVED FILTERS:', savedFilters); 
+      intervals.startInterval = this.parseStringToDate(filters.startAvailability);
+      intervals.endInterval = moment(filters.endAvailability).endOf('day').toDate();
     }
-
-
-    await this.fetchJobs();
+    if (localStorage.getItem('marketFilters') && isMarketplace) {
+      filters = JSON.parse(localStorage.getItem('marketFilters'));
+      // console.log('>>GOT SAVED FILTERS:', savedFilters);
+      intervals.startInterval = this.parseStringToDate(filters.startAvailability);
+      intervals.endInterval = moment(filters.endAvailability).endOf('day').toDate();
+    }
     await this.fetchFilterLists();
-
+    this.setState({
+      intervals,
+      filters,
+      loaded: true
+    });
+    await this.fetchJobs();
     this.setState({
       companyZipCode,
       lastZipCode,
       company,
       address,
-      filters,
-      profile,
-      loaded: true
+      profile
     });
   }
 
   async componentWillReceiveProps(nextProps) {
-    const {filters} = this.state;
+    const {filters} = {...this.state};
+    const newFilters = filters;
     if (filters.rows !== nextProps.rows || filters.page !== nextProps.page) {
-      filters.rows = nextProps.rows;
-      filters.page = nextProps.page;
-      this.setState({filters});
+      newFilters.rows = nextProps.rows;
+      newFilters.page = nextProps.page;
+      if (!nextProps.isMarketplace) {
+        localStorage.setItem('dashboardFilters', JSON.stringify(newFilters));
+      } else {
+        localStorage.setItem('marketFilters', JSON.stringify(newFilters));
+      }      
+      this.setState({ filters: newFilters });
       await this.fetchJobs();
     }
   }
@@ -210,11 +226,24 @@ class JobFilter extends Component {
     return endDate;
   }
 
+  parseStringToDate(stringDate) {
+    const dTimezone = new Date();
+    const offset = dTimezone.getTimezoneOffset() / 60;
+    const date = new Date(Date.parse(stringDate));
+    date.setHours(date.getHours() + offset);
+    return date;
+  }
+
   saveFilters() {
+    const { isMarketplace } = this.props;
     const {filters} = {...this.state};
     // don't save status
-    delete filters.status;
-    localStorage.setItem('filters', JSON.stringify(filters));
+    // delete filters.status;
+    if (!isMarketplace) {
+      localStorage.setItem('dashboardFilters', JSON.stringify(filters));
+    } else {
+      localStorage.setItem('marketFilters', JSON.stringify(filters));
+    }
   }
 
   async fetchFilterLists() {
@@ -335,8 +364,10 @@ class JobFilter extends Component {
 
     const jobs = result.data;
     const {metadata} = result;
+    const {pausedJobs} = result;
     const {returnJobs} = this.props;
-    returnJobs(jobs, filters, metadata);
+    this.saveFilters();
+    returnJobs(jobs, filters, metadata, pausedJobs);
     this.setState({lastZipCode: filters.zipCode});
     if (isLoading) {
       isLoading(false);
@@ -474,7 +505,7 @@ class JobFilter extends Component {
   }
 
   async filterWithStatus(filters) {
-    this.state = {filters};
+    this.setState({filters});
     await this.fetchJobs();
   }
 
@@ -483,13 +514,13 @@ class JobFilter extends Component {
     const resetFilters = filters;
     const resetIntervals = {
       startInterval: moment().startOf('week').add(-1, 'weeks').hours(0)
-.minutes(0)
-.seconds(0)
-.toDate(),
+        .minutes(0)
+        .seconds(0)
+        .toDate(),
       endInterval: moment().endOf('week').add(1, 'weeks').hours(23)
-.minutes(59)
-.seconds(59)
-.toDate()
+        .minutes(59)
+        .seconds(59)
+        .toDate()
     };
     resetFilters.startAvailability = resetIntervals.startInterval;
     resetFilters.endAvailability = resetIntervals.endInterval;
@@ -530,6 +561,7 @@ class JobFilter extends Component {
       loaded
     } = this.state;
     // let start = filters.startAvailability;
+    const {t} = {...this.props};
     if (loaded) {
       return (
         <Row>
@@ -540,7 +572,7 @@ class JobFilter extends Component {
                   <div className="flex-job-filters">
                     <div>
                       <div className="filter-item-title">
-                        Date Range
+                        {t('Date Range')}
                       </div>
                       <TIntervalDatePicker
                         startDate={intervals.startInterval}
@@ -553,7 +585,7 @@ class JobFilter extends Component {
                     </div>
                     <div>
                       <div className="filter-item-title">
-                        Rate Type
+                      {t('Rate Type')}
                       </div>
                       <TSelect
                         input={
@@ -582,7 +614,7 @@ class JobFilter extends Component {
                     </div>
                     <div>
                       <div className="filter-item-title">
-                        Min Rate
+                        {t('Min Rate')}
                       </div>
                       <TFieldNumber
                         input={
@@ -594,13 +626,13 @@ class JobFilter extends Component {
                         }
                         decimal
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder={t('Any')}
                         currency
                       />
                     </div>
                     <div>
                       <div className="filter-item-title">
-                        Min Capacity
+                        {t('Min Capacity')}
                       </div>
                       <TFieldNumber
                         input={
@@ -616,7 +648,7 @@ class JobFilter extends Component {
                     </div>
                     <div id="truckTypeSelect">
                       <div className="filter-item-title">
-                        Truck Type
+                        {t('Truck Type')}
                       </div>
                       <MultiSelect
                         input={
@@ -641,7 +673,7 @@ class JobFilter extends Component {
                           }))
                         }
                         // placeholder="Materials"
-                        placeholder="Any"
+                        placeholder={t('Any')}
                         id="truckTypeSelect"
                         horizontalScroll="true"
                         selectedItems={filters.equipmentType}
@@ -649,7 +681,7 @@ class JobFilter extends Component {
                     </div>
                     <div>
                       <div className="filter-item-title">
-                        # of Trucks
+                        {t('# of Trucks')}
                       </div>
                       <TFieldNumber
                         input={
@@ -660,12 +692,12 @@ class JobFilter extends Component {
                           }
                         }
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder={t('Any')}
                       />
                     </div>
                     <div>
                       <div className="filter-item-title">
-                        Zip Code
+                        {t('Zip Code')}
                       </div>
                       <TField
                         input={
@@ -683,7 +715,7 @@ class JobFilter extends Component {
                     </div>
                     <div>
                       <div className="filter-item-title">
-                        Range (mi)
+                        {t('Range')} (mi)
                       </div>
                       <TField
                         input={
@@ -695,13 +727,13 @@ class JobFilter extends Component {
                         }
                         meta={reqHandlerRange}
                         className="filter-text"
-                        placeholder="Any"
+                        placeholder={t('Any')}
                         type="number"
                       />
                     </div>
                     <div id="materialTypeSelect" >
                       <div className="filter-item-title">
-                        Materials
+                        {t('Materials')}
                       </div>
                       <MultiSelect
                         input={
@@ -725,7 +757,7 @@ class JobFilter extends Component {
                             label: materialType.trim()
                           }))
                         }
-                        placeholder="Any"
+                        placeholder={t('Any')}
                         // placeholder={materialTypeList[0]}
                         id="materialTypeSelect"
                         horizontalScroll="true"
@@ -742,7 +774,7 @@ class JobFilter extends Component {
                                   type="button"
                                   onClick={this.handleResetFilters}
                           >
-                            Reset
+                            {t('Reset')}
                           </Button>
                         </ButtonToolbar>
                       </Col>
@@ -774,12 +806,14 @@ class JobFilter extends Component {
 JobFilter.propTypes = {
   returnJobs: PropTypes.func.isRequired,
   rows: PropTypes.number,
-  page: PropTypes.number
+  page: PropTypes.number,
+  isMarketplace: PropTypes.bool
 };
 
 JobFilter.defaultProps = {
   rows: 5,
-  page: 0
+  page: 0,
+  isMarketplace: false
 };
 
 export default JobFilter;
