@@ -459,7 +459,7 @@ class DailyReportFilter extends Component {
     allFilters.rateTypes = this.getValues(allFilters.rateTypes);
 
     // exclusive for nimda (or make false for SG)
-    allFilters.isNimda = true;
+    allFilters.isNimda = false;
 
     try {
       result = await ReportsService.getJobsDailyReport(allFilters);

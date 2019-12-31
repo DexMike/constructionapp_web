@@ -620,7 +620,7 @@ class FilterComparisonReport extends Component {
     allFilters.compare = compEnabled;
 
     // exclusive for nimda (or make false for SG)
-    allFilters.isNimda = true;
+    allFilters.isNimda = false;
 
     if (type === 'Carrier') {
       allFilters.companyType = 'Carrier';
