@@ -237,7 +237,7 @@ class JobSavePage extends Component {
     try {
       const d = new Date().toISOString().split('T')[0];
       const pdf = await ReportsService.getLoadsTicketsPDF(pdfRequest);
-      pdf.text().then(body => this.gotPDF(body, `${job.name}_LoadsTickets_${d}`));
+      pdf.text().then(body => this.gotPDF(body, `${job.name}_Tickets_${d}`));
     } catch (e) {
       console.log('ERROR: Unable to retrieve PDF.', e);
     }
