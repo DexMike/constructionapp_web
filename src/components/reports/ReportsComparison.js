@@ -26,13 +26,13 @@ import { Scrollbars } from 'react-custom-scrollbars';
 // import {html2canvas} from '../../../node_modules/html2canvas';
 // import * as html2canvas from '../../../node_modules/html2canvas';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { CSVLink } from 'react-csv';
 import TSelectField from './common/TSelect';
 import TCharts from './common/TCharts';
 import FilterComparisonReport from './filters/FilterComparisonReport';
 import ProfileService from './services/ProfileService';
 import TFormat from './common/TFormat';
+import UserUtils from '../../api/UtilsService';
 
 import './css/Reports.css';
 import './css/Address.css';
@@ -743,24 +743,6 @@ class ReportsComparison extends Component {
     this.setState({ chartVisType: e.value });
   }
 
-  gotPDF(data, name) {
-    // let's convert the base64 data into a pdf and open it
-    const binaryString = window.atob(data);
-    const binaryLen = binaryString.length;
-    const bytes = new Uint8Array(binaryLen);
-    for (let i = 0; i < binaryLen; i += 1) {
-      const ascii = binaryString.charCodeAt(i);
-      bytes[i] = ascii;
-    }
-    const blob = new Blob([bytes], {type: 'application/pdf'});
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = name;
-    link.click();
-  }
-
-  opensWindow(url) { window.open(url, '_blank'); }
-
   exportToPDF() {
     const { activeTab, filters } = this.state;
     const previousTab = activeTab;
@@ -768,36 +750,43 @@ class ReportsComparison extends Component {
     this.setState({
       pdfRendering: true // hack for full PDF rendering (table width)
     }, () => {
+      window.scrollTo(0, 0); // keep this one, force scroll to corner
       const input = document.getElementById('visualizations');
-      html2canvas(input)
-        .then(async (canvas) => {
-          const img = canvas.toDataURL('image/jpg');
+      setTimeout(async () => {
+        html2canvas(input)
+          .then(async (canvas) => {
+            window.scrollTo(0, 0);
+            const img = canvas.toDataURL('image/jpg');
+            const pdfRequest = {
+              pdfTitle: `${filters.startAvailability} to ${filters.endAvailability}`,
+              contents: `<img src='${img}' alt='Reports Image'>`
+            };
 
-          const pdfRequest = {
-            pdfTitle: `Reports from ${filters.startAvailability} to ${filters.endAvailability}`,
-            contents: `<img src='${img}' alt='Reports Image'>`
-          };
+            try {
+              const d = new Date().toISOString().split('T')[0];
+              const pdf = await ReportsService.getPDF(pdfRequest);
+              pdf.text().then(body => UserUtils.blobToFile(
+                body,
+                `ComparisonReport_${d}`,
+                'application/pdf'
+              ));
+            } catch (e) {
+              console.log('ERROR: Unable to retrieve PDF.', e);
+            }
 
-          try {
-            const d = new Date().toISOString().split('T')[0];
-            const pdf = await ReportsService.getPDF(pdfRequest);
-            pdf.text().then(body => this.gotPDF(body, `ComparisonReport_${d}`));
-          } catch (e) {
-            console.log('ERROR: Unable to retrieve PDF.', e);
-          }
-
-          this.setState({
-            pdfRendering: false,
-            activeTab: '4' // this is a hack to get the width back
-          }, () => {
-            // this.forceUpdate();
-            setTimeout(() => {
-              this.setState({
-                activeTab: previousTab
-              });
-            }, 2000);
+            this.setState({
+              pdfRendering: false,
+              activeTab: '4' // this is a hack to get the width back
+            }, () => {
+              // this.forceUpdate();
+              setTimeout(() => {
+                this.setState({
+                  activeTab: previousTab
+                });
+              }, 2000);
+            });
           });
-        });
+      }, 1500);
     });
   }
 
@@ -984,7 +973,7 @@ class ReportsComparison extends Component {
                   outline
                   onClick={this.closeModal}
                 >
-Close &nbsp;
+                  Close &nbsp;
                 </Button>
               </div>
             </div>
@@ -1045,10 +1034,11 @@ Close &nbsp;
 
     return (
       <Row
-        id="visualizations"
-        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`}
+          className={
+            `${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`
+          }
       >
-        <Col md={12}>
+        <Col md={12} id="visualizations">
           <Card>
             <CardBody>
               <Row data-html2canvas-ignore="true" className="menuOnTop">
@@ -1167,17 +1157,23 @@ Close &nbsp;
                   </Nav>
                   <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div
+                        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended_chart'}`}
+                      >
                         {this.renderChart(chartType, products, title)}
                       </div>
                     </TabPane>
                     <TabPane tabId="2">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div
+                        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended_chart'}`}
+                      >
                         {this.renderChart(chartType, carriers, title)}
                       </div>
                     </TabPane>
                     <TabPane tabId="3">
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div
+                        className={`${!pdfRendering ? 'visualizations' : 'visualizations_extended_chart'}`}
+                      >
                         {this.renderChart(chartType, projects, title)}
                       </div>
                     </TabPane>
