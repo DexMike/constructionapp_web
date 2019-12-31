@@ -38,6 +38,7 @@ import LookupsService from '../../api/LookupsService';
 import JobResumePopup from './JobResumePopup';
 import JobPausePopup from './JobPausePopup';
 import JobAllocate from './JobAllocate';
+import ReportsService from '../reports/services/ReportsService';
 
 class JobSavePage extends Component {
   constructor(props) {
@@ -75,6 +76,7 @@ class JobSavePage extends Component {
       // for some reason I couldn't set it when nested
       companyType: null,
       btnSubmitting: false,
+      pdfLoader: false,
       selectedDrivers: [],
       accessForbidden: false,
       modalAddJob: false,
@@ -139,6 +141,7 @@ class JobSavePage extends Component {
     this.toggleResumeJobModal = this.toggleResumeJobModal.bind(this);
     this.togglePauseJobModal = this.togglePauseJobModal.bind(this);
     this.JobFormData = this.JobFormData.bind(this);
+    this.exportToPDF = this.exportToPDF.bind(this);
   }
 
   async componentDidMount() {
@@ -205,6 +208,40 @@ class JobSavePage extends Component {
     }
 
     this.setState({jobData: csvString});
+  }
+
+  gotPDF(data, name) {
+    // let's convert the base64 data into a pdf and open it
+    const binaryString = window.atob(data);
+    const binaryLen = binaryString.length;
+    const bytes = new Uint8Array(binaryLen);
+    for (let i = 0; i < binaryLen; i += 1) {
+      const ascii = binaryString.charCodeAt(i);
+      bytes[i] = ascii;
+    }
+    const blob = new Blob([bytes], {type: 'application/pdf'});
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+  }
+
+  async exportToPDF() {
+    const { job } = this.state;
+    this.setState({pdfLoader: true});
+
+    const pdfRequest = {
+      jobId: job.id
+    };
+
+    try {
+      const d = new Date().toISOString().split('T')[0];
+      const pdf = await ReportsService.getLoadsTicketsPDF(pdfRequest);
+      pdf.text().then(body => this.gotPDF(body, `${job.name}_Tickets_${d}`));
+    } catch (e) {
+      console.log('ERROR: Unable to retrieve PDF.', e);
+    }
+    this.setState({pdfLoader: false});
   }
 
   async loadSavePage(jobId) {
@@ -1002,6 +1039,19 @@ class JobSavePage extends Component {
     );
   }
 
+  renderPDF() {
+    const {pdfLoader} = this.state;
+    return (
+      <TSubmitButton
+        onClick={() => this.exportToPDF()}
+        className="secondaryButton"
+        loading={pdfLoader}
+        loaderSize={10}
+        bntText={['Export loads tickets as PDF ', <span key="cloudIcon" className="lnr lnr-cloud-download"/>]}
+      />
+    );
+  }
+
   renderResumeButton() {
     const {job} = this.state;
     if (job.status === 'Paused') {
@@ -1710,6 +1760,7 @@ class JobSavePage extends Component {
       profile,
       accessForbidden
     } = this.state;
+    const jobData = {...this.state};
     // console.log('>>>CO:', companyType);
     if (accessForbidden) {
       return (
@@ -1733,7 +1784,7 @@ class JobSavePage extends Component {
             {this.renderCopyJobModal()}
             {this.renderEditExistingJobModal()}
             {this.renderEditSavedJobModal()}
-            {/*{this.renderAllocateDriversModal(profile)}*/}
+            {/* {this.renderAllocateDriversModal(profile)} */}
             {this.renderCancelRequestConfirmation()}
             {this.renderLiabilityConfirmation()}
             {this.renderCancelCarrierModal()}
@@ -1750,6 +1801,10 @@ class JobSavePage extends Component {
               <div className="col-md-6 text-right">
                 {companyType === 'Customer' && profile.isAdmin && (
                   <React.Fragment>
+                    {jobData.loads
+                    && jobData.loads.length > 0
+                    && jobData.loads[0].loadStatus !== 'Started'
+                    && this.renderPDF()}
                     {this.renderCSVButton()}
                     {this.renderCopyButton()}
                     {this.renderCloseButton()}
