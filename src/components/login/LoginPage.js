@@ -61,6 +61,7 @@ class LoginPage extends SignIn {
     this.handleUserNotConfirmed = this.handleUserNotConfirmed.bind(this);
     this.changeState = this.changeState.bind(this);
     this.validateIsDriver = this.validateIsDriver.bind(this);
+    this.validateIsUserUnderReview = this.validateIsUserUnderReview.bind(this);
   }
 
   async componentDidMount() {
@@ -307,6 +308,19 @@ class LoginPage extends SignIn {
     this.setState({error: null});
   }
 
+  validateIsUserUnderReview() {
+    const {userUnderReviewIn} = this.state;
+    if (userUnderReviewIn) {
+      this.setState({
+        userUnderReview: false,
+        btnSubmitting: false,
+        showPassword: false,
+        username: '',
+        password: ''
+      });
+    }
+  }
+
   validateIsDriver() {
     const {driverIn} = this.state;
     if (driverIn) {
@@ -321,11 +335,21 @@ class LoginPage extends SignIn {
   }
 
   renderUserNotReviewed() {
+    this.state.userUnderReviewIn = true;
     return (
-      <h6> Thank you for checking back with us. Your account is still in review.
-        This normally takes 1-2 business days.
-        If you have not been contact you can email us at csr@trelar.com. Thank you.
-      </h6>
+      <div className="form">
+        <h6> Thank you for checking back with us. Your account is still in review.
+          This normally takes 1-2 business days.
+          If you have not been contact you can email us at csr@trelar.com. Thank you.
+        </h6>
+        <Button
+          className="btn btn-primary account__btn account__btn--small"
+          style={{ marginTop: '20px'}}
+          onClick={() => this.validateIsUserUnderReview()}
+        >
+          Logout
+        </Button>
+      </div>
     );
   }
 
