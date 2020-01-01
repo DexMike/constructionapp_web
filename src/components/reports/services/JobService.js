@@ -136,8 +136,13 @@ class JobService extends AgentService {
     };
   }
 
-  static async getJobsByDate(date) {
-    const response = await this.get(`/date/${date}${PATH}`);
+  static async getJobsByDateCustomer(date) {
+    const response = await this.get(`/date/${date}/producers${PATH}`);
+    return (response);
+  }
+
+  static async getJobsByDateCarrier(date) {
+    const response = await this.get(`/date/${date}/carriers${PATH}`);
     return (response);
   }
 }
