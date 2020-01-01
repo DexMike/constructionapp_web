@@ -327,10 +327,21 @@ class ReportsDailyReportPage extends Component {
   }
 
   async getJob(date) {
+    const {profile} = this.state;
+    let jobsDate = [];
     try {
-      const jobsDate = await JobService.getJobsByDate(
-        date
-      );
+      if (profile.companyType === 'Customer') {
+        jobsDate = await JobService.getJobsByDateCustomer(
+          date
+        );
+      }
+
+      if (profile.companyType === 'Carrier') {
+        jobsDate = await JobService.getJobsByDateCarrier(
+          date
+        );
+      }
+
       this.setState({
         jobsDate
       }, function done() {
