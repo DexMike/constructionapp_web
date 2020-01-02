@@ -755,7 +755,6 @@ class ReportsComparison extends Component {
       setTimeout(async () => {
         html2canvas(input)
           .then(async (canvas) => {
-            window.scrollTo(0, 0);
             const img = canvas.toDataURL('image/jpg');
             const pdfRequest = {
               pdfTitle: `${filters.startAvailability} to ${filters.endAvailability}`,
@@ -1033,12 +1032,11 @@ class ReportsComparison extends Component {
     }
 
     return (
-      <Row
-          className={
+      <Row>
+        <Col md={12} id="visualizations" className={
             `${!pdfRendering ? 'visualizations' : 'visualizations_extended'}`
           }
-      >
-        <Col md={12} id="visualizations">
+        >
           <Card>
             <CardBody>
               <Row data-html2canvas-ignore="true" className="menuOnTop">

@@ -255,6 +255,7 @@
 .visualizations {
   width: 100% !important;
   height: auto !important;
+  /* background-color: yellow; */
 }
 
 .visualizations_extended {
@@ -268,12 +269,24 @@
 @media screen and (max-width: 1080px) {
   .visualizations {
     width: 100% !important;
-    background-color: purple;
   }
   
   .visualizations_extended {
     width: 1320px !important;
-    background-color: red;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .visualizations {
+    width: 100% !important;
+  }
+  
+  .visualizations_extended {
+    width: 99% !important;
+  }
+
+  .visualizations_extended_chart {
+    width: 800px !important;
   }
 }
 

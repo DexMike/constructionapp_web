@@ -50,7 +50,7 @@ class UserUtils {
   }
 
   static blobToFile(data, name, mimetype) {
-    // let's convert the base64 data into a pdf and open it
+    // let's convert the base64 data into a file and open it
     const binaryString = window.atob(data);
     const binaryLen = binaryString.length;
     const bytes = new Uint8Array(binaryLen);
