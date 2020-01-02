@@ -1273,25 +1273,31 @@ class JobWizard extends Component {
     }
 
     let avgDistance = tabPickupDelivery.avgDistanceEnroute;
-    // let's try and figure out the distance now, if it's not already calcutlated
-    if (avgDistance !== 0) {
-      if (address1.id !== 0 || address1.id !== null) {
-        address1 = await AddressService.getAddressById(address1.id);
-      }
-
-      if (address2.id !== 0 || address2.id !== null) {
-        address2 = await AddressService.getAddressById(address2.id);
-      }
-
+    // let's try and figure out the distance now, if it's not already calculated
+    if (avgDistance === 0 || avgDistance === null || isNaN(avgDistance)) {
+      let waypoint0 = '';
+      let waypoint1 = '';
       try {
-        const startAddressCoords = await GeoUtils.getCoordsFromAddress(
-          `${address1.address1}, ${address1.city} ${address1.state} ${address1.zipCode}`
-        );
-        const endAddressCoords = await GeoUtils.getCoordsFromAddress(
-          `${address2.address1}, ${address2.city} ${address2.state} ${address2.zipCode}`
-        );
-        const waypoint0 = `${startAddressCoords.lat},${startAddressCoords.lng}`;
-        const waypoint1 = `${endAddressCoords.lat},${endAddressCoords.lng}`;
+        if (tabPickupDelivery.selectedStartAddressId > 0) {
+          address1 = await AddressService.getAddressById(tabPickupDelivery.selectedStartAddressId);
+          waypoint0 = `${address1.latitude},${address1.longitude}`;
+        } else {
+          const startAddressCoords = await GeoUtils.getCoordsFromAddress(
+            `${address1.address1}, ${address1.city} ${address1.state} ${address1.zipCode}`
+          );
+          waypoint0 = `${startAddressCoords.lat},${startAddressCoords.lng}`;
+        }
+      
+        if (tabPickupDelivery.selectedEndAddressId > 0) {
+          address2 = await AddressService.getAddressById(tabPickupDelivery.selectedEndAddressId);
+          waypoint1 = `${address2.latitude},${address2.longitude}`;
+        } else {
+          const endAddressCoords = await GeoUtils.getCoordsFromAddress(
+            `${address2.address1}, ${address2.city} ${address2.state} ${address2.zipCode}`
+          );
+          waypoint1 = `${endAddressCoords.lat},${endAddressCoords.lng}`;
+        }
+
         const newDistance = await GeoUtils.getDistance(
           waypoint0, waypoint1
         );
