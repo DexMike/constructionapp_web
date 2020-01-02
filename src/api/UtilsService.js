@@ -48,6 +48,22 @@ class UserUtils {
   static sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  static blobToFile(data, name, mimetype) {
+    // let's convert the base64 data into a pdf and open it
+    const binaryString = window.atob(data);
+    const binaryLen = binaryString.length;
+    const bytes = new Uint8Array(binaryLen);
+    for (let i = 0; i < binaryLen; i += 1) {
+      const ascii = binaryString.charCodeAt(i);
+      bytes[i] = ascii;
+    }
+    const blob = new Blob([bytes], {type: mimetype});
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+  }
 }
 
 export default UserUtils;

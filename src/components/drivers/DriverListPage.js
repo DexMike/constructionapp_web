@@ -12,6 +12,7 @@ import {
   Modal
 } from 'reactstrap';
 // import ExampleCard from "../ExampleCard";
+import { withTranslation } from 'react-i18next';
 import TTable from '../common/TTable';
 import UserService from '../../api/UserService';
 import ProfileService from '../../api/ProfileService';
@@ -20,7 +21,6 @@ import DriverForm from './DriverForm';
 // import moment from "moment";
 import TFormat from '../common/TFormat';
 import './Driver.css';
-import { withTranslation } from 'react-i18next';
 
 class DriverListPage extends Component {
   constructor(props) {
@@ -136,12 +136,18 @@ class DriverListPage extends Component {
     */
   }
 
-  toggleAddDriverModal() {
+  async toggleAddDriverModal() {
     const { modal } = this.state;
+    let { drivers, totalCount } = this.state;
+
     if (modal === true) {
-      this.fetchDrivers();
+      ({ drivers, totalCount} = await this.fetchDrivers());
     }
-    this.setState({ modal: !modal });
+    this.setState({
+      modal: !modal,
+      drivers,
+      totalCount
+    });
   }
 
   renderGoTo() {
@@ -205,13 +211,13 @@ class DriverListPage extends Component {
           {this.renderGoTo()}
           <Row>
             <Col md={12}>
-              <h3 className="page-title">Drivers</h3>
+              <h3 className="page-title">{t('Drivers')}</h3>
               <Button
                 className="mt-4"
                 color="primary"
                 onClick={() => this.setState({ modal: true, driverId: 0 })}
               >
-                Add a Driver
+                {t('Add a Driver')}
               </Button>
             </Col>
           </Row>
@@ -220,7 +226,7 @@ class DriverListPage extends Component {
               <Card>
                 <CardBody>
                   <div className="ml-4 mt-4">
-                    Displaying {drivers.length} out of {totalCount} drivers
+                    {t('Displaying')} {drivers.length} {t('out of')} {totalCount} {t('Drivers')}
                   </div>
                   <TTable
                     columns={[
@@ -230,19 +236,19 @@ class DriverListPage extends Component {
                       }, */
                       {
                         name: 'firstName',
-                        displayName: 'First Name'
+                        displayName: t('First Name')
                       },
                       {
                         name: 'lastName',
-                        displayName: 'Last Name'
+                        displayName: t('Last Name')
                       },
                       {
                         name: 'mobilePhone',
-                        displayName: 'Mobile Phone'
+                        displayName: t('Mobile Phone')
                       },
                       {
                         name: 'driverStatus',
-                        displayName: 'Driver Status'
+                        displayName: t('Driver Status')
                       },
                       {
                         name: 'defaultEquipment',
@@ -250,7 +256,7 @@ class DriverListPage extends Component {
                       },
                       {
                         name: 'email',
-                        displayName: 'Email'
+                        displayName: t('Email')
                       }
                     ]}
                     data={drivers}
@@ -270,7 +276,7 @@ class DriverListPage extends Component {
       <Container className="dashboard">
         <Row>
           <Col md={12}>
-            <h3 className="page-title">Drivers</h3>
+            <h3 className="page-title">{t('Drivers')}</h3>
           </Col>
         </Row>
         {this.renderLoader()}

@@ -463,7 +463,7 @@ class JobViewForm extends Component {
                   : TFormat.asMoney(job.rate - trelarFees.perTonPerHourFee)
               } / {job.rateType}
               <br/>
-              Estimated: {job.rateEstimate} {job.rateType}(s)
+              Estimated: {job.rateEstimate} {job.amountType}(s)
             </p>
           </Col>
           <Col md={4}>
@@ -664,7 +664,7 @@ class JobViewForm extends Component {
     return (
       <React.Fragment>
         <h3 className="subhead">
-          Instructions
+          Notes
         </h3>
         <Row>
           <Col md={12}>

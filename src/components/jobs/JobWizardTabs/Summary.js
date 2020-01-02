@@ -27,6 +27,7 @@ class Summary extends PureComponent {
       endAddressValidations: []
     };
     this.handleInstructionChange = this.handleInstructionChange.bind(this);
+    this.handlePrivateInstructionsChange = this.handlePrivateInstructionsChange.bind(this);
   }
 
   async componentDidMount() {
@@ -94,6 +95,13 @@ class Summary extends PureComponent {
     const {data, handleInputChange} = {...this.props};
     const {value} = e.target;
     data.instructions = value;
+    handleInputChange('tabSummary', data);
+  }
+
+  handlePrivateInstructionsChange(e) {
+    const {data, handleInputChange} = {...this.props};
+    const {value} = e.target;
+    data.privateInstructions = value;
     handleInputChange('tabSummary', data);
   }
 
@@ -209,10 +217,10 @@ class Summary extends PureComponent {
           </Row>
           <Row className="col-md-12">
             <div className="col-md-6 form__form-group">
-              {startAddressValidations.length > 0 ? this.renderValidationBox(startAddressValidations, 2) : this.renderStartAddress()}
+              {startAddressValidations.length > 0 ? this.renderValidationBox(startAddressValidations, 1) : this.renderStartAddress()}
             </div>
             <div className="col-md-6 form__form-group">
-              {endAddressValidations.length > 0 ? this.renderValidationBox(endAddressValidations, 2) : this.renderEndAddress()}
+              {endAddressValidations.length > 0 ? this.renderValidationBox(endAddressValidations, 1) : this.renderEndAddress()}
 
             </div>
           </Row>
@@ -377,7 +385,7 @@ class Summary extends PureComponent {
           </Row>
           <Row className="col-md-12">
             <div className="col-md-4">
-              {materialTabValidations.length > 0 ? this.renderValidationBox(materialTabValidations, 1)
+              {materialTabValidations.length > 0 ? this.renderValidationBox(materialTabValidations, 2)
                 : this.renderMaterials()}
             </div>
             <div className="col-md-4">
@@ -413,7 +421,6 @@ class Summary extends PureComponent {
       } else {
         oneWayCostPerTonHourPerMile = TCalculator.getOneWayCostByHourRate(
           parseFloat(tabPickupDelivery.avgTimeEnroute),
-          parseFloat(tabPickupDelivery.avgTimeReturn),
           0.25,
           0.25,
           parseFloat(tabHaulRate.ratePerPayType),
@@ -436,7 +443,8 @@ class Summary extends PureComponent {
           0.25,
           tabMaterials.quantity,
           truckCapacity,
-          parseFloat(haulCostPerTonHour)
+          parseFloat(haulCostPerTonHour),
+          (tabHaulRate.roundType === 'up')
         );
       } else if (tabHaulRate.payType === 'Hour' && tabMaterials.quantityType === 'Hour') {
         deliveredPricePerTon = TCalculator.getDelPricePerTonByHourRateByHourAmount(
@@ -447,7 +455,8 @@ class Summary extends PureComponent {
           0.25,
           tabMaterials.quantity,
           truckCapacity,
-          parseFloat(haulCostPerTonHour)
+          parseFloat(haulCostPerTonHour),
+          (tabHaulRate.roundType === 'up')
         );
       }
       if ((tabMaterials.quantityType === 'Ton' && tabHaulRate.payType === 'Ton')
@@ -464,7 +473,8 @@ class Summary extends PureComponent {
           0.25,
           0.25,
           parseFloat(tabMaterials.quantity),
-          truckCapacity
+          truckCapacity,
+          (tabHaulRate.roundType === 'up')
         );
       } else if (tabMaterials.quantityType === 'Hour' && tabHaulRate.payType === 'Ton') {
         estimatedCostForJob = TCalculator.getJobCostTonRateHourAmount(
@@ -474,7 +484,8 @@ class Summary extends PureComponent {
           0.25,
           0.25,
           parseFloat(tabMaterials.quantity),
-          truckCapacity
+          truckCapacity,
+          (tabHaulRate.roundType === 'up')
         );
       }
 
@@ -488,7 +499,8 @@ class Summary extends PureComponent {
           0.25,
           parseFloat(tabMaterials.quantity),
           truckCapacity,
-          deliveredPricePerTon
+          deliveredPricePerTon,
+          (tabHaulRate.roundType === 'up')
         );
       }
     }
@@ -525,7 +537,20 @@ class Summary extends PureComponent {
 
   render() {
     const {loaded, formIsValid} = {...this.state};
-    const {data, goBack, saveJob, closeModal, jobRequest, jobEdit, validateTopForm, isLoading} = {...this.props};
+    const {
+      data,
+      goBack,
+      saveJob,
+      closeModal,
+      jobRequest,
+      jobEdit,
+      validateTopForm,
+      isLoading
+    } = {...this.props};
+
+    const publicNotesInfo = 'These notes will be seen by carriers you send the job to, before they book it.';
+    const privateNotesInfo = 'These notes will be seen only by carriers after they book the job.';
+
     if (loaded) {
       return (
         <Col md={12} lg={12}>
@@ -548,7 +573,10 @@ class Summary extends PureComponent {
                 <Row className="col-md-12">
                   <div className="col-md-12 form__form-group">
                     <h3 className="subhead">
-                      Instructions
+                      Public Notes&nbsp;
+                      <span className="infoCircle">
+                        <span style={{padding: 6, color: 'white'}} data-tip data-for="publicNotesInfo">i</span>
+                      </span>
                     </h3>
                   </div>
                   <div className="col-md-12 form__form-group">
@@ -557,11 +585,41 @@ class Summary extends PureComponent {
                       type="text"
                       value={data.instructions}
                       onChange={this.handleInstructionChange}
-                      placeholder="Instructions"
+                      placeholder="Public Notes"
                       maxLength="255"
                     />
                   </div>
                 </Row>
+                <div className="customTooltip">
+                  <ReactTooltip id="publicNotesInfo" effect="solid">
+                    <p style={{color: 'white'}}>{publicNotesInfo}</p>
+                  </ReactTooltip>
+                </div>
+                <Row className="col-md-12">
+                  <div className="col-md-12 form__form-group">
+                    <h3 className="subhead">
+                      Private Notes&nbsp;
+                      <span className="infoCircle">
+                        <span style={{padding: 6, color: 'white'}} data-tip data-for="privateNotesInfo">i</span>
+                      </span>
+                    </h3>
+                  </div>
+                  <div className="col-md-12 form__form-group">
+                    <textarea
+                      name="privateInstructions"
+                      type="text"
+                      value={data.privateInstructions}
+                      onChange={this.handlePrivateInstructionsChange}
+                      placeholder="Private Notes"
+                      maxLength="255"
+                    />
+                  </div>
+                </Row>
+                <div className="customTooltip">
+                  <ReactTooltip id="privateNotesInfo" effect="solid">
+                    <p style={{color: 'white'}}>{privateNotesInfo}</p>
+                  </ReactTooltip>
+                </div>
               </form>
               <Row className="col-md-12" style={{paddingTop: 20}}>
                 <hr/>

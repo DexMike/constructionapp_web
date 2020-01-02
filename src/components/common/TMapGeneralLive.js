@@ -108,7 +108,7 @@ class TMapGeneralLive extends Component {
     onTrucksLoaded(gpsTrackings.length);
 
     // set zoom and margin
-    if (gpsTrackings.length > 0) {
+    if (gpsTrackings.length > 0 && count === 0) {
       const bounds = groupTrackings.getBoundingBox();
       this.map.getViewModel().setLookAtData({
         bounds: GeoUtils.setZoomBounds(bounds)

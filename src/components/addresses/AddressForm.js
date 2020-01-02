@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import moment from 'moment';
+import { withTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import { Col, Row, Button, Container } from 'reactstrap';
 import TSpinner from '../common/TSpinner';
@@ -11,6 +12,7 @@ import TField from '../common/TField';
 import TAlert from '../common/TAlert';
 
 import './Address.scss';
+import { t } from 'i18next/dist/commonjs';
 
 class AddressForm extends Component {
   constructor(props) {
@@ -295,7 +297,7 @@ class AddressForm extends Component {
   }
 
   renderAddressForm() {
-    const { toggle, addressId, profile } = this.props;
+    const { toggle, addressId, profile, t } = this.props;
     const {
       loading,
       alert,
@@ -313,7 +315,7 @@ class AddressForm extends Component {
       <Container className="address-form form">
         <Row className="form-title">
           <Col md={12}>
-            { !addressId ? 'Create Address' : 'Update Address' }
+            { !addressId ? t('Create Address') : t('Update Address') }
           </Col>
         </Row>
         <Row className="form-content">
@@ -336,15 +338,15 @@ class AddressForm extends Component {
             addressId ? (
               <Col md={12} className="text-right">
                 <span className="form__form-group-label">
-                  ( latitude: {address.latitude || 'Not Set'}, longitude: {address.longitude || 'Not Set'} )
+                  ( {t('latitude')}: {address.latitude || 'Not Set'}, {t('longitude')}: {address.longitude || 'Not Set'} )
                 </span>
               </Col>
             ) : ''
           }
           <Col md={12}>
             <div>
-              <span className="form__form-group-label">Address Name&nbsp;</span>
-              <span className="form-group-label-min">( required )</span>
+              <span className="form__form-group-label">{t('Address Name')}&nbsp;</span>
+              <span className="form-group-label-min">( {t('required')} )</span>
             </div>
             <TField
               input={{
@@ -352,15 +354,15 @@ class AddressForm extends Component {
                 name: 'name',
                 value: address.name
               }}
-              placeholder="Name"
+              placeholder={t('Name')}
               type="text"
               meta={reqHandlerName}
             />
           </Col>
           <Col md={6}>
             <div>
-              <span className="form__form-group-label">Address 1&nbsp;</span>
-              <span className="form-group-label-min">( required )</span>
+              <span className="form__form-group-label">{t('Address')} 1&nbsp;</span>
+              <span className="form-group-label-min">( {t('required')} )</span>
             </div>
             <TField
               input={{
@@ -368,20 +370,20 @@ class AddressForm extends Component {
                 name: 'address1',
                 value: address.address1
               }}
-              placeholder="Address 1"
+              placeholder={`${t('Address')} 1`}
               type="text"
               meta={reqHandlerAddress}
             />
           </Col>
           <Col md={6}>
-            <span className="form__form-group-label">Address 2</span>
+            <span className="form__form-group-label">{t('Address')} 2</span>
             <TField
               input={{
                 onChange: this.handleInputChange,
                 name: 'address2',
                 value: address.address2
               }}
-              placeholder="Address 2"
+              placeholder={`${t('Address')} 2`}
               type="text"
               // meta={}
             />
@@ -418,7 +420,7 @@ class AddressForm extends Component {
           }
           <Col md={6}>
             <div>
-              <span className="form__form-group-label">City&nbsp;</span>
+              <span className="form__form-group-label">{t('City')}&nbsp;</span>
               <span className="form-group-label-min">( required )</span>
             </div>
             <TField
@@ -427,15 +429,15 @@ class AddressForm extends Component {
                 name: 'city',
                 value: address.city
               }}
-              placeholder="City"
+              placeholder={t('City')}
               type="text"
               meta={reqHandlerCity}
             />
           </Col>
           <Col md={6}>
             <div>
-              <span className="form__form-group-label">State&nbsp;</span>
-              <span className="form-group-label-min">( required )</span>
+              <span className="form__form-group-label">{t('State')}&nbsp;</span>
+              <span className="form-group-label-min">( {t('required')} )</span>
             </div>
             <SelectField
               input={
@@ -448,13 +450,13 @@ class AddressForm extends Component {
               meta={reqHandlerState}
               value={address.state}
               options={states}
-              placeholder="Select a State"
+              placeholder={t('Select a State')}
             />
           </Col>
           <Col md={6}>
             <div>
-              <span className="form__form-group-label">Zip Code&nbsp;</span>
-              <span className="form-group-label-min">( required )</span>
+              <span className="form__form-group-label">{t('Zip Code')}&nbsp;</span>
+              <span className="form-group-label-min">( {t('required')} )</span>
             </div>
             <TField
               input={{
@@ -462,7 +464,7 @@ class AddressForm extends Component {
                 name: 'zipCode',
                 value: address.zipCode
               }}
-              placeholder="Name"
+              placeholder={t('Zip Code')}
               type="text"
               meta={reqHandlerZipCode}
             />
@@ -488,7 +490,7 @@ class AddressForm extends Component {
             */
           }
           <Col md={12}>
-            <span className="form__form-group-label">Notes</span>
+            <span className="form__form-group-label">{t('Notes')}</span>
             <textarea
               name="note"
               component="textarea"
@@ -505,7 +507,7 @@ class AddressForm extends Component {
                       disabled={loading}
                       onClick={() => this.handleDelete(addressId)}
                     >
-                      Delete Address
+                      {t('Delete Address')}
                     </Button>
                   ) : ''
                 }
@@ -516,7 +518,7 @@ class AddressForm extends Component {
                   className="btn btn-outline-primary"
                   onClick={toggle}
                 >
-                  { actionStatus && actionStatus === true ? 'OK' : 'Cancel'}
+                  { actionStatus && actionStatus === true ? 'OK' : t('Cancel')}
                 </Button>
                 {
                   actionStatus !== true && (
@@ -532,7 +534,7 @@ class AddressForm extends Component {
                             loaderSize={10}
                             loading
                           />
-                        ) : 'Save Address'
+                        ) : t('Save')
                       }
                     </Button>
                   )
@@ -572,4 +574,4 @@ AddressForm.defaultProps = {
   addressId: null
 };
 
-export default AddressForm;
+export default withTranslation()(AddressForm);

@@ -4,7 +4,6 @@ import AgentService from './AgentService';
 const PATH = '/reports';
 
 class ReportsService extends AgentService {
-
   // ////////////////////////////////////////
   // Daily Report
   static async getJobsDailyReport(filters) {
@@ -51,6 +50,10 @@ class ReportsService extends AgentService {
     return (response);
   }
 
+  static async getPDF(pdfRequest) {
+    const response = await super.post(`/pdf/${PATH}`, pdfRequest);
+    return (response);
+  }
 }
 
 export default ReportsService;

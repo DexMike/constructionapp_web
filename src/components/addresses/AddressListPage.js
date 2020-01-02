@@ -10,6 +10,7 @@ import {
   Row,
   Modal
 } from 'reactstrap';
+import { withTranslation } from 'react-i18next';
 import TFieldNumber from '../common/TFieldNumber';
 import AddressForm from './AddressForm';
 import AddressService from '../../api/AddressService';
@@ -187,6 +188,7 @@ class AddressListPage extends Component {
 
   renderAddressFilters() {
     const { filters } = this.state;
+    const {t} = {...this.props};
     return (
       <Col md={12}>
         <Card>
@@ -201,25 +203,27 @@ class AddressListPage extends Component {
             >
               <Row className="form">
                 <Col md={8}>
-                  <span className="form__form-group-label">Search By Value (Name, Address, City, State, Delivery/PickUp)</span>
+                  <span className="form__form-group-label">
+                    {t('Search By Value (Name, Address, City, State, Delivery/PickUp)')}
+                  </span>
                   <input
                     name="searchValue"
                     value={filters.searchValue}
                     type="text"
                     onChange={this.handleInputChange}
-                    placeholder="Enter a value to search"
+                    placeholder={t('Enter a value to search')}
                     style={{ backgroundColor: 'white'}}
                   />
                 </Col>
                 <Col md={4}>
-                  <span className="form__form-group-label">Address Zip Code</span>
+                  <span className="form__form-group-label">{t('Zip Code')}</span>
                   <TFieldNumber
                     input={{
                       onChange: this.handleInputChange,
                       name: 'zipCode',
                       value: filters.zipCode
                     }}
-                    placeholder="Enter a zip code"
+                    placeholder={t('Enter a zip code')}
                   />
                 </Col>
                 <Col md={12} className="text-right">
@@ -229,7 +233,7 @@ class AddressListPage extends Component {
                     type="button"
                     onClick={this.handleResetFilters}
                   >
-                    Reset
+                    {t('Reset')}
                   </Button>
                 </Col>
               </Row>
@@ -242,6 +246,7 @@ class AddressListPage extends Component {
 
   render() {
     const { addresses, loaded, totalCount, profile } = this.state;
+    const {t} = {...this.props};
     if (loaded && (profile.isAdmin === false || profile.companyType !== 'Customer')) {
       return <Redirect push to="/" />;
     }
@@ -251,7 +256,7 @@ class AddressListPage extends Component {
           {this.renderModal()}
           <Row>
             <Col md={6}>
-              <h3 className="page-title">Pickup/Delivery Addresses</h3>
+              <h3 className="page-title">{t('Pickup/Delivery Addresses')}</h3>
             </Col>
             <Col md={6} className="text-right">
               <Button
@@ -259,7 +264,7 @@ class AddressListPage extends Component {
                 className="primaryButton"
                 onClick={this.toggle}
               >
-                ADD ADDRESS
+                {t('ADD ADDRESS')}
               </Button>
             </Col>
           </Row>
@@ -269,20 +274,20 @@ class AddressListPage extends Component {
               <Card>
                 <CardBody>
                   <p className="pl-4">
-                    Displaying&nbsp;
+                    {t('Displaying')}&nbsp;
                     {addresses.length}
                     &nbsp;
-                    out of
+                    {t('out of')}
                     &nbsp;
-                    { totalCount }
+                    {totalCount}
                     &nbsp;
-                    addresses
+                    {t('addresses')}
                   </p>
                   <TTable
                     columns={[
                       {
                         name: 'name',
-                        displayName: 'Name'
+                        displayName: t('Name')
                       },
                       /* {
                         name: 'type',
@@ -290,16 +295,16 @@ class AddressListPage extends Component {
                       }, */
                       {
                         name: 'address1',
-                        displayName: 'Address'
+                        displayName: t('Address')
                       }, {
                         name: 'city',
-                        displayName: 'City'
+                        displayName: t('City')
                       }, {
                         name: 'state',
-                        displayName: 'State'
+                        displayName: t('State')
                       }, {
                         name: 'zipCode',
-                        displayName: 'Zip Code'
+                        displayName: t('Zip Code')
                       }
                     ]}
                     data={addresses}
@@ -338,4 +343,4 @@ AddressListPage.propTypes = {
 AddressListPage.defaultProps = {
   companyId: null
 };
-export default AddressListPage;
+export default withTranslation()(AddressListPage);
