@@ -40,6 +40,7 @@ class JobWizard extends Component {
       poNumber: '',
       minDate: null,
       topFormRef: React.createRef(),
+      btnSubmitting: false,
       reqHandlerJobName: {
         touched: false,
         error: ''
@@ -734,11 +735,10 @@ class JobWizard extends Component {
   }
 
   async validateAndSaveJobDraft() {
-    this.setState({btnSubmitting: true});
     let isValid = false;
     isValid = await this.isDraftValid();
     if (isValid) {
-      this.saveJobDraft();
+      await this.saveJobDraft();
     }
     this.setState({btnSubmitting: false});
   }
@@ -1151,266 +1151,267 @@ class JobWizard extends Component {
 
 
   async saveJob() {
-    const {
-      jobRequest,
-      jobEdit,
-      jobEditSaved,
-      selectedCarrierId,
-      job,
-      copyJob
-    } = this.props;
-    this.setState({btnSubmitting: true});
-    const {
-      profile,
-      tabSend,
-      tabPickupDelivery,
-      tabHaulRate,
-      tabMaterials,
-      name,
-      jobEndDate,
-      tabSummary,
-      tabTruckSpecs,
-      poNumber
-    } = this.state;
-
-    // Object to create a new Job
-    const jobRequestObject = {
-      job: {},
-      address1: {},
-      address2: {},
-      requestedCarrierId: null,
-      material: '',
-      trucksIds: [],
-      favoriteCarriersIds: [],
-      sendToMkt: false
-    };
-
-    let {jobStartDate} = this.state;
-    let status = 'Published';
-
-    // start location
-    let address1 = {
-      id: null
-    };
-    if (tabPickupDelivery.selectedStartAddressId === 0) {
-      address1 = {
-        type: 'Delivery',
-        name: tabPickupDelivery.startLocationAddressName,
-        companyId: profile.companyId,
-        address1: tabPickupDelivery.startLocationAddress1,
-        address2: tabPickupDelivery.startLocationAddress2,
-        city: tabPickupDelivery.startLocationCity,
-        state: tabPickupDelivery.startLocationState,
-        zipCode: tabPickupDelivery.startLocationZip,
-        latitude: tabPickupDelivery.startLocationLatitude,
-        longitude: tabPickupDelivery.startLocationLongitude,
-        country: 'US',
-        createdBy: profile.userId,
-        createdOn: moment.utc().format(),
-        modifiedBy: profile.userId,
-        modifiedOn: moment.utc().format()
-      };
-    } else {
-      address1.id = tabPickupDelivery.selectedStartAddressId;
-    }
-    // end location
-    let address2 = {
-      id: null
-    };
-    if (tabPickupDelivery.selectedEndAddressId === 0) {
-      address2 = {
-        type: 'Delivery',
-        name: tabPickupDelivery.endLocationAddressName,
-        companyId: profile.companyId,
-        address1: tabPickupDelivery.endLocationAddress1,
-        address2: tabPickupDelivery.endLocationAddress2,
-        city: tabPickupDelivery.endLocationCity,
-        state: tabPickupDelivery.endLocationState,
-        zipCode: tabPickupDelivery.endLocationZip,
-        latitude: tabPickupDelivery.endLocationLatitude,
-        longitude: tabPickupDelivery.endLocationLongitude,
-        country: 'US',
-        createdBy: profile.userId,
-        createdOn: moment.utc().format(),
-        modifiedBy: profile.userId,
-        modifiedOn: moment.utc().format()
-      };
-    } else {
-      address2.id = tabPickupDelivery.selectedEndAddressId;
-    }
-
-    jobRequestObject.address1 = address1;
-    jobRequestObject.address2 = address2;
-
-    // job p
-    let isFavorited = 0;
-    if (tabSend.showSendtoFavorites) {
-      isFavorited = 1;
-    }
-
-    const rateType = tabHaulRate.payType;
-    const rate = tabHaulRate.ratePerPayType;
-    const amountType = tabMaterials.quantityType;
-    const rateEstimate = tabMaterials.quantity;
-
-    // if both checks (Send to Mkt and Send to All Favorites) are selected
-    if ((tabSend.showSendtoFavorites
-      && (tabSend.sendToMkt === true || tabSend.sendToMkt === 1)
-      && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1))
-      || jobRequest
-    ) {
-      status = 'Published And Offered';
-    } else if (tabSend.showSendtoFavorites
-      && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1)) {
-      // sending to All Favorites only
-      status = 'On Offer';
-    } else { // default
-      status = 'Published';
-    }
-
-    if (selectedCarrierId && selectedCarrierId > 0) {
-      status = 'On Offer';
-    }
-
-    let avgDistance = tabPickupDelivery.avgDistanceEnroute;
-    // let's try and figure out the distance now, if it's not already calculated
-    if (avgDistance === 0 || avgDistance === null || isNaN(avgDistance)) {
-      let waypoint0 = '';
-      let waypoint1 = '';
-      try {
-        if (tabPickupDelivery.selectedStartAddressId > 0) {
-          address1 = await AddressService.getAddressById(tabPickupDelivery.selectedStartAddressId);
-          waypoint0 = `${address1.latitude},${address1.longitude}`;
-        } else {
-          const startAddressCoords = await GeoUtils.getCoordsFromAddress(
-            `${address1.address1}, ${address1.city} ${address1.state} ${address1.zipCode}`
-          );
-          waypoint0 = `${startAddressCoords.lat},${startAddressCoords.lng}`;
-        }
-      
-        if (tabPickupDelivery.selectedEndAddressId > 0) {
-          address2 = await AddressService.getAddressById(tabPickupDelivery.selectedEndAddressId);
-          waypoint1 = `${address2.latitude},${address2.longitude}`;
-        } else {
-          const endAddressCoords = await GeoUtils.getCoordsFromAddress(
-            `${address2.address1}, ${address2.city} ${address2.state} ${address2.zipCode}`
-          );
-          waypoint1 = `${endAddressCoords.lat},${endAddressCoords.lng}`;
-        }
-
-        const newDistance = await GeoUtils.getDistance(
-          waypoint0, waypoint1
-        );
-        // convert to miles
-        avgDistance = (newDistance.distance / 1609);
-      } catch (e) {
-        console.log("Error: Unable to obtain job's distance, avgDistance will be ignored", e);
-      }
-    }
-
-    jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
-    const jobCreate = {
-      companiesId: profile.companyId,
-      name,
-      status,
-      isFavorited,
-      startAddress: address1.id,
-      endAddress: address2.id,
-      avgDistance,
-      startTime: moment.tz(
-        jobStartDate,
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format(),
-      endTime: moment.tz(
+    this.setState({btnSubmitting: true}, async () => {
+      const {
+        jobRequest,
+        jobEdit,
+        jobEditSaved,
+        selectedCarrierId,
+        job,
+        copyJob
+      } = this.props;
+      const {
+        profile,
+        tabSend,
+        tabPickupDelivery,
+        tabHaulRate,
+        tabMaterials,
+        name,
         jobEndDate,
-        profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
-      ).utc().format(),
-      numEquipments: tabTruckSpecs.truckQuantity,
-      rateType,
-      rate: rate.toString().replace(/,/g, ''),
-      amountType,
-      rateEstimate: rateEstimate.toString().replace(/,/g, ''),
-      poNumber,
-      estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
-      notes: tabSummary.instructions,
-      privateNotes: tabSummary.privateInstructions,
-      createdBy: profile.userId,
-      createdOn: moment.utc().format(),
-      modifiedBy: profile.userId,
-      modifiedOn: moment.utc().format()
-    };
+        tabSummary,
+        tabTruckSpecs,
+        poNumber
+      } = this.state;
 
-    jobRequestObject.job = jobCreate;
-    jobRequestObject.material = tabMaterials.selectedMaterial.value;
-    const equipments = [];
-    for (const id of tabTruckSpecs.selectedTruckTypes) {
-      equipments.push(Number(id));
-    }
-    jobRequestObject.trucksIds = equipments;
+      // Object to create a new Job
+      const jobRequestObject = {
+        job: {},
+        address1: {},
+        address2: {},
+        requestedCarrierId: null,
+        material: '',
+        trucksIds: [],
+        favoriteCarriersIds: [],
+        sendToMkt: false
+      };
 
-    let newJob;
-    try {
-      if (jobEdit) {
-        jobCreate.id = job.id;
-        newJob = await JobService.updateJob(jobCreate); // updating job
-        if (newJob) {
-          if (Object.keys(tabMaterials.selectedMaterial).length > 0) {
-            // check if there's materials to add
-            await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
+      let {jobStartDate} = this.state;
+      let status = 'Published';
+
+      // start location
+      let address1 = {
+        id: null
+      };
+      if (tabPickupDelivery.selectedStartAddressId === 0) {
+        address1 = {
+          type: 'Delivery',
+          name: tabPickupDelivery.startLocationAddressName,
+          companyId: profile.companyId,
+          address1: tabPickupDelivery.startLocationAddress1,
+          address2: tabPickupDelivery.startLocationAddress2,
+          city: tabPickupDelivery.startLocationCity,
+          state: tabPickupDelivery.startLocationState,
+          zipCode: tabPickupDelivery.startLocationZip,
+          latitude: tabPickupDelivery.startLocationLatitude,
+          longitude: tabPickupDelivery.startLocationLongitude,
+          country: 'US',
+          createdBy: profile.userId,
+          createdOn: moment.utc().format(),
+          modifiedBy: profile.userId,
+          modifiedOn: moment.utc().format()
+        };
+      } else {
+        address1.id = tabPickupDelivery.selectedStartAddressId;
+      }
+      // end location
+      let address2 = {
+        id: null
+      };
+      if (tabPickupDelivery.selectedEndAddressId === 0) {
+        address2 = {
+          type: 'Delivery',
+          name: tabPickupDelivery.endLocationAddressName,
+          companyId: profile.companyId,
+          address1: tabPickupDelivery.endLocationAddress1,
+          address2: tabPickupDelivery.endLocationAddress2,
+          city: tabPickupDelivery.endLocationCity,
+          state: tabPickupDelivery.endLocationState,
+          zipCode: tabPickupDelivery.endLocationZip,
+          latitude: tabPickupDelivery.endLocationLatitude,
+          longitude: tabPickupDelivery.endLocationLongitude,
+          country: 'US',
+          createdBy: profile.userId,
+          createdOn: moment.utc().format(),
+          modifiedBy: profile.userId,
+          modifiedOn: moment.utc().format()
+        };
+      } else {
+        address2.id = tabPickupDelivery.selectedEndAddressId;
+      }
+
+      jobRequestObject.address1 = address1;
+      jobRequestObject.address2 = address2;
+
+      // job p
+      let isFavorited = 0;
+      if (tabSend.showSendtoFavorites) {
+        isFavorited = 1;
+      }
+
+      const rateType = tabHaulRate.payType;
+      const rate = tabHaulRate.ratePerPayType;
+      const amountType = tabMaterials.quantityType;
+      const rateEstimate = tabMaterials.quantity;
+
+      // if both checks (Send to Mkt and Send to All Favorites) are selected
+      if ((tabSend.showSendtoFavorites
+        && (tabSend.sendToMkt === true || tabSend.sendToMkt === 1)
+        && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1))
+        || jobRequest
+      ) {
+        status = 'Published And Offered';
+      } else if (tabSend.showSendtoFavorites
+        && (tabSend.sendToFavorites === true || tabSend.sendToFavorites === 1)) {
+        // sending to All Favorites only
+        status = 'On Offer';
+      } else { // default
+        status = 'Published';
+      }
+
+      if (selectedCarrierId && selectedCarrierId > 0) {
+        status = 'On Offer';
+      }
+
+      let avgDistance = tabPickupDelivery.avgDistanceEnroute;
+      // let's try and figure out the distance now, if it's not already calculated
+      if (avgDistance === 0 || avgDistance === null || isNaN(avgDistance)) {
+        let waypoint0 = '';
+        let waypoint1 = '';
+        try {
+          if (tabPickupDelivery.selectedStartAddressId > 0) {
+            address1 = await AddressService.getAddressById(tabPickupDelivery.selectedStartAddressId);
+            waypoint0 = `${address1.latitude},${address1.longitude}`;
+          } else {
+            const startAddressCoords = await GeoUtils.getCoordsFromAddress(
+              `${address1.address1}, ${address1.city} ${address1.state} ${address1.zipCode}`
+            );
+            waypoint0 = `${startAddressCoords.lat},${startAddressCoords.lng}`;
           }
-          if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
-            await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
+        
+          if (tabPickupDelivery.selectedEndAddressId > 0) {
+            address2 = await AddressService.getAddressById(tabPickupDelivery.selectedEndAddressId);
+            waypoint1 = `${address2.latitude},${address2.longitude}`;
+          } else {
+            const endAddressCoords = await GeoUtils.getCoordsFromAddress(
+              `${address2.address1}, ${address2.city} ${address2.state} ${address2.zipCode}`
+            );
+            waypoint1 = `${endAddressCoords.lat},${endAddressCoords.lng}`;
           }
-        }
-        this.setState({ btnSubmitting: false });
-        this.updateJobView(newJob);
-        this.closeNow();
-        return;
-      }
-    } catch (err) {
-      console.error(err);
-    }
 
-    const favoriteCarriersIds = [];
-    if (jobRequest) {
-      jobRequestObject.requestedCarrierId = selectedCarrierId;
-    } else {
-      if (tabSend.showSendtoFavorites && tabSend.sendToFavorites) {
-        for (const favCompany of tabSend.favoriteCompanies) {
-          favoriteCarriersIds.push(favCompany.id);
+          const newDistance = await GeoUtils.getDistance(
+            waypoint0, waypoint1
+          );
+          // convert to miles
+          avgDistance = (newDistance.distance / 1609);
+        } catch (e) {
+          console.log("Error: Unable to obtain job's distance, avgDistance will be ignored", e);
         }
-        jobRequestObject.favoriteCarriersIds = favoriteCarriersIds;
-      }
-      if (tabSend.sendToMkt) {
-        jobRequestObject.sendToMkt = true;
-      }
-    }
-    let redirectToNewJob = false;
-    let newJobId = 0;
-    try {
-      // Checking if there's a saved job to update instead of creating a new one
-      if (job && job.id && !copyJob) {
-        jobCreate.id = job.id;
-      } else if (copyJob) {
-        jobCreate.id = null;
       }
 
-      newJob = await JobService.createNewJob(jobRequestObject);
-      if (!copyJob) {
-        redirectToNewJob = true;
-        newJobId = newJob.id;
+      jobStartDate = moment(jobStartDate).format('YYYY-MM-DD HH:mm');
+      const jobCreate = {
+        companiesId: profile.companyId,
+        name,
+        status,
+        isFavorited,
+        startAddress: address1.id,
+        endAddress: address2.id,
+        avgDistance,
+        startTime: moment.tz(
+          jobStartDate,
+          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        ).utc().format(),
+        endTime: moment.tz(
+          jobEndDate,
+          profile.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+        ).utc().format(),
+        numEquipments: tabTruckSpecs.truckQuantity,
+        rateType,
+        rate: rate.toString().replace(/,/g, ''),
+        amountType,
+        rateEstimate: rateEstimate.toString().replace(/,/g, ''),
+        poNumber,
+        estMaterialPricing: tabMaterials.estMaterialPricing.toString().replace(/,/g, ''),
+        notes: tabSummary.instructions,
+        privateNotes: tabSummary.privateInstructions,
+        createdBy: profile.userId,
+        createdOn: moment.utc().format(),
+        modifiedBy: profile.userId,
+        modifiedOn: moment.utc().format()
+      };
+
+      jobRequestObject.job = jobCreate;
+      jobRequestObject.material = tabMaterials.selectedMaterial.value;
+      const equipments = [];
+      for (const id of tabTruckSpecs.selectedTruckTypes) {
+        equipments.push(Number(id));
       }
-    } catch (e) {
-      console.error(e);
-    }
-    
-    this.setState({
-      btnSubmitting: false,
-      redirectToNewJob,
-      newJobId
+      jobRequestObject.trucksIds = equipments;
+
+      let newJob;
+      try {
+        if (jobEdit) {
+          jobCreate.id = job.id;
+          newJob = await JobService.updateJob(jobCreate); // updating job
+          if (newJob) {
+            if (Object.keys(tabMaterials.selectedMaterial).length > 0) {
+              // check if there's materials to add
+              await this.saveJobMaterials(newJob.id, tabMaterials.selectedMaterial.value);
+            }
+            if (Object.keys(tabTruckSpecs.selectedTruckTypes).length > 0) {
+              await this.saveJobTrucks(newJob.id, tabTruckSpecs.selectedTruckTypes);
+            }
+          }
+          this.setState({ btnSubmitting: false });
+          this.updateJobView(newJob);
+          this.closeNow();
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+
+      const favoriteCarriersIds = [];
+      if (jobRequest) {
+        jobRequestObject.requestedCarrierId = selectedCarrierId;
+      } else {
+        if (tabSend.showSendtoFavorites && tabSend.sendToFavorites) {
+          for (const favCompany of tabSend.favoriteCompanies) {
+            favoriteCarriersIds.push(favCompany.id);
+          }
+          jobRequestObject.favoriteCarriersIds = favoriteCarriersIds;
+        }
+        if (tabSend.sendToMkt) {
+          jobRequestObject.sendToMkt = true;
+        }
+      }
+      let redirectToNewJob = false;
+      let newJobId = 0;
+      try {
+        // Checking if there's a saved job to update instead of creating a new one
+        if (job && job.id && !copyJob) {
+          jobCreate.id = job.id;
+        } else if (copyJob) {
+          jobCreate.id = null;
+        }
+
+        newJob = await JobService.createNewJob(jobRequestObject);
+        if (!copyJob) {
+          redirectToNewJob = true;
+          newJobId = newJob.id;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      
+      this.setState({
+        btnSubmitting: false,
+        redirectToNewJob,
+        newJobId
+      });
+      this.updateJobView(newJob);
+      this.closeNow();
     });
-    this.updateJobView(newJob);
-    this.closeNow();
   }
 
   // Used to either store a Copied or 'Saved' job to the database
@@ -2128,6 +2129,7 @@ class JobWizard extends Component {
                         sendJob={this.saveJob}
                         onClose={this.closeNow}
                         jobRequest={jobRequest}
+                        isLoading={btnSubmitting}
                       />
                       )}
                     </div>
@@ -2151,10 +2153,13 @@ class JobWizard extends Component {
                         <Button
                           color="outline-primary"
                           className="next"
-                          onClick={this.validateAndSaveJobDraft}
-                          loading={btnSubmitting}
-                          loaderSize={10}
+                          onClick={() => {
+                            this.setState({btnSubmitting: true}, () => {
+                              this.validateAndSaveJobDraft();
+                            });
+                          }}
                           disabled={btnSubmitting}
+                          loaderSize={10}
                         >
                           {
                             btnSubmitting ? (
