@@ -1,5 +1,6 @@
 const offsetFactor = 0.2;
 let smallFactor = 0;
+const hereDotComTimeout = 4000; // ms
 
 class GeoUtils {
   static getDistance(
@@ -20,27 +21,34 @@ class GeoUtils {
     };
 
     const router = platform.getRoutingService();
-    return new Promise((resolve, reject) => router.calculateRoute(
-      params,
-      (result) => {
-        const route = result.response.route[0];
-        const { summary } = route;
-        resolve(summary);
-      },
-      (err) => {
-        // reject(new Error(err));
-        const errorValues = {
-          baseTime: 0,
-          distance: 0,
-          flags: [],
-          text: err,
-          trafficTime: 0,
-          travelTime: 0,
-          _type: 'RouteSummaryType'
-        };
-        resolve({errorValues});
-      }
-    ));
+
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Unable to contact here.com'));
+      }, hereDotComTimeout);
+      router.calculateRoute(
+        params,
+        (result) => {
+          clearTimeout(timeoutId);
+          const route = result.response.route[0];
+          const { summary } = route;
+          resolve(summary);
+        },
+        (err) => {
+          clearTimeout(timeoutId);
+          const errorValues = {
+            baseTime: 0,
+            distance: 0,
+            flags: [],
+            text: err,
+            trafficTime: 0,
+            travelTime: 0,
+            _type: 'RouteSummaryType'
+          };
+          resolve({errorValues});
+        }
+      );
+    });
   }
 
   static setPlatform() {

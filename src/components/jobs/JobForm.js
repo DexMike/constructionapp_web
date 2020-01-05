@@ -92,7 +92,8 @@ class JobForm extends Component {
       summary: [],
       summaryReturn: [],
       producerBillingType: '',
-      trucks: []
+      trucks: [],
+      mapLoadingError: ''
     };
 
     this.loadJobForm = this.loadJobForm.bind(this);
@@ -181,26 +182,6 @@ class JobForm extends Component {
     const startPoint = job.startAddress;
     const endPoint = job.endAddress;
 
-    if (job.startAddress) {
-      const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
-      const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
-
-      summary = await GeoUtils.getDistance(waypoint0, waypoint1);
-      summaryReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
-
-      distanceEnroute = (summary.distance * 0.000621371192).toFixed(2);
-      distanceReturn = (summaryReturn.distance * 0.000621371192).toFixed(2);
-      timeEnroute = (parseInt(summary.travelTime) / 3600).toFixed(2);
-      timeReturn = (parseInt(summaryReturn.travelTime) / 3600).toFixed(2);
-
-      // baseTime: value in seconds, does not consider traffic conditions
-      // travelTime:  value in seconds, considers traffic conditions
-      // ref: https://developer.here.com/documentation/routing/topics/resource-type-route-summary.html
-
-      distance = summary.distance;
-      time = summary.travelTime;
-    }
-
     if (companyCarrier) {
       carrier = await CompanyService.getCompanyById(companyCarrier);
     }
@@ -263,12 +244,8 @@ class JobForm extends Component {
       cachedDestination: endPoint,
       profile,
       company,
-      distance,
-      time,
       allTruckTypes,
       trelarFees,
-      distanceEnroute,
-      distanceReturn,
       timeEnroute,
       timeReturn,
       producerBillingType,
@@ -278,6 +255,43 @@ class JobForm extends Component {
       completedLoads,
       submittedLoads
     });
+
+    // since we are having trouble reaching here.com
+    // let's try to run the route thing sepparately
+    // this should allow the page to load
+    if (job.startAddress) {
+      const waypoint0 = `${startPoint.latitude},${startPoint.longitude}`;
+      const waypoint1 = `${endPoint.latitude},${endPoint.longitude}`;
+      let mapLoadingError = '';
+
+      try {
+        summary = await GeoUtils.getDistance(waypoint0, waypoint1);
+        summaryReturn = await GeoUtils.getDistance(waypoint1, waypoint0);
+      } catch (e) {
+        console.log('ERROR: ', e);
+        mapLoadingError = 'Unable to calculate the distance or the route at the moment, please try again later.';
+      }
+
+      distanceEnroute = (summary.distance * 0.000621371192).toFixed(2);
+      distanceReturn = (summaryReturn.distance * 0.000621371192).toFixed(2);
+      timeEnroute = (parseInt(summary.travelTime) / 3600).toFixed(2);
+      timeReturn = (parseInt(summaryReturn.travelTime) / 3600).toFixed(2);
+
+      // baseTime: value in seconds, does not consider traffic conditions
+      // travelTime:  value in seconds, considers traffic conditions
+      // ref: https://developer.here.com/documentation/routing/topics/resource-type-route-summary.html
+
+      const newDistance = summary.distance;
+      time = summary.travelTime;
+
+      this.setState({
+        time,
+        distance: newDistance,
+        distanceEnroute,
+        distanceReturn,
+        mapLoadingError
+      });
+    }
   }
 
   isFormValid() {
@@ -827,7 +841,7 @@ class JobForm extends Component {
             </Row>
           </React.Fragment>
         )}
-        
+
       </React.Fragment>
     );
   }
@@ -1087,9 +1101,11 @@ class JobForm extends Component {
   }
 
   renderMap(job) {
+    const { mapLoadingError } = this.state;
     if (job.status === 'In Progress' || job.status === 'Paused') {
       return (
         <React.Fragment>
+          <p className="redError">{mapLoadingError}</p>
           <TMapLive
             id={`job${job.id}`}
             width="100%"
@@ -1104,6 +1120,7 @@ class JobForm extends Component {
     if (job.status === 'Job Ended' || job.status === 'Job Completed') {
       return (
         <React.Fragment>
+          <p className="redError">{mapLoadingError}</p>
           <TMap
             id={`job${job.id}`}
             width="100%"
