@@ -857,7 +857,7 @@ class ReportsComparison extends Component {
         'Job Name': d.name,
         // 'Date': moment.unix(d.startTime / 1000).format('MMMM Do, YYYY h:mm:ss A'),
         // N/A Means that no loads exists for that job, so there's
-        'Start Date': d.firstLoadDate === 0 ? 'N/A' : moment.unix(
+        Date: d.firstLoadDate === 0 ? 'N/A' : moment.unix(
           d.firstLoadDate / 1000
         ).format('MM/DD/YYYY'),
         'End Date': d.endTime === 0 ? 'N/A' : moment.unix(
